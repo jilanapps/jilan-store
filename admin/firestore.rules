@@ -1,0 +1,18 @@
+rules_version = '2';
+// JILAN STORE ADMIN — Firestore Security Rules
+// Paste these in: Firebase Console → Firestore Database → Rules → Publish
+//
+// Kya karta hai (Roman Urdu):
+// - Bina login ke KOI bhi data parh/badal NAHI sakta (public = deny)
+// - Sirf login shuda admin (jo aapne Console me banaya) parh/badal sakta hai
+// - Yahan koi signup nahi — admin sirf Firebase Console se banta hai
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Sab collections (costs, orders, coupons, settings...) — sirf login wala
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
