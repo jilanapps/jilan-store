@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d1a">
+<title>Jilan Smart Camera</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --bg:#0d0d1a; --bg2:#16162a; --card:#1e1e36; --txt:#fff; --mut:#9aa0b8;
+  --p1:#a855f7; --p2:#ec4899; --p3:#3b82f6;
+  --grad:linear-gradient(135deg,#a855f7,#ec4899,#3b82f6);
+  --btn:#26264a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--txt);
+  font-family:'Segoe UI',system-ui,Roboto,'Noto Nastaliq Urdu',sans-serif;overflow:hidden;
+  touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button{font-family:inherit}
+/* ---------- Splash ---------- */
+#splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 35%,#241b4d,#0d0d1a 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;
+  transition:opacity .6s}
+#splash.hide{opacity:0;pointer-events:none}
+.lenslogo{width:110px;height:110px;border-radius:50%;background:var(--grad);padding:5px;
+  box-shadow:0 0 60px rgba(168,85,247,.55);animation:pulse 2s infinite}
+.lenslogo>div{width:100%;height:100%;border-radius:50%;background:#101020;display:flex;
+  align-items:center;justify-content:center;font-size:52px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+#splash h1{margin:22px 0 4px;font-size:26px;background:var(--grad);-webkit-background-clip:text;
+  background-clip:text;color:transparent;letter-spacing:1px}
+#splash p{color:var(--mut);font-size:14px;margin:0}
+/* ---------- Screens ---------- */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+.screen.on{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+  padding-top:max(10px,env(safe-area-inset-top));background:rgba(13,13,26,.9);z-index:20}
+.topbar h2{margin:0;font-size:17px;font-weight:600}
+.iconbtn{background:var(--btn);border:none;color:#fff;width:42px;height:42px;border-radius:50%;
+  font-size:19px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.iconbtn:active{transform:scale(.92)}
+/* ---------- Camera ---------- */
+#camwrap{position:relative;flex:1;overflow:hidden;background:#000}
+#v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(1)}
+#v.mirror{transform:scaleX(-1)}
+#fxlayer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#recind{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:none;
+  align-items:center;gap:8px;background:rgba(0,0,0,.55);padding:7px 16px;border-radius:20px;
+  font-size:14px;font-weight:600;z-index:15}
+#recind.on{display:flex}
+.recdot{width:12px;height:12px;border-radius:50%;background:#ff2d55;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+#focusring{position:absolute;width:74px;height:74px;border:2px solid #ffd60a;border-radius:50%;
+  display:none;pointer-events:none;z-index:14;transform:translate(-50%,-50%)}
+#cammsg{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;align-items:center;
+  justify-content:center;background:#0d0d1a;z-index:12;text-align:center;padding:24px}
+#cammsg .big{font-size:46px}
+/* filter carousel */
+#filterbar{position:absolute;left:0;right:0;bottom:128px;z-index:13;padding:8px 0;
+  background:linear-gradient(transparent,rgba(0,0,0,.72))}
+#fcat{display:flex;gap:8px;padding:0 12px 8px;overflow-x:auto;scrollbar-width:none}
+#fcat::-webkit-scrollbar{display:none}
+.fcatchip{flex:0 0 auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+  color:#fff;font-size:12px;padding:6px 13px;border-radius:16px;cursor:pointer}
+.fcatchip.on{background:var(--grad);border-color:transparent;font-weight:700}
+#frow{display:flex;gap:10px;padding:2px 12px 6px;overflow-x:auto;scrollbar-width:none}
+#frow::-webkit-scrollbar{display:none}
+.fthumb{flex:0 0 auto;width:64px;text-align:center;cursor:pointer}
+.fthumb .im{width:60px;height:60px;border-radius:14px;overflow:hidden;border:2px solid transparent;
+  background:linear-gradient(135deg,#3b3b6e,#23234a);position:relative}
+.fthumb.on .im{border-color:#fff;box-shadow:0 0 12px rgba(236,72,153,.8)}
+.fthumb .im .demo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px}
+.fthumb span{font-size:10px;color:#d7d9e8;display:block;margin-top:3px;line-height:1.25;height:26px;overflow:hidden}
+/* camera controls */
+#camctl{position:absolute;left:0;right:0;bottom:0;z-index:13;padding:10px 18px 14px;
+  padding-bottom:max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));
+  display:flex;align-items:center;justify-content:space-between}
+.sidebtns{display:flex;flex-direction:column;gap:12px;align-items:center}
+#shutter{width:78px;height:78px;border-radius:50%;border:5px solid #fff;background:transparent;
+  position:relative;cursor:pointer}
+#shutter::after{content:'';position:absolute;inset:7px;border-radius:50%;background:#fff;transition:.15s}
+#shutter:active::after{transform:scale(.85)}
+#shutter.vidmode::after{background:#ff2d55;border-radius:14px;inset:20px}
+#shutter.recording{animation:recpulse 1.2s infinite}
+@keyframes recpulse{50%{box-shadow:0 0 0 12px rgba(255,45,85,.25)}}
+.modepill{display:flex;background:rgba(255,255,255,.14);border-radius:20px;padding:3px;margin-top:6px}
+.modepill button{border:none;background:transparent;color:#cfd2e6;font-size:12px;font-weight:600;
+  padding:6px 16px;border-radius:16px;cursor:pointer}
+.modepill button.on{background:var(--grad);color:#fff}
+#zoomrow{position:absolute;right:10px;top:38%;z-index:13;display:flex;flex-direction:column;align-items:center;gap:6px}
+#zoomrow input{writing-mode:vertical-lr;direction:rtl;width:26px;height:120px;accent-color:#ec4899}
+#zoomrow span{font-size:11px;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:10px}
+/* ---------- Editor ---------- */
+#edwrap{flex:1;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#edcanvas{max-width:100%;max-height:100%;touch-action:none}
+#edtools{background:var(--bg2);padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:20}
+#edtabs{display:flex;overflow-x:auto;gap:6px;padding:4px 12px;scrollbar-width:none}
+#edtabs::-webkit-scrollbar{display:none}
+.edtab{flex:0 0 auto;background:var(--btn);border:none;color:#dfe1f2;font-size:13px;
+  padding:9px 16px;border-radius:18px;cursor:pointer}
+.edtab.on{background:var(--grad);color:#fff;font-weight:700}
+#edpanel{padding:8px 16px 4px;max-height:150px;overflow-y:auto}
+.sldrow{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+.sldrow label{width:92px;color:var(--mut)}
+.sldrow input[type=range]{flex:1;accent-color:#ec4899}
+.sldrow b{width:42px;text-align:right;font-size:12px}
+.stkrow{display:flex;gap:10px;overflow-x:auto;padding:6px 0}
+.stkbtn{flex:0 0 auto;font-size:30px;background:var(--btn);border:none;border-radius:14px;
+  width:58px;height:58px;cursor:pointer}
+.edactions{display:flex;gap:10px;padding:10px 16px 4px}
+.abtn{flex:1;border:none;border-radius:14px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.abtn.pri{background:var(--grad);color:#fff}
+.abtn.sec{background:var(--btn);color:#fff}
+.abtn:active{transform:scale(.97)}
+/* ---------- Gallery ---------- */
+#galgrid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start}
+.gitem{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--card);cursor:pointer}
+.gitem img,.gitem video{width:100%;height:100%;object-fit:cover}
+.gitem .vdur{position:absolute;bottom:5px;right:6px;background:rgba(0,0,0,.65);font-size:10px;
+  padding:2px 7px;border-radius:8px}
+.gempty{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 20px;font-size:15px}
+/* viewer */
+#viewer{position:fixed;inset:0;background:#000;z-index:200;display:none;flex-direction:column}
+#viewer.on{display:flex}
+#viewer .stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#viewer img,#viewer video{max-width:100%;max-height:100%}
+#viewer .vbar{display:flex;gap:10px;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:#111}
+/* ---------- Settings ---------- */
+.setbody{flex:1;overflow-y:auto;padding:14px 16px}
+.setcard{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px}
+.setcard h3{margin:0 0 10px;font-size:15px}
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.setrow:last-child{border:none}
+.setrow .ok{color:#4ade80}.setrow .no{color:#f87171}
+.switch{width:48px;height:28px;border-radius:14px;background:#3a3a5e;border:none;position:relative;cursor:pointer}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+  background:#fff;transition:.2s}
+.switch.on{background:var(--grad)}
+.switch.on::after{left:23px}
+.limlist{margin:6px 0 0;padding-left:18px;color:var(--mut);font-size:13px;line-height:1.7}
+/* bottom nav */
+#navbar{display:flex;background:#12122a;border-top:1px solid rgba(255,255,255,.08);
+  padding:6px 4px max(6px,env(safe-area-inset-bottom));z-index:30}
+.navbtn{flex:1;background:none;border:none;color:var(--mut);font-size:11px;padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.navbtn .ic{font-size:21px}
+.navbtn.on{color:#fff}
+.navbtn.on .ic{filter:drop-shadow(0 0 6px #ec4899)}
+/* toast + dialog */
+#toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:#22223f;
+  color:#fff;padding:11px 20px;border-radius:24px;font-size:14px;z-index:900;opacity:0;transition:.25s;
+  max-width:88%;text-align:center;pointer-events:none;border:1px solid rgba(255,255,255,.12)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:950;display:none;align-items:center;justify-content:center;padding:24px}
+#dlg.on{display:flex}
+#dlg .box{background:var(--card);border-radius:20px;padding:22px;width:100%;max-width:340px;text-align:center}
+#dlg h3{margin:0 0 8px}
+#dlg p{color:var(--mut);font-size:14px;margin:0 0 16px}
+#dlg .row{display:flex;gap:10px}
+#txtinput{width:100%;background:var(--btn);border:1px solid rgba(255,255,255,.15);color:#fff;
+  border-radius:12px;padding:12px;font-size:15px;margin-bottom:14px;font-family:inherit}
+/* crop overlay */
+#cropover{position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.55)}
+#cropover.on{display:flex}
+#cropbox{position:relative;border:2px dashed #ec4899;background:rgba(236,72,153,.08)}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="lenslogo"><div>📷</div></div>
+  <h1>Jilan Smart Camera</h1>
+  <p>Capture More. Create Your Style.</p>
+</div>
+
+<!-- ============ CAMERA ============ -->
+<div class="screen" id="scr-cam">
+  <div id="camwrap">
+    <video id="v" playsinline muted autoplay></video>
+    <canvas id="fxlayer"></canvas>
+    <div id="recind"><span class="recdot"></span><span id="rectime">00:00</span></div>
+    <div id="focusring"></div>
+    <div id="cammsg" style="display:none"><div class="big">📷</div><div id="cammsgtxt" style="font-size:15px;color:#cfd2e6"></div>
+      <button class="abtn pri" style="max-width:240px" onclick="startCamera()">Camera Kholein</button></div>
+    <div id="filterbar">
+      <div id="fcat"></div>
+      <div id="frow"></div>
+    </div>
+    <div id="zoomrow" style="display:none"><span id="zoomval">1.0x</span><input type="range" id="zoomr" min="1" max="5" step="0.1" value="1"></div>
+    <div id="camctl">
+      <div class="sidebtns">
+        <button class="iconbtn" id="btnGalleryMini" onclick="go('gal')" title="Gallery">🖼️</button>
+        <button class="iconbtn" id="btnFlash" onclick="toggleTorch()" title="Flash">⚡</button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <button id="shutter" onclick="shutterPress()"></button>
+        <div class="modepill">
+          <button id="modePhoto" class="on" onclick="setMode('photo')">📷 Photo</button>
+          <button id="modeVideo" onclick="setMode('video')">🎥 Video</button>
+        </div>
+      </div>
+      <div class="sidebtns">
+        <button class="iconbtn" onclick="switchCamera()" title="Switch">🔄</button>
+        <button class="iconbtn" id="btnImport" onclick="importPhoto()" title="Import">📁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EDITOR ============ -->
+<div class="screen" id="scr-ed">
+  <div class="topbar">
+    <button class="iconbtn" onclick="closeEditor()">✕</button>
+    <h2 id="edtitle">Editor</h2>
+    <button class="iconbtn" onclick="editorUndo()" title="Undo">↩️</button>
+  </div>
+  <div id="edwrap"><canvas id="edcanvas"></canvas>
+    <div id="cropover"><div id="cropbox"></div></div>
+  </div>
+  <div id="edtools">
+    <div id="edtabs"></div>
+    <div id="edpanel"></div>
+    <div class="edactions">
+      <button class="abtn sec" onclick="resetEdits()">Reset</button>
+      <button class="abtn sec" onclick="toggleCompare(event)">Compare</button>
+      <button class="abtn pri" onclick="saveEdited()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GALLERY ============ -->
+<div class="screen" id="scr-gal">
+  <div class="topbar"><h2>🖼️ My Media</h2><button class="iconbtn" onclick="importPhoto()">📁</button></div>
+  <div id="galgrid"></div>
+</div>
+<div id="viewer">
+  <div class="topbar" style="background:#111"><button class="iconbtn" onclick="closeViewer()">✕</button><h2 id="vwt"></h2><span></span></div>
+  <div class="stage" id="vstage"></div>
+  <div class="vbar">
+    <button class="abtn sec" onclick="viewerShare()">📤 Share</button>
+    <button class="abtn sec" onclick="viewerDownload()">⬇️ Save</button>
+    <button class="abtn sec" onclick="viewerEdit()" id="vwEdit">✏️ Edit</button>
+    <button class="abtn sec" style="background:#5b1f2a" onclick="viewerDelete()">🗑️</button>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="screen" id="scr-set">
+  <div class="topbar"><h2>⚙️ Settings</h2><span></span></div>
+  <div class="setbody">
+    <div class="setcard"><h3>🌐 Language / زبان</h3>
+      <div class="setrow"><span>اردو / English</span><button class="switch" id="langsw" onclick="toggleLang()"></button></div>
+    </div>
+    <div class="setcard"><h3>🔐 Permissions</h3><div id="permrows"></div></div>
+    <div class="setcard"><h3>💾 Storage</h3>
+      <div class="setrow"><span>Media items</span><b id="stcount">0</b></div>
+      <div class="setrow"><span>Used space</span><b id="stsize">0 KB</b></div>
+      <div class="setrow"><span>Clear all media</span><button class="abtn sec" style="flex:0 0 auto;padding:8px 18px" onclick="clearAllMedia()">Clear</button></div>
+    </div>
+    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.0</h3>
+      <p style="color:var(--mut);font-size:13px;line-height:1.7;margin:0">
+      <span data-i18n="about1">Filters yahan color-grading aur effects hain — ye face-tracking AR lenses nahi hain.</span><br>
+      <span data-i18n="about2">Photos/videos sirf aapke phone me rehti hain, kahin upload nahi hotin.</span></p>
+      <h3 style="margin-top:12px">⚠️ Limitations</h3>
+      <ul class="limlist">
+        <li data-i18n="l1">No real-time face-tracking AR (face-api optional, not bundled)</li>
+        <li data-i18n="l2">Filtered video uses canvas re-encoding (quality may drop slightly)</li>
+        <li data-i18n="l3">Torch/zoom depend on device support</li>
+        <li data-i18n="l4">Browser gallery may clear if browser data is cleared</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<nav id="navbar">
+  <button class="navbtn on" data-s="cam" onclick="go('cam')"><span class="ic">📷</span><span data-i18n="n1">Camera</span></button>
+  <button class="navbtn" data-s="gal" onclick="go('gal')"><span class="ic">🖼️</span><span data-i18n="n2">Gallery</span></button>
+  <button class="navbtn" data-s="set" onclick="go('set')"><span class="ic">⚙️</span><span data-i18n="n3">Settings</span></button>
+</nav>
+
+<div id="toast"></div>
+<div id="dlg"><div class="box"><h3 id="dlgh"></h3><p id="dlgp"></p><input id="txtinput" style="display:none">
+<div class="row"><button class="abtn sec" id="dlgb1">Cancel</button><button class="abtn pri" id="dlgb2">OK</button></div></div></div>
+<input type="file" id="fileimp" accept="image/*" style="display:none">
+<canvas id="work" style="display:none"></canvas>
+
+<script>
+'use strict';
+/* ================= HELPERS ================= */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2200);}
+function dlg(h,p,okLbl,withInput){return new Promise(res=>{$('dlgh').textContent=h;$('dlgp').textContent=p||'';
+  const ti=$('txtinput');ti.style.display=withInput?'block':'none';ti.value='';
+  $('dlgb2').textContent=okLbl||'OK';$('dlgb1').textContent=(LANG==='ur'?'Cancel':'منسوخ');
+  $('dlg').classList.add('on');
+  $('dlgb2').onclick=()=>{$('dlg').classList.remove('on');res(withInput?ti.value:true);};
+  $('dlgb1').onclick=()=>{$('dlg').classList.remove('on');res(withInput?null:false);};});}
+function download(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},4000);}
+/* Android bridge save (APK) */
+function androidSave(dataUrl,name,mime){
+  try{if(window.Android&&Android.saveMedia){Android.saveMedia(dataUrl,name,mime||'image/png');return true;}}catch(e){}
+  return false;}
+</script>
+<script>
+'use strict';
+/* ================= 50+ FILTERS =================
+   css: CSS filter string for live <video> + canvas ctx.filter
+   ov: overlay painter name (drawn on fx canvas / capture canvas)
+   kind: 'css' | 'canvas' (canvas ones need special capture processing) */
+const FILTERS=[
+ // --- Beauty (10) ---
+ {id:'original',n:'Original',ur:'اصل',cat:'beauty',css:'none',emo:'🖼️'},
+ {id:'natural',n:'Natural Beauty',ur:'قدرتی',cat:'beauty',css:'saturate(1.08) contrast(1.04) brightness(1.03)',emo:'🌸'},
+ {id:'softskin',n:'Soft Skin',ur:'نرم جلد',cat:'beauty',css:'saturate(1.05) contrast(0.96) brightness(1.08)',emo:'🧴'},
+ {id:'smooth',n:'Smooth Portrait',ur:'ہموار',cat:'beauty',css:'contrast(0.94) brightness(1.1) saturate(1.1)',emo:'✨'},
+ {id:'warmb',n:'Warm Beauty',ur:'گرم',cat:'beauty',css:'sepia(0.18) saturate(1.25) contrast(1.05) brightness(1.04)',emo:'🌤️'},
+ {id:'coolb',n:'Cool Beauty',ur:'ٹھنڈی',cat:'beauty',css:'saturate(1.1) hue-rotate(-12deg) brightness(1.06) contrast(1.03)',emo:'❄️'},
+ {id:'rosy',n:'Rosy Cheeks',ur:'گلابی رخسار',cat:'beauty',css:'saturate(1.35) contrast(1.06) sepia(0.12) brightness(1.05)',emo:'🌹'},
+ {id:'glamour',n:'Glamour',ur:'گلیمر',cat:'beauty',css:'contrast(1.12) saturate(1.3) brightness(1.08)',emo:'💃'},
+ {id:'glow',n:'Soft Glow',ur:'چمک',cat:'beauty',css:'brightness(1.14) saturate(1.12) contrast(0.95)',emo:'💫',ov:'glow'},
+ {id:'bright',n:'Bright Portrait',ur:'روشن',cat:'beauty',css:'brightness(1.18) contrast(1.05) saturate(1.15)',emo:'☀️'},
+ // --- Cinematic (10) ---
+ {id:'vintage',n:'Vintage Film',ur:'ونٹیج',cat:'cine',css:'sepia(0.45) contrast(1.08) brightness(0.96) saturate(0.85)',emo:'🎞️',ov:'vignette'},
+ {id:'retro',n:'Retro',ur:'ریٹرو',cat:'cine',css:'sepia(0.6) saturate(0.7) contrast(1.1) brightness(1.02)',emo:'📼',ov:'vignette'},
+ {id:'cinewarm',n:'Cinematic Warm',ur:'سنیما گرم',cat:'cine',css:'sepia(0.25) saturate(1.2) contrast(1.15) brightness(0.97)',emo:'🎬',ov:'cinebars'},
+ {id:'cinecool',n:'Cinematic Cool',ur:'سنیما ٹھنڈا',cat:'cine',css:'saturate(0.95) hue-rotate(12deg) contrast(1.18) brightness(0.95)',emo:'🌌',ov:'cinebars'},
+ {id:'bw',n:'Black & White',ur:'سفید سیاہ',cat:'cine',css:'grayscale(1) contrast(1.15)',emo:'⬛'},
+ {id:'sepia',n:'Classic Sepia',ur:'سیپیا',cat:'cine',css:'sepia(0.9) contrast(1.05)',emo:'🟤'},
+ {id:'golden',n:'Golden Hour',ur:'سنہری',cat:'cine',css:'sepia(0.35) saturate(1.5) contrast(1.08) brightness(1.05)',emo:'🌅',ov:'glow'},
+ {id:'sunset',n:'Sunset',ur:'غروب',cat:'cine',css:'sepia(0.3) saturate(1.6) hue-rotate(-18deg) contrast(1.1)',emo:'🌇',ov:'vignette'},
+ {id:'dreamy',n:'Dreamy',ur:'خوابناک',cat:'cine',css:'saturate(1.15) brightness(1.1) contrast(0.9)',emo:'☁️',ov:'dream'},
+ {id:'moody',n:'Moody Dark',ur:'اداس',cat:'cine',css:'brightness(0.72) contrast(1.3) saturate(0.75)',emo:'🌑',ov:'vignette'},
+ // --- Colorful (10) ---
+ {id:'neon',n:'Neon',ur:'نیون',cat:'color',css:'saturate(2) contrast(1.25) brightness(1.05)',emo:'💠'},
+ {id:'purpledream',n:'Purple Dream',ur:'جامنی خواب',cat:'color',css:'hue-rotate(45deg) saturate(1.5) contrast(1.1)',emo:'🟣'},
+ {id:'ocean',n:'Blue Ocean',ur:'سمندر',cat:'color',css:'hue-rotate(160deg) saturate(1.4) brightness(1.05)',emo:'🌊'},
+ {id:'pinkglow',n:'Pink Glow',ur:'گلابی چمک',cat:'color',css:'saturate(1.6) hue-rotate(-40deg) brightness(1.08)',emo:'💗',ov:'glow'},
+ {id:'nature',n:'Green Nature',ur:'سبز',cat:'color',css:'hue-rotate(60deg) saturate(1.45) contrast(1.08)',emo:'🌿'},
+ {id:'orangepop',n:'Orange Pop',ur:'نارنجی',cat:'color',css:'saturate(1.8) hue-rotate(-25deg) contrast(1.15)',emo:'🍊'},
+ {id:'pastel',n:'Pastel',ur:'پیسٹل',cat:'color',css:'saturate(0.75) brightness(1.15) contrast(0.88)',emo:'🎨'},
+ {id:'hicontrast',n:'High Contrast',ur:'تیز',cat:'color',css:'contrast(1.6) saturate(1.2)',emo:'⚡'},
+ {id:'vivid',n:'Vivid Colors',ur:'شوخ',cat:'color',css:'saturate(2.2) contrast(1.2) brightness(1.03)',emo:'🌈'},
+ {id:'matte',n:'Soft Matte',ur:'میٹ',cat:'color',css:'contrast(0.85) saturate(0.85) brightness(1.08)',emo:'🧸'},
+ // --- Artistic (10) ---
+ {id:'cartoon',n:'Cartoon',ur:'کارٹون',cat:'art',css:'saturate(1.7) contrast(1.45)',emo:'😜',kind:'canvas',fx:'cartoon'},
+ {id:'comic',n:'Comic Book',ur:'کامک',cat:'art',css:'saturate(1.8) contrast(1.6)',emo:'💥',kind:'canvas',fx:'comic',ov:'vignette'},
+ {id:'sketch',n:'Sketch',ur:'خاکہ',cat:'art',css:'grayscale(1) contrast(1.8) brightness(1.15)',emo:'✏️',kind:'canvas',fx:'sketch'},
+ {id:'pixel',n:'Pixel Style',ur:'پکسل',cat:'art',css:'none',emo:'👾',kind:'canvas',fx:'pixel'},
+ {id:'mirror',n:'Mirror',ur:'آئینہ',cat:'art',css:'none',emo:'🪞',kind:'canvas',fx:'mirror'},
+ {id:'fisheye',n:'Fish-Eye',ur:'فش آئی',cat:'art',css:'none',emo:'🐟',kind:'canvas',fx:'fisheye'},
+ {id:'blurart',n:'Artistic Blur',ur:'دھندلا',cat:'art',css:'none',emo:'🌀',kind:'canvas',fx:'blurbg'},
+ {id:'miniature',n:'Miniature',ur:'چھوٹا',cat:'art',css:'saturate(1.5) contrast(1.2)',emo:'🏘️',kind:'canvas',fx:'miniature'},
+ {id:'poster',n:'Poster Art',ur:'پوسٹر',cat:'art',css:'contrast(1.5) saturate(1.6)',emo:'🖌️',kind:'canvas',fx:'poster'},
+ {id:'glitch',n:'Glitch',ur:'گلچ',cat:'art',css:'saturate(1.4) contrast(1.2)',emo:'📺',kind:'canvas',fx:'glitch'},
+ // --- Effects/Overlays (12) ---
+ {id:'sparkle',n:'Sparkle',ur:'چمکدار',cat:'fx',css:'brightness(1.1) saturate(1.2)',emo:'✨',ov:'sparkle'},
+ {id:'rainbow',n:'Rainbow',ur:'قوس قزح',cat:'fx',css:'saturate(1.3)',emo:'🌈',ov:'rainbow'},
+ {id:'snow',n:'Snow',ur:'برف',cat:'fx',css:'brightness(1.12) saturate(0.9)',emo:'❄️',ov:'snow'},
+ {id:'rain',n:'Rain',ur:'بارش',cat:'fx',css:'brightness(0.92) saturate(0.95)',emo:'🌧️',ov:'rain'},
+ {id:'hearts',n:'Hearts',ur:'دل',cat:'fx',css:'saturate(1.25)',emo:'💕',ov:'hearts'},
+ {id:'stars',n:'Stars',ur:'ستارے',cat:'fx',css:'brightness(0.9) contrast(1.15)',emo:'⭐',ov:'stars'},
+ {id:'lightleak',n:'Light Leaks',ur:'روشنی',cat:'fx',css:'saturate(1.25) brightness(1.06)',emo:'🔆',ov:'lightleak'},
+ {id:'vhs',n:'Retro VHS',ur:'وی ایچ ایس',cat:'fx',css:'saturate(1.2) contrast(1.15)',emo:'📼',ov:'vhs'},
+ {id:'faded',n:'Faded Film',ur:'دھندلا فلم',cat:'fx',css:'contrast(0.82) brightness(1.1) saturate(0.8)',emo:'🎞️'},
+ {id:'night',n:'Night Mood',ur:'رات',cat:'fx',css:'brightness(0.6) saturate(0.8) hue-rotate(15deg) contrast(1.2)',emo:'🌃',ov:'vignette'},
+ {id:'dramatic',n:'Dramatic',ur:'ڈرامائی',cat:'fx',css:'contrast(1.5) brightness(0.9) saturate(1.1)',emo:'🎭',ov:'vignette'},
+ {id:'duotone',n:'Duotone',ur:'دو رنگ',cat:'fx',css:'grayscale(1) sepia(0.5) hue-rotate(230deg) saturate(2.5)',emo:'🎷'},
+];
+const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس']];
+let curFilter=FILTERS[0], curCat='beauty';
+
+/* ---- overlay painters (ctx,w,h,t) ---- */
+const OV={
+ vignette(c,w,h){const g=c.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
+   g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.55)');c.fillStyle=g;c.fillRect(0,0,w,h);},
+ glow(c,w,h){const g=c.createRadialGradient(w/2,h/2,10,w/2,h/2,Math.max(w,h)*0.7);
+   g.addColorStop(0,'rgba(255,240,220,0.18)');g.addColorStop(1,'rgba(255,240,220,0)');c.fillStyle=g;c.fillRect(0,0,w,h);},
+ dream(c,w,h){c.fillStyle='rgba(255,255,255,0.10)';c.fillRect(0,0,w,h);OV.vignette(c,w,h);},
+ cinebars(c,w,h){c.fillStyle='#000';c.fillRect(0,0,w,h*0.09);c.fillRect(0,h*0.91,w,h*0.09);},
+ rainbow(c,w,h){const cols=['rgba(255,0,0,0.10)','rgba(255,165,0,0.10)','rgba(255,255,0,0.10)','rgba(0,255,0,0.10)','rgba(0,0,255,0.10)','rgba(128,0,128,0.10)'];
+   const bh=h/6;cols.forEach((col,i)=>{c.fillStyle=col;c.fillRect(0,i*bh,w,bh);});},
+ lightleak(c,w,h,t){const g=c.createLinearGradient(0,0,w,h);
+   g.addColorStop(0,'rgba(255,120,60,0.22)');g.addColorStop(0.4,'rgba(255,120,60,0)');g.addColorStop(0.6,'rgba(80,160,255,0)');
+   g.addColorStop(1,'rgba(80,160,255,0.18)');c.fillStyle=g;c.fillRect(0,0,w,h);},
+ vhs(c,w,h,t){c.fillStyle='rgba(255,255,255,0.05)';for(let y=((t*60)|0)%6;y<h;y+=6)c.fillRect(0,y,w,2);
+   c.fillStyle='rgba(0,255,255,0.08)';c.fillRect(0,((t*120)|0)%h,w,3);},
+};
+/* animated particles */
+let parts=[];
+function mkParts(kind,w,h){parts=[];const n=kind==='snow'?70:kind==='rain'?110:kind==='stars'?60:kind==='hearts'?24:40;
+ for(let i=0;i<n;i++)parts.push({x:Math.random()*w,y:Math.random()*h,s:2+Math.random()*5,v:0.6+Math.random()*2.4,
+  ph:Math.random()*6.28,k:kind});}
+let partKind='';
+function animOv(c,w,h,t,kind){
+ if(partKind!==kind){mkParts(kind,w,h);partKind=kind;}
+ c.save();
+ for(const p of parts){
+  p.y+=p.v*(kind==='rain'?6:kind==='snow'?1:0.5);
+  if(kind==='rain')p.x-=p.v*1.2;
+  if(p.y>h){p.y=-10;p.x=Math.random()*w;}
+  const tw=0.5+0.5*Math.sin(t*3+p.ph);
+  if(kind==='snow'){c.fillStyle=`rgba(255,255,255,${0.7*tw})`;c.beginPath();c.arc(p.x,p.y,p.s,0,7);c.fill();}
+  else if(kind==='rain'){c.strokeStyle='rgba(170,200,255,0.55)';c.lineWidth=2;c.beginPath();
+    c.moveTo(p.x,p.y);c.lineTo(p.x-4,p.y+14);c.stroke();}
+  else if(kind==='stars'){c.fillStyle=`rgba(255,255,180,${tw})`;c.font=`${p.s*3}px serif`;c.fillText('✦',p.x,p.y);}
+  else if(kind==='hearts'){c.globalAlpha=0.55*tw;c.font=`${p.s*4}px serif`;c.fillText('💕',p.x,p.y);c.globalAlpha=1;}
+  else if(kind==='sparkle'){c.fillStyle=`rgba(255,255,255,${tw})`;c.font=`${p.s*3}px serif`;c.fillText('✦',p.x,p.y);}
+ }
+ c.restore();
+}
+function paintOverlay(c,w,h,t,kind){
+ if(!kind)return;
+ if(OV[kind])OV[kind](c,w,h,t);
+ else if(['snow','rain','stars','hearts','sparkle'].includes(kind))animOv(c,w,h,t,kind);
+}
+/* ---- canvas FX (for capture / filtered video) ---- */
+function applyCanvasFX(src,dst,fxid){
+ const w=src.width,h=src.height,dc=dst.getContext('2d');
+ dst.width=w;dst.height=h;
+ const c=dc;
+ if(fxid==='pixel'){const px=Math.max(6,Math.round(w/60));const t=document.createElement('canvas');
+   t.width=Math.ceil(w/px);t.height=Math.ceil(h/px);const tc=t.getContext('2d');
+   tc.drawImage(src,0,0,t.width,t.height);c.imageSmoothingEnabled=false;c.drawImage(t,0,0,w,h);return;}
+ if(fxid==='mirror'){c.save();c.translate(w,0);c.scale(-1,1);c.drawImage(src,0,0,w/2,h);
+   c.restore();c.drawImage(src,0,0,w/2,h);return;}
+ if(fxid==='fisheye'){const img=src.getContext('2d').getImageData(0,0,w,h);
+   const out=c.createImageData(w,h);const cx=w/2,cy=h/2,R=Math.min(w,h)/2;
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+     const dx=(x-cx)/R,dy=(y-cy)/R,r=Math.sqrt(dx*dx+dy*dy);
+     let sx=x,sy=y;
+     if(r<1){const nr=r*r*0.9+r*0.35;sx=cx+dx/r*nr*R||cx;sy=cy+dy/r*nr*R||cy;}
+     const si=((clamp(Math.round(sy),0,h-1)*w)+clamp(Math.round(sx),0,w-1))*4;
+     const di=(y*w+x)*4;out.data[di]=img.data[si];out.data[di+1]=img.data[si+1];
+     out.data[di+2]=img.data[si+2];out.data[di+3]=255;}
+   c.putImageData(out,0,0);return;}
+ if(fxid==='sketch'){c.filter='grayscale(1) invert(1)';c.drawImage(src,0,0);
+   c.globalCompositeOperation='color-dodge';c.filter='grayscale(1) blur(3px) invert(1)';c.drawImage(src,0,0);
+   c.globalCompositeOperation='source-over';c.filter='none';return;}
+ if(fxid==='cartoon'){c.filter='saturate(1.8) contrast(1.5)';c.drawImage(src,0,0);c.filter='none';
+   const t=document.createElement('canvas');t.width=w;t.height=h;const tc=t.getContext('2d');
+   tc.filter='grayscale(1)';tc.drawImage(src,0,0);tc.filter='blur(2px)';tc.drawImage(t,0,0);
+   const id=tc.getImageData(0,0,w,h),d=id.data;
+   c.globalAlpha=0.35;for(let i=0;i<d.length;i+=4){const e=d[i]<90?0:255;d[i]=d[i+1]=d[i+2]=e;}
+   tc.putImageData(id,0,0);c.drawImage(t,0,0);c.globalAlpha=1;return;}
+ if(fxid==='comic'){c.filter='saturate(2) contrast(1.7)';c.drawImage(src,0,0);c.filter='none';
+   c.fillStyle='rgba(255,255,255,0.08)';for(let y=0;y<h;y+=5)for(let x=(y%10);x<w;x+=10)c.fillRect(x,y,2,2);return;}
+ if(fxid==='poster'){c.filter='contrast(1.6) saturate(1.6)';c.drawImage(src,0,0);c.filter='none';
+   const id=c.getImageData(0,0,w,h),d=id.data,lv=4;
+   for(let i=0;i<d.length;i+=4){d[i]=Math.round(d[i]/255*lv)/lv*255;d[i+1]=Math.round(d[i+1]/255*lv)/lv*255;d[i+2]=Math.round(d[i+2]/255*lv)/lv*255;}
+   c.putImageData(id,0,0);return;}
+ if(fxid==='glitch'){c.drawImage(src,0,0);const n=8;
+   for(let i=0;i<n;i++){const sy=Math.random()*h|0,sh=6+Math.random()*30|0,dx=(Math.random()-0.5)*w*0.12;
+     c.drawImage(dst,0,sy,w,sh,dx,sy,w,sh);}
+   c.fillStyle='rgba(255,0,100,0.12)';c.fillRect(0,0,w,h/3);c.fillStyle='rgba(0,255,255,0.12)';c.fillRect(0,h*2/3,w,h/3);return;}
+ if(fxid==='blurbg'){c.filter='blur(14px) brightness(0.75)';c.drawImage(src,0,0);c.filter='none';
+   const iw=w*0.72,ih=iw*(src.height/src.width);c.drawImage(src,(w-iw)/2,(h-ih)/2,iw,ih);return;}
+ if(fxid==='miniature'){c.drawImage(src,0,0);
+   const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(255,255,255,0.5)');
+   g.addColorStop(0.35,'rgba(255,255,255,0)');g.addColorStop(0.65,'rgba(255,255,255,0)');
+   g.addColorStop(1,'rgba(255,255,255,0.5)');c.fillStyle=g;c.fillRect(0,0,w,h);return;}
+ c.drawImage(src,0,0);
+}
+</script>
+<script>
+'use strict';
+/* ================= I18N ================= */
+let LANG=localStorage.getItem('jsc_lang')||'en';
+const T={
+ en:{n1:'Camera',n2:'Gallery',n3:'Settings',tap:'Tap to enable camera',denied:'Camera blocked. Allow camera in browser/app settings, then tap.',
+  photo:'Photo saved ✓',video:'Video saved ✓',rec:'Recording...',stopped:'Recording stopped',nofilter:'Original'},
+ ur:{n1:'کیمرہ',n2:'گیلری',n3:'سیٹنگز',tap:'کیمرہ چلانے کے لیے ٹیپ کریں',denied:'کیمرہ بند ہے۔ سیٹنگز میں اجازت دیں پھر ٹیپ کریں۔',
+  photo:'تصویر محفوظ ✓',video:'ویڈیو محفوظ ✓',rec:'ریکارڈنگ...',stopped:'ریکارڈنگ رک گئی',nofilter:'اصل'}
+};
+const t=k=>(T[LANG]&&T[LANG][k])||T.en[k]||k;
+function applyLang(){
+ document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.getAttribute('data-i18n');
+  const map={n1:t('n1'),n2:t('n2'),n3:t('n3')};if(map[k])e.textContent=map[k];});
+ $('langsw').classList.toggle('on',LANG==='ur');
+ document.documentElement.dir=LANG==='ur'?'rtl':'ltr';
+ buildFilterUI();
+}
+function toggleLang(){LANG=LANG==='en'?'ur':'en';localStorage.setItem('jsc_lang',LANG);applyLang();toast(LANG==='ur'?'اردو':'English');}
+
+/* ================= CAMERA ================= */
+let stream=null,curFacing='user',mode='photo',recorder=null,recChunks=[],recStart=0,recTimer=null;
+let recCanvas=null,recCtx=null,recRAF=0,recStream=null,torchOn=false,zoomCap=null;
+const v=$('v');
+
+async function startCamera(){
+ $('cammsg').style.display='none';
+ try{
+  stopStream();
+  stream=await navigator.mediaDevices.getUserMedia({
+   video:{facingMode:curFacing,width:{ideal:1920},height:{ideal:1080}},audio:true});
+  v.srcObject=stream;v.classList.toggle('mirror',curFacing==='user');
+  await v.play();
+  setupDeviceCaps();
+  startFxLoop();
+  toast('📷 '+(LANG==='ur'?'کیمرہ چل پڑا':'Camera on'));
+ }catch(e){
+  console.warn(e);
+  $('cammsg').style.display='flex';
+  $('cammsgtxt').textContent=(e&&e.name==='NotAllowedError')?t('denied'):t('tap');
+ }
+}
+function stopStream(){try{if(recorder&&recorder.state!=='inactive')recorder.stop();}catch(e){}
+ cancelAnimationFrame(recRAF);
+ try{if(stream)stream.getTracks().forEach(tr=>tr.stop());}catch(e){}stream=null;}
+function setupDeviceCaps(){
+ try{
+  const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};
+  $('btnFlash').style.opacity=cap.torch?1:0.35;
+  if(cap.zoom){zoomCap={min:cap.zoom.min||1,max:Math.min(cap.zoom.max||5,5),tr};
+   $('zoomrow').style.display='flex';const z=$('zoomr');z.min=zoomCap.min;z.max=zoomCap.max;z.value=1;
+   $('zoomval').textContent='1.0x';}
+  else{$('zoomrow').style.display='none';zoomCap=null;}
+ }catch(e){}
+}
+async function switchCamera(){curFacing=curFacing==='user'?'environment':'user';await startCamera();}
+async function toggleTorch(){
+ try{const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};
+  if(!cap.torch){toast('⚡ '+(LANG==='ur'?'فلیش سپورٹ نہیں':'No flash support'));return;}
+  torchOn=!torchOn;await tr.applyConstraints({advanced:[{torch:torchOn}]});
+  $('btnFlash').style.background=torchOn?'var(--grad)':'';
+ }catch(e){toast('⚡ Error');}
+}
+$('zoomr').addEventListener('input',async e=>{
+ try{const z=parseFloat(e.target.value);$('zoomval').textContent=z.toFixed(1)+'x';
+  await zoomCap.tr.applyConstraints({advanced:[{zoom:z}]});}catch(err){}
+});
+v.addEventListener('click',e=>{
+ const r=$('focusring');r.style.display='block';
+ r.style.left=e.clientX+'px';r.style.top=(e.clientY-$('camwrap').getBoundingClientRect().top)+'px';
+ setTimeout(()=>r.style.display='none',700);
+});
+function setMode(m){mode=m;$('modePhoto').classList.toggle('on',m==='photo');
+ $('modeVideo').classList.toggle('on',m==='video');$('shutter').classList.toggle('vidmode',m==='video');}
+
+/* ---- live overlay fx loop (for animated overlays on preview) ---- */
+const fx=$('fxlayer'),fxc=fx.getContext('2d');
+let fxRun=false;
+function startFxLoop(){if(fxRun)return;fxRun=true;
+ const loop=()=>{if(!fxRun)return;
+  try{
+   const w=fx.width=fx.clientWidth,h=fx.height=fx.clientHeight;
+   fxc.clearRect(0,0,w,h);
+   const f=curFilter;
+   if(f.ov&&!['vignette','cinebars','dream','glow','lightleak','vhs','rainbow'].includes(f.ov)){
+     paintOverlay(fxc,w,h,performance.now()/1000,f.ov);
+   }else if(f.ov){paintOverlay(fxc,w,h,performance.now()/1000,f.ov);}
+  }catch(e){}
+  requestAnimationFrame(loop);};
+ loop();}
+/* apply live css filter */
+function applyLiveFilter(){
+ v.style.filter=(curFilter.css&&curFilter.css!=='none')?curFilter.css:'';
+ partKind=''; /* reset particles */
+}
+
+/* ---- filter UI ---- */
+function buildFilterUI(){
+ const cat=$('fcat');cat.innerHTML='';
+ CATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
+  b.className='fcatchip'+(id===curCat?' on':'');b.textContent=LANG==='ur'?ur:n;
+  b.onclick=()=>{curCat=id;buildFilterUI();};cat.appendChild(b);});
+ const row=$('frow');row.innerHTML='';
+ FILTERS.filter(f=>f.cat===curCat).forEach(f=>{
+  const d=document.createElement('div');d.className='fthumb'+(f.id===curFilter.id?' on':'');
+  d.innerHTML=`<div class="im"><div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div></div><span>${LANG==='ur'?f.ur:f.n}</span>`;
+  d.onclick=()=>{curFilter=f;applyLiveFilter();buildFilterUI();};
+  row.appendChild(d);});
+}
+
+/* ================= PHOTO CAPTURE ================= */
+function shutterPress(){
+ if(mode==='photo')capturePhoto();
+ else toggleRecording();
+}
+function drawFilteredFrame(canvas){
+ /* draws current video frame with active filter + overlay onto canvas; returns canvas */
+ const w=v.videoWidth||1280,h=v.videoHeight||720;
+ canvas.width=w;canvas.height=h;
+ const c=canvas.getContext('2d');
+ const f=curFilter;
+ if(f.kind==='canvas'&&f.fx){
+   const tmp=document.createElement('canvas');tmp.width=w;tmp.height=h;
+   const tc=tmp.getContext('2d');
+   if(f.css&&f.css!=='none')tc.filter=f.css;
+   tc.drawImage(v,0,0,w,h);tc.filter='none';
+   applyCanvasFX(tmp,canvas,f.fx);
+ }else{
+   if(f.css&&f.css!=='none')c.filter=f.css;
+   c.drawImage(v,0,0,w,h);c.filter='none';
+ }
+ if(f.ov)paintOverlay(c,w,h,performance.now()/1000,f.ov);
+ /* front camera mirror already handled: video element mirrored, drawImage captures unmirrored;
+    mirror it for selfie consistency */
+ if(curFacing==='user'&&v.classList.contains('mirror')){
+   const t2=document.createElement('canvas');t2.width=w;t2.height=h;
+   const c2=t2.getContext('2d');c2.translate(w,0);c2.scale(-1,1);c2.drawImage(canvas,0,0);
+   canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(t2,0,0);
+ }
+ return canvas;
+}
+function capturePhoto(){
+ if(!stream){toast(t('tap'));return;}
+ try{
+  const cv=drawFilteredFrame($('work'));
+  cv.toBlob(b=>{openEditor(b,'photo');toast(t('photo'));},'image/jpeg',0.92);
+ }catch(e){toast('Error: '+e.message);}
+}
+
+/* ================= VIDEO RECORDING ================= */
+function toggleRecording(){
+ if(recorder&&recorder.state==='recording'){stopRecording();return;}
+ if(!stream){toast(t('tap'));return;}
+ try{
+  recChunks=[];
+  const f=curFilter;
+  const needsCanvas=(f.css&&f.css!=='none')||f.ov||(f.kind==='canvas');
+  let mstream;
+  if(needsCanvas){
+   /* filtered recording: render through canvas */
+   recCanvas=document.createElement('canvas');
+   recCanvas.width=v.videoWidth||1280;recCanvas.height=v.videoHeight||720;
+   recCtx=recCanvas.getContext('2d');
+   const draw=()=>{
+     if(!recCtx)return;
+     drawFilteredFrame(recCanvas);
+     recRAF=requestAnimationFrame(draw);};
+   draw();
+   recStream=recCanvas.captureStream(30);
+   /* add audio */
+   const at=stream.getAudioTracks()[0];if(at)recStream.addTrack(at);
+   mstream=recStream;
+  }else{
+   mstream=stream;
+  }
+  let mime='video/webm;codecs=vp9,opus';
+  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm;codecs=vp8,opus';
+  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+  if(!MediaRecorder.isTypeSupported(mime))mime='';
+  recorder=new MediaRecorder(mstream,mime?{mimeType:mime,videoBitsPerSecond:8e6}:undefined);
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data);};
+  recorder.onstop=onRecStop;
+  recorder.start(500);
+  recStart=Date.now();
+  $('recind').classList.add('on');$('shutter').classList.add('recording');
+  recTimer=setInterval(()=>{const s=((Date.now()-recStart)/1000)|0;
+   $('rectime').textContent=String((s/60)|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},500);
+  toast('🔴 '+(LANG==='ur'?'ریکارڈنگ شروع':'Recording started'));
+ }catch(e){toast('Error: '+e.message);}
+}
+function stopRecording(){
+ try{if(recorder&&recorder.state==='recording')recorder.stop();}catch(e){}
+ clearInterval(recTimer);$('recind').classList.remove('on');$('shutter').classList.remove('recording');
+ cancelAnimationFrame(recRAF);recCtx=null;
+}
+function onRecStop(){
+ cancelAnimationFrame(recRAF);recCtx=null;
+ try{
+  const blob=new Blob(recChunks,{type:recorder.mimeType||'video/webm'});
+  recChunks=[];
+  if(blob.size<1000){toast('⚠️ '+(LANG==='ur'?'ریکارڈنگ ناکام':'Recording failed'));return;}
+  const dur=Math.round((Date.now()-recStart)/1000);
+  saveMedia(blob,'video',dur);
+  toast(t('video'));
+ }catch(e){toast('Error: '+e.message);}
+}
+</script>
+<script>
+'use strict';
+/* ================= PHOTO EDITOR ================= */
+const edc=$('edcanvas'),edctx=edc.getContext('2d');
+let edOrig=null,edImg=null,edUndo=[],edRedo=[],edTab='adjust',edCompare=false;
+let edAdj={br:100,ct:100,sa:100,wm:0,bl:0};
+let edTexts=[],edStickers=[],selItem=null,dragSt=null;
+const STICKERS=['😎','👑','🐰','🐱','🐶','🌸','🦋','⭐','💖','🔥','😜','🤩','🎩','🕶️','💎','🌟'];
+
+function openEditor(blob,kind){
+ const url=URL.createObjectURL(blob);
+ const img=new Image();
+ img.onload=()=>{
+  edOrig=document.createElement('canvas');
+  let w=img.width,h=img.height;const MX=1600;
+  if(Math.max(w,h)>MX){const s=MX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+  edOrig.width=w;edOrig.height=h;edOrig.getContext('2d').drawImage(img,0,0,w,h);
+  URL.revokeObjectURL(url);
+  edAdj={br:100,ct:100,sa:100,wm:0,bl:0};edTexts=[];edStickers=[];edUndo=[];edRedo=[];selItem=null;
+  edTab='adjust';renderEditor();go('ed');buildEdTabs();
+ };
+ img.src=url;
+}
+function edFilterStr(){
+ const a=edAdj;
+ return `brightness(${a.br}%) contrast(${a.ct}%) saturate(${a.sa}%) sepia(${Math.max(0,a.wm)/200}) hue-rotate(${-a.wm/6}deg) blur(${a.bl}px)`;
+}
+function renderEditor(){
+ if(!edOrig)return;
+ const w=edOrig.width,h=edOrig.height;
+ edc.width=w;edc.height=h;
+ const c=edctx;
+ if(edCompare){c.drawImage(edOrig,0,0);}
+ else{
+  c.filter=edFilterStr();c.drawImage(edOrig,0,0,w,h);c.filter='none';
+  /* texts + stickers */
+  edTexts.forEach(tx=>{c.font=`bold ${tx.size}px sans-serif`;c.fillStyle=tx.color;
+   c.strokeStyle='rgba(0,0,0,0.6)';c.lineWidth=3;
+   c.strokeText(tx.txt,tx.x,tx.y);c.fillText(tx.txt,tx.x,tx.y);
+   if(tx===selItem){c.strokeStyle='#ec4899';c.lineWidth=2;
+    const tw=c.measureText(tx.txt).width;c.strokeRect(tx.x-6,tx.y-tx.size-4,tw+12,tx.size+12);}});
+  edStickers.forEach(s=>{c.font=`${s.size}px serif`;c.fillText(s.emo,s.x,s.y);
+   if(s===selItem){c.strokeStyle='#ec4899';c.lineWidth=2;c.strokeRect(s.x-4,s.y-s.size-2,s.size+10,s.size+10);}});
+ }
+ fitEditorCanvas();
+}
+function fitEditorCanvas(){
+ const wr=$('edwrap');const r=wr.getBoundingClientRect();
+ const s=Math.min((r.width-8)/edc.width,(r.height-8)/edc.height,1.5);
+ edc.style.width=(edc.width*s)+'px';edc.style.height=(edc.height*s)+'px';
+}
+function pushUndo(){
+ edUndo.push(JSON.stringify({a:edAdj,t:edTexts,s:edStickers,img:edc.toDataURL('image/jpeg',0.85)}));
+ if(edUndo.length>20)edUndo.shift();edRedo=[];
+}
+function editorUndo(){
+ if(!edUndo.length){toast('↩️');return;}
+ edRedo.push(JSON.stringify({a:edAdj,t:edTexts,s:edStickers}));
+ const st=JSON.parse(edUndo.pop());
+ edAdj=st.a;edTexts=st.t;edStickers=st.s;
+ const im=new Image();im.onload=()=>{edOrig.width=im.width;edOrig.height=im.height;
+  edOrig.getContext('2d').drawImage(im,0,0);renderEditor();buildEdPanel();};im.src=st.img;
+}
+function resetEdits(){pushUndo();edAdj={br:100,ct:100,sa:100,wm:0,bl:0};edTexts=[];edStickers=[];
+ openEditorRefresh();buildEdPanel();renderEditor();}
+function openEditorRefresh(){/* re-render from edOrig which keeps last crop/rotate */}
+function toggleCompare(e){edCompare=!edCompare;renderEditor();
+ if(edCompare)setTimeout(()=>{edCompare=false;renderEditor();},1200);}
+const EDTABS=[['adjust','🎚️ Adjust','ایڈجسٹ'],['crop','✂️ Crop','کاٹیں'],['text','🔤 Text','متن'],['stick','😀 Stickers','اسٹیکر']];
+function buildEdTabs(){
+ const tb=$('edtabs');tb.innerHTML='';
+ EDTABS.forEach(([id,n,ur])=>{const b=document.createElement('button');
+  b.className='edtab'+(edTab===id?' on':'');b.textContent=LANG==='ur'?ur:n;
+  b.onclick=()=>{edTab=id;buildEdTabs();buildEdPanel();};tb.appendChild(b);});
+ buildEdPanel();
+}
+function sldRow(lbl,key,min,max,unit){
+ return `<div class="sldrow"><label>${lbl}</label><input type="range" min="${min}" max="${max}" value="${edAdj[key]}"
+  oninput="edAdj.${key}=+this.value;this.nextElementSibling.textContent=this.value+'${unit||''}';renderEditor()"><b>${edAdj[key]}${unit||''}</b></div>`;
+}
+function buildEdPanel(){
+ const p=$('edpanel');
+ if(edTab==='adjust'){
+  p.innerHTML=sldRow(LANG==='ur'?'روشنائی':'Brightness','br',30,180,'%')
+   +sldRow(LANG==='ur'?'کنٹراسٹ':'Contrast','ct',30,180,'%')
+   +sldRow(LANG==='ur'?'رنگ':'Saturation','sa',0,220,'%')
+   +sldRow(LANG==='ur'?'گرمائش':'Warmth','wm',-100,100,'')
+   +sldRow(LANG==='ur'?'دھند':'Blur','bl',0,10,'px');
+ }else if(edTab==='crop'){
+  p.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 0">
+   ${[['1:1',1],['4:3',4/3],['3:4',3/4],['16:9',16/9],['9:16',9/16]].map(([n,r])=>
+    `<button class="edtab" onclick="doCrop(${r})">${n}</button>`).join('')}
+   <button class="edtab" onclick="doRotate(90)">↻ 90°</button>
+   <button class="edtab" onclick="doFlip()">⇋ Flip</button></div>
+   <div style="color:var(--mut);font-size:12px;padding:4px 2px">${LANG==='ur'?'کاٹنے کے بعد Save دبائیں':'Crop applies immediately'}</div>`;
+ }else if(edTab==='text'){
+  p.innerHTML=`<div style="display:flex;gap:8px;padding:6px 0">
+   <input id="txtin" placeholder="${LANG==='ur'?'متن لکھیں':'Type text...'}" style="flex:1;background:var(--btn);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;padding:11px;font-size:15px">
+   <button class="abtn pri" style="flex:0 0 auto;padding:11px 20px" onclick="addText()">＋</button></div>
+   <div style="display:flex;gap:8px;margin-top:6px">
+   ${['#ffffff','#ffd60a','#ff2d55','#4ade80','#3b82f6','#ec4899','#000000'].map(c=>
+    `<button onclick="setTextColor('${c}')" style="width:34px;height:34px;border-radius:50%;background:${c};border:2px solid rgba(255,255,255,.4)"></button>`).join('')}
+   </div>`;
+ }else if(edTab==='stick'){
+  p.innerHTML=`<div class="stkrow">${STICKERS.map(s=>`<button class="stkbtn" onclick="addSticker('${s}')">${s}</button>`).join('')}</div>
+   <div style="color:var(--mut);font-size:12px">${LANG==='ur'?'اسٹیکر کو کھینچ کر جگہ بدلیں':'Drag stickers on photo to move'}</div>`;
+ }
+}
+function addText(){const v=$('txtin').value.trim();if(!v)return;pushUndo();
+ edTexts.push({txt:v,x:40,y:80,size:52,color:'#ffffff'});selItem=edTexts[edTexts.length-1];
+ $('txtin').value='';renderEditor();}
+function setTextColor(c){if(selItem&&selItem.txt!==undefined){pushUndo();selItem.color=c;renderEditor();}}
+function addSticker(emo){pushUndo();
+ edStickers.push({emo,x:60,y:120,size:72});selItem=edStickers[edStickers.length-1];renderEditor();}
+function doRotate(deg){pushUndo();
+ const t=document.createElement('canvas');
+ if(deg===90||deg===270){t.width=edOrig.height;t.height=edOrig.width;}
+ else{t.width=edOrig.width;t.height=edOrig.height;}
+ const c=t.getContext('2d');c.translate(t.width/2,t.height/2);c.rotate(deg*Math.PI/180);
+ c.drawImage(edOrig,-edOrig.width/2,-edOrig.height/2);
+ edOrig=t;renderEditor();}
+function doFlip(){pushUndo();
+ const t=document.createElement('canvas');t.width=edOrig.width;t.height=edOrig.height;
+ const c=t.getContext('2d');c.translate(t.width,0);c.scale(-1,1);c.drawImage(edOrig,0,0);
+ edOrig=t;renderEditor();}
+function doCrop(ratio){
+ pushUndo();
+ const w=edOrig.width,h=edOrig.height;
+ let cw=w,ch=w/ratio;if(ch>h){ch=h;cw=h*ratio;}
+ const cx=(w-cw)/2,cy=(h-ch)/2;
+ const t=document.createElement('canvas');t.width=Math.round(cw);t.height=Math.round(ch);
+ /* apply current adjustments into pixels first */
+ const pre=document.createElement('canvas');pre.width=w;pre.height=h;
+ const pc=pre.getContext('2d');pc.filter=edFilterStr();pc.drawImage(edOrig,0,0);pc.filter='none';
+ t.getContext('2d').drawImage(pre,cx,cy,cw,ch,0,0,t.width,t.height);
+ edOrig=t;edAdj={br:100,ct:100,sa:100,wm:0,bl:0};
+ renderEditor();buildEdPanel();toast('✂️ OK');
+}
+function saveEdited(){
+ renderEditor();
+ edc.toBlob(b=>{
+  saveMedia(b,'photo');
+  toast('💾 '+(LANG==='ur'?'محفوظ ہوگئی':'Saved'));
+  closeEditor();go('gal');
+ },'image/jpeg',0.92);
+}
+function closeEditor(){go('cam');}
+/* drag text/stickers on editor canvas */
+(function(){
+ let sx,sy,moved;
+ function pos(e){const r=edc.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX),cy=(e.touches?e.touches[0].clientY:e.clientY);
+  return{x:(cx-r.left)/r.width*edc.width,y:(cy-r.top)/r.height*edc.height};}
+ edc.addEventListener('pointerdown',e=>{const p=pos(e);sx=p.x;sy=p.y;moved=false;
+  selItem=null;
+  [...edStickers].reverse().forEach(s=>{if(!selItem&&p.x>s.x-10&&p.x<s.x+s.size+10&&p.y>s.y-s.size-10&&p.y<s.y+10)selItem=s;});
+  [...edTexts].reverse().forEach(tx=>{if(!selItem&&p.y<tx.y+8&&p.y>tx.y-tx.size-12&&p.x>tx.x-10)selItem=tx;});
+  dragSt=selItem;renderEditor();});
+ edc.addEventListener('pointermove',e=>{if(!dragSt)return;const p=pos(e);
+  dragSt.x+=p.x-sx;dragSt.y+=p.y-sy;sx=p.x;sy=p.y;moved=true;renderEditor();});
+ edc.addEventListener('pointerup',()=>{if(moved)pushUndo();dragSt=null;});
+})();
+</script>
+<script>
+'use strict';
+/* ================= GALLERY (IndexedDB) ================= */
+let db=null;
+function dbOpen(){return new Promise((res,rej)=>{
+ const r=indexedDB.open('jsc_gallery',1);
+ r.onupgradeneeded=()=>{r.result.createObjectStore('media',{keyPath:'id',autoIncrement:true});};
+ r.onsuccess=()=>{db=r.result;res(db);};r.onerror=()=>rej(r.error);});}
+async function saveMedia(blob,kind,dur){
+ await dbOpen();
+ return new Promise(res=>{
+  const tx=db.transaction('media','readwrite');
+  tx.objectStore('media').add({blob,kind,ts:Date.now(),dur:dur||0});
+  tx.oncomplete=()=>{res();refreshSettings();if($('scr-gal').classList.contains('on'))loadGallery();};
+ });
+}
+function dbAll(){return new Promise(res=>{if(!db){res([]);return;}
+ const out=[];const rq=db.transaction('media').objectStore('media').openCursor(null,'prev');
+ rq.onsuccess=()=>{const c=rq.result;if(c){out.push({id:c.key,...c.value});c.continue();}else res(out);};});}
+async function loadGallery(){
+ await dbOpen();const items=await dbAll();
+ const g=$('galgrid');g.innerHTML='';
+ if(!items.length){g.innerHTML=`<div class="gempty">📷<br>${LANG==='ur'?'ابھی کوئی میڈیا نہیں':'No media yet'}</div>`;return;}
+ items.forEach(it=>{
+  const d=document.createElement('div');d.className='gitem';
+  const url=URL.createObjectURL(it.blob);
+  if(it.kind==='video'){d.innerHTML=`<video src="${url}" preload="metadata" muted playsinline></video>
+   <span class="vdur">🎥 ${it.dur||0}s</span>`;}
+  else{d.innerHTML=`<img src="${url}" loading="lazy">`;}
+  d.onclick=()=>openViewer(it);
+  g.appendChild(d);
+ });
+}
+/* ---- viewer ---- */
+let curItem=null;
+async function openViewer(it){
+ curItem=it;const st=$('vstage');st.innerHTML='';
+ const url=URL.createObjectURL(it.blob);
+ $('vwt').textContent=new Date(it.ts).toLocaleString();
+ if(it.kind==='video'){st.innerHTML=`<video src="${url}" controls playsinline style="max-height:100%"></video>`;
+  $('vwEdit').style.display='none';}
+ else{st.innerHTML=`<img src="${url}">`;$('vwEdit').style.display='';}
+ $('viewer').classList.add('on');
+}
+function closeViewer(){$('viewer').classList.remove('on');$('vstage').innerHTML='';curItem=null;}
+function viewerDownload(){
+ if(!curItem)return;
+ const ext=curItem.kind==='video'?'webm':'jpg';
+ const name=`jsc_${curItem.ts}.${ext}`;
+ if(androidSave&&window.Android&&Android.saveMedia){
+  const fr=new FileReader();
+  fr.onload=()=>{if(androidSave(fr.result,name,curItem.kind==='video'?'video/webm':'image/jpeg'))toast('💾 ✓');};
+  fr.readAsDataURL(curItem.blob);return;
+ }
+ download(curItem.blob,name);
+}
+async function viewerShare(){
+ if(!curItem)return;
+ try{
+  const f=new File([curItem.blob],`jsc_${curItem.ts}.${curItem.kind==='video'?'webm':'jpg'}`,
+   {type:curItem.blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+   await navigator.share({files:[f],title:'Jilan Smart Camera'});return;
+  }
+ }catch(e){}
+ viewerDownload();
+}
+function viewerEdit(){
+ if(!curItem||curItem.kind!=='photo')return;
+ closeViewer();openEditor(curItem.blob,'photo');
+}
+async function viewerDelete(){
+ if(!curItem)return;
+ const ok=await dlg(LANG==='ur'?'ڈیلیٹ کریں؟':'Delete?',LANG==='ur'?'یہ میڈیا ڈیلیٹ ہو جائے گا':'This media will be deleted','Delete');
+ if(!ok)return;
+ await dbOpen();
+ const tx=db.transaction('media','readwrite');tx.objectStore('media').delete(curItem.id);
+ tx.oncomplete=()=>{closeViewer();loadGallery();refreshSettings();toast('🗑️');};
+}
+/* ---- import ---- */
+function importPhoto(){$('fileimp').click();}
+$('fileimp').addEventListener('change',e=>{
+ const f=e.target.files[0];e.target.value='';
+ if(f)openEditor(f,'photo');
+});
+async function clearAllMedia(){
+ const ok=await dlg(LANG==='ur'?'سب ڈیلیٹ؟':'Clear all?',LANG==='ur'?'سارا میڈیا ڈیلیٹ ہو جائے گا':'All media will be deleted','Delete');
+ if(!ok)return;await dbOpen();
+ const tx=db.transaction('media','readwrite');tx.objectStore('media').clear();
+ tx.oncomplete=()=>{loadGallery();refreshSettings();toast('🗑️');};
+}
+/* ================= SETTINGS ================= */
+async function refreshSettings(){
+ await dbOpen();const items=await dbAll();
+ $('stcount').textContent=items.length;
+ let bytes=0;items.forEach(i=>bytes+=(i.blob?i.blob.size:0));
+ $('stsize').textContent=bytes>1048576?(bytes/1048576).toFixed(1)+' MB':Math.round(bytes/1024)+' KB';
+ const rows=[];
+ const camOk=!!(stream&&stream.active);
+ rows.push(['📷 Camera',camOk]);
+ rows.push(['🎤 Microphone',camOk]);
+ $('permrows').innerHTML=rows.map(([n,ok])=>
+  `<div class="setrow"><span>${n}</span><b class="${ok?'ok':'no'}">${ok?'✓':'✕'}</b></div>`).join('');
+}
+/* ================= NAV ================= */
+function go(s){
+ document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));
+ $('navbar').style.display=(s==='ed')?'none':'flex';
+ if(s==='cam'){$('scr-cam').classList.add('on');}
+ if(s==='gal'){$('scr-gal').classList.add('on');loadGallery();}
+ if(s==='set'){$('scr-set').classList.add('on');refreshSettings();}
+ if(s==='ed'){$('scr-ed').classList.add('on');setTimeout(fitEditorCanvas,80);}
+ document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+}
+/* ================= BOOT ================= */
+window.addEventListener('load',async()=>{
+ applyLang();
+ setTimeout(()=>$('splash').classList.add('hide'),1400);
+ go('cam');
+ try{await dbOpen();}catch(e){}
+ /* camera needs user gesture on some browsers; try anyway */
+ if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){startCamera();}
+ else{$('cammsg').style.display='flex';$('cammsgtxt').textContent=t('tap');}
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopStream();});
+window.addEventListener('resize',()=>{if($('scr-ed').classList.contains('on'))fitEditorCanvas();});
+</script>
+</body>
+</html>
