@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Jilan Reseller Network — Share karein, kamayein!</title>
+<meta name="description" content="Jilan Store Reseller Network: products share karein WhatsApp par aur har delivered order par commission kamayein.">
+<link rel="icon" href="../icon-192.png" type="image/png">
+<style>
+:root{
+  --green:#14532d; --green2:#1a5c3f; --green3:#0d3b20;
+  --cream:#faf6ee; --gold:#c9a227; --gold2:#e6c455;
+  --ink:#1f2937; --mut:#6b7280; --line:#e5e0d3; --red:#dc2626;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Nastaliq Urdu",Arial,sans-serif;background:var(--cream);color:var(--ink)}
+.hidden{display:none!important}
+.hdr{background:linear-gradient(135deg,var(--green3),var(--green2));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr .logo{width:40px;height:40px;border-radius:11px;background:var(--gold);color:var(--green3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px}
+.hdr h1{font-size:17px;margin:0}
+.hdr h1 small{display:block;font-size:11px;color:var(--gold2);font-weight:400}
+.hdr .sp{flex:1}
+.hdr a{color:#fff;text-decoration:none;font-size:13px;border:1px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:20px}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+.hero{background:linear-gradient(135deg,var(--green2),var(--green3));color:#fff;border-radius:18px;padding:26px 20px;text-align:center;margin:6px 0 14px;box-shadow:0 6px 20px rgba(13,59,32,.25)}
+.hero h2{margin:0 0 8px;font-size:24px}
+.hero p{margin:0;font-size:14px;opacity:.92;line-height:1.6}
+.hero .big{font-size:15px;background:rgba(201,162,39,.2);border:1px solid var(--gold2);border-radius:12px;padding:10px;margin-top:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 4px rgba(20,83,45,.07)}
+.card h2{margin:0 0 10px;font-size:17px;color:var(--green)}
+.steps{display:grid;gap:10px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step .n{width:32px;height:32px;flex:none;border-radius:50%;background:var(--gold);color:var(--green3);font-weight:800;display:flex;align-items:center;justify-content:center}
+.step p{margin:2px 0 0;font-size:14px;line-height:1.55}
+.tabs{display:flex;gap:8px;margin:4px 0 0}
+.tabs button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700;color:var(--mut);cursor:pointer;min-height:48px}
+.tabs button.on{border-color:var(--green2);color:var(--green2);background:#f0f7f2}
+label{font-size:13px;font-weight:600;color:var(--green2);display:block;margin:12px 0 4px}
+input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;background:#fff;min-height:46px;font-family:inherit}
+input:focus{outline:none;border-color:var(--green2);box-shadow:0 0 0 3px rgba(26,92,63,.12)}
+.btn{background:var(--green2);color:#fff;border:none;border-radius:12px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer;width:100%;min-height:50px;margin-top:14px}
+.btn:active{transform:scale(.98)}
+.btn.gold{background:var(--gold);color:var(--green3)}
+.err{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:10px;font-size:13px;margin:10px 0}
+.okmsg{background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:10px;padding:10px;font-size:13px;margin:10px 0}
+.warn{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:10px;padding:10px;font-size:13px;margin:10px 0}
+.hint{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.5}
+.terms{font-size:13px;line-height:1.8;max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fdfcf7}
+.terms b{color:var(--green2)}
+.terms ol{margin:6px 0;padding-left:20px}
+.terms li{margin-bottom:6px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:13px}
+.check input{width:22px;height:22px;flex:none;min-height:0;margin-top:2px}
+.center{text-align:center}
+.statusbox{text-align:center;padding:26px 16px}
+.statusbox .big-ic{font-size:52px}
+.ftr{text-align:center;padding:20px;font-size:12px;color:var(--mut)}
+.ftr a{color:var(--green2)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green3);color:#fff;padding:11px 20px;border-radius:30px;font-size:14px;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">J</div>
+  <h1>Jilan Reseller Network<small>Share karein • Kamayein</small></h1>
+  <div class="sp"></div>
+  <a href="../">🛒 Store</a>
+</div>
+
+<div class="wrap">
+
+  <!-- SETUP MODE -->
+  <div id="setupScreen" class="hidden">
+    <div class="card">
+      <div class="warn"><b>🔐 Firebase connect nahi hua.</b><br>Reseller system ke liye Firebase zaroori hai. Tafsil: <a href="../FIREBASE_SETUP.md">FIREBASE_SETUP.md</a></div>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <div id="landing">
+    <div class="hero">
+      <h2>🤝 Jilan Reseller Network</h2>
+      <p>Products <b>share</b> karein WhatsApp / Facebook par.<br>Har <b>delivered order</b> par <b>commission</b> kamayein!</p>
+      <div class="big">💰 Easypaisa / JazzCash / Bank me payout<br><span style="font-size:12px">Koi investment nahi • Koi stock nahi</span></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Kaam kaise karta hai? (3 steps)</h2>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><p><b>Register</b> karein neeche diye form se. Admin approval ke baad aapko <b>Reseller ID</b> milegi.</p></div>
+        <div class="step"><div class="n">2</div><p>Dashboard se kisi product ka <b>"Share &amp; Earn"</b> dabayein — aapka <b>unique link</b> ban jayega. Use WhatsApp par share karein.</p></div>
+        <div class="step"><div class="n">3</div><p>Jab aapke link se order <b>deliver</b> ho jaye, commission <b>approve</b> hogi. Phir <b>withdraw</b> karein!</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📜 Terms &amp; Commission Policy</h2>
+      <div class="terms">
+        <ol>
+          <li><b>Approval zaroori:</b> Register karne ke baad admin aapka account approve karega. Bina approval ke commission nahi milegi.</li>
+          <li><b>Commission sirf delivered orders par:</b> Order deliver hone aur return period guzarne ke baad commission <i>approve</i> hogi.</li>
+          <li><b>Cancelled / returned orders:</b> Jo order cancel ya return ho jaye, uski commission <i>nahi</i> milegi (ya wapas le li jayegi).</li>
+          <li><b>Fake orders mana hain:</b> Khud ke fake orders ya ghalat referral par account <i>suspend</i> ho sakta hai.</li>
+          <li><b>Commission rate:</b> Har product par alag ho sakti hai (fixed Rs ya %). Dashboard me har product ke sath likhi hogi. Default rate admin set karta hai.</li>
+          <li><b>Withdrawal:</b> Minimum amount admin set karega. Payout Easypaisa / JazzCash / bank transfer se, admin ki verification ke baad.</li>
+          <li><b>WhatsApp orders:</b> Jab customer WhatsApp par order kare to uske message me aapka Reseller ID hona chahiye taake admin match kar sake. <b>Is me thori manual verification lagti hai</b> — order foran count nahi hota.</li>
+          <li><b>Qeemat tabdeeli:</b> Product ki qeemat ya commission admin kabhi bhi badal sakta hai — purane pending commissions purani rate par hi rahenge.</li>
+          <li><b>Data:</b> Aapka naam, phone aur earnings record mehengfooz rahenge aur sirf aap aur admin dekh sakte hain.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button id="tabReg" class="on" onclick="showTab('reg')">📝 Register</button>
+        <button id="tabLog" onclick="showTab('log')">🔐 Login</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="paneReg">
+        <div id="regErr" class="err hidden"></div>
+        <div id="regOk" class="okmsg hidden"></div>
+        <label>Pura naam *</label>
+        <input id="rName" placeholder="masalan: Ahmed Khan" autocomplete="name">
+        <label>Mobile number *</label>
+        <input id="rPhone" placeholder="03xx-xxxxxxx" inputmode="tel" autocomplete="tel">
+        <label>Email * <span class="hint">(login ke liye)</span></label>
+        <input id="rEmail" type="email" placeholder="aapka@email.com" autocomplete="email">
+        <label>Password * <span class="hint">(kam az kam 6 harf)</span></label>
+        <input id="rPass" type="password" placeholder="••••••••" autocomplete="new-password">
+        <label>Sheher *</label>
+        <input id="rCity" placeholder="masalan: Lahore">
+        <div class="check">
+          <input type="checkbox" id="rAgree">
+          <span>Me ne upar di hui <b>Terms &amp; Commission Policy</b> parh li hai aur un se ittefaq karta/karti hun.</span>
+        </div>
+        <button class="btn gold" onclick="doRegister()">🤝 Register as Reseller</button>
+        <div class="hint center">Pehle se registered? <b>Login</b> tab dabayein.</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="paneLog" class="hidden">
+        <div id="logErr" class="err hidden"></div>
+        <label>Email</label>
+        <input id="lEmail" type="email" placeholder="aapka@email.com" autocomplete="username">
+        <label>Password</label>
+        <input id="lPass" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button class="btn" onclick="doLogin()">🔐 Login</button>
+      </div>
+    </div>
+
+    <div class="ftr">
+      <a href="../">← Wapas Jilan Store</a> • Sawal? <a href="https://wa.me/923007379385" target="_blank" rel="noopener">WhatsApp: 0300 7379385</a>
+    </div>
+  </div>
+
+  <!-- STATUS: PENDING -->
+  <div id="statusPending" class="hidden">
+    <div class="card"><div class="statusbox">
+      <div class="big-ic">⏳</div>
+      <h2 style="color:var(--green)">Approval ka intezar</h2>
+      <p class="hint">Aapki darkhwast mil gayi hai.<br>Admin approve karega to aapko dashboard khul jayega.<br><br>Aapki Reseller ID: <b id="pendId"></b></p>
+      <button class="btn" onclick="location.reload()">🔄 Dobara check karein</button>
+      <div style="margin-top:10px"><button class="btn" style="background:#fff;color:var(--green2);border:1.5px solid var(--green2)" onclick="doLogout()">🚪 Logout</button></div>
+    </div></div>
+  </div>
+
+  <!-- STATUS: SUSPENDED/REJECTED -->
+  <div id="statusBlocked" class="hidden">
+    <div class="card"><div class="statusbox">
+      <div class="big-ic">🚫</div>
+      <h2 style="color:var(--red)" id="blockedTitle">Account suspended</h2>
+      <p class="hint" id="blockedMsg"></p>
+      <div style="margin-top:10px"><button class="btn" style="background:#fff;color:var(--green2);border:1.5px solid var(--green2)" onclick="doLogout()">🚪 Logout</button></div>
+    </div></div>
+  </div>
+
+</div>
+<div id="toastRoot"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;$("toastRoot").appendChild(t);setTimeout(function(){t.remove();},2800);}
+function firebaseConfigured(){try{var c=window.FIREBASE_CONFIG;return c&&c.apiKey&&String(c.apiKey).indexOf("PASTE")!==0;}catch(e){return false;}}
+var auth=null,db=null;
+
+function showTab(w){
+  $("tabReg").classList.toggle("on",w==="reg");
+  $("tabLog").classList.toggle("on",w==="log");
+  $("paneReg").classList.toggle("hidden",w!=="reg");
+  $("paneLog").classList.toggle("hidden",w!=="log");
+}
+function genResellerId(){
+  var c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="";
+  for(var i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];
+  return "RES"+s;
+}
+async function uniqueResellerId(){
+  for(var i=0;i<8;i++){
+    var id=genResellerId();
+    var q=await db.collection("resellers").where("resellerId","==",id).limit(1).get();
+    if(q.empty)return id;
+  }
+  return "RES"+Date.now().toString(36).toUpperCase().slice(-5);
+}
+
+window.addEventListener("DOMContentLoaded",function(){
+  if(!firebaseConfigured()){$("setupScreen").classList.remove("hidden");$("landing").classList.add("hidden");return;}
+  if(typeof firebase==="undefined"){$("setupScreen").classList.remove("hidden");$("landing").classList.add("hidden");toast("⚠️ Firebase load nahi hui — internet check karein");return;}
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  auth=firebase.auth();db=firebase.firestore();
+  auth.onAuthStateChanged(function(u){ if(u)routeUser(u); });
+});
+
+async function routeUser(u){
+  try{
+    var d=await db.collection("resellers").doc(u.uid).get();
+    if(!d.exists){toast("Aap reseller ke tor par registered nahi.");return;}
+    var r=d.data();
+    $("landing").classList.add("hidden");
+    if(r.status==="approved"){location.href="dashboard.html";return;}
+    if(r.status==="pending"){$("pendId").textContent=r.resellerId||"";$("statusPending").classList.remove("hidden");return;}
+    $("blockedTitle").textContent=r.status==="rejected"?"Darkhwast reject ho gayi":"Account suspended";
+    $("blockedMsg").textContent=r.status==="rejected"
+      ?"Maaf kijiye — admin ne aapki darkhwast approve nahi ki. Sawal ho to WhatsApp 0300 7379385 par rabta karein."
+      :"Aapka account suspend kar diya gaya hai. Tafsil ke liye WhatsApp 0300 7379385 par rabta karein.";
+    $("statusBlocked").classList.remove("hidden");
+  }catch(e){toast("Error: "+e.message);}
+}
+
+async function doRegister(){
+  var e=$("regErr"),ok=$("regOk");
+  e.classList.add("hidden");ok.classList.add("hidden");
+  var name=$("rName").value.trim(),phone=$("rPhone").value.trim(),
+      email=$("rEmail").value.trim(),pass=$("rPass").value,city=$("rCity").value.trim();
+  if(!name||!phone||!email||!pass||!city){e.textContent="Tamam khane bharna zaroori hain.";e.classList.remove("hidden");return;}
+  if(pass.length<6){e.textContent="Password kam az kam 6 harf ka ho.";e.classList.remove("hidden");return;}
+  if(!$("rAgree").checked){e.textContent="Terms se ittefaq karna zaroori hai (checkbox tick karein).";e.classList.remove("hidden");return;}
+  try{
+    toast("⏳ Account ban raha hai…");
+    var cred=await auth.createUserWithEmailAndPassword(email,pass);
+    var rid=await uniqueResellerId();
+    await db.collection("resellers").doc(cred.user.uid).set({
+      name:name,phone:phone,email:email,city:city,
+      resellerId:rid,status:"pending",createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ok.innerHTML="✅ <b>Register ho gaya!</b><br>Aapki Reseller ID: <b>"+rid+"</b><br>Admin approval ke baad dashboard khul jayega.";
+    ok.classList.remove("hidden");
+    routeUser(cred.user);
+  }catch(err){
+    var m={"auth/email-already-in-use":"Ye email pehle se registered hai — Login karein.","auth/invalid-email":"Email sahi nahi.","auth/weak-password":"Password kam az kam 6 harf ka ho.","auth/network-request-failed":"Internet check karein."};
+    e.textContent=m[err.code]||("Error: "+err.message);e.classList.remove("hidden");
+  }
+}
+
+async function doLogin(){
+  var e=$("logErr");e.classList.add("hidden");
+  var email=$("lEmail").value.trim(),pass=$("lPass").value;
+  if(!email||!pass){e.textContent="Email aur password likhein.";e.classList.remove("hidden");return;}
+  try{await auth.signInWithEmailAndPassword(email,pass);}
+  catch(err){
+    var m={"auth/invalid-credential":"Email ya password ghalat hai.","auth/user-not-found":"Ye email registered nahi — pehle Register karein.","auth/wrong-password":"Password ghalat hai.","auth/too-many-requests":"Bohat koshish — thori der baad try karein.","auth/network-request-failed":"Internet check karein."};
+    e.textContent=m[err.code]||("Error: "+err.message);e.classList.remove("hidden");
+  }
+}
+async function doLogout(){await auth.signOut();location.reload();}
+</script>
+</body>
+</html>

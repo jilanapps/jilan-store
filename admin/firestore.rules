@@ -1,18 +1,105 @@
 rules_version = '2';
-// JILAN STORE ADMIN — Firestore Security Rules
-// Paste these in: Firebase Console → Firestore Database → Rules → Publish
+// JILAN STORE — Firestore Security Rules (Admin + Reseller Network)
+// Paste: Firebase Console → Firestore Database → Rules → Publish
 //
-// Kya karta hai (Roman Urdu):
-// - Bina login ke KOI bhi data parh/badal NAHI sakta (public = deny)
-// - Sirf login shuda admin (jo aapne Console me banaya) parh/badal sakta hai
-// - Yahan koi signup nahi — admin sirf Firebase Console se banta hai
+// SECURITY MODEL (Roman Urdu):
+// - Admin: Firebase Console me banaya hua user + Firestore me "admins/{uid}" doc
+//   (pehli dafa ye doc Console se manually banayein — Console rules bypass karta hai)
+// - Reseller: reseller/ page se register hota hai, sirf APNA data dekh sakta hai
+// - Bina login ke: kuch nahi (siwaye reseller_clicks me click record karne ke)
+//
+// COLLECTIONS:
+//   Admin-only : costs, overrides, customProducts, orders, coupons, settings
+//   Shared     : admins (registry), resellers, commissions, withdrawals,
+//                product_commissions, reseller_settings, reseller_clicks
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Sab collections (costs, orders, coupons, settings...) — sirf login wala
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function isSelf(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // ============ ADMIN-ONLY (private business data) ============
+    match /costs/{d}          { allow read, write: if isAdmin(); }
+    match /overrides/{d}      { allow read, write: if isAdmin(); }
+    match /customProducts/{d} { allow read, write: if isAdmin(); }
+    match /orders/{d}         { allow read, write: if isAdmin(); }
+    match /coupons/{d}        { allow read, write: if isAdmin(); }
+    match /settings/{d}       { allow read, write: if isAdmin(); }
+
+    // ============ ADMIN REGISTRY ============
+    // Pehla admin doc Firebase CONSOLE se banayein (Console rules bypass karta hai).
+    // Uske baad naye admin sirf maujooda admin bana sakta hai.
+    match /admins/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ============ RESELLERS ============
+    match /resellers/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      // Registration: sirf apna doc, status hamesha "pending" se shuru
+      allow create: if isSelf(uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasAll(
+             ['name','phone','email','city','resellerId','status','createdAt']);
+      // Reseller sirf apna profile (naam/phone/city) badal sakta hai —
+      // status aur resellerId NAHI (wo sirf admin badalta hai)
+      allow update: if isAdmin() || (
+        isSelf(uid)
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.resellerId == resource.data.resellerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['name','phone','city','updatedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ============ CLICK TRACKING ============
+    // Anonymous visitors (bina login) sirf click RECORD kar sakte hain —
+    // parh/badal/delete sirf admin. (Spam ka khatra qabool-shuda; counts estimate hain.)
+    match /reseller_clicks/{d} {
+      allow create: if request.resource.data.keys().hasAll(['resellerId','ts'])
+        && request.resource.data.resellerId is string
+        && request.resource.data.resellerId.size() >= 3
+        && request.resource.data.resellerId.size() <= 12;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ============ COMMISSIONS ============
+    match /commissions/{d} {
+      allow read: if isAdmin() ||
+        (signedIn() && resource.data.resellerUid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ============ WITHDRAWALS ============
+    match /withdrawals/{d} {
+      allow read: if isAdmin() ||
+        (signedIn() && resource.data.resellerUid == request.auth.uid);
+      // Reseller sirf apni request bana sakta hai (status hamesha "requested")
+      allow create: if signedIn()
+        && request.resource.data.resellerUid == request.auth.uid
+        && request.resource.data.status == 'requested'
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0;
+      allow update, delete: if isAdmin();
+    }
+
+    // ============ PRODUCT COMMISSIONS & SETTINGS ============
+    // Rates sab logged-in users dekh sakte hain (reseller ko apni kamai pata honi chahiye);
+    // badalna sirf admin ke ikhtiyar me.
+    match /product_commissions/{d} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+    match /reseller_settings/{d} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
   }
 }

@@ -509,9 +509,18 @@ button.oos{opacity:.5;cursor:not-allowed}
 #updateCard .t{font-weight:700;font-size:16px;margin-bottom:6px}
 #updateCard .n{font-size:13px;color:#666;margin-bottom:10px}
 #updateCard a{display:inline-block;background:#1a5c3f;color:#fff;padding:10px 24px;border-radius:25px;text-decoration:none;font-weight:bold}
+
+/* ---- Jilan Reseller Network ---- */
+#refBanner{display:none;background:linear-gradient(135deg,#14532d,#1a5c3f);color:#fff;padding:10px 14px;font-size:13px;text-align:center;position:sticky;top:0;z-index:70}
+#refBanner b{color:#e6c455}
+#refBanner button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:14px;padding:3px 10px;margin-left:8px;font-size:12px;cursor:pointer}
+.share-btn{background:none;border:1px solid #e5e0d3;color:#6b7280;border-radius:16px;padding:5px 10px;font-size:11px;cursor:pointer;margin-top:6px;display:inline-block}
+.share-btn:hover{border-color:#c9a227;color:#14532d}
+.reseller-link{display:inline-block;margin-top:8px;font-size:13px;color:#1a5c3f;font-weight:700;text-decoration:none;border:1px dashed #1a5c3f;border-radius:18px;padding:7px 16px}
 </style>
 </head>
 <body>
+<div id="refBanner">🤝 Aap <b id="refBannerId"></b> ke referral se aaye hain — shukriya! <button onclick="document.getElementById('refBanner').style.display='none'" aria-label="Band karein">✕</button></div>
 <div id="updateCard">
 <div class="t">🎉 Naya version available hai!</div>
 <div class="n" id="updateNotes">Nai products aur features ke liye update karein</div>
@@ -616,6 +625,7 @@ button.oos{opacity:.5;cursor:not-allowed}
           TikTok: @jilanshoppinghub
         </a>
         <a href="https://wa.me/923007379385" target="_blank" rel="noopener">WhatsApp: 0300 7379385</a>
+        <a class="reseller-link" href="reseller/">🤝 Become a Reseller — kamayein!</a>
       </div>
     </footer>
   </main>
@@ -690,6 +700,42 @@ button.oos{opacity:.5;cursor:not-allowed}
       var PRODUCTS_VER = "4.0";
       /* Catalog products.json se live load hota hai taake naye products ke liye naya APK na bhejna pare */
       function __boot(){
+
+      /* ============ JILAN RESELLER NETWORK: referral tracking ============ */
+      var REF_KEY='jilan_ref';
+      function getRef(){try{var r=JSON.parse(localStorage.getItem(REF_KEY)||'null');if(r&&r.id&&(Date.now()-r.ts)<30*24*3600*1000)return r.id;}catch(e){}return null;}
+      function logRefClick(ref,pid){
+        try{
+          var c=window.FIREBASE_CONFIG;
+          if(!c||!c.apiKey||String(c.apiKey).indexOf('PASTE')===0||!c.projectId||String(c.projectId).indexOf('PASTE')===0)return;
+          fetch('https://firestore.googleapis.com/v1/projects/'+c.projectId+'/databases/(default)/documents/reseller_clicks?key='+c.apiKey,{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({fields:{resellerId:{stringValue:ref},productId:{stringValue:String(pid||'')},ts:{timestampValue:new Date().toISOString()}}})
+          }).catch(function(){});
+        }catch(e){}
+      }
+      function scrollToProduct(pid){
+        var el=document.querySelector('[data-product-card="'+pid+'"]');
+        if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='3px solid #c9a227';el.style.borderRadius='12px';setTimeout(function(){el.style.outline='';},3500);}
+      }
+      (function trackRef(){
+        try{
+          var q=new URLSearchParams(location.search);
+          var ref=q.get('ref'),prod=q.get('product');
+          if(ref&&/^[A-Za-z0-9]{3,12}$/.test(ref)){
+            ref=ref.toUpperCase();
+            try{localStorage.setItem(REF_KEY,JSON.stringify({id:ref,ts:Date.now()}));}catch(e){}
+            document.getElementById('refBannerId').textContent=ref;
+            document.getElementById('refBanner').style.display='block';
+            logRefClick(ref,prod);
+          }else{
+            var saved=getRef();
+            if(saved){document.getElementById('refBannerId').textContent=saved;document.getElementById('refBanner').style.display='block';}
+          }
+          if(prod){setTimeout(function(){scrollToProduct(prod);},1500);}
+        }catch(e){}
+      })();
+      /* ============ /reseller tracking ============ */
 
       var CATEGORY_MAP = {
         "Women's Fashion": "Women's Fashion", "Women's Stitched": "Women's Fashion",
@@ -853,7 +899,7 @@ button.oos{opacity:.5;cursor:not-allowed}
         return '<article class="showcase-card" data-product-card="' + p.id + '">' +
           '<div class="product-media"><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="lazy" decoding="async"></div>' +
           '<div class="product-body"><h3>' + escapeHtml(p.name) + '</h3><p class="price">' + money(p.price) + '</p>' +
-          '<button class="mini-add" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button></div></article>';
+          '<button class="mini-add" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><br><button class="share-btn" type="button" data-share="' + p.id + '">🔗 Share &amp; Earn</button></div></article>';
       }
 
       function renderShowcases() {
@@ -887,7 +933,7 @@ button.oos{opacity:.5;cursor:not-allowed}
           return '<article class="product-card" data-product-card="' + p.id + '">' +
             '<div class="product-media" data-imgs=\'' + JSON.stringify(p.images) + '\'><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="' + loadMode + '" fetchpriority="' + priority + '" decoding="async">' + (p.images.length>1?'<span class="img-count">1/'+p.images.length+'</span>':'') + (oos?'<span class="stock-badge stock-out">Out of Stock</span>':'<span class="stock-badge stock-in">In Stock</span>') + '<span class="category-badge">' + escapeHtml(p.category) + '</span></div>' +
             '<div class="product-body"><h3>' + escapeHtml(p.name) + '</h3><p class="price">' + money(p.price) + '</p>' +
-            '<div class="card-actions">' + (oos?'<button class="add-button oos" type="button" disabled>Out of Stock</button>':'<button class="add-button' + (inCart ? ' added' : '') + '" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><button class="order-now-button" type="button" data-order-now="' + p.id + '">Order now</button>') + '</div></div></article>';
+            '<div class="card-actions">' + (oos?'<button class="add-button oos" type="button" disabled>Out of Stock</button>':'<button class="add-button' + (inCart ? ' added' : '') + '" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><button class="order-now-button" type="button" data-order-now="' + p.id + '">Order now</button>') + '</div><button class="share-btn" type="button" data-share="' + p.id + '">🔗 Share &amp; Earn</button></div></article>';
         }).join('');
         catalogMore.hidden = shown.length >= visible.length;
         if (!catalogMore.hidden) {
@@ -1024,6 +1070,8 @@ button.oos{opacity:.5;cursor:not-allowed}
         lines.push('Subtotal: ' + money(total));
         lines.push('Delivery charges: Separate');
         lines.push('Payment: Cash on Delivery');
+        var _refId = getRef();
+        if (_refId) lines.push('Referral: ' + _refId);
         var analyticsItems = directOrderId !== null ? [{
           item_id: String(directProduct.id), item_name: directProduct.name, item_category: directProduct.category,
           price: directProduct.price, quantity: directOrderQty
@@ -1056,8 +1104,10 @@ button.oos{opacity:.5;cursor:not-allowed}
         showAllGroups = !showAllGroups;
         renderCatPills();
       });
-      /* Single delegation for Add to cart / Order now — works in main grid AND showcase rows */
+      /* Single delegation for Add to cart / Order now / Share & Earn — works in main grid AND showcase rows */
       document.addEventListener('click', function (event) {
+        var shareButton = event.target.closest('[data-share]');
+        if (shareButton) { window.location.href = 'reseller/?share=' + shareButton.getAttribute('data-share'); return; }
         var addButton = event.target.closest('[data-add]');
         if (addButton) {
           addToCart(Number(addButton.getAttribute('data-add')));
@@ -1238,6 +1288,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
 })();
 </script>
+<script src="admin/firebase-config.js"></script>
 <script>
 const JILAN_APP_VERSION='3.0';
 async function jilanCheckUpdate(){

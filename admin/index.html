@@ -157,6 +157,7 @@ canvas.chart{width:100%;height:180px;background:#fff;border:1px solid var(--line
     <button data-t="orders" onclick="goTab('orders')"><span class="ic">🧾</span>Orders</button>
     <button data-t="sales" onclick="goTab('sales')"><span class="ic">📊</span>Sales</button>
     <button data-t="coupons" onclick="goTab('coupons')"><span class="ic">🎟️</span>Coupons</button>
+    <button data-t="resellers" onclick="goTab('resellers')"><span class="ic">🤝</span>Resellers</button>
   </nav>
 
   <div class="wrap">
@@ -253,6 +254,45 @@ canvas.chart{width:100%;height:180px;background:#fff;border:1px solid var(--line
         <div class="btnrow"><button class="btn sm gold" onclick="openCouponModal()">➕ Naya coupon</button></div>
         <div class="warn" style="font-size:12px">Coupon website cart me <b>lagoo</b> hoga jab storefront update hoga. Yahan se codes banayein aur active rakhein.</div>
         <div id="couponList"></div>
+      </div>
+    </section>
+
+    <!-- RESELLERS -->
+    <section id="tab-resellers" class="hidden">
+      <div class="card"><h2>🤝 Reseller Network</h2>
+        <div class="warn" style="font-size:12px">⚠️ <b>Naya security model:</b> Rules update ho gaye hain — ab sirf <b>admins/{uid}</b> doc wala user admin hai.
+        Firebase Console → Firestore me <code>admins</code> collection banayein aur apne user ki <b>UID</b> ka document add karein (pehli dafa Console se — wo rules bypass karta hai). Tafsil: FIREBASE_SETUP.md</div>
+        <div class="btnrow">
+          <button class="btn sm ghost" onclick="loadResellerAdmin()">🔄 Refresh</button>
+          <button class="btn sm gold" onclick="openCommSettings()">⚙️ Commission settings</button>
+        </div>
+        <div id="rsStats" class="stats"></div>
+      </div>
+      <div class="card"><h2>⏳ Pending approvals <span class="hint" id="rsPendCount"></span></h2><div id="rsPending"></div></div>
+      <div class="card"><h2>👥 Tamam resellers</h2>
+        <div class="tblwrap"><table><thead><tr><th>ID</th><th>Naam</th><th>Phone</th><th>Status</th><th>Clicks</th><th>Earned</th><th></th></tr></thead><tbody id="rsRows"></tbody></table></div>
+      </div>
+      <div class="card"><h2>💰 Commissions <span class="hint">— approve / payout</span></h2>
+        <div class="btnrow">
+          <button class="btn sm gold" onclick="openRecordComm()">➕ Commission darj karein</button>
+          <button class="btn sm ghost" onclick="exportCommCSV()">⬇️ CSV</button>
+        </div>
+        <div class="frow">
+          <div><label>Status filter</label><select id="cmStatus" onchange="renderComms()"><option value="">Sab</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="paid">Paid</option><option value="reversed">Reversed</option></select></div>
+          <div><label>Search</label><input id="cmSearch" placeholder="Reseller ID / order ref…" oninput="renderComms()"></div>
+        </div>
+        <div id="commList" style="margin-top:8px"></div>
+      </div>
+      <div class="card"><h2>💸 Withdrawal requests</h2><div id="wdList"></div></div>
+      <div class="card"><h2>🏷️ Per-product commission</h2>
+        <div class="hint">Kisi product ki khaas commission set karein (warna default lagegi). Khali chhorne = default.</div>
+        <div class="frow">
+          <div><label>Product</label><select id="pcProd"></select></div>
+          <div><label>Type</label><select id="pcType"><option value="percent">% Percent</option><option value="fixed">Rs Fixed</option></select></div>
+        </div>
+        <label>Value</label><input id="pcVal" type="number" placeholder="masalan: 10 (ya Rs)">
+        <div class="btnrow"><button class="btn sm" onclick="saveProdComm()">💾 Save</button><button class="btn sm ghost" onclick="clearProdComm()">🗑️ Default par wapas</button></div>
+        <div id="pcOut" class="hint"></div>
       </div>
     </section>
 
@@ -386,10 +426,11 @@ function marginOf(p){const c=prodCost(p.id);return c==null?null:effPrice(p)-c;}
 
 /* ================= TABS ================= */
 function goTab(t){
-  ["home","products","orders","sales","coupons","settings"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t));
+  ["home","products","orders","sales","coupons","resellers","settings"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t));
   document.querySelectorAll("#bnav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   if(t==="home")renderHome(); if(t==="products")renderProducts();
   if(t==="orders")renderOrders(); if(t==="sales")renderSales(); if(t==="coupons")renderCoupons();
+  if(t==="resellers")loadResellerAdmin();
   window.scrollTo(0,0);
 }
 async function refreshAll(){await loadAll();goTab("home");}
@@ -748,6 +789,217 @@ async function restoreData(ev){
     toast("✅ Restore mukammal — refresh kar rahe hain");setTimeout(()=>location.reload(),1500);
   }catch(e){toast("❌ File sahi nahi: "+e.message);}
   ev.target.value="";
+}
+</script>
+<script>
+"use strict";
+/* ================= RESELLER NETWORK (admin) ================= */
+let RSELLERS=[], RCOMMS=[], RWDRAW=[], RPCOMM={}, RSET={minWithdrawal:500,defaultType:"percent",defaultValue:5,returnDays:7};
+
+async function loadResellerAdmin(){
+  toast("⏳ Reseller data…");
+  try{
+    const q=await db.collection("resellers").orderBy("createdAt","desc").limit(300).get();
+    RSELLERS=[];q.forEach(d=>RSELLERS.push(Object.assign({uid:d.id},d.data())));
+  }catch(e){console.warn("resellers",e);}
+  try{
+    const q=await db.collection("commissions").orderBy("createdAt","desc").limit(300).get();
+    RCOMMS=[];q.forEach(d=>RCOMMS.push(Object.assign({fid:d.id},d.data())));
+  }catch(e){console.warn("commissions",e);}
+  try{
+    const q=await db.collection("withdrawals").orderBy("createdAt","desc").limit(200).get();
+    RWDRAW=[];q.forEach(d=>RWDRAW.push(Object.assign({fid:d.id},d.data())));
+  }catch(e){console.warn("withdrawals",e);}
+  try{const q=await db.collection("product_commissions").get();RPCOMM={};q.forEach(d=>RPCOMM[d.id]=d.data());}catch(e){}
+  try{const s=await db.collection("reseller_settings").doc("config").get();if(s.exists)RSET=Object.assign(RSET,s.data());}catch(e){}
+  // product dropdown
+  $("pcProd").innerHTML=PRODUCTS.slice(0,400).map(p=>'<option value="'+p.id+'">'+esc(p.name).slice(0,55)+" — "+fmt(p.price)+"</option>").join("");
+  renderResellers();renderComms();renderWdraw();
+  toast("✅ Reseller data loaded");
+}
+function rcalcComm(price,rate){
+  if(!rate)return 0;
+  return rate.type==="percent"?Math.round(Number(price)*Number(rate.value)/100):Math.round(Number(rate.value));
+}
+function rRateFor(pid){
+  if(RPCOMM[pid])return RPCOMM[pid];
+  return {type:RSET.defaultType,value:RSET.defaultValue};
+}
+function renderResellers(){
+  const pend=RSELLERS.filter(r=>r.status==="pending");
+  $("rsPendCount").textContent="— "+pend.length;
+  $("rsPending").innerHTML=pend.map(r=>
+    '<div class="card" style="margin:8px 0"><b>'+esc(r.name)+'</b> <span class="chip c-gold">'+esc(r.resellerId||"")+'</span>'+
+    '<div class="hint">📞 '+esc(r.phone||"")+' • 📧 '+esc(r.email||"")+' • 🏙️ '+esc(r.city||"")+'</div>'+
+    '<div class="btnrow"><button class="btn sm" onclick="setRStatus(\''+r.uid+'\',\'approved\')">✅ Approve</button>'+
+    '<button class="btn sm danger" onclick="setRStatus(\''+r.uid+'\',\'rejected\')">❌ Reject</button></div></div>'
+  ).join("")||'<p class="hint">Koi pending request nahi. 🎉</p>';
+  const STC={approved:"c-green",pending:"c-gold",suspended:"c-red",rejected:"c-gray"};
+  // per-reseller earned (approved+paid, not reversed)
+  const earn={};
+  RCOMMS.forEach(c=>{if(c.status==="approved"||c.status==="paid"){earn[c.resellerUid]=(earn[c.resellerUid]||0)+Number(c.amount||0);}});
+  $("rsRows").innerHTML=RSELLERS.map(r=>
+    "<tr><td><b>"+esc(r.resellerId||"—")+"</b></td><td>"+esc(r.name||"")+"<br><span class='hint'>"+esc(r.city||"")+"</span></td>"+
+    "<td>"+esc(r.phone||"")+"</td><td><span class='chip "+(STC[r.status]||"c-gray")+"'>"+esc(r.status)+"</span></td>"+
+    "<td>—</td><td><b>"+fmt(earn[r.uid]||0)+"</b></td>"+
+    "<td style='white-space:nowrap'>"+
+    (r.status==="approved"
+      ?'<button class="btn sm danger" onclick="setRStatus(\''+r.uid+'\',\'suspended\')">⏸️</button>'
+      :r.status==="suspended"
+      ?'<button class="btn sm" onclick="setRStatus(\''+r.uid+'\',\'approved\')">▶️</button>'
+      :"")+
+    "</td></tr>"
+  ).join("")||'<tr><td colspan="7" class="hint" style="text-align:center">Koi reseller nahi.</td></tr>';
+  const nAppr=RSELLERS.filter(r=>r.status==="approved").length;
+  let pendComm=0;RCOMMS.forEach(c=>{if(c.status==="pending")pendComm+=Number(c.amount)||0;});
+  let wdReq=0;RWDRAW.forEach(w=>{if(w.status==="requested")wdReq++;});
+  $("rsStats").innerHTML=stat(nAppr,"Approved resellers","")+stat(pend.length,"Pending approval","")+stat(fmt(pendComm),"Pending commission","")+stat(wdReq,"Withdraw requests","");
+}
+async function setRStatus(uid,st){
+  const r=RSELLERS.find(x=>x.uid===uid);
+  const msg={approved:"Approve karein?",rejected:"Reject karein?",suspended:"Suspend karein? (earning rok jayegi)"}[st]||"Confirm?";
+  if(!confirm((r?r.name+" ("+r.resellerId+") ":"")+msg))return;
+  await db.collection("resellers").doc(uid).update({status:st,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await loadResellerAdmin();toast("✅ Status: "+st);
+}
+/* ---- commissions ---- */
+function renderComms(){
+  const st=$("cmStatus").value,q=$("cmSearch").value.trim().toLowerCase();
+  const list=RCOMMS.filter(c=>{
+    if(st&&c.status!==st)return false;
+    if(q&&!((c.resellerId||"")+" "+(c.orderRef||"")+" "+(c.productName||"")).toLowerCase().includes(q))return false;
+    return true;
+  });
+  const CM={pending:["c-gold","⏳ Pending"],approved:["c-green","✅ Approved"],paid:["c-blue","💸 Paid"],reversed:["c-red","↩️ Reversed"]};
+  $("commList").innerHTML=list.slice(0,80).map(c=>{
+    const m=CM[c.status]||["c-gray",c.status];
+    return '<div class="card" style="margin:8px 0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'+
+    "<b>"+esc(c.resellerId||"")+"</b>"+'<span class="chip '+m[0]+'">'+m[1]+"</span></div>"+
+    "<div style='font-size:14px;margin:4px 0'><b>"+esc(c.productName||"")+"</b> × "+(c.qty||1)+" — Ref: <b>"+esc(c.orderRef||"—")+"</b></div>"+
+    "<div class='hint'>Rate: "+(c.rateType==="percent"?c.rateValue+"%":"Rs "+c.rateValue)+" • Kamai: <b style='color:var(--green2)'>"+fmt(c.amount)+"</b>"+
+    (c.payoutRef?" • Payout: "+esc(c.payoutRef):"")+(c.note?"<br>📝 "+esc(c.note):"")+"</div>"+
+    "<div class='btnrow'>"+
+    (c.status==="pending"?'<button class="btn sm" onclick="setComm(\''+c.fid+'\',\'approved\')">✅ Approve</button>':"")+
+    (c.status==="approved"?'<button class="btn sm gold" onclick="payComm(\''+c.fid+'\')">💸 Mark paid</button>':"")+
+    ((c.status==="pending"||c.status==="approved")?'<button class="btn sm danger" onclick="setComm(\''+c.fid+'\',\'reversed\')">↩️ Reverse</button>':"")+
+    "</div></div>";
+  }).join("")||'<p class="hint">Koi commission nahi. ➕ se darj karein.</p>';
+}
+async function setComm(fid,st){
+  if(!confirm("Commission "+st+" karein?"))return;
+  const up={status:st,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  if(st==="approved")up.approvedAt=firebase.firestore.FieldValue.serverTimestamp();
+  await db.collection("commissions").doc(fid).update(up);
+  await loadResellerAdmin();toast("✅ "+st);
+}
+async function payComm(fid){
+  const ref=prompt("Payout reference likhein (masalan: Easypaisa TID 12345):");
+  if(ref===null)return;
+  await db.collection("commissions").doc(fid).update({status:"paid",payoutRef:ref||"",paidAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await loadResellerAdmin();toast("💸 Paid mark ho gaya");
+}
+function openRecordComm(){
+  const rOpts=RSELLERS.filter(r=>r.status==="approved").map(r=>'<option value="'+r.uid+'">'+esc(r.resellerId)+" — "+esc(r.name)+"</option>").join("");
+  if(!rOpts){toast("Pehle koi reseller approve karein");return;}
+  const pOpts=PRODUCTS.slice(0,300).map(p=>'<option value="'+p.id+'">'+esc(p.name).slice(0,55)+" — "+fmt(p.price)+"</option>").join("");
+  openModal("<h2>➕ Commission darj karein</h2><div id='rcErr' class='err hidden'></div>"+
+  "<div class='warn' style='font-size:12px'>ℹ️ WhatsApp order me <b>Referral: RESXXX</b> likha ho to us reseller ko chunein. Sirf <b>delivered</b> hone wale orders ki commission <i>approve</i> karein.</div>"+
+  "<label>Reseller *</label><select id='rcRes'>"+rOpts+"</select>"+
+  "<label>Product *</label><select id='rcProd' onchange='rcFill()'>"+pOpts+"</select>"+
+  "<div class='frow'><div><label>Selling price (Rs)</label><input id='rcPrice' type='number'></div>"+
+  "<div><label>Qty</label><input id='rcQty' type='number' value='1' min='1'></div></div>"+
+  "<label>Order ref (JL-XXXXXX)</label><input id='rcRef' placeholder='WhatsApp message wala ref'>"+
+  "<label>Note (optional)</label><input id='rcNote' placeholder='masalan: delivered 12-Oct'>"+
+  "<div id='rcPrev' class='hint'></div>"+
+  "<div class='btnrow'><button class='btn' style='flex:1' onclick='saveComm()'>💾 Save (Pending)</button><button class='btn ghost' onclick='closeModal()'>Cancel</button></div>");
+  rcFill();
+}
+function rcFill(){
+  const p=prodById($("rcProd").value);
+  if(!p)return;
+  $("rcPrice").value=p.price;
+  const r=rRateFor(p.id),amt=rcalcComm(p.price,r);
+  $("rcPrev").innerHTML="Rate: <b>"+(r.type==="percent"?r.value+"%":"Rs "+r.value)+"</b> → Kamai: <b style='color:var(--green2)'>"+fmt(amt)+"</b> (per unit)";
+}
+async function saveComm(){
+  const uid=$("rcRes").value,pid=$("rcProd").value,p=prodById(pid);
+  const price=Number($("rcPrice").value),qty=Math.max(1,Number($("rcQty").value)||1);
+  const ref=$("rcRef").value.trim();
+  if(!p||isNaN(price)||price<0){$("rcErr").textContent="Product aur sahi price chunein.";$("rcErr").classList.remove("hidden");return;}
+  const r=RSELLERS.find(x=>x.uid===uid);
+  const rate=rRateFor(pid),amt=rcalcComm(price,rate)*qty;
+  await db.collection("commissions").add({
+    resellerUid:uid,resellerId:r?r.resellerId:"",resellerName:r?r.name:"",
+    productId:String(pid),productName:p.name,qty:qty,price:price,
+    rateType:rate.type,rateValue:Number(rate.value),amount:amt,
+    orderRef:ref,note:$("rcNote").value.trim(),status:"pending",
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  closeModal();await loadResellerAdmin();toast("✅ Commission darj (pending)");
+}
+function exportCommCSV(){
+  const rows=[["reseller_id","reseller_name","order_ref","product","qty","price","rate","amount","status","payout_ref"]];
+  RCOMMS.forEach(c=>rows.push([c.resellerId,c.resellerName,c.orderRef,c.productName,c.qty,c.price,(c.rateType==="percent"?c.rateValue+"%":"Rs "+c.rateValue),c.amount,c.status,c.payoutRef||""]));
+  download("jilan-commissions-"+Date.now()+".csv",toCSV(rows),"text/csv");toast("⬇️ CSV download");
+}
+/* ---- withdrawals ---- */
+function renderWdraw(){
+  const WM={requested:["c-gold","⏳ Requested"],paid:["c-green","✅ Paid"],rejected:["c-red","❌ Rejected"]};
+  $("wdList").innerHTML=RWDRAW.map(w=>{
+    const m=WM[w.status]||["c-gray",w.status];
+    const mm={easypaisa:"Easypaisa",jazzcash:"JazzCash",bank:"Bank"}[w.method]||w.method;
+    return '<div class="card" style="margin:8px 0"><div style="display:flex;justify-content:space-between;align-items:center">'+
+    "<b>"+fmt(w.amount)+"</b>"+'<span class="chip '+m[0]+'">'+m[1]+"</span></div>"+
+    "<div class='hint'>👤 "+esc(w.resellerName||"")+" ("+esc(w.resellerId||"")+")<br>💳 "+mm+" — "+esc(w.accountTitle||"")+" / "+esc(w.accountNumber||"")+
+    (w.payoutRef?"<br>📝 Ref: "+esc(w.payoutRef):"")+"</div>"+
+    (w.status==="requested"?'<div class="btnrow"><button class="btn sm gold" onclick="wdPay(\''+w.fid+'\')">💸 Paid mark karein</button><button class="btn sm danger" onclick="wdReject(\''+w.fid+'\')">❌ Reject</button></div>':"")+"</div>";
+  }).join("")||'<p class="hint">Koi withdraw request nahi.</p>';
+}
+async function wdPay(fid){
+  const ref=prompt("Payout reference (TID / transaction no):");
+  if(ref===null)return;
+  const w=RWDRAW.find(x=>x.fid===fid);
+  // mark related approved commissions as paid? Keep manual — admin marks commissions separately.
+  await db.collection("withdrawals").doc(fid).update({status:"paid",payoutRef:ref||"",paidAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await loadResellerAdmin();toast("💸 Withdraw paid!");
+}
+async function wdReject(fid){
+  if(!confirm("Request reject karein?"))return;
+  await db.collection("withdrawals").doc(fid).update({status:"rejected"});
+  await loadResellerAdmin();toast("❌ Rejected");
+}
+/* ---- per-product commission ---- */
+function saveProdComm(){
+  const pid=$("pcProd").value,type=$("pcType").value,val=Number($("pcVal").value);
+  if(isNaN(val)||val<0||(type==="percent"&&val>50)){$("pcOut").textContent="Sahi value likhein (percent max 50).";return;}
+  db.collection("product_commissions").doc(String(pid)).set({type:type,value:val,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){
+    RPCOMM[String(pid)]={type:type,value:val};
+    $("pcOut").innerHTML="✅ Save ho gaya: <b>"+(type==="percent"?val+"%":"Rs "+val)+"</b>";
+  });
+}
+function clearProdComm(){
+  const pid=$("pcProd").value;
+  if(!confirm("Is product ki khaas commission hatayein (default lagegi)?"))return;
+  db.collection("product_commissions").doc(String(pid)).delete().then(function(){
+    delete RPCOMM[String(pid)];$("pcOut").textContent="🗑️ Default par wapas.";toast("Default restored");
+  });
+}
+/* ---- commission settings ---- */
+function openCommSettings(){
+  openModal("<h2>⚙️ Commission settings</h2>"+
+  "<label>Default commission type</label><select id='csType'><option value='percent'"+(RSET.defaultType==="percent"?" selected":"")+">% Percent</option><option value='fixed'"+(RSET.defaultType==="fixed"?" selected":"")+">Rs Fixed</option></select>"+
+  "<label>Default value</label><input id='csVal' type='number' value='"+RSET.defaultValue+"'>"+
+  "<label>Minimum withdrawal (Rs)</label><input id='csMin' type='number' value='"+RSET.minWithdrawal+"'>"+
+  "<label>Return period (din) — is ke baad commission approve karein</label><input id='csRet' type='number' value='"+RSET.returnDays+"'>"+
+  "<div class='hint'>Test: Rs 1000 product, 10% = <b>Rs 100</b> ✅</div>"+
+  "<div class='btnrow'><button class='btn' style='flex:1' onclick='saveCommSettings()'>💾 Save</button><button class='btn ghost' onclick='closeModal()'>Cancel</button></div>");
+}
+async function saveCommSettings(){
+  const t=$("csType").value,v=Number($("csVal").value),mn=Number($("csMin").value),rt=Number($("csRet").value);
+  if(isNaN(v)||v<0||(t==="percent"&&v>50)){toast("Sahi value likhein");return;}
+  RSET={defaultType:t,defaultValue:v,minWithdrawal:isNaN(mn)?500:mn,returnDays:isNaN(rt)?7:rt};
+  await db.collection("reseller_settings").doc("config").set(Object.assign({updatedAt:firebase.firestore.FieldValue.serverTimestamp()},RSET));
+  closeModal();toast("✅ Settings save");
 }
 </script>
 </body>

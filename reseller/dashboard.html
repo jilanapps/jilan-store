@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Reseller Dashboard — Jilan Store</title>
+<link rel="icon" href="../icon-192.png" type="image/png">
+<style>
+:root{
+  --green:#14532d; --green2:#1a5c3f; --green3:#0d3b20;
+  --cream:#faf6ee; --gold:#c9a227; --gold2:#e6c455;
+  --ink:#1f2937; --mut:#6b7280; --line:#e5e0d3; --red:#dc2626; --blue:#2563eb;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Nastaliq Urdu",Arial,sans-serif;background:var(--cream);color:var(--ink);padding-bottom:78px}
+.hidden{display:none!important}
+.hdr{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--green3),var(--green2));color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.hdr .logo{width:38px;height:38px;border-radius:10px;background:var(--gold);color:var(--green3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px}
+.hdr h1{font-size:15px;margin:0}
+.hdr h1 small{display:block;font-size:11px;color:var(--gold2);font-weight:400}
+.hdr .sp{flex:1}
+.btn{background:var(--green2);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px}
+.btn:active{transform:scale(.97)}
+.btn.gold{background:var(--gold);color:var(--green3)}
+.btn.ghost{background:#fff;color:var(--green2);border:1.5px solid var(--green2)}
+.btn.sm{padding:8px 12px;font-size:13px;min-height:38px}
+.btn.wa{background:#25D366;color:#fff}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.wrap{max-width:680px;margin:0 auto;padding:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 4px rgba(20,83,45,.07)}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--green)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:linear-gradient(135deg,#fff,#fdf9ef);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:12px}
+.stat .v{font-size:19px;font-weight:800;color:var(--green)}
+.stat .l{font-size:12px;color:var(--mut);margin-top:2px}
+.linkbox{background:#f0f7f2;border:1.5px dashed var(--green2);border-radius:12px;padding:12px;word-break:break-all;font-size:13px;margin:8px 0}
+label{font-size:13px;font-weight:600;color:var(--green2);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;background:#fff;min-height:44px;font-family:inherit}
+input:focus{outline:none;border-color:var(--green2);box-shadow:0 0 0 3px rgba(26,92,63,.12)}
+.err{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:10px;font-size:13px;margin:8px 0}
+.okmsg{background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:10px;padding:10px;font-size:13px;margin:8px 0}
+.warn{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:10px;padding:10px;font-size:13px;margin:8px 0}
+.hint{font-size:12px;color:var(--mut);margin-top:3px;line-height:1.5}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.c-green{background:#dcfce7;color:#166534}.c-gold{background:#fef3c7;color:#92400e}
+.c-red{background:#fee2e2;color:#991b1b}.c-blue{background:#dbeafe;color:#1e40af}.c-gray{background:#f3f4f6;color:#4b5563}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:flex;box-shadow:0 -2px 10px rgba(0,0,0,.08)}
+.bnav button{flex:1;background:none;border:none;padding:9px 2px 8px;font-size:10px;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:62px}
+.bnav button .ic{font-size:20px}
+.bnav button.on{color:var(--green2);font-weight:800}
+.prow{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:#fff}
+.prow img{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#f5f5f5;flex:none}
+.prow .inf{flex:1;min-width:0}
+.prow .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .pr{font-size:13px;font-weight:800;color:var(--green)}
+.prow .cm{font-size:11px;color:#166534;font-weight:700}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv b{color:var(--green2)}
+.mback{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.mback{align-items:center;padding:20px}}
+.modal{background:#fff;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:18px}
+@media(min-width:640px){.modal{border-radius:18px}}
+.modal h2{margin:0 0 6px;color:var(--green);font-size:17px}
+.searchbar{position:sticky;top:61px;z-index:40;background:var(--cream);padding:8px 0}
+.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:var(--green3);color:#fff;padding:11px 20px;border-radius:30px;font-size:14px;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="setupScreen" class="hidden"><div class="wrap"><div class="card">
+  <div class="warn"><b>🔐 Firebase connect nahi hua.</b> Tafsil: <a href="../FIREBASE_SETUP.md">FIREBASE_SETUP.md</a></div>
+</div></div></div>
+
+<div id="app" class="hidden">
+  <div class="hdr">
+    <div class="logo">J</div>
+    <h1>Reseller Dashboard<small id="hdrId">…</small></h1>
+    <div class="sp"></div>
+    <button class="btn sm" style="background:rgba(255,255,255,.15)" onclick="doLogout()">🚪</button>
+  </div>
+
+  <nav class="bnav" id="bnav">
+    <button data-t="home" onclick="goTab('home')"><span class="ic">🏠</span>Home</button>
+    <button data-t="products" onclick="goTab('products')"><span class="ic">🔗</span>Share &amp; Earn</button>
+    <button data-t="earnings" onclick="goTab('earnings')"><span class="ic">💰</span>Earnings</button>
+    <button data-t="withdraw" onclick="goTab('withdraw')"><span class="ic">💸</span>Withdraw</button>
+  </nav>
+
+  <div class="wrap">
+    <!-- HOME -->
+    <section id="tab-home">
+      <div class="card"><h2>👋 Khush aamdeed, <span id="rName">…</span>!</h2>
+        <div class="hint">Aapki Reseller ID: <b id="rId" style="color:var(--green2)"></b></div>
+        <div id="homeStats" class="stats" style="margin-top:10px"></div>
+      </div>
+      <div class="card"><h2>🔗 Aapka referral link</h2>
+        <div class="hint">Ye link share karein — jo is par click karke khareede, uska order aapke naam hoga:</div>
+        <div class="linkbox" id="refLink">…</div>
+        <div class="btnrow">
+          <button class="btn sm" onclick="copyRef()">📋 Copy link</button>
+          <button class="btn sm wa" onclick="shareRefWA()">💬 WhatsApp par share</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="warn" style="font-size:12px;margin:0">ℹ️ <b>Zaroori baat:</b> Jab customer aapke link se <b>WhatsApp</b> par order karega, uske message me aapki <b>Reseller ID</b> khud likhi jayegi. Admin usko dekh kar aapka order <b>manually confirm</b> karega — is me thora waqt lag sakta hai. Order foran "confirmed" nahi hota.</div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="tab-products" class="hidden">
+      <div class="card"><h2>🔗 Share &amp; Earn</h2>
+        <div class="hint">Kisi product ka <b>Share &amp; Earn</b> dabayein — aapka unique link ban jayega:</div>
+        <div class="searchbar"><input id="pSearch" placeholder="🔍 Product talash karein…" oninput="renderPlist()"></div>
+        <div id="plist"></div>
+        <div class="btnrow"><button class="btn sm ghost" onclick="pPage(-1)">‹ Prev</button><span class="hint" id="pPageInfo" style="align-self:center"></span><button class="btn sm ghost" onclick="pPage(1)">Next ›</button></div>
+      </div>
+    </section>
+
+    <!-- EARNINGS -->
+    <section id="tab-earnings" class="hidden">
+      <div class="card"><h2>💰 Meri kamai</h2>
+        <div id="earnStats" class="stats"></div>
+        <div class="hint" style="margin-top:8px">⏳ <b>Pending:</b> order deliver hona baqi • ✅ <b>Approved:</b> withdraw ke liye tayyar • 💸 <b>Paid:</b> ada ho gayi • ↩️ <b>Reversed:</b> order cancel/return</div>
+      </div>
+      <div class="card"><h2>📜 Commission history</h2><div id="commList"></div></div>
+    </section>
+
+    <!-- WITHDRAW -->
+    <section id="tab-withdraw" class="hidden">
+      <div class="card"><h2>💸 Withdraw request</h2>
+        <div class="hint">Withdrawable balance: <b id="wBal" style="color:var(--green2)">…</b> <span id="wMin" class="hint"></span></div>
+        <div id="wErr" class="err hidden"></div>
+        <div id="wOk" class="okmsg hidden"></div>
+        <label>Raqam (Rs) *</label><input id="wAmt" type="number" placeholder="masalan: 1000">
+        <label>Tareeqa *</label>
+        <select id="wMethod"><option value="easypaisa">Easypaisa</option><option value="jazzcash">JazzCash</option><option value="bank">Bank transfer</option></select>
+        <label>Account title (naam) *</label><input id="wTitle" placeholder="Jis naam par account hai">
+        <label>Account / mobile number *</label><input id="wNum" placeholder="03xx-xxxxxxx ya IBAN">
+        <div class="warn" style="font-size:12px">🔒 <b>Kabhi bhi</b> apna PIN, password ya OTP yahan na likhein — sirf account number/title kafi hai. Payout admin verify karke bhejega.</div>
+        <button class="btn gold" onclick="reqWithdraw()">💸 Withdraw request bhejein</button>
+      </div>
+      <div class="card"><h2>📜 Withdraw history</h2><div id="wList"></div></div>
+    </section>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]);});};
+var fmt=function(n){return "Rs "+Number(n||0).toLocaleString("en-PK");};
+function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;$("toastRoot").appendChild(t);setTimeout(function(){t.remove();},2600);}
+function openModal(h){$("modalRoot").innerHTML='<div class="mback" onclick="if(event.target===this)closeModal()"><div class="modal">'+h+"</div></div>";}
+function closeModal(){$("modalRoot").innerHTML="";}
+function firebaseConfigured(){try{var c=window.FIREBASE_CONFIG;return c&&c.apiKey&&String(c.apiKey).indexOf("PASTE")!==0;}catch(e){return false;}}
+
+var auth=null,db=null,USER=null,R=null;
+var PRODUCTS=[],PCOMM={},RSET={minWithdrawal:500,defaultType:"percent",defaultValue:5,returnDays:7};
+var COMMS=[],WDRAW=[],CLICKS=0;
+var pPageN=0,PER=15;
+var STORE="https://jilanapps.github.io/jilan-store/";
+
+function calcComm(price,rate){
+  if(!rate)return 0;
+  if(rate.type==="percent")return Math.round(Number(price)*Number(rate.value)/100);
+  return Math.round(Number(rate.value));
+}
+function rateFor(pid){
+  if(PCOMM[pid])return PCOMM[pid];
+  return {type:RSET.defaultType,value:RSET.defaultValue};
+}
+function rateLabel(pid){
+  var r=rateFor(pid);
+  return r.type==="percent"?r.value+"%":"Rs "+Number(r.value).toLocaleString("en-PK");
+}
+
+window.addEventListener("DOMContentLoaded",function(){
+  if(!firebaseConfigured()){$("setupScreen").classList.remove("hidden");return;}
+  if(typeof firebase==="undefined"){$("setupScreen").classList.remove("hidden");toast("⚠️ Firebase load nahi hui");return;}
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  auth=firebase.auth();db=firebase.firestore();
+  auth.onAuthStateChanged(function(u){
+    if(!u){location.href="index.html";return;}
+    USER=u;boot();
+  });
+});
+
+async function boot(){
+  try{
+    var d=await db.collection("resellers").doc(USER.uid).get();
+    if(!d.exists){location.href="index.html";return;}
+    R=d.data();
+    if(R.status!=="approved"){location.href="index.html";return;}
+    $("hdrId").textContent="ID: "+R.resellerId;
+    $("rName").textContent=R.name||"";
+    $("rId").textContent=R.resellerId;
+    $("refLink").textContent=STORE+"?ref="+R.resellerId;
+    $("app").classList.remove("hidden");
+    await loadData();
+    var sharePid=new URLSearchParams(location.search).get("share");
+    goTab("home");
+    if(sharePid)openShare(Number(sharePid));
+  }catch(e){toast("Error: "+e.message);}
+}
+
+async function loadData(){
+  toast("⏳ Load ho raha…");
+  try{var pj=await fetch("../products.json").then(function(r){return r.json();});PRODUCTS=pj||[];}catch(e){PRODUCTS=[];}
+  try{var s=await db.collection("reseller_settings").doc("config").get();if(s.exists)RSET=Object.assign(RSET,s.data());}catch(e){}
+  try{var q=await db.collection("product_commissions").get();q.forEach(function(x){PCOMM[x.id]=x.data();});}catch(e){}
+  try{var c=await db.collection("commissions").where("resellerUid","==",USER.uid).get();COMMS=[];c.forEach(function(x){COMMS.push(Object.assign({fid:x.id},x.data()));});}catch(e){}
+  try{var w=await db.collection("withdrawals").where("resellerUid","==",USER.uid).orderBy("createdAt","desc").get();WDRAW=[];w.forEach(function(x){WDRAW.push(Object.assign({fid:x.id},x.data()));});}catch(e){}
+  try{var k=await db.collection("reseller_clicks").where("resellerId","==",R.resellerId).get();CLICKS=k.size;}catch(e){CLICKS=0;}
+  renderHome();renderPlist();renderEarnings();renderWithdraw();
+  toast("✅ Tayyar!");
+}
+
+function commSums(){
+  var s={pending:0,approved:0,paid:0,orders:0};
+  COMMS.forEach(function(c){
+    if(c.status==="pending")s.pending+=Number(c.amount)||0;
+    else if(c.status==="approved")s.approved+=Number(c.amount)||0;
+    else if(c.status==="paid")s.paid+=Number(c.amount)||0;
+    if(c.status==="approved"||c.status==="paid"||c.status==="pending")s.orders++;
+  });
+  return s;
+}
+function stat(v,l){return '<div class="stat"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>';}
+
+function renderHome(){
+  var s=commSums();
+  $("homeStats").innerHTML=
+    stat(CLICKS,"Link clicks")+
+    stat(s.orders,"Referred orders")+
+    stat(fmt(s.pending),"Pending ⏳")+
+    stat(fmt(s.approved),"Approved ✅")+
+    stat(fmt(s.paid),"Paid out 💸")+
+    stat(fmt(s.approved),"Withdrawable");
+}
+
+/* ---------- referral link ---------- */
+function copyRef(){
+  var t=$("refLink").textContent;
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("📋 Copy ho gaya!");},function(){fallbackCopy(t);});
+  else fallbackCopy(t);
+}
+function fallbackCopy(t){var i=document.createElement("input");i.value=t;document.body.appendChild(i);i.select();try{document.execCommand("copy");toast("📋 Copy ho gaya!");}catch(e){toast(t);}i.remove();}
+function shareRefWA(){
+  var msg="🛒 *Jilan Online Shopping Store* — Fashion, beauty, electronics aur home essentials!\n\nIs link se khareedein (Cash on Delivery):\n"+$("refLink").textContent;
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+
+/* ---------- products: Share & Earn ---------- */
+function filteredP(){
+  var q=$("pSearch").value.trim().toLowerCase();
+  return PRODUCTS.filter(function(p){return !q||(p.name||"").toLowerCase().indexOf(q)>=0;});
+}
+function renderPlist(){
+  var list=filteredP();
+  var pages=Math.max(1,Math.ceil(list.length/PER));
+  if(pPageN>=pages)pPageN=pages-1;
+  $("plist").innerHTML=list.slice(pPageN*PER,(pPageN+1)*PER).map(function(p){
+    var img=(p.images&&p.images[0])||"";
+    var amt=calcComm(p.price,rateFor(p.id));
+    return '<div class="prow">'+(img?'<img src="'+esc(img)+'" loading="lazy" onerror="this.style.display=\'none\'">':"")+
+    '<div class="inf"><div class="nm">'+esc(p.name)+'</div><div class="pr">'+fmt(p.price)+'</div><div class="cm">💰 Aapki kamai: '+fmt(amt)+' ('+esc(rateLabel(p.id))+')</div></div>'+
+    '<button class="btn sm gold" onclick="openShare('+p.id+')">🔗 Share &amp; Earn</button></div>';
+  }).join("")||'<p class="hint">Koi product nahi mila.</p>';
+  $("pPageInfo").textContent="Page "+(pPageN+1)+" / "+pages;
+}
+function pPage(d){pPageN=Math.max(0,pPageN+d);renderPlist();}
+function prodById(id){return PRODUCTS.find(function(p){return p.id===id;});}
+
+function openShare(pid){
+  var p=prodById(pid);if(!p){toast("Product nahi mila");return;}
+  var link=STORE+"?ref="+R.resellerId+"&product="+p.id;
+  var amt=calcComm(p.price,rateFor(p.id));
+  openModal("<h2>🔗 Share &amp; Earn</h2>"+
+    "<p style='font-size:14px'><b>"+esc(p.name)+"</b><br>Qeemat: <b>"+fmt(p.price)+"</b> • Aapki kamai: <b style='color:var(--green2)'>"+fmt(amt)+"</b></p>"+
+    "<label>Aapka unique link:</label><div class='linkbox' id='shareLink'>"+esc(link)+"</div>"+
+    "<div class='btnrow'><button class='btn sm' onclick='copyShare()'>📋 Copy</button>"+
+    "<button class='btn sm wa' onclick='shareWA("+p.id+")'>💬 WhatsApp</button>"+
+    "<button class='btn sm ghost' onclick='closeModal()'>Band karein</button></div>"+
+    "<div class='hint'>Jo is link se khareedega, uske WhatsApp order me aapki ID <b>"+esc(R.resellerId)+"</b> khud ayegi — admin match karke commission darj karega.</div>");
+}
+function copyShare(){
+  var t=$("shareLink").textContent;
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("📋 Copy!");},function(){fallbackCopy(t);});
+  else fallbackCopy(t);
+}
+function shareWA(pid){
+  var p=prodById(pid);if(!p)return;
+  var link=STORE+"?ref="+R.resellerId+"&product="+p.id;
+  var msg="🛒 *"+p.name+"*\n💰 Sirf "+fmt(p.price)+" (Cash on Delivery)\n\nOrder karein is link se:\n"+link;
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+
+/* ---------- earnings ---------- */
+var CMAP={pending:["c-gold","⏳ Pending"],approved:["c-green","✅ Approved"],paid:["c-blue","💸 Paid"],reversed:["c-red","↩️ Reversed"]};
+function renderEarnings(){
+  var s=commSums();
+  $("earnStats").innerHTML=stat(fmt(s.pending),"Pending")+stat(fmt(s.approved),"Approved")+stat(fmt(s.paid),"Paid out")+stat(fmt(s.pending+s.approved+s.paid),"Kul kamai");
+  var list=COMMS.slice().sort(function(a,b){return (b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0)-(a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0);});
+  $("commList").innerHTML=list.map(function(c){
+    var m=CMAP[c.status]||["c-gray",c.status];
+    return '<div class="kv"><span><b>'+esc(c.productName||"")+'</b> × '+(c.qty||1)+'<br><span class="hint">'+esc(c.orderRef||"")+(c.payoutRef?" • "+esc(c.payoutRef):"")+'</span></span><span style="text-align:right"><b>'+fmt(c.amount)+'</b><br><span class="chip '+m[0]+'">'+m[1]+'</span></span></div>';
+  }).join("")||'<p class="hint">Abhi koi commission nahi. Products share karein! 🔗</p>';
+}
+
+/* ---------- withdraw ---------- */
+function renderWithdraw(){
+  var s=commSums();
+  $("wBal").textContent=fmt(s.approved);
+  $("wMin").textContent="(min: "+fmt(RSET.minWithdrawal)+")";
+  var WM={requested:["c-gold","⏳ Requested"],paid:["c-green","✅ Paid"],rejected:["c-red","❌ Rejected"]};
+  $("wList").innerHTML=WDRAW.map(function(w){
+    var m=WM[w.status]||["c-gray",w.status];
+    var mm={easypaisa:"Easypaisa",jazzcash:"JazzCash",bank:"Bank"}[w.method]||w.method;
+    return '<div class="kv"><span><b>'+fmt(w.amount)+'</b> • '+mm+'<br><span class="hint">'+esc(w.accountTitle||"")+" — "+esc(w.accountNumber||"")+(w.payoutRef?" • Ref: "+esc(w.payoutRef):"")+'</span></span><span class="chip '+m[0]+'">'+m[1]+'</span></div>';
+  }).join("")||'<p class="hint">Koi withdraw request nahi.</p>';
+}
+async function reqWithdraw(){
+  var e=$("wErr"),ok=$("wOk");e.classList.add("hidden");ok.classList.add("hidden");
+  var amt=Number($("wAmt").value),s=commSums();
+  if(!amt||amt<=0){e.textContent="Sahi raqam likhein.";e.classList.remove("hidden");return;}
+  if(amt<RSET.minWithdrawal){e.textContent="Minimum withdraw "+fmt(RSET.minWithdrawal)+" hai.";e.classList.remove("hidden");return;}
+  if(amt>s.approved){e.textContent="Balance se zyada! Withdrawable: "+fmt(s.approved);e.classList.remove("hidden");return;}
+  var title=$("wTitle").value.trim(),num=$("wNum").value.trim();
+  if(!title||!num){e.textContent="Account title aur number likhein.";e.classList.remove("hidden");return;}
+  try{
+    await db.collection("withdrawals").add({
+      resellerUid:USER.uid,resellerId:R.resellerId,resellerName:R.name,
+      amount:amt,method:$("wMethod").value,accountTitle:title,accountNumber:num,
+      status:"requested",createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ok.textContent="✅ Request bhej di! Admin verify karke payout karega.";ok.classList.remove("hidden");
+    $("wAmt").value="";$("wTitle").value="";$("wNum").value="";
+    var w=await db.collection("withdrawals").where("resellerUid","==",USER.uid).orderBy("createdAt","desc").get();
+    WDRAW=[];w.forEach(function(x){WDRAW.push(Object.assign({fid:x.id},x.data()));});
+    renderWithdraw();toast("✅ Request sent!");
+  }catch(err){e.textContent="Error: "+err.message;e.classList.remove("hidden");}
+}
+
+/* ---------- tabs/nav ---------- */
+function goTab(t){
+  ["home","products","earnings","withdraw"].forEach(function(x){$("tab-"+x).classList.toggle("hidden",x!==t);});
+  var btns=document.querySelectorAll("#bnav button");
+  for(var i=0;i<btns.length;i++)btns[i].classList.toggle("on",btns[i].dataset.t===t);
+  window.scrollTo(0,0);
+}
+async function doLogout(){await auth.signOut();location.href="index.html";}
+</script>
+</body>
+</html>

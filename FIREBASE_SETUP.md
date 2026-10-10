@@ -36,6 +36,17 @@
 
 > Ye rules kehte hain: *bina login ke koi data nahi dekh sakta.* 🔒
 
+## Step 3B — ⚠️ ZAROORI: Apne aap ko Admin banayein (Reseller Network update)
+
+Rules ab **Admin vs Reseller** me farq karte hain. Apne admin account ko pehchanna jaye, is liye:
+
+1. Firebase Console → **Authentication → Users** → apne admin user par click karein → **UID** copy karein (lambi si ID)
+2. **Firestore Database → Data** tab → **+ Start collection** → Collection ID: `admins` → **Next**
+3. Document ID me apni **UID paste** karein → koi field add karne ki zaroorat nahi (bas **Save**)
+4. Ho gaya! Ab aap **admin** hain — resellers sirf apna data dekhenge, aap sab kuch.
+
+> ⚠️ Ye step **ek dafa** karna hai. Bina iske admin dashboard **khali** nazar ayega (permission denied). Reseller pages isi step ke baghair bhi registration lete rahenge.
+
 ## Step 4 — Web app ki config copy karein
 
 1. Project home (⚙️ **Project settings** — left bottom gear icon)
@@ -87,5 +98,23 @@
 
 - **"Firebase connect nahi hua"** screen → Step 5 dobara check karein (config paste hui?)
 - **Login fail** → Step 2 me user bana? Email/password sahi?
-- **"Permission denied"** → Step 3 ke Rules publish hue? (`allow read, write: if request.auth != null`)
+- **"Permission denied" / khali dashboard** → Step 3B kiya? `admins` collection me aapki UID ka document hai?
 - Baqi har cheez ke liye: **Muse se poochein** — main madad karunga. 🤝
+
+---
+
+## 🤝 Reseller Network — Setup
+
+Reseller pages (`/reseller/`) **usi Firebase project** ko use karte hain — alag setup nahi chahiye. Bas:
+
+1. **Rules dobara publish karein** — `admin/firestore.rules` ka **naya** code (Admin + Reseller wala) paste karke **Publish** (purane rules reseller ko rok denge).
+2. **Step 3B** zaroor karein (khud ko admin banayein), warna reseller approve nahi kar sakenge.
+3. **Default commission set karein** — Admin → 🤝 Resellers → ⚙️ Commission settings (masalan: 5%).
+4. **Reseller link:** `https://jilanapps.github.io/jilan-store/reseller/` — ye link apne resellers ko dein.
+5. **Approval flow:** Reseller register karega → Admin → 🤝 Resellers → ⏳ Pending me **Approve** → reseller ko dashboard khul jayega.
+6. **Commission flow:** WhatsApp order me `Referral: RESXXX` nazar aye → Admin → 🤝 Resellers → ➕ Commission darj karein → order **deliver** hone ke baad **Approve** → reseller withdraw kar sakta hai.
+
+**Seedhi baat (limitations):**
+- 📱 WhatsApp orders ki **auto-attribution nahi** hoti — customer jab WhatsApp kholta hai to website ka session toot jata hai. Is liye reseller ID order message me likhi ati hai aur admin **manually** match karta hai. Dashboard me ye baat reseller ko saaf batai gayi hai.
+- 👆 Click counts **estimate** hain (public write) — spam ho sakta hai; commission sirf **delivered orders** par, clicks par nahi.
+- 🔒 Reseller sirf **apna** data dekhta hai; cost/margin/orders usko **nazar nahi ate** (rules se mehfooz).
