@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>English Bolna Seekho — Learn English with Urdu</title>
+<style>
+:root{--bg:#f5f7fb;--card:#ffffff;--txt:#1a2333;--mut:#6b7a90;--pri:#1a73e8;--acc:#ff8c1a;--ok:#2e9e5b;--bad:#e5484d;--line:#e3e8f0;--nav:#ffffff;--shadow:0 2px 12px rgba(20,40,80,.08)}
+[data-theme=dark]{--bg:#0f1522;--card:#182130;--txt:#eef2f8;--mut:#9aa7bd;--line:#263146;--nav:#141b2a;--shadow:0 2px 12px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,Roboto,'Noto Nastaliq Urdu',sans-serif;background:var(--bg);color:var(--txt);padding-bottom:76px;min-height:100vh}
+.ur{font-family:'Noto Nastaliq Urdu','Jameel Noori',serif;direction:rtl;text-align:right;line-height:2}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+header h1{font-size:19px;font-weight:800}
+header .tag{font-size:11px;opacity:.85}
+.hbtns{display:flex;gap:8px}
+.hbtn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:20px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer}
+main{padding:14px 14px 20px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-block;border:none;border-radius:14px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer;background:var(--pri);color:#fff;min-width:0}
+.btn.acc{background:var(--acc)}
+.btn.ghost{background:transparent;color:var(--pri);border:2px solid var(--pri)}
+.btn.ok{background:var(--ok)}
+.btn.big{width:100%;font-size:17px;padding:15px}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.5}
+h2{font-size:19px;margin-bottom:10px}
+h3{font-size:16px;margin:12px 0 8px}
+.mut{color:var(--mut);font-size:13px}
+.phrase{background:var(--bg);border-radius:12px;padding:12px;margin:10px 0;border:1px solid var(--line)}
+.phrase .en{font-size:17px;font-weight:700;color:var(--pri)}
+.phrase .roman{font-size:14px;color:var(--acc);font-weight:600;margin-top:2px}
+.phrase .ur{font-size:16px;margin-top:4px}
+.ex{background:var(--bg);border-left:4px solid var(--acc);padding:10px 12px;border-radius:0 10px 10px 0;margin:8px 0;font-size:14px}
+.quizopt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;font-size:15px;cursor:pointer;color:var(--txt)}
+.quizopt.sel{border-color:var(--pri)}
+.quizopt.right{border-color:var(--ok);background:rgba(46,158,91,.12)}
+.quizopt.wrong{border-color:var(--bad);background:rgba(229,72,77,.12)}
+.tabs{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto}
+.tab{padding:10px 16px;border-radius:20px;border:2px solid var(--line);background:var(--card);font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--txt)}
+.tab.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.chip{padding:7px 13px;border-radius:16px;background:var(--bg);border:1px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;color:var(--txt)}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.lesson{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow)}
+.lesson .num{background:linear-gradient(135deg,var(--pri),#0d47a1);color:#fff;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.lesson .t{flex:1}
+.lesson .t b{font-size:15px}
+.lesson.done{opacity:.75}
+.lesson.done .num{background:var(--ok)}
+.word{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
+.word .w{font-size:18px;font-weight:800;color:var(--pri)}
+.word .m{font-size:15px;margin-top:2px}
+.fav{float:right;font-size:22px;cursor:pointer;background:none;border:none}
+input,select,textarea{width:100%;padding:13px;border:2px solid var(--line);border-radius:12px;font-size:15px;background:var(--card);color:var(--txt);margin:6px 0}
+input:focus{border-color:var(--pri);outline:none}
+#bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--nav);border-top:1px solid var(--line);display:flex;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+#bottomnav button{flex:1;background:none;border:none;padding:9px 2px 7px;font-size:10px;color:var(--mut);cursor:pointer;font-weight:600}
+#bottomnav button .ic{font-size:21px;display:block}
+#bottomnav button.on{color:var(--pri)}
+.badge{display:inline-block;background:linear-gradient(135deg,#ff8c1a,#ff5e1a);color:#fff;border-radius:14px;padding:10px 14px;margin:5px;font-size:13px;font-weight:700}
+.badge.lock{filter:grayscale(1);opacity:.45}
+.stat{background:var(--bg);border-radius:12px;padding:12px;text-align:center;flex:1;min-width:100px;border:1px solid var(--line)}
+.stat b{font-size:22px;color:var(--pri);display:block}
+.stat span{font-size:12px;color:var(--mut)}
+.streak{background:linear-gradient(135deg,#ff8c1a,#ff5e1a);color:#fff;border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+.streak b{font-size:34px;display:block}
+.dlg{background:var(--bg);border-radius:12px;padding:12px;margin:10px 0;border:1px solid var(--line)}
+.dlg .sp{font-weight:800;font-size:12px;color:var(--acc);text-transform:uppercase}
+.dlg.mine{border-color:var(--pri);background:rgba(26,115,232,.07)}
+.speakbtn{background:var(--acc);border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;flex-shrink:0}
+.empty{text-align:center;padding:34px 10px;color:var(--mut)}
+.empty .e{font-size:48px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--acc));border-radius:6px}
+.note{background:rgba(255,140,26,.12);border:1px solid var(--acc);border-radius:12px;padding:10px 12px;font-size:13px;margin:10px 0}
+.hidden{display:none!important}
+.wotd{background:linear-gradient(135deg,#1a73e8,#6a1ae8);color:#fff;border-radius:16px;padding:16px;margin-bottom:14px}
+.wotd .w{font-size:26px;font-weight:800}
+.rec{width:74px;height:74px;border-radius:50%;background:var(--bad);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 4px 16px rgba(229,72,77,.4)}
+.rec.live{animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+</style>
+</head>
+<body>
+<header>
+<div><h1 id="appTitle">📚 English Bolna Seekho</h1><div class="tag" id="appTag">Learn Daily. Speak Confidently.</div></div>
+<div class="hbtns"><button class="hbtn" id="langBtn" onclick="toggleLang()">اردو</button><button class="hbtn" id="themeBtn" onclick="toggleTheme()">🌙</button></div>
+</header>
+<main id="view"></main>
+<nav id="bottomnav"></nav>
+<script>
+/* ============ STATE ============ */
+const SKEY='ebs_v1';
+let S={done:{},scores:{},favs:[],learned:[],streak:{c:0,last:''},lang:'en',theme:'light',level:'beginner'};
+try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)S=Object.assign(S,s);}catch(e){}
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){}}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function touchStreak(){const t=todayStr();if(S.streak.last!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak.c=(S.streak.last===y)?S.streak.c+1:1;S.streak.last=t;save();}}
+touchStreak();
+/* ============ I18N ============ */
+const T={
+home:{en:'Home',ur:'ہوم'},lessons:{en:'Lessons',ur:'اسباق'},words:{en:'Words',ur:'الفاظ'},grammar:{en:'Grammar',ur:'گرامر'},talk:{en:'Talk',ur:'بات چیت'},quiz:{en:'Quiz',ur:'کوئز'},progress:{en:'Progress',ur:'پیش رفت'},
+beginner:{en:'Beginner',ur:'ابتدائی'},intermediate:{en:'Intermediate',ur:'درمیانہ'},advanced:{en:'Advanced',ur:'اعلیٰ'},
+};
+function t(k){const v=T[k];return v?(v[S.lang]||v.en):k;}
+function toggleLang(){S.lang=S.lang==='en'?'ur':'en';save();render();}
+function toggleTheme(){S.theme=S.theme==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',S.theme);save();}
+document.documentElement.setAttribute('data-theme',S.theme);
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function speak(text,lang){try{const u=new SpeechSynthesisUtterance(text);u.lang=lang||'en-US';u.rate=.92;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){alert(S.lang==='ur'?'آواز دستیاب نہیں':'Voice not available');}}
+function nav(){const items=[['home','🏠','home'],['lessons','📖','lessons'],['words','🔤','words'],['grammar','✏️','grammar'],['talk','💬','talk'],['quiz','❓','quiz'],['progress','🏆','progress']];$('bottomnav').innerHTML=items.map(i=>`<button class="${V===i[0]?'on':''}" onclick="go('${i[0]}')"><span class="ic">${i[1]}</span>${t(i[2])}</button>`).join('');}
+let V='home',VP={};
+let _lq=[],_lqi=0,_lqs=0,_gq=[],_gqi=0,_gqs=0;
+function go(v,p){V=v;VP=p||{};render();window.scrollTo(0,0);}
+function render(){nav();const R={home:rHome,lessons:rLessons,lesson:rLesson,words:rWords,grammar:rGrammar,grammard:rGrammarD,talk:rTalk,talkd:rTalkD,quiz:rQuiz,quizrun:rQuizRun,progress:rProgress};(R[V]||rHome)();}
+/* lesson done helper */
+function markDone(id){S.done[id]=true;touchStreak();save();}
+function learnedCount(){return Object.keys(S.done).length;}
+/* ============ HOME ============ */
+function rHome(){const done=learnedCount();const wotd=VOCAB[Math.floor(Date.now()/864e5)%VOCAB.length];
+const daily=LESSONS[Math.floor(Date.now()/864e5)%LESSONS.length];
+$('view').innerHTML=`
+<div class="streak">🔥 <b>${S.streak.c}</b>${S.lang==='ur'?'دن کی لگاتار محنت':'day learning streak'}</div>
+<div class="card"><h2>${S.lang==='ur'?'خوش آمدید!':'Welcome!'}</h2>
+<p class="mut">${S.lang==='ur'?'آج کچھ نیا سیکھیں':'Learn something new today'}</p>
+<div class="bar"><i style="width:${Math.min(100,done/30*100)}%"></i></div>
+<p class="mut">${done}/30 ${S.lang==='ur'?'اسباق مکمل':'lessons done'}</p>
+<div class="row" style="margin-top:10px"><button class="btn acc big" onclick="go('lessons')">📖 ${S.lang==='ur'?'سیکھنا جاری رکھیں':'Continue Learning'}</button></div></div>
+<div class="wotd"><div class="mut" style="color:#fff;opacity:.8">📅 ${S.lang==='ur'?'آج کا لفظ':'Word of the Day'}</div>
+<div class="w">${esc(wotd[0])}</div><div class="ur" style="color:#fff">${esc(wotd[1])}</div>
+<div style="font-size:13px;opacity:.85">${esc(wotd[2])} • ${esc(wotd[4])}</div>
+<button class="hbtn" style="margin-top:8px" onclick="speak('${esc(wotd[0])}')">🔊 ${S.lang==='ur'?'سنیں':'Listen'}</button></div>
+<div class="card"><h2>📖 ${S.lang==='ur'?'آج کا سبق':'Daily Lesson'}</h2>
+<p><b>${esc(daily.te)}</b></p><p class="ur mut">${esc(daily.tu)}</p>
+<button class="btn sm" onclick="go('lesson',{id:'${daily.id}'})">${S.lang==='ur'?'شروع کریں':'Start'} →</button></div>
+<div class="row">
+<div class="card" style="flex:1;min-width:140px;text-align:center;cursor:pointer" onclick="go('words')"><div style="font-size:32px">🔤</div><b>${t('words')}</b></div>
+<div class="card" style="flex:1;min-width:140px;text-align:center;cursor:pointer" onclick="go('talk')"><div style="font-size:32px">💬</div><b>${t('talk')}</b></div>
+<div class="card" style="flex:1;min-width:140px;text-align:center;cursor:pointer" onclick="go('quiz')"><div style="font-size:32px">❓</div><b>${t('quiz')}</b></div>
+</div>`;}
+/* ============ LESSONS ============ */
+let LL='beginner';
+function rLessons(){const lv=['beginner','intermediate','advanced'];
+$('view').innerHTML=`<h2>📖 ${t('lessons')}</h2><div class="tabs">${lv.map(l=>`<button class="tab ${LL===l?'on':''}" onclick="LL='${l}';rLessons()">${t(l)}</button>`).join('')}</div>
+${LESSONS.filter(l=>l.level===LL).map((l,i)=>`<div class="lesson ${S.done[l.id]?'done':''}" onclick="go('lesson',{id:'${l.id}'})"><div class="num">${S.done[l.id]?'✓':i+1}</div><div class="t"><b>${esc(l.te)}</b><br><span class="mut ur">${esc(l.tu)}</span></div><div>→</div></div>`).join('')}`;}
+function rLesson(){const l=LESSONS.find(x=>x.id===VP.id);if(!l)return go('lessons');
+$('view').innerHTML=`<button class="btn sm ghost" onclick="go('lessons')">← ${t('lessons')}</button>
+<div class="card" style="margin-top:10px"><h2>${esc(l.te)}</h2><p class="ur mut">${esc(l.tu)}</p>
+<h3>📝 ${S.lang==='ur'?'جملے':'Phrases'}</h3>
+${l.ph.map(p=>`<div class="phrase"><div class="row"><div class="en" style="flex:1">${esc(p.en)}</div><button class="speakbtn" onclick="speak('${esc(p.en).replace(/'/g,"\\'")}')">🔊</button></div>${p.roman?`<div class="roman">${esc(p.roman)}</div>`:''}<div class="ur">${esc(p.ur)}</div></div>`).join('')}
+<h3>💡 ${S.lang==='ur'?'وضاحت':'Explanation'}</h3><p>${esc(S.lang==='ur'?l.xu:l.xe)}</p>
+<h3>📌 ${S.lang==='ur'?'مثالیں':'Examples'}</h3>${l.ex.map(e=>`<div class="ex"><b>${esc(e.en)}</b><br><span class="ur">${esc(e.ur)}</span></div>`).join('')}
+<h3>❓ ${t('quiz')}</h3><div id="lq"></div>
+<div class="row" style="margin-top:12px"><button class="btn ok big" onclick="markDone('${l.id}');rLesson()">${S.done[l.id]?'✅ ':'✓ '}${S.lang==='ur'?'مکمل! اگلا سبق':'Done! Next Lesson'}</button></div></div>`;
+window._lq=l.qz;window._lqi=0;window._lqs=0;_lq=l.qz;_lqi=0;_lqs=0;renderLQuiz();}
+function renderLQuiz(){const q=_lq[_lqi];if(!q){$('lq').innerHTML=`<div class="note">🎉 ${S.lang==='ur'?'اسکور':'Score'}: ${_lqs}/${_lq.length}</div>`;S.scores['lq_'+VP.id]=_lqs;save();return;}
+$('lq').innerHTML=`<p><b>Q${_lqi+1}. ${esc(q.q)}</b></p>${q.o.map((o,i)=>`<button class="quizopt" id="qo${i}" onclick="ansLQuiz(${i},${q.a},'${esc(q.xu).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}<div id="lx"></div>`;}
+function ansLQuiz(i,a,x){const opts=_lq[_lqi].o;opts.forEach((_,j)=>{$('qo'+j).classList.add(j===a?'right':(j===i?'wrong':''));$('qo'+j).onclick=null;});if(i===a)_lqs++;$('lx').innerHTML=`<div class="note">${i===a?'✅':'❌'} <span class="ur">${x}</span><br><button class="btn sm" style="margin-top:8px" onclick="_lqi++;renderLQuiz()">${S.lang==='ur'?'اگلا':'Next'} →</button></div>`;}
+/* ============ WORDS ============ */
+let WC='all',WQ='',WF=false;
+function rWords(){const cats=['all','food','family','travel','business','shopping','education','daily'];
+let list=VOCAB.filter(w=>(WC==='all'||w[4]===WC)&&(!WQ||w[0].toLowerCase().includes(WQ.toLowerCase())||w[1].includes(WQ))&&(!WF||S.favs.includes(w[0])));
+$('view').innerHTML=`<h2>🔤 ${t('words')}</h2>
+<input placeholder="${S.lang==='ur'?'لفظ تلاش کریں...':'Search word...'}" value="${esc(WQ)}" oninput="WQ=this.value;rWordsL()">
+<div class="row" style="margin:8px 0;overflow-x:auto;flex-wrap:nowrap">${cats.map(c=>`<button class="chip ${WC===c?'on':''}" onclick="WC='${c}';rWords()">${c==='all'?(S.lang==='ur'?'سب':'All'):c}</button>`).join('')}<button class="chip ${WF?'on':''}" onclick="WF=!WF;rWords()">⭐ ${S.lang==='ur'?'پسندیدہ':'Fav'}</button></div>
+<div id="wl"></div>`;rWordsL();}
+function rWordsL(){const cats=['all'];let list=VOCAB.filter(w=>(WC==='all'||w[4]===WC)&&(!WQ||w[0].toLowerCase().includes(WQ.toLowerCase())||w[1].includes(WQ))&&(!WF||S.favs.includes(w[0])));
+const el=$('wl');if(!el)return;
+el.innerHTML=list.length?list.slice(0,60).map(w=>{const f=S.favs.includes(w[0]);return `<div class="word"><button class="fav" onclick="togFav('${esc(w[0])}')">${f?'⭐':'☆'}</button><div class="row"><div class="w" style="flex:1">${esc(w[0])}</div><button class="speakbtn" style="width:36px;height:36px;font-size:16px" onclick="speak('${esc(w[0])}')">🔊</button></div><div class="m ur">${esc(w[1])}</div><div class="mut">${esc(w[2])} • ${esc(w[4])}</div><div class="ex">${esc(w[3])}</div></div>`;}).join(''):`<div class="empty"><div class="e">🔍</div>${S.lang==='ur'?'کچھ نہیں ملا':'Nothing found'}</div>`;}
+function togFav(w){const i=S.favs.indexOf(w);if(i>=0)S.favs.splice(i,1);else S.favs.push(w);save();rWordsL();}
+/* ============ GRAMMAR ============ */
+function rGrammar(){$('view').innerHTML=`<h2>✏️ ${t('grammar')}</h2>${GRAMMAR.map((g,i)=>`<div class="lesson" onclick="go('grammard',{id:'${g.id}'})"><div class="num">${i+1}</div><div class="t"><b>${esc(g.te)}</b><br><span class="mut ur">${esc(g.tu)}</span></div><div>→</div></div>`).join('')}`;}
+function rGrammarD(){const g=GRAMMAR.find(x=>x.id===VP.id);if(!g)return go('grammar');
+$('view').innerHTML=`<button class="btn sm ghost" onclick="go('grammar')">← ${t('grammar')}</button><div class="card" style="margin-top:10px"><h2>${esc(g.te)}</h2><p class="ur mut">${esc(g.tu)}</p><p style="margin:10px 0">${esc(S.lang==='ur'?g.cu:g.ce)}</p><h3>✏️ ${S.lang==='ur'?'مشق':'Exercises'}</h3><div id="gq"></div></div>`;
+window._gq=g.exr;window._gqi=0;window._gqs=0;_gq=g.exr;_gqi=0;_gqs=0;renderGQuiz();}
+function renderGQuiz(){const q=_gq[_gqi];if(!q){$('gq').innerHTML=`<div class="note">🎉 ${S.lang==='ur'?'اسکور':'Score'}: ${_gqs}/${_gq.length}</div>`;return;}
+$('gq').innerHTML=`<p><b>Q${_gqi+1}. ${esc(q.q)}</b></p>${q.o.map((o,i)=>`<button class="quizopt" id="go${i}" onclick="ansGQuiz(${i},${q.a},'${esc(q.x).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}<div id="gx"></div>`;}
+function ansGQuiz(i,a,x){_gq[_gqi].o.forEach((_,j)=>{$('go'+j).classList.add(j===a?'right':(j===i?'wrong':''));$('go'+j).onclick=null;});if(i===a)_gqs++;$('gx').innerHTML=`<div class="note">${i===a?'✅':'❌'} <span class="ur">${x}</span><br><button class="btn sm" style="margin-top:8px" onclick="_gqi++;renderGQuiz()">${S.lang==='ur'?'اگلا':'Next'} →</button></div>`;}
+/* ============ TALK ============ */
+function rTalk(){$('view').innerHTML=`<h2>💬 ${t('talk')}</h2><p class="mut">${S.lang==='ur'?'روزمرہ گفتگو کی مشق':'Practice everyday conversations'}</p>${CONVOS.map(c=>`<div class="lesson" onclick="go('talkd',{id:'${c.id}'})"><div class="num">💬</div><div class="t"><b>${esc(c.te)}</b><br><span class="mut ur">${esc(c.tu)}</span></div><div>→</div></div>`).join('')}
+<div class="card"><h2>🎤 ${S.lang==='ur'?'بولنے کی مشق':'Speaking Practice'}</h2><p class="mut">${S.lang==='ur'?'کوئی جملہ چنیں اور بول کر مشق کریں':'Pick a line and practice speaking'}</p><button class="btn acc big" onclick="go('talkd',{id:'c1',speak:true})">🎤 ${S.lang==='ur'?'شروع کریں':'Start'}</button></div>`;}
+let TROLE='A';
+function rTalkD(){const c=CONVOS.find(x=>x.id===VP.id);if(!c)return go('talk');
+$('view').innerHTML=`<button class="btn sm ghost" onclick="go('talk')">← ${t('talk')}</button><div class="card" style="margin-top:10px"><h2>${esc(c.te)}</h2><p class="ur mut">${esc(c.tu)}</p>
+<div class="row"><span class="mut">${S.lang==='ur'?'آپ کا کردار':'Your role'}:</span><button class="tab ${TROLE==='A'?'on':''}" onclick="TROLE='A';rTalkD()">A</button><button class="tab ${TROLE==='B'?'on':''}" onclick="TROLE='B';rTalkD()">B</button></div>
+${c.lines.map(l=>`<div class="dlg ${l[0]===TROLE?'mine':''}"><div class="sp">🧑 ${l[0]} ${l[0]===TROLE?(S.lang==='ur'?'(آپ)':'(You)'):''}</div><div class="row"><div style="flex:1"><b>${esc(l[1])}</b><div class="roman" style="color:var(--acc);font-size:13px">${esc(l[3])}</div><div class="ur">${esc(l[2])}</div></div><button class="speakbtn" onclick="speak('${esc(l[1]).replace(/'/g,"\\'")}')">🔊</button></div>
+${l[0]===TROLE?`<div class="row" style="margin-top:8px"><button class="btn sm acc" onclick="practiceSay('${esc(l[1]).replace(/'/g,"\\'")}')">🎤 ${S.lang==='ur'?'بول کر مشق':'Practice Speaking'}</button></div><div id="spk"></div>`:''}</div>`).join('')}
+<div class="note">💡 ${S.lang==='ur'?'پہلے سنیں، پھر دہرائیں۔ مائیک صرف بولنے کی مشق پر مانگا جائے گا۔ AI اسکورنگ نہیں — صرف مشق۔':'Listen first, then repeat. Mic is asked only for speaking practice. No AI scoring — practice only.'}</div></div>`;}
+let recog=null;
+function practiceSay(expected){const box=$('spk');const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){box.innerHTML=`<div class="note">⚠️ ${S.lang==='ur'?'اس براؤزر میں آواز پہچان نہیں ہے۔ اونچی آواز میں خود دہرائیں۔':'Speech recognition not supported here. Repeat aloud yourself.'}</div>`;return;}
+box.innerHTML=`<div class="note">🎤 ${S.lang==='ur'?'بولیں...':'Speak now...'}</div>`;
+try{recog=new SR();recog.lang='en-US';recog.onresult=e=>{const said=e.results[0][0].transcript;box.innerHTML=`<div class="note">🗣️ ${S.lang==='ur'?'آپ نے کہا':'You said'}: "<b>${esc(said)}</b>"<br>🎯 ${S.lang==='ur'?'ہدف':'Target'}: "<b>${esc(expected)}</b>"<br>${S.lang==='ur'?'مشق جاری رکھیں!':'Keep practicing!'}</div>`;};recog.onerror=()=>{box.innerHTML=`<div class="note">⚠️ ${S.lang==='ur'?'مائیک کی اجازت دیں':'Allow mic permission'}</div>`;};recog.start();}catch(e){box.innerHTML=`<div class="note">⚠️ Error</div>`;}}
+/* ============ QUIZ ============ */
+function rQuiz(){const lv=['beginner','intermediate','advanced'];
+$('view').innerHTML=`<h2>❓ ${t('quiz')}</h2><p class="mut">${S.lang==='ur'?'اپنا امتحان لیں':'Test yourself'}</p>
+${lv.map(l=>{const qs=[];LESSONS.filter(x=>x.level===l).forEach(x=>x.qz.forEach(q=>qs.push(q)));const best=S.scores['test_'+l];return `<div class="card"><h3>${t(l)} ${S.lang==='ur'?'ٹیسٹ':'Test'}</h3><p class="mut">${qs.length} ${S.lang==='ur'?'سوالات':'questions'}${best!=null?` • ${S.lang==='ur'?'بہترین':'Best'}: ${best}/${qs.length}`:''}</p><button class="btn big" onclick="go('quizrun',{level:'${l}'})">▶ ${S.lang==='ur'?'شروع کریں':'Start'}</button></div>`;}).join('')}`;}
+let QQ=[],QQI=0,QQS=0;
+function rQuizRun(){QQ=[];LESSONS.filter(x=>x.level===VP.level).forEach(x=>x.qz.forEach(q=>QQ.push(q)));QQ=QQ.sort(()=>Math.random()-.5);QQI=0;QQS=0;renderQQ();}
+function renderQQ(){const q=QQ[QQI];if(!q){const pct=Math.round(QQS/QQ.length*100);const prev=S.scores['test_'+VP.level]||0;if(QQS>prev)S.scores['test_'+VP.level]=QQS;save();
+const badge=pct>=80?'🏆':pct>=50?'👍':'💪';$('view').innerHTML=`<div class="card" style="text-align:center"><div style="font-size:60px">${badge}</div><h2>${QQS}/${QQ.length} (${pct}%)</h2><p class="mut">${pct>=80?(S.lang==='ur'?'شاباش!':'Excellent!'):pct>=50?(S.lang==='ur'?'اچھا!':'Good!'):(S.lang==='ur'?'پھر کوشش کریں':'Try again')}</p><div class="row"><button class="btn" onclick="rQuizRun()">${S.lang==='ur'?'دوبارہ':'Retry'}</button><button class="btn ghost" onclick="go('quiz')">${t('quiz')}</button></div></div>`;return;}
+$('view').innerHTML=`<div class="card"><p class="mut">Q${QQI+1}/${QQ.length} • ✅ ${QQS}</p><p style="font-size:17px;margin:10px 0"><b>${esc(q.q)}</b></p>${q.o.map((o,i)=>`<button class="quizopt" id="qq${i}" onclick="ansQQ(${i},${q.a},'${esc(q.xu).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}<div id="qx"></div></div>`;}
+function ansQQ(i,a,x){QQ[QQI].o.forEach((_,j)=>{$('qq'+j).classList.add(j===a?'right':(j===i?'wrong':''));$('qq'+j).onclick=null;});if(i===a)QQS++;$('qx').innerHTML=`<div class="note">${i===a?'✅':'❌'} <span class="ur">${x}</span><br><button class="btn sm" style="margin-top:8px" onclick="QQI++;renderQQ()">${S.lang==='ur'?'اگلا':'Next'} →</button></div>`;}
+/* ============ PROGRESS ============ */
+function badges(){const b=[];const done=learnedCount();
+b.push({n:'🔥 7-Day Streak',u:'7 دن لگاتار',ok:S.streak.c>=7});b.push({n:'📖 10 Lessons',u:'10 اسباق',ok:done>=10});
+b.push({n:'📖 30 Lessons',u:'30 اسباق',ok:done>=30});b.push({n:'⭐ 50 Favorites',u:'50 پسندیدہ',ok:S.favs.length>=50});
+b.push({n:'🏆 Quiz Master',u:'کوئز ماسٹر',ok:Object.values(S.scores).some(s=>s>=8)});b.push({n:'🔤 Word Explorer',u:'الفاظ کے متلاشی',ok:S.favs.length>=20});
+return b;}
+function rProgress(){const done=learnedCount();const bs=badges();const got=bs.filter(b=>b.ok).length;
+$('view').innerHTML=`<h2>🏆 ${t('progress')}</h2>
+<div class="card"><div class="row"><div class="stat"><b>${S.streak.c}</b><span>🔥 ${S.lang==='ur'?'دن لگاتار':'day streak'}</span></div><div class="stat"><b>${done}/30</b><span>📖 ${S.lang==='ur'?'اسباق':'lessons'}</span></div><div class="stat"><b>${S.favs.length}</b><span>⭐ ${S.lang==='ur'?'پسندیدہ':'favs'}</span></div></div>
+<div class="bar"><i style="width:${done/30*100}%"></i></div></div>
+<div class="card"><h2>🎖️ ${S.lang==='ur'?'اعزازات':'Badges'} (${got}/${bs.length})</h2>${bs.map(b=>`<span class="badge ${b.ok?'':'lock'}">${b.n}</span>`).join('')}</div>
+<div class="card"><h2>📊 ${S.lang==='ur'?'کوئز اسکور':'Quiz Scores'}</h2>${['beginner','intermediate','advanced'].map(l=>`<p>${t(l)}: <b>${S.scores['test_'+l]!=null?S.scores['test_'+l]:'—'}</b></p>`).join('')||'<p class="mut">—</p>'}</div>
+<div class="card"><button class="btn sm ghost" onclick="if(confirm('${S.lang==='ur'?'سب ڈیٹا صاف کریں؟':'Clear all data?'}')){localStorage.removeItem(SKEY);location.reload();}">${S.lang==='ur'?'ڈیٹا صاف کریں':'Reset Data'}</button>
+<p class="mut" style="margin-top:8px">${S.lang==='ur'?'ڈیٹا اسی ڈیوائس کے براؤزر میں محفوظ ہے۔':'Data is stored in this device browser only.'}</p></div>`;}
+/* ============ INIT ============ */
+render();
+
+const LESSONS=[
+/* ---- BEGINNER ---- */
+{id:'b1',level:'beginner',te:'The English Alphabet',tu:'انگریزی حروفِ تہجی',ph:[
+{en:'A B C D E F G',ur:'اے بی سی ڈی ای ایف جی',roman:'ay bee see dee ee ef jee'},
+{en:'H I J K L M N',ur:'ایچ آئی جے کے ایل ایم این',roman:'aich aai jay kay el em en'},
+{en:'O P Q R S T U',ur:'او پی کیو آر ایس ٹی یو',roman:'o pee cue aar es tee you'},
+{en:'V W X Y Z',ur:'وی ڈبلیو ایکس وائی زیڈ',roman:'vee dabalyoo ex wai zed'}],
+xe:'English has 26 letters. 5 are vowels (A E I O U), the rest are consonants.',xu:'انگریزی میں 26 حروف ہیں۔ 5 واول (A E I O U) اور باقی کونسوننٹ ہیں۔',
+ex:[{en:'B is for Boy',ur:'B سے Boy (لڑکا)'},{en:'C is for Cat',ur:'C سے Cat (بلی)'}],
+qz:[{q:'How many letters in English?',o:['24','26','28','30'],a:1,xu:'انگریزی میں 26 حروف ہوتے ہیں۔'},{q:'Which is a vowel?',o:['B','C','E','T'],a:2,xu:'واول: A E I O U'},{q:'Z is pronounced as?',o:['Zee/Zed','Yed','Jet','Ket'],a:0,xu:'Z کو Zee یا Zed کہتے ہیں۔'}]},
+{id:'b2',level:'beginner',te:'Greetings & Introductions',tu:'سلام اور تعارف',ph:[
+{en:'Hello! How are you?',ur:'السلام علیکم! آپ کیسے ہیں؟',roman:'helo! hao aar yoo?'},
+{en:'I am fine, thank you.',ur:'میں ٹھیک ہوں، شکریہ۔',roman:'aai am faain, thenk yoo.'},
+{en:'What is your name?',ur:'آپ کا نام کیا ہے؟',roman:'wat iz yor naym?'},
+{en:'My name is Asif.',ur:'میرا نام آصف ہے۔',roman:'maai naym iz aasif.'},
+{en:'Nice to meet you!',ur:'آپ سے مل کر خوشی ہوئی!',roman:'naais too meet yoo!'}],
+xe:'Use "Hello" any time. "How are you?" is a polite question — answer "I am fine".',xu:'"Hello" ہر وقت کہہ سکتے ہیں۔ "How are you?" شائستہ سوال ہے — جواب "I am fine" دیں۔',
+ex:[{en:'A: Good morning! B: Good morning!',ur:'صبح بخیر کا تبادلہ'},{en:'A: I am Ali. B: Nice to meet you, Ali!',ur:'تعارف کی مثال'}],
+qz:[{q:'"How are you?" ka jawab?',o:['I am fine','My name is Ali','Good night','Thank you'],a:0,xu:'حال پوچھنے پر "I am fine" کہیں۔'},{q:'"Nice to meet you" kab kehte hain?',o:['Khana khate','Pehli mulaqat par','Sote waqt','Narazgi par'],a:1,xu:'پہلی ملاقات پر کہتے ہیں۔'},{q:'"My name ___ Asif." (sahi lafz?)',o:['are','am','is','be'],a:1,xu:'"I" ke sath "am" ata hai.'}]},
+{id:'b3',level:'beginner',te:'Numbers, Days & Time',tu:'گنتی، دن اور وقت',ph:[
+{en:'One, two, three, four, five',ur:'ایک، دو، تین، چار، پانچ',roman:'wan, too, thri, for, faaiv'},
+{en:'Ten, twenty, thirty, hundred',ur:'دس، بیس، تیس، سو',roman:'ten, twenti, tharti, handred'},
+{en:'Monday, Tuesday, Wednesday',ur:'پیر، منگل، بدھ',roman:'manday, tyoozday, wenzday'},
+{en:'What time is it? — It is 5 o\'clock.',ur:'کتنے بجے ہیں؟ — پانچ بجے ہیں۔',roman:'wat taaim iz it? — it iz faaiv o klok.'}],
+xe:'Numbers: learn 1-20 first, then tens (20,30...). Days start from Monday.',xu:'پہلے 1 سے 20 سیکھیں، پھر دہائیاں (20،30...)۔ دن پیر سے شروع ہوتے ہیں۔',
+ex:[{en:'I have two books.',ur:'میرے پاس دو کتابیں ہیں۔'},{en:'Today is Friday.',ur:'آج جمعہ ہے۔'}],
+qz:[{q:'"Fifteen" ka matlab?',o:['12','14','15','50'],a:2,xu:'Fifteen = 15'},{q:'"Sunday" ke baad ka din?',o:['Monday','Friday','Saturday','Tuesday'],a:0,xu:'اتوار کے بعد پیر'},{q:'"It is 3 o\'clock" matlab?',o:['3 بجے','30 منٹ','3 دن','تیسرا'],a:0,xu:'o\'clock = بجے'}]},
+{id:'b4',level:'beginner',te:'Everyday Vocabulary',tu:'روزمرہ الفاظ',ph:[
+{en:'Water — Pani',ur:'پانی',roman:'vaater'},
+{en:'Food — Khana',ur:'کھانا',roman:'food'},
+{en:'House — Ghar',ur:'گھر',roman:'haoos'},
+{en:'Book — Kitab',ur:'کتاب',roman:'buk'},
+{en:'Mobile — Phone',ur:'موبائل فون',roman:'mobaa-il'}],
+xe:'Learn 5 new words daily. Say them aloud and use in a sentence.',xu:'روز 5 نئے الفاظ سیکھیں۔ اونچی آواز میں بولیں اور جملے میں استعمال کریں۔',
+ex:[{en:'I drink water.',ur:'میں پانی پیتا ہوں۔'},{en:'This is my house.',ur:'یہ میرا گھر ہے۔'}],
+qz:[{q:'"Book" ka Urdu matlab?',o:['قلم','کتاب','کاپی','میز'],a:1,xu:'Book = کتاب'},{q:'"Ghar" in English?',o:['Home/House','Room','Door','Wall'],a:0,xu:'گھر = House/Home'},{q:'"I ___ water." (drink/drinks)',o:['drink','drinks','drank','drunk'],a:0,xu:'"I" ke sath drink'}]},
+{id:'b5',level:'beginner',te:'Simple Sentences',tu:'آسان جملے',ph:[
+{en:'I eat rice.',ur:'میں چاول کھاتا ہوں۔',roman:'aai eet raais.'},
+{en:'She drinks tea.',ur:'وہ چائے پیتی ہے۔',roman:'shi drinks tee.'},
+{en:'We go to school.',ur:'ہم اسکول جاتے ہیں۔',roman:'wi go too skool.'},
+{en:'They play cricket.',ur:'وہ کرکٹ کھیلتے ہیں۔',roman:'thay play cricket.'}],
+xe:'Pattern: Subject + Verb + Object. "She/He/It" ke sath verb me "s" lagta hai.',xu:'ترتیب: فاعل + فعل + مفعول۔ She/He/It کے ساتھ فعل میں s لگتا ہے۔',
+ex:[{en:'He reads a book.',ur:'وہ کتاب پڑھتا ہے۔'},{en:'I like mangoes.',ur:'مجھے آم پسند ہیں۔'}],
+qz:[{q:'"She ___ tea." (sahi?)',o:['drink','drinks','drinkes','drinking'],a:1,xu:'She ke sath drinks'},{q:'Jumlay ki sahi tarteeb?',o:['Verb+Subject','Subject+Verb+Object','Object+Verb','Verb only'],a:1,xu:'Subject + Verb + Object'},{q:'"They ___ cricket."',o:['plays','play','playing','played'],a:1,xu:'They ke sath play'}]},
+{id:'b6',level:'beginner',te:'Pronouns (I, You, He...)',tu:'ضمیریں',ph:[
+{en:'I — Main',ur:'میں',roman:'aai'},
+{en:'You — Tum/Aap',ur:'تم / آپ',roman:'yoo'},
+{en:'He — Woh (larka)',ur:'وہ (لڑکا)',roman:'hee'},
+{en:'She — Woh (larki)',ur:'وہ (لڑکی)',roman:'shi'},
+{en:'We — Hum, They — Woh (sab)',ur:'ہم، وہ سب',roman:'wi, thay'}],
+xe:'He = larka, She = larki, It = bejaan cheez, They = plural.',xu:'He لڑکے، She لڑکی، It بے جان چیز، They جمع کے لیے۔',
+ex:[{en:'He is my brother.',ur:'وہ میرا بھائی ہے۔'},{en:'They are friends.',ur:'وہ دوست ہیں۔'}],
+qz:[{q:'Larki ke liye?',o:['He','She','It','We'],a:1,xu:'لڑکی = She'},{q:'"___ am a student."',o:['He','She','I','They'],a:2,xu:'I am...'},{q:'Kitab (bejaan) ke liye?',o:['He','She','It','They'],a:2,xu:'بے جان = It'}]},
+{id:'b7',level:'beginner',te:'am / is / are',tu:'am / is / are',ph:[
+{en:'I am happy.',ur:'میں خوش ہوں۔',roman:'aai am happy.'},
+{en:'He is a doctor.',ur:'وہ ڈاکٹر ہے۔',roman:'hee iz a doctor.'},
+{en:'They are students.',ur:'وہ طالب علم ہیں۔',roman:'thay aar students.'},
+{en:'You are my friend.',ur:'تم میرے دوست ہو۔',roman:'yoo aar maai friend.'}],
+xe:'I+am, He/She/It+is, You/We/They+are. Ye "honay" ke liye.',xu:'I کے ساتھ am، He/She/It کے ساتھ is، You/We/They کے ساتھ are۔',
+ex:[{en:'She is tall.',ur:'وہ لمبی ہے۔'},{en:'We are ready.',ur:'ہم تیار ہیں۔'}],
+qz:[{q:'"She ___ happy."',o:['am','is','are','be'],a:1,xu:'She + is'},{q:'"They ___ playing."',o:['am','is','are','be'],a:2,xu:'They + are'},{q:'"I ___ Asif."',o:['am','is','are','be'],a:0,xu:'I + am'}]},
+{id:'b8',level:'beginner',te:'Asking Questions',tu:'سوال پوچھنا',ph:[
+{en:'What is this?',ur:'یہ کیا ہے؟',roman:'wat iz this?'},
+{en:'Where are you?',ur:'آپ کہاں ہیں؟',roman:'wher aar yoo?'},
+{en:'How old are you?',ur:'آپ کی عمر کیا ہے؟',roman:'hao old aar yoo?'},
+{en:'Do you like tea?',ur:'کیا آپ کو چائے پسند ہے؟',roman:'doo yoo laaik tee?'}],
+xe:'What=kya, Where=kahan, When=kab, Why=kyun, How=kaise. Jumlay ke shuru me lagao.',xu:'What کیا، Where کہاں، When کب، Why کیوں، How کیسے — جملے کے شروع میں۔',
+ex:[{en:'Why are you late?',ur:'آپ دیر سے کیوں آئے؟'},{en:'When is Eid?',ur:'عید کب ہے؟'}],
+qz:[{q:'"___ is your father?" (kaun)',o:['What','Who','Where','When'],a:1,xu:'Kaun = Who'},{q:'Jagah ke liye?',o:['What','Who','Where','Why'],a:2,xu:'کہاں = Where'},{q:'"Do you ___ mangoes?"',o:['likes','like','liking','liked'],a:1,xu:'Do you like...'}]},
+{id:'b9',level:'beginner',te:'My Family',tu:'میرا خاندان',ph:[
+{en:'Father — Walid',ur:'والد',roman:'faather'},
+{en:'Mother — Walida',ur:'والدہ',roman:'mather'},
+{en:'Brother — Bhai',ur:'بھائی',roman:'brather'},
+{en:'Sister — Behen',ur:'بہن',roman:'sister'},
+{en:'This is my family.',ur:'یہ میرا خاندان ہے۔',roman:'this iz maai family.'}],
+xe:'Family words roz istemal hote hain. Rishton ke naam yaad karein.',xu:'خاندان کے الفاظ روز استعمال ہوتے ہیں۔',
+ex:[{en:'My mother cooks food.',ur:'میری والدہ کھانا پکاتی ہیں۔'},{en:'He is my elder brother.',ur:'وہ میرا بڑا بھائی ہے۔'}],
+qz:[{q:'"Sister" ka matlab?',o:['بھائی','بہن','والدہ','بیٹی'],a:1,xu:'Sister = بہن'},{q:'"Walid" in English?',o:['Mother','Father','Uncle','Son'],a:1,xu:'والد = Father'},{q:'"She is my ___." (behen)',o:['brother','sister','father','son'],a:1,xu:'behen = sister'}]},
+{id:'b10',level:'beginner',te:'Food & Drinks',tu:'کھانا پینا',ph:[
+{en:'I am hungry.',ur:'مجھے بھوک لگی ہے۔',roman:'aai am hangri.'},
+{en:'The food is delicious.',ur:'کھانا مزیدار ہے۔',roman:'tha food iz delishas.'},
+{en:'One cup of tea, please.',ur:'ایک کپ چائے دیجیے۔',roman:'wan kap ov tee, pleez.'},
+{en:'Rice, bread, meat, vegetables',ur:'چاول، روٹی، گوشت، سبزیاں',roman:'raais, bred, meet, vejtebalz'}],
+xe:'Restaurant me: "I would like..." (mujhe chahiye) polite hai.',xu:'ریسٹورنٹ میں "I would like" شائستہ انداز ہے۔',
+ex:[{en:'I would like some rice.',ur:'مجھے چاول چاہئیں۔'},{en:'She cooks biryani.',ur:'وہ بریانی پکاتی ہے۔'}],
+qz:[{q:'"Bhuk" in English?',o:['Thirsty','Hungry','Tired','Happy'],a:1,xu:'بھوک = Hungry'},{q:'"___ cup of tea, please."',o:['One','On','An','A one'],a:0,xu:'One cup...'},{q:'"Delicious" matlab?',o:['کڑوا','مزیدار','پھیکا','گرم'],a:1,xu:'Delicious = مزیدار'}]},
+{id:'b11',level:'beginner',te:'Shopping English',tu:'خریداری کی انگریزی',ph:[
+{en:'How much is this?',ur:'یہ کتنے کا ہے؟',roman:'hao mach iz this?'},
+{en:'It is 500 rupees.',ur:'یہ 500 روپے کا ہے۔',roman:'it iz 500 rupees.'},
+{en:'Do you have a bigger size?',ur:'کیا بڑا سائز ہے؟',roman:'doo yoo hav a bigar saaiz?'},
+{en:'I am just looking, thank you.',ur:'بس دیکھ رہا ہوں، شکریہ۔',roman:'aai am jast luking, thenk yoo.'}],
+xe:'Bazaar me ye 4 jumlay sab se kaam ke hain.',xu:'بازار میں یہ 4 جملے سب سے کام کے ہیں۔',
+ex:[{en:'Can I try this?',ur:'کیا میں یہ آزما سکتا ہوں؟'},{en:'Too expensive!',ur:'بہت مہنگا ہے!'}],
+qz:[{q:'Qeemat poochne ke liye?',o:['How much is this?','What time?','Where are you?','Who is this?'],a:0,xu:'How much is this?'},{q:'"500 ___." (rupe)',o:['rupee','rupees','rupies','rups'],a:1,xu:'rupees'},{q:'"I am just ___."',o:['looking','look','looks','looked'],a:0,xu:'I am just looking'}]},
+{id:'b12',level:'beginner',te:'Common Daily Phrases',tu:'روزمرہ جملے',ph:[
+{en:'Good morning!',ur:'صبح بخیر!',roman:'gud morning!'},
+{en:'See you tomorrow!',ur:'کل ملیں گے!',roman:'see yoo tomorro!'},
+{en:'Sorry, I am late.',ur:'معاف کیجیے، دیر ہو گئی۔',roman:'sori, aai am layt.'},
+{en:'Thank you very much!',ur:'بہت بہت شکریہ!',roman:'thenk yoo veri mach!'},
+{en:'Take care!',ur:'اپنا خیال رکھیے!',roman:'tayk kair!'}],
+xe:'Ye phrases roz bolne ki aadat banayein.',xu:'یہ جملے روز بولنے کی عادت بنائیں۔',
+ex:[{en:'Good night, sleep well!',ur:'شب بخیر، اچھی نیند!'},{en:'Welcome back!',ur:'واپسی پر خوش آمدید!'}],
+qz:[{q:'Subah ko kehte hain?',o:['Good night','Good morning','Good evening','Bye'],a:1,xu:'صبح = Good morning'},{q:'"___ you tomorrow!"',o:['See','Saw','Seen','Sees'],a:0,xu:'See you tomorrow'},{q:'Shukriya ke liye?',o:['Sorry','Thank you','Please','Welcome'],a:1,xu:'Thank you'}]},
+/* ---- INTERMEDIATE ---- */
+{id:'i1',level:'intermediate',te:'Present Tense',tu:'فعلِ حال',ph:[
+{en:'I go to office daily.',ur:'میں روز دفتر جاتا ہوں۔',roman:'aai go too ofis dayli.'},
+{en:'She teaches English.',ur:'وہ انگریزی پڑھاتی ہے۔',roman:'shi teechez english.'},
+{en:'They do not watch TV.',ur:'وہ ٹی وی نہیں دیکھتے۔',roman:'thay doo not woch tee vee.'},
+{en:'Does he work here?',ur:'کیا وہ یہاں کام کرتا ہے؟',roman:'daz hee wark heer?'}],
+xe:'Roz ke kaam ke liye present simple. Negative: do/does + not. Sawal: Do/Does shuru me.',xu:'روز کے کام کے لیے۔ نفی: do/does + not۔ سوال: Do/Does شروع میں۔',
+ex:[{en:'Water boils at 100 degrees.',ur:'پانی 100 ڈگری پر ابلتا ہے۔'},{en:'He does not smoke.',ur:'وہ سگریٹ نہیں پیتا۔'}],
+qz:[{q:'"She ___ to school."',o:['go','goes','going','gone'],a:1,xu:'She + goes'},{q:'Negative: "He ___ not play."',o:['do','does','is','are'],a:1,xu:'He does not'},{q:'"___ they eat meat?"',o:['Does','Do','Is','Are'],a:1,xu:'They + Do'}]},
+{id:'i2',level:'intermediate',te:'Past Tense',tu:'فعلِ ماضی',ph:[
+{en:'I went to Lahore yesterday.',ur:'میں کل لاہور گیا۔',roman:'aai went too lahor yesterday.'},
+{en:'She cooked dinner.',ur:'اس نے کھانا پکایا۔',roman:'shi kukt dinner.'},
+{en:'They did not come.',ur:'وہ نہیں آئے۔',roman:'thay did not kam.'},
+{en:'Did you sleep well?',ur:'کیا آپ اچھی طرح سوئے؟',roman:'did yoo sleep wel?'}],
+xe:'Guzre kaam ke liye verb ki 2nd form (go→went). Negative/sawal me "did".',xu:'گزرے کام کے لیے فعل کی دوسری شکل۔ نفی/سوال میں did۔',
+ex:[{en:'We watched a movie.',ur:'ہم نے فلم دیکھی۔'},{en:'He bought a car.',ur:'اس نے گاڑی خریدی۔'}],
+qz:[{q:'"Go" ki past?',o:['goed','went','gone','goes'],a:1,xu:'go → went'},{q:'"She ___ not come."',o:['do','does','did','done'],a:2,xu:'Past negative = did not'},{q:'"Did he ___?" (verb form)',o:['went','go','goes','gone'],a:1,xu:'Did ke baad 1st form'}]},
+{id:'i3',level:'intermediate',te:'Future Tense',tu:'فعلِ مستقبل',ph:[
+{en:'I will call you tomorrow.',ur:'میں کل آپ کو فون کروں گا۔',roman:'aai wil kaal yoo tomorro.'},
+{en:'She will join the office.',ur:'وہ دفتر جوائن کرے گی۔',roman:'shi wil join tha ofis.'},
+{en:'It will rain today.',ur:'آج بارش ہوگی۔',roman:'it wil rayn today.'},
+{en:'Will you help me?',ur:'کیا آپ میری مدد کریں گے؟',roman:'wil yoo help mee?'}],
+xe:'Aane wale kaam ke liye "will + verb". Faisla abhi kiya ho to will.',xu:'آنے والے کام کے لیے will + فعل۔',
+ex:[{en:'We will win, inshallah.',ur:'ہم جیتیں گے، ان شاء اللہ۔'},{en:'He will not come.',ur:'وہ نہیں آئے گا۔'}],
+qz:[{q:'"I ___ go tomorrow."',o:['will','am','was','goes'],a:0,xu:'Future = will'},{q:'"___ you come?" (future)',o:['Do','Did','Will','Are'],a:2,xu:'Will you come?'},{q:'"She will not ___."',o:['comes','come','came','coming'],a:1,xu:'will + 1st form'}]},
+{id:'i4',level:'intermediate',te:'Everyday Conversations',tu:'روزمرہ گفتگو',ph:[
+{en:'What do you do?',ur:'آپ کیا کرتے ہیں؟',roman:'wat doo yoo doo?'},
+{en:'I am a teacher.',ur:'میں استاد ہوں۔',roman:'aai am a teacher.'},
+{en:'How long have you lived here?',ur:'آپ یہاں کب سے رہ رہے ہیں؟',roman:'hao long hav yoo livd heer?'},
+{en:'I have lived here for 5 years.',ur:'میں یہاں 5 سال سے رہ رہا ہوں۔',roman:'aai hav livd heer for 5 years.'}],
+xe:'"What do you do?" = aapka kaam kya hai. "For 5 years" = muddat.',xu:'کام پوچھنے کے لیے What do you do?۔',
+ex:[{en:'Where do you live? — I live in Karachi.',ur:'آپ کہاں رہتے ہیں؟ — میں کراچی میں رہتا ہوں۔'}],
+qz:[{q:'"What do you ___?"',o:['does','do','doing','done'],a:1,xu:'What do you do?'},{q:'Kaam batane ke liye?',o:['I am a teacher','I teacher','Me teacher','Teacher I'],a:0,xu:'I am a teacher'},{q:'"___ 5 years." (muddat)',o:['Since','For','From','At'],a:1,xu:'For 5 years'}]},
+{id:'i5',level:'intermediate',te:'Travel English',tu:'سفر کی انگریزی',ph:[
+{en:'Where is the bus stop?',ur:'بس اسٹاپ کہاں ہے؟',roman:'wher iz tha bas stop?'},
+{en:'One ticket to Lahore, please.',ur:'لاہور کا ایک ٹکٹ دیجیے۔',roman:'wan ticket too lahor, pleez.'},
+{en:'How far is the airport?',ur:'ایئرپورٹ کتنی دور ہے؟',roman:'hao faar iz tha airport?'},
+{en:'The train is late.',ur:'ٹرین دیر سے ہے۔',roman:'tha trayn iz layt.'}],
+xe:'Safar me direction aur ticket ke jumlay sab se zaroori.',xu:'سفر میں راستہ اور ٹکٹ کے جملے اہم ہیں۔',
+ex:[{en:'Is this seat free?',ur:'کیا یہ سیٹ خالی ہے؟'},{en:'Please hurry, I am late!',ur:'جلدی کیجیے، مجھے دیر ہو رہی ہے!'}],
+qz:[{q:'Rasta poochne ke liye?',o:['Where is...?','What is...?','Who is...?','When is...?'],a:0,xu:'Where is...?'},{q:'"One ___ to Lahore."',o:['ticket','tickets','ticketing','tick'],a:0,xu:'One ticket'},{q:'"How ___ is it?" (fasla)',o:['much','many','far','long time'],a:2,xu:'How far = کتنی دور'}]},
+{id:'i6',level:'intermediate',te:'Workplace English',tu:'دفتر کی انگریزی',ph:[
+{en:'I have a meeting at 10.',ur:'میری دس بجے میٹنگ ہے۔',roman:'aai hav a meeting at ten.'},
+{en:'Please send me the report.',ur:'براہ کرم رپورٹ بھیج دیں۔',roman:'pleez send mee tha report.'},
+{en:'The deadline is Friday.',ur:'آخری تاریخ جمعہ ہے۔',roman:'tha deadline iz fraaiday.'},
+{en:'I will finish it by evening.',ur:'میں شام تک مکمل کر لوں گا۔',roman:'aai wil finish it bai evening.'}],
+xe:'Office me polite requests: "Please" aur "Could you" use karein.',xu:'دفتر میں شائستہ گزارش کے لیے Please / Could you۔',
+ex:[{en:'Could you help me with this?',ur:'کیا آپ اس میں میری مدد کر سکتے ہیں؟'}],
+qz:[{q:'Polite request?',o:['Send report!','Please send the report.','You send!','Report now!'],a:1,xu:'Please se polite'},{q:'"I have a ___ at 10."',o:['meet','meeting','met','meetings'],a:1,xu:'a meeting'},{q:'"Deadline" matlab?',o:['شروع','آخری تاریخ','چھٹی','تنخواہ'],a:1,xu:'آخری تاریخ'}]},
+{id:'i7',level:'intermediate',te:'Making Sentences',tu:'جملے بنانا',ph:[
+{en:'I like tea because it is hot.',ur:'مجھے چائے پسند ہے کیونکہ وہ گرم ہوتی ہے۔',roman:'aai laaik tee bikaaz it iz hot.'},
+{en:'He is rich but unhappy.',ur:'وہ امیر ہے لیکن ناخوش ہے۔',roman:'hee iz rich bat unhappy.'},
+{en:'If it rains, we will stay home.',ur:'اگر بارش ہوئی تو ہم گھر رہیں گے۔',roman:'if it raynz, wi wil stay home.'},
+{en:'She sings and dances.',ur:'وہ گاتی اور ناچتی ہے۔',roman:'shi sings and danses.'}],
+xe:'because=کیونکہ, but=لیکن, if=اگر, and=اور — jumlay jorne ke liye.',xu:'ان الفاظ سے جملے جوڑیں۔',
+ex:[{en:'I was tired so I slept.',ur:'میں تھکا تھا اس لیے سو گیا۔'}],
+qz:[{q:'Wajah batane ke liye?',o:['but','because','and','or'],a:1,xu:'because = کیونکہ'},{q:'"___ it rains..." (agar)',o:['But','If','So','And'],a:1,xu:'If = اگر'},{q:'"He is tall ___ weak."',o:['and','because','but','if'],a:2,xu:'but = لیکن'}]},
+{id:'i8',level:'intermediate',te:'Common Mistakes',tu:'عام غلطیاں',ph:[
+{en:'❌ I am agree → ✅ I agree.',ur:'غلط: I am agree — صحیح: I agree',roman:''},
+{en:'❌ He don\'t know → ✅ He doesn\'t know.',ur:'غلط: He don\'t — صحیح: He doesn\'t',roman:''},
+{en:'❌ I have 25 years → ✅ I am 25 years old.',ur:'عمر کے لیے "I am" use karein',roman:''},
+{en:'❌ Discuss about → ✅ Discuss (no "about")',ur:'Discuss کے ساتھ about نہیں آتا',roman:''}],
+xe:'Urdu speakers ki aam ghaltiyan — in se bachein!',xu:'اردو بولنے والوں کی عام غلطیاں۔',
+ex:[{en:'✅ She is married (not "She married").',ur:'صحیح: She is married'}],
+qz:[{q:'Sahi jumla?',o:['I am agree','I agree','I agreed am','Me agree'],a:1,xu:'I agree (am nahi)'},{q:'"He ___ know."',o:['don\'t','doesn\'t','not','isn\'t'],a:1,xu:'He doesn\'t'},{q:'Umar ke liye?',o:['I have 25 years','I am 25 years old','I 25 years','Me 25'],a:1,xu:'I am 25 years old'}]},
+{id:'i9',level:'intermediate',te:'Shopping & Bargaining',tu:'خریداری اور بھاؤ تاؤ',ph:[
+{en:'This is too expensive. Give discount!',ur:'یہ بہت مہنگا ہے۔ رعایت دیں!',roman:'this iz too expensive. giv discount!'},
+{en:'What is the last price?',ur:'آخری قیمت کیا ہے؟',roman:'wat iz tha laast praais?'},
+{en:'I will take two.',ur:'میں دو لوں گا۔',roman:'aai wil tayk too.'},
+{en:'Do you accept JazzCash?',ur:'کیا آپ جاز کیش لیتے ہیں؟',roman:'doo yoo accept jazzcash?'}],
+xe:'Bargaining ke liye polite lekin firm rahein.',xu:'بھاؤ تاؤ میں شائستہ مگر پختہ رہیں۔',
+ex:[{en:'Make it 800, deal?',ur:'800 کر دیں، سودا؟'}],
+qz:[{q:'Riyayat ke liye?',o:['Give discount!','No discount','Full price','Expensive!'],a:0,xu:'Give discount'},{q:'"What is the ___ price?"',o:['last','lost','least','late'],a:0,xu:'last price'},{q:'"I will take ___." (do)',o:['two','to','too','2x'],a:0,xu:'two'}]},
+{id:'i10',level:'intermediate',te:'Phone Conversations',tu:'فون پر بات',ph:[
+{en:'Hello, may I speak to Ali?',ur:'السلام علیکم، کیا علی سے بات ہو سکتی ہے؟',roman:'helo, may aai speak too ali?'},
+{en:'Hold on, please.',ur:'ایک منٹ رکیے۔',roman:'hold on, pleez.'},
+{en:'He is not available now.',ur:'وہ ابھی دستیاب نہیں۔',roman:'hee iz not available naao.'},
+{en:'I will call back later.',ur:'میں بعد میں کال کروں گا۔',roman:'aai wil kaal bak layter.'}],
+xe:'Phone par: pehle naam batayein, phir maqsad.',xu:'فون پر پہلے اپنا نام بتائیں۔',
+ex:[{en:'Sorry, wrong number.',ur:'معاف کیجیے، غلط نمبر۔'}],
+qz:[{q:'Phone par pehle?',o:['Apna naam','Gaali','Chup','Kaat do'],a:0,xu:'Pehle naam batayein'},{q:'"___ on, please."',o:['Hold','Old','Cold','Sold'],a:0,xu:'Hold on'},{q:'"I will call ___ later."',o:['back','front','up','down'],a:0,xu:'call back'}]},
+/* ---- ADVANCED ---- */
+{id:'a1',level:'advanced',te:'Job Interviews',tu:'ملازمت کے انٹرویو',ph:[
+{en:'Tell me about yourself.',ur:'اپنے بارے میں بتائیں۔',roman:'tel mee abaaot yorself.'},
+{en:'I have 5 years of experience in sales.',ur:'مجھے سیلز میں 5 سال کا تجربہ ہے۔',roman:'aai hav 5 years ov experience in saylz.'},
+{en:'My strength is hard work.',ur:'میری خوبی محنت ہے۔',roman:'maai strength iz haard wark.'},
+{en:'Why should we hire you?',ur:'ہم آپ کو کیوں رکھیں؟',roman:'waai shud wi haair yoo?'}],
+xe:'Interview me confident jawab dein, examples ke sath.',xu:'انٹرویو میں اعتماد سے جواب دیں۔',
+ex:[{en:'I am a quick learner.',ur:'میں جلدی سیکھتا ہوں۔'}],
+qz:[{q:'"Tell me ___ yourself."',o:['about','of','for','to'],a:0,xu:'about yourself'},{q:'Tajurba ke liye?',o:['I have experience','I experience','Me experienced','Experience me'],a:0,xu:'I have experience'},{q:'"My ___ is hard work."',o:['weekness','strength','strong','power'],a:1,xu:'strength'}]},
+{id:'a2',level:'advanced',te:'Presentations',tu:'پریزنٹیشن',ph:[
+{en:'Good morning everyone.',ur:'سب کو صبح بخیر۔',roman:'gud morning evriwan.'},
+{en:'Today I will talk about sales growth.',ur:'آج میں سیلز کی ترقی پر بات کروں گا۔',roman:'today aai wil taak abaaot saylz growth.'},
+{en:'As you can see in this chart...',ur:'جیسا کہ چارٹ میں دیکھ سکتے ہیں...',roman:'az yoo kan see in this chaart...'},
+{en:'Thank you for your attention.',ur:'توجہ کا شکریہ۔',roman:'thenk yoo for yor attention.'}],
+xe:'Presentation: greeting → topic → points → thanks.',xu:'ترتیب: سلام → موضوع → نکات → شکریہ۔',
+ex:[{en:'Any questions?',ur:'کوئی سوال؟'}],
+qz:[{q:'Shuru me?',o:['Good morning everyone','Bye everyone','Sit down','No talking'],a:0,xu:'Good morning everyone'},{q:'"I will talk ___ sales."',o:['on','about','of','for'],a:1,xu:'talk about'},{q:'Aakhir me?',o:['Thank you for your attention','Go home','Stop now','Enough'],a:0,xu:'Thank you...'}]},
+{id:'a3',level:'advanced',te:'Advanced Vocabulary',tu:'اعلیٰ الفاظ',ph:[
+{en:'Brave — Bahadur',ur:'بہادر',roman:'brayv'},
+{en:'Honest — Imaandar',ur:'ایماندار',roman:'onest'},
+{en:'Success — Kamyabi',ur:'کامیابی',roman:'sakses'},
+{en:'Opportunity — Mauqa',ur:'موقع',roman:'opportunity'}],
+xe:'Roz 4 mushkil alfaz seekhein aur jumlon me lagayein.',xu:'روز مشکل الفاظ جملوں میں استعمال کریں۔',
+ex:[{en:'Honesty is the best policy.',ur:'ایمانداری بہترین حکمت عملی ہے۔'}],
+qz:[{q:'"Bahadur" in English?',o:['Brave','Bright','Broad','Break'],a:0,xu:'Brave'},{q:'"Mauqa" in English?',o:['Opposite','Opportunity','Option','Order'],a:1,xu:'Opportunity'},{q:'"Kamyabi"?',o:['Success','Succeed','Successful','Succession'],a:0,xu:'Success'}]},
+{id:'a4',level:'advanced',te:'Professional Talk',tu:'پیشہ ورانہ گفتگو',ph:[
+{en:'Let us schedule a meeting.',ur:'آئیے میٹنگ طے کریں۔',roman:'let as schedule a meeting.'},
+{en:'I appreciate your help.',ur:'میں آپ کی مدد کا شکر گزار ہوں۔',roman:'aai appreciate yor help.'},
+{en:'We need to discuss the budget.',ur:'ہمیں بجٹ پر بات کرنی ہے۔',roman:'wi need too discuss tha bajet.'},
+{en:'Looking forward to working with you.',ur:'آپ کے ساتھ کام کا منتظر ہوں۔',roman:'luking forward too working with yoo.'}],
+xe:'Formal lafz: appreciate, schedule, discuss, confirm.',xu:'رسمی الفاظ استعمال کریں۔',
+ex:[{en:'Please confirm by email.',ur:'براہ کرم ای میل سے تصدیق کریں۔'}],
+qz:[{q:'Formal shukriya?',o:['Thanks yaar','I appreciate your help','Shukriya bhai','Ok thanks'],a:1,xu:'I appreciate...'},{q:'"Let us ___ a meeting."',o:['schedule','do','make fast','cancel'],a:0,xu:'schedule a meeting'},{q:'"Looking forward ___ you."',o:['to meet','to meeting','meet','met'],a:1,xu:'Looking forward to meeting'}]},
+{id:'a5',level:'advanced',te:'Writing Skills',tu:'لکھنے کی مہارت',ph:[
+{en:'Dear Sir, I am writing to apply...',ur:'محترم، میں درخواست کے لیے لکھ رہا ہوں...',roman:'dear sir, aai am raaiting too apply...'},
+{en:'I would be grateful if...',ur:'میں شکر گزار ہوں گا اگر...',roman:'aai wud bee grateful if...'},
+{en:'Yours sincerely, Asif',ur:'مخلص، آصف',roman:'yors sincerely, aasif'},
+{en:'Subject: Leave Application',ur:'موضوع: چھٹی کی درخواست',roman:'subject: leev application'}],
+xe:'Formal letter: Dear → body → Yours sincerely.',xu:'رسمی خط کی ترتیب۔',
+ex:[{en:'I hope you are well.',ur:'امید ہے آپ خیریت سے ہوں گے۔'}],
+qz:[{q:'Khat ke shuru me?',o:['Dear Sir','Hey','Yo','Listen'],a:0,xu:'Dear Sir'},{q:'Aakhir me?',o:['Yours sincerely','Bye bye','Ok done','See ya'],a:0,xu:'Yours sincerely'},{q:'"Subject" matlab?',o:['دستخط','موضوع','تاریخ','نام'],a:1,xu:'موضوع'}]},
+{id:'a6',level:'advanced',te:'Idioms & Phrases',tu:'محاورے',ph:[
+{en:'Break the ice — Pehli baat karna',ur:'پہلی بات چیت شروع کرنا',roman:'brayk tha aais'},
+{en:'A piece of cake — Bohat aasan',ur:'بہت آسان کام',roman:'a pees ov kayk'},
+{en:'Hit the books — Parhna shuru karna',ur:'پڑھائی شروع کرنا',roman:'hit tha buks'},
+{en:'Under the weather — Halka bimar',ur:'ہلکا بیمار ہونا',roman:'ander tha wether'}],
+xe:'Idioms ka lafzi matlab na lein — inka khaas matlab hota hai.',xu:'محاوروں کا لفظی مطلب نہ لیں۔',
+ex:[{en:'The exam was a piece of cake!',ur:'امتحان بہت آسان تھا!'}],
+qz:[{q:'"A piece of cake" matlab?',o:['کیک کا ٹکڑا','بہت آسان','میٹھا','مشکل'],a:1,xu:'بہت آسان'},{q:'"Break the ice"?',o:['برف توڑنا','بات شروع کرنا','لڑنا','بھاگنا'],a:1,xu:'بات چیت شروع کرنا'},{q:'"Under the weather"?',o:['موسم','ہلکا بیمار','بارش','دھوپ'],a:1,xu:'ہلکا بیمار'}]},
+{id:'a7',level:'advanced',te:'Debate & Opinions',tu:'بحث اور رائے',ph:[
+{en:'In my opinion, education is key.',ur:'میری رائے میں تعلیم کلید ہے۔',roman:'in maai opinion, education iz kee.'},
+{en:'I agree with you.',ur:'میں آپ سے متفق ہوں۔',roman:'aai agree with yoo.'},
+{en:'I see your point, but...',ur:'آپ کی بات سمجھتا ہوں، لیکن...',roman:'aai see yor point, bat...'},
+{en:'What is your view on this?',ur:'اس بارے میں آپ کی کیا رائے ہے؟',roman:'wat iz yor vyoo on this?'}],
+xe:'Rayein: "In my opinion", "I believe", "From my view".',xu:'رائے دینے کے شائستہ انداز۔',
+ex:[{en:'I strongly believe in hard work.',ur:'میں محنت پر پختہ یقین رکھتا ہوں۔'}],
+qz:[{q:'Raye ke liye?',o:['In my opinion','In my kitchen','In my car','In my bag'],a:0,xu:'In my opinion'},{q:'"I ___ with you."',o:['agree','agrees','agreeing','agreed to be'],a:0,xu:'I agree with you'},{q:'Ikhtilaf politely?',o:['You are wrong!','I see your point, but...','Shut up','No!'],a:1,xu:'I see your point, but...'}]},
+{id:'a8',level:'advanced',te:'Story Telling',tu:'کہانی سنانا',ph:[
+{en:'Once upon a time, there was a king.',ur:'ایک دفعہ کا ذکر ہے، ایک بادشاہ تھا۔',roman:'wans apon a taaim...'},
+{en:'Suddenly, he heard a noise.',ur:'اچانک اس نے آواز سنی۔',roman:'suddenly, hee herd a noise.'},
+{en:'In the end, everyone was happy.',ur:'آخر میں سب خوش تھے۔',roman:'in tha end, evriwan waz happy.'},
+{en:'Moral: Honesty wins.',ur:'سبق: ایمانداری جیتتی ہے۔',roman:'moral: honesty winz.'}],
+xe:'Kahani: shuru (Once...) → darmiyan (Suddenly...) → aakhir (In the end...).',xu:'کہانی کی ترتیب۔',
+ex:[{en:'They lived happily ever after.',ur:'وہ ہمیشہ خوش رہے۔'}],
+qz:[{q:'Kahani shuru?',o:['Once upon a time','In the end','Suddenly','Moral'],a:0,xu:'Once upon a time'},{q:'Aakhir me?',o:['Suddenly','Once','In the end','Then'],a:2,xu:'In the end'},{q:'"Moral" matlab?',o:['کہانی','سبق','کردار','جگہ'],a:1,xu:'سبق'}]}
+];
+/* ============ VOCABULARY (150+) ============ */
+const VOCAB=[
+['Apple','سیب','aipal','I eat an apple daily.','food'],['Banana','کیلا','banaana','Bananas are sweet.','food'],
+['Rice','چاول','raais','We eat rice.','food'],['Bread','روٹی','bred','Fresh bread is tasty.','food'],
+['Milk','دودھ','milk','Drink milk daily.','food'],['Tea','چائے','tee','I like hot tea.','food'],
+['Sugar','چینی','shugar','Less sugar, please.','food'],['Salt','نمک','saalt','Add some salt.','food'],
+['Meat','گوشت','meet','Meat is expensive.','food'],['Egg','انڈا','eg','Boil two eggs.','food'],
+['Father','والد','faather','My father is kind.','family'],['Mother','والدہ','mather','My mother cooks well.','family'],
+['Brother','بھائی','brather','He is my brother.','family'],['Sister','بہن','sister','She is my sister.','family'],
+['Son','بیٹا','san','My son is 10.','family'],['Daughter','بیٹی','daater','My daughter studies.','family'],
+['Uncle','چچا/ماموں','ankal','Uncle came today.','family'],['Aunt','چچی/خالہ','aant','Aunt is nice.','family'],
+['Wife','بیوی','waaif','His wife is a doctor.','family'],['Husband','شوہر','hazband','Her husband works.','family'],
+['Car','گاڑی','kaar','My car is new.','travel'],['Bus','بس','bas','The bus is late.','travel'],
+['Train','ٹرین','trayn','Train is fast.','travel'],['Ticket','ٹکٹ','ticket','Buy a ticket.','travel'],
+['Road','سڑک','road','The road is long.','travel'],['Airport','ایئرپورٹ','airport','Airport is far.','travel'],
+['Hotel','ہوٹل','hotel','Book a hotel.','travel'],['Journey','سفر','jarni','Safe journey!','travel'],
+['Map','نقشہ','map','See the map.','travel'],['Luggage','سامان','lagej','Heavy luggage.','travel'],
+['Shop','دکان','shop','Open the shop.','business'],['Price','قیمت','praais','What is the price?','business'],
+['Money','پیسہ','mani','Save money.','business'],['Profit','منافع','profit','Good profit!','business'],
+['Loss','نقصان','laas','Avoid loss.','business'],['Customer','گاہک','kastomer','Happy customer.','business'],
+['Order','آرڈر','order','New order came.','business'],['Sale','فروخت','sayl','Big sale today!','business'],
+['Discount','رعایت','discount','10% discount.','business'],['Cash','نقد','kash','Pay in cash.','business'],
+['Book','کتاب','buk','Read a book.','education'],['Pen','قلم','pen','Blue pen.','education'],
+['School','اسکول','skool','Go to school.','education'],['Teacher','استاد','teacher','Teacher is kind.','education'],
+['Student','طالب علم','student','I am a student.','education'],['Exam','امتحان','egzaam','Exam is near.','education'],
+['Lesson','سبق','lesan','Learn the lesson.','education'],['Homework','ہوم ورک','homework','Do homework.','education'],
+['Class','جماعت','klaas','Class is big.','education'],['Question','سوال','kweschan','Ask a question.','education'],
+['Water','پانی','vaater','Cold water.','daily'],['Food','کھانا','food','Hot food.','daily'],
+['House','گھر','haoos','My house.','daily'],['Room','کمرہ','room','Clean room.','daily'],
+['Door','دروازہ','door','Open the door.','daily'],['Window','کھڑکی','windo','Close window.','daily'],
+['Light','بتی/روشنی','laait','Turn on light.','daily'],['Fan','پنکھا','fan','Fan is on.','daily'],
+['Bed','بستر','bed','Go to bed.','daily'],['Cloth','کپڑا','kloth','New clothes.','daily'],
+['Shirt','قمیض','shirt','White shirt.','shopping'],['Shoes','جوتے','shooz','New shoes.','shopping'],
+['Size','سائز','saaiz','Big size.','shopping'],['Color','رنگ','kalar','Red color.','shopping'],
+['Cheap','سستا','cheep','Very cheap!','shopping'],['Expensive','مہنگا','expensive','Too expensive.','shopping'],
+['Market','بازار','maarket','Go to market.','shopping'],['Bill','بل','bil','Pay the bill.','shopping'],
+['Bag','تھیلا','bag','Carry bag.','shopping'],['Gift','تحفہ','gift','Nice gift!','shopping'],
+['Happy','خوش','happy','I am happy.','daily'],['Sad','اداس','sad','He is sad.','daily'],
+['Big','بڑا','big','Big house.','daily'],['Small','چھوٹا','smaal','Small room.','daily'],
+['New','نیا','nyoo','New phone.','daily'],['Old','پرانا','old','Old car.','daily'],
+['Good','اچھا','gud','Good boy.','daily'],['Bad','برا','bad','Bad habit.','daily'],
+['Fast','تیز','faast','Fast car.','daily'],['Slow','آہستہ','slo','Slow walk.','daily'],
+['Hot','گرم','hot','Hot tea.','daily'],['Cold','ٹھنڈا','cold','Cold water.','daily'],
+['Day','دن','day','Sunny day.','daily'],['Night','رات','naait','Dark night.','daily'],
+['Morning','صبح','morning','Good morning.','daily'],['Evening','شام','evening','Good evening.','daily'],
+['Time','وقت','taaim','What time?','daily'],['Work','کام','wark','Hard work.','daily'],
+['Office','دفتر','ofis','Go to office.','business'],['Doctor','ڈاکٹر','dokter','See a doctor.','daily'],
+['Hospital','ہسپتال','hospital','Near hospital.','daily'],['Medicine','دوا','medisan','Take medicine.','daily'],
+['Phone','فون','fon','My phone.','daily'],['Call','کال کرنا','kaal','Call me.','daily'],
+['Message','پیغام','mesej','Send message.','daily'],['Photo','تصویر','foto','Nice photo!','daily'],
+['Friend','دوست','frend','Best friend.','daily'],['Love','محبت','lav','I love you.','daily'],
+['Help','مدد','help','Help me!','daily'],['Sorry','معاف کرنا','sori','I am sorry.','daily'],
+['Thanks','شکریہ','thenks','Thanks a lot!','daily'],['Please','براہ کرم','pleez','Please come.','daily'],
+['Yes','ہاں','yes','Yes, sure.','daily'],['No','نہیں','no','No, thanks.','daily'],
+['Boy','لڑکا','boy','Good boy.','family'],['Girl','لڑکی','garl','Smart girl.','family'],
+['Man','آدمی','man','Old man.','family'],['Woman','عورت','woman','Kind woman.','family'],
+['Child','بچہ','chaaild','Small child.','family'],['Baby','شیر خوار','baybi','Cute baby!','family'],
+['King','بادشاہ','king','The king.','education'],['Country','ملک','kantri','My country.','travel'],
+['City','شہر','siti','Big city.','travel'],['Village','گاؤں','vilej','My village.','travel'],
+['River','دریا','river','Long river.','travel'],['Mountain','پہاڑ','maaonten','High mountain.','travel'],
+['Tree','درخت','tree','Green tree.','daily'],['Flower','پھول','flaauer','Red flower.','daily'],
+['Sun','سورج','san','Hot sun.','daily'],['Moon','چاند','moon','Full moon.','daily'],
+['Star','ستارہ','staar','Bright star.','daily'],['Rain','بارش','rayn','Heavy rain.','daily'],
+['Wind','ہوا','wind','Cold wind.','daily'],['Snow','برف','sno','White snow.','daily'],
+['Fire','آگ','faaier','Hot fire.','daily'],['Earth','زمین','arth','Green earth.','daily'],
+['Dog','کتا','dog','My dog.','daily'],['Cat','بلی','kat','Cute cat.','daily'],
+['Bird','پرندہ','bard','Fly bird!','daily'],['Fish','مچھلی','fish','Big fish.','food'],
+['Cow','گائے','kao','White cow.','daily'],['Horse','گھوڑا','hors','Fast horse.','daily'],
+['Run','دوڑنا','ran','Run fast!','daily'],['Walk','چلنا','vaak','Walk slow.','daily'],
+['Eat','کھانا','eet','Eat food.','daily'],['Drink','پینا','drink','Drink water.','daily'],
+['Sleep','سونا','sleep','Sleep well.','daily'],['Wake','جاگنا','wayk','Wake up!','daily'],
+['Read','پڑھنا','reed','Read book.','education'],['Write','لکھنا','raait','Write name.','education'],
+['Speak','بولنا','speek','Speak loud.','daily'],['Listen','سننا','lisan','Listen me.','daily'],
+['Buy','خریدنا','baai','Buy milk.','shopping'],['Sell','بیچنا','sel','Sell car.','business'],
+['Open','کھولنا','open','Open door.','daily'],['Close','بند کرنا','kloz','Close shop.','daily'],
+['Come','آنا','kam','Come here.','daily'],['Go','جانا','go','Go home.','daily'],
+['Sit','بیٹھنا','sit','Sit down.','daily'],['Stand','کھڑا ہونا','stand','Stand up.','daily'],
+['Give','دینا','giv','Give me.','daily'],['Take','لینا','tayk','Take it.','daily'],
+['Make','بنانا','mayk','Make tea.','daily'],['Break','توڑنا','brayk','Do not break.','daily'],
+['Clean','صاف کرنا','kleen','Clean room.','daily'],['Wash','دھونا','vaash','Wash hands.','daily']
+];
+/* ============ GRAMMAR ============ */
+const GRAMMAR=[
+{id:'g1',te:'Nouns & Pronouns',tu:'اسم اور ضمیر',ce:'Noun = kisi cheez ka naam (book, Ali). Pronoun = noun ki jagah (he, she, it).',cu:'اسم کسی چیز کا نام ہے۔ ضمیر اس کی جگہ آتا ہے۔',
+exr:[{q:'"___ is my friend." (Ali larka)',o:['She','He','It','They'],a:1,x:'لڑکا = He'},{q:'Noun kaun sa?',o:['run','book','happy','quickly'],a:1,x:'book = اسم'},{q:'"They" kis ke liye?',o:['ek larka','sab log','ek kitab','ek billa'],a:1,x:'جمع کے لیے They'}]},
+{id:'g2',te:'Verbs & Tenses Intro',tu:'افعال کا تعارف',ce:'Verb = kaam (eat, go). 3 tenses: Present (roz), Past (guzra), Future (aane wala).',cu:'فعل کام بتاتا ہے۔ تین زمانے: حال، ماضی، مستقبل۔',
+exr:[{q:'"Eat" ka past?',o:['eated','ate','eatened','eating'],a:1,x:'eat → ate'},{q:'Future ke liye?',o:['will go','went','goes','going'],a:0,x:'will + verb'},{q:'"She ___ now." (present)',o:['eat','eats','ate','eaten'],a:1,x:'She + eats'}]},
+{id:'g3',te:'Articles (a/an/the)',tu:'a / an / the',ce:'"a" = consonant se pehle (a book), "an" = vowel sound (an apple), "the" = khaas cheez.',cu:'عام چیز: a/an، خاص چیز: the۔',
+exr:[{q:'"___ apple"',o:['A','An','The apple a','No word'],a:1,x:'vowel sound = an'},{q:'"___ sun is hot."',o:['A','An','The','No word'],a:2,x:'khaas = the'},{q:'"___ honest man"',o:['A','An','The','No'],a:1,x:'h silent = an'}]},
+{id:'g4',te:'Prepositions',tu:'حروفِ جار',ce:'in=mein/andar, on=uper, at=jagah/waqt, to=ki taraf, from=se.',cu:'مقام اور وقت بتانے والے الفاظ۔',
+exr:[{q:'"___ the table" (uper)',o:['in','on','at','to'],a:1,x:'uper = on'},{q:'"___ 5 o\'clock"',o:['in','on','at','to'],a:2,x:'waqt = at'},{q:'"Go ___ school."',o:['in','to','at','from'],a:1,x:'ki taraf = to'}]},
+{id:'g5',te:'Present Continuous',tu:'فعلِ حال جاری',ce:'Abhi ho raha kaam: is/am/are + verb-ing. "I am eating."',cu:'جو کام ابھی ہو رہا ہو۔',
+exr:[{q:'"She ___ reading."',o:['is','are','am','be'],a:0,x:'She + is'},{q:'"They ___ playing."',o:['is','are','am','be'],a:1,x:'They + are'},{q:'Verb form?',o:['eat','eating','eats','ate'],a:1,x:'verb-ing'}]},
+{id:'g6',te:'Past Simple Deep',tu:'ماضی (تفصیل)',ce:'Regular: verb+ed (play→played). Irregular: go→went, eat→ate.',cu:'باقاعدہ اور بے قاعدہ افعال۔',
+exr:[{q:'"Play" ka past?',o:['plaied','played','playd','plawed'],a:1,x:'play → played'},{q:'Irregular kaun?',o:['walked','played','went','talked'],a:2,x:'go → went'},{q:'"I ___ TV yesterday."',o:['watch','watched','watching','watches'],a:1,x:'yesterday = past'}]},
+{id:'g7',te:'Future Plans',tu:'مستقبل کے ارادے',ce:'"will" = faisla, "going to" = pehle se irada. "I am going to buy a car."',cu:'will اچانک فیصلہ، going to پہلے سے ارادہ۔',
+exr:[{q:'Pehle se irada?',o:['I will go','I am going to go','I go','I went'],a:1,x:'going to = irada'},{q:'"It ___ rain." (lagta hai)',o:['will','is going to','goes','went'],a:1,x:'nishani = going to'},{q:'"Will" kab?',o:['guzra kaam','abhi faisla','roz ka kaam','khaab'],a:1,x:'abhi faisla = will'}]},
+{id:'g8',te:'Negatives',tu:'منفی جملے',ce:'Present: do/does not. Past: did not. Future: will not.',cu:'نفی بنانے کے اصول۔',
+exr:[{q:'"He ___ not eat."',o:['do','does','did','done'],a:1,x:'He + does not'},{q:'Past negative?',o:['do not','does not','did not','will not'],a:2,x:'did not'},{q:'"I ___ not go." (future)',o:['do','will','did','does'],a:1,x:'will not'}]},
+{id:'g9',te:'Question Forms',tu:'سوالیہ جملے',ce:'Yes/No: Do/Did/Will shuru me. Wh: What/Where/Why + helping verb.',cu:'دو طرح کے سوال۔',
+exr:[{q:'"___ you like tea?"',o:['Do','Does','Did','Is'],a:0,x:'Do you like?'},{q:'Past sawal?',o:['Do he go?','Did he go?','Does he go?','Went he?'],a:1,x:'Did he go?'},{q:'"Why ___ you late?"',o:['are','is','do','does be'],a:0,x:'Why are you...?'}]},
+{id:'g10',te:'Common Grammar Mistakes',tu:'عام گرامر غلطیاں',ce:'"I am agree" ❌ → "I agree" ✅. "He don\'t" ❌ → "He doesn\'t" ✅.',cu:'سب سے عام غلطیاں اور اصلاح۔',
+exr:[{q:'Sahi?',o:['I am agree','I agree','I agreeing','Me agree'],a:1,x:'I agree'},{q:'"There ___ many people."',o:['is','are','was a','be'],a:1,x:'many = are'},{q:'"Each student ___ a book."',o:['have','has','having','had be'],a:1,x:'Each + has'}]}
+];
+/* ============ CONVERSATIONS ============ */
+const CONVOS=[
+{id:'c1',te:'Meeting Someone',tu:'کسی سے ملنا',lines:[
+['A','Hello! What is your name?','السلام علیکم! آپ کا نام کیا ہے؟','helo! wat iz yor naym?'],
+['B','My name is Sara. What is yours?','میرا نام سارہ ہے۔ آپ کا؟','maai naym iz saara. wat iz yorz?'],
+['A','I am Bilal. Nice to meet you!','میں بلال ہوں۔ مل کر خوشی ہوئی!','aai am bila al. naais too meet yoo!'],
+['B','Nice to meet you too! Where are you from?','مجھے بھی خوشی ہوئی! آپ کہاں سے ہیں؟','naais too meet yoo too! wher aar yoo from?'],
+['A','I am from Multan. And you?','میں ملتان سے ہوں۔ اور آپ؟','aai am from multaan. and yoo?'],
+['B','I am from Lahore.','میں لاہور سے ہوں۔','aai am from lahor.']]},
+{id:'c2',te:'At a Shop',tu:'دکان پر',lines:[
+['A','Assalam-o-Alaikum! How much is this shirt?','السلام علیکم! یہ قمیض کتنے کی ہے؟','asaalam o alaikum! hao mach iz this shirt?'],
+['B','Walaikum-salam! It is 1200 rupees.','وعلیکم السلام! یہ 1200 روپے کی ہے۔','walaikum salaam! it iz 1200 rupees.'],
+['A','Too expensive! Give some discount.','بہت مہنگی! کچھ رعایت دیں۔','too expensive! giv sam discount.'],
+['B','Last price 1000. Deal?','آخری قیمت 1000۔ سودا؟','laast praais 1000. deel?'],
+['A','Okay, I will take it.','ٹھیک ہے، لے لیتا ہوں۔','okay, aai wil tayk it.'],
+['B','Thank you! Come again!','شکریہ! پھر آئیے گا!','thenk yoo! kam again!']]},
+{id:'c3',te:'At a Restaurant',tu:'ریسٹورنٹ میں',lines:[
+['A','Good evening! Table for two, please.','شام بخیر! دو افراد کی میز چاہیے۔','gud evening! taybal for too, pleez.'],
+['B','Sure! This way please. Here is the menu.','ضرور! اس طرف۔ یہ مینیو ہے۔','shor! this way pleez. heer iz tha menyoo.'],
+['A','I would like chicken karahi and naan.','مجھے چکن کڑاہی اور نان چاہیے۔','aai wud laaik chicken karaahi and naan.'],
+['B','Anything to drink?','پینے کے لیے کچھ؟','anything too drink?'],
+['A','Two fresh juices, please.','دو فریش جوس دیجیے۔','too fresh juices, pleez.'],
+['B','The bill is 2500 rupees.','بل 2500 روپے ہے۔','tha bil iz 2500 rupees.']]},
+{id:'c4',te:'Asking Directions',tu:'راستہ پوچھنا',lines:[
+['A','Excuse me, where is the hospital?','معاف کیجیے، ہسپتال کہاں ہے؟','excuse mee, wher iz tha hospital?'],
+['B','Go straight, then turn left.','سیدھا جائیں، پھر بائیں مڑیں۔','go strayt, then tarn left.'],
+['A','How far is it from here?','یہاں سے کتنی دور ہے؟','hao faar iz it from heer?'],
+['B','About 10 minutes walk.','تقریباً دس منٹ کی پیدل مسافت۔','abaout ten minutes vaak.'],
+['A','Thank you very much!','بہت بہت شکریہ!','thenk yoo veri mach!'],
+['B','You are welcome!','خوش آمدید!','yoo aar welcome!']]},
+{id:'c5',te:'Job Interview',tu:'ملازمت کا انٹرویو',lines:[
+['A','Good morning! Please sit down.','صبح بخیر! بیٹھیے۔','gud morning! pleez sit daaon.'],
+['B','Good morning, sir. Thank you.','صبح بخیر سر۔ شکریہ۔','gud morning, sir. thenk yoo.'],
+['A','Tell me about yourself.','اپنے بارے میں بتائیں۔','tel mee abaaot yorself.'],
+['B','I am a hardworking graduate with 2 years experience.','میں محنتی گریجویٹ ہوں، 2 سال کا تجربہ ہے۔','aai am a haardworking graduate with 2 years experience.'],
+['A','Why do you want this job?','آپ یہ نوکری کیوں چاہتے ہیں؟','waai doo yoo vaant this job?'],
+['B','I want to grow my skills in your company.','میں آپ کی کمپنی میں اپنی مہارت بڑھانا چاہتا ہوں۔','aai vaant too grow maai skills in yor kampani.']]},
+{id:'c6',te:'On the Phone',tu:'فون پر',lines:[
+['A','Hello, this is Asif speaking.','السلام علیکم، آصف بات کر رہا ہے۔','helo, this iz aasif speaking.'],
+['B','Hello Asif! This is Hina. How are you?','السلام علیکم آصف! میں حنا ہوں۔ کیسے ہیں؟','helo aasif! this iz hina. hao aar yoo?'],
+['A','I am fine. I am calling about the meeting.','میں ٹھیک ہوں۔ میٹنگ کے بارے میں فون کیا۔','aai am faain. aai am kaaling abaaot tha meeting.'],
+['B','Yes, the meeting is at 3 pm tomorrow.','جی، میٹنگ کل سہ پہر 3 بجے ہے۔','yes, tha meeting iz at 3 pm tomorro.'],
+['A','Okay, I will be there. Thank you!','ٹھیک ہے، میں آؤں گا۔ شکریہ!','okay, aai wil bee thair. thenk yoo!'],
+['B','Bye, take care!','خدا حافظ، خیال رکھیے!','baai, tayk kair!']]},
+{id:'c7',te:'At the Airport',tu:'ایئرپورٹ پر',lines:[
+['A','Where is the check-in counter?','چیک ان کاؤنٹر کہاں ہے؟','wher iz tha check-in kaaonter?'],
+['B','Counter number 5, straight ahead.','کاؤنٹر نمبر 5، سیدھا آگے۔','kaaonter nambar faaiv, strayt ahead.'],
+['A','Here is my passport and ticket.','یہ میرا پاسپورٹ اور ٹکٹ ہے۔','heer iz maai paasport and ticket.'],
+['B','Your flight boards at gate 12.','آپ کی فلائٹ گیٹ 12 سے بورڈ ہوگی۔','yor flaait bordz at gayt twelv.'],
+['A','Thank you! Have a nice day!','شکریہ! اچھا دن گزرے!','thenk yoo! hav a naais day!'],
+['B','Safe journey!','محفوظ سفر!','sayf jarni!']]},
+{id:'c8',te:'Talking to a Teacher',tu:'استاد سے بات',lines:[
+['A','Assalam-o-Alaikum, sir!','السلام علیکم سر!','asaalam o alaikum, sir!'],
+['B','Walaikum-salam! How can I help you?','وعلیکم السلام! میں آپ کی کیا مدد کر سکتا ہوں؟','walaikum salaam! hao kan aai help yoo?'],
+['A','Sir, I did not understand this lesson.','سر، مجھے یہ سبق سمجھ نہیں آیا۔','sir, aai did not anderstand this lesan.'],
+['B','No problem. Let me explain again.','کوئی بات نہیں۔ میں دوبارہ سمجھاتا ہوں۔','no problem. let mee explain again.'],
+['A','Now I understand. Thank you, sir!','اب سمجھ آ گیا۔ شکریہ سر!','naao aai anderstand. thenk yoo, sir!'],
+['B','Good! Keep practicing!','شاباش! مشق جاری رکھو!','gud! keep practicing!']]}
+];
+</script>
+</body>
+</html>
+
