@@ -125,6 +125,7 @@ select option{background:var(--bg2)}
     <h1 data-i18n="hero_title">Jilan AI Studio</h1>
     <p data-i18n="hero_sub">Apni kahaniyon ko cinematic videos mein badlein</p>
     <button class="btn btn-gold" onclick="go('pg-new')">🎬 <span data-i18n="create_new">Create New Video</span></button>
+    <button class="btn btn-dark" onclick="go('pg-thumb')">🖼️ <span data-i18n="thumb_make">Thumbnail Banayein</span></button>
   </div>
   <div class="stat-row">
     <div class="stat"><div class="n" id="statProjects">0</div><div class="l" data-i18n="st_projects">Projects</div></div>
@@ -146,10 +147,18 @@ select option{background:var(--bg2)}
     <div><label data-i18n="np_scenes">Scenes ki tadaad</label><input type="number" id="npCount" value="5" min="1" max="30"></div>
     <div><label data-i18n="np_dur">Har scene (seconds)</label><input type="number" id="npDur" value="8" min="2" max="60"></div>
   </div>
+  <label data-i18n="aspect">Aspect ratio</label>
+  <select id="npAspect" onchange="draft.aspect=this.value">
+    <option value="16:9" data-i18n="a_land">16:9 Landscape (YouTube)</option>
+    <option value="9:16" data-i18n="a_vert">9:16 Vertical (YouTube Shorts)</option>
+  </select>
+  <p class="small" data-i18n="shorts_note">📱 9:16 — YouTube Shorts ke liye</p>
+  <div class="toggle"><span data-i18n="subtitles">📝 Subtitles (dialogue neeche)</span><input type="checkbox" id="npSubs" checked onchange="draft.subtitles=this.checked" style="width:24px;height:24px;accent-color:#f5c518"></div>
   <div class="mt"></div>
   <button class="btn btn-gold" onclick="breakIntoScenes()">✂️ <span data-i18n="np_break">Break into Scenes</span></button>
   <div id="sceneList"></div>
   <div class="divider"></div>
+  <button class="btn btn-blue" onclick="openExport()">📋 <span data-i18n="export_prompts">Prompts Export Karein</span></button>
   <button class="btn btn-green" onclick="saveProject()">💾 <span data-i18n="save_proj">Project Save Karein</span></button>
   <button class="btn btn-dark" onclick="go('pg-home')">🏠 <span data-i18n="back_home">Wapis</span></button>
 </div>
@@ -223,6 +232,39 @@ select option{background:var(--bg2)}
   </div>
 </div>
 
+<!-- ================= THUMBNAIL MAKER ================= -->
+<div class="page" id="pg-thumb">
+  <h2 data-i18n="th_title">Thumbnail Maker</h2>
+  <p class="desc">YouTube / Shorts ke liye striking thumbnail — bold dramatic style!</p>
+  <canvas id="thumbCanvas" width="1280" height="720" style="width:100%;border-radius:8px;background:#000"></canvas>
+  <label data-i18n="th_line1">Bari heading (line 1)</label>
+  <input type="text" id="thL1" value="WAQT KA SAUDAGAR" oninput="drawThumb()">
+  <label data-i18n="th_line2">Heading (line 2)</label>
+  <input type="text" id="thL2" value="" oninput="drawThumb()">
+  <label data-i18n="th_sub">Chhota text (optional)</label>
+  <input type="text" id="thSub" value="JILANVERSE" oninput="drawThumb()">
+  <div class="row2">
+    <div><label data-i18n="th_bg">Background</label><select id="thBg" onchange="drawThumb()">
+      <option value="g1" data-i18n="th_bg1">Sunset Gold</option>
+      <option value="g2" data-i18n="th_bg2">Ocean Blue</option>
+      <option value="g3" data-i18n="th_bg3">Royal Purple</option>
+      <option value="g4" data-i18n="th_bg4">Fire Red</option>
+      <option value="g5" data-i18n="th_bg5">Forest Green</option>
+      <option value="img" data-i18n="th_bgimg">Apni tasveer</option>
+    </select></div>
+    <div><label data-i18n="th_size">Size</label><select id="thSize" onchange="drawThumb()">
+      <option value="1280x720">1280×720 (YouTube)</option>
+      <option value="720x1280">720×1280 (Shorts)</option>
+    </select></div>
+  </div>
+  <div class="row2 mt">
+    <button class="btn btn-dark btn-sm" onclick="document.getElementById('thFile').click()">🖼️ <span data-i18n="img_add">Tasveer Lagayein</span></button>
+    <input type="file" id="thFile" accept="image/*" class="hidden">
+    <button class="btn btn-gold btn-sm" onclick="dlThumb()">⬇️ <span data-i18n="th_dl">PNG Download Karein</span></button>
+  </div>
+  <button class="btn btn-dark mt" onclick="go('pg-home')">🏠 <span data-i18n="back_home">Wapis</span></button>
+</div>
+
 <!-- ================= HELP ================= -->
 <div class="page" id="pg-help">
   <h2 data-i18n="he_title">❓ Help / Madad</h2>
@@ -257,6 +299,18 @@ select option{background:var(--bg2)}
     </ul></div>
 </div>
 
+<!-- ================= EXPORT MODAL ================= -->
+<div class="modal" id="mExport"><div class="sheet">
+  <h3 data-i18n="exp_title">Scene Prompts — Copy / Download</h3>
+  <p class="small">Midjourney / Runway / Pika waghera mein paste karein</p>
+  <textarea id="expText" style="min-height:260px;font-size:13px" readonly></textarea>
+  <div class="row2 mt">
+    <button class="btn btn-gold btn-sm" onclick="copyExport()">📋 <span data-i18n="copy_all">Copy All</span></button>
+    <button class="btn btn-blue btn-sm" onclick="dlExport()">⬇️ <span data-i18n="dl_txt">Download .txt</span></button>
+  </div>
+  <button class="btn btn-dark btn-sm mt" onclick="closeM('mExport')" data-i18n="cancel">Cancel</button>
+</div></div>
+
 <!-- ================= CHARACTER MODAL ================= -->
 <div class="modal" id="mChar"><div class="sheet">
   <h3 data-i18n="ch_add">➕ Naya Character</h3>
@@ -264,6 +318,12 @@ select option{background:var(--bg2)}
   <label data-i18n="ch_descf">Description</label><textarea id="chDesc" style="min-height:70px" placeholder="Umar, shaksiyat..."></textarea>
   <label data-i18n="ch_cloth">Libas (Clothing)</label><input type="text" id="chCloth" placeholder="Masalan: neele kapre, dupatta">
   <label data-i18n="ch_face">Chehre ki khususiyat</label><input type="text" id="chFace" placeholder="Masalan: lambi zulfein, bhuri aankhein">
+  <label data-i18n="voice">Awaz</label><select id="chVoice">
+    <option value="normal" data-i18n="v_normal">Normal</option>
+    <option value="mard" data-i18n="v_mard">Mard (bhari awaz)</option>
+    <option value="aurat" data-i18n="v_aurat">Aurat</option>
+    <option value="bacha" data-i18n="v_bacha">Bacha</option>
+  </select>
   <label data-i18n="ch_photo">Reference photo (optional)</label><input type="file" id="chPhoto" accept="image/*">
   <img id="chPreview" class="hidden" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-top:8px;border:2px solid var(--gold)">
   <div class="row2 mt">
@@ -294,6 +354,13 @@ select option{background:var(--bg2)}
   <label data-i18n="sc_loc">Location</label><input type="text" id="scLoc" placeholder="Masalan: purani haveli ka sehan">
   <label data-i18n="sc_chars">Characters (scene mein shamil)</label>
   <div id="scCharChecks"></div>
+  <label data-i18n="scene_img">Scene ki tasveer (optional)</label>
+  <div class="row2">
+    <button class="btn btn-dark btn-sm" onclick="document.getElementById('scImgFile').click()">🖼️ <span data-i18n="img_add">Tasveer Lagayein</span></button>
+    <button class="btn btn-red btn-sm hidden" id="scImgDel" onclick="delSceneImg()">🗑️ <span data-i18n="img_remove">Tasveer hatayein</span></button>
+  </div>
+  <input type="file" id="scImgFile" accept="image/*" class="hidden">
+  <img id="scImgPrev" class="hidden" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin:8px 0;border:1px solid var(--gold-dim)">
   <label data-i18n="sc_full">Full prompt (auto-generated, edit kar sakte hain)</label>
   <textarea id="scPrompt" style="min-height:120px"></textarea>
   <div class="row2 mt">
@@ -327,8 +394,8 @@ select option{background:var(--bg2)}
 
 /* ---------- i18n (English / Roman Urdu) ---------- */
 const I18N = {
-en:{tagline:"AI Video Maker",hero_title:"Jilan AI Studio",hero_sub:"Turn your stories into cinematic videos",create_new:"Create New Video",st_projects:"Projects",st_scenes:"Scenes",st_chars:"Characters",recent:"Recent Projects",np_title:"📝 New Project",np_name:"Project name",np_story:"Write story / script",np_scenes:"Scene count",np_dur:"Duration per scene (sec)",np_break:"Break into Scenes",save_proj:"Save Project",back_home:"Back",pr_title:"📁 My Projects",export:"Export JSON",import:"Import JSON",as_title:"🎥 Assemble Video",as_demo_note:"This is LOCAL assembly — NOT AI-generated footage. Cinematic placeholders with slow zoom are created per scene and a real .webm video is downloaded.",as_pick:"Choose project",as_music:"🎵 Background music (generated tone)",as_tts:"🔊 Speak dialogue (TTS)",as_start:"Assemble Video",as_dl:"Download Video",ch_title:"👤 Characters",ch_desc:"Create character profiles — their description is auto-added to scene prompts. Photo upload optional.",ch_honest:"⚠️ Honestly: face consistency depends on the AI model that generates the video. These profiles only keep descriptions consistent.",ch_add:"New Character",se_title:"⚙️ Settings",se_provider:"🤖 AI Video Provider",se_which:"Provider",se_test:"Test Connection",se_limits:"💡 Free-tier limits: Most AI video APIs are paid or give limited free credits. Without an API key only Demo Mode works (local assembly). Never hardcode API keys in frontend code.",se_voice:"🔊 Voice (TTS)",se_voicelang:"Dialogue language",he_title:"❓ Help",he_s1t:"Getting started (on phone)",he_s1a:'Tap "Create New Video" on Home',he_s1b:'Write name + story, tap "Break into Scenes"',he_s1c:"Edit each scene prompt, attach characters",he_s1d:'Save project, then "Assemble" to make video',he_s2t:"Free deploy (GitHub Pages)",he_s3t:"Connect an AI video provider",he_s3a:'Settings → Provider: choose "Custom API"',he_s3b:"Enter your provider's Endpoint URL, Model name and API Key",he_s3c:'Tap "Test Connection" — connected if it answers OK!',he_s3d:'Then tap "Generate with AI" on a scene',he_s4t:"Limitations (honest)",he_s4a:'"Assemble Video" does NOT create AI footage — local cinematic placeholders',he_s4b:"Real AI video needs an API key + (usually) a paid plan",he_s4c:"Face consistency depends on the AI model",he_s4d:"localStorage space is limited — big images are compressed",he_s4e:"Video downloads in .webm format",ch_name:"Name",ch_descf:"Description",ch_cloth:"Clothing",ch_face:"Facial features",ch_photo:"Reference photo (optional)",cancel:"Cancel",save:"Save",sc_edit:"Edit Scene",sc_visual:"Visual description",sc_dialog:"Dialogue",sc_cam:"Camera",sc_dur:"Duration (sec)",sc_light:"Lighting",sc_mood:"Mood",sc_loc:"Location",sc_chars:"Characters in this scene",sc_full:"Full prompt (auto-generated, editable)",preview:"Preview",regen:"Regenerate",gen_ai:"Generate with AI",nav_home:"Home",nav_proj:"Projects",nav_make:"Assemble",nav_chars:"Characters",nav_set:"Settings",nav_help:"Help"},
-ur:{tagline:"AI Video Maker",hero_title:"Jilan AI Studio",hero_sub:"Apni kahaniyon ko cinematic videos mein badlein",create_new:"Naya Video Banayein",st_projects:"Projects",st_scenes:"Scenes",st_chars:"Characters",recent:"Haali Projects",np_title:"📝 Naya Project",np_name:"Project ka naam",np_story:"Kahani / Script likhein",np_scenes:"Scenes ki tadaad",np_dur:"Har scene (seconds)",np_break:"Scenes Mein Todo",save_proj:"Project Save Karein",back_home:"Wapis",pr_title:"📁 Mere Projects",export:"Export JSON",import:"Import JSON",as_title:"🎥 Video Assemble",as_demo_note:"Ye LOCAL assembly hai — AI-generated footage NAHI. Har scene ke liye slow zoom wala cinematic placeholder banega aur asli .webm video download hogi.",as_pick:"Project chunein",as_music:"🎵 Background music (generated tone)",as_tts:"🔊 Dialogue bol kar sunayein (TTS)",as_start:"Video Banayein",as_dl:"Video Download Karein",ch_title:"👤 Characters",ch_desc:"Character profiles banayein — inka description scenes ke prompts mein khud add ho jayega. Tasveer optional hai.",ch_honest:"⚠️ Imandari se: chehre ki consistency us AI model par hai jo video banayega. Ye profiles sirf description consistent rakhte hain.",ch_add:"Naya Character",se_title:"⚙️ Settings",se_provider:"🤖 AI Video Provider",se_which:"Provider",se_test:"Test Connection",se_limits:"💡 Free-tier limits: Aksar AI video APIs paid hote hain ya mehdood free credits dete hain. Bina API key ke sirf Demo Mode kaam karega (local assembly). API key kabhi frontend code mein hardcode na karein.",se_voice:"🔊 Voice (TTS)",se_voicelang:"Dialogue ki zaban",he_title:"❓ Madad",he_s1t:"Shuru kaise karein (Phone par)",he_s1a:'Home par "Naya Video Banayein" dabayein',he_s1b:'Naam + kahani likhein, "Scenes Mein Todo" dabayein',he_s1c:"Har scene ka prompt edit karein, characters attach karein",he_s1d:'Project save karein, phir "Assemble" se video banayein',he_s2t:"Free deploy (GitHub Pages)",he_s3t:"AI Provider kaise connect karein",he_s3a:'Settings → Provider: "Custom API" chunein',he_s3b:"Apne provider ka Endpoint URL, Model naam aur API Key dalein",he_s3c:'"Test Connection" dabayein — sahi jawab aaye to connected!',he_s3d:'Phir scene par "Generate with AI" dabayein',he_s4t:"Limitations (Imandari se)",he_s4a:'"Video Banayein" AI footage NAHI banata — local cinematic placeholders hain',he_s4b:"Asli AI video ke liye API key + (aksar) paid plan chahiye",he_s4c:"Chehre ki consistency AI model par depend karti hai",he_s4d:"localStorage mein jagah mehdood hai — bari tasveerein compress hoti hain",he_s4e:"Video .webm format mein download hoti hai",ch_name:"Naam",ch_descf:"Description",ch_cloth:"Libas",ch_face:"Chehre ki khususiyat",ch_photo:"Reference photo (optional)",cancel:"Cancel",save:"Save",sc_edit:"Scene Edit",sc_visual:"Visual description",sc_dialog:"Dialogue",sc_cam:"Camera",sc_dur:"Duration (sec)",sc_light:"Lighting",sc_mood:"Mood",sc_loc:"Location",sc_chars:"Characters (scene mein shamil)",sc_full:"Full prompt (auto-generated, edit kar sakte hain)",preview:"Preview",regen:"Regenerate",gen_ai:"Generate with AI",nav_home:"Home",nav_proj:"Projects",nav_make:"Assemble",nav_chars:"Characters",nav_set:"Settings",nav_help:"Madad"}
+en:{tagline:"AI Video Maker",hero_title:"Jilan AI Studio",hero_sub:"Turn your stories into cinematic videos",create_new:"Create New Video",st_projects:"Projects",st_scenes:"Scenes",st_chars:"Characters",recent:"Recent Projects",np_title:"📝 New Project",np_name:"Project name",np_story:"Write story / script",np_scenes:"Scene count",np_dur:"Duration per scene (sec)",np_break:"Break into Scenes",save_proj:"Save Project",back_home:"Back",pr_title:"📁 My Projects",export:"Export JSON",import:"Import JSON",as_title:"🎥 Assemble Video",as_demo_note:"This is LOCAL assembly — NOT AI-generated footage. Cinematic placeholders with slow zoom are created per scene and a real .webm video is downloaded.",as_pick:"Choose project",as_music:"🎵 Background music (generated tone)",as_tts:"🔊 Speak dialogue (TTS)",as_start:"Assemble Video",as_dl:"Download Video",ch_title:"👤 Characters",ch_desc:"Create character profiles — their description is auto-added to scene prompts. Photo upload optional.",ch_honest:"⚠️ Honestly: face consistency depends on the AI model that generates the video. These profiles only keep descriptions consistent.",ch_add:"New Character",se_title:"⚙️ Settings",se_provider:"🤖 AI Video Provider",se_which:"Provider",se_test:"Test Connection",se_limits:"💡 Free-tier limits: Most AI video APIs are paid or give limited free credits. Without an API key only Demo Mode works (local assembly). Never hardcode API keys in frontend code.",se_voice:"🔊 Voice (TTS)",se_voicelang:"Dialogue language",he_title:"❓ Help",he_s1t:"Getting started (on phone)",he_s1a:'Tap "Create New Video" on Home',he_s1b:'Write name + story, tap "Break into Scenes"',he_s1c:"Edit each scene prompt, attach characters",he_s1d:'Save project, then "Assemble" to make video',he_s2t:"Free deploy (GitHub Pages)",he_s3t:"Connect an AI video provider",he_s3a:'Settings → Provider: choose "Custom API"',he_s3b:"Enter your provider's Endpoint URL, Model name and API Key",he_s3c:'Tap "Test Connection" — connected if it answers OK!',he_s3d:'Then tap "Generate with AI" on a scene',he_s4t:"Limitations (honest)",he_s4a:'"Assemble Video" does NOT create AI footage — local cinematic placeholders',he_s4b:"Real AI video needs an API key + (usually) a paid plan",he_s4c:"Face consistency depends on the AI model",he_s4d:"localStorage space is limited — big images are compressed",he_s4e:"Video downloads in .webm format",ch_name:"Name",ch_descf:"Description",ch_cloth:"Clothing",ch_face:"Facial features",ch_photo:"Reference photo (optional)",cancel:"Cancel",save:"Save",sc_edit:"Edit Scene",sc_visual:"Visual description",sc_dialog:"Dialogue",sc_cam:"Camera",sc_dur:"Duration (sec)",sc_light:"Lighting",sc_mood:"Mood",sc_loc:"Location",sc_chars:"Characters in this scene",sc_full:"Full prompt (auto-generated, editable)",preview:"Preview",regen:"Regenerate",gen_ai:"Generate with AI",nav_home:"Home",nav_proj:"Projects",nav_make:"Assemble",nav_chars:"Characters",nav_set:"Settings",nav_help:"Help",aspect:"Aspect ratio",a_land:"16:9 Landscape (YouTube)",a_vert:"9:16 Vertical (YouTube Shorts)",shorts_note:"📱 9:16 — for YouTube Shorts",scene_img:"Scene image (optional)",img_add:"🖼️ Add Image",img_remove:"Remove image",export_prompts:"📋 Export Prompts",exp_title:"Scene Prompts — Copy / Download",copy_all:"📋 Copy All",dl_txt:"⬇️ Download .txt",subtitles:"📝 Subtitles (dialogue at bottom)",voice:"Voice",v_normal:"Normal",v_mard:"Man (deep)",v_aurat:"Woman",v_bacha:"Child",thumb_make:"🖼️ Make Thumbnail",th_title:"Thumbnail Maker",th_line1:"Big heading (line 1)",th_line2:"Heading (line 2)",th_sub:"Small text (optional)",th_bg:"Background",th_bg1:"Sunset Gold",th_bg2:"Ocean Blue",th_bg3:"Royal Purple",th_bg4:"Fire Red",th_bg5:"Forest Green",th_bgimg:"Your own image",th_size:"Size",th_dl:"⬇️ Download PNG",storage_warn:"⚠️ Storage full! Try a smaller image."},
+ur:{tagline:"AI Video Maker",hero_title:"Jilan AI Studio",hero_sub:"Apni kahaniyon ko cinematic videos mein badlein",create_new:"Naya Video Banayein",st_projects:"Projects",st_scenes:"Scenes",st_chars:"Characters",recent:"Haali Projects",np_title:"📝 Naya Project",np_name:"Project ka naam",np_story:"Kahani / Script likhein",np_scenes:"Scenes ki tadaad",np_dur:"Har scene (seconds)",np_break:"Scenes Mein Todo",save_proj:"Project Save Karein",back_home:"Wapis",pr_title:"📁 Mere Projects",export:"Export JSON",import:"Import JSON",as_title:"🎥 Video Assemble",as_demo_note:"Ye LOCAL assembly hai — AI-generated footage NAHI. Har scene ke liye slow zoom wala cinematic placeholder banega aur asli .webm video download hogi.",as_pick:"Project chunein",as_music:"🎵 Background music (generated tone)",as_tts:"🔊 Dialogue bol kar sunayein (TTS)",as_start:"Video Banayein",as_dl:"Video Download Karein",ch_title:"👤 Characters",ch_desc:"Character profiles banayein — inka description scenes ke prompts mein khud add ho jayega. Tasveer optional hai.",ch_honest:"⚠️ Imandari se: chehre ki consistency us AI model par hai jo video banayega. Ye profiles sirf description consistent rakhte hain.",ch_add:"Naya Character",se_title:"⚙️ Settings",se_provider:"🤖 AI Video Provider",se_which:"Provider",se_test:"Test Connection",se_limits:"💡 Free-tier limits: Aksar AI video APIs paid hote hain ya mehdood free credits dete hain. Bina API key ke sirf Demo Mode kaam karega (local assembly). API key kabhi frontend code mein hardcode na karein.",se_voice:"🔊 Voice (TTS)",se_voicelang:"Dialogue ki zaban",he_title:"❓ Madad",he_s1t:"Shuru kaise karein (Phone par)",he_s1a:'Home par "Naya Video Banayein" dabayein',he_s1b:'Naam + kahani likhein, "Scenes Mein Todo" dabayein',he_s1c:"Har scene ka prompt edit karein, characters attach karein",he_s1d:'Project save karein, phir "Assemble" se video banayein',he_s2t:"Free deploy (GitHub Pages)",he_s3t:"AI Provider kaise connect karein",he_s3a:'Settings → Provider: "Custom API" chunein',he_s3b:"Apne provider ka Endpoint URL, Model naam aur API Key dalein",he_s3c:'"Test Connection" dabayein — sahi jawab aaye to connected!',he_s3d:'Phir scene par "Generate with AI" dabayein',he_s4t:"Limitations (Imandari se)",he_s4a:'"Video Banayein" AI footage NAHI banata — local cinematic placeholders hain',he_s4b:"Asli AI video ke liye API key + (aksar) paid plan chahiye",he_s4c:"Chehre ki consistency AI model par depend karti hai",he_s4d:"localStorage mein jagah mehdood hai — bari tasveerein compress hoti hain",he_s4e:"Video .webm format mein download hoti hai",ch_name:"Naam",ch_descf:"Description",ch_cloth:"Libas",ch_face:"Chehre ki khususiyat",ch_photo:"Reference photo (optional)",cancel:"Cancel",save:"Save",sc_edit:"Scene Edit",sc_visual:"Visual description",sc_dialog:"Dialogue",sc_cam:"Camera",sc_dur:"Duration (sec)",sc_light:"Lighting",sc_mood:"Mood",sc_loc:"Location",sc_chars:"Characters (scene mein shamil)",sc_full:"Full prompt (auto-generated, edit kar sakte hain)",preview:"Preview",regen:"Regenerate",gen_ai:"Generate with AI",nav_home:"Home",nav_proj:"Projects",nav_make:"Assemble",nav_chars:"Characters",nav_set:"Settings",nav_help:"Madad",aspect:"Aspect ratio",a_land:"16:9 Landscape (YouTube)",a_vert:"9:16 Vertical (YouTube Shorts)",shorts_note:"📱 9:16 — YouTube Shorts ke liye",scene_img:"Scene ki tasveer (optional)",img_add:"🖼️ Tasveer Lagayein",img_remove:"Tasveer hatayein",export_prompts:"📋 Prompts Export Karein",exp_title:"Scene Prompts — Copy / Download",copy_all:"📋 Copy All",dl_txt:"⬇️ Download .txt",subtitles:"📝 Subtitles (dialogue neeche)",voice:"Awaz",v_normal:"Normal",v_mard:"Mard (bhari awaz)",v_aurat:"Aurat",v_bacha:"Bacha",thumb_make:"🖼️ Thumbnail Banayein",th_title:"Thumbnail Maker",th_line1:"Bari heading (line 1)",th_line2:"Heading (line 2)",th_sub:"Chhota text (optional)",th_bg:"Background",th_bg1:"Sunset Gold",th_bg2:"Ocean Blue",th_bg3:"Royal Purple",th_bg4:"Fire Red",th_bg5:"Forest Green",th_bgimg:"Apni tasveer",th_size:"Size",th_dl:"⬇️ PNG Download Karein",storage_warn:"⚠️ Storage full! Chhoti tasveer try karein."}
 };
 let LANG = localStorage.getItem('jst_lang') || 'ur';
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
@@ -374,13 +441,14 @@ function go(id){
   if(id==='pg-chars') renderChars();
   if(id==='pg-home') renderHome();
   if(id==='pg-assemble') fillAssembleProjects();
+  if(id==='pg-thumb'){ try{ drawThumb(); }catch(e){} }
 }
 function openM(id){ document.getElementById(id).classList.add('open'); }
 function closeM(id){ document.getElementById(id).classList.remove('open'); }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /* ---------- Working project (unsaved draft) ---------- */
-let draft = {title:'', story:'', scenes:[]};
+let draft = {title:'', story:'', scenes:[], aspect:'16:9', subtitles:true};
 let editSceneIdx = -1;
 
 /* ---------- Scene breakdown ---------- */
@@ -395,6 +463,8 @@ function breakIntoScenes(){
   if(!story){ alert(LANG==='ur'?'Pehle kahani likhein!':'Write the story first!'); return; }
   draft.title = title || ('Untitled ' + new Date().toLocaleDateString());
   draft.story = story;
+  draft.aspect = document.getElementById('npAspect').value || '16:9';
+  draft.subtitles = document.getElementById('npSubs').checked;
   // Split: prefer paragraphs, else chunk sentences
   let paras = story.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
   let chunks;
@@ -419,7 +489,7 @@ function makeScene(num, text, dur){
   return {
     num, visual, dialogue:'', cam:'Slow push-in', dur,
     light:'Golden hour', mood:'Epic', loc:'', chars:[],
-    prompt:''
+    prompt:'', img:''
   };
 }
 function charBlock(scene){
@@ -435,7 +505,7 @@ function buildPrompt(s){
     `Camera: ${s.cam} | Lighting: ${s.light} | Mood: ${s.mood}\n`+
     (s.dialogue?`Dialogue: "${s.dialogue}"\n`:'')+
     charBlock(s)+
-    `\nStyle: photorealistic, dramatic lighting, film still, 16:9.`;
+    `\nStyle: photorealistic, dramatic lighting, film still, '+(s.aspect||draft.aspect||'16:9')+'.`;
 }
 
 /* ---------- Scene list UI ---------- */
@@ -450,7 +520,7 @@ function renderScenes(){
       .map(c=>`<img class="char-thumb" src="${c.photo}">`).join('');
     h+=`<div class="scene"><div class="scene-head">
       <span class="scene-num">Scene ${s.num}</span>
-      <span class="scene-dur">⏱ ${s.dur}s ${thumbs}</span></div>
+      <span class="scene-dur">⏱ ${s.dur}s ${s.img?'📷':''} ${thumbs}</span></div>
       <div class="scene-prompt">${esc(s.prompt||buildPrompt(s))}</div>
       <div class="scene-actions">
         <button class="iconbtn" onclick="openSceneEdit(${i})">✏️ Edit</button>
@@ -468,8 +538,9 @@ function renderScenes(){
 function toggleBoard(){
   const w=document.getElementById('boardWrap'); w.classList.toggle('hidden');
   if(!w.classList.contains('hidden')){
+    const vert=(draft.aspect==='9:16');
     document.getElementById('boardGrid').innerHTML = draft.scenes.map((s,i)=>
-      `<div class="shot" onclick="openSceneEdit(${i})"><div class="thumb">🎞️</div><div class="cap"><b>Scene ${s.num}</b> • ${s.dur}s<br>${esc((s.visual||'').slice(0,40))}…</div></div>`).join('');
+      `<div class="shot" onclick="openSceneEdit(${i})"><div class="thumb" style="height:${vert?'160px':'90px'}">${s.img?`<img src="${s.img}" style="width:100%;height:100%;object-fit:cover">`:'🎞️'}</div><div class="cap"><b>Scene ${s.num}</b> • ${s.dur}s<br>${esc((s.visual||'').slice(0,40))}…</div></div>`).join('');
   }
 }
 function moveScene(i,d){
@@ -493,6 +564,28 @@ function regenSceneAt(i){
   s.prompt='';
   renderScenes();
 }
+/* ---------- Scene images ---------- */
+let scImgData='';
+document.getElementById('scImgFile').addEventListener('change', function(){
+  const f=this.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=function(){
+    const c=document.createElement('canvas');
+    const mx=1280, sc=Math.min(1, mx/Math.max(img.width,img.height));
+    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    scImgData=c.toDataURL('image/jpeg',0.7);
+    const pv=document.getElementById('scImgPrev'); pv.src=scImgData; pv.classList.remove('hidden');
+    document.getElementById('scImgDel').classList.remove('hidden');
+    URL.revokeObjectURL(img.src);
+  };
+  img.src=URL.createObjectURL(f); this.value='';
+});
+function delSceneImg(){
+  scImgData='';
+  document.getElementById('scImgPrev').classList.add('hidden');
+  document.getElementById('scImgDel').classList.add('hidden');
+}
 /* ---------- Scene edit modal ---------- */
 function openSceneEdit(i){
   editSceneIdx=i; const s=draft.scenes[i];
@@ -508,6 +601,10 @@ function openSceneEdit(i){
   document.getElementById('scCharChecks').innerHTML = characters.length
     ? characters.map(c=>`<label class="checkbox-row"><input type="checkbox" data-cid="${c.id}" ${s.chars.includes(c.id)?'checked':''}> ${c.photo?`<img src="${c.photo}" style="width:30px;height:30px;border-radius:50%;object-fit:cover">`:''} <b>${esc(c.name)}</b></label>`).join('')
     : `<p class="small">${LANG==='ur'?'Pehle Characters tab mein character banayein':'Create characters in the Characters tab first'}</p>`;
+  scImgData=s.img||'';
+  const spv=document.getElementById('scImgPrev');
+  if(scImgData){ spv.src=scImgData; spv.classList.remove('hidden'); document.getElementById('scImgDel').classList.remove('hidden'); }
+  else { spv.classList.add('hidden'); document.getElementById('scImgDel').classList.add('hidden'); }
   document.getElementById('aiGenStatus').textContent='';
   openM('mScene');
 }
@@ -521,6 +618,7 @@ function saveSceneEdit(){
   s.mood=document.getElementById('scMood').value;
   s.loc=document.getElementById('scLoc').value.trim();
   s.chars=[...document.querySelectorAll('#scCharChecks input:checked')].map(x=>x.dataset.cid);
+  s.img=scImgData||'';
   s.prompt=document.getElementById('scPrompt').value;
   closeM('mScene'); renderScenes();
 }
@@ -532,25 +630,33 @@ function pickVoice(lang){
     return vs.find(v=>v.lang===lang) || vs.find(v=>v.lang&&v.lang.startsWith(lang.slice(0,2))) || null;
   }catch(e){ return null; }
 }
-function speakText(text, lang){
+function speakText(text, lang, pitch, rate){
   try{
     if(!('speechSynthesis' in window)){ alert('TTS supported nahi'); return; }
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang=lang||settings.voiceLang||'ur-PK';
     const v=pickVoice(u.lang); if(v) u.voice=v;
-    u.rate=0.95; speechSynthesis.speak(u);
+    u.rate=rate||0.95; u.pitch=pitch||1.0; speechSynthesis.speak(u);
   }catch(e){}
+}
+/* Character voice -> pitch/rate mapping */
+const VOICE_FX={normal:[1.0,0.95], mard:[0.8,0.9], aurat:[1.3,1.0], bacha:[1.6,1.1]};
+function voiceForScene(s){
+  if(!s||!s.chars||!s.chars.length) return VOICE_FX.normal;
+  const c=characters.find(x=>s.chars.includes(x.id));
+  return VOICE_FX[(c&&c.voice)||'normal']||VOICE_FX.normal;
 }
 function speakScene(){
   const d=document.getElementById('scDialog').value.trim();
   if(!d){ alert(LANG==='ur'?'Pehle dialogue likhein!':'Write dialogue first!'); return; }
-  speakText(d);
+  const s=draft.scenes[editSceneIdx];
+  const vp=voiceForScene(s); speakText(d, null, vp[0], vp[1]);
 }
 function quickSpeak(i){
-  const d=draft.scenes[i].dialogue;
+  const s=draft.scenes[i], d=s.dialogue;
   if(!d){ alert(LANG==='ur'?'Is scene mein dialogue nahi':'No dialogue in this scene'); return; }
-  speakText(d);
+  const vp=voiceForScene(s); speakText(d, null, vp[0], vp[1]);
 }
 /* ---------- AI Generate (honest provider layer) ---------- */
 async function generateWithAI(){
@@ -622,6 +728,7 @@ function saveCharacter(){
     desc:document.getElementById('chDesc').value.trim(),
     cloth:document.getElementById('chCloth').value.trim(),
     face:document.getElementById('chFace').value.trim(),
+    voice:document.getElementById('chVoice').value||'normal',
     photo:charPhotoData||''});
   if(!store(LS_C,characters)) return;
   closeM('mChar'); renderChars();
@@ -635,7 +742,7 @@ function renderChars(){
   const box=document.getElementById('charList');
   box.innerHTML = characters.length ? characters.map(c=>
     `<div class="char-card">${c.photo?`<img src="${c.photo}">`:`<img src="" style="display:flex;align-items:center;justify-content:center" alt="👤">`}
-    <div class="info"><div class="nm">${esc(c.name)}</div><div class="ds">${esc((c.desc||'')+' • '+(c.cloth||''))}</div></div>
+    <div class="info"><div class="nm">${esc(c.name)}</div><div class="ds">${esc((c.desc||'')+' • '+(c.cloth||''))}</div><div class="ds">🎙️ ${esc(t('v_'+(c.voice||'normal')))}</div></div>
     <button class="iconbtn" onclick="delChar('${c.id}')">🗑️</button></div>`).join('')
     : `<p class="desc center">${LANG==='ur'?'Abhi koi character nahi — upar button dabayein':'No characters yet — tap the button above'}</p>`;
 }
@@ -644,7 +751,7 @@ function renderChars(){
 function saveProject(){
   if(!draft.scenes.length){ alert(LANG==='ur'?'Pehle "Break into Scenes" dabayein!':'Tap "Break into Scenes" first!'); return; }
   const ex=projects.findIndex(p=>p.title===draft.title);
-  const rec={id:'p'+Date.now(), title:draft.title, story:draft.story, scenes:draft.scenes, updated:new Date().toLocaleString()};
+  const rec={id:'p'+Date.now(), title:draft.title, story:draft.story, scenes:draft.scenes, aspect:draft.aspect||'16:9', subtitles:draft.subtitles!==false, updated:new Date().toLocaleString()};
   if(ex>=0){ rec.id=projects[ex].id; projects[ex]=rec; } else projects.unshift(rec);
   if(!store(LS_P,projects)) return;
   alert('✅ '+(LANG==='ur'?'Project save ho gaya!':'Project saved!'));
@@ -674,9 +781,11 @@ function renderProjects(){
 }
 function openProject(id){
   const p=projects.find(x=>x.id===id); if(!p) return;
-  draft={title:p.title, story:p.story, scenes:JSON.parse(JSON.stringify(p.scenes))};
+  draft={title:p.title, story:p.story, scenes:JSON.parse(JSON.stringify(p.scenes)), aspect:p.aspect||'16:9', subtitles:p.subtitles!==false};
   document.getElementById('npTitle').value=p.title;
   document.getElementById('npStory').value=p.story;
+  document.getElementById('npAspect').value=draft.aspect;
+  document.getElementById('npSubs').checked=draft.subtitles;
   renderScenes(); go('pg-new');
 }
 function delProject(id){
@@ -708,11 +817,103 @@ function importProject(inp){
   r.readAsText(f); inp.value='';
 }
 
+/* ---------- PROMPTS EXPORT ---------- */
+function buildExportText(){
+  const lines=[];
+  lines.push((draft.title||'Untitled')+' — Scene Prompts ('+(draft.aspect||'16:9')+')');
+  lines.push('='.repeat(50));
+  draft.scenes.forEach(s=>{
+    lines.push('');
+    lines.push('SCENE '+s.num+' ('+s.dur+'s) — '+(s.loc||''));
+    lines.push((s.prompt||buildPrompt(s)));
+    lines.push('-'.repeat(40));
+  });
+  return lines.join('\n');
+}
+function openExport(){
+  if(!draft.scenes.length){ alert(LANG==='ur'?'Pehle scenes banayein!':'Make scenes first!'); return; }
+  document.getElementById('expText').value=buildExportText();
+  openM('mExport');
+}
+function copyExport(){
+  const ta=document.getElementById('expText');
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(()=>{});
+  alert('✅ '+(LANG==='ur'?'Copy ho gaya!':'Copied!'));
+}
+function dlExport(){
+  const blob=new Blob([document.getElementById('expText').value],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=((draft.title||'prompts').replace(/\s+/g,'-'))+'-prompts.txt'; a.click();
+}
+
+/* ---------- THUMBNAIL MAKER ---------- */
+let thumbBgImg=null;
+document.getElementById('thFile').addEventListener('change', function(){
+  const f=this.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=function(){
+    const c=document.createElement('canvas');
+    const mx=1280, sc=Math.min(1, mx/Math.max(img.width,img.height));
+    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    thumbBgImg=c; document.getElementById('thBg').value='img'; drawThumb();
+    URL.revokeObjectURL(img.src);
+  };
+  img.src=URL.createObjectURL(f); this.value='';
+});
+const TH_GRADS={
+  g1:['#ff9a3c','#c0392b'], g2:['#1a6fc4','#0a2a5e'],
+  g3:['#8e44ad','#2c1a4e'], g4:['#e74c3c','#5e0a0a'], g5:['#1a8a4a','#0a3a1e']
+};
+function drawThumb(){
+  const cv=document.getElementById('thumbCanvas');
+  const [W,H]=document.getElementById('thSize').value.split('x').map(Number);
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  const bg=document.getElementById('thBg').value;
+  if(bg==='img'&&thumbBgImg){
+    // cover-fit uploaded image
+    const s=Math.max(W/thumbBgImg.width, H/thumbBgImg.height);
+    const dw=thumbBgImg.width*s, dh=thumbBgImg.height*s;
+    ctx.drawImage(thumbBgImg,(W-dw)/2,(H-dh)/2,dw,dh);
+    ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(0,0,W,H);
+  } else {
+    const [c1,c2]=TH_GRADS[bg]||TH_GRADS.g1;
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,c1); g.addColorStop(1,c2);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+  // dark bottom band for text pop
+  const bg2=ctx.createLinearGradient(0,H*0.45,0,H);
+  bg2.addColorStop(0,'rgba(0,0,0,0)'); bg2.addColorStop(1,'rgba(0,0,0,0.75)');
+  ctx.fillStyle=bg2; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';
+  const l1=(document.getElementById('thL1').value||'').toUpperCase();
+  const l2=(document.getElementById('thL2').value||'').toUpperCase();
+  const sub=document.getElementById('thSub').value||'';
+  const fs1=Math.min(W*0.11, 130), fs2=Math.min(W*0.085, 100);
+  ctx.lineWidth=Math.max(4,W*0.008); ctx.strokeStyle='#000';
+  let y=H*0.52;
+  if(l1){ ctx.font='900 '+fs1+'px Arial'; ctx.fillStyle='#f5c518'; ctx.strokeText(l1,W/2,y); ctx.fillText(l1,W/2,y); y+=fs1*1.15; }
+  if(l2){ ctx.font='900 '+fs2+'px Arial'; ctx.fillStyle='#fff'; ctx.strokeText(l2,W/2,y); ctx.fillText(l2,W/2,y); y+=fs2*1.3; }
+  if(sub){ ctx.font='bold '+Math.min(W*0.045,44)+'px Arial'; ctx.fillStyle='#f5c518'; ctx.lineWidth=Math.max(3,W*0.005); ctx.strokeText(sub,W/2,y); ctx.fillText(sub,W/2,y); }
+  // gold top/bottom bars
+  ctx.fillStyle='#f5c518'; ctx.fillRect(0,0,W,Math.max(6,H*0.012)); ctx.fillRect(0,H-Math.max(6,H*0.012),W,Math.max(6,H*0.012));
+}
+function dlThumb(){
+  drawThumb();
+  const cv=document.getElementById('thumbCanvas');
+  const a=document.createElement('a');
+  a.href=cv.toDataURL('image/png'); a.download='thumbnail-'+cv.width+'x'+cv.height+'.png'; a.click();
+}
+
 /* ---------- VIDEO ASSEMBLY (real local render via canvas + MediaRecorder) ---------- */
 let assembling=false;
 function fillAssembleProjects(){
   document.getElementById('asProj').innerHTML =
-    projects.map(p=>`<option value="${p.id}">${esc(p.title)} (${p.scenes.length})</option>`).join('')
+    projects.map(p=>`<option value="${p.id}">${esc(p.title)} (${p.scenes.length}) ${(p.aspect||'16:9')==='9:16'?'📱9:16':'🖥️16:9'}</option>`).join('')
     || `<option value="">${LANG==='ur'?'Pehle project banayein':'Create a project first'}</option>`;
 }
 // Background music: simple generated ambient loop (WebAudio, no files)
@@ -731,45 +932,80 @@ function startMusic(ctx, dest){
 }
 function stopMusic(){ try{ if(musicNodes){ musicNodes.o1.stop(); musicNodes.o2.stop(); musicNodes.lfo.stop(); } }catch(e){} musicNodes=null; }
 
-function drawSceneFrame(ctx,W,H,scene,idx,elapsed){
-  // Cinematic placeholder: dark gradient + slow Ken Burns zoom + scene text
+/* Cached gradients per scene (speed: no per-frame allocation) */
+const _gradCache={};
+function sceneGrads(idx,W,H){
+  const k=idx+'_'+W+'x'+H;
+  if(_gradCache[k]) return _gradCache[k];
   const hues=[[26,10,46],[10,26,46],[30,20,10],[16,30,20],[40,12,20]];
   const hu=hues[idx%hues.length];
-  const zoom=1+0.12*(elapsed/scene.dur); // slow push-in
-  ctx.save();
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
-  const g=ctx.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,`rgb(${hu[0]*2},${hu[1]*2},${hu[2]*2})`);
+  const cv=document.createElement('canvas'); // offscreen for gradient creation
+  const cx=cv.getContext('2d');
+  const g=cx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'rgb('+(hu[0]*2)+','+(hu[1]*2)+','+(hu[2]*2)+')');
   g.addColorStop(1,'#050508');
-  ctx.fillStyle=g;
-  const zw=W*zoom, zh=H*zoom;
-  ctx.fillRect((W-zw)/2,(H-zh)/2,zw,zh);
-  // film grain-ish vignette
-  const v=ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.8);
+  const v=cx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.8);
   v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,0.65)');
+  _gradCache[k]={g,v}; return _gradCache[k];
+}
+function isRTL(txt){ return /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(txt||''); }
+let ASM_SUBS=true;
+function drawSceneFrame(ctx,W,H,scene,idx,elapsed){
+  const dur=scene.dur||8;
+  const zoom=1+0.10*(elapsed/dur); // slow Ken Burns push-in
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  const im=scene._imgEl;
+  if(im&&im.complete&&im.naturalWidth){
+    // cover-fit + zoom + slight pan
+    const s=Math.max(W/im.naturalWidth,H/im.naturalHeight)*zoom;
+    const dw=im.naturalWidth*s, dh=im.naturalHeight*s;
+    const px=(W-dw)/2+Math.sin(elapsed*0.25)*W*0.015;
+    const py=(H-dh)/2;
+    ctx.drawImage(im,px,py,dw,dh);
+    ctx.fillStyle='rgba(0,0,0,0.30)'; ctx.fillRect(0,0,W,H);
+  } else {
+    const {g}=sceneGrads(idx,W,H);
+    ctx.fillStyle=g;
+    const zw=W*zoom, zh=H*zoom;
+    ctx.fillRect((W-zw)/2,(H-zh)/2,zw,zh);
+  }
+  const {v}=sceneGrads(idx,W,H);
   ctx.fillStyle=v; ctx.fillRect(0,0,W,H);
-  ctx.restore();
-  // JILAN AI STUDIO watermark
-  ctx.fillStyle='rgba(245,197,24,0.85)'; ctx.font='bold 16px Arial'; ctx.textAlign='left';
-  ctx.fillText('JILAN AI STUDIO', 16, 28);
-  // Scene number big
-  ctx.fillStyle='rgba(245,197,24,0.9)'; ctx.font='bold 64px Arial'; ctx.textAlign='center';
-  ctx.fillText('SCENE '+scene.num, W/2, H/2-10);
-  // Visual text wrapped
-  ctx.fillStyle='rgba(240,234,214,0.92)'; ctx.font='18px Arial';
-  wrapText(ctx,(scene.visual||'').slice(0,160),W/2,H/2+34,W-80,24);
-  // Dialogue subtitle
-  if(scene.dialogue){
-    ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(20,H-64,W-40,44);
-    ctx.fillStyle='#fff'; ctx.font='italic 16px Arial';
-    wrapText(ctx,'"'+scene.dialogue.slice(0,90)+'"',W/2,H-38,W-80,20);
+  // watermark
+  ctx.fillStyle='rgba(245,197,24,0.85)'; ctx.font='bold '+Math.max(14,W*0.022)+'px Arial'; ctx.textAlign='left'; ctx.direction='ltr';
+  ctx.fillText('JILAN AI STUDIO', W*0.025, H*0.055);
+  if(!im){
+    // Scene number + visual text (only for placeholder)
+    ctx.fillStyle='rgba(245,197,24,0.9)'; ctx.font='bold '+Math.max(40,W*0.09)+'px Arial'; ctx.textAlign='center'; ctx.direction='ltr';
+    ctx.fillText('SCENE '+scene.num, W/2, H/2-H*0.03);
+    ctx.fillStyle='rgba(240,234,214,0.92)'; ctx.font=Math.max(14,W*0.026)+'px Arial';
+    wrapText(ctx,(scene.visual||'').slice(0,160),W/2,H/2+H*0.09,W*0.88,Math.max(18,W*0.034));
+  } else {
+    // small scene tag on images
+    ctx.fillStyle='rgba(245,197,24,0.9)'; ctx.font='bold '+Math.max(13,W*0.02)+'px Arial'; ctx.textAlign='left'; ctx.direction='ltr';
+    ctx.fillText('SCENE '+scene.num, W*0.025, H*0.055+Math.max(16,W*0.028));
+  }
+  // Subtitles: white text, black outline, RTL-aware
+  if(ASM_SUBS&&scene.dialogue){
+    const txt=scene.dialogue.slice(0,120);
+    const fs=Math.max(20,W*0.038);
+    ctx.font='bold '+fs+'px Arial';
+    ctx.textAlign='center'; ctx.direction=isRTL(txt)?'rtl':'ltr';
+    ctx.lineWidth=Math.max(4,fs*0.18); ctx.strokeStyle='#000';
+    const sy=H-H*0.09;
+    const words=txt.split(' '); let line='',yy=sy,lines=[];
+    for(const w of words){ const t2=line?line+' '+w:w;
+      if(ctx.measureText(t2).width>W*0.9&&line){ lines.push(line); line=w; } else line=t2; }
+    if(line) lines.push(line);
+    yy=sy-(lines.length-1)*(fs*1.25);
+    for(const ln of lines){ ctx.strokeText(ln,W/2,yy); ctx.fillStyle='#fff'; ctx.fillText(ln,W/2,yy); yy+=fs*1.25; }
   }
   // progress of this scene
   ctx.fillStyle='rgba(245,197,24,0.9)';
-  ctx.fillRect(0,H-6,W*(elapsed/scene.dur),6);
+  ctx.fillRect(0,H-6,W*(elapsed/dur),6);
 }
 function wrapText(ctx,text,x,y,mw,lh){
-  const words=text.split(' '); let line='',yy=y; ctx.textAlign='center';
+  const words=text.split(' '); let line='',yy=y; ctx.textAlign='center'; ctx.direction=isRTL(text)?'rtl':'ltr';
   for(const w of words){ const t=line?line+' '+w:w;
     if(ctx.measureText(t).width>mw && line){ ctx.fillText(line,x,yy); line=w; yy+=lh; } else line=t; }
   ctx.fillText(line,x,yy);
@@ -782,7 +1018,25 @@ async function assembleVideo(){
   const useMusic=document.getElementById('asMusic').checked;
   const useTTS=document.getElementById('asTTS').checked;
   const canvas=document.getElementById('assemblyCanvas');
+  const aspect=proj.aspect||'16:9';
+  if(aspect==='9:16'){ canvas.width=720; canvas.height=1280; } else { canvas.width=1280; canvas.height=720; }
   const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height;
+  ASM_SUBS = proj.subtitles!==false;
+  // Preload scene images (speed: decode once, not per frame)
+  st.textContent='⏳ '+(LANG==='ur'?'Tasveerein load ho rahi hain…':'Loading images…');
+  for(const sc of proj.scenes){
+    sc._imgEl=null;
+    if(sc.img){
+      try{
+        await new Promise(res=>{
+          const im=new Image();
+          im.onload=()=>{ sc._imgEl=im; res(); };
+          im.onerror=()=>res();
+          im.src=sc.img;
+        });
+      }catch(e){}
+    }
+  }
   canvas.classList.remove('hidden');
   document.getElementById('asProgWrap').classList.remove('hidden');
   document.getElementById('asDownload').classList.add('hidden');
@@ -811,7 +1065,7 @@ async function assembleVideo(){
   for(let i=0;i<proj.scenes.length;i++){
     const sc=proj.scenes[i], dur=+sc.dur||8;
     st.textContent=(LANG==='ur'?'Scene':'Scene')+` ${i+1}/${proj.scenes.length} …`;
-    if(useTTS&&sc.dialogue){ try{ speakText(sc.dialogue); }catch(e){} }
+    if(useTTS&&sc.dialogue){ try{ const vp=voiceForScene(sc); speakText(sc.dialogue,null,vp[0],vp[1]); }catch(e){} }
     const t0=performance.now();
     await new Promise(res=>{
       function frame(){
