@@ -100,6 +100,18 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold)}
 .help-sec h4{color:var(--gold);margin-bottom:8px}
 .help-sec ol,.help-sec ul{margin-left:20px;font-size:14px;line-height:1.8;color:#d0cab8}
 .help-sec code{background:var(--bg2);padding:2px 8px;border-radius:4px;color:var(--gold);font-size:13px}
+/* ---------- AI Setup Wizard ---------- */
+#wizAi{z-index:300}
+#wizAi .sheet{max-width:480px;width:100%;text-align:center;padding:28px 22px;border:2px solid var(--gold-dim);border-radius:20px;background:linear-gradient(180deg,#1c1c28,#121218);max-height:92vh;overflow-y:auto}
+.wiz-dots{display:flex;justify-content:center;gap:10px;margin:14px 0 20px}
+.wiz-dot{width:14px;height:14px;border-radius:50%;background:#3a3a48;transition:all .25s}
+.wiz-dot.on{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.wiz-step{display:none;animation:wizIn .3s ease}
+.wiz-step.on{display:block}
+@keyframes wizIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.wiz-big{font-size:17px;padding:16px;min-height:60px}
+.wiz-emoji{font-size:52px;margin-bottom:6px}
+.wiz-skip{margin-top:16px;background:none;border:none;color:var(--muted);font-size:14px;text-decoration:underline;cursor:pointer}
 /* ---------- Misc ---------- */
 .hidden{display:none!important}
 .divider{height:1px;background:#2a2a38;margin:16px 0}
@@ -266,6 +278,14 @@ select option{background:var(--bg2)}
     <label data-i18n="gid_label">🔐 Google Client ID (optional)</label>
     <input type="text" id="setGid" placeholder="xxx.apps.googleusercontent.com" onchange="saveSettings()">
     <p class="small" data-i18n="gid_help">See Help for how to make a free Client ID.</p>
+  </div>
+    <h3>🤖 <span data-i18n="wiz_status_t">AI Status</span></h3>
+  <div class="card gold-border">
+    <p id="aiStatusLine" style="margin-bottom:10px"></p>
+    <div class="row2">
+      <button class="btn btn-gold btn-sm" onclick="openAiWizard()">🧙 <span data-i18n="wiz_setup">Setup Wizard</span></button>
+      <button class="btn btn-dark btn-sm" onclick="openM('mAISetup')">✏️ <span data-i18n="wiz_manual">Manual Entry</span></button>
+    </div>
   </div>
   <h3 data-i18n="se_voice">🔊 Voice (TTS)</h3>
   <div class="card">
@@ -538,6 +558,31 @@ select option{background:var(--bg2)}
     <button class="btn btn-gold btn-sm mt" onclick="saveAiKey()">💾 <span data-i18n="ai_save">Key Save Karein</span></button></div>
   <p class="small" id="aiKeyStatus" style="min-height:18px"></p>
   <button class="btn btn-dark btn-sm" onclick="closeM('mAISetup')">Band karein</button>
+</div></div>
+
+<!-- ================= AI SETUP WIZARD ================= -->
+<div class="modal" id="wizAi"><div class="sheet">
+  <div class="wiz-emoji">🤖</div>
+  <h2 data-i18n="wiz_title">AI Activate Karein!</h2>
+  <p class="small" data-i18n="wiz_sub">Login ho gaya! Ab 3 asaan steps me Gemini AI lagayein — bilkul muft.</p>
+  <div class="wiz-dots"><div class="wiz-dot" id="wizD1"></div><div class="wiz-dot" id="wizD2"></div><div class="wiz-dot" id="wizD3"></div></div>
+  <div class="wiz-step" id="wizS1">
+    <p><b data-i18n="wiz_s1">Step 1: Neeche button dabayein — Google AI Studio khulega</b></p>
+    <button class="btn btn-gold wiz-big" onclick="window.open('https://aistudio.google.com/app/apikey','_blank');wizGo(2)">🌐 <span data-i18n="wiz_open">AI Studio Kholein</span></button>
+  </div>
+  <div class="wiz-step" id="wizS2">
+    <p><b data-i18n="wiz_s2">Step 2: Wahan "Create API Key" dabayein, key copy karein</b></p>
+    <p class="small" data-i18n="wiz_s2h">Key "AIza..." se shuru hoti hai. Copy kar ke wapis aayein.</p>
+    <button class="btn btn-gold wiz-big" onclick="wizGo(3)">✅ <span data-i18n="wiz_copied">Key Copy Kar Li</span></button>
+    <div><button class="btn btn-dark btn-sm mt" onclick="wizGo(1)">⬅️ <span data-i18n="wiz_back">Wapis</span></button></div>
+  </div>
+  <div class="wiz-step" id="wizS3">
+    <p><b data-i18n="wiz_s3">Step 3: Key yahan paste karein</b></p>
+    <input type="text" id="wizKeyIn" placeholder="AIza..." autocomplete="off" style="font-size:16px">
+    <button class="btn btn-gold wiz-big mt" id="wizSaveBtn" onclick="wizTestSave()">🔌 <span data-i18n="wiz_test">Test &amp; Save</span></button>
+    <p class="small" id="wizStatus" style="min-height:20px"></p>
+  </div>
+  <button class="wiz-skip" onclick="wizSkip()" data-i18n="wiz_later">Baad me</button>
 </div></div>
 
 <!-- ================= EXPORT MODAL ================= -->
@@ -2229,6 +2274,20 @@ gid_label:"🔐 Google Client ID (optional)",gid_help:"Free Client ID kaise bana
 he_gid:"Free Google Client ID kaise banayein",
 demo_login:"🔐 Login (Demo)"
 });
+Object.assign(I18N.en,{
+wiz_title:"🤖 Activate AI!",wiz_sub:"Logged in! Now add Gemini AI in 3 easy steps — totally free.",
+wiz_s1:"Step 1: Tap the button below — Google AI Studio will open",wiz_open:"🌐 Open AI Studio",
+wiz_s2:'Step 2: Tap "Create API Key" there and copy the key',wiz_s2h:'The key starts with "AIza...". Copy it and come back here.',
+wiz_copied:"✅ Key Copied",wiz_back:"Back",wiz_s3:"Step 3: Paste the key here",wiz_test:"🔌 Test & Save",
+wiz_later:"Later",wiz_status_t:"AI Status",wiz_setup:"Setup Wizard",wiz_manual:"Manual Entry"
+});
+Object.assign(I18N.ur,{
+wiz_title:"🤖 AI Activate Karein!",wiz_sub:"Login ho gaya! Ab 3 asaan steps me Gemini AI lagayein — bilkul muft.",
+wiz_s1:"Step 1: Neeche button dabayein — Google AI Studio khulega",wiz_open:"🌐 AI Studio Kholein",
+wiz_s2:'Step 2: Wahan "Create API Key" dabayein, key copy karein',wiz_s2h:'Key "AIza..." se shuru hoti hai. Copy kar ke wapis aayein.',
+wiz_copied:"✅ Key Copy Kar Li",wiz_back:"Wapis",wiz_s3:"Step 3: Key yahan paste karein",wiz_test:"🔌 Test & Save",
+wiz_later:"Baad me",wiz_status_t:"AI Status",wiz_setup:"Setup Wizard",wiz_manual:"Manual Entry"
+});
 /* ---------- Google login + AI setup ---------- */
 let GIS_READY=false;
 function gisLoad(){
@@ -2262,13 +2321,13 @@ function gisCred(resp){
     const p=JSON.parse(atob(resp.credential.split('.')[1]));
     const prof={name:p.name||'User',email:p.email||'',photo:p.picture||''};
     try{localStorage.setItem('jst_profile',JSON.stringify(prof));}catch(e){}
-    renderProfile(prof); gisRender();
+    renderProfile(prof); gisRender(); maybeOpenWizard();
   }catch(e){}
 }
 function demoLogin(){
   const prof={name:'Demo User',email:'',photo:'',demo:true};
   try{localStorage.setItem('jst_profile',JSON.stringify(prof));}catch(e){}
-  renderProfile(prof); gisRender();
+  renderProfile(prof); gisRender(); maybeOpenWizard();
 }
 function gLogout(){
   try{localStorage.removeItem('jst_profile');}catch(e){}
@@ -2300,6 +2359,57 @@ function updateAiBadge(){
   b.innerHTML= ok
     ? '<span style="color:#4caf50;font-weight:bold">✅ '+t('ai_connected')+'</span>'
     : '<span style="color:#888">'+t('ai_nokey')+'</span>';
+  renderAiStatus();
+}
+/* ---------- AI Setup Wizard ---------- */
+let wizCur=1;
+function openAiWizard(){
+  wizGo(1); openM('wizAi');
+  const k=document.getElementById('wizKeyIn'); if(k) k.value='';
+  const st=document.getElementById('wizStatus'); if(st) st.textContent='';
+}
+function wizGo(n){
+  wizCur=n;
+  for(let i=1;i<=3;i++){
+    const sc=document.getElementById('wizS'+i); if(sc) sc.classList.toggle('on',i===n);
+    const d=document.getElementById('wizD'+i); if(d) d.classList.toggle('on',i<=n);
+  }
+}
+function wizSkip(){ closeM('wizAi'); }
+async function wizTestSave(){
+  const k=document.getElementById('wizKeyIn').value.trim();
+  const st=document.getElementById('wizStatus'); const btn=document.getElementById('wizSaveBtn');
+  if(!k||k.length<10){ st.textContent='❌ '+(LANG==='ur'?'Pehle key paste karein!':'Paste the key first!'); return; }
+  btn.disabled=true; st.textContent='⏳ '+(LANG==='ur'?'Key test ho rahi hai...':'Testing key...');
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(k),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:'Reply with just: ok'}]}],generationConfig:{maxOutputTokens:5}})});
+    const j=await r.json();
+    const txt=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]&&j.candidates[0].content.parts[0].text;
+    if(!txt) throw new Error((j.error&&j.error.message)||'Invalid key');
+    settings.key=k;
+    try{localStorage.setItem(LS_S,JSON.stringify(settings));}catch(e){}
+    const sk=document.getElementById('setKey'); if(sk) sk.value=k;
+    const sk2=document.getElementById('aiKeyIn'); if(sk2) sk2.value=k;
+    st.textContent='✅ '+t('ai_connected');
+    updateAiBadge(); renderAiStatus();
+    setTimeout(()=>{ closeM('wizAi'); },1500);
+  }catch(e){
+    st.textContent='❌ '+(LANG==='ur'?'Key ghalat hai! Dobara check karein.':'Key is wrong! Check again.')+' ('+e.message+')';
+  }
+  btn.disabled=false;
+}
+function renderAiStatus(){
+  const el=document.getElementById('aiStatusLine'); if(!el) return;
+  const ok=(settings.key||'').trim().length>10;
+  el.innerHTML= ok
+    ? '<span style="color:#4caf50;font-weight:bold">✅ '+t('ai_connected')+'</span>'
+    : '<span style="color:#ff9a7a;font-weight:bold">❌ '+t('ai_nokey')+'</span>';
+}
+function maybeOpenWizard(){
+  const ok=(settings.key||'').trim().length>10;
+  if(!ok) setTimeout(openAiWizard,900);
 }
 /* ---------- Init ---------- */
 function renderAll(){ renderHome(); renderProjects(); renderChars(); renderScenes(); fillAssembleProjects(); }
