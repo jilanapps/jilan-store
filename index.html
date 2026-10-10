@@ -491,6 +491,12 @@
 #imgLightbox .lb-copy{background:#25d366;color:#fff;border:none;padding:10px 22px;border-radius:30px;font-weight:bold;margin-top:10px;font-size:14px}
 .product-body h3,.product-body .price{-webkit-user-select:text;user-select:text}
 .product-media img{cursor:zoom-in}
+
+.img-count{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 8px;border-radius:12px}
+.product-media{position:relative}
+#imgLightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;border:none;font-size:28px;padding:10px 14px;border-radius:50%;cursor:pointer}
+#lbPrev{left:10px}#lbNext{right:10px}
+#imgLightbox .lb-dots{color:#fff;margin-top:8px;font-size:13px}
 </style>
 </head>
 <body>
@@ -1050,7 +1056,7 @@
           var loadMode = index < 4 ? 'eager' : 'lazy';
           var priority = index === 0 ? 'high' : 'auto';
           return '<article class="product-card" data-product-card="' + p.id + '">' +
-            '<div class="product-media"><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="' + loadMode + '" fetchpriority="' + priority + '" decoding="async"><span class="category-badge">' + escapeHtml(p.category) + '</span></div>' +
+            '<div class="product-media" data-imgs=\'' + JSON.stringify(p.images) + '\'><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="' + loadMode + '" fetchpriority="' + priority + '" decoding="async">' + (p.images.length>1?'<span class="img-count">1/'+p.images.length+'</span>':'') + '<span class="category-badge">' + escapeHtml(p.category) + '</span></div>' +
             '<div class="product-body"><h3>' + escapeHtml(p.name) + '</h3><p class="price">' + money(p.price) + '</p>' +
             '<div class="card-actions"><button class="add-button' + (inCart ? ' added' : '') + '" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><button class="order-now-button" type="button" data-order-now="' + p.id + '">Order now</button></div></div></article>';
         }).join('');
@@ -1322,18 +1328,27 @@
 
 <div id="imgLightbox" role="dialog" aria-label="Product image viewer">
 <button class="lb-close" aria-label="Close">&times;</button>
+<button class="lb-nav" id="lbPrev" aria-label="Previous">&#8249;</button>
 <img id="lbImg" src="" alt="">
-<div class="lb-name" id="lbName"></div>
+<button class="lb-nav" id="lbNext" aria-label="Next">&#8250;</button>
+<div class="lb-name" id="lbName"></div><div class="lb-dots" id="lbDots"></div>
 <button class="lb-copy" id="lbCopy">📋 Copy Product Details</button>
 </div>
 <script>
 (function(){
 var lb=document.getElementById('imgLightbox'),img=document.getElementById('lbImg'),
     nm=document.getElementById('lbName'),cp=document.getElementById('lbCopy'),cur={n:'',p:''};
-function openLb(src,name,price){img.src=src;nm.textContent=name+' — '+price;cur={n:name,p:price};lb.classList.add('open');document.body.style.overflow='hidden';}
+var lbImgs=[],lbIdx=0;
+function openLb(imgs,idx,name,price){lbImgs=imgs;lbIdx=idx||0;showLbImg();nm.textContent=name+' — '+price;cur={n:name,p:price};lb.classList.add('open');document.body.style.overflow='hidden';}
+function showLbImg(){img.src=lbImgs[lbIdx];var d=document.getElementById('lbDots');if(d)d.textContent=(lbIdx+1)+' / '+lbImgs.length;}
+function lbGo(d){lbIdx=(lbIdx+d+lbImgs.length)%lbImgs.length;showLbImg();}
 function closeLb(){lb.classList.remove('open');document.body.style.overflow='';}
 lb.querySelector('.lb-close').onclick=closeLb;
 lb.onclick=function(e){if(e.target===lb)closeLb();};
+document.getElementById('lbPrev').onclick=function(e){e.stopPropagation();lbGo(-1);};
+document.getElementById('lbNext').onclick=function(e){e.stopPropagation();lbGo(1);};
+var _tsx=0;img.addEventListener('touchstart',function(e){_tsx=e.touches[0].clientX;},{passive:true});
+img.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-_tsx;if(Math.abs(dx)>40)lbGo(dx<0?1:-1);},{passive:true});
 cp.onclick=function(){
   var t=cur.n+' — '+cur.p;
   if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){cp.textContent='✅ Copied!';setTimeout(function(){cp.textContent='📋 Copy Product Details';},1500);});}
@@ -1343,9 +1358,12 @@ document.addEventListener('click',function(e){
   var m=e.target.closest('.product-media img');
   if(m){
     var card=m.closest('.product-card');
+    var media=m.closest('.product-media');
     var name=card?card.querySelector('.product-body h3').textContent:'';
     var price=card?card.querySelector('.product-body .price').textContent:'';
-    openLb(m.src,name,price);
+    var imgs=[m.src];try{var dj=media.getAttribute('data-imgs');if(dj)imgs=JSON.parse(dj);}catch(e2){}
+    var idx=imgs.indexOf(m.src);if(idx<0)idx=0;
+    openLb(imgs,idx,name,price);
   }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
