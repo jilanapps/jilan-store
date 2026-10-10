@@ -127,6 +127,17 @@ select option{background:var(--bg2)}
     <button class="btn btn-gold" onclick="go('pg-new')">🎬 <span data-i18n="create_new">Create New Video</span></button>
     <button class="btn btn-dark" onclick="go('pg-veditor')">🎬 <span data-i18n="ve_title">Video Editor</span></button>
     <button class="btn btn-dark" onclick="go('pg-design')">🎨 <span data-i18n="ds_title">Design Studio</span></button>
+    <div id="loginBox" class="mt">
+      <div id="gLoginWrap"></div>
+      <button class="btn btn-dark btn-sm hidden" id="demoLoginBtn" onclick="demoLogin()">🔐 <span data-i18n="demo_login">Login (Demo)</span></button>
+      <div id="profileBox" class="hidden">
+        <img id="profImg" style="width:48px;height:48px;border-radius:50%;vertical-align:middle;display:none">
+        <b id="profName" style="margin:0 8px"></b>
+        <button class="btn btn-dark btn-sm" onclick="gLogout()"><span data-i18n="glogout">Logout</span></button>
+      </div>
+      <div id="aiBadge" class="mt"></div>
+      <button class="btn btn-blue btn-sm" onclick="openM('mAISetup')">🤖 <span data-i18n="ai_setup">AI Tools Lagayein</span></button>
+    </div>
     <button class="btn btn-dark" onclick="go('pg-thumb')">🖼️ <span data-i18n="thumb_make">Thumbnail Banayein</span></button>
   </div>
   <div class="stat-row">
@@ -250,6 +261,12 @@ select option{background:var(--bg2)}
     </div>
   </div>
   <div class="notice" data-i18n="se_limits">💡 <b>Free-tier limits:</b> Aksar AI video APIs paid hote hain ya mehdood free credits dete hain. Bina API key ke sirf <b>Demo Mode</b> kaam karega (local assembly). API key kabhi frontend code mein hardcode na karein.</div>
+  <h3>🔐 Google Login</h3>
+  <div class="card">
+    <label data-i18n="gid_label">🔐 Google Client ID (optional)</label>
+    <input type="text" id="setGid" placeholder="xxx.apps.googleusercontent.com" onchange="saveSettings()">
+    <p class="small" data-i18n="gid_help">See Help for how to make a free Client ID.</p>
+  </div>
   <h3 data-i18n="se_voice">🔊 Voice (TTS)</h3>
   <div class="card">
     <label data-i18n="se_voicelang">Dialogue ki zaban</label>
@@ -490,6 +507,16 @@ select option{background:var(--bg2)}
       <li><b>"Altered content / AI-generated"</b> wala option tick karein</li>
       <li><b>"Made for kids" = No</b> rakhein, phir <b>Upload</b> dabayein</li>
     </ol></div>
+  <div class="help-sec"><h4>🔐 <span data-i18n="he_gid">Free Google Client ID kaise banayein</span></h4>
+    <ol>
+      <li><b>console.cloud.google.com</b> kholein (free Google account se login)</li>
+      <li>Naya project banayein (koi bhi naam)</li>
+      <li><b>APIs &amp; Services</b> → <b>Credentials</b> → <b>Create Credentials</b> → <b>OAuth client ID</b></li>
+      <li>Application type: <b>Web application</b> chunein</li>
+      <li><b>Authorized JavaScript origins</b> me apni site ka URL dalein (masalan <code>https://jilanapps.github.io</code>)</li>
+      <li><b>Client ID</b> copy kar ke <b>Settings</b> me paste karein — phir asli Google Login button ayega!</li>
+      <li>Client ID na ho to <b>Login (Demo)</b> se kaam chal jayega</li>
+    </ol></div>
   <div class="help-sec"><h4>⚠️ <span data-i18n="he_s4t">Limitations (Imandari se)</span></h4>
     <ul>
       <li><span data-i18n="he_s4a">"Assemble Video" AI footage NAHI banata — local cinematic placeholders hain</span></li>
@@ -499,6 +526,19 @@ select option{background:var(--bg2)}
       <li><span data-i18n="he_s4e">Video .webm format mein download hoti hai</span></li>
     </ul></div>
 </div>
+
+<div class="modal" id="mAISetup"><div class="sheet">
+  <h3>🤖 <span data-i18n="ai_setup">AI Tools Lagayein</span></h3>
+  <p class="small" data-i18n="ai_note">⚠️ Google login se API key khud nahi nikalti (security!) — 2 minute me muft key bana kar paste karein.</p>
+  <div class="card"><b data-i18n="ai_s1">Step 1: Google AI Studio kholein</b><br>
+    <button class="btn btn-dark btn-sm mt" onclick="window.open('https://aistudio.google.com','_blank')">🌐 <span data-i18n="ai_open">AI Studio Kholein</span></button></div>
+  <div class="card"><b data-i18n="ai_s2">Step 2: "Get API Key" dabayein, copy karein</b></div>
+  <div class="card"><b data-i18n="ai_s3">Step 3: Key yahan paste karein</b><br>
+    <input type="password" id="aiKeyIn" placeholder="AIza..." class="mt">
+    <button class="btn btn-gold btn-sm mt" onclick="saveAiKey()">💾 <span data-i18n="ai_save">Key Save Karein</span></button></div>
+  <p class="small" id="aiKeyStatus" style="min-height:18px"></p>
+  <button class="btn btn-dark btn-sm" onclick="closeM('mAISetup')">Band karein</button>
+</div></div>
 
 <!-- ================= EXPORT MODAL ================= -->
 <div class="modal" id="mExport"><div class="sheet">
@@ -656,6 +696,7 @@ function saveSettings(){
   settings.model=document.getElementById('setModel').value.trim();
   settings.key=document.getElementById('setKey').value.trim();
   settings.voiceLang=document.getElementById('setVoiceLang').value;
+  const _gid=document.getElementById('setGid'); if(_gid) settings.gClientId=_gid.value.trim();
   store(LS_S,settings);
   document.getElementById('customApiBox').classList.toggle('hidden', settings.provider!=='custom');
 }
@@ -665,6 +706,7 @@ function loadSettingsUI(){
   document.getElementById('setModel').value=settings.model;
   document.getElementById('setKey').value=settings.key;
   document.getElementById('setVoiceLang').value=settings.voiceLang;
+  const _gid2=document.getElementById('setGid'); if(_gid2) _gid2.value=settings.gClientId||'';
   document.getElementById('customApiBox').classList.toggle('hidden', settings.provider!=='custom');
 }
 
@@ -2163,9 +2205,105 @@ async function dsShare(){
   }catch(e){ alert('Error: '+e.message); }
 }
 
+Object.assign(I18N.en,{
+glogin:"🔐 Login with Google",glogout:"Logout",ai_setup:"🤖 Setup AI Tools",
+ai_s1:"Step 1: Open Google AI Studio",ai_open:"🌐 Open AI Studio",
+ai_s2:'Step 2: Tap "Get API Key" and copy it',
+ai_s3:"Step 3: Paste the key here",ai_save:"💾 Save Key",
+ai_note:"⚠️ Google login cannot auto-extract an API key (security!) — make a free key in 2 minutes and paste it.",
+ai_connected:"✅ Gemini Connected! AI Story Writer unlocked!",
+ai_nokey:"🤖 Gemini: no key yet",ai_needkey:"❌ Add your Gemini API key in Settings first!",
+gid_label:"🔐 Google Client ID (optional)",gid_help:"See Help for how to make a free Client ID.",
+he_gid:"How to make a free Google Client ID",
+demo_login:"🔐 Login (Demo)"
+});
+Object.assign(I18N.ur,{
+glogin:"🔐 Google se Login Karein",glogout:"Logout",ai_setup:"🤖 AI Tools Lagayein",
+ai_s1:"Step 1: Google AI Studio kholein",ai_open:"🌐 AI Studio Kholein",
+ai_s2:'Step 2: "Get API Key" dabayein, copy karein',
+ai_s3:"Step 3: Key yahan paste karein",ai_save:"💾 Key Save Karein",
+ai_note:"⚠️ Google login se API key khud nahi nikalti (security!) — 2 minute me muft key bana kar paste karein.",
+ai_connected:"✅ Gemini Connected! AI Story Writer unlock ho gaya!",
+ai_nokey:"🤖 Gemini: key nahi lagi",ai_needkey:"❌ Pehle Settings me Gemini API key dalein!",
+gid_label:"🔐 Google Client ID (optional)",gid_help:"Free Client ID kaise banayein — Help me dekhein.",
+he_gid:"Free Google Client ID kaise banayein",
+demo_login:"🔐 Login (Demo)"
+});
+/* ---------- Google login + AI setup ---------- */
+let GIS_READY=false;
+function gisLoad(){
+  renderProfile(load('jst_profile',null));
+  if(window.google&&google.accounts&&google.accounts.id){ GIS_READY=true; gisRender(); return; }
+  const sc=document.createElement('script');
+  sc.src='https://accounts.google.com/gsi/client'; sc.async=true; sc.defer=true;
+  sc.onload=()=>{ GIS_READY=true; gisRender(); };
+  sc.onerror=()=>{ gisRender(); };
+  document.head.appendChild(sc);
+}
+function gisRender(){
+  const wrap=document.getElementById('gLoginWrap'); if(!wrap) return;
+  const prof=load('jst_profile',null);
+  const demoBtn=document.getElementById('demoLoginBtn');
+  if(prof){ wrap.innerHTML=''; if(demoBtn) demoBtn.classList.add('hidden'); return; }
+  const cid=(settings.gClientId||'').trim();
+  if(cid&&GIS_READY&&window.google&&google.accounts&&google.accounts.id){
+    if(demoBtn) demoBtn.classList.add('hidden');
+    try{
+      google.accounts.id.initialize({client_id:cid,callback:gisCred});
+      google.accounts.id.renderButton(wrap,{theme:'filled_black',size:'large',width:260});
+    }catch(e){ wrap.innerHTML=''; if(demoBtn) demoBtn.classList.remove('hidden'); }
+  } else {
+    wrap.innerHTML='';
+    if(demoBtn) demoBtn.classList.remove('hidden');
+  }
+}
+function gisCred(resp){
+  try{
+    const p=JSON.parse(atob(resp.credential.split('.')[1]));
+    const prof={name:p.name||'User',email:p.email||'',photo:p.picture||''};
+    try{localStorage.setItem('jst_profile',JSON.stringify(prof));}catch(e){}
+    renderProfile(prof); gisRender();
+  }catch(e){}
+}
+function demoLogin(){
+  const prof={name:'Demo User',email:'',photo:'',demo:true};
+  try{localStorage.setItem('jst_profile',JSON.stringify(prof));}catch(e){}
+  renderProfile(prof); gisRender();
+}
+function gLogout(){
+  try{localStorage.removeItem('jst_profile');}catch(e){}
+  try{ if(window.google&&google.accounts&&google.accounts.id) google.accounts.id.disableAutoSelect(); }catch(e){}
+  renderProfile(null); gisRender();
+}
+function renderProfile(prof){
+  const box=document.getElementById('profileBox'); if(!box) return;
+  if(prof){
+    box.classList.remove('hidden');
+    document.getElementById('profName').textContent=prof.name||'User';
+    const im=document.getElementById('profImg');
+    if(prof.photo){ im.src=prof.photo; im.style.display=''; } else im.style.display='none';
+  } else box.classList.add('hidden');
+}
+function saveAiKey(){
+  const k=document.getElementById('aiKeyIn').value.trim();
+  const st=document.getElementById('aiKeyStatus');
+  if(!k){ st.textContent='❌ Key likhein!'; return; }
+  settings.key=k;
+  try{localStorage.setItem(LS_S,JSON.stringify(settings));}catch(e){}
+  const sk=document.getElementById('setKey'); if(sk) sk.value=k;
+  st.textContent='✅ '+t('ai_connected');
+  updateAiBadge();
+}
+function updateAiBadge(){
+  const b=document.getElementById('aiBadge'); if(!b) return;
+  const ok=(settings.key||'').trim().length>10;
+  b.innerHTML= ok
+    ? '<span style="color:#4caf50;font-weight:bold">✅ '+t('ai_connected')+'</span>'
+    : '<span style="color:#888">'+t('ai_nokey')+'</span>';
+}
 /* ---------- Init ---------- */
 function renderAll(){ renderHome(); renderProjects(); renderChars(); renderScenes(); fillAssembleProjects(); }
-applyLang(); loadSettingsUI(); restoreDraft(); renderAll();
+applyLang(); loadSettingsUI(); restoreDraft(); renderAll(); renderProfile(load('jst_profile',null)); updateAiBadge(); gisLoad();
 if('speechSynthesis' in window){ try{ speechSynthesis.getVoices(); }catch(e){} }
 </script>
 </body>
