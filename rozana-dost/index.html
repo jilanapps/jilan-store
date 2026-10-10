@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Jilan Rozana Ka Dost</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--orange:#f97316;--green:#16a34a;--bg:#fff7ed;--text:#1c1917;--card:#ffffff;--muted:#78716c;--red:#dc2626;--line:#fde68a;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:84px;font-size:16px}
+body.rtl{direction:rtl}
+h2{font-size:20px;margin:4px 0 12px}
+h3{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:12px}
+/* top bar */
+#topbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 14px;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.appname{font-weight:800;color:var(--orange);font-size:18px;line-height:1.1}
+.tagline{font-size:11px;color:var(--muted)}
+.topbtns{display:flex;gap:8px;align-items:center}
+.iconbtn{background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:18px;padding:8px 12px;cursor:pointer}
+.langbtn{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer;color:var(--orange)}
+/* bottom nav */
+#bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.navbtn{flex:1;background:none;border:none;padding:8px 2px 10px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit}
+.navbtn .ico{font-size:21px}
+.navbtn.active{color:var(--orange);font-weight:700}
+/* screens */
+.screen{display:none;padding:14px 14px 20px;max-width:640px;margin:0 auto}
+.screen.active{display:block}
+#scr-login.active{display:flex}
+#scr-login{position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;padding:20px}
+/* cards */
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);border:1px solid #fef3c7}
+.card h3{display:flex;align-items:center;justify-content:space-between}
+.big{font-size:26px;font-weight:800;color:var(--green)}
+.demobanner{background:#fef3c7;border:1px dashed var(--orange);color:#9a3412;border-radius:12px;padding:8px 12px;font-size:13px;font-weight:700;margin-bottom:12px;text-align:center}
+/* buttons */
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin:8px 0;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.btn-danger{background:#fee2e2;color:var(--red);border:1px solid #fecaca}
+.btn-sm{width:auto;display:inline-block;padding:8px 14px;font-size:14px;margin:4px 4px 4px 0}
+.btn:disabled{opacity:.6}
+/* forms */
+label{display:block;font-weight:700;margin:10px 0 4px;font-size:14px}
+input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid #e7e5e4;font-size:16px;background:#fff;font-family:inherit}
+textarea{min-height:90px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.req{color:var(--red)}
+/* list rows */
+.item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #fef3c7;border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.item .grow{flex:1;min-width:0}
+.item .ttl{font-weight:700;word-break:break-word}
+.item.done .ttl{text-decoration:line-through;color:var(--muted)}
+.chk{width:26px;height:26px;accent-color:var(--green);flex:none;cursor:pointer}
+.act{background:none;border:none;font-size:18px;cursor:pointer;padding:6px;flex:none}
+.badge{background:#fee2e2;color:var(--red);font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;white-space:nowrap}
+.badge.green{background:#dcfce7;color:var(--green)}
+.badge.orange{background:#ffedd5;color:#c2410c}
+.overdue{color:var(--red);font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:28px 10px;font-size:15px}
+/* chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 14px;font-size:14px;cursor:pointer}
+.chip.active{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}
+/* progress */
+.prog{background:#fde68a;border-radius:99px;height:12px;overflow:hidden;margin-top:6px}
+.prog>div{background:var(--green);height:100%;border-radius:99px;transition:width .3s}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:300}
+#modal.open{display:flex}
+#modalCard{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:92vh;overflow:auto;padding:18px 18px 30px}
+.mic{background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:20px;padding:10px 14px;cursor:pointer;flex:none}
+.inputmic{display:flex;gap:6px;align-items:center}
+.inputmic input{flex:1}
+canvas.chart{width:100%;height:150px;background:#fff;border-radius:12px}
+.spin{display:inline-block;width:18px;height:18px;border:3px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.login-card{background:#fff;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.login-card .logo{font-size:44px}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e7e5e4}
+.help ol{padding-inline-start:20px;font-size:14px;line-height:1.7}
+.help code{background:#fef3c7;padding:2px 6px;border-radius:6px;font-size:13px}
+</style>
+</head>
+<body>
+<!-- LOGIN SCREEN -->
+<div id="scr-login" class="screen active">
+  <div class="login-card">
+    <div class="logo">🌅</div>
+    <div class="appname" style="font-size:22px" data-t="appName">Jilan Rozana Ka Dost</div>
+    <div class="tagline" style="font-size:13px;margin:4px 0 16px" data-t="tagline">Aapke roz ke kaam ka dost</div>
+    <div class="demobanner" data-t="demoShort">DEMO MODE – data sirf is browser me</div>
+    <button class="btn btn-primary" id="demoBtn" onclick="demoLogin()" data-t="demoLogin">Demo me dakhil hon</button>
+    <div id="fbLoginWrap" style="display:none">
+      <div class="divider" data-t="or">ya</div>
+      <label style="text-align:start" data-t="email">Email</label>
+      <input id="loginEmail" type="email" autocomplete="email" style="margin-bottom:8px">
+      <label style="text-align:start" data-t="password">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password">
+      <button class="btn btn-green" id="fbLoginBtn" onclick="fbLogin()" data-t="login">Login</button>
+      <div class="small muted" data-t="fbLoginNote">Firebase connect hone par email login kaam karega</div>
+    </div>
+    <div style="margin-top:14px"><button class="langbtn" onclick="toggleLang()">🌐 EN / اردو</button></div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" style="display:none">
+  <div id="topbar">
+    <div>
+      <div class="appname" data-t="appName">Jilan Rozana Ka Dost</div>
+      <div class="tagline" data-t="tagline">Aapke roz ke kaam ka dost</div>
+    </div>
+    <div class="topbtns">
+      <button class="iconbtn" onclick="show('scr-rem')" title="Reminders">🔔</button>
+      <button class="langbtn" onclick="toggleLang()">🌐 EN/اردو</button>
+    </div>
+  </div>
+
+  <main>
+    <section id="scr-dash" class="screen"><div id="dashBody"></div></section>
+    <section id="scr-tasks" class="screen">
+      <h2 data-t="tasksTitle">📝 Tasks</h2>
+      <input id="taskSearch" data-t-ph="searchPh" placeholder="Talash karein..." oninput="renderTasks()">
+      <div class="chips" id="taskChips"></div>
+      <div id="taskList"></div>
+      <button class="btn btn-primary" onclick="openTaskForm()" data-t="addTask">+ Naya Task</button>
+    </section>
+    <section id="scr-exp" class="screen">
+      <h2 data-t="expTitle">💰 Kharcha</h2>
+      <div id="expBody"></div>
+    </section>
+    <section id="scr-groc" class="screen">
+      <h2 data-t="grocTitle">🛒 Grocery</h2>
+      <div id="grocBody"></div>
+    </section>
+    <section id="scr-bills" class="screen">
+      <h2 data-t="billsTitle">🧾 Bills</h2>
+      <div id="billList"></div>
+      <button class="btn btn-primary" onclick="openBillForm()" data-t="addBill">+ Naya Bill</button>
+    </section>
+    <section id="scr-rem" class="screen">
+      <h2 data-t="remTitle">🔔 Reminders</h2>
+      <div class="card"><div class="small muted" data-t="remNote">Ye list aapke tamam zaroori kaamon ki yaad-dihani hai. Browser notification sirf tab open honay par kaam karti hai.</div></div>
+      <div id="remList"></div>
+    </section>
+    <section id="scr-set" class="screen">
+      <h2 data-t="setTitle">⚙️ Settings</h2>
+      <div id="setBody"></div>
+    </section>
+  </main>
+
+  <nav id="bottomnav">
+    <button class="navbtn active" data-scr="scr-dash" onclick="show('scr-dash')"><span class="ico">🏠</span><span data-t="navHome">Ghar</span></button>
+    <button class="navbtn" data-scr="scr-tasks" onclick="show('scr-tasks')"><span class="ico">📝</span><span data-t="navTasks">Kaam</span></button>
+    <button class="navbtn" data-scr="scr-exp" onclick="show('scr-exp')"><span class="ico">💰</span><span data-t="navExp">Kharcha</span></button>
+    <button class="navbtn" data-scr="scr-groc" onclick="show('scr-groc')"><span class="ico">🛒</span><span data-t="navGroc">Rashan</span></button>
+    <button class="navbtn" data-scr="scr-bills" onclick="show('scr-bills')"><span class="ico">🧾</span><span data-t="navBills">Bill</span></button>
+    <button class="navbtn" data-scr="scr-set" onclick="show('scr-set')"><span class="ico">⚙️</span><span data-t="navSet">Settings</span></button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div id="modal"><div id="modalCard"><div id="modalBody"></div></div></div>
+
+<script>
+/* ============ HELPERS (exact) ============ */
+const $=id=>document.getElementById(id);
+function fmt(n){n=Math.round(Number(n)||0);return 'Rs '+n.toLocaleString('en-PK');}
+function todayStr(d){d=d||new Date();return d.toISOString().slice(0,10);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function uid(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function openModal(html){$('modalBody').innerHTML=html;$('modal').classList.add('open');applyLang();}
+function closeModal(){$('modal').classList.remove('open');}
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+
+/* ============ I18N ============ */
+const T={
+en:{
+appName:'Jilan Rozana Ka Dost',tagline:'Your everyday helper',
+demoShort:'DEMO MODE – data stays in this browser only',
+demoBanner:'DEMO MODE – data sirf is browser me hai (is phone ke browser me). Delete karne par data chala jayega.',
+demoLogin:'Continue in Demo',or:'or',email:'Email',password:'Password',login:'Login',
+fbLoginNote:'Email login works only after Firebase is connected in Settings',
+navHome:'Home',navTasks:'Tasks',navExp:'Kharcha',navGroc:'Grocery',navBills:'Bills',navSet:'Settings',
+morning:'Good morning',afternoon:'Good afternoon',evening:'Good evening',
+dashTasks:"Today's Tasks",dashRem:'Upcoming Reminders',dashExp:"Today's Spending",dashBudget:'Monthly Budget',
+dashExpSoon:'Expiring Soon',viewAll:'View all →',noTasks:'No tasks 🎉',noRem:'Nothing due 🎉',noExpSoon:'Nothing expiring 🎉',
+noBudget:'No budget set',setBudget:'Set budget',
+quickAdd:'Quick Add',qTask:'+ Task',qExp:'+ Kharcha',qGroc:'+ Grocery',qBill:'+ Bill',
+tasksTitle:'📝 Tasks',addTask:'+ New Task',searchPh:'Search...',
+fAll:'All',fToday:'Today',fUpcoming:'Upcoming',fDone:'Done',
+taskTitle:'Task title',dueDate:'Due date',priority:'Priority',recurring:'Repeat',notes:'Notes (optional)',
+pHigh:'High',pMed:'Medium',pLow:'Low',
+rNone:'No',rDaily:'Daily',rWeekly:'Weekly',rMonthly:'Monthly',
+save:'Save',cancel:'Cancel',edit:'Edit',del:'Delete',close:'Close',
+confirmDel:'Are you sure you want to delete this?',fillReq:'Please fill all required (*) fields',
+voiceTitle:'Speak',voiceNo:'🎤 Voice not supported on this device/browser',voiceErr:'Voice input failed. Please type instead.',
+expTitle:'💰 Kharcha',addExp:'+ New Expense',amount:'Amount (Rs)',category:'Category',date:'Date',note:'Note',
+catFood:'Food',catTransport:'Transport',catBills:'Bills',catShopping:'Shopping',catHealth:'Health',catHome:'Home',catOther:'Other',
+monthTotal:'This month total',vsBudget:'of budget',last7:'Last 7 days',budgetSet:'Set Budget',totalBudget:'Total monthly budget',
+catBudgets:'Category budgets (optional)',budgetSaved:'Budget saved ✅',
+fMonth:'Month',fCat:'Category',allCats:'All categories',
+expSearchPh:'Search expenses...',noExp:'No expenses 🎉',
+grocTitle:'🛒 Grocery',newList:'+ New List',listName:'List name',listNamePh:'e.g. Haftawar',
+customItem:'+ Custom item',itemName:'Item name',qty:'Qty',expiry:'Expiry (optional)',
+bought:'bought',expiringSoon:'expiring soon',noItems:'No items 🎉',searchItemsPh:'Search items...',
+confirmDelList:'Delete this list and all its items?',saveItem:'Save Item',addItem:'Add Item',
+billsTitle:'🧾 Bills',addBill:'+ New Bill',billName:'Bill name',dueDay:'Due day of month',paidThisMonth:'Paid this month',
+billElectricity:'Bijli (Electricity)',billGas:'Gas',billInternet:'Internet',billRent:'Kiraya (Rent)',billWater:'Pani (Water)',billOther:'Other',
+overdue:'OVERDUE',dueIn:'due in {n} days',dueToday:'due today',paid:'Paid ✅',markPaid:'Mark paid',markUnpaid:'Mark unpaid',noBills:'No bills 🎉',
+remTitle:'🔔 Reminders',
+remNote:'This list reminds you of all important things. Browser notifications only work while this app tab is open — they do not work when the app is closed.',
+setTitle:'⚙️ Settings',yourName:'Your name',namePh:'e.g. Asif',language:'Language',
+fbCfg:'Firebase config (JSON)',fbCfgPh:'Paste firebaseConfig JSON here...',fbSave:'Save Firebase config',
+fbSaved:'Firebase config saved. Restart app / login to connect.',fbBad:'Invalid JSON. Please paste correct firebaseConfig.',
+exportData:'⬇ Export data (JSON)',importData:'⬆ Import data (JSON)',confirmImport:'This will REPLACE all current data. Continue?',
+clearData:'🗑 Clear demo data',confirmClear:'Delete ALL demo data? This cannot be undone.',
+notifBtn:'🔔 Turn on browser notification',notifOn:'Notifications are ON',notifOff:'Notifications are OFF',
+notifExplain:'Honest note: browser notifications ONLY work while this app tab is open on your phone. They do NOT work when the app is closed. The in-app Reminders list always works — check it daily.',
+logout:'Logout',about:'About / Help',
+aboutHtml:'<b>Jilan Rozana Ka Dost</b> — Aapke roz ke kaam ka dost.<br><br>• Tasks, kharcha, grocery, bills aur reminders — sab ek jagah.<br>• <b>Demo mode:</b> data sirf is browser me save hota hai.<br>• <b>Free cloud sync:</b> neeche Firebase setup se apna free account jorain taake data phone badalne par bhi mehfooz rahe.<br><br><b>Free Firebase setup (5 minute):</b><ol><li><code>console.firebase.google.com</code> par jayein, free Google account se login karein</li><li><b>Add project</b> → naam likhein → <b>Continue</b> (Analytics band kar sakte hain)</li><li><b>Build → Firestore Database → Create database</b> → <b>Start in test mode</b></li><li><b>Build → Authentication → Get started → Email/Password → Enable</b>, phir <b>Add user</b> se apna email+password banayein</li><li>Project <b>Settings (⚙) → General → Your apps → Web app (&lt;/&gt;)</b> → app register karein, <code>firebaseConfig</code> copy karein</li><li>Wo JSON upar wale box me paste karke <b>Save</b> dabayein, phir email se login karein</li></ol>',
+notifBody:'{n} zaroori yaad-dihaniyan hain. App khol kar dekhein.',
+urgTask:'Task: {t} (due {d})',urgBill:'Bill: {t} — {a} due',urgExp:'Grocery: {t} expiring',
+daysLeft:'{n} din baqi',today:'aaj',
+logoutDone:'Logged out',dataCleared:'Demo data cleared',imported:'Data imported ✅',importBad:'Invalid file',
+},
+ur:{
+appName:'Jilan Rozana Ka Dost',tagline:'Aapke roz ke kaam ka dost',
+demoShort:'DEMO MODE – data sirf is browser me',
+demoBanner:'DEMO MODE – data sirf is browser me save hota hai (is phone ke browser me).',
+demoLogin:'Demo me dakhil hon',or:'ya',email:'Email',password:'Password',login:'Login',
+fbLoginNote:'Email login sirf Settings me Firebase connect karne ke baad kaam karega',
+navHome:'Ghar',navTasks:'Kaam',navExp:'Kharcha',navGroc:'Rashan',navBills:'Bill',navSet:'Settings',
+morning:'Subah bakhair',afternoon:'Dopeher bakhair',evening:'Shaam bakhair',
+dashTasks:'Aaj ke Tasks',dashRem:'Aanay wale Reminders',dashExp:'Aaj ka Kharcha',dashBudget:'Maahana Budget',
+dashExpSoon:'Khatam honay wale',viewAll:'Sab dekhein →',noTasks:'Koi task nahi 🎉',noRem:'Kuch due nahi 🎉',noExpSoon:'Kuch khatam nahi ho raha 🎉',
+noBudget:'Budget set nahi hai',setBudget:'Budget set karein',
+quickAdd:'Quick Add',qTask:'+ Task',qExp:'+ Kharcha',qGroc:'+ Grocery',qBill:'+ Bill',
+tasksTitle:'📝 Tasks',addTask:'+ Naya Task',searchPh:'Talash karein...',
+fAll:'Sab',fToday:'Aaj',fUpcoming:'Aanay wale',fDone:'Mukammal',
+taskTitle:'Task ka naam',dueDate:'Due date',priority:'Ahmiyat',recurring:'Repeat',notes:'Notes (optional)',
+pHigh:'Zyada zaroori',pMed:'Darmiyani',pLow:'Kam zaroori',
+rNone:'Nahi',rDaily:'Rozana',rWeekly:'Haftawar',rMonthly:'Mahana',
+save:'Save karein',cancel:'Cancel',edit:'Edit',del:'Delete',close:'Band karein',
+confirmDel:'Kya aap waqai delete karna chahte hain?',fillReq:'Barah-e-karam zaroori (*) fields bharein',
+voiceTitle:'Bolein',voiceNo:'🎤 Is device/browser me voice support nahi',voiceErr:'Voice input nakaam. Likhein.',
+expTitle:'💰 Kharcha',addExp:'+ Naya Kharcha',amount:'Raqam (Rs)',category:'Category',date:'Tareekh',note:'Note',
+catFood:'Khana',catTransport:'Transport',catBills:'Bill',catShopping:'Shopping',catHealth:'Sehat',catHome:'Ghar',catOther:'Other',
+monthTotal:'Is mahine ka total',vsBudget:'budget me se',last7:'Pichlay 7 din',budgetSet:'Budget Set Karein',totalBudget:'Total mahana budget',
+catBudgets:'Category budgets (optional)',budgetSaved:'Budget save ho gaya ✅',
+fMonth:'Mahina',fCat:'Category',allCats:'Sab categories',
+expSearchPh:'Kharcha talash karein...',noExp:'Koi kharcha nahi 🎉',
+grocTitle:'🛒 Grocery',newList:'+ Nai List',listName:'List ka naam',listNamePh:'masalan Haftawar',
+customItem:'+ Custom item',itemName:'Item ka naam',qty:'Miqdar',expiry:'Expiry (optional)',
+bought:'kharid liya',expiringSoon:'khatam honay wala',noItems:'Koi item nahi 🎉',searchItemsPh:'Items talash karein...',
+confirmDelList:'Kya ye list aur iske tamam items delete kar dein?',saveItem:'Item Save karein',addItem:'Item Add karein',
+billsTitle:'🧾 Bills',addBill:'+ Naya Bill',billName:'Bill ka naam',dueDay:'Mahine ki due tareekh',paidThisMonth:'Is mahine paid',
+billElectricity:'Bijli',billGas:'Gas',billInternet:'Internet',billRent:'Kiraya',billWater:'Pani',billOther:'Other',
+overdue:'DUE GUZAR GAYA',dueIn:'{n} din me due',dueToday:'aaj due',paid:'Paid ✅',markPaid:'Paid mark karein',markUnpaid:'Unpaid karein',noBills:'Koi bill nahi 🎉',
+remTitle:'🔔 Reminders',
+remNote:'Ye list aapke tamam zaroori kaamon ki yaad-dihani hai. Browser notification sirf tab open honay par kaam karti hai — app band ho to notification nahi ayegi.',
+setTitle:'⚙️ Settings',yourName:'Aapka naam',namePh:'masalan Asif',language:'Zuban',
+fbCfg:'Firebase config (JSON)',fbCfgPh:'firebaseConfig JSON yahan paste karein...',fbSave:'Firebase config save karein',
+fbSaved:'Firebase config save ho gaya. Connect ke liye app dobara khol kar login karein.',fbBad:'Ghalat JSON. Sahi firebaseConfig paste karein.',
+exportData:'⬇ Data export karein (JSON)',importData:'⬆ Data import karein (JSON)',confirmImport:'Ye tamam mojooda data REPLACE kar dega. Jari rakhein?',
+clearData:'🗑 Demo data saaf karein',confirmClear:'TAMAM demo data delete kar dein? Ye wapas nahi ayega.',
+notifBtn:'🔔 Browser notification on karein',notifOn:'Notifications ON hain',notifOff:'Notifications OFF hain',
+notifExplain:'Seedhi baat: browser notification SIRF tab open honay par kaam karti hai. App band ho to notification NAHI ayegi. In-app Reminders list hamesha kaam karti hai — roz dekhein.',
+logout:'Logout',about:'About / Help',
+aboutHtml:'<b>Jilan Rozana Ka Dost</b> — Aapke roz ke kaam ka dost.<br><br>• Tasks, kharcha, grocery, bills aur reminders — sab ek jagah.<br>• <b>Demo mode:</b> data sirf is browser me save hota hai.<br>• <b>Free cloud sync:</b> neeche Firebase setup se apna free account jorain taake data phone badalne par bhi mehfooz rahe.<br><br><b>Free Firebase setup (5 minute):</b><ol><li><code>console.firebase.google.com</code> par jayein, free Google account se login karein</li><li><b>Add project</b> → naam likhein → <b>Continue</b> (Analytics band kar sakte hain)</li><li><b>Build → Firestore Database → Create database</b> → <b>Start in test mode</b></li><li><b>Build → Authentication → Get started → Email/Password → Enable</b>, phir <b>Add user</b> se apna email+password banayein</li><li>Project <b>Settings (⚙) → General → Your apps → Web app (&lt;/&gt;)</b> → app register karein, <code>firebaseConfig</code> copy karein</li><li>Wo JSON upar wale box me paste karke <b>Save</b> dabayein, phir email se login karein</li></ol>',
+notifBody:'{n} zaroori yaad-dihaniyan hain. App khol kar dekhein.',
+urgTask:'Task: {t} (due {d})',urgBill:'Bill: {t} — {a} due',urgExp:'Grocery: {t} khatam honay wala',
+daysLeft:'{n} din baqi',today:'aaj',
+logoutDone:'Logout ho gaya',dataCleared:'Demo data saaf ho gaya',imported:'Data import ho gaya ✅',importBad:'Ghalat file',
+}
+};
+let LANG=localStorage.getItem('rd_lang')||'ur';
+function t(k){return (T[LANG]&&T[LANG][k])||T.en[k]||k;}
+function applyLang(){
+  document.querySelectorAll('[data-t]').forEach(e=>{e.innerHTML=t(e.getAttribute('data-t'));});
+  document.querySelectorAll('[data-t-ph]').forEach(e=>{e.placeholder=t(e.getAttribute('data-t-ph'));});
+  document.body.classList.toggle('rtl',LANG==='ur');
+}
+function toggleLang(){LANG=LANG==='en'?'ur':'en';try{localStorage.setItem('rd_lang',LANG);}catch(e){}applyLang();show(CUR,true);}
+
+/* ============ DATA / DB ============ */
+let MODE='demo', FB=null, DBF=null, USER=null;
+const LS_KEY='rd_data_v1';
+const CATS=['Food','Transport','Bills','Shopping','Health','Home','Other'];
+const BILLTYPES=['Electricity','Gas','Internet','Rent','Water','Other'];
+function freshMem(){return {tasks:[],expenses:[],lists:[{id:uid(),name:'Haftawar',items:[]}],bills:[],budgets:{total:0,cats:{}},settings:{name:'Dost'}};}
+let MEM=freshMem();
+function memLoad(){try{const s=localStorage.getItem(LS_KEY);if(s){const d=JSON.parse(s);MEM=Object.assign(freshMem(),d);}}catch(e){}}
+function memSave(){try{localStorage.setItem(LS_KEY,JSON.stringify(MEM));}catch(e){alert(LANG==='ur'?'Storage full! Kuch data delete karein.':'Storage full! Please delete some data.');}}
+function catLabel(c){return t('cat'+c)||c;}
+function billLabel(b){const m={Electricity:'billElectricity',Gas:'billGas',Internet:'billInternet',Rent:'billRent',Water:'billWater',Other:'billOther'};return t(m[b]||'billOther');}
+async function persist(col,item){
+  if(MODE==='fb'&&USER&&DBF){try{await DBF.collection('users').doc(USER.uid).collection(col).doc(item.id).set(JSON.parse(JSON.stringify(item)));}catch(e){}}
+  else memSave();
+}
+async function persistDel(col,id){
+  if(MODE==='fb'&&USER&&DBF){try{await DBF.collection('users').doc(USER.uid).collection(col).doc(id).delete();}catch(e){}}
+  else memSave();
+}
+async function persistMeta(){
+  if(MODE==='fb'&&USER&&DBF){try{await DBF.collection('users').doc(USER.uid).collection('meta').doc('settings').set({budgets:MEM.budgets,settings:MEM.settings});}catch(e){}}
+  else memSave();
+}
+const DB={
+  init(){memLoad();},
+  list(col){return MEM[col]||[];},
+  async save(col,item){
+    if(!MEM[col])MEM[col]=[];
+    const i=MEM[col].findIndex(x=>x.id===item.id);
+    if(i>=0)MEM[col][i]=item;else MEM[col].push(item);
+    await persist(col,item);
+  },
+  async del(col,id){MEM[col]=MEM[col].filter(x=>x.id!==id);await persistDel(col,id);}
+};
+/* Firebase */
+function fbConfigured(){try{const s=localStorage.getItem('rd_fb_config');if(!s)return false;const c=JSON.parse(s);return !!(c&&c.apiKey);}catch(e){return false;}}
+async function fbInit(){
+  if(!fbConfigured()||!window.firebase)return false;
+  try{
+    const cfg=JSON.parse(localStorage.getItem('rd_fb_config'));
+    if(!firebase.apps.length)firebase.initializeApp(cfg);
+    FB=firebase.auth();DBF=firebase.firestore();
+    return true;
+  }catch(e){return false;}
+}
+async function fbLoadAll(){
+  for(const c of ['tasks','expenses','lists','bills']){
+    try{const snap=await DBF.collection('users').doc(USER.uid).collection(c).get();
+      MEM[c]=snap.docs.map(d=>Object.assign({id:d.id},d.data()));}catch(e){MEM[c]=[];}
+  }
+  try{const sdoc=await DBF.collection('users').doc(USER.uid).collection('meta').doc('settings').get();
+    if(sdoc.exists){const d=sdoc.data();MEM.budgets=d.budgets||{total:0,cats:{}};MEM.settings=d.settings||{name:'Dost'};}}catch(e){}
+  if(!MEM.lists.length)MEM.lists=[{id:uid(),name:'Haftawar',items:[]}];
+}
+</script>
+
+<script>
+/* ============ AUTH ============ */
+let CUR='scr-dash';
+async function demoLogin(){
+  const b=$('demoBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> …';
+  MODE='demo';DB.init();
+  await new Promise(r=>setTimeout(r,400));
+  enterApp();
+}
+async function fbLogin(){
+  const em=$('loginEmail').value.trim(),pw=$('loginPass').value;
+  if(!em||!pw){alert(t('fillReq'));return;}
+  const b=$('fbLoginBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> …';
+  try{
+    await FB.signInWithEmailAndPassword(em,pw);
+    USER=FB.currentUser;MODE='fb';
+    await fbLoadAll();enterApp();
+  }catch(e){alert('Login failed: '+(e.message||e));b.disabled=false;b.innerHTML=t('login');applyLang();}
+}
+function enterApp(){
+  $('scr-login').classList.remove('active');
+  $('app').style.display='block';
+  applyLang();show('scr-dash');maybeNotify();
+}
+function logout(){USER=null;MODE='demo';location.reload();}
+
+/* ============ NAV ============ */
+const RENDER={'scr-dash':renderDash,'scr-tasks':renderTasks,'scr-exp':renderExp,'scr-groc':renderGroc,'scr-bills':renderBills,'scr-rem':renderRem,'scr-set':renderSet};
+function show(id,silent){
+  CUR=id;
+  document.querySelectorAll('main .screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.scr===id));
+  const f=RENDER[id];if(f)f();
+  if(!silent)window.scrollTo(0,0);
+}
+function dispDate(s){try{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}catch(e){return s;}}
+function greeting(){const h=new Date().getHours();return h<12?t('morning'):h<17?t('afternoon'):t('evening');}
+function fullDate(){return new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function curMonth(){return todayStr().slice(0,7);}
+
+/* ============ URGENT COLLECTOR (dashboard + reminders + notifications) ============ */
+function collectUrgent(){
+  const out=[],today=todayStr();
+  MEM.tasks.filter(x=>!x.done&&x.due&&x.due<=today).forEach(x=>out.push({type:'task',rank:0,title:x.title,sub:t('urgTask').replace('{t}',x.title).replace('{d}',dispDate(x.due)),scr:'scr-tasks'}));
+  const dd=new Date().getDate(),cm=curMonth();
+  MEM.bills.filter(b=>b.paidMonth!==cm&&Number(b.dueDay)<dd).forEach(b=>out.push({type:'bill',rank:0,title:b.name,sub:t('urgBill').replace('{t}',billLabel(b.name)).replace('{a}',fmt(b.amount)),scr:'scr-bills'}));
+  MEM.lists.forEach(l=>(l.items||[]).forEach(it=>{
+    if(it.bought||!it.expiry)return;
+    const days=Math.ceil((new Date(it.expiry+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+    if(days<=3)out.push({type:'groc',rank:days<0?0:1,title:it.name,sub:t('urgExp').replace('{t}',it.name)+' — '+(days<0?t('overdue'):days===0?t('today'):t('daysLeft').replace('{n}',days)),scr:'scr-groc'});
+  }));
+  out.sort((a,b)=>a.rank-b.rank);
+  return out;
+}
+function upcoming7(){
+  const out=[],today=todayStr();
+  const d7=new Date();d7.setDate(d7.getDate()+7);const s7=d7.toISOString().slice(0,10);
+  MEM.tasks.filter(x=>!x.done&&x.due&&x.due>today&&x.due<=s7).forEach(x=>out.push({icon:'📝',txt:x.title+' — '+dispDate(x.due),scr:'scr-tasks'}));
+  const dd=new Date().getDate(),cm=curMonth();
+  MEM.bills.filter(b=>b.paidMonth!==cm&&(Number(b.dueDay)-dd)>=0&&(Number(b.dueDay)-dd)<=7).forEach(b=>out.push({icon:'🧾',txt:billLabel(b.name)+' — '+fmt(b.amount)+' ('+t('dueIn').replace('{n}',Number(b.dueDay)-dd)+')',scr:'scr-bills'}));
+  return out;
+}
+function expiringSoon(){
+  const out=[],today=todayStr();
+  MEM.lists.forEach(l=>(l.items||[]).forEach(it=>{
+    if(it.bought||!it.expiry)return;
+    const days=Math.ceil((new Date(it.expiry+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+    if(days<=3&&days>=-30)out.push({name:it.name,list:l.name,days,qty:it.qty||''});
+  }));
+  return out.sort((a,b)=>a.days-b.days);
+}
+
+/* ============ DASHBOARD ============ */
+function renderDash(){
+  const today=todayStr();
+  const todays=MEM.tasks.filter(x=>!x.done&&x.due===today);
+  const up=upcoming7().slice(0,5);
+  const expToday=MEM.expenses.filter(e=>e.date===today).reduce((s,e)=>s+Number(e.amount||0),0);
+  const cm=curMonth();
+  const mExp=MEM.expenses.filter(e=>(e.date||'').slice(0,7)===cm).reduce((s,e)=>s+Number(e.amount||0),0);
+  const bTot=Number((MEM.budgets||{}).total||0);
+  const pct=bTot>0?Math.min(100,Math.round(mExp/bTot*100)):0;
+  const expS=expiringSoon();
+  let h='<div class="demobanner">'+t('demoBanner')+'</div>';
+  h+='<h2>'+greeting()+', '+esc((MEM.settings||{}).name||'Dost')+' 👋</h2><div class="muted" style="margin:-8px 0 12px">'+fullDate()+'</div>';
+  h+='<div class="card"><h3>📝 '+t('dashTasks')+' <span class="badge '+(todays.length?'orange':'green')+'">'+todays.length+'</span></h3>';
+  h+=todays.length?todays.slice(0,3).map(x=>'<div class="small">• '+esc(x.title)+'</div>').join(''):'<div class="empty" style="padding:10px">'+t('noTasks')+'</div>';
+  h+='<div class="small" style="margin-top:6px"><a href="#" onclick="show(\'scr-tasks\');return false;">'+t('viewAll')+'</a></div></div>';
+  h+='<div class="card"><h3>🔔 '+t('dashRem')+'</h3>';
+  const urg=collectUrgent().slice(0,4);
+  if(urg.length)h+=urg.map(u=>'<div class="small '+(u.rank===0?'overdue':'')+'">• '+esc(u.sub)+'</div>').join('');
+  else h+=up.length?up.map(u=>'<div class="small">'+u.icon+' '+esc(u.txt)+'</div>').join(''):'<div class="empty" style="padding:10px">'+t('noRem')+'</div>';
+  h+='<div class="small" style="margin-top:6px"><a href="#" onclick="show(\'scr-rem\');return false;">'+t('viewAll')+'</a></div></div>';
+  h+='<div class="row"><div class="card" style="flex:1"><h3>💰 '+t('dashExp')+'</h3><div class="big">'+fmt(expToday)+'</div></div>';
+  h+='<div class="card" style="flex:1"><h3>📊 '+t('dashBudget')+'</h3>';
+  if(bTot>0){h+='<div class="small">'+fmt(mExp)+' / '+fmt(bTot)+'</div><div class="prog"><div style="width:'+pct+'%"></div></div>';}
+  else{h+='<div class="small muted">'+t('noBudget')+'</div><button class="btn btn-sm btn-ghost" onclick="show(\'scr-exp\')">'+t('setBudget')+'</button>';}
+  h+='</div></div>';
+  h+='<div class="card"><h3>⏰ '+t('dashExpSoon')+'</h3>';
+  h+=expS.length?expS.slice(0,5).map(x=>'<div class="small">• '+esc(x.name)+(x.qty?' ('+esc(x.qty)+')':'')+' — <span class="badge">'+(x.days<0?t('overdue'):x.days===0?t('today'):t('daysLeft').replace('{n}',x.days))+'</span></div>').join(''):'<div class="empty" style="padding:10px">'+t('noExpSoon')+'</div>';
+  h+='</div>';
+  h+='<h3 style="margin-top:14px">'+t('quickAdd')+'</h3><div class="row"><div class="row" style="flex:1">';
+  h+='<button class="btn btn-primary btn-sm" style="flex:1" onclick="openTaskForm()">'+t('qTask')+'</button>';
+  h+='<button class="btn btn-green btn-sm" style="flex:1" onclick="openExpForm()">'+t('qExp')+'</button></div></div>';
+  h+='<div class="row"><div class="row" style="flex:1">';
+  h+='<button class="btn btn-ghost btn-sm" style="flex:1" onclick="openGrocItemForm()">'+t('qGroc')+'</button>';
+  h+='<button class="btn btn-ghost btn-sm" style="flex:1" onclick="openBillForm()">'+t('qBill')+'</button></div></div>';
+  $('dashBody').innerHTML=h;
+}
+
+/* ============ VOICE ============ */
+function micBtn(targetId){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return '<div class="small muted">'+t('voiceNo')+'</div>';
+  return '<button type="button" class="mic" onclick="startVoice(\''+targetId+'\')" title="'+t('voiceTitle')+'">🎤</button>';
+}
+function startVoice(id){
+  try{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const r=new SR();r.lang=(LANG==='ur'?'ur-PK':'en-US');r.interimResults=false;r.maxAlternatives=1;
+    r.onresult=e=>{const txt=e.results[0][0].transcript;const el=$(id);if(el)el.value=(el.value?el.value+' ':'')+txt;};
+    r.onerror=()=>{};
+    r.start();
+  }catch(e){alert(t('voiceErr'));}
+}
+
+/* ============ TASKS ============ */
+let taskFilter='all',editTaskId=null;
+function renderTasks(){
+  const chips=[['all',t('fAll')],['today',t('fToday')],['upcoming',t('fUpcoming')],['done',t('fDone')]];
+  $('taskChips').innerHTML=chips.map(c=>'<button class="chip'+(taskFilter===c[0]?' active':'')+'" onclick="taskFilter=\''+c[0]+'\';renderTasks()">'+c[1]+'</button>').join('');
+  const q=($('taskSearch').value||'').toLowerCase(),today=todayStr();
+  let list=MEM.tasks.slice().sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+  if(taskFilter==='today')list=list.filter(x=>x.due===today&&!x.done);
+  else if(taskFilter==='upcoming')list=list.filter(x=>!x.done&&x.due&&x.due>today);
+  else if(taskFilter==='done')list=list.filter(x=>x.done);
+  else list=list.filter(x=>!x.done);
+  if(q)list=list.filter(x=>(x.title+' '+(x.notes||'')).toLowerCase().includes(q));
+  if(!list.length){$('taskList').innerHTML='<div class="empty">'+t('noTasks')+'</div>';return;}
+  const pm={High:t('pHigh'),Medium:t('pMed'),Low:t('pLow')};
+  $('taskList').innerHTML=list.map(x=>{
+    const od=!x.done&&x.due&&x.due<today;
+    return '<div class="item'+(x.done?' done':'')+'"><input type="checkbox" class="chk" '+(x.done?'checked':'')+' onchange="toggleTask(\''+x.id+'\')">'
+    +'<div class="grow"><div class="ttl">'+esc(x.title)+'</div>'
+    +'<div class="small muted">'+(x.due?dispDate(x.due):'')+' • '+(pm[x.pr]||x.pr)+(x.rec&&x.rec!=='none'?' • 🔁 '+t('r'+x.rec[0].toUpperCase()+x.rec.slice(1)):'')+(od?' • <span class="overdue">'+t('overdue')+'</span>':'')+'</div>'
+    +(x.notes?'<div class="small">'+esc(x.notes)+'</div>':'')+'</div>'
+    +'<button class="act" onclick="openTaskForm(\''+x.id+'\')">✏️</button>'
+    +'<button class="act" onclick="delTask(\''+x.id+'\')">🗑</button></div>';
+  }).join('');
+}
+function openTaskForm(id){
+  const x=id?MEM.tasks.find(z=>z.id===id):null;editTaskId=id||null;
+  const pr=['High','Medium','Low'].map(p=>'<option value="'+p+'" '+(x&&x.pr===p?'selected':'')+'>'+t('p'+p[0].toUpperCase()+p.slice(1).toLowerCase())+'</option>').join('');
+  const rec=[['none',t('rNone')],['daily',t('rDaily')],['weekly',t('rWeekly')],['monthly',t('rMonthly')]].map(r=>'<option value="'+r[0]+'" '+(x&&x.rec===r[0]?'selected':'')+'>'+r[1]+'</option>').join('');
+  openModal('<h2>'+(x?t('edit'):t('addTask'))+'</h2><form onsubmit="return saveTask(event)">'
+  +'<label>'+t('taskTitle')+' <span class="req">*</span></label><div class="inputmic"><input id="f_taskTitle" value="'+esc(x?x.title:'')+'" required maxlength="120">'+micBtn('f_taskTitle')+'</div>'
+  +'<label>'+t('dueDate')+' <span class="req">*</span></label><input id="f_taskDue" type="date" value="'+(x?x.due:todayStr())+'" required>'
+  +'<div class="row"><div><label>'+t('priority')+'</label><select id="f_taskPr">'+pr+'</select></div>'
+  +'<div><label>'+t('recurring')+'</label><select id="f_taskRec">'+rec+'</select></div></div>'
+  +'<label>'+t('notes')+'</label><textarea id="f_taskNotes" style="min-height:60px">'+esc(x?x.notes:'')+'</textarea>'
+  +'<button class="btn btn-primary" type="submit">'+t('save')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveTask(e){
+  e.preventDefault();
+  const title=$('f_taskTitle').value.trim(),due=$('f_taskDue').value;
+  if(!title||!due){alert(t('fillReq'));return false;}
+  const item={id:editTaskId||uid(),title,due,pr:$('f_taskPr').value,rec:$('f_taskRec').value,notes:$('f_taskNotes').value.trim(),done:editTaskId?(MEM.tasks.find(z=>z.id===editTaskId)||{}).done:false,createdAt:Date.now()};
+  await DB.save('tasks',item);closeModal();renderTasks();return false;
+}
+async function toggleTask(id){
+  const x=MEM.tasks.find(z=>z.id===id);if(!x)return;
+  x.done=!x.done;
+  if(x.done&&x.rec&&x.rec!=='none'){
+    const d=new Date(x.due+'T00:00:00');
+    if(x.rec==='daily')d.setDate(d.getDate()+1);
+    else if(x.rec==='weekly')d.setDate(d.getDate()+7);
+    else d.setMonth(d.getMonth()+1);
+    const nx={id:uid(),title:x.title,due:d.toISOString().slice(0,10),pr:x.pr,rec:x.rec,notes:x.notes,done:false,createdAt:Date.now()};
+    await DB.save('tasks',nx);
+  }
+  await DB.save('tasks',x);renderTasks();
+}
+async function delTask(id){if(!confirm(t('confirmDel')))return;await DB.del('tasks',id);renderTasks();}
+</script>
+
+<script>
+/* ============ EXPENSES ============ */
+let expMonth='',expCat='',editExpId=null;
+function renderExp(){
+  if(!expMonth)expMonth=curMonth();
+  const cats='<option value="">'+t('allCats')+'</option>'+CATS.map(c=>'<option value="'+c+'" '+(expCat===c?'selected':'')+'>'+catLabel(c)+'</option>').join('');
+  const b=MEM.budgets||{total:0,cats:{}};
+  const mExp=MEM.expenses.filter(e=>(e.date||'').slice(0,7)===expMonth);
+  const tot=mExp.reduce((s,e)=>s+Number(e.amount||0),0);
+  const bTot=Number(b.total||0),pct=bTot>0?Math.min(100,Math.round(tot/bTot*100)):0;
+  let h='<div class="card"><h3>📊 '+t('monthTotal')+'</h3><div class="big">'+fmt(tot)+'</div>';
+  if(bTot>0){h+='<div class="small muted">'+fmt(tot)+' '+t('vsBudget')+' '+fmt(bTot)+'</div><div class="prog"><div style="width:'+pct+'%"></div></div>';}
+  h+='<button class="btn btn-ghost btn-sm" onclick="openBudgetForm()">'+t('budgetSet')+'</button></div>';
+  h+='<div class="card"><h3>📈 '+t('last7')+'</h3><canvas class="chart" id="expChart"></canvas></div>';
+  h+='<div class="row"><div><label>'+t('fMonth')+'</label><input type="month" id="expMonthF" value="'+expMonth+'" onchange="expMonth=this.value;renderExp()"></div>'
+    +'<div><label>'+t('fCat')+'</label><select id="expCatF" onchange="expCat=this.value;renderExp()">'+cats+'</select></div></div>';
+  h+='<input id="expSearch" placeholder="'+t('expSearchPh')+'" oninput="renderExpList()" style="margin:10px 0">';
+  h+='<div id="expList"></div>';
+  h+='<button class="btn btn-primary" onclick="openExpForm()">'+t('addExp')+'</button>';
+  $('expBody').innerHTML=h;applyLang();
+  drawChart();renderExpList();
+}
+function renderExpList(){
+  const q=(($('expSearch')||{}).value||'').toLowerCase();
+  let list=MEM.expenses.filter(e=>(e.date||'').slice(0,7)===expMonth&&(!expCat||e.cat===expCat));
+  list=list.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(q)list=list.filter(e=>((e.note||'')+' '+catLabel(e.cat)).toLowerCase().includes(q));
+  if(!list.length){$('expList').innerHTML='<div class="empty">'+t('noExp')+'</div>';return;}
+  $('expList').innerHTML=list.map(e=>'<div class="item"><div class="grow"><div class="ttl">'+fmt(e.amount)+' <span class="badge green">'+catLabel(e.cat)+'</span></div>'
+    +'<div class="small muted">'+dispDate(e.date)+(e.note?' • '+esc(e.note):'')+'</div></div>'
+    +'<button class="act" onclick="openExpForm(\''+e.id+'\')">✏️</button>'
+    +'<button class="act" onclick="delExp(\''+e.id+'\')">🗑</button></div>').join('');
+}
+function drawChart(){
+  const cv=$('expChart');if(!cv)return;
+  const w=cv.parentElement.clientWidth-28||300;cv.width=w;cv.height=150;
+  const ctx=cv.getContext('2d');
+  const days=[],totals=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const s=d.toISOString().slice(0,10);days.push(d.toLocaleDateString('en-GB',{weekday:'short'}));totals.push(MEM.expenses.filter(e=>e.date===s).reduce((a,e)=>a+Number(e.amount||0),0));}
+  const max=Math.max.apply(null,totals.concat([1]));
+  const bw=w/7;
+  ctx.clearRect(0,0,w,150);
+  totals.forEach((v,i)=>{
+    const bh=Math.max(1,Math.round(v/max*100));
+    ctx.fillStyle='#f97316';
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(i*bw+8,130-bh,bw-16,bh,6);ctx.fill();}
+    else{ctx.fillRect(i*bw+8,130-bh,bw-16,bh);}
+    ctx.fillStyle='#1c1917';ctx.font='10px sans-serif';ctx.textAlign='center';
+    if(v>0)ctx.fillText(fmt(v).replace('Rs ',''),i*bw+bw/2,126-bh);
+    ctx.fillStyle='#78716c';ctx.fillText(days[i],i*bw+bw/2,144);
+  });
+}
+function openExpForm(id){
+  const e=id?MEM.expenses.find(z=>z.id===id):null;editExpId=id||null;
+  const cats=CATS.map(c=>'<option value="'+c+'" '+(e&&e.cat===c?'selected':'')+'>'+catLabel(c)+'</option>').join('');
+  openModal('<h2>'+(e?t('edit'):t('addExp'))+'</h2><form onsubmit="return saveExp(event)">'
+  +'<label>'+t('amount')+' <span class="req">*</span></label><input id="f_expAmt" type="number" inputmode="numeric" min="1" value="'+(e?e.amount:'')+'" required>'
+  +'<label>'+t('category')+' <span class="req">*</span></label><select id="f_expCat">'+cats+'</select>'
+  +'<label>'+t('date')+' <span class="req">*</span></label><input id="f_expDate" type="date" value="'+(e?e.date:todayStr())+'" required>'
+  +'<label>'+t('note')+'</label><div class="inputmic"><input id="f_expNote" value="'+esc(e?e.note:'')+'" maxlength="120">'+micBtn('f_expNote')+'</div>'
+  +'<button class="btn btn-primary" type="submit">'+t('save')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveExp(e){
+  e.preventDefault();
+  const amt=Number($('f_expAmt').value),dt=$('f_expDate').value;
+  if(!amt||amt<=0||!dt){alert(t('fillReq'));return false;}
+  const item={id:editExpId||uid(),amount:amt,cat:$('f_expCat').value,date:dt,note:$('f_expNote').value.trim(),createdAt:Date.now()};
+  await DB.save('expenses',item);closeModal();renderExp();return false;
+}
+async function delExp(id){if(!confirm(t('confirmDel')))return;await DB.del('expenses',id);renderExp();}
+function openBudgetForm(){
+  const b=MEM.budgets||{total:0,cats:{}};
+  const rows=CATS.map(c=>'<div class="row" style="align-items:center"><div style="flex:1">'+catLabel(c)+'</div><div style="flex:1"><input type="number" min="0" id="bc_'+c+'" value="'+(Number((b.cats||{})[c])||'')+'" placeholder="Rs"></div></div>').join('');
+  openModal('<h2>'+t('budgetSet')+'</h2><form onsubmit="return saveBudget(event)">'
+  +'<label>'+t('totalBudget')+' <span class="req">*</span></label><input id="b_total" type="number" min="0" value="'+(Number(b.total)||'')+'" required>'
+  +'<label>'+t('catBudgets')+'</label>'+rows
+  +'<button class="btn btn-primary" type="submit">'+t('save')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveBudget(e){
+  e.preventDefault();
+  const total=Number($('b_total').value)||0;
+  const cats={};CATS.forEach(c=>{const v=Number($('bc_'+c).value)||0;if(v>0)cats[c]=v;});
+  MEM.budgets={total,cats};await persistMeta();closeModal();alert(t('budgetSaved'));renderExp();return false;
+}
+
+/* ============ GROCERY ============ */
+let grocListId=null,grocSearch='';
+function curList(){let l=MEM.lists.find(x=>x.id===grocListId);if(!l){l=MEM.lists[0];}return l;}
+function renderGroc(){
+  if(!grocListId&&MEM.lists.length)grocListId=MEM.lists[0].id;
+  const l=curList();
+  let h='<div class="chips">'+MEM.lists.map(x=>'<button class="chip'+(l&&x.id===l.id?' active':'')+'" onclick="grocListId=\''+x.id+'\';renderGroc()">'+esc(x.name)+'</button>').join('')
+    +'<button class="chip" onclick="newGrocList()">'+t('newList')+'</button></div>';
+  if(l){
+    h+='<div class="row" style="align-items:center;margin-bottom:8px"><h3 style="flex:1;margin:0">📋 '+esc(l.name)+'</h3><button class="btn btn-danger btn-sm" onclick="delGrocList(\''+l.id+'\')">'+t('del')+'</button></div>';
+    h+='<input placeholder="'+t('searchItemsPh')+'" value="'+esc(grocSearch)+'" oninput="grocSearch=this.value;renderGrocItems()">';
+    h+='<div id="grocItems" style="margin-top:8px"></div>';
+    h+='<button class="btn btn-primary" onclick="openGrocItemForm()">'+t('customItem')+'</button>';
+  }
+  $('grocBody').innerHTML=h;applyLang();renderGrocItems();
+}
+function renderGrocItems(){
+  const l=curList();if(!l||!$('grocItems'))return;
+  const q=grocSearch.toLowerCase(),today=todayStr();
+  let items=(l.items||[]).slice();
+  if(q)items=items.filter(i=>(i.name+' '+(i.qty||'')).toLowerCase().includes(q));
+  items.sort((a,b)=>(a.bought?1:0)-(b.bought?1:0));
+  if(!items.length){$('grocItems').innerHTML='<div class="empty">'+t('noItems')+'</div>';return;}
+  $('grocItems').innerHTML=items.map(it=>{
+    let badge='';
+    if(!it.bought&&it.expiry){
+      const days=Math.ceil((new Date(it.expiry+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+      if(days<=3)badge=' <span class="badge">'+t('expiringSoon')+(days<0?' ('+t('overdue')+')':days===0?' ('+t('today')+')':' ('+days+'d)')+'</span>';
+    }
+    return '<div class="item'+(it.bought?' done':'')+'"><input type="checkbox" class="chk" '+(it.bought?'checked':'')+' onchange="toggleGrocItem(\''+l.id+'\',\''+it.id+'\')">'
+    +'<div class="grow"><div class="ttl">'+esc(it.name)+'</div>'
+    +'<div class="small muted">'+(it.qty?esc(it.qty)+' • ':'')+(it.expiry?dispDate(it.expiry):'')+badge+'</div></div>'
+    +'<button class="act" onclick="openGrocItemForm(\''+l.id+'\',\''+it.id+'\')">✏️</button>'
+    +'<button class="act" onclick="delGrocItem(\''+l.id+'\',\''+it.id+'\')">🗑</button></div>';
+  }).join('');
+}
+async function saveList(l){const i=MEM.lists.findIndex(x=>x.id===l.id);if(i>=0)MEM.lists[i]=l;else MEM.lists.push(l);await DB.save('lists',l);}
+function newGrocList(){
+  openModal('<h2>'+t('newList')+'</h2><form onsubmit="return saveGrocList(event)">'
+  +'<label>'+t('listName')+' <span class="req">*</span></label><input id="f_listName" placeholder="'+t('listNamePh')+'" required maxlength="40">'
+  +'<button class="btn btn-primary" type="submit">'+t('save')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveGrocList(e){e.preventDefault();const n=$('f_listName').value.trim();if(!n){alert(t('fillReq'));return false;}
+  const l={id:uid(),name:n,items:[]};await saveList(l);grocListId=l.id;closeModal();renderGroc();return false;}
+async function delGrocList(id){if(!confirm(t('confirmDelList')))return;await DB.del('lists',id);if(grocListId===id)grocListId=null;renderGroc();}
+function openGrocItemForm(lid,iid){
+  const l=MEM.lists.find(x=>x.id===(lid||grocListId))||curList();if(!l)return;
+  const it=iid?(l.items||[]).find(z=>z.id===iid):null;
+  openModal('<h2>'+(it?t('edit'):t('addItem'))+' — '+esc(l.name)+'</h2><form onsubmit="return saveGrocItem(event,\''+l.id+'\',\''+(it?it.id:'')+'\')">'
+  +'<label>'+t('itemName')+' <span class="req">*</span></label><input id="f_itemName" value="'+esc(it?it.name:'')+'" required maxlength="80">'
+  +'<div class="row"><div><label>'+t('qty')+'</label><input id="f_itemQty" value="'+esc(it?it.qty:'')+'" maxlength="20"></div>'
+  +'<div><label>'+t('expiry')+'</label><input id="f_itemExp" type="date" value="'+(it&&it.expiry?it.expiry:'')+'"></div></div>'
+  +'<button class="btn btn-primary" type="submit">'+t('saveItem')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveGrocItem(e,lid,iid){
+  e.preventDefault();
+  const l=MEM.lists.find(x=>x.id===lid);if(!l)return false;
+  const nm=$('f_itemName').value.trim();if(!nm){alert(t('fillReq'));return false;}
+  l.items=l.items||[];
+  const item={id:iid||uid(),name:nm,qty:$('f_itemQty').value.trim(),expiry:$('f_itemExp').value||'',bought:iid?((l.items.find(z=>z.id===iid)||{}).bought||false):false};
+  const i=l.items.findIndex(z=>z.id===item.id);if(i>=0)l.items[i]=item;else l.items.push(item);
+  await saveList(l);closeModal();renderGroc();return false;
+}
+async function toggleGrocItem(lid,iid){const l=MEM.lists.find(x=>x.id===lid);if(!l)return;const it=(l.items||[]).find(z=>z.id===iid);if(!it)return;it.bought=!it.bought;await saveList(l);renderGrocItems();}
+async function delGrocItem(lid,iid){if(!confirm(t('confirmDel')))return;const l=MEM.lists.find(x=>x.id===lid);if(!l)return;l.items=(l.items||[]).filter(z=>z.id!==iid);await saveList(l);renderGrocItems();}
+
+/* ============ BILLS ============ */
+function renderBills(){
+  const cm=curMonth(),dd=new Date().getDate();
+  if(!MEM.bills.length){$('billList').innerHTML='<div class="empty">'+t('noBills')+'</div>';return;}
+  $('billList').innerHTML=MEM.bills.map(b=>{
+    const paid=b.paidMonth===cm;
+    const diff=Number(b.dueDay)-dd;
+    let status='';
+    if(paid)status='<span class="badge green">'+t('paid')+'</span>';
+    else if(diff<0)status='<span class="badge">'+t('overdue')+'</span>';
+    else if(diff===0)status='<span class="badge orange">'+t('dueToday')+'</span>';
+    else if(diff<=5)status='<span class="badge orange">'+t('dueIn').replace('{n}',diff)+'</span>';
+    return '<div class="item"><div class="grow"><div class="ttl">'+esc(billLabel(b.name))+' — '+fmt(b.amount)+'</div>'
+    +'<div class="small muted">'+t('dueDay')+': '+b.dueDay+' '+status+'</div></div>'
+    +'<button class="btn btn-sm '+(paid?'btn-ghost':'btn-green')+'" onclick="toggleBillPaid(\''+b.id+'\')">'+(paid?t('markUnpaid'):t('markPaid'))+'</button>'
+    +'<button class="act" onclick="openBillForm(\''+b.id+'\')">✏️</button>'
+    +'<button class="act" onclick="delBill(\''+b.id+'\')">🗑</button></div>';
+  }).join('');
+}
+function openBillForm(id){
+  const b=id?MEM.bills.find(z=>z.id===id):null;
+  const opts=BILLTYPES.map(x=>'<option value="'+x+'" '+(b&&b.name===x?'selected':'')+'>'+billLabel(x)+'</option>').join('');
+  openModal('<h2>'+(b?t('edit'):t('addBill'))+'</h2><form onsubmit="return saveBill(event,\''+(b?b.id:'')+'\')">'
+  +'<label>'+t('billName')+' <span class="req">*</span></label><select id="f_billName">'+opts+'</select>'
+  +'<label>'+t('amount')+' <span class="req">*</span></label><input id="f_billAmt" type="number" inputmode="numeric" min="1" value="'+(b?b.amount:'')+'" required>'
+  +'<label>'+t('dueDay')+' <span class="req">*</span></label><input id="f_billDay" type="number" min="1" max="31" value="'+(b?b.dueDay:'')+'" required>'
+  +'<button class="btn btn-primary" type="submit">'+t('save')+'</button>'
+  +'<button class="btn btn-ghost" type="button" onclick="closeModal()">'+t('cancel')+'</button></form>');
+}
+async function saveBill(e,id){
+  e.preventDefault();
+  const amt=Number($('f_billAmt').value),day=Number($('f_billDay').value);
+  if(!amt||amt<=0||!day||day<1||day>31){alert(t('fillReq'));return false;}
+  const old=id?MEM.bills.find(z=>z.id===id):null;
+  const item={id:id||uid(),name:$('f_billName').value,amount:amt,dueDay:day,paidMonth:old?old.paidMonth||'':''};
+  await DB.save('bills',item);closeModal();renderBills();return false;
+}
+async function toggleBillPaid(id){
+  const b=MEM.bills.find(z=>z.id===id);if(!b)return;
+  b.paidMonth=(b.paidMonth===curMonth())?'':curMonth();
+  await DB.save('bills',b);renderBills();
+}
+async function delBill(id){if(!confirm(t('confirmDel')))return;await DB.del('bills',id);renderBills();}
+</script>
+
+<script>
+/* ============ REMINDERS ============ */
+function renderRem(){
+  const urg=collectUrgent();
+  const up=upcoming7();
+  let h='';
+  if(urg.length){
+    h+='<div class="card"><h3>⚠️ '+t('overdue')+'</h3>'+urg.map(u=>'<div class="item" onclick="show(\''+u.scr+'\')"><div class="grow"><div class="ttl">'+esc(u.title)+'</div><div class="small '+(u.rank===0?'overdue':'')+'">'+esc(u.sub)+'</div></div><span>›</span></div>').join('')+'</div>';
+  }
+  if(up.length){
+    h+='<div class="card"><h3>📅 '+t('dashRem')+'</h3>'+up.map(u=>'<div class="item" onclick="show(\''+u.scr+'\')"><div class="grow"><div class="small">'+u.icon+' '+esc(u.txt)+'</div></div><span>›</span></div>').join('')+'</div>';
+  }
+  if(!urg.length&&!up.length)h='<div class="empty">'+t('noRem')+'</div>';
+  $('remList').innerHTML=h;
+}
+
+/* ============ NOTIFICATIONS (honest: only while app open) ============ */
+function notifStatus(){
+  if(!('Notification' in window))return 'unsupported';
+  return Notification.permission;
+}
+async function askNotif(){
+  try{
+    if(!('Notification' in window)){alert(t('notifOff'));return;}
+    const p=await Notification.requestPermission();
+    renderSet();
+    if(p==='granted')maybeNotify(true);
+  }catch(e){}
+}
+function maybeNotify(force){
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const today=todayStr();
+    if(!force&&localStorage.getItem('rd_notif_day')===today)return;
+    const urg=collectUrgent().filter(u=>u.rank===0);
+    if(!urg.length)return;
+    new Notification('Jilan Rozana Ka Dost',{body:t('notifBody').replace('{n}',urg.length)});
+    try{localStorage.setItem('rd_notif_day',today);}catch(e){}
+  }catch(e){}
+}
+
+/* ============ SETTINGS ============ */
+function renderSet(){
+  const s=MEM.settings||{name:'Dost'};
+  const ns=notifStatus();
+  const ntxt=ns==='granted'?t('notifOn'):ns==='denied'?t('notifOff'):t('notifOff');
+  let h='<div class="card"><label>'+t('yourName')+'</label>'
+    +'<input id="setName" value="'+esc(s.name||'')+'" placeholder="'+t('namePh')+'" maxlength="30" onchange="saveName()">'
+    +'<label>'+t('language')+'</label><button class="btn btn-ghost" onclick="toggleLang()">🌐 EN / اردو ('+LANG.toUpperCase()+')</button></div>';
+  h+='<div class="card"><h3>🔔 Notifications</h3><div class="small">'+ntxt+'</div>'
+    +'<div class="small muted" style="margin:6px 0">'+t('notifExplain')+'</div>'
+    +'<button class="btn btn-ghost" onclick="askNotif()">'+t('notifBtn')+'</button></div>';
+  h+='<div class="card"><h3>☁️ Firebase (free cloud sync)</h3>'
+    +'<div class="small muted" style="margin-bottom:6px">Status: '+(fbConfigured()?'<b style="color:var(--green)">configured ✅</b>':'<b>not configured (demo only)</b>')+(MODE==='fb'?' • <b>logged in</b>':'')+'</div>'
+    +'<label>'+t('fbCfg')+'</label><textarea id="fbCfg" placeholder="'+t('fbCfgPh')+'">'+esc(localStorage.getItem('rd_fb_config')||'')+'</textarea>'
+    +'<button class="btn btn-primary" onclick="saveFbCfg()">'+t('fbSave')+'</button>'
+    +(MODE==='fb'?'<button class="btn btn-ghost" onclick="logout()">'+t('logout')+'</button>':'')+'</div>';
+  h+='<div class="card"><h3>💾 Data</h3>'
+    +'<button class="btn btn-ghost" onclick="exportData()">'+t('exportData')+'</button>'
+    +'<button class="btn btn-ghost" onclick="$(\'importFile\').click()">'+t('importData')+'</button>'
+    +'<input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importData(this)">'
+    +'<button class="btn btn-danger" onclick="clearData()">'+t('clearData')+'</button></div>';
+  h+='<div class="card help"><h3>ℹ️ '+t('about')+'</h3><div class="small">'+t('aboutHtml')+'</div></div>';
+  $('setBody').innerHTML=h;applyLang();
+}
+async function saveName(){MEM.settings=MEM.settings||{};MEM.settings.name=$('setName').value.trim()||'Dost';await persistMeta();}
+function saveFbCfg(){
+  const v=$('fbCfg').value.trim();
+  if(!v){try{localStorage.removeItem('rd_fb_config');}catch(e){}alert(t('fbSaved'));renderSet();return;}
+  try{const c=JSON.parse(v);if(!c.apiKey)throw 0;localStorage.setItem('rd_fb_config',v);alert(t('fbSaved'));}
+  catch(e){alert(t('fbBad'));}
+  renderSet();
+}
+function exportData(){
+  try{
+    const blob=new Blob([JSON.stringify(MEM,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='jilan-rozana-dost-backup-'+todayStr()+'.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  }catch(e){}
+}
+function importData(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  if(!confirm(t('confirmImport'))){inp.value='';return;}
+  const r=new FileReader();
+  r.onload=async()=>{try{
+    const d=JSON.parse(r.result);
+    if(!d||typeof d!=='object')throw 0;
+    MEM=Object.assign(freshMem(),d);
+    if(MODE==='fb'&&USER){for(const c of ['tasks','expenses','lists','bills'])for(const it of (MEM[c]||[]))await persist(c,it);await persistMeta();}
+    else memSave();
+    alert(t('imported'));show(CUR,true);
+  }catch(e){alert(t('importBad'));}};
+  r.readAsText(f);inp.value='';
+}
+async function clearData(){
+  if(!confirm(t('confirmClear')))return;
+  MEM=freshMem();grocListId=null;expMonth='';
+  if(MODE==='fb'&&USER){for(const c of ['tasks','expenses','lists','bills']){try{const snap=await DBF.collection('users').doc(USER.uid).collection(c).get();const batch=DBF.batch();snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();}catch(e){}}await persistMeta();}
+  else memSave();
+  alert(t('dataCleared'));show('scr-dash');
+}
+
+/* ============ INIT ============ */
+document.addEventListener('DOMContentLoaded',async()=>{
+  applyLang();
+  $('fbLoginWrap').style.display=fbConfigured()?'block':'none';
+  await fbInit();
+  if(fbConfigured())$('fbLoginWrap').style.display='block';
+});
+</script>
+</body>
+</html>
