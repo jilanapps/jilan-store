@@ -497,6 +497,11 @@
 #imgLightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;border:none;font-size:28px;padding:10px 14px;border-radius:50%;cursor:pointer}
 #lbPrev{left:10px}#lbNext{right:10px}
 #imgLightbox .lb-dots{color:#fff;margin-top:8px;font-size:13px}
+
+.stock-badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:bold;padding:3px 10px;border-radius:12px}
+.stock-in{background:#e8f5e9;color:#1a5c3f}
+.stock-out{background:#ffebee;color:#c62828}
+button.oos{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -1055,10 +1060,11 @@
           var inCart = !!cart[p.id];
           var loadMode = index < 4 ? 'eager' : 'lazy';
           var priority = index === 0 ? 'high' : 'auto';
+          var oos = p.stock==='out';
           return '<article class="product-card" data-product-card="' + p.id + '">' +
-            '<div class="product-media" data-imgs=\'' + JSON.stringify(p.images) + '\'><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="' + loadMode + '" fetchpriority="' + priority + '" decoding="async">' + (p.images.length>1?'<span class="img-count">1/'+p.images.length+'</span>':'') + '<span class="category-badge">' + escapeHtml(p.category) + '</span></div>' +
+            '<div class="product-media" data-imgs=\'' + JSON.stringify(p.images) + '\'><img src="' + p.images[0] + '" alt="' + escapeHtml(p.name) + '" loading="' + loadMode + '" fetchpriority="' + priority + '" decoding="async">' + (p.images.length>1?'<span class="img-count">1/'+p.images.length+'</span>':'') + (oos?'<span class="stock-badge stock-out">Out of Stock</span>':'<span class="stock-badge stock-in">In Stock</span>') + '<span class="category-badge">' + escapeHtml(p.category) + '</span></div>' +
             '<div class="product-body"><h3>' + escapeHtml(p.name) + '</h3><p class="price">' + money(p.price) + '</p>' +
-            '<div class="card-actions"><button class="add-button' + (inCart ? ' added' : '') + '" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><button class="order-now-button" type="button" data-order-now="' + p.id + '">Order now</button></div></div></article>';
+            '<div class="card-actions">' + (oos?'<button class="add-button oos" type="button" disabled>Out of Stock</button>':'<button class="add-button' + (inCart ? ' added' : '') + '" type="button" data-add="' + p.id + '">' + (inCart ? 'Add another' : 'Add to cart') + '</button><button class="order-now-button" type="button" data-order-now="' + p.id + '">Order now</button>') + '</div></div></article>';
         }).join('');
         catalogMore.hidden = shown.length >= visible.length;
         if (!catalogMore.hidden) {
