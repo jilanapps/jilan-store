@@ -502,9 +502,20 @@
 .stock-in{background:#e8f5e9;color:#1a5c3f}
 .stock-out{background:#ffebee;color:#c62828}
 button.oos{opacity:.5;cursor:not-allowed}
+
+#updateCard{display:none;background:#fff8e1;border:2px solid #d4a017;border-radius:12px;padding:14px;margin:12px;text-align:center}
+#updateCard .t{font-weight:700;font-size:16px;margin-bottom:6px}
+#updateCard .n{font-size:13px;color:#666;margin-bottom:10px}
+#updateCard a{display:inline-block;background:#1a5c3f;color:#fff;padding:10px 24px;border-radius:25px;text-decoration:none;font-weight:bold}
 </style>
 </head>
 <body>
+<div id="updateCard">
+<div class="t">🎉 Naya version available hai!</div>
+<div class="n" id="updateNotes">Nai products aur features ke liye update karein</div>
+<a href="https://jilanapps.github.io/jilan-store/jilan-store.apk">📥 Update Download Karein</a>
+</div>
+
   <header class="topbar">
     <div class="topbar-inner">
       <div class="wordmark" aria-label="Jilan Online Shopping Store"><strong>Jilan</strong><span>ONLINE SHOPPING STORE</span></div>
@@ -1401,6 +1412,21 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
 })();
+</script>
+<script>
+const JILAN_APP_VERSION='3.0';
+async function jilanCheckUpdate(){
+  try{
+    const r=await fetch('store-version.json?t='+Date.now());
+    if(!r.ok)return;
+    const v=await r.json();
+    if(v.version&&v.version!==JILAN_APP_VERSION){
+      document.getElementById('updateCard').style.display='block';
+      if(v.notes)document.getElementById('updateNotes').textContent=v.notes;
+    }
+  }catch(e){}
+}
+setTimeout(jilanCheckUpdate,2500);
 </script>
 </body>
 </html>
