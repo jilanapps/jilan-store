@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WhatsApp Business Manager</title>
+<style>
+:root{--green:#25D366;--dark:#075E54;--teal:#128C7E;--bg:#f0f2f5;--card:#fff;--txt:#1a1a1a;--mut:#6b7280;--red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:76px}
+body.rtl{direction:rtl}
+.topbar{background:var(--dark);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:18px}
+.topbar .sub{font-size:11px;opacity:.85}
+.langbtn{background:rgba(255,255,255,.2);border:1px solid #fff;color:#fff;border-radius:20px;padding:5px 14px;font-size:13px;cursor:pointer}
+.screen{display:none;padding:14px;max-width:640px;margin:0 auto}
+.screen.active{display:block}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card h3{font-size:15px;margin-bottom:10px;color:var(--dark)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center}
+.stat .v{font-size:20px;font-weight:700;color:var(--dark)}
+.stat .l{font-size:11px;color:var(--mut);margin-top:4px}
+.stat.green .v{color:var(--teal)}.stat.red .v{color:var(--red)}.stat.amber .v{color:var(--amber)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin:8px 0}
+.btn-green{background:var(--green);color:#fff}
+.btn-dark{background:var(--dark);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--teal);color:var(--teal)}
+.btn-red{background:var(--red);color:#fff}
+.btn-gray{background:#e5e7eb;color:var(--txt)}
+.btn-sm{padding:8px 12px;font-size:13px;width:auto;display:inline-block;margin:4px 4px 4px 0}
+.btn:disabled{opacity:.5}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;margin:6px 0;background:#fff}
+label{font-size:13px;font-weight:600;color:var(--mut)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-bottom:1px solid #eee;padding:10px 0;display:flex;gap:10px;align-items:center}
+.item:last-child{border:none}
+.item img{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#eee}
+.item .info{flex:1}.item .info .t{font-weight:600;font-size:14px}.item .info .d{font-size:12px;color:var(--mut)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.b-pending{background:#fef3c7;color:#92400e}.b-confirmed{background:#dbeafe;color:#1e40af}
+.b-processing{background:#e0e7ff;color:#3730a3}.b-shipped{background:#ede9fe;color:#5b21b6}
+.b-delivered{background:#d1fae5;color:#065f46}.b-cancelled{background:#fee2e2;color:#991b1b}
+.b-paid{background:#d1fae5;color:#065f46}.b-unpaid{background:#fee2e2;color:#991b1b}.b-partial{background:#fef3c7;color:#92400e}
+.badge-repeat{background:#fce7f3;color:#9d174d}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;z-index:50;max-width:640px;margin:0 auto}
+.bottomnav button{flex:1;background:none;border:none;padding:8px 2px;font-size:10px;color:var(--mut);cursor:pointer}
+.bottomnav button .ic{font-size:22px;display:block}
+.bottomnav button.on{color:var(--teal);font-weight:700}
+.fab{position:fixed;bottom:86px;right:16px;width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;border:none;font-size:28px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;z-index:40}
+body.rtl .fab{right:auto;left:16px}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:18px}
+.sheet h2{font-size:18px;margin-bottom:12px;color:var(--dark)}
+.close-x{float:right;font-size:24px;cursor:pointer;color:var(--mut)}
+body.rtl .close-x{float:left}
+.empty{text-align:center;padding:30px;color:var(--mut)}
+.empty .e{font-size:44px}
+.loading{text-align:center;padding:30px;color:var(--mut)}
+.demo-banner{background:#fef3c7;color:#92400e;padding:8px 14px;font-size:12px;font-weight:700;text-align:center}
+.quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.quick button{background:var(--card);border:none;border-radius:12px;padding:14px 6px;box-shadow:0 1px 3px rgba(0,0,0,.1);font-size:12px;font-weight:600;color:var(--dark);cursor:pointer}
+.quick button .ic{font-size:26px;display:block;margin-bottom:4px}
+.tmpl{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:8px 0}
+.tmpl pre{white-space:pre-wrap;font-size:13px;background:#fff;padding:10px;border-radius:8px;margin:8px 0;font-family:inherit}
+.searchbar{position:sticky;top:56px;z-index:40;background:var(--bg);padding:8px 0}
+table.rep{width:100%;border-collapse:collapse;font-size:13px}
+table.rep td{padding:8px 4px;border-bottom:1px solid #eee}
+table.rep td:last-child{text-align:right;font-weight:600}
+.tl-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.lowstock{color:var(--red);font-weight:700}
+select.status{padding:6px;font-size:13px;width:auto;margin:0}
+.wa-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>💼 <span data-t="appname">Business Manager</span></h1><div class="sub" id="shopNameTop">Demo Shop</div></div>
+  <button class="langbtn" onclick="toggleLang()">اردو</button>
+</div>
+<div class="demo-banner" id="demoBanner" style="display:none">⚠️ <span data-t="demomode">DEMO MODE</span> — <span data-t="demomsg">data sirf is browser me</span></div>
+
+<!-- LOGIN -->
+<div class="screen" id="scr-login">
+  <div class="card" style="margin-top:30px;text-align:center">
+    <div style="font-size:52px">💼</div>
+    <h2 data-t="welcome">Khush Amdeed!</h2>
+    <p style="color:var(--mut);font-size:14px;margin:8px 0" data-t="loginsub">Apni dukan ka hisaab kitab</p>
+    <div id="loginForm">
+      <input id="li-email" type="email" placeholder="Email">
+      <input id="li-pass" type="password" placeholder="Password">
+      <button class="btn btn-green" onclick="doLogin()" data-t="login">Login</button>
+      <button class="btn btn-gray" onclick="doSignup()" data-t="signup">Naya Account</button>
+    </div>
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
+    <button class="btn btn-outline" onclick="demoLogin()">🎭 <span data-t="demologin">Bina Account — Demo Try Karein</span></button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="scr-dash">
+  <h2 style="margin:4px 0 12px" data-t="dashboard">Dashboard</h2>
+  <div class="quick">
+    <button onclick="openOrderModal()"><span class="ic">🧾</span><span data-t="neworder">Naya Order</span></button>
+    <button onclick="openProductModal()"><span class="ic">📦</span><span data-t="newprod">Product</span></button>
+    <button onclick="openCustomerModal()"><span class="ic">👤</span><span data-t="newcust">Customer</span></button>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="stat green"><div class="v" id="st-sales">Rs 0</div><div class="l" data-t="today">Aaj ki Sale</div></div>
+    <div class="stat"><div class="v" id="st-orders">0</div><div class="l" data-t="orders">Orders</div></div>
+    <div class="stat amber"><div class="v" id="st-pending">0</div><div class="l" data-t="pending">Pending</div></div>
+    <div class="stat"><div class="v" id="st-delivered">0</div><div class="l" data-t="delivered">Delivered</div></div>
+    <div class="stat red"><div class="v" id="st-exp">Rs 0</div><div class="l" data-t="expenses">Kharcha</div></div>
+    <div class="stat green"><div class="v" id="st-profit">Rs 0</div><div class="l" data-t="profit">Munafa</div></div>
+  </div>
+  <div class="card" style="margin-top:12px" id="followCard">
+    <h3>⏰ <span data-t="reminders">Follow-up Yaad Dehani</span></h3>
+    <div id="followList"></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>⚠️ <span data-t="lowstock">Kam Stock</span></h3>
+    <div id="lowStockList"></div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="screen" id="scr-products">
+  <h2 style="margin:4px 0 12px" data-t="products">Products</h2>
+  <div class="searchbar"><input id="prodSearch" placeholder="🔍 Search..." oninput="renderProducts()"></div>
+  <select id="prodCat" onchange="renderProducts()" style="margin-bottom:8px"><option value="" data-t="allcat">Sab Categories</option></select>
+  <div class="card"><div id="prodList"></div></div>
+</div>
+
+<!-- ORDERS -->
+<div class="screen" id="scr-orders">
+  <h2 style="margin:4px 0 12px" data-t="orders2">Orders</h2>
+  <div class="searchbar"><input id="ordSearch" placeholder="🔍 Search..." oninput="renderOrders()"></div>
+  <select id="ordStatus" onchange="renderOrders()" style="margin-bottom:8px">
+    <option value="" data-t="allstatus">Sab Status</option>
+    <option>Pending</option><option>Confirmed</option><option>Processing</option>
+    <option>Shipped</option><option>Delivered</option><option>Cancelled</option>
+  </select>
+  <div class="card"><div id="ordList"></div></div>
+</div>
+
+<!-- CUSTOMERS -->
+<div class="screen" id="scr-customers">
+  <h2 style="margin:4px 0 12px" data-t="customers">Customers</h2>
+  <div class="searchbar"><input id="custSearch" placeholder="🔍 Search..." oninput="renderCustomers()"></div>
+  <div class="card"><div id="custList"></div></div>
+</div>
+
+<!-- WHATSAPP TOOLS -->
+<div class="screen" id="scr-wa">
+  <h2 style="margin:4px 0 12px">📱 <span data-t="watools">WhatsApp Tools</span></h2>
+  <div class="card">
+    <p style="font-size:12px;color:var(--mut);margin-bottom:10px" data-t="wanote">WhatsApp khulega — Send aap khud dabayein gay. Auto-send nahi hota.</p>
+    <div id="tmplList"></div>
+  </div>
+  <div class="card">
+    <h3>🚫 <span data-t="bulk">Bulk Messaging</span></h3>
+    <p style="font-size:13px;color:var(--mut)" data-t="bulkmsg">Bulk/auto messages ke liye WhatsApp Business API chahiye (paid, alag setup). Ye band hai.</p>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div class="screen" id="scr-reports">
+  <h2 style="margin:4px 0 12px" data-t="reports">Reports</h2>
+  <div class="card">
+    <div class="row">
+      <button class="btn btn-sm btn-dark" onclick="setRepRange('day')" data-t="daily">Rozana</button>
+      <button class="btn btn-sm btn-gray" onclick="setRepRange('week')" data-t="weekly">Haftawar</button>
+      <button class="btn btn-sm btn-gray" onclick="setRepRange('month')" data-t="monthly">Mahana</button>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV Download</button>
+    <table class="rep" id="repTable"></table>
+  </div>
+  <div class="card">
+    <h3>💸 <span data-t="expenses2">Kharchay</span></h3>
+    <div id="expList"></div>
+    <button class="btn btn-outline" onclick="openExpenseModal()">+ <span data-t="addexp">Kharcha Add</span></button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="scr-settings">
+  <h2 style="margin:4px 0 12px" data-t="settings">Settings</h2>
+  <div class="card">
+    <h3>🏪 <span data-t="shopinfo">Dukan ki Maloomat</span></h3>
+    <input id="set-shop" placeholder="Dukan ka naam">
+    <input id="set-phone" placeholder="WhatsApp number (923001234567)">
+    <button class="btn btn-dark" onclick="saveSettings()" data-t="save">Save</button>
+  </div>
+  <div class="card">
+    <h3>🔥 Firebase (Real Database)</h3>
+    <p style="font-size:12px;color:var(--mut)" data-t="fbmsg">Firebase lagayein to data har device par sync hoga. Bina iske demo mode.</p>
+    <textarea id="set-fb" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
+    <button class="btn btn-dark" onclick="saveFirebase()" data-t="connect">Connect</button>
+    <button class="btn btn-gray" onclick="location.reload()" data-t="logout">Logout</button>
+  </div>
+  <div class="card">
+    <h3>❓ <span data-t="help">Madad</span></h3>
+    <div style="font-size:13px;line-height:1.8" data-t="helptext">help</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav" id="bottomNav" style="display:none">
+  <button onclick="go('dash')" id="nav-dash"><span class="ic">🏠</span><span data-t="dashboard">Home</span></button>
+  <button onclick="go('products')" id="nav-products"><span class="ic">📦</span><span data-t="products">Items</span></button>
+  <button onclick="go('orders')" id="nav-orders"><span class="ic">🧾</span><span data-t="orders2">Orders</span></button>
+  <button onclick="go('customers')" id="nav-customers"><span class="ic">👥</span><span data-t="customers">Gahak</span></button>
+  <button onclick="go('wa')" id="nav-wa"><span class="ic">📱</span>WA</button>
+  <button onclick="go('reports')" id="nav-reports"><span class="ic">📊</span><span data-t="reports">Report</span></button>
+  <button onclick="go('settings')" id="nav-settings"><span class="ic">⚙️</span><span data-t="settings">Setting</span></button>
+</nav>
+
+<button class="fab" id="fabBtn" style="display:none" onclick="fabAction()">+</button>
+
+<!-- MODAL SHEET -->
+<div class="modal" id="modal"><div class="sheet"><span class="close-x" onclick="closeModal()">×</span><div id="modalBody"></div></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+
+/* ============ I18N ============ */
+const T={
+en:{appname:"Business Manager",demomode:"DEMO MODE",demomsg:"data only in this browser",welcome:"Welcome!",loginsub:"Your shop accounts",login:"Login",signup:"New Account",demologin:"Try Demo Without Account",dashboard:"Dashboard",neworder:"New Order",newprod:"Product",newcust:"Customer",today:"Today's Sales",orders:"Orders",pending:"Pending",delivered:"Delivered",expenses:"Expenses",profit:"Profit",reminders:"Follow-up Reminders",lowstock:"Low Stock",products:"Products",allcat:"All Categories",orders2:"Orders",allstatus:"All Status",customers:"Customers",watools:"WhatsApp Tools",wanote:"WhatsApp will open — YOU press Send. Nothing is auto-sent.",bulk:"Bulk Messaging",bulkmsg:"Bulk/auto messages need WhatsApp Business API (paid, separate setup). Disabled.",reports:"Reports",daily:"Daily",weekly:"Weekly",monthly:"Monthly",expenses2:"Expenses",addexp:"Add Expense",settings:"Settings",shopinfo:"Shop Info",save:"Save",fbmsg:"Connect Firebase to sync data on all devices. Without it: demo mode.",connect:"Connect",logout:"Logout",help:"Help",helptext:"<b>Firebase free setup:</b><br>1. Go to console.firebase.google.com<br>2. New project → enable Email/Password Auth<br>3. Create Firestore Database (production mode)<br>4. Paste config JSON above → Connect<br><b>Firestore rules:</b><br>match /users/{uid}/{doc=**} { allow read,write: if request.auth.uid==uid; }"},
+ur:{appname:"Business Manager",demomode:"ڈیمو موڈ",demomsg:"ڈیٹا صرف اس براؤزر میں",welcome:"خوش آمدید!",loginsub:"آپ کی دکان کا حساب کتاب",login:"لاگ اِن",signup:"نیا اکاؤنٹ",demologin:"بغیر اکاؤنٹ ڈیمو آزمائیں",dashboard:"ڈیش بورڈ",neworder:"نیا آرڈر",newprod:"پروڈکٹ",newcust:"گاہک",today:"آج کی سیل",orders:"آرڈرز",pending:"زیر التواء",delivered:"ڈیلیورڈ",expenses:"اخراجات",profit:"منافع",reminders:"فالو اپ یاد دہانی",lowstock:"کم اسٹاک",products:"پروڈکٹس",allcat:"تمام کیٹیگریز",orders2:"آرڈرز",allstatus:"تمام اسٹیٹس",customers:"گاہک",watools:"واٹس ایپ ٹولز",wanote:"واٹس ایپ کھلے گا — سینڈ آپ خود دبائیں گے۔ کچھ خودکار نہیں بھیجا جاتا۔",bulk:"بلک میسجنگ",bulkmsg:"بلک/خودکار پیغامات کے لیے واٹس ایپ بزنس API چاہیے (پیڈ)۔ بند ہے۔",reports:"رپورٹس",daily:"روزانہ",weekly:"ہفتہ وار",monthly:"ماہانہ",expenses2:"اخراجات",addexp:"خرچہ شامل کریں",settings:"سیٹنگز",shopinfo:"دکان کی معلومات",save:"محفوظ کریں",fbmsg:"ڈیٹا سنک کے لیے فائربیس لگائیں۔ ورنہ ڈیمو موڈ۔",connect:"کنیکٹ کریں",logout:"لاگ آؤٹ",help:"مدد",helptext:"<b>فائربیس مفت سیٹ اپ:</b><br>1. console.firebase.google.com پر جائیں<br>2. نیا پروجیکٹ → Email/Password Auth آن کریں<br>3. Firestore Database بنائیں<br>4. اوپر config JSON پیسٹ کریں → کنیکٹ<br><b>Firestore rules:</b><br>match /users/{uid}/{doc=**} { allow read,write: if request.auth.uid==uid; }"}};
+let LANG=localStorage.getItem('wbm_lang')||'en';
+function toggleLang(){LANG=LANG==='en'?'ur':'en';localStorage.setItem('wbm_lang',LANG);applyLang();}
+function t(k){return (T[LANG]&&T[LANG][k])||T.en[k]||k;}
+function applyLang(){document.body.classList.toggle('rtl',LANG==='ur');document.querySelectorAll('[data-t]').forEach(e=>{e.innerHTML=t(e.getAttribute('data-t'));});document.querySelector('.langbtn').textContent=LANG==='en'?'اردو':'English';}
+
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+function fmt(n){n=Math.round(Number(n)||0);return 'Rs '+n.toLocaleString('en-PK');}
+function todayStr(d){d=d||new Date();return d.toISOString().slice(0,10);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function waNum(p){p=String(p||'').replace(/\D/g,'');if(p.startsWith('0'))p='92'+p.slice(1);if(!p.startsWith('92')&&p.length===10)p='92'+p;return p;}
+function openWA(phone,msg){window.open('https://wa.me/'+waNum(phone)+'?text='+encodeURIComponent(msg),'_blank');}
+function openModal(html){$('modalBody').innerHTML=html;$('modal').classList.add('open');}
+function closeModal(){$('modal').classList.remove('open');}
+function uid(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function compressImg(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,600/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.65));};img.src=e.target.result;};r.readAsDataURL(file);}
+
+/* ============ DB LAYER (localStorage demo / Firestore) ============ */
+let MODE='demo', FB=null, DBF=null, USER=null;
+const LS_KEY='wbm_data_v1';
+let MEM={products:[],orders:[],customers:[],expenses:[],settings:{shop:'Demo Shop',phone:''},seq:1};
+
+function memLoad(){try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d)MEM=d;}catch(e){}}
+function memSave(){try{localStorage.setItem(LS_KEY,JSON.stringify(MEM));}catch(e){alert('Storage full! Purani tasveerain hatayein.');}}
+
+const DB={
+ async init(){
+   memLoad();
+   const cfg=localStorage.getItem('wbm_fb');
+   if(cfg){try{FB=firebase.initializeApp(JSON.parse(cfg));DBF=firebase.firestore();firebase.auth().onAuthStateChanged(u=>{USER=u;if(u){MODE='fb';}postAuth();});}catch(e){console.log('fb err',e);}}
+ },
+ async list(col){ if(MODE==='fb'){const s=await DBF.collection('users').doc(USER.uid).collection(col).get();return s.docs.map(d=>({id:d.id,...d.data()}));} return MEM[col]||[];},
+ async save(col,item){ if(MODE==='fb'){if(item.id&&!String(item.id).startsWith('x')){await DBF.collection('users').doc(USER.uid).collection(col).doc(item.id).set(item);return item;}const r=await DBF.collection('users').doc(USER.uid).collection(col).add(item);item.id=r.id;return item;} const arr=MEM[col]=MEM[col]||[];if(!item.id)item.id=uid();const i=arr.findIndex(x=>x.id===item.id);if(i>=0)arr[i]=item;else arr.push(item);memSave();return item;},
+ async del(col,id){ if(MODE==='fb'){await DBF.collection('users').doc(USER.uid).collection(col).doc(id).delete();return;} MEM[col]=(MEM[col]||[]).filter(x=>x.id!==id);memSave();}
+};
+
+/* ============ AUTH ============ */
+function demoLogin(){MODE='demo';localStorage.setItem('wbm_seen','1');$('demoBanner').style.display='block';postAuth();}
+async function doLogin(){
+ const e=$('li-email').value.trim(),p=$('li-pass').value;
+ if(!e||!p)return alert('Email + password likhein');
+ if(MODE!=='fb')return alert('Pehle Settings me Firebase lagayein, ya Demo use karein');
+ try{await firebase.auth().signInWithEmailAndPassword(e,p);}catch(err){alert('Login fail: '+err.message);}
+}
+async function doSignup(){
+ const e=$('li-email').value.trim(),p=$('li-pass').value;
+ if(!e||!p)return alert('Email + password likhein');
+ if(MODE!=='fb')return alert('Pehle Settings me Firebase lagayein, ya Demo use karein');
+ try{await firebase.auth().createUserWithEmailAndPassword(e,p);}catch(err){alert('Signup fail: '+err.message);}
+}
+function saveFirebase(){
+ try{const cfg=JSON.parse($('set-fb').value);localStorage.setItem('wbm_fb',JSON.stringify(cfg));alert('Save ho gaya! Page reload kar ke login karein.');location.reload();}
+ catch(e){alert('Ghalat JSON!');}
+}
+async function saveSettings(){MEM.settings.shop=$('set-shop').value||'Demo Shop';MEM.settings.phone=$('set-phone').value||'';memSave();if(MODE==='fb'&&USER){try{await DBF.collection('users').doc(USER.uid).collection('meta').doc('settings').set(MEM.settings);}catch(e){}}$('shopNameTop').textContent=MEM.settings.shop;alert('Save!');}
+
+let CUR='dash';
+async function postAuth(){
+ if(MODE==='fb'&&USER){try{const d=await DBF.collection('users').doc(USER.uid).collection('meta').doc('settings').get();if(d.exists)MEM.settings=d.data();}catch(e){}}
+ $('scr-login').classList.remove('active');$('bottomNav').style.display='flex';$('fabBtn').style.display='block';
+ if(MODE==='demo')$('demoBanner').style.display='block';
+ $('shopNameTop').textContent=MEM.settings.shop||'Demo Shop';
+ $('set-shop').value=MEM.settings.shop||'';$('set-phone').value=MEM.settings.phone||'';
+ go('dash');
+}
+function go(s){
+ CUR=s;document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+ $('scr-'+s).classList.add('active');
+ document.querySelectorAll('.bottomnav button').forEach(b=>b.classList.remove('on'));
+ const nb=$('nav-'+s);if(nb)nb.classList.add('on');
+ if(s==='dash')renderDash();if(s==='products')renderProducts();if(s==='orders')renderOrders();
+ if(s==='customers')renderCustomers();if(s==='wa')renderTmpl();if(s==='reports')renderReports();
+}
+function fabAction(){if(CUR==='products')openProductModal();else if(CUR==='orders')openOrderModal();else if(CUR==='customers')openCustomerModal();else if(CUR==='reports')openExpenseModal();else go('orders');}
+
+/* ============ DASHBOARD ============ */
+async function renderDash(){
+ const [orders,products,expenses,customers]=await Promise.all([DB.list('orders'),DB.list('products'),DB.list('expenses'),DB.list('customers')]);
+ const td=todayStr();
+ const todays=orders.filter(o=>o.date===td&&o.status!=='Cancelled');
+ const sales=todays.reduce((s,o)=>s+Number(o.total||0),0);
+ const texp=expenses.filter(e=>e.date===td).reduce((s,e)=>s+Number(e.amount||0),0);
+ const profit=todays.reduce((s,o)=>s+Number(o.profit||0),0)-texp;
+ $('st-sales').textContent=fmt(sales);
+ $('st-orders').textContent=todays.length;
+ $('st-pending').textContent=orders.filter(o=>o.status==='Pending').length;
+ $('st-delivered').textContent=orders.filter(o=>o.status==='Delivered').length;
+ $('st-exp').textContent=fmt(texp);
+ $('st-profit').textContent=fmt(profit);
+ const low=products.filter(p=>Number(p.stock||0)<5);
+ $('lowStockList').innerHTML=low.length?low.map(p=>`<div class="tl-item"><span>📦</span><span style="flex:1">${esc(p.name)}</span><span class="lowstock">${p.stock} left</span></div>`).join(''):'<div class="empty">✅ Stock theek hai</div>';
+ const rem=customers.filter(c=>c.reminderDate&&c.reminderDate>=td);
+ $('followCard').style.display=rem.length?'block':'none';
+ $('followList').innerHTML=rem.length?rem.map(c=>`<div class="tl-item"><span>⏰</span><span style="flex:1"><b>${esc(c.name)}</b> — ${esc(c.reminderNote||'')}</span><span style="color:var(--mut)">${esc(c.reminderDate)}</span><button class="wa-btn btn-sm" onclick='event.stopPropagation();openWA("${esc(c.phone||'')}",${JSON.stringify("Assalam-o-Alaikum "+(c.name||"")+"! Kya haal hain?")})'>📱</button></div>`).join(''):'<div class="empty">Koi reminder nahi</div>';
+}
+
+/* ============ PRODUCTS ============ */
+let PROD_IMG='';
+async function renderProducts(){
+ const prods=await DB.list('products');
+ const q=($('prodSearch').value||'').toLowerCase(),cat=$('prodCat').value;
+ const cats=[...new Set(prods.map(p=>p.category).filter(Boolean))];
+ $('prodCat').innerHTML='<option value="">'+t('allcat')+'</option>'+cats.map(c=>`<option ${c===cat?'selected':''}>${esc(c)}</option>`).join('');
+ const list=prods.filter(p=>(!q||p.name.toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q))&&(!cat||p.category===cat));
+ $('prodList').innerHTML=list.length?list.map(p=>`
+  <div class="item">
+   ${p.photo?`<img src="${p.photo}">`:`<div style="width:52px;height:52px;border-radius:10px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">📦</div>`}
+   <div class="info"><div class="t">${esc(p.name)}</div>
+    <div class="d">${fmt(p.price)} • Stock: <b style="color:${p.stock<5?'var(--red)':'inherit'}">${p.stock}</b>${p.sku?' • '+esc(p.sku):''}</div></div>
+   <div>
+    <button class="wa-btn btn-sm" onclick='shareProduct("${p.id}")'>📱</button>
+    <button class="btn btn-sm btn-gray" onclick='openProductModal("${p.id}")'>✏️</button>
+   </div>
+  </div>`).join(''):'<div class="empty"><div class="e">📦</div>Koi product nahi</div>';
+ window._prods=prods;
+}
+async function shareProduct(id){
+ const p=(window._prods||[]).find(x=>x.id===id);if(!p)return;
+ const shop=MEM.settings.shop||'';
+ const msg=`🛍️ *${p.name}*\n${p.description||''}\n💰 Price: ${fmt(p.price)}\n🏪 ${shop}\n\nOrder ke liye reply karein!`;
+ const tmpPh=prompt('Customer ka WhatsApp number (923...):','');
+ if(tmpPh)openWA(tmpPh,msg);
+}
+function openProductModal(id){
+ const p=id?(window._prods||[]).find(x=>x.id===id):null;
+ PROD_IMG=p&&p.photo?p.photo:'';
+ openModal(`
+  <h2>${p?'✏️ Edit':'➕ Naya'} Product</h2>
+  <input id="pm-name" placeholder="Naam *" value="${esc(p?p.name:'')}">
+  <textarea id="pm-desc" rows="2" placeholder="Tafseel">${esc(p?p.description:'')}</textarea>
+  <div class="row"><input id="pm-sku" placeholder="SKU" value="${esc(p?p.sku:'')}"><input id="pm-cat" placeholder="Category" value="${esc(p?p.category:'')}"></div>
+  <div class="row"><input id="pm-price" type="number" placeholder="Price (Rs) *" value="${p?p.price:''}"><input id="pm-cost" type="number" placeholder="Cost (Rs)" value="${p?p.cost||'':''}"></div>
+  <div class="row"><input id="pm-stock" type="number" placeholder="Stock *" value="${p?p.stock:''}">
+  <div><label>Tasveer</label><input id="pm-photo" type="file" accept="image/*" onchange="compressImg(this.files[0],u=>{PROD_IMG=u;document.getElementById('pm-prev').src=u;})"><img id="pm-prev" src="${PROD_IMG}" style="width:70px;height:70px;border-radius:10px;object-fit:cover;margin-top:6px;${PROD_IMG?'':'display:none'}"></div></div>
+  <button class="btn btn-green" onclick="saveProduct('${id||''}')">💾 Save</button>
+  ${p?`<button class="btn btn-red" onclick="delProduct('${p.id}')">🗑️ Delete</button>`:''}
+ `);
+}
+async function saveProduct(id){
+ const name=$('pm-name').value.trim(),price=+$('pm-price').value,stock=+$('pm-stock').value;
+ if(!name||!price||isNaN(stock))return alert('Naam, Price, Stock zaroori!');
+ const item={id:id||undefined,name,description:$('pm-desc').value,sku:$('pm-sku').value,category:$('pm-cat').value,price,cost:+$('pm-cost').value||0,stock,photo:PROD_IMG};
+ await DB.save('products',item);closeModal();renderProducts();
+}
+async function delProduct(id){if(!confirm('Delete karein?'))return;await DB.del('products',id);closeModal();renderProducts();}
+
+/* ============ ORDERS ============ */
+let ORD_ITEMS=[],ORD_SAVING=false;
+async function renderOrders(){
+ const orders=(await DB.list('orders')).sort((a,b)=>(b.created||'').localeCompare(a.created||''));
+ const q=($('ordSearch').value||'').toLowerCase(),st=$('ordStatus').value;
+ const list=orders.filter(o=>(!q||o.num.toLowerCase().includes(q)||(o.cname||'').toLowerCase().includes(q))&&(!st||o.status===st));
+ const bc={Pending:'b-pending',Confirmed:'b-confirmed',Processing:'b-processing',Shipped:'b-shipped',Delivered:'b-delivered',Cancelled:'b-cancelled'};
+ const pc={Paid:'b-paid',Unpaid:'b-unpaid',Partial:'b-partial'};
+ $('ordList').innerHTML=list.length?list.map(o=>`
+  <div class="item" style="align-items:flex-start">
+   <div class="info">
+    <div class="t">${esc(o.num)} <span class="badge ${bc[o.status]||''}">${o.status}</span> <span class="badge ${pc[o.payStatus]||''}">${o.payStatus}</span></div>
+    <div class="d">${esc(o.cname||'')} • ${fmt(o.total)} • ${esc(o.date||'')}</div>
+    <div style="margin-top:6px">
+     <select class="status" onchange="setOrderStatus('${o.id}',this.value)">
+      ${['Pending','Confirmed','Processing','Shipped','Delivered','Cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}
+     </select>
+     <button class="wa-btn btn-sm" onclick='event.stopPropagation();openWA("${esc(o.cphone||'')}",${JSON.stringify(waOrderMsg(o))})'>💬</button>
+     <button class="btn btn-sm btn-outline" onclick='event.stopPropagation();sendConfirm("${o.id}")'>✅ Confirm Msg</button>
+    </div>
+   </div>
+  </div>`).join(''):'<div class="empty"><div class="e">🧾</div>Koi order nahi</div>';
+ window._orders=orders;
+}
+function waOrderMsg(o){
+ const items=(o.items||[]).map(i=>`• ${i.name} x${i.qty} = ${fmt(i.qty*i.price)}`).join('\n');
+ return `🧾 *Order ${o.num}*\n${items}\n${o.discount?`Discount: -${fmt(o.discount)}\n`:''}${o.delivery?`Delivery: ${fmt(o.delivery)}\n`:''}*Total: ${fmt(o.total)}*\nStatus: ${o.status}\n🏪 ${MEM.settings.shop||''}`;
+}
+async function sendConfirm(id){
+ const o=(window._orders||[]).find(x=>x.id===id);if(!o)return;
+ const msg=`Assalam-o-Alaikum ${o.cname||''}! ✅\nAapka order *${o.num}* confirm ho gaya hai.\n*Total: ${fmt(o.total)}*\nJald deliver kar dein gay. Shukriya! 🏪`;
+ openWA(o.cphone,msg);
+}
+async function setOrderStatus(id,st){
+ const o=(window._orders||[]).find(x=>x.id===id);if(!o||o.status===st)return;
+ const wasConfirmed=o.stockDeducted;
+ o.status=st;
+ // stock guard: deduct only once when leaving Pending, restore on Cancel
+ if(!wasConfirmed&&st!=='Pending'&&st!=='Cancelled'){
+   const prods=await DB.list('products');let ok=true;
+   for(const it of (o.items||[])){const p=prods.find(x=>x.id===it.pid);if(p&&Number(p.stock)<Number(it.qty)){ok=false;alert(`Stock kam: ${p.name} (${p.stock})`);break;}}
+   if(!ok)return;
+   for(const it of (o.items||[])){const p=prods.find(x=>x.id===it.pid);if(p){p.stock=Number(p.stock)-Number(it.qty);await DB.save('products',p);}}
+   o.stockDeducted=true;
+ }
+ if(st==='Cancelled'&&wasConfirmed){
+   const prods=await DB.list('products');
+   for(const it of (o.items||[])){const p=prods.find(x=>x.id===it.pid);if(p){p.stock=Number(p.stock)+Number(it.qty);await DB.save('products',p);}}
+   o.stockDeducted=false;
+ }
+ await DB.save('orders',o);renderOrders();
+ // update customer totals
+ if(o.cphone)await refreshCustomer(o.cphone);
+}
+async function openOrderModal(){
+ ORD_ITEMS=[];ORD_SAVING=false;
+ const prods=await DB.list('products');
+ window._prods=prods;
+ openModal(`
+  <h2>🧾 Naya Order</h2>
+  <input id="om-name" placeholder="Customer naam *">
+  <div class="row"><input id="om-phone" placeholder="Phone (03...)*"><input id="om-addr" placeholder="Address"></div>
+  <label>Product shamil karein</label>
+  <div class="row"><select id="om-prod">${prods.map(p=>`<option value="${p.id}">${esc(p.name)} — ${fmt(p.price)} (${p.stock})</option>`).join('')}</select>
+  <input id="om-qty" type="number" value="1" style="max-width:70px"><button class="btn btn-sm btn-dark" onclick="ordAddItem()">+ Add</button></div>
+  <div id="om-items" style="margin:8px 0"></div>
+  <div class="row"><input id="om-disc" type="number" placeholder="Discount Rs" value="0"><input id="om-del" type="number" placeholder="Delivery Rs" value="0"></div>
+  <div class="row"><select id="om-paym"><option>Cash</option><option>JazzCash</option><option>EasyPaisa</option><option>Bank</option></select>
+  <select id="om-pays"><option>Unpaid</option><option>Paid</option><option>Partial</option></select></div>
+  <input id="om-notes" placeholder="Notes">
+  <div style="font-size:18px;font-weight:700;margin:8px 0">Total: <span id="om-total">Rs 0</span></div>
+  <button class="btn btn-green" id="om-save" onclick="saveOrder()">✅ Order Save Karein</button>
+ `);
+ ordCalc();
+}
+function ordAddItem(){
+ const prods=window._prods||[];const p=prods.find(x=>x.id===$('om-prod').value);if(!p)return;
+ const q=Math.max(1,+$('om-qty').value||1);
+ const ex=ORD_ITEMS.find(i=>i.pid===p.id);
+ if(ex)ex.qty+=q;else ORD_ITEMS.push({pid:p.id,name:p.name,price:p.price,qty:q,cost:p.cost||0});
+ ordCalc();
+}
+function ordCalc(){
+ $('om-items').innerHTML=ORD_ITEMS.map((i,x)=>`<div class="tl-item"><span style="flex:1">${esc(i.name)} x${i.qty}</span><span>${fmt(i.qty*i.price)}</span><button class="btn btn-sm btn-red" onclick="ORD_ITEMS.splice(${x},1);ordCalc()">×</button></div>`).join('')||'<div class="empty">Koi item nahi</div>';
+ const sub=ORD_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
+ const tot=sub-(+$('om-disc').value||0)+( +$('om-del').value||0);
+ $('om-total').textContent=fmt(tot);
+}
+async function saveOrder(){
+ if(ORD_SAVING)return; // double-tap guard
+ const name=$('om-name').value.trim(),phone=$('om-phone').value.trim();
+ if(!name||!phone)return alert('Naam + phone zaroori!');
+ if(!ORD_ITEMS.length)return alert('Koi item add karein!');
+ if(!confirm(`Order save karein? Total: ${$('om-total').textContent}`))return;
+ ORD_SAVING=true;$('om-save').disabled=true;$('om-save').textContent='Save ho raha...';
+ const sub=ORD_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
+ const disc=+$('om-disc').value||0,del=+$('om-del').value||0;
+ const total=sub-disc+del;
+ const costSum=ORD_ITEMS.reduce((s,i)=>s+i.qty*(i.cost||0),0);
+ MEM.seq=(MEM.seq||1);
+ const num='ORD-'+String(MEM.seq).padStart(3,'0');MEM.seq++;memSave();
+ const o={num,cname:name,cphone:phone,caddr:$('om-addr').value,items:ORD_ITEMS,discount:disc,delivery:del,total,profit:total-costSum-del,payMethod:$('om-paym').value,payStatus:$('om-pays').value,notes:$('om-notes').value,status:'Pending',date:todayStr(),created:new Date().toISOString(),stockDeducted:false};
+ await DB.save('orders',o);
+ await refreshCustomer(phone,{name,phone,addr:$('om-addr').value});
+ closeModal();renderOrders();
+}
+
+/* ============ CUSTOMERS ============ */
+async function refreshCustomer(phone,info){
+ const cs=await DB.list('customers');
+ let c=cs.find(x=>x.phone===phone);
+ const orders=(await DB.list('orders')).filter(o=>o.cphone===phone&&o.status!=='Cancelled');
+ const spent=orders.reduce((s,o)=>s+Number(o.total||0),0);
+ const unpaid=orders.filter(o=>o.payStatus!=='Paid').reduce((s,o)=>s+Number(o.total||0),0);
+ if(!c)c={phone,name:(info&&info.name)||'',addr:(info&&info.addr)||''};
+ c.name=(info&&info.name)||c.name||'';c.addr=(info&&info.addr)||c.addr||'';
+ c.totalSpent=spent;c.orderCount=orders.length;c.outstanding=unpaid;
+ await DB.save('customers',c);
+}
+async function renderCustomers(){
+ const cs=(await DB.list('customers')).sort((a,b)=>(b.orderCount||0)-(a.orderCount||0));
+ const q=($('custSearch').value||'').toLowerCase();
+ const list=cs.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+ $('custList').innerHTML=list.length?list.map(c=>`
+  <div class="item" style="align-items:flex-start"><div class="info">
+   <div class="t">${esc(c.name||'—')} ${(c.orderCount||0)>=3?'<span class="badge badge-repeat">⭐ Repeat</span>':''}</div>
+   <div class="d">📞 ${esc(c.phone||'')} • 🧾 ${c.orderCount||0} orders • 💰 ${fmt(c.totalSpent||0)}</div>
+   ${c.outstanding?`<div class="d" style="color:var(--red)">Udhar: ${fmt(c.outstanding)}</div>`:''}
+   ${c.addr?`<div class="d">📍 ${esc(c.addr)}</div>`:''}
+   <div style="margin-top:6px">
+    <button class="wa-btn btn-sm" onclick='openWA("${esc(c.phone||'')}",${JSON.stringify("Assalam-o-Alaikum "+(c.name||"")+"!")})'>💬</button>
+    <button class="btn btn-sm btn-gray" onclick='openCustomerModal("${c.id}")'>✏️</button>
+    <button class="btn btn-sm btn-outline" onclick='setReminder("${c.id}")'>⏰ Reminder</button>
+   </div></div></div>`).join(''):'<div class="empty"><div class="e">👥</div>Koi customer nahi</div>';
+ window._custs=cs;
+}
+function openCustomerModal(id){
+ const c=id?(window._custs||[]).find(x=>x.id===id):null;
+ openModal(`<h2>👤 ${c?'Edit':'Naya'} Customer</h2>
+  <input id="cm-name" placeholder="Naam *" value="${esc(c?c.name:'')}">
+  <input id="cm-phone" placeholder="Phone (03...) *" value="${esc(c?c.phone:'')}">
+  <input id="cm-addr" placeholder="Address" value="${esc(c?c.addr:'')}">
+  <textarea id="cm-notes" rows="2" placeholder="Notes">${esc(c?c.notes:'')}</textarea>
+  <button class="btn btn-green" onclick="saveCustomer('${id||''}')">💾 Save</button>`);
+}
+async function saveCustomer(id){
+ const name=$('cm-name').value.trim(),phone=$('cm-phone').value.trim();
+ if(!name||!phone)return alert('Naam + phone zaroori!');
+ const cs=await DB.list('customers');let c=cs.find(x=>x.id===id)||{phone};
+ c.name=name;c.phone=phone;c.addr=$('cm-addr').value;c.notes=$('cm-notes').value;
+ await DB.save('customers',c);closeModal();renderCustomers();
+}
+async function setReminder(id){
+ const c=(window._custs||[]).find(x=>x.id===id);if(!c)return;
+ const d=prompt('Reminder date (YYYY-MM-DD):',todayStr());if(!d)return;
+ const n=prompt('Note:','Follow-up call');if(n===null)return;
+ c.reminderDate=d;c.reminderNote=n;await DB.save('customers',c);alert('Reminder set!');renderCustomers();
+}
+
+/* ============ WHATSAPP TEMPLATES ============ */
+function renderTmpl(){
+ const S=MEM.settings.shop||'Dukan';
+ const TPL=[
+  {n:'🧾 Order Confirmation',m:`Assalam-o-Alaikum! ✅\nAapka order confirm ho gaya.\n🏪 ${S}\nShukriya!`},
+  {n:'💰 Payment Reminder',m:`Assalam-o-Alaikum!\nYaad dehani: aapka payment *{amount}* baqi hai.\n🏪 ${S}\nJazzCash/EasyPaisa par bhej dein. Shukriya!`},
+  {n:'🚚 Dispatch',m:`Assalam-o-Alaikum! 📦\nAapka order rawana kar diya gaya hai.\n🏪 ${S}`},
+  {n:'✅ Delivery',m:`Assalam-o-Alaikum!\nAapka order deliver ho gaya. 🎉\nUmeed hai pasand aya hoga!\n🏪 ${S}`},
+  {n:'🆕 New Product',m:`Assalam-o-Alaikum! 🆕\nNaya product aya hai: *{product}*\nPrice: *{price}*\nOrder ke liye reply karein!\n🏪 ${S}`},
+  {n:'👋 Follow-up',m:`Assalam-o-Alaikum!\nKya haal hain? Kuch chahiye to batayein!\n🏪 ${S}`}
+ ];
+ $('tmplList').innerHTML=TPL.map((x,i)=>`<div class="tmpl"><b>${x.n}</b><pre>${esc(x.m)}</pre>
+  <input id="tp-${i}" placeholder="Customer WhatsApp number (923...)">
+  <button class="btn btn-green btn-sm" onclick="sendTmpl(${i})">📱 WhatsApp par Bhejein</button></div>`).join('');
+ window._tpl=TPL;
+}
+function sendTmpl(i){
+ const ph=$('tp-'+i).value.trim();if(!ph)return alert('Number likhein!');
+ openWA(ph,window._tpl[i].m);
+}
+
+/* ============ EXPENSES ============ */
+function openExpenseModal(){
+ openModal(`<h2>💸 Naya Kharcha</h2>
+  <input id="em-title" placeholder="Kis cheez ka? *">
+  <input id="em-amt" type="number" placeholder="Amount Rs *">
+  <div class="row"><input id="em-date" type="date" value="${todayStr()}">
+  <select id="em-cat"><option>Stock</option><option>Rent</option><option>Bills</option><option>Salary</option><option>Transport</option><option>Other</option></select></div>
+  <button class="btn btn-green" onclick="saveExpense()">💾 Save</button>`);
+}
+async function saveExpense(){
+ const t=$('em-title').value.trim(),a=+$('em-amt').value;
+ if(!t||!a)return alert('Title + amount zaroori!');
+ await DB.save('expenses',{title:t,amount:a,date:$('em-date').value,cat:$('em-cat').value});
+ closeModal();renderReports();
+}
+
+/* ============ REPORTS ============ */
+let REP_RANGE='day';
+function setRepRange(r){REP_RANGE=r;renderReports();}
+function rangeStart(){
+ const n=new Date();
+ if(REP_RANGE==='day')return todayStr(n);
+ if(REP_RANGE==='week'){n.setDate(n.getDate()-6);return todayStr(n);}
+ n.setDate(1);return todayStr(n);
+}
+async function renderReports(){
+ const [orders,expenses]=await Promise.all([DB.list('orders'),DB.list('expenses')]);
+ const from=rangeStart(),to=todayStr();
+ const os=orders.filter(o=>o.date>=from&&o.date<=to&&o.status!=='Cancelled');
+ const ex=expenses.filter(e=>e.date>=from&&e.date<=to);
+ const gross=os.reduce((s,o)=>s+Number(o.total||0),0);
+ const disc=os.reduce((s,o)=>s+Number(o.discount||0),0);
+ const del=os.reduce((s,o)=>s+Number(o.delivery||0),0);
+ const exp=ex.reduce((s,e)=>s+Number(e.amount||0),0);
+ const cost=os.reduce((s,o)=>s+(o.profit!=null?Number(o.total)-Number(o.profit)-Number(o.delivery||0):0),0);
+ const profit=gross-cost-exp;
+ const unpaid=os.filter(o=>o.payStatus!=='Paid').reduce((s,o)=>s+Number(o.total||0),0);
+ const rows=[['Gross Sales',fmt(gross)],['Discounts','-'+fmt(disc)],['Delivery Charges',fmt(del)],['Expenses','-'+fmt(exp)],['Estimated Profit',fmt(profit)],['Orders',os.length],['Unpaid',fmt(unpaid)]];
+ $('repTable').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+ window._rep={os,ex,from,to};
+ $('expList').innerHTML=ex.length?ex.map(e=>`<div class="tl-item"><span style="flex:1">${esc(e.title)} <small style="color:var(--mut)">${esc(e.cat||'')}</small></span><span style="color:var(--red)">${fmt(e.amount)}</span><button class="btn btn-sm btn-red" onclick="delExp('${e.id}')">×</button></div>`).join(''):'<div class="empty">Koi kharcha nahi</div>';
+}
+async function delExp(id){if(!confirm('Delete?'))return;await DB.del('expenses',id);renderReports();}
+function exportCSV(){
+ const {os,ex,from,to}=window._rep||{};
+ let csv='Type,Date,Title,Amount\n';
+ (os||[]).forEach(o=>{csv+=`Order,${o.date},${(o.num||'').replace(/,/g,'')},${o.total}\n`;});
+ (ex||[]).forEach(e=>{csv+=`Expense,${e.date},${(e.title||'').replace(/,/g,'')},${e.amount}\n`;});
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`report-${from}-${to}.csv`;a.click();
+}
+
+/* ============ INIT ============ */
+window.addEventListener('load',async()=>{applyLang();await DB.init();if(!USER&&MODE==='demo'&&localStorage.getItem('wbm_seen')){postAuth();}else{$('scr-login').classList.add('active');}});
+</script>
+</body>
+</html>
