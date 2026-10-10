@@ -314,8 +314,8 @@ select option{background:var(--bg2)}
 <!-- ================= VIDEO EDITOR ================= -->
 <div class="page" id="pg-veditor">
   <h2>🎬 <span data-i18n="ve_title">Video Editor</span></h2>
-  <p class="small" data-i18n="ve_honest">⚠️ Simple editor hai — CapCut jesa full editor nahi. Export .webm me hoga.</p>
-  <p class="small" data-i18n="ve_capcut_note">⚠️ CapCut jesa professional editor nahi — basic mobile editor hai. Heavy effects ke liye CapCut app use karein.</p>
+  <p class="small" data-i18n="ve_honest">⚠️ Simple editor hai — export .webm me hoga.</p>
+  <p class="small" data-i18n="ve_capcut_note">⚠️ Basic mobile editor hai — heavy 4K projects slow ho sakte hain.</p>
   <p class="small hidden" id="veAdvNote" data-i18n="ve_browser_note">⚠️ Browser-based editor hai — 4K/heavy projects slow ho sakte hain.</p>
   <div class="row2">
     <button class="btn btn-dark btn-sm" id="veModeBtn" onclick="veToggleMode()">🔧 <span data-i18n="ve_adv">Advanced</span></button>
@@ -414,7 +414,7 @@ select option{background:var(--bg2)}
 <!-- ================= DESIGN STUDIO ================= -->
 <div class="page" id="pg-design">
   <h2>🎨 <span data-i18n="ds_title">Design Studio</span></h2>
-  <p class="small" data-i18n="ds_note">Mini designer hai — full Canva nahi. Pro designs ke liye Canva app!</p>
+  <p class="small" data-i18n="ds_note">Mini designer hai — pro kaam ke liye desktop software behtar.</p>
   <label><span data-i18n="ds_templates">Templates</span></label>
   <div class="row2">
     <button class="btn btn-dark btn-sm" onclick="dsSetTpl(1280,720)">YouTube 1280×720</button>
@@ -1666,12 +1666,12 @@ autosaved:"Auto-saved ✓",
 rec_voice:"🎤 Record your voice (narration)",rec_start:"Record",rec_stop:"Stop",rec_play:"▶️ Listen",rec_mic_err:"❌ Mic permission denied!",
 filter_label:"🎨 Scene Filter",f_normal:"Normal",f_bw:"⚫ Black & White (flashback!)",f_sepia:"🟤 Sepia (memories!)",f_dark:"🌑 Dark (horror!)",
 timeline:"⏱️ Timeline",
-ve_title:"Video Editor",ve_honest:"⚠️ Simple editor — not a full editor like CapCut. Export is .webm.",
+ve_title:"Video Editor",ve_honest:"⚠️ Simple editor — export is .webm.",
 ve_adv:"Advanced",ve_basic:"Basic",ve_upload:"Choose Video",ve_frame:"Frame → PNG",ve_start:"Start",ve_end:"End",ve_vol:"Volume",
 ve_split:"Split here",ve_export:"Export (.webm)",ve_filter:"Filter",
-share:"Share",ve_capcut_note:"⚠️ Not a professional editor like CapCut — basic mobile editor. For heavy effects use the CapCut app.",
+share:"Share",ve_capcut_note:"⚠️ Basic mobile editor — heavy 4K projects may be slow.",
 ve_browser_note:"⚠️ Browser-based editor — 4K/heavy projects may be slow. For professional films desktop software is better.",
-ds_title:"Design Studio",ds_note:"Mini designer — not full Canva. For pro designs use the Canva app!",
+ds_title:"Design Studio",ds_note:"Mini designer — desktop software is better for pro work.",
 ds_templates:"Templates",ds_bg:"Background",ds_text:"Text",ds_shape:"Shapes",ds_sticker:"Stickers",
 ds_add_text:"Add Text",ds_size:"Size",ds_color:"Color",ds_bold:"Bold",ds_italic:"Italic",
 ds_up:"⬆️ Forward",ds_down:"⬇️ Backward",ds_del:"🗑️ Delete",ds_dl:"⬇️ Download PNG",
@@ -1686,12 +1686,12 @@ autosaved:"Auto-saved ✓",
 rec_voice:"🎤 Apni awaz record karein (narration)",rec_start:"Record",rec_stop:"Rokein",rec_play:"▶️ Sunein",rec_mic_err:"❌ Mic ki ijazat nahi mili!",
 filter_label:"🎨 Scene Filter",f_normal:"Normal",f_bw:"⚫ Black & White (flashback!)",f_sepia:"🟤 Sepia (yaadein!)",f_dark:"🌑 Dark (horror!)",
 timeline:"⏱️ Timeline",
-ve_title:"Video Editor",ve_honest:"⚠️ Simple editor hai — CapCut jesa full editor nahi. Export .webm me hoga.",
+ve_title:"Video Editor",ve_honest:"⚠️ Simple editor hai — export .webm me hoga.",
 ve_adv:"Advanced",ve_basic:"Basic",ve_upload:"Video Chunein",ve_frame:"Frame → PNG",ve_start:"Shuru",ve_end:"Aakhir",ve_vol:"Awaz",
 ve_split:"Yahan split karein",ve_export:"Export Karein (.webm)",ve_filter:"Filter",
-share:"Share Karein",ve_capcut_note:"⚠️ CapCut jesa professional editor nahi — basic mobile editor hai. Heavy effects ke liye CapCut app use karein.",
+share:"Share Karein",ve_capcut_note:"⚠️ Basic mobile editor hai — heavy 4K projects slow ho sakte hain.",
 ve_browser_note:"⚠️ Browser-based editor hai — 4K/heavy projects slow ho sakte hain. Professional films ke liye desktop software behtar.",
-ds_title:"Design Studio",ds_note:"Mini designer hai — full Canva nahi. Pro designs ke liye Canva app!",
+ds_title:"Design Studio",ds_note:"Mini designer hai — pro kaam ke liye desktop software behtar.",
 ds_templates:"Templates",ds_bg:"Background",ds_text:"Text",ds_shape:"Shapes",ds_sticker:"Stickers",
 ds_add_text:"Text Add Karein",ds_size:"Size",ds_color:"Rang",ds_bold:"Bold",ds_italic:"Italic",
 ds_up:"⬆️ Aagay",ds_down:"⬇️ Peechay",ds_del:"🗑️ Delete",ds_dl:"⬇️ PNG Download",
@@ -2085,7 +2085,7 @@ function veSeekEv(e){ try{ const r=e.currentTarget.getBoundingClientRect(); veV.
   });
 })();
 
-/* ================= DESIGN STUDIO (mini-canva) ================= */
+/* ================= DESIGN STUDIO ================= */
 const DS={W:1280,H:720,bg:{type:'grad',i:0},els:[],sel:-1,seq:1};
 const DS_GRADS=[['#f5c518','#8a4b00'],['#2196f3','#0d2a5e'],['#9c27b0','#3a0a5e'],['#f44336','#5e0a0a'],['#4caf50','#0e3a1a'],['#2a2a3e','#050508']];
 const DS_EMOJIS=['⭐','❤️','🔥','🎉','👍','💡','😎','🌙'];
