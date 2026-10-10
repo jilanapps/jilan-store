@@ -342,8 +342,8 @@ select option{background:var(--bg2)}
     <button class="btn btn-dark btn-sm" onclick="document.getElementById('veFile').click()">📤 <span data-i18n="ve_upload">Video Chunein</span></button>
     <input type="file" id="veFile" accept="video/*" class="hidden">
   </div>
-  <video id="veVideo" class="hidden" playsinline preload="auto"></video>
-  <video id="vePipV" class="hidden" playsinline muted loop></video>
+  <video id="veVideo" playsinline preload="auto" style="position:absolute;width:4px;height:4px;opacity:0;pointer-events:none"></video>
+  <video id="vePipV" playsinline muted loop style="position:absolute;width:4px;height:4px;opacity:0;pointer-events:none"></video>
   <canvas id="veCanvas" width="640" height="360" style="width:100%;border-radius:8px;background:#000;margin-top:8px"></canvas>
   <div class="row2 mt">
     <button class="btn btn-gold btn-sm" id="vePlayBtn" onclick="veTogglePlay()">▶️ Play</button>
@@ -1783,6 +1783,7 @@ function veEnsure(){
   veV=document.getElementById('veVideo'); veC=document.getElementById('veCanvas');
   veX=veC.getContext('2d'); vePipV=document.getElementById('vePipV');
   veV.addEventListener('loadedmetadata',veMeta);
+  veV.addEventListener('error',function(){ var st=document.getElementById('veStatus'); if(st) st.textContent='❌ '+(LANG==='ur'?'Video load nahi hui — koi dusri video try karein':'Video failed to load — try another file'); });
   veV.addEventListener('timeupdate',()=>{ if(VE.adv) veRenderTimeline(); });
   veV.addEventListener('play',()=>{ const b=document.getElementById('vePlayBtn'); if(b) b.textContent='⏸️ Pause'; });
   veV.addEventListener('pause',()=>{ const b=document.getElementById('vePlayBtn'); if(b) b.textContent='▶️ Play'; });
@@ -1816,10 +1817,11 @@ function veMeta(){
       VE.videoSrc=VE.audioCtx.createMediaElementSource(v);
       const g=VE.audioCtx.createGain();
       VE.analyser=VE.audioCtx.createAnalyser(); VE.analyser.fftSize=256;
-      VE.videoSrc.connect(g); g.connect(VE.analyser); VE.analyser.connect(VE.audioDest);
+      VE.videoSrc.connect(g); g.connect(VE.analyser); VE.analyser.connect(VE.audioDest); try{g.connect(VE.audioCtx.destination);}catch(e2){}
     }catch(e){}
   }
   v.volume=VE.vol; v.playbackRate=VE.speed;
+  try{ if(v.currentTime===0) v.currentTime=0.01; }catch(e){}
   document.getElementById('veStatus').textContent='✅ '+(LANG==='ur'?'Video tayyar!':'Video ready!');
   veRenderTimeline();
 }
@@ -2234,7 +2236,7 @@ function dsDownload(){
   const a=document.createElement('a');
   a.href=dsC.toDataURL('image/png'); a.download='design-'+DS.W+'x'+DS.H+'.png'; a.click();
 }
-async (function(){ const bf=document.getElementById('dsBgFile'); if(bf) bf.addEventListener('change',function(){
+(function(){ const bf=document.getElementById('dsBgFile'); if(bf) bf.addEventListener('change',function(){
   const f=this.files[0]; if(!f) return;
   dsEnsure();
   if(dsBgUrl) try{URL.revokeObjectURL(dsBgUrl);}catch(e){}
