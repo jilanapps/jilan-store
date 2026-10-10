@@ -481,7 +481,17 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
-  </style>
+  
+/* Image lightbox - tap product image to enlarge */
+#imgLightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column}
+#imgLightbox.open{display:flex}
+#imgLightbox img{max-width:94vw;max-height:82vh;border-radius:8px}
+#imgLightbox .lb-name{color:#fff;margin-top:10px;font-size:15px;padding:0 16px;text-align:center}
+#imgLightbox .lb-close{position:absolute;top:14px;right:18px;color:#fff;font-size:32px;background:none;border:none;cursor:pointer}
+#imgLightbox .lb-copy{background:#25d366;color:#fff;border:none;padding:10px 22px;border-radius:30px;font-weight:bold;margin-top:10px;font-size:14px}
+.product-body h3,.product-body .price{-webkit-user-select:text;user-select:text}
+.product-media img{cursor:zoom-in}
+</style>
 </head>
 <body>
   <header class="topbar">
@@ -1309,5 +1319,37 @@
       renderCart();
     })();
   </script>
+
+<div id="imgLightbox" role="dialog" aria-label="Product image viewer">
+<button class="lb-close" aria-label="Close">&times;</button>
+<img id="lbImg" src="" alt="">
+<div class="lb-name" id="lbName"></div>
+<button class="lb-copy" id="lbCopy">📋 Copy Product Details</button>
+</div>
+<script>
+(function(){
+var lb=document.getElementById('imgLightbox'),img=document.getElementById('lbImg'),
+    nm=document.getElementById('lbName'),cp=document.getElementById('lbCopy'),cur={n:'',p:''};
+function openLb(src,name,price){img.src=src;nm.textContent=name+' — '+price;cur={n:name,p:price};lb.classList.add('open');document.body.style.overflow='hidden';}
+function closeLb(){lb.classList.remove('open');document.body.style.overflow='';}
+lb.querySelector('.lb-close').onclick=closeLb;
+lb.onclick=function(e){if(e.target===lb)closeLb();};
+cp.onclick=function(){
+  var t=cur.n+' — '+cur.p;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){cp.textContent='✅ Copied!';setTimeout(function(){cp.textContent='📋 Copy Product Details';},1500);});}
+  else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);cp.textContent='✅ Copied!';setTimeout(function(){cp.textContent='📋 Copy Product Details';},1500);}
+};
+document.addEventListener('click',function(e){
+  var m=e.target.closest('.product-media img');
+  if(m){
+    var card=m.closest('.product-card');
+    var name=card?card.querySelector('.product-body h3').textContent:'';
+    var price=card?card.querySelector('.product-body .price').textContent:'';
+    openLb(m.src,name,price);
+  }
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
+})();
+</script>
 </body>
 </html>
