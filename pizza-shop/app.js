@@ -31,6 +31,10 @@ waNumber:"Shop WhatsApp Number",waHint:"e.g. 923001234567 (country code, no +). 
 saveSet:"Save Settings",saved:"Saved! ✅",noOrders:"No orders yet.",needName:"Please enter your name.",needMobile:"Please enter a valid mobile number (03XX-XXXXXXX).",
 needAddr:"Please enter delivery address.",orderType:"Delivery",pickupT:"Pickup",custInfo:"Customer Info",backHome:"← Back to Home",
 viewOrder:"View",markSent:"Demo mode: WhatsApp not configured.",demoLock:"DEMO",pizza:"Pizza",side:"Side",drink:"Drink",dessert:"Dessert",deal:"Deal",
+promo:"Daily Promo",promoNew:"Aaj ki promo tayyar! 🎨",dTitle:"Deal title",dDisc:"Discount %",dPrice:"Deal price (Rs)",dOld:"Old price (Rs)",
+regen:"🎲 Regenerate",dlImg:"⬇️ Download Image",shareWA:"📱 Share on WhatsApp",promoSaved:"Promo saved! ✅",
+promoHint:"Image sirf tab banti hai jab app khuli ho (background me nahi). Share dabane par image aap ke phone ke share menu se jayegi — WhatsApp me broadcast list aap khud select karein. Koi auto-send nahi hota.",
+waShareFallback:"Image download ho gayi — WhatsApp khol kar broadcast list me khud attach kar ke bhejein.",
 qtyShort:"Qty",orderEmpty:"Cart is empty!",invName:"Item",invQty:"Qty",invPrice:"Price",invTotal:"Total",invSub:"Subtotal",invDel:"Delivery",invGrand:"Grand Total",invThanks:"Thank you for ordering! 🙏"},
 ur:{tag:"گرم اور تازہ پیزا",heroT:"تازہ، گرم اور چیز سے بھرپور! 🍕",heroS:"اپنا پسندیدہ پیزا منٹوں میں آرڈر کریں",
 deals:"آج کی ڈیلز",popular:"مشہور پیزے",cart:"آپ کی ٹوکری",checkout:"آرڈر مکمل کریں →",checkoutT:"آرڈر کی تفصیل",
@@ -55,6 +59,10 @@ waNumber:"دکان کا واٹس ایپ نمبر",waHint:"مثلاً 92300123456
 saveSet:"سیٹنگز محفوظ کریں",saved:"محفوظ ہو گیا! ✅",noOrders:"ابھی کوئی آرڈر نہیں۔",needName:"براہ کرم نام لکھیں۔",needMobile:"درست موبائل نمبر لکھیں (03XX-XXXXXXX)۔",
 needAddr:"ڈیلیوری کا پتہ لکھیں۔",orderType:"ڈیلیوری",pickupT:"پک اپ",custInfo:"کسٹمر کی معلومات",backHome:"← ہوم پر واپس",
 viewOrder:"دیکھیں",markSent:"ڈیمو موڈ: واٹس ایپ نمبر سیٹ نہیں۔",demoLock:"DEMO",pizza:"پیزا",side:"سائیڈ",drink:"مشروب",dessert:"میٹھا",deal:"ڈیل",
+promo:"روزانہ پرومو",promoNew:"آج کی پرومو تیار ہے! 🎨",dTitle:"ڈیل کا عنوان",dDisc:"رعایت %",dPrice:"ڈیل قیمت (روپے)",dOld:"پرانی قیمت (روپے)",
+regen:"🎲 دوبارہ بنائیں",dlImg:"⬇️ ڈاؤن لوڈ",shareWA:"📱 واٹس ایپ شیئر",promoSaved:"پرومو محفوظ! ✅",
+promoHint:"تصویر صرف تب بنتی ہے جب ایپ کھلی ہو (بیک گراؤنڈ میں نہیں)۔ شیئر دبانے پر تصویر آپ کے فون کے شیئر مینیو سے جائے گی — واٹس ایپ میں براڈکاسٹ لسٹ آپ خود منتخب کریں۔ کوئی آٹو سینڈ نہیں ہوتا۔",
+waShareFallback:"تصویر ڈاؤن لوڈ ہو گئی — واٹس ایپ کھول کر براڈکاسٹ لسٹ میں خود اٹیچ کر کے بھیجیں۔",
 qtyShort:"تعداد",orderEmpty:"ٹوکری خالی ہے!",invName:"آئٹم",invQty:"تعداد",invPrice:"قیمت",invTotal:"کل",invSub:"ذیلی رقم",invDel:"ڈیلیوری",invGrand:"کل رقم",invThanks:"آرڈر کا شکریہ! 🙏"}
 };
 function T(k){ return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k; }
@@ -375,12 +383,12 @@ function renderAccount(){
     '<div style="height:12px"></div><button class="btn btn-red" onclick="doLogin()">'+T('login')+'</button></div>';
     return;
   }
-  var tabs=[['dash','📊'],['menu','🍕 '+T('menuMgmt')],['orders','📦 '+T('ordersAdm')],['set','⚙️ '+T('settings')]];
+  var tabs=[['dash','📊'],['promo','🎨 '+T('promo')],['menu','🍕 '+T('menuMgmt')],['orders','📦 '+T('ordersAdm')],['set','⚙️ '+T('settings')]];
   var h='<div class="sec-title">🔐 '+T('admin')+' <span style="font-size:11px;background:var(--gold);color:#fff;padding:2px 8px;border-radius:8px">'+T('demoLock')+'</span></div>';
   h+='<div class="cat-pills">'+tabs.map(function(t){return '<div class="cat-pill'+(adminTab===t[0]?' on':'')+'" onclick="adminTab=\''+t[0]+'\';renderAccount()">'+t[1]+'</div>';}).join('')+'</div><div id="admBody"></div>';
   h+='<button class="btn btn-ghost" onclick="localStorage.removeItem(\'jps_admin\');renderAccount()">'+T('logout')+'</button>';
   box.innerHTML=h;
-  if(adminTab==='dash') admDash(); else if(adminTab==='menu') admMenu();
+  if(adminTab==='dash') admDash(); else if(adminTab==='promo') admPromo(); else if(adminTab==='menu') admMenu();
   else if(adminTab==='orders') admOrders(); else admSettings();
 }
 function doLogin(){
@@ -399,6 +407,7 @@ function admDash(){
     '<div class="dcard"><div class="v">'+orders.length+'</div><div class="l">📦 Total Orders</div></div>'+
     '<div class="dcard"><div class="v">'+pend+'</div><div class="l">⏳ Pending</div></div>'+
     '<div class="dcard"><div class="v">'+menu.length+'</div><div class="l">🍕 Menu Items</div></div></div>'+
+    '<button class="btn btn-orange" onclick="adminTab=\'promo\';renderAccount()">🎨 '+T('promo')+' — '+esc(promoDateStr())+'</button><div style="height:10px"></div>'+
     '<div class="sec-title">🕘 Recent Orders</div>'+
     (orders.slice(0,5).map(function(o){return '<div class="oitem"><div class="h"><span>'+o.no+'</span>'+stBadge(o.status)+'</div><div style="font-size:12px;color:var(--muted)">'+rs(o.total)+' · '+esc(o.name)+'</div></div>';}).join('')||'<p style="color:var(--muted)">'+T('noOrders')+'</p>');
 }
@@ -470,6 +479,135 @@ function saveCfg(){
   toast(T('saved'));
 }
 
+/* ---------- DAILY PROMO IMAGE ---------- */
+function todayKey(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function promoDateStr(){ try{ return new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return todayKey(); } }
+function getPromo(){ try{var p=JSON.parse(localStorage.getItem('jps_promo')); if(p&&p.date) return p;}catch(e){} return null; }
+function setPromo(p){ try{localStorage.setItem('jps_promo',JSON.stringify(p));}catch(e){} }
+function genPromo(){
+  var all=getMenu(), menu=all.filter(function(p){return p.cat==='pizza';});
+  if(!menu.length) menu=all;
+  var pz=menu[Math.floor(Math.random()*menu.length)];
+  var pct=[10,15,20,25][Math.floor(Math.random()*4)];
+  var base=pz.prices.M||pz.prices.L||pz.prices.S||pz.prices.one||0;
+  var price=Math.max(99,Math.round(base*(1-pct/100)/10)*10-1);
+  var p={date:todayKey(),en:pz.en,ur:pz.ur||pz.en,pct:pct,price:price,old:base,emoji:pz.emoji||'🍕'};
+  setPromo(p); return p;
+}
+function roundRectP(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+function fitFont(x,text,maxW,base,weight){
+  var s=base;
+  x.font=weight+' '+s+'px "Segoe UI",Arial,sans-serif';
+  while(x.measureText(text).width>maxW&&s>30){ s-=6; x.font=weight+' '+s+'px "Segoe UI",Arial,sans-serif'; }
+}
+function drawPromoCanvas(p){
+  var W=1080,H=1080,c=document.createElement('canvas'); c.width=W; c.height=H;
+  var x=c.getContext('2d'), u=(LANG==='ur');
+  var g=x.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#b31217'); g.addColorStop(.55,'#d92d1a'); g.addColorStop(1,'#f97316');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.fillStyle='rgba(255,255,255,0.07)';
+  x.beginPath(); x.arc(120,180,150,0,7); x.fill();
+  x.beginPath(); x.arc(960,860,190,0,7); x.fill();
+  x.beginPath(); x.arc(900,140,90,0,7); x.fill();
+  x.fillStyle='rgba(0,0,0,0.12)';
+  x.beginPath(); x.arc(140,900,120,0,7); x.fill();
+  x.textAlign='center'; x.textBaseline='middle';
+  var shop=getCfg().shop||'Jilan Pizza Shop';
+  x.font='800 44px "Segoe UI",Arial,sans-serif';
+  var sw=x.measureText('🍕 '+shop).width+80;
+  x.fillStyle='rgba(255,255,255,0.95)'; roundRectP(x,(W-sw)/2,44,sw,84,42); x.fill();
+  x.fillStyle='#b31217'; x.fillText('🍕 '+shop,W/2,88);
+  x.fillStyle='#ffe9c9'; x.font='800 60px "Segoe UI",Arial,sans-serif';
+  x.fillText(u?'آج کی ڈیل':"TODAY'S DEAL",W/2,196);
+  x.fillStyle='#ffffff'; x.font='600 38px "Segoe UI",Arial,sans-serif';
+  x.fillText(promoDateStr()+' · '+(u?'صرف آج کے لیے':'Valid today only'),W/2,252);
+  x.font='380px serif'; x.fillText(p.emoji||'🍕',W/2,530);
+  x.fillStyle='#ffd200';
+  x.beginPath(); x.arc(872,392,108,0,7); x.fill();
+  x.fillStyle='#b31217'; x.font='800 64px "Segoe UI",Arial,sans-serif';
+  x.fillText('-'+p.pct+'%',872,394);
+  x.fillStyle='#fff'; fitFont(x,u?p.ur:p.en,920,84,800);
+  x.fillText(u?p.ur:p.en,W/2,776);
+  x.fillStyle='#fff'; x.font='800 108px "Segoe UI",Arial,sans-serif';
+  var pr='Rs '+Number(p.price).toLocaleString('en-PK');
+  x.fillText(pr,W/2-80,878);
+  x.fillStyle='#ffd9a8'; x.font='600 52px "Segoe UI",Arial,sans-serif';
+  var old='Rs '+Number(p.old).toLocaleString('en-PK');
+  var ow=x.measureText(old).width;
+  x.fillText(old,W/2+170,870);
+  x.strokeStyle='#fff'; x.lineWidth=5;
+  x.beginPath(); x.moveTo(W/2+170-ow/2,870); x.lineTo(W/2+170+ow/2,870); x.stroke();
+  var ct=u?'📱 واٹس ایپ پر آرڈر کریں':'📱 Order on WhatsApp';
+  x.font='800 46px "Segoe UI",Arial,sans-serif';
+  var cw=x.measureText(ct).width+90;
+  x.fillStyle='#fff'; roundRectP(x,(W-cw)/2,932,cw,80,40); x.fill();
+  x.fillStyle='#15803d'; x.fillText(ct,W/2,974);
+  x.fillStyle='rgba(255,255,255,0.85)'; x.font='700 30px "Segoe UI",Arial,sans-serif';
+  x.fillText('🏷️ DEMO by Jilan Apps',W/2,1044);
+  return c;
+}
+function promoShareText(){
+  var p=getPromo(); if(!p) return '';
+  var u=(LANG==='ur');
+  return '🍕 '+(u?'آج کی ڈیل':'Today\'s Deal')+': '+(u?p.ur:p.en)+' — '+p.pct+'% OFF, '+(u?'صرف':'only')+' Rs '+Number(p.price).toLocaleString('en-PK')+'! '+(u?'آج ہی آرڈر کریں 🙏':'Order today 🙏');
+}
+function dlPromoBlob(blob,p){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='promo-'+p.date+'.png';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ try{URL.revokeObjectURL(a.href);}catch(e){} a.remove(); },2000);
+}
+function dlPromo(){
+  var p=getPromo(); if(!p) return;
+  drawPromoCanvas(p).toBlob(function(b){ if(b) dlPromoBlob(b,p); },'image/png');
+}
+function sharePromo(){
+  var p=getPromo(); if(!p) return;
+  drawPromoCanvas(p).toBlob(function(blob){
+    if(!blob){ toast(T('dlImg')); return; }
+    var file;
+    try{ file=new File([blob],'promo-'+p.date+'.png',{type:'image/png'}); }catch(e){ file=null; }
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:promoShareText(),text:promoShareText()}).catch(function(){});
+    } else {
+      dlPromoBlob(blob,p);
+      toast(T('waShareFallback'));
+    }
+  },'image/png');
+}
+function admPromo(){
+  var p=getPromo()||genPromo();
+  var h='<div class="sec-title">🎨 '+T('promo')+'</div><div class="note">'+T('promoHint')+'</div>';
+  h+='<div style="text-align:center"><img id="promoImg" style="max-width:320px;width:100%;border-radius:14px;box-shadow:var(--shadow)" alt="promo"></div><div style="height:10px"></div>';
+  h+='<div class="form">';
+  h+='<label>'+T('dTitle')+' (EN)</label><input id="pr-en" value="'+esc(p.en)+'">';
+  h+='<label>'+T('dTitle')+' (UR)</label><input id="pr-ur" value="'+esc(p.ur)+'">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+  h+='<div><label>'+T('dDisc')+'</label><input id="pr-pct" type="number" value="'+p.pct+'"></div>';
+  h+='<div><label>'+T('dPrice')+'</label><input id="pr-price" type="number" value="'+p.price+'"></div>';
+  h+='<div><label>'+T('dOld')+'</label><input id="pr-old" type="number" value="'+p.old+'"></div></div>';
+  h+='<div style="height:12px"></div>';
+  h+='<button class="btn btn-red" onclick="savePromo()">'+T('save')+'</button>';
+  h+='<button class="btn btn-ghost" onclick="regenPromo()">'+T('regen')+'</button>';
+  h+='<button class="btn btn-green" onclick="sharePromo()">'+T('shareWA')+'</button>';
+  h+='<button class="btn btn-ghost" onclick="dlPromo()">'+T('dlImg')+'</button>';
+  h+='</div>';
+  document.getElementById('admBody').innerHTML=h;
+  refreshPromoImg();
+}
+function refreshPromoImg(){ var p=getPromo(),im=document.getElementById('promoImg'); if(p&&im) im.src=drawPromoCanvas(p).toDataURL('image/png'); }
+function savePromo(){
+  var p=getPromo()||genPromo();
+  p.en=document.getElementById('pr-en').value.trim()||p.en;
+  p.ur=document.getElementById('pr-ur').value.trim()||p.ur;
+  p.pct=Math.max(0,Math.min(90,+document.getElementById('pr-pct').value||0));
+  p.price=+document.getElementById('pr-price').value||p.price;
+  p.old=+document.getElementById('pr-old').value||p.old;
+  setPromo(p); refreshPromoImg(); toast(T('promoSaved'));
+}
+function regenPromo(){ genPromo(); admPromo(); toast(T('promoNew')); }
+
 /* ---------- 3-DAY DEMO EXPIRY ---------- */
 var DEMO_MS = 3 * 86400000;
 function demoSince(){ try{ var v = localStorage.getItem('jps_demo_since'); return v ? parseInt(v, 10) : 0; }catch(e){ return 0; } }
@@ -491,4 +629,8 @@ function showDemoLock(){
 /* ---------- INIT ---------- */
 ensureDemoSince();
 if (demoExpired()) { showDemoLock(); }
-else { applyLang(); updateCartBadge(); renderHome(); updateDemoBar(); }
+else {
+  applyLang(); updateCartBadge(); renderHome(); updateDemoBar();
+  var _ep=getPromo();
+  if(!_ep||_ep.date!==todayKey()){ genPromo(); setTimeout(function(){ toast(T('promoNew')); },900); }
+}
