@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ShopEasy — Shop Smarter, Live Better</title>
+<style>
+:root{
+  --p:#6C5CE7; --pd:#5a4bd1; --a:#00D9A5; --bg:#ffffff; --bg2:#f6f6fb;
+  --card:#ffffff; --txt:#2d2d3a; --mut:#8a8a99; --line:#ececf3;
+  --shadow:0 4px 18px rgba(60,50,120,.10); --r:18px;
+}
+body.dark{
+  --bg:#14141c; --bg2:#1c1c26; --card:#1e1e2a; --txt:#f0f0f5;
+  --mut:#9a9ab0; --line:#2c2c3a; --shadow:0 4px 18px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;touch-action:manipulation;transition:background .25s,color .25s}
+.screen{display:none;min-height:100vh;padding-bottom:86px;animation:fade .22s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes slideup{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes checkmark{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+/* DEMO banner */
+.demobanner{position:sticky;top:0;z-index:200;background:linear-gradient(90deg,#6C5CE7,#00D9A5);color:#fff;text-align:center;font-size:12px;font-weight:700;padding:7px;letter-spacing:.5px}
+/* header */
+.hdr{position:sticky;top:0;z-index:100;background:var(--bg);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.hdr .logo{font-size:22px;font-weight:800;color:var(--p)}
+.hdr .logo span{color:var(--a)}
+.hdr .sp{flex:1}
+.icobtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow)}
+.icobtn:active{transform:scale(.93)}
+.badge{min-width:20px;height:20px;border-radius:10px;background:#ff5a5a;color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+/* bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 4px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(60,50,120,.08)}
+.bnav button{flex:1;border:none;background:none;color:var(--mut);font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;position:relative}
+.bnav button .ic{font-size:22px}
+.bnav button.act{color:var(--p)}
+.bnav .cbadge{position:absolute;top:0;right:calc(50% - 22px);background:#ff5a5a;color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+/* buttons */
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--p),var(--pd));cursor:pointer;box-shadow:0 6px 16px rgba(108,92,231,.35);transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.acc{background:linear-gradient(135deg,var(--a),#00b589);box-shadow:0 6px 16px rgba(0,217,165,.3)}
+.btn.ghost{background:var(--card);color:var(--p);border:2px solid var(--p);box-shadow:none}
+.btn.grey{background:var(--bg2);color:var(--txt);box-shadow:none;border:1px solid var(--line)}
+.btnrow{display:flex;gap:10px}
+/* inputs */
+.inp{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:14px;background:var(--card);color:var(--txt);font-size:15px;outline:none;transition:border .15s}
+.inp:focus{border-color:var(--p)}
+.lbl{font-size:13px;font-weight:600;color:var(--mut);margin:12px 0 6px;display:block}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin:12px 16px}
+.sec{padding:0 16px;margin-top:18px}
+.sec h3{font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.sec h3 .more{font-size:13px;color:var(--p);font-weight:600;cursor:pointer}
+/* search */
+.searchbar{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:14px;padding:12px 14px;margin:12px 16px;border:1px solid var(--line)}
+.searchbar input{flex:1;border:none;background:none;outline:none;font-size:15px;color:var(--txt)}
+/* carousel */
+.car{overflow:hidden;border-radius:var(--r);margin:0 16px;position:relative;box-shadow:var(--shadow)}
+.car-track{display:flex;transition:transform .45s ease}
+.car-slide{min-width:100%;padding:34px 20px;color:#fff;position:relative;overflow:hidden}
+.car-slide h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.car-slide p{font-size:13px;opacity:.9}
+.dots{display:flex;gap:6px;justify-content:center;margin:10px 0 2px}
+.dots span{width:7px;height:7px;border-radius:4px;background:var(--line);transition:all .2s}
+.dots span.on{width:22px;background:var(--p)}
+/* chips */
+.chips{display:flex;gap:10px;overflow-x:auto;padding:4px 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);border-radius:24px;padding:10px 18px;font-size:14px;font-weight:600;color:var(--txt);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--p);border-color:var(--p);color:#fff}
+/* product cards */
+.prow{display:flex;gap:12px;overflow-x:auto;padding:6px 16px;scrollbar-width:none}
+.prow::-webkit-scrollbar{display:none}
+.pcard{flex:0 0 158px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;position:relative;animation:slideup .3s ease}
+.pimg{height:128px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative}
+.pimg .off{position:absolute;top:8px;left:8px;background:#ff5a5a;color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:3px 8px}
+.pimg .heart{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pimg .heart.fav{color:#ff4d6d}
+.pbody{padding:10px 12px 12px}
+.pname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pprice{font-size:15px;font-weight:800;color:var(--p);margin-top:4px}
+.pprice s{font-size:12px;color:var(--mut);font-weight:400;margin-left:6px}
+.prate{font-size:12px;color:var(--mut);margin-top:3px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:6px 16px}
+.pgrid .pcard{flex:none}
+.plist{display:flex;flex-direction:column;gap:12px;padding:6px 16px}
+.plist .pcard{flex:none;display:flex}
+.plist .pimg{width:110px;height:110px;flex:0 0 110px}
+.plist .pbody{flex:1;display:flex;flex-direction:column;justify-content:center}
+/* detail */
+.gal{position:relative;overflow:hidden}
+.gal-track{display:flex;transition:transform .35s ease}
+.gal-slide{min-width:100%;height:300px;display:flex;align-items:center;justify-content:center;font-size:110px}
+.optrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.opt{border:1.5px solid var(--line);border-radius:12px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer;background:var(--card);color:var(--txt)}
+.opt.on{border-color:var(--p);background:#efeaff;color:var(--p)}
+body.dark .opt.on{background:#2a2547}
+.swatch{width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+.swatch.on{border-color:var(--p)}
+.rev{border-top:1px solid var(--line);padding:10px 0}
+/* cart */
+.citem{display:flex;gap:12px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;margin:10px 16px;align-items:center}
+.citem .pimg{width:74px;height:74px;font-size:38px;border-radius:12px;flex:0 0 74px}
+.qty{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:12px;padding:4px}
+.qty button{width:30px;height:30px;border-radius:50%;border:none;background:var(--p);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.trow{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+.trow.tt{font-size:17px;font-weight:800;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+/* misc */
+.empty{text-align:center;padding:60px 30px;color:var(--mut)}
+.empty .big{font-size:64px;margin-bottom:14px}
+.addr{border:1.5px solid var(--line);border-radius:14px;padding:14px;margin:8px 0;cursor:pointer}
+.addr.on{border-color:var(--p);background:#f4f1ff}
+body.dark .addr.on{background:#242038}
+.pay{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:14px;margin:8px 0;cursor:pointer}
+.pay.on{border-color:var(--a);background:#effffa}
+body.dark .pay.on{background:#12332b}
+.checkwrap{width:110px;height:110px;margin:26px auto;border-radius:50%;background:#e6fff7;display:flex;align-items:center;justify-content:center;animation:pop .5s ease}
+.checkwrap svg circle{stroke:var(--a);stroke-width:6;fill:none;stroke-dasharray:200;animation:checkmark .6s ease forwards}
+.checkwrap svg path{stroke:var(--a);stroke-width:8;fill:none;stroke-linecap:round;stroke-dasharray:60;animation:checkmark .5s .35s ease forwards}
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.setrow .l{display:flex;align-items:center;gap:12px;font-size:15px;font-weight:600}
+.tog{width:50px;height:29px;border-radius:15px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;flex:0 0 50px}
+.tog.on{background:var(--a)}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tog.on::after{left:24px}
+.avatar{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--a));display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;font-weight:800}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2d2d3a;color:#fff;padding:12px 22px;border-radius:24px;font-size:14px;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:88vw;text-align:center}
+.toast.show{opacity:1}
+.splashbg{min-height:100vh;background:linear-gradient(135deg,#6C5CE7 0%,#8e7bff 45%,#00D9A5 130%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:30px;text-align:center}
+.splashlogo{width:110px;height:110px;border-radius:32px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:56px;box-shadow:0 12px 34px rgba(0,0,0,.25);animation:pop .6s ease}
+.socbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1.5px solid var(--line);background:var(--card);color:var(--txt);border-radius:14px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px}
+.stars{color:#ffb400;font-size:13px;letter-spacing:1px}
+.kv{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div class="toast" id="toast"></div>
+
+<!-- SPLASH -->
+<div id="scr-splash" class="screen">
+  <div class="splashbg">
+    <div class="splashlogo">🛍️</div>
+    <h1 style="font-size:34px;font-weight:800;margin-top:18px">ShopEasy</h1>
+    <p style="opacity:.92;margin-top:6px;font-size:15px" data-t="tagline">Shop Smarter, Live Better</p>
+    <div style="flex:1"></div>
+    <button class="btn" style="background:#fff;color:#6C5CE7;box-shadow:0 8px 22px rgba(0,0,0,.2)" onclick="go('login')" data-t="getstarted">Get Started →</button>
+    <button onclick="guestLogin()" style="background:none;border:none;color:#fff;margin-top:14px;font-size:14px;font-weight:600;cursor:pointer" data-t="skip">Skip</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="scr-login" class="screen">
+  <div style="padding:34px 24px">
+    <div style="text-align:center;margin-bottom:26px">
+      <div class="splashlogo" style="width:84px;height:84px;font-size:44px;margin:0 auto">🛍️</div>
+      <h2 style="margin-top:12px;font-size:24px" data-t="welcome">Welcome back 👋</h2>
+      <p style="color:var(--mut);font-size:14px" data-t="loginsub">Login to continue shopping</p>
+    </div>
+    <label class="lbl" data-t="email">Email</label>
+    <input class="inp" id="li-email" type="email" placeholder="you@example.com">
+    <label class="lbl" data-t="password">Password</label>
+    <input class="inp" id="li-pass" type="password" placeholder="••••••••">
+    <button class="btn" style="margin-top:20px" onclick="doLogin()" data-t="login">Login</button>
+    <button class="socbtn" onclick="socialLogin('Google')"><span style="font-size:19px">🔵</span> <span data-t="cgoogle">Continue with Google</span></button>
+    <button class="socbtn" onclick="socialLogin('Apple')"><span style="font-size:19px">🍎</span> <span data-t="capple">Continue with Apple</span></button>
+    <button class="btn grey" style="margin-top:10px" onclick="guestLogin()" data-t="guest">Continue as Guest</button>
+    <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--mut)"><span data-t="noacc">No account?</span> <b style="color:var(--p);cursor:pointer" onclick="go('signup')" data-t="signup">Sign Up</b></p>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div id="scr-signup" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo">Shop<span>Easy</span></div></div>
+  <div style="padding:20px 24px">
+    <h2 style="font-size:24px" data-t="createacc">Create account ✨</h2>
+    <label class="lbl" data-t="name">Full name</label>
+    <input class="inp" id="su-name" placeholder="Your name">
+    <label class="lbl" data-t="email">Email</label>
+    <input class="inp" id="su-email" type="email" placeholder="you@example.com">
+    <label class="lbl" data-t="password">Password</label>
+    <input class="inp" id="su-pass" type="password" placeholder="••••••••">
+    <button class="btn" style="margin-top:20px" onclick="doSignup()" data-t="signup">Sign Up</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="scr-home" class="screen">
+  <div class="hdr">
+    <div class="logo">Shop<span>Easy</span></div><div class="sp"></div>
+    <button class="icobtn" onclick="toggleLang()" id="langBtn" title="Language">🌐</button>
+    <button class="icobtn" onclick="go('cart')" style="position:relative">🛒<span class="cbadge" id="cartBadge" style="display:none">0</span></button>
+  </div>
+  <div class="searchbar"><span>🔍</span><input id="homeSearch" data-ph="searchph" placeholder="Search products..." oninput="homeSearchGo(this.value)"></div>
+  <div class="car"><div class="car-track" id="carTrack"></div></div>
+  <div class="dots" id="carDots"></div>
+  <div class="sec"><h3><span data-t="cats">Categories</span><span class="more" onclick="go('cats')" data-t="seeall">See all →</span></h3></div>
+  <div class="chips" id="homeChips" style="margin-top:8px"></div>
+  <div class="sec"><h3><span data-t="trending">🔥 Trending Now</span><span class="more" onclick="openListing('all')" data-t="seeall">See all →</span></h3></div>
+  <div class="prow" id="trendRow" style="margin-top:8px"></div>
+  <div class="sec"><h3><span data-t="deals">⚡ Deals of the Day</span><span class="more" onclick="openListing('deals')" data-t="seeall">See all →</span></h3></div>
+  <div class="pgrid" id="dealsGrid" style="margin-top:8px"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- CATEGORIES -->
+<div id="scr-cats" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" data-t="cats">Categories</div></div>
+  <div id="catList"></div>
+</div>
+
+<!-- LISTING -->
+<div id="scr-list" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" id="listTitle">Products</div><div class="sp"></div>
+    <button class="icobtn" onclick="toggleView()" id="viewBtn" title="View">▦</button>
+  </div>
+  <div style="display:flex;gap:8px;padding:10px 16px">
+    <select class="inp" id="sortSel" onchange="renderListing()" style="padding:10px">
+      <option value="pop" data-t="sortpop">Sort: Popularity</option>
+      <option value="plh" data-t="sortplh">Price: Low → High</option>
+      <option value="phl" data-t="sortphl">Price: High → Low</option>
+      <option value="rate" data-t="sortrate">Top Rated</option>
+    </select>
+    <select class="inp" id="filterSel" onchange="renderListing()" style="padding:10px">
+      <option value="all" data-t="fall">All prices</option>
+      <option value="u1000" data-t="fu1000">Under ₹1000</option>
+      <option value="u5000" data-t="fu5000">Under ₹5000</option>
+      <option value="a5000" data-t="fa5000">Above ₹5000</option>
+    </select>
+  </div>
+  <div id="listBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="scr-detail" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" data-t="details">Product Details</div><div class="sp"></div>
+    <button class="icobtn" id="detHeart" onclick="toggleWish(curPid)">🤍</button>
+  </div>
+  <div id="detBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- CART -->
+<div id="scr-cart" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" data-t="cart">Shopping Cart</div></div>
+  <div id="cartBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="scr-checkout" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" data-t="checkout">Checkout</div></div>
+  <div id="coBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- CONFIRM -->
+<div id="scr-confirm" class="screen">
+  <div class="hdr"><div class="logo">Shop<span>Easy</span></div></div>
+  <div style="padding:10px 24px;text-align:center">
+    <div class="checkwrap"><svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24"/><path d="M19 30l8 8 14-15"/></svg></div>
+    <h2 data-t="orderok">Order Placed! 🎉</h2>
+    <p style="color:var(--mut);margin-top:6px" data-t="thx">Thank you for shopping with us</p>
+    <div class="card" style="margin:18px 0;text-align:left">
+      <div class="trow"><span data-t="orderid">Order ID</span><b id="cfOid">#SE0000</b></div>
+      <div class="trow"><span data-t="eta">Estimated delivery</span><b id="cfEta">—</b></div>
+      <div class="trow"><span data-t="total">Total</span><b id="cfTotal">₹0</b></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn acc" onclick="go('track')" data-t="track">Track Order</button>
+      <button class="btn ghost" onclick="go('home')" data-t="contshop">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACK -->
+<div id="scr-track" class="screen">
+  <div class="hdr"><button class="icobtn" onclick="goback()">←</button><div class="logo" style="font-size:19px" data-t="track">Track Order</div></div>
+  <div id="trackBody"></div>
+</div>
+
+<!-- WISHLIST -->
+<div id="scr-wish" class="screen">
+  <div class="hdr"><div class="logo" style="font-size:19px" data-t="wishlist">Wishlist ❤️</div></div>
+  <div id="wishBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="scr-profile" class="screen">
+  <div class="hdr"><div class="logo" style="font-size:19px" data-t="profile">Profile</div><div class="sp"></div>
+    <button class="icobtn" onclick="toggleTheme()" title="Dark mode">🌙</button>
+  </div>
+  <div id="profBody"></div>
+  <div style="height:14px"></div>
+</div>
+
+<!-- bottom nav -->
+<nav class="bnav" id="bnav" style="display:none">
+  <button data-s="home" onclick="go('home')"><span class="ic">🏠</span><span data-t="nhome">Home</span></button>
+  <button data-s="cats" onclick="go('cats')"><span class="ic">🗂️</span><span data-t="ncats">Categories</span></button>
+  <button data-s="cart" onclick="go('cart')"><span class="ic">🛒</span><span data-t="ncart">Cart</span><span class="cbadge" id="navCartBadge" style="display:none">0</span></button>
+  <button data-s="wish" onclick="go('wish')"><span class="ic">❤️</span><span data-t="nwish">Wishlist</span></button>
+  <button data-s="profile" onclick="go('profile')"><span class="ic">👤</span><span data-t="nprof">Profile</span></button>
+</nav>
+<script>
+/* ============ DATA ============ */
+var CATS=[{id:'electronics',en:'Electronics',hi:'इलेक्ट्रॉनिक्स',ic:'📱'},{id:'fashion',en:'Fashion',hi:'फैशन',ic:'👗'},{id:'home',en:'Home',hi:'घर',ic:'🏠'},{id:'beauty',en:'Beauty',hi:'ब्यूटी',ic:'💄'},{id:'sports',en:'Sports',hi:'खेल',ic:'⚽'}];
+var P=[
+{id:1,en:'Wireless Headphones',hi:'वायरलेस हेडफोन',price:2499,mrp:3999,rating:4.5,rev:2314,cat:'electronics',em:'🎧',bg:'linear-gradient(135deg,#a29bfe,#6C5CE7)',sold:5200,colors:['#2d2d3a','#6C5CE7','#00D9A5'],desc:'Crystal-clear sound, 40h battery, noise cancellation.'},
+{id:2,en:'Smart Watch Pro',hi:'स्मार्ट वॉच प्रो',price:4999,mrp:7999,rating:4.6,rev:1876,cat:'electronics',em:'⌚',bg:'linear-gradient(135deg,#81ecec,#00cec9)',sold:4100,colors:['#2d2d3a','#dfe6e9'],desc:'AMOLED display, heart-rate + SpO2, 10-day battery.'},
+{id:3,en:'Bluetooth Speaker',hi:'ब्लूटूथ स्पीकर',price:1799,mrp:2999,rating:4.3,rev:954,cat:'electronics',em:'🔊',bg:'linear-gradient(135deg,#fab1a0,#e17055)',sold:2900,colors:['#2d2d3a','#e17055'],desc:'Deep bass, IPX7 waterproof, 24h playtime.'},
+{id:4,en:'Laptop Stand Pro',hi:'लैपटॉप स्टैंड',price:1299,mrp:1999,rating:4.4,rev:642,cat:'electronics',em:'💻',bg:'linear-gradient(135deg,#74b9ff,#0984e3)',sold:1800,colors:['#b2bec3','#2d2d3a'],desc:'Aluminium, adjustable height, foldable.'},
+{id:5,en:'Drone Camera 4K',hi:'ड्रोन कैमरा 4K',price:12999,mrp:18999,rating:4.7,rev:423,cat:'electronics',em:'🚁',bg:'linear-gradient(135deg,#55efc4,#00b894)',sold:640,colors:['#2d2d3a'],desc:'4K camera, 30-min flight, GPS return-home.'},
+{id:6,en:'Denim Jacket',hi:'डेनिम जैकेट',price:1599,mrp:2799,rating:4.4,rev:1120,cat:'fashion',em:'🧥',bg:'linear-gradient(135deg,#74b9ff,#6C5CE7)',sold:3400,sizes:['S','M','L','XL'],colors:['#3d5a99','#2d2d3a'],desc:'Premium denim, all-season comfort fit.'},
+{id:7,en:'Running Shoes',hi:'रनिंग शूज़',price:2199,mrp:3499,rating:4.6,rev:2870,cat:'fashion',em:'👟',bg:'linear-gradient(135deg,#ff7675,#d63031)',sold:6100,sizes:['6','7','8','9','10'],colors:['#d63031','#2d2d3a','#ffffff'],desc:'Lightweight, breathable mesh, anti-slip sole.'},
+{id:8,en:'Sunglasses UV400',hi:'धूप का चश्मा',price:899,mrp:1499,rating:4.2,rev:733,cat:'fashion',em:'🕶️',bg:'linear-gradient(135deg,#fdcb6e,#e17055)',sold:2100,colors:['#2d2d3a','#6b4f2a'],desc:'Polarized UV400, stylish unisex frame.'},
+{id:9,en:'Cotton Kurta',hi:'सूती कुर्ता',price:999,mrp:1799,rating:4.5,rev:1540,cat:'fashion',em:'👘',bg:'linear-gradient(135deg,#ffeaa7,#fdcb6e)',sold:3900,sizes:['S','M','L','XL'],colors:['#fdcb6e','#ffffff','#00b894'],desc:'Pure cotton, festive & daily wear.'},
+{id:10,en:'Leather Wallet',hi:'चमड़े का बटुआ',price:649,mrp:999,rating:4.3,rev:890,cat:'fashion',em:'👛',bg:'linear-gradient(135deg,#e17055,#6b4f2a)',sold:2600,colors:['#6b4f2a','#2d2d3a'],desc:'Genuine leather, RFID protection, 8 slots.'},
+{id:11,en:'Ceramic Dinner Set',hi:'डिनर सेट',price:1899,mrp:2999,rating:4.5,rev:467,cat:'home',em:'🍽️',bg:'linear-gradient(135deg,#dfe6e9,#b2bec3)',sold:1200,desc:'18-piece ceramic set, microwave safe.'},
+{id:12,en:'LED Table Lamp',hi:'टेबल लैंप',price:749,mrp:1299,rating:4.4,rev:620,cat:'home',em:'💡',bg:'linear-gradient(135deg,#ffeaa7,#f9ca24)',sold:1950,colors:['#f9ca24','#ffffff'],desc:'Warm light, touch dimmer, USB powered.'},
+{id:13,en:'Bedsheet King Set',hi:'बेडशीट सेट',price:1099,mrp:1899,rating:4.6,rev:2310,cat:'home',em:'🛏️',bg:'linear-gradient(135deg,#a29bfe,#6C5CE7)',sold:5400,colors:['#6C5CE7','#00b894','#e17055'],desc:'300TC cotton, 1 sheet + 2 pillow covers.'},
+{id:14,en:'Air Fryer 5L',hi:'एयर फ्रायर',price:5999,mrp:8999,rating:4.7,rev:980,cat:'home',em:'🍟',bg:'linear-gradient(135deg,#fab1a0,#ff7675)',sold:1500,desc:'Oil-free cooking, digital touch panel.'},
+{id:15,en:'Wall Clock Modern',hi:'दीवार घड़ी',price:849,mrp:1399,rating:4.3,rev:410,cat:'home',em:'🕐',bg:'linear-gradient(135deg,#81ecec,#0984e3)',sold:980,desc:'Silent sweep, modern minimal design.'},
+{id:16,en:'Matte Lipstick Set',hi:'लिपस्टिक सेट',price:499,mrp:899,rating:4.4,rev:1730,cat:'beauty',em:'💄',bg:'linear-gradient(135deg,#ff7675,#e84393)',sold:4200,colors:['#e84393','#d63031','#6b4f2a'],desc:'6 shades, long-lasting matte finish.'},
+{id:17,en:'Face Serum Vitamin C',hi:'फेस सीरम',price:699,mrp:1199,rating:4.6,rev:2140,cat:'beauty',em:'🧴',bg:'linear-gradient(135deg,#ffeaa7,#fdcb6e)',sold:5100,desc:'Brightening vitamin C, all skin types.'},
+{id:18,en:'Hair Dryer 2000W',hi:'हेयर ड्रायर',price:1399,mrp:2299,rating:4.3,rev:760,cat:'beauty',em:'💨',bg:'linear-gradient(135deg,#74b9ff,#a29bfe)',sold:1700,colors:['#a29bfe','#ffffff'],desc:'Fast dry, cool-shot button, 2 speeds.'},
+{id:19,en:'Perfume 100ml',hi:'परफ्यूम',price:999,mrp:1699,rating:4.5,rev:1320,cat:'beauty',em:'🌸',bg:'linear-gradient(135deg,#e84393,#6C5CE7)',sold:3300,desc:'Long-lasting floral fragrance, unisex.'},
+{id:20,en:'Yoga Mat Pro',hi:'योगा मैट',price:799,mrp:1399,rating:4.5,rev:1870,cat:'sports',em:'🧘',bg:'linear-gradient(135deg,#55efc4,#00b894)',sold:4400,colors:['#00b894','#6C5CE7','#e17055'],desc:'6mm anti-slip, carry strap included.'},
+{id:21,en:'Football Size 5',hi:'फुटबॉल',price:899,mrp:1499,rating:4.4,rev:540,cat:'sports',em:'⚽',bg:'linear-gradient(135deg,#dfe6e9,#636e72)',sold:1300,desc:'FIFA-standard size 5, durable PU.'},
+{id:22,en:'Dumbbell Set 20kg',hi:'डम्बल सेट',price:2499,mrp:3999,rating:4.6,rev:890,cat:'sports',em:'🏋️',bg:'linear-gradient(135deg,#636e72,#2d3436)',sold:1600,desc:'Adjustable 20kg set, non-slip grip.'},
+{id:23,en:'Badminton Racket',hi:'बैडमिंटन रैकेट',price:1199,mrp:1999,rating:4.3,rev:450,cat:'sports',em:'🏸',bg:'linear-gradient(135deg,#00cec9,#0984e3)',sold:1100,desc:'Carbon fiber, lightweight + shuttle set.'},
+{id:24,en:'Cricket Bat Pro',hi:'क्रिकेट बैट',price:1799,mrp:2999,rating:4.7,rev:670,cat:'sports',em:'🏏',bg:'linear-gradient(135deg,#fdcb6e,#e17055)',sold:1400,desc:'English willow, tournament grade.'}
+];
+/* ============ I18N ============ */
+var T={
+tagline:{en:'Shop Smarter, Live Better',hi:'स्मार्ट खरीदारी, बेहतर जीवन'},
+getstarted:{en:'Get Started →',hi:'शुरू करें →'},skip:{en:'Skip',hi:'छोड़ें'},
+welcome:{en:'Welcome back 👋',hi:'वापस स्वागत है 👋'},loginsub:{en:'Login to continue shopping',hi:'खरीदारी जारी रखने के लिए लॉगिन करें'},
+email:{en:'Email',hi:'ईमेल'},password:{en:'पासवर्ड',hi:'पासवर्ड'},login:{en:'Login',hi:'लॉगिन'},
+cgoogle:{en:'Continue with Google',hi:'Google से जारी रखें'},capple:{en:'Continue with Apple',hi:'Apple से जारी रखें'},
+guest:{en:'Continue as Guest',hi:'अतिथि के रूप में जारी रखें'},noacc:{en:'No account?',hi:'खाता नहीं है?'},
+signup:{en:'Sign Up',hi:'साइन अप'},createacc:{en:'Create account ✨',hi:'खाता बनाएं ✨'},name:{en:'Full name',hi:'पूरा नाम'},
+cats:{en:'Categories',hi:'श्रेणियां'},seeall:{en:'See all →',hi:'सभी देखें →'},
+trending:{en:'🔥 Trending Now',hi:'🔥 अभी ट्रेंडिंग'},deals:{en:'⚡ Deals of the Day',hi:'⚡ आज की डील्स'},
+searchph:{en:'Search products...',hi:'उत्पाद खोजें...'},details:{en:'Product Details',hi:'उत्पाद विवरण'},
+cart:{en:'Shopping Cart',hi:'शॉपिंग कार्ट'},checkout:{en:'Checkout',hi:'चेकआउट'},wishlist:{en:'Wishlist ❤️',hi:'इच्छा सूची ❤️'},
+profile:{en:'Profile',hi:'प्रोफ़ाइल'},track:{en:'Track Order',hi:'ऑर्डर ट्रैक करें'},
+nhome:{en:'Home',hi:'होम'},ncats:{en:'Categories',hi:'श्रेणी'},ncart:{en:'Cart',hi:'कार्ट'},nwish:{en:'Wishlist',hi:'इच्छा'},nprof:{en:'Profile',hi:'प्रोफ़ाइल'},
+sortpop:{en:'Sort: Popularity',hi:'क्रम: लोकप्रियता'},sortplh:{en:'Price: Low → High',hi:'कीमत: कम → ज़्यादा'},
+sortphl:{en:'Price: High → Low',hi:'कीमत: ज़्यादा → कम'},sortrate:{en:'Top Rated',hi:'टॉप रेटेड'},
+fall:{en:'All prices',hi:'सभी कीमतें'},fu1000:{en:'Under ₹1000',hi:'₹1000 से कम'},fu5000:{en:'Under ₹5000',hi:'₹5000 से कम'},fa5000:{en:'Above ₹5000',hi:'₹5000 से ऊपर'},
+addcart:{en:'Add to Cart',hi:'कार्ट में डालें'},buynow:{en:'Buy Now',hi:'अभी खरीदें'},
+subtotal:{en:'Subtotal',hi:'उप-योग'},delivery:{en:'Delivery',hi:'डिलीवरी'},total:{en:'Total',hi:'कुल'},
+free:{en:'FREE',hi:'मुफ़्त'},promo:{en:'Promo code',hi:'प्रोमो कोड'},apply:{en:'Apply',hi:'लागू करें'},
+proceed:{en:'Proceed to Checkout',hi:'चेकआउट पर जाएं'},emptycart:{en:'Your cart is empty',hi:'आपका कार्ट खाली है'},
+emptysub:{en:'Add something you love! 💜',hi:'कुछ पसंदीदा जोड़ें! 💜'},shopnow:{en:'Shop Now',hi:'खरीदें'},
+address:{en:'Delivery Address',hi:'डिलीवरी पता'},addnew:{en:'+ Add New Address',hi:'+ नया पता जोड़ें'},
+payment:{en:'Payment Method',hi:'भुगतान विधि'},placeorder:{en:'Place Order',hi:'ऑर्डर करें'},
+orderok:{en:'Order Placed! 🎉',hi:'ऑर्डर हो गया! 🎉'},thx:{en:'Thank you for shopping with us',hi:'हमसे खरीदारी के लिए धन्यवाद'},
+orderid:{en:'Order ID',hi:'ऑर्डर ID'},eta:{en:'Estimated delivery',hi:'अनुमानित डिलीवरी'},
+contshop:{en:'Continue Shopping',hi:'खरीदारी जारी रखें'},
+orders:{en:'My Orders',hi:'मेरे ऑर्डर'},addresses:{en:'My Addresses',hi:'मेरे पते'},
+settings:{en:'Settings',hi:'सेटिंग्स'},help:{en:'Help & Support',hi:'मदद'},logout:{en:'Logout',hi:'लॉगआउट'},
+darkmode:{en:'Dark Mode',hi:'डार्क मोड'},language:{en:'Language / भाषा',hi:'भाषा / Language'},
+similar:{en:'Similar Products',hi:'मिलते-जुलते उत्पाद'},reviews:{en:'reviews',hi:'समीक्षाएं'},
+qty:{en:'Qty',hi:'मात्रा'},remove:{en:'Remove',hi:'हटाएं'},cod:{en:'Cash on Delivery',hi:'कैश ऑन डिलीवरी'},
+card:{en:'Credit/Debit Card',hi:'क्रेडिट/डेबिट कार्ड'},upi:{en:'UPI',hi:'UPI'},
+};
+var lang=localStorage.getItem('se_lang')||'en';
+function t(k){return (T[k]&&(T[k][lang]||T[k].en))||k;}
+function pname(p){return lang==='hi'?p.hi:p.en;}
+function pcat(id){var c=CATS.find(function(x){return x.id===id;});return c?(lang==='hi'?c.hi:c.en):id;}
+function applyLang(){document.querySelectorAll('[data-t]').forEach(function(e){e.textContent=t(e.getAttribute('data-t'));});document.querySelectorAll('[data-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-ph'));});}
+/* ============ STATE ============ */
+var cart=JSON.parse(localStorage.getItem('se_cart')||'[]');
+var wish=JSON.parse(localStorage.getItem('se_wish')||'[]');
+var user=JSON.parse(localStorage.getItem('se_user')||'null');
+var addresses=JSON.parse(localStorage.getItem('se_addr')||'[]');
+var orders=JSON.parse(localStorage.getItem('se_orders')||'[]');
+var theme=localStorage.getItem('se_theme')||'light';
+var stack=[];var curPid=null,curCat='all',listView='grid',promoDisc=0,coAddr=0,coPay='cod',selColor=0,selSize=0;
+function save(){localStorage.setItem('se_cart',JSON.stringify(cart));localStorage.setItem('se_wish',JSON.stringify(wish));localStorage.setItem('se_orders',JSON.stringify(orders));localStorage.setItem('se_addr',JSON.stringify(addresses));updateBadges();}
+function toast(m){var e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},1800);}
+function rs(n){return '₹'+Number(n).toLocaleString('en-IN');}
+function off(p){return Math.round((1-p.price/p.mrp)*100);}
+function stars(r){var s='',f=Math.floor(r);for(var i=0;i<5;i++)s+=i<f?'★':'☆';return '<span class="stars">'+s+'</span> <b>'+r+'</b>';}
+/* ============ NAV ============ */
+var NAVSCR=['home','cats','cart','wish','profile'];
+function go(id){if(cur()!==id)stack.push(id);show(id);}
+function goback(){stack.pop();var p=stack[stack.length-1]||'home';show(p,true);}
+function cur(){return stack[stack.length-1];}
+function show(id,nopush){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  var el=document.getElementById('scr-'+id);if(!el)id='home',el=document.getElementById('scr-home');
+  el.classList.add('on');window.scrollTo(0,0);
+  var inNav=NAVSCR.indexOf(id)>=0;
+  document.getElementById('bnav').style.display=inNav?'flex':'none';
+  document.querySelectorAll('.bnav button').forEach(function(b){b.classList.toggle('act',b.getAttribute('data-s')===id);});
+  if(id==='home')renderHome();if(id==='cats')renderCats();if(id==='cart')renderCart();
+  if(id==='wish')renderWish();if(id==='profile')renderProfile();if(id==='checkout')renderCheckout();if(id==='track')renderTrack();
+  if(window.__goBack===undefined)window.__goBack=goback;
+}
+window.__goBack=function(){goback();};
+/* ============ THEME/LANG ============ */
+function toggleTheme(){theme=theme==='light'?'dark':'light';localStorage.setItem('se_theme',theme);document.body.classList.toggle('dark',theme==='dark');toast(theme==='dark'?'🌙 Dark mode':'☀️ Light mode');}
+function toggleLang(){lang=lang==='en'?'hi':'en';localStorage.setItem('se_lang',lang);applyLang();show(cur());toast(lang==='hi'?'🇮🇳 हिन्दी':'🇬🇧 English');}
+/* ============ HOME ============ */
+var BANNERS=[
+{g:'linear-gradient(135deg,#6C5CE7,#a29bfe)',t:{en:'MEGA SALE',hi:'मेगा सेल'},s:{en:'Up to 50% off electronics',hi:'इलेक्ट्रॉनिक्स पर 50% तक छूट'}},
+{g:'linear-gradient(135deg,#00D9A5,#00b894)',t:{en:'FASHION FEST',hi:'फैशन फेस्ट'},s:{en:'Trendy styles from ₹499',hi:'₹499 से ट्रेंडी स्टाइल'}},
+{g:'linear-gradient(135deg,#e84393,#6C5CE7)',t:{en:'BEAUTY BONANZA',hi:'ब्यूटी धमाका'},s:{en:'Flat 30% off beauty picks',hi:'ब्यूटी पर फ्लैट 30% छूट'}}];
+var carIdx=0,carTimer=null;
+function renderHome(){
+  var tr=document.getElementById('carTrack'),dt=document.getElementById('carDots');
+  tr.innerHTML=BANNERS.map(function(b){return '<div class="car-slide" style="background:'+b.g+'"><h2>'+b.t[lang]+'</h2><p>'+b.s[lang]+'</p><button class="btn" style="width:auto;padding:10px 22px;margin-top:12px;background:#fff;color:#6C5CE7" onclick="openListing(\'deals\')">'+t('shopnow')+'</button></div>';}).join('');
+  dt.innerHTML=BANNERS.map(function(_,i){return '<span class="'+(i===0?'on':'')+'"></span>';}).join('');
+  clearInterval(carTimer);carIdx=0;
+  carTimer=setInterval(function(){carIdx=(carIdx+1)%BANNERS.length;tr.style.transform='translateX(-'+(carIdx*100)+'%)';dt.querySelectorAll('span').forEach(function(s,i){s.classList.toggle('on',i===carIdx);});},3500);
+  document.getElementById('homeChips').innerHTML=CATS.map(function(c){return '<button class="chip" onclick="openListing(\''+c.id+'\')">'+c.ic+' '+(lang==='hi'?c.hi:c.en)+'</button>';}).join('');
+  var trend=P.slice().sort(function(a,b){return b.sold-a.sold;}).slice(0,8);
+  document.getElementById('trendRow').innerHTML=trend.map(pcard).join('');
+  var deals=P.filter(function(p){return off(p)>=30;}).slice(0,6);
+  document.getElementById('dealsGrid').innerHTML=deals.map(pcard).join('');
+  applyLang();updateBadges();
+}
+function pcard(p){
+  var fav=wish.indexOf(p.id)>=0;
+  return '<div class="pcard" onclick="openDetail('+p.id+')"><div class="pimg" style="background:'+p.bg+'"><span>'+p.em+'</span>'+
+  '<span class="off">-'+off(p)+'%</span>'+
+  '<button class="heart '+(fav?'fav':'')+'" onclick="event.stopPropagation();toggleWish('+p.id+')">'+(fav?'❤️':'🤍')+'</button></div>'+
+  '<div class="pbody"><div class="pname">'+pname(p)+'</div><div class="pprice">'+rs(p.price)+'<s>'+rs(p.mrp)+'</s></div><div class="prate">'+stars(p.rating)+' <span>('+p.rev+')</span></div></div></div>';
+}
+function homeSearchGo(q){if(q.trim().length>1){openListing('search',q.trim());}}
+/* ============ CATEGORIES ============ */
+function renderCats(){
+  document.getElementById('catList').innerHTML=CATS.map(function(c){
+    var n=P.filter(function(p){return p.cat===c.id;}).length;
+    return '<div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="openListing(\''+c.id+'\')">'+
+    '<div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#6C5CE7,#00D9A5);display:flex;align-items:center;justify-content:center;font-size:28px">'+c.ic+'</div>'+
+    '<div style="flex:1"><b style="font-size:16px">'+(lang==='hi'?c.hi:c.en)+'</b><div style="color:var(--mut);font-size:13px">'+n+' products</div></div><span style="font-size:20px;color:var(--mut)">›</span></div>';
+  }).join('');applyLang();
+}
+/* ============ LISTING ============ */
+var listCat='all',listQ='';
+function openListing(cat,q){listCat=cat;listQ=q||'';document.getElementById('sortSel').value='pop';document.getElementById('filterSel').value='all';go('list');renderListing();}
+function renderListing(){
+  var arr=P.slice();
+  if(listCat==='deals')arr=arr.filter(function(p){return off(p)>=30;});
+  else if(listCat==='search')arr=arr.filter(function(p){return (p.en+p.hi).toLowerCase().indexOf(listQ.toLowerCase())>=0;});
+  else if(listCat!=='all')arr=arr.filter(function(p){return p.cat===listCat;});
+  var f=document.getElementById('filterSel').value;
+  if(f==='u1000')arr=arr.filter(function(p){return p.price<1000;});
+  if(f==='u5000')arr=arr.filter(function(p){return p.price<5000;});
+  if(f==='a5000')arr=arr.filter(function(p){return p.price>=5000;});
+  var s=document.getElementById('sortSel').value;
+  if(s==='plh')arr.sort(function(a,b){return a.price-b.price;});
+  if(s==='phl')arr.sort(function(a,b){return b.price-a.price;});
+  if(s==='rate')arr.sort(function(a,b){return b.rating-a.rating;});
+  if(s==='pop')arr.sort(function(a,b){return b.sold-a.sold;});
+  var title=listCat==='all'?(lang==='hi'?'सभी उत्पाद':'All Products'):listCat==='deals'?t('deals'):listCat==='search'?('🔍 '+listQ):pcat(listCat);
+  document.getElementById('listTitle').textContent=title;
+  var body=document.getElementById('listBody');
+  if(!arr.length){body.innerHTML='<div class="empty"><div class="big">🔎</div><b>No products found</b></div>';return;}
+  body.innerHTML='<div class="'+(listView==='grid'?'pgrid':'plist')+'">'+arr.map(pcard).join('')+'</div>';
+}
+function toggleView(){listView=listView==='grid'?'list':'grid';document.getElementById('viewBtn').textContent=listView==='grid'?'▦':'☰';renderListing();}
+/* ============ DETAIL ============ */
+function openDetail(id){curPid=id;selColor=0;selSize=0;go('detail');renderDetail();}
+function getP(id){return P.find(function(p){return p.id===id;});}
+function renderDetail(){
+  var p=getP(curPid);if(!p)return;
+  var fav=wish.indexOf(p.id)>=0;
+  document.getElementById('detHeart').textContent=fav?'❤️':'🤍';
+  var slides=[0,1,2].map(function(i){return '<div class="gal-slide" style="background:'+p.bg+';filter:hue-rotate('+(i*18)+'deg)"><span>'+p.em+'</span></div>';}).join('');
+  var html='<div class="gal"><div class="gal-track" id="galTrack">'+slides+'</div></div><div class="dots" id="galDots"><span class="on"></span><span></span><span></span></div>';
+  html+='<div class="card" style="margin-top:0"><div style="display:flex;justify-content:space-between;align-items:start"><h2 style="font-size:20px">'+pname(p)+'</h2><span class="off" style="background:#ff5a5a;color:#fff;font-size:12px;font-weight:700;border-radius:8px;padding:4px 10px">-'+off(p)+'%</span></div>';
+  html+='<div class="prate" style="margin:8px 0">'+stars(p.rating)+' <span>'+p.rev+' '+t('reviews')+' • '+p.sold.toLocaleString()+' sold</span></div>';
+  html+='<div style="font-size:24px;font-weight:800;color:var(--p)">'+rs(p.price)+' <s style="font-size:15px;color:var(--mut);font-weight:400">'+rs(p.mrp)+'</s></div>';
+  html+='<p style="color:var(--mut);font-size:14px;margin-top:10px;line-height:1.55">'+p.desc+'</p>';
+  if(p.colors){html+='<div class="lbl">Color</div><div class="optrow">'+p.colors.map(function(c,i){return '<div class="swatch '+(i===selColor?'on':'')+'" style="background:'+c+'" onclick="selColor='+i+';renderDetail()"></div>';}).join('')+'</div>';}
+  if(p.sizes){html+='<div class="lbl">Size</div><div class="optrow">'+p.sizes.map(function(s,i){return '<button class="opt '+(i===selSize?'on':'')+'" onclick="selSize='+i+';renderDetail()">'+s+'</button>';}).join('')+'</div>';}
+  html+='<div class="btnrow" style="margin-top:18px"><button class="btn ghost" onclick="addCart('+p.id+',1)">🛒 '+t('addcart')+'</button><button class="btn" onclick="buyNow('+p.id+')">'+t('buynow')+'</button></div></div>';
+  html+='<div class="card"><h3 style="font-size:15px;margin-bottom:8px">⭐ '+(lang==='hi'?'टॉप रिव्यू':'Top Reviews')+'</h3>'+
+    '<div class="rev"><b>Rahul S.</b> '+stars(5)+'<p style="font-size:13px;color:var(--mut);margin-top:4px">'+(lang==='hi'?'बहुत बढ़िया क्वालिटी, जल्दी डिलीवरी!':'Great quality, fast delivery! Highly recommended.')+'</p></div>'+
+    '<div class="rev"><b>Priya M.</b> '+stars(4)+'<p style="font-size:13px;color:var(--mut);margin-top:4px">'+(lang==='hi'?'अच्छा उत्पाद, कीमत के हिसाब से सही।':'Good product, value for money.')+'</p></div></div>';
+  var sim=P.filter(function(x){return x.cat===p.cat&&x.id!==p.id;}).slice(0,6);
+  html+='<div class="sec"><h3>'+t('similar')+'</h3></div><div class="prow">'+sim.map(pcard).join('')+'</div>';
+  document.getElementById('detBody').innerHTML=html;applyLang();
+  var gi=0,gt=document.getElementById('galTrack'),gd=document.getElementById('galDots').querySelectorAll('span');
+  var sx=0;gt.parentElement.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+  gt.parentElement.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;if(dx<-40)gi=Math.min(2,gi+1);if(dx>40)gi=Math.max(0,gi-1);gt.style.transform='translateX(-'+(gi*100)+'%)';gd.forEach(function(d,i){d.classList.toggle('on',i===gi);});},{passive:true});
+}
+/* ============ WISHLIST ============ */
+function toggleWish(id){
+  var i=wish.indexOf(id);
+  if(i>=0){wish.splice(i,1);toast('💔 '+(lang==='hi'?'इच्छा सूची से हटाया':'Removed from wishlist'));}
+  else{wish.push(id);toast('❤️ '+(lang==='hi'?'इच्छा सूची में जोड़ा':'Added to wishlist'));}
+  save();if(cur()==='wish')renderWish();if(cur()==='detail')renderDetail();if(cur()==='home')renderHome();if(cur()==='list')renderListing();if(cur()==='profile')renderProfile();
+}
+function renderWish(){
+  var arr=wish.map(getP).filter(Boolean);
+  document.getElementById('wishBody').innerHTML=arr.length?'<div class="pgrid">'+arr.map(pcard).join('')+'</div>':'<div class="empty"><div class="big">💔</div><b>'+(lang==='hi'?'इच्छा सूची खाली है':'Wishlist is empty')+'</b><p style="margin:8px 0 16px">'+(lang==='hi'?'पसंदीदा पर दिल दबाएं':'Tap the heart on products you love')+'</p><button class="btn" style="max-width:220px;margin:0 auto" onclick="go(\'home\')">'+t('shopnow')+'</button></div>';
+  applyLang();
+}
+/* ============ CART ============ */
+function addCart(id,q){var it=cart.find(function(x){return x.id===id;});if(it)it.q+=q;else cart.push({id:id,q:q});save();toast('🛒 '+(lang==='hi'?'कार्ट में जोड़ा':'Added to cart'));}
+function buyNow(id){addCart(id,1);go('checkout');}
+function setQty(id,d){var it=cart.find(function(x){return x.id===id;});if(!it)return;it.q+=d;if(it.q<=0)cart=cart.filter(function(x){return x.id!==id;});save();renderCart();}
+function cartSub(){return cart.reduce(function(s,x){var p=getP(x.id);return s+(p?p.price*x.q:0);},0);}
+function updateBadges(){var n=cart.reduce(function(s,x){return s+x.q;},0);['cartBadge','navCartBadge'].forEach(function(b){var e=document.getElementById(b);if(e){e.style.display=n?'flex':'none';e.textContent=n;}});}
+function renderCart(){
+  var body=document.getElementById('cartBody');
+  if(!cart.length){body.innerHTML='<div class="empty"><div class="big">🛒</div><b>'+t('emptycart')+'</b><p style="margin:8px 0 16px">'+t('emptysub')+'</p><button class="btn" style="max-width:220px;margin:0 auto" onclick="go(\'home\')">'+t('shopnow')+'</button></div>';return;}
+  var items=cart.map(function(x){var p=getP(x.id);if(!p)return '';
+    return '<div class="citem"><div class="pimg" style="background:'+p.bg+'"><span>'+p.em+'</span></div>'+
+    '<div style="flex:1"><div class="pname">'+pname(p)+'</div><div class="pprice">'+rs(p.price)+'</div>'+
+    '<div class="qty" style="margin-top:8px"><button onclick="setQty('+p.id+',-1)">−</button><b>'+x.q+'</b><button onclick="setQty('+p.id+',1)">+</button>'+
+    '<button onclick="setQty('+p.id+',-999)" style="background:none;color:#ff5a5a;font-size:13px;width:auto;padding:0 8px">'+t('remove')+'</button></div></div></div>';}).join('');
+  var sub=cartSub(),del=sub>999?0:49;
+  body.innerHTML=items+'<div class="card"><div style="display:flex;gap:8px"><input class="inp" id="promoInp" placeholder="'+t('promo')+'"><button class="btn acc" style="width:auto;padding:12px 20px" onclick="applyPromo()">'+t('apply')+'</button></div>'+
+  '<div style="margin-top:12px"><div class="trow"><span>'+t('subtotal')+'</span><span>'+rs(sub)+'</span></div>'+
+  '<div class="trow"><span>'+t('delivery')+'</span><span>'+(del?rs(del):t('free'))+'</span></div>'+
+  (promoDisc?'<div class="trow" style="color:var(--a)"><span>Promo (SAVE10)</span><span>−'+rs(promoDisc)+'</span></div>':'')+
+  '<div class="trow tt"><span>'+t('total')+'</span><span>'+rs(sub+del-promoDisc)+'</span></div></div>'+
+  '<button class="btn" style="margin-top:14px" onclick="go(\'checkout\')">'+t('proceed')+' →</button></div>';
+  applyLang();
+}
+function applyPromo(){var v=document.getElementById('promoInp').value.trim().toUpperCase();if(v==='SAVE10'){promoDisc=Math.round(cartSub()*0.10);toast('✅ Promo applied: 10% off');}else{promoDisc=0;toast('❌ '+(lang==='hi'?'अमान्य कोड':'Invalid code'));}renderCart();}
+/* ============ CHECKOUT ============ */
+function renderCheckout(){
+  if(!cart.length){go('cart');return;}
+  if(!addresses.length)addresses=[{n:user?user.name:'Guest',ph:'9876543210',ad:'123, MG Road, Mumbai 400001'}];
+  var sub=cartSub(),del=sub>999?0:49,total=sub+del-promoDisc;
+  var html='<div class="sec"><h3>'+t('address')+'</h3></div><div style="padding:0 16px">'+
+    addresses.map(function(a,i){return '<div class="addr '+(i===coAddr?'on':'')+'" onclick="coAddr='+i+';renderCheckout()"><b>'+a.n+'</b> • '+a.ph+'<div style="color:var(--mut);font-size:13px;margin-top:4px">'+a.ad+'</div></div>';}).join('')+
+    '<button class="btn ghost" onclick="addAddress()">'+t('addnew')+'</button></div>';
+  html+='<div class="sec"><h3>'+t('payment')+'</h3></div><div style="padding:0 16px">'+
+    [['cod','💵',t('cod')],['upi','📲',t('upi')],['card','💳',t('card')]].map(function(m){
+    return '<div class="pay '+(coPay===m[0]?'on':'')+'" onclick="coPay=\''+m[0]+'\';renderCheckout()"><span style="font-size:24px">'+m[1]+'</span><b>'+m[2]+'</b>'+(coPay===m[0]?'<span style="margin-left:auto;color:var(--a);font-size:20px">✓</span>':'')+'</div>';}).join('')+'</div>';
+  html+='<div class="card"><h3 style="font-size:15px;margin-bottom:8px">🧾 '+(lang==='hi'?'ऑर्डर सारांश':'Order Summary')+'</h3>'+
+    cart.map(function(x){var p=getP(x.id);return '<div class="trow"><span>'+p.em+' '+pname(p)+' × '+x.q+'</span><span>'+rs(p.price*x.q)+'</span></div>';}).join('')+
+    '<div class="trow"><span>'+t('delivery')+'</span><span>'+(del?rs(del):t('free'))+'</span></div>'+
+    (promoDisc?'<div class="trow" style="color:var(--a)"><span>Promo</span><span>−'+rs(promoDisc)+'</span></div>':'')+
+    '<div class="trow tt"><span>'+t('total')+'</span><span>'+rs(total)+'</span></div></div>'+
+    '<div style="padding:0 16px"><button class="btn acc" onclick="placeOrder('+total+')">✅ '+t('placeorder')+'</button></div>';
+  document.getElementById('coBody').innerHTML=html;applyLang();
+}
+function addAddress(){var n=prompt(lang==='hi'?'नाम:':'Name:',user?user.name:'');if(n===null)return;var a=prompt(lang==='hi'?'पूरा पता:':'Full address:');if(!a)return;addresses.push({n:n,ph:'9876543210',ad:a});save();coAddr=addresses.length-1;renderCheckout();toast('📍 '+(lang==='hi'?'पता जोड़ा गया':'Address added'));}
+function placeOrder(total){
+  var oid='#SE'+Math.floor(100000+Math.random()*900000);
+  var d=new Date();d.setDate(d.getDate()+4);
+  orders.unshift({id:oid,total:total,date:new Date().toLocaleDateString(),items:cart.slice(),status:0});
+  cart=[];promoDisc=0;save();
+  document.getElementById('cfOid').textContent=oid;
+  document.getElementById('cfEta').textContent=d.toDateString();
+  document.getElementById('cfTotal').textContent=rs(total);
+  stack.push('confirm');show('confirm');applyLang();
+}
+/* ============ TRACK ============ */
+function renderTrack(){
+  var o=orders[0];
+  var body=document.getElementById('trackBody');
+  if(!o){body.innerHTML='<div class="empty"><div class="big">📦</div><b>'+(lang==='hi'?'कोई ऑर्डर नहीं':'No orders yet')+'</b></div>';return;}
+  var steps=lang==='hi'?['ऑर्डर मिला','पैक हो रहा','शिप हो गया','डिलीवर हो गया']:['Order received','Packing','Shipped','Delivered'];
+  var st=Math.min(3,Math.floor((Date.now()/60000)%4));
+  body.innerHTML='<div class="card"><div class="trow"><span>'+t('orderid')+'</span><b>'+o.id+'</b></div><div class="trow"><span>'+t('total')+'</span><b>'+rs(o.total)+'</b></div></div>'+
+  '<div class="card">'+steps.map(function(s,i){return '<div style="display:flex;gap:12px;align-items:center;padding:10px 0;'+(i<3?'border-bottom:1px solid var(--line)':'')+'">'+
+  '<div style="width:34px;height:34px;border-radius:50%;background:'+(i<=st?'var(--a)':'var(--line)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">'+(i<=st?'✓':i+1)+'</div>'+
+  '<b style="'+(i<=st?'':'color:var(--mut)')+'">'+s+'</b></div>';}).join('')+'</div>';
+  applyLang();
+}
+/* ============ PROFILE ============ */
+function renderProfile(){
+  var nm=user?user.name:(lang==='hi'?'अतिथि':'Guest'),em=user?user.email:'';
+  var html='<div class="card" style="display:flex;gap:14px;align-items:center"><div class="avatar">'+nm.charAt(0).toUpperCase()+'</div><div><b style="font-size:18px">'+nm+'</b><div style="color:var(--mut);font-size:13px">'+em+'</div>'+(!user?'<button class="btn" style="padding:8px 18px;font-size:13px;margin-top:8px;width:auto" onclick="go(\'login\')">'+t('login')+'</button>':'')+'</div></div>';
+  html+='<div class="card"><div class="setrow" onclick="go(\'track\')"><div class="l">📦 '+t('orders')+' <span class="badge">'+orders.length+'</span></div><span>›</span></div>'+
+  '<div class="setrow" onclick="go(\'wish\')"><div class="l">❤️ '+t('wishlist')+' <span class="badge">'+wish.length+'</span></div><span>›</span></div>'+
+  '<div class="setrow" onclick="toast(\'📍 '+addresses.length+' '+(lang==='hi'?'पते सहेजे गए':'addresses saved')+'\')"><div class="l">📍 '+t('addresses')+'</div><span>›</span></div></div>';
+  html+='<div class="card"><div class="setrow"><div class="l">🌙 '+t('darkmode')+'</div><div class="tog '+(theme==='dark'?'on':'')+'" onclick="toggleTheme();renderProfile()"></div></div>'+
+  '<div class="setrow" onclick="toggleLang()"><div class="l">🌐 '+t('language')+'</div><b style="color:var(--p)">'+(lang==='hi'?'हिन्दी':'English')+'</b></div>'+
+  '<div class="setrow" onclick="toast(\'🔔 '+(lang==='hi'?'नोटिफिकेशन जल्द आ रहे हैं':'Notifications coming soon')+'\')"><div class="l">🔔 Push Notifications</div><div class="tog" onclick="event.stopPropagation();this.classList.toggle(\'on\')"></div></div>'+
+  '<div class="setrow" onclick="toast(\'💬 support@shopeasy.demo\')"><div class="l">❓ '+t('help')+'</div><span>›</span></div>'+
+  '<div class="setrow" onclick="doLogout()"><div class="l" style="color:#ff5a5a">🚪 '+t('logout')+'</div><span>›</span></div></div>';
+  document.getElementById('profBody').innerHTML=html;applyLang();
+}
+/* ============ AUTH ============ */
+function doLogin(){var e=document.getElementById('li-email').value.trim();if(!e||e.indexOf('@')<0){toast('⚠️ '+(lang==='hi'?'सही ईमेल डालें':'Enter valid email'));return;}user={name:e.split('@')[0],email:e};localStorage.setItem('se_user',JSON.stringify(user));stack=[];go('home');toast('👋 '+(lang==='hi'?'स्वागत है':'Welcome')+'!');}
+function doSignup(){var n=document.getElementById('su-name').value.trim(),e=document.getElementById('su-email').value.trim();if(!n||!e||e.indexOf('@')<0){toast('⚠️ '+(lang==='hi'?'सभी फ़ील्ड भरें':'Fill all fields'));return;}user={name:n,email:e};localStorage.setItem('se_user',JSON.stringify(user));stack=[];go('home');toast('🎉 '+(lang==='hi'?'खाता बन गया':'Account created')+'!');}
+function socialLogin(p){user={name:p+' User',email:'user@'+p.toLowerCase()+'.com'};localStorage.setItem('se_user',JSON.stringify(user));stack=[];go('home');toast('✅ '+p+' '+(lang==='hi'?'से लॉगिन':'login')+' (demo)');}
+function guestLogin(){user=null;localStorage.removeItem('se_user');stack=[];go('home');toast('👤 '+(lang==='hi'?'अतिथि मोड':'Guest mode'));}
+function doLogout(){user=null;localStorage.removeItem('se_user');stack=[];go('login');toast('👋 '+(lang==='hi'?'लॉगआउट हो गया':'Logged out'));}
+/* ============ INIT ============ */
+document.body.classList.toggle('dark',theme==='dark');
+applyLang();updateBadges();
+stack=['splash'];show('splash');
+setTimeout(function(){if(cur()==='splash'){stack=['login'];show('login');}},2600);
+</script>
+</body>
+</html>
