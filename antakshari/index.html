@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a0b2e">
+<title>Antakshari Adda 🎤</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--mag:#EC4899;--gold:#F59E0B;--pur:#7C3AED;--bg1:#1a0b2e;--bg2:#2d1155;--card:#2a1650;--txt:#fff;--mut:#c9b8e8}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:radial-gradient(1200px 600px at 20% -5%,#3b1a6e 0%,var(--bg1) 55%),var(--bg1);color:var(--txt);min-height:100vh;touch-action:manipulation;padding-bottom:76px}
+.demobanner{position:sticky;top:0;z-index:99;background:linear-gradient(90deg,#EC4899,#F59E0B);color:#1a0b2e;font-weight:800;text-align:center;padding:6px;font-size:13px;letter-spacing:.5px}
+.screen{display:none;padding:14px 14px 20px;max-width:520px;margin:0 auto;animation:fade .25s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:26px;margin:6px 0;text-shadow:0 0 18px rgba(236,72,153,.55)}
+h2{font-size:20px;margin:10px 0 6px}
+.sub{color:var(--mut);font-size:14px;margin:2px 0 12px}
+.card{background:linear-gradient(160deg,#33185e,#241040);border:1px solid #4c2a86;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:15px;font-size:17px;font-weight:800;color:#fff;margin:10px 0;cursor:pointer;background:linear-gradient(135deg,var(--mag),var(--pur));box-shadow:0 0 16px rgba(236,72,153,.45),0 4px 0 rgba(0,0,0,.3)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.gold{background:linear-gradient(135deg,#F59E0B,#d97706);box-shadow:0 0 16px rgba(245,158,11,.45),0 4px 0 rgba(0,0,0,.3);color:#2a1500}
+.btn.ghost{background:#ffffff14;border:1px solid #ffffff2e;box-shadow:none}
+.btn.small{padding:10px;font-size:14px}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+input,select{width:100%;padding:13px;border-radius:14px;border:1px solid #4c2a86;background:#1d0e38;color:#fff;font-size:16px;margin:8px 0}
+input::placeholder{color:#8f7bb5}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:9px 14px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff26;font-size:14px;cursor:pointer}
+.chip.on{background:linear-gradient(135deg,var(--mag),var(--pur));border-color:transparent;font-weight:700;box-shadow:0 0 12px rgba(236,72,153,.5)}
+#tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;background:#170826f2;border-top:1px solid #4c2a86;z-index:50;backdrop-filter:blur(8px)}
+.tab{flex:1;text-align:center;padding:9px 2px 10px;font-size:11px;color:var(--mut);cursor:pointer}
+.tab .ic{font-size:22px;display:block}
+.tab.on{color:var(--gold)}
+.bigletter{font-size:84px;font-weight:900;text-align:center;color:var(--gold);text-shadow:0 0 26px rgba(245,158,11,.7);margin:4px 0;line-height:1}
+.timer{font-size:15px;text-align:center;color:var(--mut)}
+.timer b{color:#fff;font-size:20px}
+.pturn{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.pav{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;background:#ffffff14;border:2px solid transparent;position:relative}
+.pav.on{border-color:var(--gold);box-shadow:0 0 14px rgba(245,158,11,.8)}
+.pav .nm{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:var(--mut)}
+.pav .sc{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#2a1500;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px}
+.songlog{max-height:150px;overflow:auto;font-size:14px;background:#00000030;border-radius:12px;padding:8px 10px;margin:8px 0}
+.songlog div{padding:3px 0;border-bottom:1px dashed #ffffff14}
+.float-emoji{position:fixed;font-size:34px;pointer-events:none;z-index:200;animation:floatup 1.6s forwards}
+@keyframes floatup{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-120px)}}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--gold),#fbbf24);color:#2a1500;font-weight:800;border-radius:999px;padding:6px 12px;margin:4px;font-size:13px}
+.coinpill{background:#00000040;border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:5px 12px;font-weight:800;font-size:14px}
+table.lb{width:100%;border-collapse:collapse;font-size:14px}
+table.lb td,table.lb th{padding:8px;border-bottom:1px solid #ffffff12;text-align:left}
+.note{font-size:12px;color:var(--mut);background:#ffffff0d;border-radius:10px;padding:8px 10px;margin:8px 0}
+.checkmark{font-size:72px;text-align:center;animation:pop .5s}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.hidden{display:none!important}
+.center{text-align:center}
+.err{color:#ff8fa3;font-size:13px;min-height:18px;text-align:center}
+.ok{color:#6ee7a0;font-size:13px;min-height:18px;text-align:center}
+.stars{color:var(--gold);font-size:18px}
+</style>
+</head>
+<body>
+<div class="demobanner">🎤 DEMO by Jilan Apps</div>
+<script>
+/* 3-day demo expiry */
+(function(){try{var k='aa_demo_start',n=Date.now(),s=localStorage.getItem(k);if(!s){localStorage.setItem(k,String(n));}else if(n-parseInt(s,10)>3*864e5){document.addEventListener('DOMContentLoaded',function(){document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;text-align:center;padding:24px;font-family:system-ui"><div style="font-size:64px">🎤</div><h1>Antakshari Adda</h1><p>Demo muddat (3 din) khatam.<br>Full version ke liye Jilan Apps se rabta karein.</p></div>';});}}catch(e){}})();
+</script>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="ob" class="screen">
+  <div class="center" style="margin-top:26px">
+    <div style="font-size:70px">🎤</div>
+    <h1>Antakshari Adda</h1>
+    <div class="sub" data-i="tagline">Gaana Shuru, Dosti Pakki!</div>
+  </div>
+  <div class="card">
+    <label data-i="uname">Username</label>
+    <input id="obName" maxlength="14" placeholder="Aapka naam">
+    <label data-i="uavatar">Avatar chunein</label>
+    <div class="chips" id="obAvatars"></div>
+    <label data-i="ulang">Language</label>
+    <div class="chips" id="obLangs"></div>
+    <label data-i="uera">Era pasand</label>
+    <div class="chips" id="obEras"></div>
+  </div>
+  <button class="btn gold" onclick="finishOb()" data-i="start">🚀 Shuru Karein</button>
+  <div class="note" data-i="obnote">Demo: same phone par pass-and-play. Online multiplayer ke liye server chahiye hoga.</div>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="home" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h1>🎤 Antakshari Adda</h1>
+    <span class="coinpill">🪙 <span id="coinHome">100</span></span>
+  </div>
+  <div class="sub" id="homeHi">Salaam!</div>
+  <button class="btn" onclick="quickPlay()" style="font-size:20px;padding:18px">▶️ <span data-i="playnow">Play Now</span></button>
+  <div class="row2">
+    <button class="btn ghost small" onclick="go('modes')">🎮 <span data-i="modes">Modes</span></button>
+    <button class="btn ghost small" onclick="go('rooms')">🚪 <span data-i="rooms">Rooms</span></button>
+  </div>
+  <div class="card">
+    <h2>🎯 <span data-i="daily">Daily Challenge</span></h2>
+    <div id="dailyBox" class="sub"></div>
+    <div class="sub"><span data-i="progress">Progress</span>: <b id="dailyProg">0/3</b></div>
+  </div>
+  <div class="card">
+    <h2>🏆 <span data-i="lbprev">Leaderboard</span></h2>
+    <div id="lbPreview" class="sub"></div>
+    <button class="btn ghost small" onclick="go('lb')" data-i="viewall">Sab dekhein</button>
+  </div>
+  <div class="note" data-i="homenote">💡 Bot ke khilaf khelein ya doston ke saath ek hi phone par (pass-and-play).</div>
+</div>
+
+<!-- ============ MODES ============ -->
+<div id="modes" class="screen">
+  <h1>🎮 Game Modes</h1>
+  <div class="card"><h2>🎤 Classic Antakshari</h2><div class="sub" data-i="m1d">2-6 khiladi, ek phone par. Aakhri harf se agla gaana!</div><button class="btn small" onclick="setupClassic(false)" data-i="play">Khelein</button></div>
+  <div class="card"><h2>🤖 Bot ke Khilaf</h2><div class="sub" data-i="m2d">Akela khelein — bot jawab dega.</div><button class="btn small" onclick="setupClassic(true)" data-i="play">Khelein</button></div>
+  <div class="card"><h2>⚡ Speed Round</h2><div class="sub" data-i="m3d">Har turn sirf 10 second! 60 second me kitne gaane?</div><button class="btn small gold" onclick="startSpeed()" data-i="play">Khelein</button></div>
+  <div class="card"><h2>🔍 Guess the Song</h2><div class="sub" data-i="m4d">Hints se gaane ka naam pehchanein.</div><button class="btn small" onclick="startGuess()" data-i="play">Khelein</button></div>
+  <div class="card"><h2>✏️ Complete the Title</h2><div class="sub" data-i="m5d">Adhoora title mukammal karein.</div><button class="btn small" onclick="startComplete()" data-i="play">Khelein</button></div>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ SETUP ============ -->
+<div id="setup" class="screen">
+  <h1>👥 Khiladi</h1>
+  <div class="card">
+    <div class="sub" data-i="addp">2 se 6 naam likhein (ek hi phone par khelenge)</div>
+    <div id="pInputs"></div>
+    <div class="row2">
+      <button class="btn ghost small" onclick="addPInput()">➕</button>
+      <button class="btn ghost small" onclick="rmPInput()">➖</button>
+    </div>
+  </div>
+  <button class="btn gold" onclick="beginClassic()" data-i="startgame">🎤 Game Shuru</button>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <b id="gMode">🎤 Classic</b><span class="coinpill">🪙 <span id="coinGame">100</span></span>
+  </div>
+  <div class="pturn" id="gPlayers"></div>
+  <div class="timer"><span data-i="time">Waqt</span>: <b id="gTimer">30</b>s</div>
+  <div class="sub center" data-i="reqletter">Is harf se gaana shuru ho:</div>
+  <div class="bigletter" id="gLetter">M</div>
+  <input id="gInput" maxlength="60" data-i-ph="songph" placeholder="Gaane ka naam likhein...">
+  <div class="err" id="gErr"></div><div class="ok" id="gOk"></div>
+  <button class="btn gold" onclick="submitSong()">🎵 <span data-i="singsong">Gaana Sunao</span></button>
+  <div class="row2">
+    <button class="btn ghost small" onclick="useHint()">💡 <span data-i="hint">Hint</span> (10🪙)</button>
+    <button class="btn ghost small" onclick="skipTurn()">⏭️ <span data-i="skip">Skip</span> (5🪙)</button>
+  </div>
+  <div class="chips" id="gReacts"></div>
+  <div class="songlog" id="gLog"></div>
+  <button class="btn ghost" onclick="endGame()">🏁 <span data-i="endgame">Game Khatam</span></button>
+</div>
+
+<!-- ============ GUESS ============ -->
+<div id="guess" class="screen">
+  <h1>🔍 Guess the Song</h1>
+  <div class="card center">
+    <div class="sub" data-i="guessd">Hints dekhein, gaane ka naam batayein:</div>
+    <div style="font-size:15px;line-height:2" id="guessHints"></div>
+  </div>
+  <input id="guessInput" maxlength="60" data-i-ph="songph" placeholder="Gaane ka naam likhein...">
+  <div class="err" id="guessErr"></div><div class="ok" id="guessOk"></div>
+  <div class="row2">
+    <button class="btn gold" onclick="submitGuess()">✅ <span data-i="check">Check</span></button>
+    <button class="btn ghost" onclick="startGuess()">🔄 <span data-i="newq">Naya</span></button>
+  </div>
+  <div class="sub center"><span data-i="score">Score</span>: <b id="guessScore">0</b> | 🪙 <b id="guessCoins">0</b></div>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ COMPLETE TITLE ============ -->
+<div id="ctitle" class="screen">
+  <h1>✏️ Complete the Title</h1>
+  <div class="card center">
+    <div class="sub" data-i="ctd">Khaali jagah pur karein:</div>
+    <div style="font-size:24px;font-weight:800;color:var(--gold)" id="ctQ"></div>
+  </div>
+  <input id="ctInput" maxlength="40" placeholder="...">
+  <div class="err" id="ctErr"></div><div class="ok" id="ctOk"></div>
+  <div class="row2">
+    <button class="btn gold" onclick="submitComplete()">✅ <span data-i="check">Check</span></button>
+    <button class="btn ghost" onclick="startComplete()">🔄 <span data-i="newq">Naya</span></button>
+  </div>
+  <div class="sub center"><span data-i="score">Score</span>: <b id="ctScore">0</b> | 🪙 <b id="ctCoins">0</b></div>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div id="result" class="screen">
+  <div class="checkmark">🏆</div>
+  <h1 class="center" data-i="gameres">Game Result</h1>
+  <div class="card" id="resBox"></div>
+  <button class="btn gold" onclick="go('modes')" data-i="again">🔄 Dobara Khelein</button>
+  <button class="btn ghost" onclick="go('home')">🏠 Home</button>
+</div>
+
+<!-- ============ ROOMS ============ -->
+<div id="rooms" class="screen">
+  <h1>🚪 Rooms</h1>
+  <div class="note" data-i="roomnote">⚠️ Demo: rooms sirf isi phone par pass-and-play ke liye hain. Online multiplayer ke liye server chahiye hoga.</div>
+  <div class="card">
+    <h2 data-i="createroom">Naya Room Banayein</h2>
+    <div class="sub" data-i="roomtheme">Theme chunein:</div>
+    <div class="chips" id="roomThemes"></div>
+    <button class="btn gold" onclick="createRoom()">🚪 <span data-i="createroom">Naya Room Banayein</span></button>
+  </div>
+  <div class="card">
+    <h2 data-i="joinroom">Room Join Karein</h2>
+    <input id="roomCode" maxlength="6" placeholder="ABC123" style="text-transform:uppercase">
+    <button class="btn" onclick="joinRoom()">➡️ <span data-i="join">Join</span></button>
+  </div>
+  <div class="card hidden" id="roomInfo">
+    <h2><span data-i="room">Room</span>: <b id="roomCodeShow" style="color:var(--gold)"></b></h2>
+    <div class="sub" id="roomThemeShow"></div>
+    <button class="btn" onclick="setupClassic(false)">🎤 <span data-i="startgame">Game Shuru</span></button>
+  </div>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ LEADERBOARD ============ -->
+<div id="lb" class="screen">
+  <h1>🏆 Leaderboard</h1>
+  <div class="card"><h2 data-i="top">Top Khiladi</h2><div id="lbTable"></div></div>
+  <div class="card"><h2 data-i="badges">Badges</h2><div id="badgeBox"></div></div>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="pf" class="screen">
+  <h1>👤 Profile</h1>
+  <div class="card center">
+    <div style="font-size:56px" id="pfAvatar">🎤</div>
+    <h2 id="pfName">Player</h2>
+    <span class="coinpill">🪙 <span id="coinPf">100</span> <span data-i="coins">coins</span></span>
+  </div>
+  <div class="card"><h2 data-i="stats">Stats</h2><div id="pfStats" class="sub"></div></div>
+  <div class="card">
+    <h2 data-i="ulang">Language / زبان</h2>
+    <div class="chips" id="pfLangs"></div>
+  </div>
+  <div class="card">
+    <h2 data-i="friends">Dost (demo)</h2>
+    <div class="sub" data-i="friendsd">Demo me dost offline list hain — online friends ke liye server chahiye.</div>
+    <div class="chips"><span class="chip">🎧 Ali</span><span class="chip">🎸 Sara</span><span class="chip">🎹 Bilal</span></div>
+  </div>
+  <button class="btn ghost small" onclick="resetAll()">🗑️ <span data-i="reset">Reset Demo Data</span></button>
+  <button class="btn ghost" onclick="goBack()">⬅️ <span data-i="back">Back</span></button>
+</div>
+
+<nav id="tabbar">
+  <div class="tab on" data-t="home" onclick="go('home')"><span class="ic">🏠</span><span data-i="thome">Home</span></div>
+  <div class="tab" data-t="modes" onclick="go('modes')"><span class="ic">▶️</span><span data-i="tplay">Play</span></div>
+  <div class="tab" data-t="rooms" onclick="go('rooms')"><span class="ic">🚪</span><span data-i="trooms">Rooms</span></div>
+  <div class="tab" data-t="lb" onclick="go('lb')"><span class="ic">🏆</span><span data-i="tlb">Rank</span></div>
+  <div class="tab" data-t="pf" onclick="go('pf')"><span class="ic">👤</span><span data-i="tpf">Profile</span></div>
+</nav>
+
+<script>
+/* ================= STORE ================= */
+function LS(k,d){try{var v=localStorage.getItem('aa_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function SV(k,v){try{localStorage.setItem('aa_'+k,JSON.stringify(v));}catch(e){}}
+var st=LS('settings',{name:'',avatar:'🎤',lang:'ur',langs:['hin'],era:'all',ob:0,coins:100});
+var stats=LS('stats',{games:0,wins:{},songs:0,guessed:0,completed:0,best:0,badges:[]});
+var LANG=st.lang||'ur';
+/* ================= SONG DB (titles only, no lyrics) ================= */
+var SONGS=[
+["Aaj Kal Tere Mere","hin","90s"],["Abhi Na Jao Chhod Kar","hin","60s"],["Aankhon Mein Teri","hin","00s"],["Ae Mere Humsafar","hin","80s"],["Aati Kya Khandala","hin","90s"],["Aaja Nachle","hin","00s"],["Aap Ki Nazron Ne Samjha","hin","60s"],["Ankhiyon Ke Jharokhon Se","hin","70s"],["Agar Tum Saath Ho","hin","new"],["Apna Time Aayega","hin","new"],["Aashiq Banaya Aapne","hin","00s"],["Aa Dekhen Zara","hin","00s"],["Aahun Aahun","hin","00s"],["Aadat","urd","00s"],["Afreen Afreen","urd","new"],["Aitebar","urd","90s"],["Alif Allah","pun","90s"],
+["Baharon Phool Barsao","hin","60s"],["Bekhayali","hin","new"],["Bulleya","hin","new"],["Badtameez Dil","hin","new"],["Ban Ja Rani","hin","new"],["Bom Diggy Diggy","hin","new"],["Balam Pichkari","hin","new"],["Badri Ki Dulhania","hin","new"],
+["Chaiyya Chaiyya","hin","90s"],["Chand Sifarish","hin","00s"],["Chura Liya Hai","hin","70s"],["Chalte Chalte","hin","70s"],["Choli Ke Peeche","hin","90s"],["Chura Ke Dil Mera","hin","90s"],["Chikni Chameli","hin","new"],["Chaar Bottle Vodka","hin","new"],
+["Dum Maro Dum","hin","70s"],["Dheere Dheere","hin","90s"],["Dil Diyan Gallan","hin","new"],["Desi Girl","hin","00s"],["Dil Dil Pakistan","urd","80s"],["Duur","urd","00s"],["Do Lafzon Ki Hai","hin","70s"],["Dilliwali Girlfriend","hin","new"],["Dilbar","hin","new"],["Dhadak","hin","new"],
+["Ek Do Teen","hin","80s"],["Ek Pal Ka Jeena","hin","00s"],["Ek Ladki Ko Dekha","hin","90s"],
+["Fevicol Se","hin","new"],
+["Gallan Goodiyan","hin","new"],["Gerua","hin","new"],["Ghungroo","hin","new"],["Gulabi Aankhen","hin","70s"],["Genda Phool","hin","new"],["Garmi","hin","new"],
+["Humko Humise Chura Lo","hin","90s"],["Hawa Hawai","hin","80s"],["High Rated Gabru","pun","new"],["Haule Haule","hin","00s"],["Husn Hai Suhana","hin","90s"],
+["Iktara","hin","00s"],["Ishq Wala Love","hin","new"],["Itna Na Mujhse Tu Pyaar Badha","hin","60s"],
+["Jai Ho","hin","00s"],["Jumma Chumma","hin","90s"],["Jeene Ke Hain Chaar Din","hin","00s"],["Jazba Junoon","urd","90s"],
+["Kabhi Kabhie Mere Dil Mein","hin","70s"],["Kala Chashma","hin","new"],["Kar Gayi Chull","hin","new"],["Kajra Re","hin","00s"],["Kuch Kuch Hota Hai","hin","90s"],["Kal Ho Naa Ho","hin","00s"],["Kesariya","hin","new"],["Kudi Nu Nachne De","hin","new"],["Koka","pun","new"],
+["Lag Jaa Gale","hin","60s"],["Lungi Dance","hin","new"],["London Thumakda","hin","new"],["Lahore","pun","new"],["Leja Re","hin","new"],
+["Mere Sapno Ki Rani","hin","60s"],["Mundian To Bach Ke","pun","00s"],["Makhna","hin","new"],["Mast Magan","hin","new"],["Mera Bichra Yaar","urd","00s"],["Mahi Ve","pun","00s"],["Manali Trance","hin","new"],["Mile Ho Tum Humko","hin","new"],["Muqabla","hin","new"],["Morni Banke","hin","new"],
+["Nadaan Parindey","hin","new"],["Nashe Si Chadh Gayi","hin","new"],["Naina","hin","new"],["Naach Meri Rani","hin","new"],["Nainowale Ne","hin","new"],
+["O O Jaane Jaana","hin","90s"],["O Saki Saki","hin","new"],["O Mere Dil Ke Chain","hin","70s"],
+["Pehla Nasha","hin","90s"],["Pinga","hin","new"],["Proper Patola","pun","new"],["Pasoori","urd","new"],["Patola","pun","new"],["Pee Loon","hin","new"],["Param Sundari","hin","new"],["Paani Da Rang","hin","new"],
+["Qismat Se Tum Humko Mile","hin","00s"],
+["Raabta","hin","new"],["Ramta Jogi","hin","90s"],["Rang De Basanti","hin","00s"],["Roop Tera Mastana","hin","60s"],["Raanjhanaa Hua","hin","new"],["Raataan Lambiyan","hin","new"],
+["Senorita","hin","new"],["Swag Se Swagat","hin","new"],["Sadi Gali","hin","new"],["Soch Na Sake","hin","new"],["Sun Saathiya","hin","new"],["Sammi Meri Waar","pun","90s"],["Sayonee","urd","90s"],["Suit Suit","pun","new"],["Saawariya","hin","00s"],["Shayad","hin","new"],["Sakhiyaan","pun","new"],["Sauda Khara Khara","hin","new"],
+["Tamma Tamma","hin","90s"],["Tujhe Dekha To","hin","90s"],["Tum Hi Ho","hin","new"],["Tera Ban Jaunga","hin","new"],["Tajdar-e-Haram","urd","new"],["Tera Woh Pyaar","urd","new"],["Tareefan","hin","new"],["Tera Yaar Hoon Main","hin","new"],
+["Ude Jab Jab Zulfein Teri","hin","60s"],["Urvashi Urvashi","hin","90s"],
+["Vaaste","hin","new"],["Ve Maahi","hin","new"],
+["Wakhra Swag","pun","new"],
+["Yeh Dosti","hin","70s"],["Yeh Sham Mastani","hin","70s"],
+["Zingaat","hin","new"],["Zara Zara","hin","00s"],["Zaalima","hin","new"],
+["Akhiyon Se Goli Maare","hin","90s"],["Besharam Rang","hin","new"],["Channa Mereya","hin","new"],["Dil Ne Yeh Kaha Hai Dil Se","hin","00s"],["Ghar More Pardesiya","hin","new"],["Hum Tum","hin","00s"],["Jashn-e-Bahara","hin","00s"],["Kaho Naa Pyaar Hai","hin","00s"],["Laila Main Laila","hin","80s"],["Main Hoon Hero Tera","hin","new"],["Nachde Ne Saare","hin","new"],["Odhni","hin","new"]
+];
+function fl(s){s=(s||'').trim().toLowerCase();for(var i=0;i<s.length;i++){var c=s[i];if(c>='a'&&c<='z')return c;}return '';}
+function ll(s){s=(s||'').trim().toLowerCase();for(var i=s.length-1;i>=0;i--){var c=s[i];if(c>='a'&&c<='z')return c;}return '';}
+var IDX={};
+SONGS.forEach(function(s){var k=fl(s[0]);if(!IDX[k])IDX[k]=[];IDX[k].push(s);});
+var LETTERS=Object.keys(IDX).sort();
+function rndSong(letter){var a=IDX[letter]||[];if(!a.length){var all=[];LETTERS.forEach(function(k){all=all.concat(IDX[k]);});a=all;}return a[Math.floor(Math.random()*a.length)];}
+/* ================= I18N ================= */
+var I18N={
+ur:{tagline:'Gaana Shuru, Dosti Pakki!',uname:'Username',uavatar:'Avatar chunein',ulang:'Language',uera:'Era pasand',start:'🚀 Shuru Karein',obnote:'Demo: same phone par pass-and-play. Online multiplayer ke liye server chahiye hoga.',playnow:'Play Now',modes:'Modes',rooms:'Rooms',daily:'Daily Challenge',progress:'Progress',lbprev:'Leaderboard',viewall:'Sab dekhein',homenote:'💡 Bot ke khilaf khelein ya doston ke saath ek hi phone par (pass-and-play).',play:'Khelein',back:'Back',m1d:'2-6 khiladi, ek phone par. Aakhri harf se agla gaana!',m2d:'Akela khelein — bot jawab dega.',m3d:'Har turn sirf 10 second! 60 second me kitne gaane?',m4d:'Hints se gaane ka naam pehchanein.',m5d:'Adhoora title mukammal karein.',addp:'2 se 6 naam likhein (ek hi phone par khelenge)',startgame:'🎤 Game Shuru',time:'Waqt',reqletter:'Is harf se gaana shuru ho:',songph:'Gaane ka naam likhein...',singsong:'Gaana Sunao',hint:'Hint',skip:'Skip',endgame:'Game Khatam',check:'Check',newq:'Naya',score:'Score',coins:'coins',gameres:'Game Result',again:'🔄 Dobara Khelein',roomnote:'⚠️ Demo: rooms sirf isi phone par pass-and-play ke liye hain. Online multiplayer ke liye server chahiye hoga.',createroom:'Naya Room Banayein',roomtheme:'Theme chunein:',joinroom:'Room Join Karein',join:'Join',room:'Room',top:'Top Khiladi',badges:'Badges',stats:'Stats',friends:'Dost (demo)',friendsd:'Demo me dost offline list hain — online friends ke liye server chahiye.',reset:'Reset Demo Data',guessd:'Hints dekhein, gaane ka naam batayein:',ctd:'Khaali jagah pur karein:',thome:'Home',tplay:'Play',trooms:'Rooms',tlb:'Rank',tpf:'Profile'},
+hi:{tagline:'Gaana Shuru, Dosti Pakki!',uname:'Username',uavatar:'Avatar chunein',ulang:'Bhasha',uera:'Era pasand',start:'🚀 Shuru Karein',obnote:'Demo: ek hi phone par pass-and-play. Online multiplayer ke liye server chahiye.',playnow:'Play Now',modes:'Modes',rooms:'Rooms',daily:'Daily Challenge',progress:'Pragati',lbprev:'Leaderboard',viewall:'Sab dekhein',homenote:'💡 Bot se khelein ya doston ke saath ek phone par.',play:'Khelein',back:'Back',m1d:'2-6 khiladi, ek phone. Aakhri akshar se agla gaana!',m2d:'Akele khelein — bot jawab dega.',m3d:'Har turn sirf 10 second!',m4d:'Hints se gaane ka naam pehchanein.',m5d:'Adhoora title poora karein.',addp:'2 se 6 naam likhein',startgame:'🎤 Game Shuru',time:'Samay',reqletter:'Is akshar se gaana shuru ho:',songph:'Gaane ka naam likhein...',singsong:'Gaana Sunao',hint:'Hint',skip:'Skip',endgame:'Game Khatam',check:'Check',newq:'Naya',score:'Score',coins:'coins',gameres:'Game Result',again:'🔄 Dobara Khelein',roomnote:'⚠️ Demo: rooms sirf isi phone par hain.',createroom:'Naya Room Banayein',roomtheme:'Theme chunein:',joinroom:'Room Join Karein',join:'Join',room:'Room',top:'Top Khiladi',badges:'Badges',stats:'Stats',friends:'Dost (demo)',friendsd:'Demo me dost offline hain.',reset:'Reset Demo Data',guessd:'Hints dekhein, naam batayein:',ctd:'Khaali jagah bharein:',thome:'Home',tplay:'Play',trooms:'Rooms',tlb:'Rank',tpf:'Profile'},
+en:{tagline:'Let the Music Begin!',uname:'Username',uavatar:'Pick avatar',ulang:'Language',uera:'Era',start:'🚀 Start',obnote:'Demo: pass-and-play on the same phone. Online multiplayer needs a server.',playnow:'Play Now',modes:'Modes',rooms:'Rooms',daily:'Daily Challenge',progress:'Progress',lbprev:'Leaderboard',viewall:'View all',homenote:'💡 Play vs the bot or pass-and-play with friends on one phone.',play:'Play',back:'Back',m1d:'2-6 players, one phone. Next song starts with the last letter!',m2d:'Play solo — the bot replies.',m3d:'Only 10 seconds per turn! How many songs in 60s?',m4d:'Guess the song from hints.',m5d:'Complete the unfinished title.',addp:'Enter 2-6 names (same phone)',startgame:'🎤 Start Game',time:'Time',reqletter:'Song must start with:',songph:'Type song title...',singsong:'Sing it!',hint:'Hint',skip:'Skip',endgame:'End Game',check:'Check',newq:'New',score:'Score',coins:'coins',gameres:'Game Result',again:'🔄 Play Again',roomnote:'⚠️ Demo: rooms are same-phone pass-and-play only. Online multiplayer needs a server.',createroom:'Create Room',roomtheme:'Pick theme:',joinroom:'Join Room',join:'Join',room:'Room',top:'Top Players',badges:'Badges',stats:'Stats',friends:'Friends (demo)',friendsd:'Demo friends are offline list — online needs a server.',reset:'Reset Demo Data',guessd:'See hints, name the song:',ctd:'Fill in the blank:',thome:'Home',tplay:'Play',trooms:'Rooms',tlb:'Rank',tpf:'Profile'}};
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.ur[k]||k;}
+function applyLang(){document.querySelectorAll('[data-i]').forEach(function(e){e.textContent=t(e.getAttribute('data-i'));});document.querySelectorAll('[data-i-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-i-ph'));});}
+function setLang(v){LANG=v;st.lang=v;saveSt();applyLang();renderHome();}
+/* ================= NAV ================= */
+var cur='home',stack=['home'];
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});var el=document.getElementById(id);if(el)el.classList.add('on');window.scrollTo(0,0);}
+function go(id){if(cur!==id){stack.push(id);if(stack.length>12)stack.shift();}cur=id;show(id);document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-t')===id);});var tb=document.getElementById('tabbar');tb.style.display=(['ob','game'].indexOf(id)>=0)?'none':'flex';if(id==='home')renderHome();if(id==='lb')renderLb();if(id==='pf')renderPf();}
+function goBack(){stopTimer();if(stack.length>1){stack.pop();var id=stack[stack.length-1];cur=id;show(id);document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-t')===id);});document.getElementById('tabbar').style.display=(['ob','game'].indexOf(id)>=0)?'none':'flex';}else{go('home');}}
+window.__goBack=function(){goBack();};
+function saveSt(){SV('settings',st);}function saveStats(){SV('stats',stats);}
+function addCoins(n){st.coins=Math.max(0,(st.coins||0)+n);saveSt();syncCoins();}
+function syncCoins(){['coinHome','coinGame','coinPf'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=st.coins;});var g=document.getElementById('guessCoins');if(g)g.textContent=st.coins;var c=document.getElementById('ctCoins');if(c)c.textContent=st.coins;}
+function react(e){var d=document.createElement('div');d.className='float-emoji';d.textContent=e;var r=document.getElementById('gReacts');d.style.left=(r.getBoundingClientRect().left+Math.random()*160)+'px';d.style.top=(r.getBoundingClientRect().top-10)+'px';document.body.appendChild(d);setTimeout(function(){d.remove();},1600);}
+/* ================= ONBOARDING ================= */
+var AVS=['🎤','🎧','🎸','🎹','🥁','🎺','🎷','🎻'];
+var LANGS=[['hin','Hindi'],['urd','Urdu'],['pun','Punjabi'],['mix','Mixed']];
+var ERAS=[['all','All'],['70s','70s-80s'],['90s','90s'],['00s','2000s'],['new','Latest']];
+var obAv='🎤',obLang=['hin'],obEra='all';
+function renderOb(){
+  var a=document.getElementById('obAvatars');a.innerHTML='';
+  AVS.forEach(function(x){var s=document.createElement('span');s.className='chip'+(x===obAv?' on':'');s.textContent=x;s.onclick=function(){obAv=x;renderOb();};a.appendChild(s);});
+  var l=document.getElementById('obLangs');l.innerHTML='';
+  LANGS.forEach(function(p){var s=document.createElement('span');s.className='chip'+(obLang.indexOf(p[0])>=0?' on':'');s.textContent=p[1];s.onclick=function(){var i=obLang.indexOf(p[0]);if(i>=0){if(obLang.length>1)obLang.splice(i,1);}else obLang.push(p[0]);renderOb();};l.appendChild(s);});
+  var e=document.getElementById('obEras');e.innerHTML='';
+  ERAS.forEach(function(p){var s=document.createElement('span');s.className='chip'+(obEra===p[0]?' on':'');s.textContent=p[1];s.onclick=function(){obEra=p[0];renderOb();};e.appendChild(s);});
+}
+function finishOb(){var n=document.getElementById('obName').value.trim();st.name=n||'Player';st.avatar=obAv;st.langs=obLang;st.era=obEra;st.ob=1;saveSt();go('home');}
+/* ================= HOME ================= */
+function renderHome(){
+  document.getElementById('homeHi').textContent='👋 '+(st.name||'Player')+'! '+t('tagline');
+  syncCoins();
+  var d=new Date();var seed=d.getFullYear()*1000+d.getMonth()*40+d.getDate();
+  var dl=LETTERS[seed%LETTERS.length].toUpperCase();
+  var key='dc_'+d.toDateString();var done=LS(key,0);
+  document.getElementById('dailyBox').textContent='🎯 "'+dl+'" se shuru hone wale 3 gaane sunao!';
+  document.getElementById('dailyProg').textContent=done+'/3';
+  window._daily={letter:dl.toLowerCase(),done:done,key:key};
+  var w=stats.wins||{};var arr=Object.keys(w).map(function(k){return[k,w[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+  document.getElementById('lbPreview').innerHTML=arr.length?arr.map(function(p,i){return (i+1)+'. '+p[0]+' — '+p[1]+' wins';}).join('<br>'):'Abhi koi game nahi kheli.';
+}
+function dailyHit(letter){var d=window._daily;if(d&&letter===d.letter&&d.done<3){d.done++;SV(d.key,d.done);document.getElementById('dailyProg').textContent=d.done+'/3';if(d.done>=3){addCoins(15);react('🎉');}}}
+
+/* ================= CLASSIC GAME ================= */
+var G=null,tmr=null;
+function setupClassic(bot){window._botMode=!!bot;var w=document.getElementById('pInputs');w.innerHTML='';for(var i=0;i<2;i++)addPInput();go('setup');}
+function addPInput(){var w=document.getElementById('pInputs');if(w.children.length>=6)return;var inp=document.createElement('input');inp.maxLength=12;inp.placeholder='Khiladi '+(w.children.length+1)+' ka naam';w.appendChild(inp);}
+function rmPInput(){var w=document.getElementById('pInputs');if(w.children.length>2)w.removeChild(w.lastChild);}
+function beginClassic(){
+  var names=[];var w=document.getElementById('pInputs');
+  for(var i=0;i<w.children.length;i++){var v=w.children[i].value.trim();if(v)names.push(v);}
+  if(window._botMode){names=[st.name||'Player','🤖 Bot'];}
+  else{while(names.length<2)names.push('Khiladi '+(names.length+1));}
+  startClassic(names,window._botMode);
+}
+function startClassic(names,bot){
+  var startL=LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  G={mode:bot?'bot':'classic',players:names.map(function(n){return{name:n,score:0};}),turn:0,req:startL,time:30,left:30,log:[],over:false};
+  document.getElementById('gMode').textContent=bot?'🤖 Bot ke Khilaf':'🎤 Classic';
+  document.getElementById('gInput').value='';document.getElementById('gLog').innerHTML='';
+  document.getElementById('gErr').textContent='';document.getElementById('gOk').textContent='';
+  renderPlayers();setReq(startL);go('game');startTimer();
+  if(bot&&G.players[1].name.indexOf('Bot')>=0)setTimeout(botTurn,1800);
+}
+function renderPlayers(){
+  var w=document.getElementById('gPlayers');w.innerHTML='';
+  G.players.forEach(function(p,i){
+    var d=document.createElement('div');d.className='pav'+(i===G.turn?' on':'');
+    d.innerHTML=(i===0?st.avatar:'🤖')+'<span class="sc">'+p.score+'</span><span class="nm">'+p.name+'</span>';
+    w.appendChild(d);
+  });
+}
+function setReq(l){G.req=l;document.getElementById('gLetter').textContent=l.toUpperCase();}
+function startTimer(){stopTimer();G.left=G.time;updTimer();tmr=setInterval(function(){G.left--;updTimer();if(G.left<=0){stopTimer();timeoutTurn();}},1000);}
+function updTimer(){document.getElementById('gTimer').textContent=G.left;}
+function stopTimer(){if(tmr){clearInterval(tmr);tmr=null;}}
+function timeoutTurn(){
+  gErr('⏰ Waqt khatam! Turn gaya.');
+  nextTurn();
+}
+function gErr(m){document.getElementById('gErr').textContent=m;document.getElementById('gOk').textContent='';}
+function gOk(m){document.getElementById('gOk').textContent=m;document.getElementById('gErr').textContent='';}
+function norm(s){return (s||'').trim().replace(/\s+/g,' ');}
+function submitSong(){
+  if(!G||G.over)return;
+  if(G.mode==='speed'){submitSpeed();return;}
+  var v=norm(document.getElementById('gInput').value);
+  if(!v){gErr('Pehle gaane ka naam likhein!');return;}
+  if(fl(v)!==G.req){gErr('❌ "'+G.req.toUpperCase()+'" se shuru hona chahiye!');return;}
+  acceptSong(v,false);
+}
+function submitSpeed(){
+  var v=norm(document.getElementById('gInput').value);
+  if(!v){gErr('Pehle gaane ka naam likhein!');return;}
+  if(fl(v)!==G.req){gErr('❌ "'+G.req.toUpperCase()+'" se shuru hona chahiye!');return;}
+  SP.count++;stats.songs++;G.players[0].score=SP.count;
+  var sc=document.getElementById('spSc');if(sc)sc.textContent=SP.count;
+  addCoins(1);dailyHit(G.req);
+  var log=document.getElementById('gLog');
+  var d=document.createElement('div');d.textContent='🎵 '+v;log.insertBefore(d,log.firstChild);
+  gOk('✅ Zabardast!');
+  document.getElementById('gInput').value='';
+  SP.left=10;document.getElementById('gTimer').textContent=10;
+  var nl=ll(v);
+  if(!IDX[nl]||!IDX[nl].length)nl=LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  setReq(nl);G.req=nl;saveStats();
+}
+function acceptSong(v,isBot){
+  var p=G.players[G.turn];
+  p.score++;stats.songs++;stats.best=Math.max(stats.best,p.score);
+  addCoins(2);dailyHit(G.req);
+  var nl=ll(v);
+  var log=document.getElementById('gLog');
+  var d=document.createElement('div');d.textContent='🎵 '+p.name+': '+v;log.insertBefore(d,log.firstChild);
+  gOk('✅ Zabardast! +1 point');
+  document.getElementById('gInput').value='';
+  if(!IDX[nl]||!IDX[nl].length){nl=LETTERS[Math.floor(Math.random()*LETTERS.length)];gOk('✅ Zabardast! ("'+nl.toUpperCase()+'" se jari — house rule)');}
+  checkBadges();
+  nextTurn(nl);
+}
+function nextTurn(nl){
+  if(nl)setReq(nl);
+  G.turn=(G.turn+1)%G.players.length;
+  renderPlayers();saveStats();
+  var np=G.players[G.turn];
+  if(G.mode==='bot'&&np.name.indexOf('Bot')>=0){startTimer();setTimeout(botTurn,1600);}
+  else startTimer();
+}
+function botTurn(){
+  if(!G||G.over)return;
+  if(G.players[G.turn].name.indexOf('Bot')<0)return;
+  stopTimer();
+  var s=rndSong(G.req);
+  document.getElementById('gInput').value=s[0];
+  setTimeout(function(){acceptSong(s[0],true);},700);
+}
+function useHint(){
+  if(!G||G.over)return;
+  if(st.coins<10){gErr('🪙 Coins kam hain!');return;}
+  addCoins(-10);
+  var s=rndSong(G.req);
+  gOk('💡 Try: "'+s[0]+'"');
+}
+function skipTurn(){
+  if(!G||G.over)return;
+  if(st.coins<5){gErr('🪙 Coins kam hain!');return;}
+  addCoins(-5);gErr('⏭️ Skip!');
+  var nl=LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  nextTurn(nl);
+}
+function endGame(){
+  if(!G)return;
+  if(G.mode==='speed'){endSpeed();return;}
+  stopTimer();G.over=true;
+  var ps=G.players.slice().sort(function(a,b){return b.score-a.score;});
+  var w0=ps[0].name;
+  stats.games++;
+  if(w0.indexOf('Bot')<0){stats.wins[w0]=(stats.wins[w0]||0)+1;addCoins(20);}
+  checkBadges();saveStats();
+  var html=ps.map(function(p,i){return '<div>'+(i===0?'🥇':'🎵')+' '+p.name+': <b>'+p.score+'</b> points</div>';}).join('');
+  html+='<div class="sub" style="margin-top:8px">+20 🪙 winner bonus'+(w0.indexOf('Bot')>=0?' (bot jeeta — koi bonus nahi)':'')+'</div>';
+  document.getElementById('resBox').innerHTML=html;
+  go('result');
+}
+function checkBadges(){
+  var b=stats.badges;
+  function add(x){if(b.indexOf(x)<0){b.push(x);react('🏅');}}
+  if(stats.songs>=20)add('Melody Master');
+  if(stats.completed>=10)add('Lyrics Legend');
+  var w=stats.wins||{};var tot=Object.keys(w).reduce(function(s,k){return s+w[k];},0);
+  if(tot>=5)add('Antakshari King');
+  saveStats();
+}
+/* ================= SPEED ROUND ================= */
+var SP=null;
+function startSpeed(){
+  var startL=LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  SP={req:startL,left:10,total:60,count:0,over:false};
+  G={mode:'speed',players:[{name:st.name||'Player',score:0}],turn:0,req:startL,time:10,over:false};
+  document.getElementById('gMode').textContent='⚡ Speed Round (60s)';
+  document.getElementById('gPlayers').innerHTML='<div class="pav on">'+st.avatar+'<span class="sc" id="spSc">0</span><span class="nm">'+(st.name||'Player')+'</span></div>';
+  document.getElementById('gInput').value='';document.getElementById('gLog').innerHTML='';
+  document.getElementById('gErr').textContent='';document.getElementById('gOk').textContent='';
+  setReq(startL);go('game');
+  var iv=setInterval(function(){
+    if(!SP||SP.over){clearInterval(iv);return;}
+    SP.left--;SP.total--;
+    document.getElementById('gTimer').textContent=SP.left;
+    if(SP.left<=0){gErr('⏰ Turn gaya!');newSpeedLetter();}
+    if(SP.total<=0){clearInterval(iv);endSpeed();}
+  },1000);
+  window._spIv=iv;
+}
+function newSpeedLetter(){
+  var nl=LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  SP.left=10;setReq(nl);G.req=nl;
+  document.getElementById('gTimer').textContent=10;
+}
+function endSpeed(){
+  SP.over=true;G.over=true;stopTimer();
+  stats.games++;stats.best=Math.max(stats.best,SP.count);
+  addCoins(SP.count);
+  var w=stats.wins;w[st.name||'Player']=(w[st.name||'Player']||0)+0;saveStats();
+  document.getElementById('resBox').innerHTML='<div style="font-size:20px">⚡ <b>'+SP.count+'</b> gaane 60 second me!</div><div class="sub">+'+SP.count+' 🪙 coins mile</div>';
+  go('result');
+}
+var _origSubmit=null;
+/* ================= GUESS THE SONG ================= */
+var GQ=null;
+function startGuess(){
+  var s=SONGS[Math.floor(Math.random()*SONGS.length)];
+  GQ={s:s,score:parseInt(document.getElementById('guessScore').textContent)||0};
+  var words=s[0].split(' ').length;
+  document.getElementById('guessHints').innerHTML=
+    '🔤 Pehla harf: <b style="color:var(--gold)">'+fl(s[0]).toUpperCase()+'</b><br>'+
+    '📝 Alfaz: <b>'+words+'</b><br>'+
+    '🗓 Era: <b>'+s[2]+'</b><br>'+
+    '🌍 <b>'+({hin:'Bollywood Hindi',urd:'Pakistani/Urdu',pun:'Punjabi',mix:'Mixed'}[s[1]]||s[1])+'</b>';
+  document.getElementById('guessInput').value='';
+  document.getElementById('guessErr').textContent='';document.getElementById('guessOk').textContent='';
+  go('guess');
+}
+function submitGuess(){
+  var v=norm(document.getElementById('guessInput').value).toLowerCase();
+  if(!v)return;
+  if(v===GQ.s[0].toLowerCase()){
+    GQ.score++;stats.guessed++;addCoins(5);
+    document.getElementById('guessScore').textContent=GQ.score;
+    document.getElementById('guessOk').textContent='✅ Sahi! "'+GQ.s[0]+'" +5 🪙';
+    document.getElementById('guessErr').textContent='';
+    react('🎉');saveStats();
+    setTimeout(startGuess,1400);
+  }else{
+    document.getElementById('guessErr').textContent='❌ Ghalat — dobara try karein!';
+  }
+}
+/* ================= COMPLETE TITLE ================= */
+var CT=null;
+function startComplete(){
+  var cand=SONGS.filter(function(s){return s[0].split(' ').length>=2;});
+  var s=cand[Math.floor(Math.random()*cand.length)];
+  var parts=s[0].split(' ');var missing=parts.pop();
+  CT={s:s,missing:missing,score:parseInt(document.getElementById('ctScore').textContent)||0};
+  document.getElementById('ctQ').textContent=parts.join(' ')+'  _____';
+  document.getElementById('ctInput').value='';
+  document.getElementById('ctErr').textContent='';document.getElementById('ctOk').textContent='';
+  go('ctitle');
+}
+function submitComplete(){
+  var v=norm(document.getElementById('ctInput').value).toLowerCase();
+  if(!v)return;
+  if(v===CT.missing.toLowerCase()){
+    CT.score++;stats.completed++;addCoins(5);checkBadges();
+    document.getElementById('ctScore').textContent=CT.score;
+    document.getElementById('ctOk').textContent='✅ Sahi! "'+CT.s[0]+'" +5 🪙';
+    document.getElementById('ctErr').textContent='';
+    react('🎉');saveStats();
+    setTimeout(startComplete,1400);
+  }else{
+    document.getElementById('ctErr').textContent='❌ Ghalat — dobara try karein!';
+  }
+}
+/* ================= ROOMS ================= */
+var THEMES=['🎬 Bollywood','🎤 Qawwali','💃 Punjabi','🌙 Ghazal'];
+function renderRooms(){
+  var w=document.getElementById('roomThemes');w.innerHTML='';
+  THEMES.forEach(function(x,i){var s=document.createElement('span');s.className='chip'+(i===0?' on':'');s.textContent=x;s.onclick=function(){w.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});s.classList.add('on');w.setAttribute('data-th',x);};w.appendChild(s);});
+  w.setAttribute('data-th',THEMES[0]);
+}
+function createRoom(){
+  var code='';var ch='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  for(var i=0;i<6;i++)code+=ch[Math.floor(Math.random()*ch.length)];
+  var th=document.getElementById('roomThemes').getAttribute('data-th')||THEMES[0];
+  document.getElementById('roomCodeShow').textContent=code;
+  document.getElementById('roomThemeShow').textContent='Theme: '+th+' (demo — isi phone par khelein)';
+  document.getElementById('roomInfo').classList.remove('hidden');
+}
+function joinRoom(){
+  var c=document.getElementById('roomCode').value.trim().toUpperCase();
+  if(c.length<4){return;}
+  document.getElementById('roomCodeShow').textContent=c;
+  document.getElementById('roomThemeShow').textContent='Demo room join ho gaya — isi phone par pass-and-play!';
+  document.getElementById('roomInfo').classList.remove('hidden');
+}
+/* ================= LEADERBOARD / PROFILE ================= */
+function renderLb(){
+  var w=stats.wins||{};var arr=Object.keys(w).map(function(k){return[k,w[k]];}).sort(function(a,b){return b[1]-a[1];});
+  document.getElementById('lbTable').innerHTML=arr.length?'<table class="lb"><tr><th>#</th><th>Khiladi</th><th>Wins</th></tr>'+arr.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+p[0]+'</td><td>'+p[1]+'</td></tr>';}).join('')+'</table>':'<div class="sub">Abhi koi game nahi kheli.</div>';
+  var all=['Antakshari King','Melody Master','Lyrics Legend'];
+  document.getElementById('badgeBox').innerHTML=all.map(function(b){var has=stats.badges.indexOf(b)>=0;return '<span class="badge" style="'+(has?'':'opacity:.35;filter:grayscale(1)')+'">'+(has?'🏅 ':'🔒 ')+b+'</span>';}).join('');
+}
+function renderPf(){
+  document.getElementById('pfAvatar').textContent=st.avatar||'🎤';
+  document.getElementById('pfName').textContent=st.name||'Player';
+  syncCoins();
+  var w=stats.wins||{};var tot=Object.keys(w).reduce(function(s,k){return s+w[k];},0);
+  document.getElementById('pfStats').innerHTML='🎮 Games: <b>'+stats.games+'</b><br>🏆 Wins: <b>'+tot+'</b><br>🎵 Gaane: <b>'+stats.songs+'</b><br>⭐ Best: <b>'+stats.best+'</b> points<br>🏅 Badges: <b>'+stats.badges.length+'</b>';
+  var w2=document.getElementById('pfLangs');w2.innerHTML='';
+  [['ur','Urdu'],['hi','Hindi'],['en','English']].forEach(function(p){var s=document.createElement('span');s.className='chip'+(LANG===p[0]?' on':'');s.textContent=p[1];s.onclick=function(){setLang(p[0]);renderPf();};w2.appendChild(s);});
+}
+function resetAll(){if(confirm('Demo data reset karein?')){try{Object.keys(localStorage).filter(function(k){return k.indexOf('aa_')===0;}).forEach(function(k){localStorage.removeItem(k);});}catch(e){}location.reload();}}
+/* quick play = vs bot */
+function quickPlay(){setupClassic(true);}
+/* ================= INIT ================= */
+function init(){
+  renderOb();applyLang();renderRooms();syncCoins();
+  document.getElementById('gReacts').innerHTML=['🎉','👏','🔥','😂','❤️'].map(function(e){return '<span class="chip" onclick="react(\''+e+'\')">'+e+'</span>';}).join('');
+  if(!st.ob){go('ob');document.getElementById('tabbar').style.display='none';}
+  else{go('home');}
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
