@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SafeGhar — Ghar Ko Banao Fort</title>
+<style>
+:root{--navy:#1E3A8A;--navy2:#16296b;--yel:#FBBF24;--yel2:#f59e0b;--bg:#f4f6fb;--card:#fff;--txt:#1f2937;--mut:#6b7280;--line:#e5e7eb;--ok:#16a34a;--bad:#dc2626}
+body.dark{--bg:#0f172a;--card:#1e293b;--txt:#f1f5f9;--mut:#94a3b8;--line:#334155}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:76px}
+.demobanner{position:sticky;top:0;z-index:100;background:var(--yel);color:#1E3A8A;text-align:center;font-weight:800;font-size:13px;padding:7px;letter-spacing:.5px}
+.screen{display:none;max-width:480px;margin:0 auto;padding:14px 14px 20px}
+.screen.on{display:block}
+.topbar{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+.topbar h2{margin:0;font-size:20px;flex:1}
+.backbtn{background:var(--card);border:1px solid var(--line);border-radius:10px;width:38px;height:38px;font-size:18px;cursor:pointer;color:var(--txt)}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(30,58,138,.08);border:1px solid var(--line)}
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-size:17px;font-weight:700;color:#fff;background:var(--navy);cursor:pointer;margin:8px 0}
+.btn.yel{background:var(--yel);color:#1E3A8A}
+.btn.ghost{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+body.dark .btn.ghost{color:var(--yel);border-color:var(--yel)}
+.btn.sm{padding:10px;font-size:14px;width:auto;display:inline-block;margin:4px}
+.row{display:flex;gap:8px;align-items:center}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--txt)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:15px;margin:6px 0}
+label{font-size:13px;color:var(--mut);font-weight:600}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;z-index:90}
+.bottomnav button{flex:1;background:none;border:none;padding:9px 2px 7px;font-size:10px;color:var(--mut);cursor:pointer}
+.bottomnav button .ic{font-size:21px;display:block}
+.bottomnav button.on{color:var(--navy);font-weight:700}
+body.dark .bottomnav button.on{color:var(--yel)}
+.scorering{width:130px;height:130px;border-radius:50%;margin:6px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(var(--yel) 0deg, var(--line) 0deg);position:relative}
+.scorering .inner{width:104px;height:104px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.scorering b{font-size:30px;color:var(--navy)}
+body.dark .scorering b{color:var(--yel)}
+.scorering small{font-size:11px;color:var(--mut)}
+.guidecard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;cursor:pointer;background:var(--card)}
+.guidecard .gicon{font-size:34px;background:var(--bg);border-radius:12px;width:58px;height:58px;display:flex;align-items:center;justify-content:center;flex:none}
+.guidecard .gt{flex:1}
+.guidecard .gt b{display:block;font-size:15px}
+.guidecard .gt small{color:var(--mut);font-size:12px}
+.diff{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px}
+.diff.Easy{background:#dcfce7;color:#166534}.diff.Medium{background:#fef3c7;color:#92400e}.diff.Hard{background:#fee2e2;color:#991b1b}
+.step{border-right:4px solid var(--yel);padding:10px 12px;margin:10px 0;background:var(--bg);border-radius:0 12px 12px 0}
+.step b{color:var(--navy)}body.dark .step b{color:var(--yel)}
+.tipbox{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;margin:10px 0;font-size:14px}
+body.dark .tipbox{background:#3a2c07;border-color:#92600a}
+.warnbox{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px;margin:10px 0;font-size:14px}
+body.dark .warnbox{background:#3b0d0d;border-color:#7f1d1d}
+.prodcard{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--card)}
+.prodcard .picon{font-size:38px;flex:none}
+.stars{color:var(--yel2);font-size:13px}
+.checkitem{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--card)}
+.checkitem.done{opacity:.65}
+.checkitem .cbx{width:26px;height:26px;border-radius:8px;border:2px solid var(--navy);flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;margin-top:2px}
+.checkitem.done .cbx{background:var(--ok);border-color:var(--ok)}
+.progressbar{height:12px;background:var(--line);border-radius:8px;overflow:hidden;margin:8px 0}
+.progressbar>div{height:100%;background:linear-gradient(90deg,var(--navy),var(--yel));border-radius:8px;transition:width .4s}
+.emg{display:flex;gap:10px;margin-bottom:8px}
+.emg a{flex:1;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;color:var(--txt)}
+.emg a b{display:block;font-size:16px;color:var(--navy)}body.dark .emg a b{color:var(--yel)}
+.panicbtn{background:var(--bad);color:#fff;font-size:19px;border-radius:16px;padding:18px;border:none;width:100%;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(220,38,38,.4)}
+.onb{text-align:center;padding:30px 20px}
+.onb .big{font-size:80px;margin:20px 0}
+.onb h1{color:var(--navy);font-size:26px}body.dark .onb h1{color:var(--yel)}
+.dots{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.dots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots span.on{background:var(--navy);width:28px;border-radius:6px}
+.hometype{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.hometype button{border:2px solid var(--line);background:var(--card);border-radius:14px;padding:18px 8px;font-size:15px;cursor:pointer;color:var(--txt)}
+.hometype button.on{border-color:var(--navy);background:#eef2ff}body.dark .hometype button.on{background:#1a2450}
+.hometype .ic{font-size:34px;display:block;margin-bottom:6px}
+.catgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.catcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer}
+.catcard .ic{font-size:36px;display:block;margin-bottom:8px}
+.catcard b{font-size:13px}
+.sliderow{display:flex;align-items:center;gap:10px}
+input[type=range]{padding:0}
+.fakecall{position:fixed;inset:0;background:#0f172a;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.fakecall.on{display:flex}
+.fakecall .avatar{width:110px;height:110px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:14px}
+.callbtns{display:flex;gap:40px;margin-top:34px}
+.callbtns button{width:66px;height:66px;border-radius:50%;border:none;font-size:28px;cursor:pointer}
+.langrow{display:flex;gap:8px}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border:none}
+.small{font-size:12px;color:var(--mut)}
+h3.sec{font-size:16px;margin:18px 0 10px;color:var(--navy)}body.dark h3.sec{color:var(--yel)}
+.errstrip{position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:10px;font-size:13px;z-index:9999;text-align:center;display:none}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div class="errstrip" id="errstrip"></div>
+
+<!-- ONBOARDING -->
+<div class="screen" id="scr-onb">
+  <div class="onb" id="onbSlides"></div>
+  <div class="dots" id="onbDots"></div>
+  <div style="padding:0 20px;max-width:480px;margin:0 auto">
+    <button class="btn" id="onbNext" onclick="onbNext()">Agay →</button>
+    <button class="btn ghost" onclick="finishOnb()" data-i="skip">Skip</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="scr-home">
+  <div class="topbar"><h2>🛡️ <span data-i="appname">SafeGhar</span></h2>
+    <button class="backbtn" onclick="toggleLang()" title="Language">🌐</button>
+    <button class="backbtn" onclick="toggleDark()" title="Dark">🌙</button>
+  </div>
+  <div class="card" style="text-align:center">
+    <div class="small" data-i="yourscore">Aapke ghar ka Security Score</div>
+    <div class="scorering" id="scoreRing"><div class="inner"><b id="scoreNum">0</b><small>/ 100</small></div></div>
+    <div class="small" id="scoreLabel"></div>
+    <div class="progressbar"><div id="scoreBar" style="width:0%"></div></div>
+    <button class="btn sm yel" onclick="go('scr-checklist')" data-i="improve">Score Behtar Karein →</button>
+  </div>
+  <div class="card"><b>💡 <span data-i="tipoftheday">Aaj ki Tip</span></b><p id="tipOfDay" style="margin:8px 0 0"></p></div>
+  <div class="card" id="weakCard"><b>⚠️ <span data-i="weakspots">Kamzor Jaghein</span></b><div id="weakList" style="margin-top:8px"></div></div>
+  <h3 class="sec" data-i="recentguides">Haal ke Guides</h3>
+  <div id="recentGuides"></div>
+  <h3 class="sec" data-i="emergency">Emergency Numbers</h3>
+  <div class="card"><div class="emg">
+    <a href="tel:15"><b>15</b><span data-i="police">Police</span></a>
+    <a href="tel:16"><b>16</b><span data-i="fire">Fire</span></a>
+    <a href="tel:1122"><b>1122</b><span data-i="rescue">Rescue</span></a>
+  </div></div>
+  <button class="panicbtn" onclick="panicAlarm()">🚨 <span data-i="panic">PANIC BUTTON</span></button>
+  <div class="small" style="text-align:center;margin-top:6px" data-i="panichint">Dabane par tez alarm bajega (demo)</div>
+</div>
+
+<!-- GUIDES -->
+<div class="screen" id="scr-guides">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 data-i="guides">Guides</h2></div>
+  <div class="catgrid" id="catGrid"></div>
+  <h3 class="sec" data-i="allguides">Tamam Guides</h3>
+  <div id="guideList"></div>
+</div>
+
+<!-- GUIDE DETAIL -->
+<div class="screen" id="scr-guidedetail">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 id="gdTitle">Guide</h2>
+    <button class="backbtn" id="gdSave" onclick="toggleSaveGuide()">🤍</button></div>
+  <div id="gdBody"></div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="screen" id="scr-products">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 data-i="products">Products</h2></div>
+  <div class="card">
+    <b data-i="budget">Budget: Rs. <span id="budgetVal">5000</span></b>
+    <div class="sliderow"><span>500</span><input type="range" id="budgetRange" min="500" max="20000" step="500" value="5000" oninput="budgetChg(this.value)"><span>20000</span></div>
+    <div class="row" id="prodCats" style="margin-top:8px;overflow-x:auto"></div>
+  </div>
+  <div class="card" style="border-color:var(--yel)"><b>🏆 <span data-i="bestunder">Best under Rs. 5000</span></b><div id="bestUnder" style="margin-top:8px"></div></div>
+  <div id="prodList"></div>
+  <div class="small" style="text-align:center" data-i="affnote">Prices demo hain. Buy links demo hain.</div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="screen" id="scr-checklist">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 data-i="checklist">Security Checklist</h2></div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><b data-i="monthly">Monthly Audit</b><b id="chkPct">0%</b></div>
+    <div class="progressbar"><div id="chkBar" style="width:0%"></div></div>
+    <div class="small" id="chkHint"></div>
+  </div>
+  <div id="checkList"></div>
+  <button class="btn ghost" onclick="resetChecklist()" data-i="reset">Reset Checklist</button>
+</div>
+
+<!-- COMMUNITY -->
+<div class="screen" id="scr-community">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 data-i="community">Community</h2></div>
+  <div class="card">
+    <b data-i="report">⚠️ Mashkook Activity Report karein</b>
+    <input id="repArea" data-i-ph="area" placeholder="Ilaqa / Area">
+    <textarea id="repText" rows="2" data-i-ph="whatseen" placeholder="Kya dekha?"></textarea>
+    <button class="btn sm yel" onclick="addReport()" data-i="submitreport">Report Bhejein</button>
+  </div>
+  <h3 class="sec" data-i="localreports">Ilaqai Reports (Demo)</h3>
+  <div id="reportList"></div>
+  <h3 class="sec" data-i="tips">Security Tips</h3>
+  <div class="card"><b data-i="sharetip">💡 Apni tip share karein</b>
+    <textarea id="tipText" rows="2" data-i-ph="yourtip" placeholder="Apki tip..."></textarea>
+    <button class="btn sm" onclick="addTip()" data-i="sharetipbtn">Tip Share Karein</button></div>
+  <div id="tipList"></div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen" id="scr-profile">
+  <div class="topbar"><h2 data-i="profile">Profile</h2></div>
+  <div class="card">
+    <div class="row"><div style="font-size:44px">🏠</div><div><b id="pfHomeType">House</b><div class="small" data-i="demouser">Demo User</div></div></div>
+  </div>
+  <div class="card"><b data-i="emgcontacts">🚨 Emergency Contacts</b>
+    <div id="emgList"></div>
+    <div class="row"><input id="emgName" data-i-ph="name" placeholder="Naam" style="flex:1"><input id="emgPhone" placeholder="03xx-xxxxxxx" style="flex:1"></div>
+    <button class="btn sm" onclick="addEmg()" data-i="add">Add karein</button>
+  </div>
+  <div class="card"><b data-i="savedguides">🔖 Saved Guides</b><div id="savedList" style="margin-top:8px"></div></div>
+  <div class="card"><b data-i="settings">⚙️ Settings</b>
+    <div class="kv"><span data-i="language">Language / زبان</span><button class="btn sm" onclick="toggleLang()" id="langBtn">اردو</button></div>
+    <div class="kv"><span data-i="darkmode">Dark Mode</span><button class="btn sm" onclick="toggleDark()" data-i="toggle">Toggle</button></div>
+    <div class="kv"><span data-i="hometype">Ghar ki qisam</span><button class="btn sm" onclick="go('scr-onbtype')" data-i="change">Change</button></div>
+  </div>
+  <button class="btn ghost" onclick="resetAll()" data-i="resetdemo">Reset Demo Data</button>
+</div>
+
+<!-- HOME TYPE (change) -->
+<div class="screen" id="scr-onbtype">
+  <div class="topbar"><button class="backbtn" onclick="goBack()">←</button><h2 data-i="hometype">Ghar ki qisam</h2></div>
+  <div class="card"><div class="hometype" id="htGrid2"></div>
+  <button class="btn" onclick="saveHomeType2()" data-i="save">Save karein</button></div>
+</div>
+
+<!-- Fake call overlay -->
+<div class="fakecall" id="fakeCall">
+  <div class="avatar">📞</div>
+  <h2 id="fcName">Ami</h2><div class="small" style="color:#94a3b8">Fake call (demo)...</div>
+  <div class="callbtns">
+    <button style="background:#dc2626" onclick="endFakeCall()">✖</button>
+    <button style="background:#16a34a" onclick="endFakeCall()">📞</button>
+  </div>
+  <button class="btn sm yel" style="margin-top:24px" onclick="endFakeCall()">Demo band karein</button>
+</div>
+
+<nav class="bottomnav" id="bottomnav">
+  <button data-s="scr-home" onclick="go('scr-home')"><span class="ic">🏠</span><span data-i="navhome">Home</span></button>
+  <button data-s="scr-guides" onclick="go('scr-guides')"><span class="ic">📖</span><span data-i="navguides">Guides</span></button>
+  <button data-s="scr-products" onclick="go('scr-products')"><span class="ic">🛒</span><span data-i="navprod">Products</span></button>
+  <button data-s="scr-checklist" onclick="go('scr-checklist')"><span class="ic">✅</span><span data-i="navcheck">Checklist</span></button>
+  <button data-s="scr-profile" onclick="go('scr-profile')"><span class="ic">👤</span><span data-i="navprof">Profile</span></button>
+</nav>
+
+<script>
+/* ================= EXPIRY (3-day demo) ================= */
+(function(){try{var K='safeghar_demo_start',D=3,N=Date.now(),s=localStorage.getItem(K);if(!s){localStorage.setItem(K,String(N));}else if(N-parseInt(s,10)>D*864e5){document.write('<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1E3A8A;color:#fff;font-family:system-ui;text-align:center;padding:24px"><div style="font-size:64px">🛡️</div><h1>Demo Expired</h1><p>3 din ki demo muddat khatam.<br>Poori app ke liye Jilan Apps se rabta karein.</p><div style="margin-top:16px;padding:10px 22px;background:#FBBF24;color:#1E3A8A;border-radius:10px;font-weight:800">DEMO by Jilan Apps</div></div>');throw new Error('expired');}}catch(e){if(e.message==='expired')throw e;}})();
+</script>
+<script>
+/* ================= I18N ================= */
+var LANG=localStorage.getItem('sg_lang')||'ur';
+var I={
+ur:{skip:'Skip',appname:'SafeGhar',yourscore:'Aapke ghar ka Security Score',improve:'Score Behtar Karein →',tipoftheday:'Aaj ki Tip',weakspots:'Kamzor Jaghein',recentguides:'Haal ke Guides',emergency:'Emergency Numbers',police:'Police',fire:'Fire',rescue:'Rescue',panic:'PANIC BUTTON',panichint:'Dabane par tez alarm bajega (demo)',guides:'Guides',allguides:'Tamam Guides',products:'Products',budget:'Budget',bestunder:'Best under Rs. 5000',affnote:'Prices demo hain. Buy links demo hain.',checklist:'Security Checklist',monthly:'Monthly Audit',reset:'Reset Checklist',community:'Community',report:'Mashkook Activity Report karein',area:'Ilaqa / Area',whatseen:'Kya dekha?',submitreport:'Report Bhejein',localreports:'Ilaqai Reports (Demo)',tips:'Security Tips',sharetip:'Apni tip share karein',yourtip:'Apki tip...',sharetipbtn:'Tip Share Karein',profile:'Profile',demouser:'Demo User',emgcontacts:'Emergency Contacts',name:'Naam',add:'Add karein',savedguides:'Saved Guides',settings:'Settings',language:'Language / زبان',darkmode:'Dark Mode',toggle:'Toggle',hometype:'Ghar ki qisam',change:'Change',save:'Save karein',resetdemo:'Reset Demo Data',navhome:'Home',navguides:'Guides',navprod:'Products',navcheck:'Checklist',navprof:'Profile',fakecallby:'Fake call aa rahi hai (demo)'},
+en:{skip:'Skip',appname:'SafeGhar',yourscore:'Your Home Security Score',improve:'Improve Score →',tipoftheday:"Today's Tip",weakspots:'Weak Spots',recentguides:'Recent Guides',emergency:'Emergency Numbers',police:'Police',fire:'Fire',rescue:'Rescue',panic:'PANIC BUTTON',panichint:'Loud alarm will sound (demo)',guides:'Guides',allguides:'All Guides',products:'Products',budget:'Budget',bestunder:'Best under Rs. 5000',affnote:'Prices are demo. Buy links are demo.',checklist:'Security Checklist',monthly:'Monthly Audit',reset:'Reset Checklist',community:'Community',report:'Report Suspicious Activity',area:'Area',whatseen:'What did you see?',submitreport:'Submit Report',localreports:'Local Reports (Demo)',tips:'Security Tips',sharetip:'Share your tip',yourtip:'Your tip...',sharetipbtn:'Share Tip',profile:'Profile',demouser:'Demo User',emgcontacts:'Emergency Contacts',name:'Name',add:'Add',savedguides:'Saved Guides',settings:'Settings',language:'Language / زبان',darkmode:'Dark Mode',toggle:'Toggle',hometype:'Home Type',change:'Change',save:'Save',resetdemo:'Reset Demo Data',navhome:'Home',navguides:'Guides',navprod:'Products',navcheck:'Checklist',navprof:'Profile',fakecallby:'Incoming fake call (demo)'}
+};
+function t(k){return (I[LANG]&&I[LANG][k])||I.ur[k]||k;}
+function applyLang(){document.querySelectorAll('[data-i]').forEach(function(e){e.textContent=t(e.getAttribute('data-i'));});document.querySelectorAll('[data-i-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-i-ph'));});document.getElementById('langBtn').textContent=(LANG==='ur'?'اردو':'English');}
+function toggleLang(){LANG=(LANG==='ur'?'en':'ur');localStorage.setItem('sg_lang',LANG);applyLang();renderAll();}
+function toggleDark(){var d=document.body.classList.toggle('dark');localStorage.setItem('sg_dark',d?'1':'0');}
+if(localStorage.getItem('sg_dark')==='1')document.body.classList.add('dark');
+</script>
+<script>
+/* ================= DATA ================= */
+var CATS=[
+ {id:'locks',ic:'🔐',ur:'Darwaze & Tale',en:'Doors & Locks'},
+ {id:'windows',ic:'🪟',ur:'Khirkiyan',en:'Windows'},
+ {id:'cctv',ic:'📹',ur:'CCTV & Camere',en:'CCTV & Cameras'},
+ {id:'alarm',ic:'🔔',ur:'Alarm System',en:'Alarm Systems'},
+ {id:'light',ic:'💡',ur:'Roshni',en:'Lighting'},
+ {id:'saferoom',ic:'🚪',ur:'Safe Room',en:'Safe Room'},
+ {id:'watch',ic:'👀',ur:'Mohalla Watch',en:'Neighborhood Watch'}
+];
+function catName(c){return LANG==='ur'?c.ur:c.en;}
+var GUIDES=[
+{id:'g1',cat:'locks',ic:'🔐',diff:'Easy',cost:1800,time:'1 ghanta',ur_title:'Rs. 2000 ke andar Door Lock Upgrade',en_title:'Door Lock Upgrade under Rs. 2000',
+ ur_tools:'Naya deadbolt lock, screwdriver set, pencil, measuring tape',en_tools:'New deadbolt lock, screwdriver set, pencil, measuring tape',
+ ur_steps:[['Purana lock utarein','Darwaze ke andar wali side se screws kholein aur purana lock nikal lein. Tasveer le lein taake wapas lagana aasaan ho.'],['Naya lock naapein','Deadbolt ke size ko darwaze ke surakh se match karein. Agar surakh chota hai to lakri wali file se barha lein.'],['Strike plate lagayein','Chokhat par strike plate ko mazboot lambe screws (3 inch) se lagayein — yehi asal mazbooti hai.'],['Deadbolt fit karein','Lock ko surakh me dal kar dono taraf se screws kasein. Chabi dono taraf se ghuma kar check karein.'],['Test karein','Darwaza band karke 10 dafa lock/unlock karein. Agar atak raha hai to plate thori adjust karein.']],
+ en_steps:[['Remove old lock','Unscrew from inside and take photos so reassembly is easy.'],['Measure new lock','Match deadbolt size to the door hole; enlarge with a wood file if needed.'],['Install strike plate','Use long 3-inch screws on the frame — this is the real strength.'],['Fit deadbolt','Insert and tighten both sides; test key both ways.'],['Test','Lock/unlock 10 times with door closed; adjust plate if sticking.']],
+ ur_mist:['Sirf chote screws use karna — chor aasani se tor deta hai','Sasta local lock lena jo 2 minute me khul jaye'],en_mist:['Using only short screws — easy to kick in','Buying cheap local locks that open in 2 minutes'],
+ ur_tips:['Hamesha branded deadbolt lein (Rs. 1200–1800)','Raat ko double-lock ki aadat banayein'],en_tips:['Always buy branded deadbolts (Rs. 1200–1800)','Make double-locking at night a habit']},
+{id:'g2',cat:'cctv',ic:'📹',diff:'Medium',cost:0,time:'2 ghante',ur_title:'Purane Smartphone se DIY CCTV',en_title:'DIY CCTV with Old Smartphone',
+ ur_tools:'Purana Android phone, charger, mobile stand ya wall mount, Alfred Camera app (free)',en_tools:'Old Android phone, charger, stand/wall mount, Alfred Camera app (free)',
+ ur_steps:[['App install karein','Purane phone aur apne asal phone dono me "Alfred Camera" install karein.'],['Camera set karein','Purane phone ko "Camera" mode par lagayein, apne phone ko "Viewer" mode par.'],['Jagah muntakhib karein','Main darwaze ya sehan ki taraf phone lagayein — unchai par taake hath na aaye.'],['Charging ka bandobast','Phone ko mustaqil charger par lagayein; battery saver off rakhein.'],['Motion alert on karein','App me motion detection on karein — hiljul par notification milega.']],
+ en_steps:[['Install app','Install "Alfred Camera" on old phone and your main phone.'],['Set roles','Old phone = Camera mode, your phone = Viewer mode.'],['Position it','Point at main door/yard, mounted high out of reach.'],['Keep it charged','Leave on charger permanently; disable battery saver.'],['Enable motion alerts','Turn on motion detection for notifications.']],
+ ur_mist:['Phone ko neeche rakhna jahan koi utha le','WiFi disconnect hone par check na karna'],en_mist:['Placing phone within reach of intruders','Not checking when WiFi disconnects'],
+ ur_tips:['Ek se zyada purane phones hon to har konay me lagayein','"Beware of CCTV" ka board lagayein — deterrent hai'],en_tips:['Use multiple old phones for more angles','Put up a CCTV warning sign — it deters']},
+{id:'g3',cat:'light',ic:'💡',diff:'Easy',cost:1500,time:'30 minute',ur_title:'Motion Sensor Light Lagayein',en_title:'Motion Sensor Light Installation',
+ ur_tools:'Solar motion sensor light (Rs. 1200–1500), screws, drill ya screwdriver',en_tools:'Solar motion sensor light (Rs. 1200–1500), screws, drill/screwdriver',
+ ur_steps:[['Jagah chunein','Andheri gali, sehan ya darwaze ke upar — jahan chor chhup sake.'],['Solar panel ka rukh','Panel ko din me dhoop milni chahiye (south/west behtar).'],['Unchai par lagayein','8–10 feet unchai par taake koi utar na sake.'],['Sensor test karein','Raat ko samne se guzrein — 5–8 meter par jalni chahiye.'],['Mode set karein','"Motion only" mode rakhein taake battery bache.']],
+ en_steps:[['Choose spot','Dark lane, yard or above door — where thieves hide.'],['Face solar panel','Needs daytime sun (south/west best).'],['Mount high','8–10 ft so nobody can remove it.'],['Test sensor','Walk past at night — should trigger at 5–8m.'],['Set mode','Use motion-only mode to save battery.']],
+ ur_mist:['Darakht ke neeche lagana (solar charge nahi hoga)','Bohat neeche lagana'],en_mist:['Mounting under trees (no solar charge)','Mounting too low'],
+ ur_tips:['2–3 lights mukhtalif konon me behtar hain','Solar wali me bijli ka kharch zero'],en_tips:['2–3 lights at different corners work best','Solar = zero electricity cost']},
+{id:'g4',cat:'windows',ic:'🪟',diff:'Medium',cost:2500,time:'2 ghante',ur_title:'Window Grill ke Saste Alternatives',en_title:'Window Grill Alternatives',
+ ur_tools:'Window security film ya steel mesh, cutter, double-sided tape/screws',en_tools:'Window security film or steel mesh, cutter, tape/screws',
+ ur_steps:[['Khirki naapein','Har khirki ka size note karein.'],['Security film lagayein','Sheesha tootne par bhi film pakre rakhti hai — chor andar nahi aa sakta.'],['Mesh lagayein','Sasti steel mesh ko frame par screw karein — grill se 70% sasti.'],['Lock check karein','Khirki ke lock mazboot hon; kamzor hon to badlein.'],['Parday ka khayal','Raat ko parde band rakhein taake andar nazar na aaye.']],
+ en_steps:[['Measure windows','Note each window size.'],['Apply security film','Holds shattered glass together — blocks entry.'],['Add mesh','Screw cheap steel mesh on frames — 70% cheaper than grills.'],['Check locks','Replace weak window locks.'],['Use curtains','Keep curtains closed at night.']],
+ ur_mist:['Sirf film par bharosa karna baghair lock ke','Mesh ko kamzor tape se lagana'],en_mist:['Relying on film alone without locks','Fixing mesh with weak tape'],
+ ur_tips:['Ground floor ki khirkiyon par tawajjo dein','Film + mesh dono mil kar best hain'],en_tips:['Focus on ground-floor windows','Film + mesh together are best']},
+{id:'g5',cat:'light',ic:'📺',diff:'Easy',cost:2200,time:'20 minute',ur_title:'Khali Ghar ke liye Fake TV Light',en_title:'Fake TV Light for Empty House',
+ ur_tools:'Fake TV simulator light (Rs. 1800–2200) ya purana tablet',en_tools:'Fake TV simulator (Rs. 1800–2200) or old tablet',
+ ur_steps:[['Device lein','Market ya online se fake TV light lein — ye TV jaisi roshni banata hai.'],['Khirki ke paas rakhein','Bahir se nazar aane wali khirki ke andar rakhein.'],['Timer lagayein','Shaam 7 se 11 tak auto on/off set karein.'],['Test karein','Bahir se dekhein — lagna chahiye ghar me koi TV dekh raha hai.']],
+ en_steps:[['Get device','Buy fake TV light — simulates TV glow.'],['Place near window','Inside a window visible from outside.'],['Set timer','Auto on 7–11 PM.'],['Test','Check from outside — should look like someone watches TV.']],
+ ur_mist:['Har waqt on rakhna (bijli zaya + shak)','Chhupi khirki me rakhna jahan nazar na aaye'],en_mist:['Leaving it on all day (waste + suspicious)','Placing where not visible outside'],
+ ur_tips:['Chor khali ghar ko nishana banate hain — ye sasta dhoka hai','Padosi ko bhi bata dein ke ghar khali hai'],en_tips:['Thieves target empty homes — this is cheap deception','Also inform a neighbor the house is empty']}
+];
+function gTitle(g){return LANG==='ur'?g.ur_title:g.en_title;}
+function gTools(g){return LANG==='ur'?g.ur_tools:g.en_tools;}
+function gSteps(g){return LANG==='ur'?g.ur_steps:g.en_steps;}
+function gMist(g){return LANG==='ur'?g.ur_mist:g.en_mist;}
+function gTips(g){return LANG==='ur'?g.ur_tips:g.en_tips;}
+
+var PRODUCTS=[
+{id:'p1',cat:'locks',ic:'🔐',ur_n:'Mazboot Deadbolt Lock',en_n:'Heavy Deadbolt Lock',price:1800,rating:4.6},
+{id:'p2',cat:'locks',ic:'🔒',ur_n:'Brass Padlock (50mm)',en_n:'Brass Padlock (50mm)',price:650,rating:4.2},
+{id:'p3',cat:'locks',ic:'🚪',ur_n:'Smart Door Lock',en_n:'Smart Door Lock',price:8500,rating:4.4},
+{id:'p4',cat:'cctv',ic:'📹',ur_n:'WiFi Security Camera',en_n:'WiFi Security Camera',price:3500,rating:4.5},
+{id:'p5',cat:'cctv',ic:'🎥',ur_n:'Dummy CCTV Camera',en_n:'Dummy CCTV Camera',price:800,rating:3.9},
+{id:'p6',cat:'alarm',ic:'🔔',ur_n:'Door/Window Alarm (2pc)',en_n:'Door/Window Alarm (2pc)',price:1200,rating:4.3},
+{id:'p7',cat:'alarm',ic:'📡',ur_n:'Motion Sensor Alarm',en_n:'Motion Sensor Alarm',price:950,rating:4.1},
+{id:'p8',cat:'light',ic:'💡',ur_n:'Solar Motion Light',en_n:'Solar Motion Light',price:1500,rating:4.7},
+{id:'p9',cat:'light',ic:'📺',ur_n:'Fake TV Simulator',en_n:'Fake TV Simulator',price:2200,rating:4.0},
+{id:'p10',cat:'locks',ic:'⛓️',ur_n:'Door Security Chain',en_n:'Door Security Chain',price:450,rating:4.0}
+];
+var PCATS=[{id:'all',ur:'Sab',en:'All'},{id:'locks',ur:'Tale',en:'Locks'},{id:'cctv',ur:'Camere',en:'Cameras'},{id:'alarm',ur:'Alarm',en:'Alarms'},{id:'light',ur:'Roshni',en:'Lights'}];
+function pName(p){return LANG==='ur'?p.ur_n:p.en_n;}
+
+var CHECKS=[
+{id:'c1',ur:'Main darwaze par deadbolt lock hai',en:'Main door has a deadbolt lock'},
+{id:'c2',ur:'Tamam khirkiyon ke lock kaam karte hain',en:'All window locks work'},
+{id:'c3',ur:'Bahir motion sensor light lagi hai',en:'Motion sensor light installed outside'},
+{id:'c4',ur:'CCTV ya dummy camera laga hai',en:'CCTV or dummy camera installed'},
+{id:'c5',ur:'Raat ko darwaze double-lock hote hain',en:'Doors double-locked at night'},
+{id:'c6',ur:'Emergency numbers sab ko yaad hain',en:'Everyone knows emergency numbers'},
+{id:'c7',ur:'Qeemti samaan chhupa kar rakha hai',en:'Valuables kept hidden'},
+{id:'c8',ur:'Padosi se rabta hai (watch)',en:'In touch with neighbor (watch)'},
+{id:'c9',ur:'Ghar khali ho to TV light timer on hai',en:'Fake TV timer on when away'},
+{id:'c10',ur:'Chhat ka darwaza lock hota hai',en:'Roof door is locked'}
+];
+var TIPS=[
+'Raat ko sone se pehle tamam darwaze double-lock karein.',
+'Qeemti zevar ghar me na rakhein — bank locker behtar hai.',
+'Ajnabi ko darwaza kholne se pehle chain lagayein.',
+'Social media par "ghar khali hai" kabhi post na karein.',
+'Mahine me ek dafa tamam lock test karein.',
+'CCTV ka board lagayein — chahe camera na ho, dar rehta hai.',
+'Padosi se achay taluqat sab se sasta security system hai.',
+'Chhat ka darwaza hamesha lock rakhein.'
+];
+/* ================= STATE ================= */
+var stack=[];
+function ls(k,d){try{var v=localStorage.getItem('sg_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
+function ss(k,v){try{localStorage.setItem('sg_'+k,JSON.stringify(v));}catch(e){}}
+var state={
+ homeType:ls('hometype','house'),
+ checks:ls('checks',{}),
+ saved:ls('saved',[]),
+ emg:ls('emg',[{n:'Ghar',p:'0300-0000000'}]),
+ reports:ls('reports',[{a:'Gulshan-e-Iqbal',x:'Raat 2 baje mashkook shakhs gali me tha.',d:Date.now()-864e5}]),
+ tips:ls('tips',[]),
+ prodCat:'all',budget:5000,
+ guideCat:'all',curGuide:null,
+ onbSlide:0,onbType:'house'
+};
+function saveState(){ss('hometype',state.homeType);ss('checks',state.checks);ss('saved',state.saved);ss('emg',state.emg);ss('reports',state.reports);ss('tips',state.tips);}
+/* ================= NAV ================= */
+function showErr(m){var d=document.getElementById('errstrip');d.textContent='⚠️ '+m;d.style.display='block';setTimeout(function(){d.style.display='none';},4000);}
+window.onerror=function(m){showErr('Error: '+m);};
+function show(id){var el=document.getElementById(id);if(!el){showErr('Screen "'+id+'" nahi mili');return;}
+ document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+ el.classList.add('on');
+ var nav=document.getElementById('bottomnav');
+ var tabs=['scr-home','scr-guides','scr-products','scr-checklist','scr-profile'];
+ nav.style.display=tabs.indexOf(id)>=0?'flex':'none';
+ document.querySelectorAll('#bottomnav button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-s')===id);});
+ try{window.scrollTo(0,0);}catch(e){}}
+function go(id){if(stack[stack.length-1]!==id)stack.push(id);show(id);renderScreen(id);}
+function goBack(){if(stack.length>1){stack.pop();var id=stack[stack.length-1];show(id);renderScreen(id);}}
+window.__goBack=function(){goBack();};
+function renderScreen(id){
+ if(id==='scr-home')renderHome();
+ else if(id==='scr-guides')renderGuides();
+ else if(id==='scr-guidedetail')renderGuideDetail();
+ else if(id==='scr-products')renderProducts();
+ else if(id==='scr-checklist')renderChecklist();
+ else if(id==='scr-community')renderCommunity();
+ else if(id==='scr-profile')renderProfile();
+}
+/* ================= ONBOARDING ================= */
+var ONB=[
+ {ic:'🛡️',ur_t:'Ghar Ko Banao Fort',en_t:'Make Your Home a Fort',ur_d:'DIY security guides — kisi expert ki zaroorat nahi.',en_d:'DIY security guides — no expert needed.'},
+ {ic:'💰',ur_t:'Budget Friendly',en_t:'Budget Friendly',ur_d:'Rs. 500 se shuru — har jeb ke liye hal.',en_d:'Starting Rs. 500 — solutions for every pocket.'},
+ {ic:'🔧',ur_t:'Khud Karein',en_t:'Do It Yourself',ur_d:'Step-by-step tasveeron ke sath aasaan guides.',en_d:'Easy guides with step-by-step visuals.'}
+];
+function renderOnb(){
+ var s=ONB[state.onbSlide];
+ document.getElementById('onbSlides').innerHTML='<div class="big">'+s.ic+'</div><h1>'+(LANG==='ur'?s.ur_t:s.en_t)+'</h1><p>'+(LANG==='ur'?s.ur_d:s.en_d)+'</p>';
+ var d='';for(var i=0;i<3;i++)d+='<span class="'+(i===state.onbSlide?'on':'')+'"></span>';
+ document.getElementById('onbDots').innerHTML=d;
+ document.getElementById('onbNext').textContent=(state.onbSlide<2?(LANG==='ur'?'Agay →':'Next →'):(LANG==='ur'?'Shuru Karein':'Get Started'));
+ if(state.onbSlide===2&&!document.getElementById('htGrid')){
+   var h='<div class="card" style="margin-top:10px"><b>'+t('hometype')+'</b><div class="hometype" id="htGrid"></div></div>';
+   document.getElementById('onbSlides').insertAdjacentHTML('beforeend',h);renderHT('htGrid');
+ }
+}
+function renderHT(gid){
+ var types=[['house','🏠','House','Makan'],['apartment','🏢','Apartment','Flat'],['shop','🏪','Shop','Dukan'],['office','🏬','Office','Daftar']];
+ document.getElementById(gid).innerHTML=types.map(function(x){return '<button class="'+(state.onbType===x[0]?'on':'')+'" onclick="pickType(\''+x[0]+'\',\''+gid+'\')"><span class="ic">'+x[1]+'</span>'+(LANG==='ur'?x[3]:x[2])+'</button>';}).join('');
+}
+function pickType(v,gid){state.onbType=v;renderHT(gid);}
+function onbNext(){
+ if(state.onbSlide<2){state.onbSlide++;renderOnb();}
+ else{state.homeType=state.onbType;saveState();finishOnb();}
+}
+function finishOnb(){ss('onb_done','1');stack=['scr-home'];go('scr-home');}
+function saveHomeType2(){state.homeType=state.onbType;saveState();goBack();renderAll();}
+/* ================= HOME ================= */
+function calcScore(){var done=0;CHECKS.forEach(function(c){if(state.checks[c.id])done++;});return Math.round(done/CHECKS.length*100);}
+function renderHome(){
+ var sc=calcScore();
+ document.getElementById('scoreNum').textContent=sc;
+ document.getElementById('scoreBar').style.width=sc+'%';
+ document.getElementById('scoreRing').style.background='conic-gradient(var(--yel) '+(sc*3.6)+'deg, var(--line) 0deg)';
+ var lbl=sc>=80?(LANG==='ur'?'MashaAllah! Bohat mehfooz':'Great! Very secure'):sc>=50?(LANG==='ur'?'Theek hai, behtar ho sakta hai':'OK, can improve'):(LANG==='ur'?'Khatra hai! Checklist poori karein':'At risk! Complete checklist');
+ document.getElementById('scoreLabel').textContent=lbl;
+ document.getElementById('tipOfDay').textContent='💡 '+TIPS[new Date().getDate()%TIPS.length];
+ var weak=CHECKS.filter(function(c){return !state.checks[c.id];}).slice(0,3);
+ document.getElementById('weakList').innerHTML=weak.length?weak.map(function(c){return '<div class="small" style="padding:4px 0">🔴 '+(LANG==='ur'?c.ur:c.en)+'</div>';}).join(''):'<div class="small">✅ '+(LANG==='ur'?'Koi kamzor jagah nahi!':'No weak spots!')+'</div>';
+ document.getElementById('recentGuides').innerHTML=GUIDES.slice(0,3).map(guideCardHTML).join('');
+}
+function guideCardHTML(g){
+ var sv=state.saved.indexOf(g.id)>=0?'❤️':'🤍';
+ return '<div class="guidecard" onclick="openGuide(\''+g.id+'\')"><div class="gicon">'+g.ic+'</div><div class="gt"><b>'+gTitle(g)+'</b><small>Rs. '+g.cost+' • '+g.time+' • <span class="diff '+g.diff+'">'+g.diff+'</span></small></div><div>'+sv+'</div></div>';
+}
+function openGuide(id){state.curGuide=id;go('scr-guidedetail');}
+function toggleSaveGuide(){var id=state.curGuide;var i=state.saved.indexOf(id);if(i>=0)state.saved.splice(i,1);else state.saved.push(id);saveState();renderGuideDetail();}
+/* ================= GUIDES ================= */
+function renderGuides(){
+ document.getElementById('catGrid').innerHTML=CATS.map(function(c){
+  return '<div class="catcard" onclick="filterCat(\''+c.id+'\')"><span class="ic">'+c.ic+'</span><b>'+catName(c)+'</b><div class="small">'+GUIDES.filter(function(g){return g.cat===c.id;}).length+' guides</div></div>';
+ }).join('');
+ var list=GUIDES.filter(function(g){return state.guideCat==='all'||g.cat===state.guideCat;});
+ document.getElementById('guideList').innerHTML=list.map(guideCardHTML).join('')||'<div class="small">Koi guide nahi.</div>';
+}
+function filterCat(id){state.guideCat=id;renderGuides();try{var el=document.getElementById('guideList');if(el)el.scrollIntoView();}catch(e){}}
+function renderGuideDetail(){
+ var g=GUIDES.find(function(x){return x.id===state.curGuide;});if(!g){goBack();return;}
+ document.getElementById('gdTitle').textContent=gTitle(g);
+ document.getElementById('gdSave').textContent=state.saved.indexOf(g.id)>=0?'❤️':'🤍';
+ var steps=gSteps(g).map(function(s,i){return '<div class="step"><b>Step '+(i+1)+': '+s[0]+'</b><div>'+s[1]+'</div></div>';}).join('');
+ document.getElementById('gdBody').innerHTML=
+ '<div class="card"><div class="row" style="justify-content:space-between"><span class="diff '+g.diff+'">'+g.diff+'</span><b>Rs. '+g.cost+'</b><span class="small">⏱ '+g.time+'</span></div>'+
+ '<div class="kv"><span>🧰 Tools</span></div><div class="small">'+gTools(g)+'</div></div>'+
+ '<h3 class="sec">📝 Steps</h3>'+steps+
+ '<div class="warnbox"><b>⚠️ Aam Ghaltiyan</b><ul style="margin:6px 0;padding-right:18px">'+gMist(g).map(function(m){return '<li>'+m+'</li>';}).join('')+'</ul></div>'+
+ '<div class="tipbox"><b>💡 Pro Tips</b><ul style="margin:6px 0;padding-right:18px">'+gTips(g).map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+ '<div class="small" style="text-align:center">🎥 Video tutorial jald aa raha hai (demo)</div>';
+}
+/* ================= PRODUCTS ================= */
+function budgetChg(v){state.budget=parseInt(v,10);document.getElementById('budgetVal').textContent=v;renderProducts();}
+function prodCat(id){state.prodCat=id;renderProducts();}
+function renderProducts(){
+ document.getElementById('prodCats').innerHTML=PCATS.map(function(c){
+  return '<span class="chip '+(state.prodCat===c.id?'on':'')+'" onclick="prodCat(\''+c.id+'\')">'+(LANG==='ur'?c.ur:c.en)+'</span>';
+ }).join('');
+ var list=PRODUCTS.filter(function(p){return p.price<=state.budget&&(state.prodCat==='all'||p.cat===state.prodCat);});
+ document.getElementById('prodList').innerHTML=list.map(function(p){
+  var st='★'.repeat(Math.round(p.rating))+'☆'.repeat(5-Math.round(p.rating));
+  return '<div class="prodcard"><div class="picon">'+p.ic+'</div><div style="flex:1"><b>'+pName(p)+'</b><div class="stars">'+st+' '+p.rating+'</div><div style="margin-top:4px"><b style="color:var(--navy)">Rs. '+p.price+'</b> <button class="btn sm yel" onclick="buyDemo(\''+pName(p).replace(/\'/g,'')+'\')">Buy (demo)</button></div></div></div>';
+ }).join('')||'<div class="card small">Is budget me koi product nahi. Slider barhayein.</div>';
+ var best=PRODUCTS.filter(function(p){return p.price<=5000;}).sort(function(a,b){return b.rating-a.rating;}).slice(0,3);
+ document.getElementById('bestUnder').innerHTML=best.map(function(p){return '<div class="small" style="padding:3px 0">🏆 '+pName(p)+' — <b>Rs. '+p.price+'</b> ('+p.rating+'★)</div>';}).join('');
+}
+function buyDemo(n){showErr('Demo: "'+n+'" ka buy link jald aa raha hai.');}
+/* ================= CHECKLIST ================= */
+function renderChecklist(){
+ var done=0;
+ document.getElementById('checkList').innerHTML=CHECKS.map(function(c){
+  var d=!!state.checks[c.id];if(d)done++;
+  return '<div class="checkitem '+(d?'done':'')+'" onclick="toggleCheck(\''+c.id+'\')"><div class="cbx">'+(d?'✓':'')+'</div><div>'+(LANG==='ur'?c.ur:c.en)+'</div></div>';
+ }).join('');
+ var pct=Math.round(done/CHECKS.length*100);
+ document.getElementById('chkPct').textContent=pct+'%';
+ document.getElementById('chkBar').style.width=pct+'%';
+ document.getElementById('chkHint').textContent=(LANG==='ur'?'Har mahine audit karein. Score home par update hota hai.':'Audit every month. Score updates on home.');
+}
+function toggleCheck(id){state.checks[id]=!state.checks[id];saveState();renderChecklist();}
+function resetChecklist(){state.checks={};saveState();renderChecklist();renderHome();}
+/* ================= COMMUNITY ================= */
+function renderCommunity(){
+ document.getElementById('reportList').innerHTML=state.reports.map(function(r){
+  return '<div class="card"><b>📍 '+r.a+'</b><div class="small">'+r.x+'</div></div>';
+ }).join('')||'<div class="small">Koi report nahi.</div>';
+ var all=TIPS.concat(state.tips);
+ document.getElementById('tipList').innerHTML=all.map(function(x){return '<div class="card"><div class="small">💡 '+x+'</div></div>';}).join('');
+}
+function addReport(){var a=document.getElementById('repArea').value.trim(),x=document.getElementById('repText').value.trim();if(!a||!x){showErr(LANG==='ur'?'Ilaqa aur tafseel likhein':'Enter area and detail');return;}state.reports.unshift({a:a,x:x,d:Date.now()});saveState();document.getElementById('repArea').value='';document.getElementById('repText').value='';renderCommunity();}
+function addTip(){var x=document.getElementById('tipText').value.trim();if(!x)return;state.tips.unshift(x);saveState();document.getElementById('tipText').value='';renderCommunity();}
+/* ================= PANIC ================= */
+var actx=null;
+function panicAlarm(){
+ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);
+  o.type='sawtooth';o.frequency.value=880;g.gain.value=0.25;o.start();
+  var on=true;var iv=setInterval(function(){o.frequency.value=on?880:440;on=!on;},300);
+  setTimeout(function(){clearInterval(iv);try{o.stop();}catch(e){}},5000);
+ }catch(e){}
+ showErr(LANG==='ur'?'🚨 ALARM! Madad bulayein! (demo)':'🚨 ALARM! Call for help! (demo)');
+ if(confirm(LANG==='ur'?'Fake call demo dekhna hai?':'See fake call demo?')){document.getElementById('fakeCall').classList.add('on');}
+}
+function endFakeCall(){document.getElementById('fakeCall').classList.remove('on');}
+/* ================= PROFILE ================= */
+function renderProfile(){
+ var names={house:'🏠 House',apartment:'🏢 Apartment',shop:'🏪 Shop',office:'🏬 Office'};
+ document.getElementById('pfHomeType').textContent=names[state.homeType]||state.homeType;
+ document.getElementById('emgList').innerHTML=state.emg.map(function(e,i){
+  return '<div class="kv"><span>📞 '+e.n+' — <b>'+e.p+'</b></span><button class="btn sm" onclick="delEmg('+i+')">✖</button></div>';
+ }).join('');
+ document.getElementById('savedList').innerHTML=state.saved.length?state.saved.map(function(id){
+  var g=GUIDES.find(function(x){return x.id===id;});return g?'<div class="guidecard" onclick="openGuide(\''+id+'\')"><div class="gicon">'+g.ic+'</div><div class="gt"><b>'+gTitle(g)+'</b></div></div>':'';
+ }).join(''):'<div class="small">Koi saved guide nahi.</div>';
+ renderHT('htGrid2');
+}
+function addEmg(){var n=document.getElementById('emgName').value.trim(),p=document.getElementById('emgPhone').value.trim();if(!n||!p){showErr('Naam aur number likhein');return;}state.emg.push({n:n,p:p});saveState();document.getElementById('emgName').value='';document.getElementById('emgPhone').value='';renderProfile();}
+function delEmg(i){state.emg.splice(i,1);saveState();renderProfile();}
+function resetAll(){if(confirm('Reset all demo data?')){Object.keys(localStorage).filter(function(k){return k.indexOf('sg_')===0||k==='safeghar_demo_start';}).forEach(function(k){localStorage.removeItem(k);});location.reload();}}
+/* ================= INIT ================= */
+function renderAll(){applyLang();renderScreen(stack[stack.length-1]||'scr-home');}
+window.addEventListener('DOMContentLoaded',function(){
+ applyLang();
+ if(localStorage.getItem('sg_onb_done')!=='1'){stack=['scr-onb'];state.onbSlide=0;renderOnb();show('scr-onb');}
+ else{stack=['scr-home'];go('scr-home');}
+});
+</script>
+
+</body>
+</html>
