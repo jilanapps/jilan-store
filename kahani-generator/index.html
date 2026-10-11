@@ -227,7 +227,7 @@ function showStory(){
   $('stMeta').textContent = `ہیرو: ${s.hero} | جگہ: ${s.setting} | سبق: ${s.moral}`;
   $('stImg').src = s.img;
   $('stText').textContent = s.text;
-  $('stMoral').innerHTML = `💡 <b>کہانی کا سبق:</b> ${s.moralText}`;
+  $('stMoral').innerHTML = `💡 <b>کہانی کا سبق:</b> ${s.moralText || 'اس کہانی کا سبق دستیاب نہیں'}`;
   updateFavBtn();
   saveHistory(s);
   go('scr-story');
@@ -321,13 +321,13 @@ function toggleFav(){
   let favs=getFavs();
   const i=favs.findIndex(f=>f.title===currentStory.title&&f.text===currentStory.text);
   if(i>=0){ favs.splice(i,1); toast('پسندیدہ سے ہٹائی'); }
-  else{ favs.unshift({title:currentStory.title,text:currentStory.text,hero:currentStory.hero,setting:currentStory.setting,moral:currentStory.moral,img:currentStory.img,ts:Date.now()}); toast('پسندیدہ میں شامل! ⭐'); }
+  else{ favs.unshift({title:currentStory.title,text:currentStory.text,hero:currentStory.hero,setting:currentStory.setting,moral:currentStory.moral,moralText:currentStory.moralText,img:currentStory.img,ts:Date.now()}); toast('پسندیدہ میں شامل! ⭐'); }
   setFavs(favs); updateFavBtn();
 }
 function getHist(){ try{return JSON.parse(localStorage.getItem('kg_hist')||'[]');}catch(e){return[];} }
 function saveHistory(s){
   let h=getHist();
-  h.unshift({title:s.title,hero:s.hero,setting:s.setting,moral:s.moral,img:s.img,text:s.text,ts:Date.now()});
+  h.unshift({title:s.title,hero:s.hero,setting:s.setting,moral:s.moral,moralText:s.moralText,img:s.img,text:s.text,ts:Date.now()});
   h=h.slice(0,30); localStorage.setItem('kg_hist',JSON.stringify(h));
 }
 function openFav(i){ const f=getFavs()[i]; if(f) openStory(f); }
