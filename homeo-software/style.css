@@ -1,0 +1,122 @@
+/* Jilan Homeo Store Software — desktop-style demo */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:#3a6ea5;font-size:14px;color:#222;height:100vh;overflow:hidden}
+#desktop-app{display:flex;flex-direction:column;height:100vh;background:#f0f0f0;border:1px solid #1a4d2e;max-width:1400px;margin:0 auto}
+
+/* Title bar */
+#titlebar{background:linear-gradient(180deg,#2e7d32 0%,#1b5e20 100%);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:6px 10px;user-select:none}
+.tb-left{display:flex;align-items:center;gap:8px}
+.tb-icon{font-size:18px}
+.tb-title{font-weight:600;font-size:14px}
+.ver{font-weight:400;font-size:11px;opacity:.85}
+.demo-tag{background:#ff9800;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;margin-left:6px}
+.tb-right{display:flex;gap:2px}
+.tb-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;width:34px;height:26px;cursor:pointer;font-size:13px;border-radius:2px}
+.tb-btn:hover{background:rgba(255,255,255,.35)}
+.tb-close:hover{background:#e81123}
+
+/* Menu bar */
+#menubar{background:#e8f5e9;border-bottom:1px solid #c8e6c9;padding:4px 8px;display:flex;gap:2px}
+.menu{padding:4px 12px;cursor:pointer;border-radius:3px;font-size:13px}
+.menu:hover{background:#c8e6c9}
+
+/* Toolbar */
+#toolbar{background:#f5f5f5;border-bottom:1px solid #ccc;padding:6px 8px;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.tool{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:1px solid #bbb;border-radius:4px;padding:6px 12px;cursor:pointer;font-size:16px;min-width:70px}
+.tool span{font-size:11px;color:#333}
+.tool:hover{background:#e8f5e9;border-color:#2e7d32}
+.tool-sep{width:1px;height:40px;background:#ccc;margin:0 6px}
+
+/* Main */
+#main{flex:1;overflow:auto;padding:14px;background:#fafafa}
+.view h2{margin-bottom:12px;color:#1b5e20;border-bottom:2px solid #c8e6c9;padding-bottom:6px}
+.date-line{font-size:12px;color:#777;font-weight:400}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.card{background:#fff;border:1px solid #c8e6c9;border-left:4px solid #2e7d32;border-radius:6px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card .lbl{font-size:12px;color:#666}
+.card .val{font-size:22px;font-weight:700;color:#1b5e20;margin-top:4px}
+.card.warn{border-left-color:#ff9800}.card.warn .val{color:#e65100}
+.card.danger{border-left-color:#e53935}.card.danger .val{color:#c62828}
+
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:12px}
+.panel h3{margin-bottom:8px;color:#2e7d32;font-size:14px}
+.panel ol{margin-left:20px;line-height:1.8}
+.demo-note{background:#fff3e0;border:1px dashed #ff9800;padding:8px;border-radius:4px;margin-top:10px}
+
+/* Forms & tables */
+.form-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.form-row label{font-size:13px;display:flex;align-items:center;gap:6px}
+.input,.big-input{border:1px solid #bbb;border-radius:4px;padding:8px 10px;font-size:14px}
+.big-input{width:100%;font-size:15px}
+.input.sm{width:110px}
+select.input{padding:7px}
+.grid{width:100%;border-collapse:collapse;background:#fff;font-size:13px;margin-bottom:12px}
+.grid th{background:#2e7d32;color:#fff;padding:8px;text-align:left;font-weight:600}
+.grid td{border-bottom:1px solid #eee;padding:7px 8px}
+.grid tr:hover td{background:#f1f8e9}
+.btn{border:1px solid #999;border-radius:4px;padding:8px 14px;cursor:pointer;font-size:13px;background:#fff}
+.btn.green{background:#2e7d32;color:#fff;border-color:#1b5e20}
+.btn.green:hover{background:#1b5e20}
+.btn.blue{background:#1565c0;color:#fff;border-color:#0d47a1}
+.btn.blue:hover{background:#0d47a1}
+.btn.gray{background:#eee}.btn.gray:hover{background:#ddd}
+.btn.small{padding:4px 8px;font-size:12px}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+/* Billing */
+.bill-layout{display:grid;grid-template-columns:300px 1fr;gap:14px}
+.search-results{max-height:400px;overflow:auto;margin-top:8px;border:1px solid #ddd;border-radius:4px;background:#fff}
+.sr-item{padding:8px 10px;border-bottom:1px solid #eee;cursor:pointer}
+.sr-item:hover{background:#e8f5e9}
+.sr-item .nm{font-weight:600}
+.sr-item .ct{font-size:11px;color:#777}
+.bill-totals{background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px 14px;margin-top:10px;max-width:340px;margin-left:auto}
+.bill-totals>div{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:14px}
+.bill-totals .grand{border-top:2px solid #2e7d32;margin-top:6px;padding-top:8px;font-size:16px}
+.bill-totals .grand b{color:#1b5e20}
+
+/* Bill preview / voucher */
+.bill-preview{background:#fff;border:2px solid #2e7d32;border-radius:8px;padding:20px;max-width:420px;margin:16px auto;font-family:"Courier New",monospace}
+.bill-preview h3{text-align:center;color:#1b5e20;font-family:inherit}
+.bill-preview .shop{text-align:center;font-size:12px;margin-bottom:8px}
+.bill-preview hr{border:none;border-top:1px dashed #999;margin:8px 0}
+.bill-preview table{width:100%;font-size:12px;border-collapse:collapse}
+.bill-preview td{padding:2px 0}
+.bill-preview .tot{text-align:right}
+.bill-preview .center{text-align:center}
+.watermark{text-align:center;color:#ff9800;font-size:11px;font-weight:700;margin-top:8px}
+
+/* Status bar */
+#statusbar{background:#e8f5e9;border-top:1px solid #c8e6c9;padding:5px 12px;display:flex;gap:20px;font-size:12px;color:#555}
+#statusbar .right{margin-left:auto}
+
+/* Modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal-box{background:#fff;border-radius:8px;padding:20px;min-width:340px;max-width:480px;max-height:90vh;overflow:auto;border-top:4px solid #2e7d32}
+.modal-box h3{margin-bottom:12px;color:#1b5e20}
+.modal-box .form-row label{min-width:110px}
+.modal-box input,.modal-box select{flex:1}
+
+#close-msg{position:fixed;inset:0;background:#3a6ea5;z-index:100;align-items:center;justify-content:center}
+.close-box{background:#fff;padding:30px;border-radius:10px;text-align:center}
+.close-box p{margin:12px 0}
+
+.low{color:#e65100;font-weight:700}.out{color:#c62828;font-weight:700}.ok{color:#2e7d32}
+#print-area{display:none}
+
+/* Print */
+@media print{
+  body{background:#fff;height:auto;overflow:visible}
+  #desktop-app,#close-msg,#modal{display:none!important}
+  #print-area{display:block!important}
+  .bill-preview{border:none;max-width:100%}
+}
+@media(max-width:900px){
+  .bill-layout{grid-template-columns:1fr}
+  .panel-grid{grid-template-columns:1fr}
+  .tool span{display:none}
+  .tool{min-width:44px}
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Homeo Store Software v1.0 — DEMO</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="desktop-app">
+  <!-- ===== TITLE BAR ===== -->
+  <div id="titlebar">
+    <div class="tb-left">
+      <span class="tb-icon">💊</span>
+      <span class="tb-title">Jilan Homeo Store Software <span class="ver">v1.0</span> <span class="demo-tag">DEMO</span></span>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" title="Minimize" onclick="alert('Demo: minimize disabled')">—</button>
+      <button class="tb-btn" title="Maximize" onclick="alert('Demo: already maximized')">▢</button>
+      <button class="tb-btn tb-close" title="Close" onclick="if(confirm('Close Jilan Homeo Store Software? (Demo)'))document.getElementById('close-msg').style.display='flex'">✕</button>
+    </div>
+  </div>
+
+  <!-- ===== MENU BAR ===== -->
+  <div id="menubar">
+    <span class="menu" onclick="showView('dashboard')">File</span>
+    <span class="menu" onclick="showView('billing')">Billing</span>
+    <span class="menu" onclick="showView('vouchers')">Vouchers</span>
+    <span class="menu" onclick="showView('inventory')">Inventory</span>
+    <span class="menu" onclick="showView('customers')">Customers</span>
+    <span class="menu" onclick="showView('reports')">Reports</span>
+    <span class="menu" onclick="showView('help')">Help</span>
+  </div>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div id="toolbar">
+    <button class="tool" onclick="showView('dashboard')">🏠<span>Dashboard</span></button>
+    <button class="tool" onclick="showView('billing')">🧾<span>New Bill</span></button>
+    <button class="tool" onclick="showView('vouchers')">📑<span>Vouchers</span></button>
+    <button class="tool" onclick="showView('inventory')">📦<span>Inventory</span></button>
+    <button class="tool" onclick="showView('customers')">👥<span>Customers</span></button>
+    <button class="tool" onclick="showView('reports')">📊<span>Reports</span></button>
+    <span class="tool-sep"></span>
+    <button class="tool" onclick="backupData()">💾<span>Backup</span></button>
+    <button class="tool" onclick="if(confirm('Reset ALL demo data?')){localStorage.clear();location.reload()}">🗑️<span>Reset Demo</span></button>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="main">
+    <!-- DASHBOARD -->
+    <div class="view" id="v-dashboard">
+      <h2>📊 Dashboard <small class="date-line" id="dash-date"></small></h2>
+      <div class="cards" id="dash-cards"></div>
+      <div class="panel-grid">
+        <div class="panel"><h3>⚠️ Low Stock Alerts</h3><div id="dash-lowstock"></div></div>
+        <div class="panel"><h3>🧾 Recent Bills</h3><div id="dash-recent"></div></div>
+      </div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="view" id="v-billing" style="display:none">
+      <h2>🧾 New Bill / Sale Voucher</h2>
+      <div class="bill-layout">
+        <div class="bill-left">
+          <input id="bill-search" class="big-input" placeholder="🔍 Search medicine… (type name)" oninput="renderBillSearch()">
+          <div id="bill-search-results" class="search-results"></div>
+        </div>
+        <div class="bill-right">
+          <div class="form-row">
+            <label>Customer: <input id="bill-customer" class="input" placeholder="Walk-in Customer"></label>
+            <label>Phone: <input id="bill-phone" class="input" placeholder="03XX-XXXXXXX"></label>
+          </div>
+          <table class="grid" id="bill-items-table">
+            <thead><tr><th>Medicine</th><th>Potency</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+            <tbody id="bill-items"></tbody>
+          </table>
+          <div class="bill-totals">
+            <div><span>Subtotal:</span><b id="bill-subtotal">Rs 0</b></div>
+            <div><span>Discount Rs:</span><input id="bill-discount" type="number" class="input sm" value="0" min="0" oninput="updateBillTotals()"></div>
+            <div class="grand"><span>Grand Total:</span><b id="bill-grand">Rs 0</b></div>
+            <div><span>Paid Rs:</span><input id="bill-paid" type="number" class="input sm" value="0" min="0" oninput="updateBillTotals()"></div>
+            <div><span>Balance:</span><b id="bill-balance">Rs 0</b></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn green" onclick="saveBill()">💾 Save Bill (Voucher)</button>
+            <button class="btn blue" onclick="printBillPreview()">🖨️ Print Preview</button>
+            <button class="btn gray" onclick="clearBill()">🧹 Clear</button>
+          </div>
+        </div>
+      </div>
+      <div id="bill-preview" class="bill-preview" style="display:none"></div>
+    </div>
+
+    <!-- VOUCHERS -->
+    <div class="view" id="v-vouchers" style="display:none">
+      <h2>📑 Sale Vouchers</h2>
+      <div class="form-row">
+        <label>From: <input type="date" id="v-from" class="input"></label>
+        <label>To: <input type="date" id="v-to" class="input"></label>
+        <button class="btn blue" onclick="renderVouchers()">🔍 Filter</button>
+        <button class="btn gray" onclick="document.getElementById('v-from').value='';document.getElementById('v-to').value='';renderVouchers()">Clear</button>
+      </div>
+      <table class="grid"><thead><tr><th>Voucher No</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Paid</th><th>Balance</th><th>Actions</th></tr></thead>
+      <tbody id="voucher-list"></tbody></table>
+      <div id="voucher-view" class="bill-preview" style="display:none"></div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="view" id="v-inventory" style="display:none">
+      <h2>📦 Inventory</h2>
+      <div class="form-row">
+        <input id="inv-search" class="input" placeholder="🔍 Search…" oninput="renderInventory()">
+        <button class="btn green" onclick="openProductModal()">➕ Add Medicine</button>
+      </div>
+      <table class="grid"><thead><tr><th>Medicine</th><th>Category</th><th>Stock (30C/200C/1M/10M/Q)</th><th>Prices Rs</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="inv-list"></tbody></table>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="view" id="v-customers" style="display:none">
+      <h2>👥 Customers</h2>
+      <div class="form-row">
+        <button class="btn green" onclick="openCustomerModal()">➕ Add Customer</button>
+      </div>
+      <table class="grid"><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th>Balance Rs</th><th>Actions</th></tr></thead>
+      <tbody id="cust-list"></tbody></table>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="view" id="v-reports" style="display:none">
+      <h2>📊 Reports</h2>
+      <div class="form-row">
+        <label>From: <input type="date" id="r-from" class="input"></label>
+        <label>To: <input type="date" id="r-to" class="input"></label>
+        <button class="btn blue" onclick="renderReports()">📊 Generate</button>
+      </div>
+      <div class="cards" id="report-cards"></div>
+      <div class="panel"><h3>📈 Daily Sales</h3><div id="report-daily"></div></div>
+    </div>
+
+    <!-- HELP -->
+    <div class="view" id="v-help" style="display:none">
+      <h2>❓ Help — Demo Guide</h2>
+      <div class="panel">
+        <h3>How this demo works</h3>
+        <ol>
+          <li><b>New Bill</b>: search medicine → select potency → add → Save Bill. Stock decreases automatically.</li>
+          <li><b>Vouchers</b>: every saved bill becomes a numbered Sale Voucher (JV-0001…). View / reprint anytime.</li>
+          <li><b>Inventory</b>: add stock, edit prices, low-stock alerts at min level.</li>
+          <li><b>Customers</b>: unpaid balance is tracked per customer.</li>
+          <li><b>Reports</b>: sales, profit estimate, stock valuation.</li>
+        </ol>
+        <p><b>Note:</b> This is a <b>web demo</b> showing how the Windows software will look and work.
+        The real <b>.exe software</b> runs natively on the shop PC — no internet, no domain, no hosting needed.
+        Data stays on the PC.</p>
+        <p class="demo-note">🏷️ DEMO by Jilan Apps — sample data only.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STATUS BAR ===== -->
+  <div id="statusbar">
+    <span id="st-user">👤 User: Demo Owner</span>
+    <span id="st-db">💾 Database: Local (Demo)</span>
+    <span id="st-demo">🏷️ DEMO by Jilan Apps</span>
+    <span id="st-clock" class="right"></span>
+  </div>
+</div>
+
+<!-- Close overlay -->
+<div id="close-msg" style="display:none"><div class="close-box">
+  <h2>💊 Jilan Homeo Store Software</h2>
+  <p>Demo closed. (In the real software, data is saved on the PC.)</p>
+  <button class="btn green" onclick="document.getElementById('close-msg').style.display='none'">↩ Reopen Demo</button>
+</div></div>
+
+<!-- Modal -->
+<div id="modal" style="display:none"><div class="modal-box" id="modal-body"></div></div>
+
+<!-- Print area -->
+<div id="print-area"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
