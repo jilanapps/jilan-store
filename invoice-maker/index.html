@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<title>Jilan Invoice Maker — Simple Billing. Smarter Business.</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+</head>
+<body>
+<header id="topbar">
+  <div class="brand">
+    <div class="logo">J</div>
+    <div>
+      <div class="appname">Jilan Invoice Maker</div>
+      <div class="tagline">Simple Billing. Smarter Business.</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button id="btnTheme" class="iconbtn" title="Theme">🌙</button>
+    <button id="btnLang" class="iconbtn" title="Language">🌐</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="screen" id="scr-home"></section>
+  <section class="screen" id="scr-invoices"></section>
+  <section class="screen" id="scr-invedit"></section>
+  <section class="screen" id="scr-invview"></section>
+  <section class="screen" id="scr-customers"></section>
+  <section class="screen" id="scr-products"></section>
+  <section class="screen" id="scr-more"></section>
+  <section class="screen" id="scr-reports"></section>
+  <section class="screen" id="scr-inventory"></section>
+  <section class="screen" id="scr-backup"></section>
+  <section class="screen" id="scr-settings"></section>
+  <section class="screen" id="scr-profile"></section>
+  <section class="screen" id="scr-print"></section>
+</main>
+
+<nav id="bottomnav">
+  <button data-nav="home" class="active"><span>🏠</span><label data-i="nav_home">Home</label></button>
+  <button data-nav="invoices"><span>🧾</span><label data-i="nav_inv">Invoices</label></button>
+  <button data-nav="customers"><span>👥</span><label data-i="nav_cust">Customers</label></button>
+  <button data-nav="products"><span>📦</span><label data-i="nav_prod">Products</label></button>
+  <button data-nav="more"><span>⋯</span><label data-i="nav_more">More</label></button>
+</nav>
+
+<div id="modalWrap" class="hidden"><div id="modal"></div></div>
+<div id="toast"></div>
+<div id="printArea" class="hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
