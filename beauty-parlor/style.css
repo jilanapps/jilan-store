@@ -1,0 +1,122 @@
+/* Jilan Beauty Parlor — elegant pink/gold/cream */
+:root{
+  --pink:#c2185b; --pink-d:#8e0f42; --pink-l:#f8bbd0;
+  --gold:#c9a227; --gold-l:#f3e5b8;
+  --cream:#fff9f5; --white:#ffffff;
+  --ink:#3d2b33; --muted:#9a7b88; --line:#f0dfe6;
+  --green:#1b7a4a;
+  --shadow:0 4px 18px rgba(194,24,91,.10);
+  --radius:16px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:'Segoe UI',system-ui,'Noto Nastaliq Urdu',sans-serif;background:var(--cream);color:var(--ink);padding-bottom:76px;}
+body.ur{direction:rtl;}
+h1,h2,h3{margin:.4em 0;}
+a{color:var(--pink);}
+button{font-family:inherit;}
+
+/* Demo banner */
+.demo-banner{background:linear-gradient(90deg,#7b1fa2,#c2185b);color:#fff;text-align:center;font-size:12px;font-weight:700;padding:7px 10px;letter-spacing:.4px;position:sticky;top:0;z-index:60;}
+
+/* Header */
+.hdr{background:linear-gradient(135deg,var(--pink-d),var(--pink));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+body .demo-banner + .hdr{top:31px;}
+.logo-badge{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f9d976,#c9a227);display:grid;place-items:center;font-size:24px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.hdr h1{font-size:19px;margin:0;line-height:1.2;}
+.hdr small{opacity:.9;font-size:11px;}
+.hdr .sp{flex:1;}
+.lang-btn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:700;}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,#f8bbd0,#f48fb1 55%,#ec407a);color:#fff;padding:34px 20px;text-align:center;}
+.hero h2{font-size:26px;margin:0 0 6px;text-shadow:0 1px 4px rgba(0,0,0,.2);}
+.hero p{margin:0 0 16px;opacity:.95;font-size:14px;}
+.btn{display:inline-block;border:0;border-radius:30px;padding:12px 26px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;}
+.btn-gold{background:linear-gradient(135deg,#e6c65c,#c9a227);color:#4a2c00;box-shadow:0 3px 10px rgba(201,162,39,.4);}
+.btn-pink{background:linear-gradient(135deg,var(--pink),var(--pink-d));color:#fff;}
+.btn-ghost{background:#fff;color:var(--pink);border:2px solid var(--pink);}
+.btn-block{width:100%;}
+.btn-sm{padding:8px 16px;font-size:13px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Sections */
+.wrap{max-width:900px;margin:0 auto;padding:14px;}
+.sec-title{font-size:20px;color:var(--pink-d);border-bottom:3px solid var(--gold);display:inline-block;padding-bottom:4px;margin:18px 0 12px;}
+.sec-title .ur-f{font-family:'Noto Nastaliq Urdu',serif;}
+
+/* Category pills */
+.pills{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;}
+.pill{flex:none;background:#fff;border:2px solid var(--line);border-radius:24px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;color:var(--ink);}
+.pill.on{background:var(--pink);border-color:var(--pink);color:#fff;}
+
+/* Service cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;flex-direction:column;}
+.card .thumb{height:110px;display:grid;place-items:center;font-size:44px;background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
+.card .body{padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px;}
+.card .nm{font-weight:700;font-size:14px;}
+.card .ds{font-size:12px;color:var(--muted);flex:1;}
+.card .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+.card .pr{font-weight:800;color:var(--pink-d);font-size:16px;}
+.card .ft{padding:0 12px 12px;}
+
+/* Packages */
+.pkg{background:linear-gradient(135deg,#fff,#fff8e1);border:2px solid var(--gold);border-radius:var(--radius);padding:16px;margin:10px 0;box-shadow:var(--shadow);}
+.pkg h3{color:#8a6d00;margin:0 0 6px;}
+.pkg ul{margin:6px 0;padding-left:18px;font-size:13px;}
+body.ur .pkg ul{padding-left:0;padding-right:18px;}
+.pkg .pr{font-size:22px;font-weight:800;color:var(--pink-d);}
+
+/* Gallery */
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.gal div{aspect-ratio:1;border-radius:12px;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,#f8bbd0,#f48fb1);}
+
+/* Reviews */
+.rev{background:#fff;border-radius:var(--radius);padding:14px;margin:8px 0;border:1px solid var(--line);box-shadow:var(--shadow);}
+.rev .stars{color:var(--gold);font-size:16px;}
+.rev .who{font-size:12px;color:var(--muted);margin-top:6px;}
+
+/* Forms */
+.form{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border:1px solid var(--line);}
+.form label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px;color:var(--pink-d);}
+.form input,.form select,.form textarea{width:100%;padding:11px;border:2px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);}
+.form input:focus,.form select:focus{border-color:var(--pink);outline:none;}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
+.slot{border:2px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:13px;cursor:pointer;background:#fff;}
+.slot.on{background:var(--pink);color:#fff;border-color:var(--pink);font-weight:700;}
+.slot.off{opacity:.35;text-decoration:line-through;cursor:not-allowed;}
+.err{color:#c62828;font-size:13px;margin-top:6px;display:none;}
+.ok-box{background:#e8f5e9;border:2px solid var(--green);border-radius:var(--radius);padding:18px;text-align:center;margin:14px 0;}
+.ok-box .big{font-size:20px;font-weight:800;color:var(--green);}
+
+/* Bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--line);display:flex;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.08);}
+.bnav button{flex:1;border:0;background:none;padding:8px 2px 10px;font-size:11px;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bnav button .ic{font-size:20px;}
+.bnav button.on{color:var(--pink);font-weight:700;}
+
+/* Admin */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:12px;overflow:hidden;}
+.tbl th{background:var(--pink);color:#fff;padding:8px;text-align:left;}
+body.ur .tbl th{text-align:right;}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);}
+.st{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+.st-Pending{background:#fff3e0;color:#e65100;}
+.st-Confirmed{background:#e3f2fd;color:#1565c0;}
+.st-Completed{background:#e8f5e9;color:#2e7d32;}
+.st-Cancelled{background:#ffebee;color:#c62828;}
+.rowbtns{display:flex;gap:6px;flex-wrap:wrap;}
+.chipbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;}
+.chipbtn.go{background:#e8f5e9;border-color:#a5d6a7;}
+.chipbtn.no{background:#ffebee;border-color:#ef9a9a;}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:100;padding:16px;}
+.modal-bg.show{display:grid;}
+.modal{background:#fff;border-radius:18px;max-width:440px;width:100%;max-height:88vh;overflow:auto;padding:18px;}
+
+.note{background:#fff8e1;border:1px dashed var(--gold);border-radius:10px;padding:10px;font-size:12px;color:#8a6d00;margin:10px 0;}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;}
+.wa-fab{position:fixed;bottom:86px;right:14px;width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;font-size:28px;box-shadow:0 4px 14px rgba(0,0,0,.25);border:0;cursor:pointer;z-index:55;}
+body.ur .wa-fab{right:auto;left:14px;}
+@media(min-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}}
