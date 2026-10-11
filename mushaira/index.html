@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#4a0e18">
+<title>جیلن مشاعرہ — Jilan Mushaira</title>
+<style>
+:root{--maroon:#4a0e18;--maroon2:#5c1a24;--gold:#d4af37;--gold2:#b8942a;--cream:#faf3e3;--cream2:#f3e8d0;--ink:#3a2415;--muted:#8a6f55}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting",serif;background:var(--cream);color:var(--ink);margin:0;padding:0;min-height:100vh}
+header{background:linear-gradient(135deg,var(--maroon),var(--maroon2));color:var(--cream);padding:14px 16px;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hrow{display:flex;align-items:center;gap:10px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--gold);color:var(--maroon);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:bold;flex:none}
+h1{font-size:20px;margin:0;color:var(--gold)}
+.sub{font-size:12px;color:#e8d5a8;margin:0}
+#searchbar{display:none;margin-top:10px}
+#searchbar.on{display:block}
+#q{width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--gold);font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+main{padding:14px 14px 90px;max-width:640px;margin:0 auto}
+.screen{display:none}.screen.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.card{background:#fff;border:1px solid #e6d7b8;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(74,14,24,.08)}
+.card h2{margin:0 0 6px;color:var(--maroon);font-size:19px}
+.sher{font-size:19px;line-height:2.4;text-align:center;padding:6px 4px}
+.misra{display:block}
+.poetline{text-align:center;color:var(--muted);font-size:14px;margin-top:4px}
+.actions{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.btn{border:none;border-radius:12px;padding:10px 16px;font-size:15px;font-family:inherit;cursor:pointer;font-weight:bold}
+.btn:active{transform:scale(.96)}
+.gold{background:var(--gold);color:var(--maroon)}
+.maroon{background:var(--maroon);color:var(--cream)}
+.ghost{background:transparent;border:2px solid var(--gold);color:var(--maroon)}
+.small{font-size:13px;padding:8px 12px}
+.poetgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.poetcard{background:linear-gradient(150deg,var(--maroon2),var(--maroon));color:var(--cream);border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;border:2px solid var(--gold)}
+.poetcard .pn{font-size:19px;color:var(--gold);font-weight:bold}
+.poetcard .py{font-size:12px;color:#e8d5a8}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.qbtn{background:#fff;border:2px solid var(--maroon2);border-radius:12px;padding:14px;font-size:16px;font-family:inherit;cursor:pointer;color:var(--maroon);font-weight:bold}
+.qbtn.ok{background:#1d7a3a;border-color:#1d7a3a;color:#fff}
+.qbtn.no{background:#a12323;border-color:#a12323;color:#fff}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--maroon);display:flex;z-index:50;border-top:2px solid var(--gold)}
+nav button{flex:1;background:none;border:none;color:#e8d5a8;font-family:inherit;font-size:12px;padding:10px 4px 12px;cursor:pointer}
+nav button .ic{font-size:22px;display:block}
+nav button.on{color:var(--gold)}
+.note{background:#fff8e6;border:1px dashed var(--gold2);border-radius:10px;padding:10px;font-size:13px;color:var(--muted);margin-top:8px}
+textarea{width:100%;min-height:110px;border-radius:12px;border:2px solid #e6d7b8;padding:12px;font-size:17px;font-family:inherit;line-height:2.2;background:#fff;color:var(--ink)}
+input.txt{width:100%;padding:12px;border-radius:12px;border:2px solid #e6d7b8;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:16px}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--maroon);color:var(--cream);padding:12px 22px;border-radius:30px;font-size:15px;display:none;z-index:99;border:1px solid var(--gold)}
+.quizscore{font-size:22px;text-align:center;color:var(--maroon);font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="logo">م</div>
+    <div><h1>جیلن مشاعرہ</h1><p class="sub">اردو شاعری کی محفل</p></div>
+    <div style="flex:1"></div>
+    <button class="btn gold small" id="sbtn" onclick="toggleSearch()">🔍 تلاش</button>
+  </div>
+  <div id="searchbar"><input id="q" placeholder="شعر یا لفظ تلاش کریں…" oninput="doSearch(this.value)"></div>
+</header>
+<main>
+  <section class="screen on" id="s-home">
+    <div class="card"><h2>📜 آج کا شعر</h2><div id="sotd"></div></div>
+    <h2 class="st">شعرا</h2>
+    <div class="poetgrid" id="poetgrid"></div>
+    <div class="card" style="margin-top:14px"><h2>🎭 مشہور اقتباسات</h2><div id="excerpts"></div>
+    <div class="note">یہ صرف مختصر اقتباسات ہیں۔ مکمل کلام کے لیے شاعر کی کتاب خریدیں۔</div></div>
+  </section>
+  <section class="screen" id="s-poet"><div id="poetpage"></div></section>
+  <section class="screen" id="s-learn"><h2 class="st">🎓 شاعری سیکھیں</h2><div id="guides"></div></section>
+  <section class="screen" id="s-quiz"><h2 class="st">🎯 کوئز: یہ شعر کس کا ہے؟</h2><div id="quizbox"></div></section>
+  <section class="screen" id="s-fav"><h2 class="st">⭐ پسندیدہ اشعار</h2><div id="favlist"></div></section>
+  <section class="screen" id="s-my"><h2 class="st">✍️ میرا شعر</h2>
+    <div class="card"><textarea id="mysher" placeholder="اپنا شعر یہاں لکھیں…"></textarea>
+    <div class="actions" style="margin-top:10px"><button class="btn maroon" onclick="saveMySher()">💾 محفوظ کریں</button></div></div>
+    <div id="mysherlist"></div>
+  </section>
+  <section class="screen" id="s-about"><h2 class="st">ℹ️ تعارف</h2>
+    <div class="card"><p><b>جیلن مشاعرہ</b> اردو شاعری کی ایک محفل ہے۔</p>
+    <p>📖 غالب، اقبال اور میر کا کلام <b>پبلک ڈومین</b> ہے (ان کے انتقال کو 50 سال سے زیادہ ہو چکے)۔</p>
+    <p>⚖️ احمد فراز، جون ایلیا اور ساغر صدیقی کے صرف مختصر اقتباسات شامل ہیں۔</p>
+    <p style="color:var(--muted);font-size:14px">Jilan Mushaira v1.0 — تمام مواد صرف تعلیمی مقصد کے لیے۔</p></div>
+  </section>
+</main>
+<nav>
+  <button id="n-home" class="on" onclick="go('home')"><span class="ic">🏠</span>ہوم</button>
+  <button id="n-learn" onclick="go('learn')"><span class="ic">🎓</span>سیکھیں</button>
+  <button id="n-quiz" onclick="go('quiz')"><span class="ic">🎯</span>کوئز</button>
+  <button id="n-fav" onclick="go('fav')"><span class="ic">⭐</span>پسندیدہ</button>
+  <button id="n-my" onclick="go('my')"><span class="ic">✍️</span>میرا شعر</button>
+</nav>
+<div id="toast"></div>
+<script src="ashaar.js"></script>
+<script>
+var navStack=["home"];
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none"},2200)}
+function go(s){navStack.push(s);show(s)}
+function show(s){var a=document.querySelectorAll(".screen");for(var i=0;i<a.length;i++)a[i].classList.remove("on");document.getElementById("s-"+s).classList.add("on");
+ var b=document.querySelectorAll("nav button");for(var j=0;j<b.length;j++)b[j].classList.remove("on");var nb=document.getElementById("n-"+s);if(nb)nb.classList.add("on");
+ if(s==="fav")renderFav();if(s==="my")renderMy();if(s==="quiz"&&!quizOn)startQuiz();window.scrollTo(0,0)}
+function onAndroidBack(){if(navStack.length>1){navStack.pop();show(navStack[navStack.length-1])}else{if(window.Android&&Android.exitApp)Android.exitApp()}}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function favKey(p,i){return p+":"+i}
+function getFav(){try{return JSON.parse(localStorage.getItem("mush_fav")||"[]")}catch(e){return[]}}
+function isFav(k){return getFav().indexOf(k)>=0}
+function toggleFav(p,i){var f=getFav(),k=favKey(p,i),ix=f.indexOf(k);if(ix>=0)f.splice(ix,1);else f.push(k);localStorage.setItem("mush_fav",JSON.stringify(f));toast(ix>=0?"⭐ ہٹا دیا":"⭐ پسندیدہ میں شامل");if(document.getElementById("s-fav").classList.contains("on"))renderFav();else refreshCards()}
+/* ---- TTS ---- */
+var speaking=false;
+function ttsSpeak(text){
+  stopTts();
+  if(window.JilanTts&&JilanTts.speak){var st="";try{st=JilanTts.urduStatus()}catch(e){}
+    if(st==="ok"){JilanTts.speak(text);speaking=true;toast("🔊 سنا رہے ہیں…");return}
+    if(st==="missing_data"){toast("⚠️ اردو آواز انسٹال کریں: Settings → Text-to-Speech → اردو ڈیٹا");return}}
+  if("speechSynthesis" in window){var u=new SpeechSynthesisUtterance(text);u.lang="ur-PK";
+    var vs=speechSynthesis.getVoices(),uv=null;
+    for(var i=0;i<vs.length;i++){if(vs[i].lang&&vs[i].lang.toLowerCase().indexOf("ur")===0){uv=vs[i];break}}
+    if(uv){u.voice=uv;speechSynthesis.speak(u);speaking=true;toast("🔊 سنا رہے ہیں…")}
+    else toast("⚠️ اردو آواز دستیاب نہیں — ڈیوائس میں اردو TTS انسٹال کریں");
+  } else toast("⚠️ اس ڈیوائس پر آواز دستیاب نہیں");
+}
+function stopTts(){speaking=false;try{if(window.JilanTts&&JilanTts.stopTts)JilanTts.stopTts()}catch(e){}
+ try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}}
+function sherText(p,i){var a=POETS.filter(function(x){return x.id===p})[0].ashaar[i];return a[0]+(a[1]?" ۔ "+a[1]:"")}
+/* ---- share ---- */
+function shareSher(p,i){var t="📜 "+sherText(p,i)+"\n— جیلن مشاعرہ";
+ if(navigator.share){navigator.share({text:t}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("📋 کاپی ہو گیا")})}else toast("شیئر دستیاب نہیں")}
+/* ---- cards ---- */
+function card(p,i){var a=POETS.filter(function(x){return x.id===p})[0].ashaar[i];
+ var h='<div class="card" data-card="'+p+':'+i+'"><div class="sher"><span class="misra">'+esc(a[0])+"</span>"+(a[1]?'<span class="misra">'+esc(a[1])+"</span>":"")+"</div>";
+ h+='<div class="actions"><button class="btn ghost small" onclick="toggleFav(\''+p+'\','+i+')">'+(isFav(favKey(p,i))?"⭐":"☆")+'</button>';
+ h+='<button class="btn gold small" onclick="ttsSpeak(sherText(\''+p+'\','+i+'))">🔊 سناؤ</button>';
+ h+='<button class="btn maroon small" onclick="shareSher(\''+p+'\','+i+')">📤 شیئر</button>';
+ h+='<button class="btn ghost small" onclick="stopTts()">⏹</button></div></div>';return h}
+function refreshCards(){var cs=document.querySelectorAll("[data-card]");for(var i=0;i<cs.length;i++){var k=cs[i].getAttribute("data-card").split(":");cs[i].outerHTML=card(k[0],+k[1])}}
+/* ---- home ---- */
+function init(){
+ var pg=document.getElementById("poetgrid");var h="";
+ POETS.forEach(function(p){h+='<div class="poetcard" onclick="openPoet(\''+p.id+'\')"><div class="pn">'+p.name+'</div><div class="py">'+p.years+'</div><div style="font-size:13px;margin-top:6px">'+p.ashaar.length+' اشعار</div></div>'});
+ pg.innerHTML=h;
+ var ex=document.getElementById("excerpts");var eh="";
+ EXCERPTS.forEach(function(e){e.ashaar.forEach(function(a){eh+='<div class="sher" style="font-size:17px"><span class="misra">'+esc(a[0])+'</span><span class="misra">'+esc(a[1])+'</span></div><div class="poetline">— '+e.poet+' (اقتباس)</div>'})});
+ ex.innerHTML=eh;
+ var all=[];POETS.forEach(function(p){p.ashaar.forEach(function(a,i){all.push([p.id,i])})});
+ var day=Math.floor(Date.now()/86400000)%all.length;var d=all[day];
+ document.getElementById("sotd").innerHTML=card(d[0],d[1]);
+ var g=document.getElementById("guides");var gh="";
+ GUIDES.forEach(function(x){gh+='<div class="card"><h2>'+x.t+'</h2><p style="line-height:2.2;font-size:16px">'+x.b+'</p></div>'});
+ g.innerHTML=gh;
+ if("speechSynthesis" in window){try{speechSynthesis.getVoices()}catch(e){}}
+}
+function openPoet(id){var p=POETS.filter(function(x){return x.id===id})[0];var h='<button class="btn ghost small" onclick="onAndroidBack()">← واپس</button>';
+ h+='<div class="card" style="margin-top:10px"><h2>'+p.name+'</h2><div class="poetline">'+p.en+' • '+p.years+'</div><p style="line-height:2.2">'+p.bio+'</p></div>';
+ p.ashaar.forEach(function(a,i){h+=card(id,i)});
+ document.getElementById("poetpage").innerHTML=h;navStack.push("poet");show("poet")}
+/* ---- search ---- */
+function toggleSearch(){var b=document.getElementById("searchbar");b.classList.toggle("on");if(b.classList.contains("on"))document.getElementById("q").focus()}
+function doSearch(q){q=q.trim();if(!q){document.getElementById("poetpage").innerHTML="";return}
+ var h='<button class="btn ghost small" onclick="onAndroidBack()">← واپس</button><h2 class="st">تلاش: '+esc(q)+'</h2>';var n=0;
+ POETS.forEach(function(p){p.ashaar.forEach(function(a,i){if((a[0]+(a[1]||"")).indexOf(q)>=0){h+=card(p.id,i)+'<div class="poetline">— '+p.name+'</div>';n++}})});
+ if(!n)h+='<div class="empty">کوئی شعر نہیں ملا۔ کچھ اور لکھ کر دیکھیں۔</div>';
+ document.getElementById("poetpage").innerHTML=h;if(navStack[navStack.length-1]!=="poet"){navStack.push("poet");show("poet")}else show("poet")}
+/* ---- favorites ---- */
+function renderFav(){var f=getFav();var h="";f.forEach(function(k){var s=k.split(":");h+=card(s[0],+s[1])});
+ if(!h)h='<div class="empty">ابھی کوئی پسندیدہ شعر نہیں۔ ⭐ دبائیں۔</div>';
+ document.getElementById("favlist").innerHTML=h}
+/* ---- quiz ---- */
+var quizOn=false,qi=0,qscore=0,qorder=[];
+function startQuiz(){quizOn=true;qi=0;qscore=0;var all=[];POETS.forEach(function(p){p.ashaar.forEach(function(a,i){if(a[1])all.push([p.id,i])})});
+ for(var k=all.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=all[k];all[k]=all[j];all[j]=t}
+ qorder=all.slice(0,10);showQ()}
+function showQ(){var b=document.getElementById("quizbox");if(qi>=qorder.length){b.innerHTML='<div class="card"><div class="quizscore">🏆 '+qscore+' / '+qorder.length+'</div><div class="actions"><button class="btn gold" onclick="startQuiz()">🔄 دوبارہ</button></div></div>';quizOn=false;return}
+ var d=qorder[qi],p=POETS.filter(function(x){return x.id===d[0]})[0],a=p.ashaar[d[1]];
+ var opts=[p.id];POETS.forEach(function(x){if(x.id!==p.id)opts.push(x.id)});
+ for(var k=opts.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=opts[k];opts[k]=opts[j];opts[j]=t}
+ var h='<div class="card"><div class="poetline">سوال '+(qi+1)+' / '+qorder.length+'</div><div class="sher"><span class="misra">'+esc(a[0])+'</span><span class="misra">'+esc(a[1])+'</span></div><div class="poetline">یہ شعر کس کا ہے؟</div><div class="qgrid">';
+ opts.forEach(function(o){var pn=POETS.filter(function(x){return x.id===o})[0].name;h+='<button class="qbtn" onclick="ansQ(this,\''+o+'\',\''+p.id+'\')">'+pn+'</button>'});
+ h+='</div></div>';b.innerHTML=h}
+function ansQ(el,pick,real){var bs=el.parentNode.querySelectorAll(".qbtn");for(var i=0;i<bs.length;i++)bs[i].disabled=true;
+ if(pick===real){el.classList.add("ok");qscore++}else{el.classList.add("no");
+  for(var j=0;j<bs.length;j++){if(bs[j].textContent===POETS.filter(function(x){return x.id===real})[0].name)bs[j].classList.add("ok")}}
+ setTimeout(function(){qi++;showQ()},1400)}
+/* ---- my sher ---- */
+function getMy(){try{return JSON.parse(localStorage.getItem("mush_my")||"[]")}catch(e){return[]}}
+function saveMySher(){var t=document.getElementById("mysher").value.trim();if(!t){toast("پہلے شعر لکھیں");return}
+ var m=getMy();m.unshift({t:t,d:Date.now()});localStorage.setItem("mush_my",JSON.stringify(m));document.getElementById("mysher").value="";toast("💾 محفوظ ہو گیا");renderMy()}
+function renderMy(){var m=getMy();var h="";m.forEach(function(x,ix){h+='<div class="card"><div class="sher" style="font-size:17px;white-space:pre-line">'+esc(x.t)+'</div><div class="actions"><button class="btn gold small" onclick="ttsSpeak(document.querySelectorAll(\'#mysherlist .sher\')['+ix+'].innerText)">🔊 سناؤ</button><button class="btn ghost small" onclick="delMy('+ix+')">🗑</button><button class="btn ghost small" onclick="stopTts()">⏹</button></div></div>'});
+ if(!h)h='<div class="empty">ابھی آپ نے کوئی شعر نہیں لکھا۔</div>';
+ document.getElementById("mysherlist").innerHTML=h}
+function delMy(ix){var m=getMy();m.splice(ix,1);localStorage.setItem("mush_my",JSON.stringify(m));renderMy();toast("🗑 حذف ہو گیا")}
+init();
+</script>
+</body>
+</html>
