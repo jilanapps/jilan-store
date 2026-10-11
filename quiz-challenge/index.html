@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jilan Quiz Challenge</title>
+<link rel="icon" href="icon.png">
+<meta name="theme-color" content="#1e3a8a">
+<style>
+:root{
+  --navy:#1e3a8a; --navy2:#172c6b; --navy3:#0f1f4d;
+  --cyan:#22d3ee; --cyan-d:#0ea5c4;
+  --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --muted:#64748b;
+  --green:#16a34a; --red:#dc2626; --gold:#f59e0b;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+body.dark{--bg:#0b1226;--card:#141d38;--text:#e2e8f0;--muted:#94a3b8}
+.app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+/* Header */
+header{background:linear-gradient(135deg,var(--navy),var(--navy3));color:#fff;padding:14px 16px;position:sticky;top:0;z-index:50;border-radius:0 0 20px 20px;box-shadow:0 4px 14px rgba(30,58,138,.35)}
+.hrow{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),#0ea5c4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#0b1226;box-shadow:0 2px 8px rgba(34,211,238,.5)}
+.logo h1{font-size:19px;letter-spacing:.3px}
+.logo h1 span{color:var(--cyan)}
+.hstats{display:flex;gap:8px}
+.chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 11px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px}
+/* Screens */
+main{flex:1;padding:14px 14px 86px}
+.screen{display:none;animation:fade .25s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(15,23,42,.07)}
+body.dark .card{box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.card h2{font-size:17px;margin-bottom:8px;color:var(--navy)}
+body.dark .card h2{color:var(--cyan)}
+.muted{color:var(--muted);font-size:13px}
+/* Buttons */
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .1s,box-shadow .2s;margin-bottom:10px}
+.btn:active{transform:scale(.98)}
+.btn-pri{background:linear-gradient(135deg,var(--cyan),var(--cyan-d));color:#0b1226;box-shadow:0 4px 14px rgba(34,211,238,.4)}
+.btn-navy{background:linear-gradient(135deg,var(--navy),var(--navy3));color:#fff;box-shadow:0 4px 14px rgba(30,58,138,.35)}
+.btn-ghost{background:transparent;border:2px solid var(--navy);color:var(--navy)}
+body.dark .btn-ghost{border-color:var(--cyan);color:var(--cyan)}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{margin-bottom:0}
+/* Mode cards */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--card);border-radius:var(--radius);padding:16px 10px;text-align:center;cursor:pointer;border:2px solid transparent;box-shadow:0 2px 10px rgba(15,23,42,.07);transition:border .2s,transform .1s}
+.mode:active{transform:scale(.97)}
+.mode.sel{border-color:var(--cyan)}
+.mode .ic{font-size:32px;margin-bottom:6px}
+.mode .t{font-weight:800;font-size:14px}
+.mode .d{font-size:11px;color:var(--muted);margin-top:3px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{background:var(--card);border-radius:12px;padding:13px 8px;text-align:center;cursor:pointer;border:2px solid transparent;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,.06)}
+.cat:active{transform:scale(.97)}
+.cat.sel{border-color:var(--cyan);background:rgba(34,211,238,.08)}
+.cat .ic{font-size:24px;display:block;margin-bottom:4px}
+.diff{display:flex;gap:10px}
+.diff .cat{flex:1}
+/* Quiz */
+.qtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qprog{font-size:13px;font-weight:700;color:var(--muted)}
+.qtimer{font-size:15px;font-weight:800;background:var(--navy);color:#fff;border-radius:20px;padding:5px 14px}
+.qtimer.low{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.tbar{height:8px;background:rgba(100,116,139,.25);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.tbar>div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--navy));border-radius:6px;transition:width .2s linear}
+.qtext{font-size:18px;font-weight:700;line-height:1.45;margin-bottom:14px}
+.qcat{display:inline-block;font-size:11px;font-weight:800;color:var(--cyan-d);background:rgba(34,211,238,.14);border-radius:12px;padding:4px 12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid #e2e8f0;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;font-family:inherit;color:var(--text);transition:border .15s,background .15s}
+body.dark .opt{border-color:#2a3a63}
+.opt:active{transform:scale(.99)}
+.opt.correct{border-color:var(--green);background:rgba(22,163,74,.12)}
+.opt.wrong{border-color:var(--red);background:rgba(220,38,38,.12)}
+.opt.dim{opacity:.55}
+.opt:disabled{cursor:default}
+.explain{background:rgba(34,211,238,.1);border-left:4px solid var(--cyan);border-radius:8px;padding:10px 12px;font-size:13.5px;margin:6px 0 12px;line-height:1.5}
+/* Pause overlay */
+.overlay{position:fixed;inset:0;background:rgba(11,18,38,.72);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(3px)}
+.overlay.on{display:flex}
+.sheet{background:var(--card);border-radius:20px;padding:24px;width:100%;max-width:340px;text-align:center;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.sheet h2{margin-bottom:14px}
+/* Results */
+.score-big{font-size:56px;font-weight:900;color:var(--navy);text-align:center}
+body.dark .score-big{color:var(--cyan)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.rstat{background:var(--bg);border-radius:12px;padding:12px;text-align:center}
+.rstat .v{font-size:22px;font-weight:800}
+.rstat .l{font-size:11px;color:var(--muted);margin-top:2px}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.nbadge{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:800;animation:pop .3s ease}
+/* Review */
+.rev{border-bottom:1px solid #e2e8f0;padding:10px 0}
+body.dark .rev{border-color:#2a3a63}
+.rev:last-child{border:none}
+.rev .q{font-weight:700;font-size:14px;margin-bottom:4px}
+.rev .a{font-size:13px;color:var(--green);font-weight:600}
+.rev .w{font-size:13px;color:var(--red)}
+.rev .e{font-size:12px;color:var(--muted);margin-top:3px}
+/* Progress */
+.pbar{height:10px;background:rgba(100,116,139,.2);border-radius:6px;overflow:hidden;margin-top:6px}
+.pbar>div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--navy));border-radius:6px}
+.prow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eef2f7;font-size:14px}
+body.dark .prow{border-color:#22304f}
+.prow:last-child{border:none}
+.stars{color:var(--gold);font-size:15px;letter-spacing:2px}
+/* Settings */
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef2f7;font-size:15px;font-weight:600}
+body.dark .setrow{border-color:#22304f}
+.setrow:last-child{border:none}
+select,input[type=number]{padding:9px 12px;border-radius:10px;border:2px solid #e2e8f0;font-size:14px;font-family:inherit;background:var(--card);color:var(--text)}
+.switch{position:relative;width:52px;height:30px;background:#cbd5e1;border-radius:20px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.switch.on{background:var(--green)}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.switch.on::after{left:25px}
+/* Bottom nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid #e2e8f0;display:flex;z-index:60;box-shadow:0 -2px 12px rgba(15,23,42,.08)}
+body.dark nav{border-color:#22304f}
+nav .wrap{max-width:560px;margin:0 auto;display:flex;width:100%}
+nav button{flex:1;background:none;border:none;padding:10px 4px 12px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit}
+nav button .ic{font-size:22px;display:block;margin-bottom:2px}
+nav button.on{color:var(--navy)}
+body.dark nav button.on{color:var(--cyan)}
+/* Home dashboard */
+.dash{background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:20px;padding:20px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden}
+.dash::after{content:'🧠';position:absolute;right:8px;top:4px;font-size:90px;opacity:.14}
+.dash h2{font-size:20px;margin-bottom:2px}
+.dash .sub{font-size:13px;opacity:.8;margin-bottom:14px}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative;z-index:1}
+.dstat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px;text-align:center}
+.dstat .v{font-size:19px;font-weight:800;color:var(--cyan)}
+.dstat .l{font-size:10.5px;opacity:.85;margin-top:2px}
+.streak-fire{font-size:15px}
+.empty{text-align:center;padding:26px;color:var(--muted);font-size:14px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:11px 20px;border-radius:24px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:200;pointer-events:none;max-width:90%}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media(min-width:600px){.modes,.cats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="hrow">
+    <div class="logo"><div class="mark">?</div><h1>JILAN <span>QUIZ</span> CHALLENGE</h1></div>
+    <div class="hstats">
+      <div class="chip">🪙 <span id="hCoins">0</span></div>
+      <div class="chip">🔥 <span id="hStreak">0</span></div>
+    </div>
+  </div>
+</header>
+<main>
+  <!-- HOME -->
+  <section class="screen on" id="s-home">
+    <div class="dash">
+      <h2 id="welcomeMsg">Welcome, Challenger! 👋</h2>
+      <div class="sub" id="dateLine"></div>
+      <div class="dgrid">
+        <div class="dstat"><div class="v" id="dStreak">0</div><div class="l">🔥 Day Streak</div></div>
+        <div class="dstat"><div class="v" id="dBest">0</div><div class="l">🏆 Best Score</div></div>
+        <div class="dstat"><div class="v" id="dPlayed">0</div><div class="l">🎮 Quizzes</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>⚡ Quick Actions</h2>
+      <button class="btn btn-pri" onclick="goSetup('quick')">▶ Quick Quiz — 10 Questions</button>
+      <div class="btn-row">
+        <button class="btn btn-navy" onclick="goSetup('daily')">📅 Daily Challenge</button>
+        <button class="btn btn-navy" onclick="goSetup('practice')">📖 Practice Mode</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📚 Categories</h2>
+      <div class="cats" id="homeCats"></div>
+    </div>
+    <div class="card">
+      <h2>🏅 Latest Badges</h2>
+      <div class="badge-row" id="homeBadges"></div>
+      <div class="empty" id="noBadges" style="display:none">Play quizzes to earn badges!</div>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="screen" id="s-setup">
+    <div class="card">
+      <h2 id="setupTitle">Quiz Setup</h2>
+      <div class="muted" style="margin-bottom:12px">Choose a category:</div>
+      <div class="cats" id="setupCats"></div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px">Difficulty:</div>
+      <div class="diff" id="setupDiff">
+        <div class="cat sel" data-d="0"><span class="ic">🎲</span>Mixed</div>
+        <div class="cat" data-d="1"><span class="ic">🌱</span>Easy</div>
+        <div class="cat" data-d="2"><span class="ic">🔥</span>Medium</div>
+        <div class="cat" data-d="3"><span class="ic">🚀</span>Hard</div>
+      </div>
+    </div>
+    <button class="btn btn-pri" id="startBtn" onclick="startQuiz()">🚀 Start Quiz</button>
+    <button class="btn btn-ghost" onclick="show('s-home')">← Back</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="s-quiz">
+    <div class="card">
+      <div class="qtop">
+        <span class="qprog" id="qProg">Q 1/10</span>
+        <span class="qtimer" id="qTimer">20</span>
+        <button class="btn-ghost" style="border:none;font-size:20px;padding:4px 8px" onclick="pauseQuiz()">⏸</button>
+      </div>
+      <div class="tbar"><div id="tFill" style="width:100%"></div></div>
+      <span class="qcat" id="qCat">General</span>
+      <div class="qtext" id="qText"></div>
+      <div id="qOpts"></div>
+      <div id="qExplain"></div>
+      <button class="btn btn-navy" id="nextBtn" style="display:none" onclick="nextQ()">Next →</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="screen" id="s-results">
+    <div class="card" style="text-align:center">
+      <h2>🎉 Quiz Complete!</h2>
+      <div class="score-big" id="rScore">0</div>
+      <div class="muted">points</div>
+      <div class="badge-row" id="rBadges"></div>
+      <div class="rgrid">
+        <div class="rstat"><div class="v" id="rCorrect" style="color:var(--green)">0</div><div class="l">Correct</div></div>
+        <div class="rstat"><div class="v" id="rWrong" style="color:var(--red)">0</div><div class="l">Wrong</div></div>
+        <div class="rstat"><div class="v" id="rPct">0%</div><div class="l">Accuracy</div></div>
+        <div class="rstat"><div class="v" id="rCoins" style="color:var(--gold)">+0</div><div class="l">Coins Earned</div></div>
+      </div>
+      <button class="btn btn-pri" onclick="showReview()">📝 Review Answers</button>
+      <div class="btn-row">
+        <button class="btn btn-navy" onclick="playAgain()">🔁 Play Again</button>
+        <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section class="screen" id="s-review">
+    <div class="card"><h2>📝 Answer Review</h2><div id="revList"></div></div>
+    <div class="btn-row">
+      <button class="btn btn-navy" onclick="retryWrong()">🎯 Retry Wrong Ones</button>
+      <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section class="screen" id="s-progress">
+    <div class="card">
+      <h2>📊 My Records</h2>
+      <div class="rgrid">
+        <div class="rstat"><div class="v" id="pBest">0</div><div class="l">Best Score</div></div>
+        <div class="rstat"><div class="v" id="pPlayed">0</div><div class="l">Quizzes Played</div></div>
+        <div class="rstat"><div class="v" id="pCorrect">0</div><div class="l">Correct Answers</div></div>
+        <div class="rstat"><div class="v" id="pStreak">0</div><div class="l">Day Streak 🔥</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📚 Category Progress</h2>
+      <div id="catProg"></div>
+    </div>
+    <div class="card">
+      <h2>🏅 Badges</h2>
+      <div class="badge-row" id="allBadges" style="justify-content:flex-start"></div>
+    </div>
+    <div class="card">
+      <h2>🏆 Personal Best Scores</h2>
+      <div id="bestList"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="screen" id="s-settings">
+    <div class="card">
+      <h2>⚙️ Settings</h2>
+      <div class="setrow"><span>🌙 Dark Mode</span><div class="switch" id="swDark" onclick="toggleSet('dark')"></div></div>
+      <div class="setrow"><span>🔊 Sound</span><div class="switch" id="swSound" onclick="toggleSet('sound')"></div></div>
+      <div class="setrow"><span>📳 Vibration</span><div class="switch" id="swVib" onclick="toggleSet('vib')"></div></div>
+      <div class="setrow"><span>⏱ Timer (seconds)</span>
+        <select id="selTimer" onchange="setTimer(this.value)">
+          <option value="10">10</option><option value="15">15</option><option value="20" selected>20</option><option value="30">30</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <h2>ℹ️ About</h2>
+      <p class="muted" style="line-height:1.6">Jilan Quiz Challenge v1.0<br>216 questions across 9 categories.<br>All progress is saved on your device only. Virtual coins have no cash value.</p>
+    </div>
+    <button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)" onclick="resetAll()">🗑 Reset All Progress</button>
+  </section>
+</main>
+
+<nav><div class="wrap">
+  <button class="on" data-s="s-home" onclick="navGo('s-home',this)"><span class="ic">🏠</span>Home</button>
+  <button data-s="s-setup" onclick="navGo('s-setup',this)"><span class="ic">▶</span>Play</button>
+  <button data-s="s-progress" onclick="navGo('s-progress',this)"><span class="ic">📊</span>Progress</button>
+  <button data-s="s-settings" onclick="navGo('s-settings',this)"><span class="ic">⚙️</span>Settings</button>
+</div></nav>
+
+<div class="overlay" id="pauseOv">
+  <div class="sheet">
+    <h2>⏸ Paused</h2>
+    <button class="btn btn-pri" onclick="resumeQuiz()">▶ Resume</button>
+    <button class="btn btn-navy" onclick="restartQuiz()">🔁 Restart</button>
+    <button class="btn btn-ghost" onclick="quitQuiz()">🏠 Quit</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+
+<script src="questions.js"></script>
+<script src="questions2.js"></script>
+<script src="questions3.js"></script>
+<script src="questions4.js"></script>
+<script>
+'use strict';
+/* ============ DATA ============ */
+const CATS={
+  gk:{n:"General Knowledge",ic:"🌍"},sci:{n:"Science & Nature",ic:"🔬"},
+  geo:{n:"World Geography",ic:"🗺"},his:{n:"History",ic:"🏛"},
+  voc:{n:"English Vocabulary",ic:"📝"},cmp:{n:"Computer",ic:"💻"},
+  spo:{n:"Sports & Cricket",ic:"🏏"},mat:{n:"Mathematics",ic:"🔢"},
+  isl:{n:"Islamic Knowledge",ic:"🕌"}
+};
+const DIFFN={1:"Easy",2:"Medium",3:"Hard"};
+const BADGES={
+  first:{n:"🌟 Shuruaat",d:"First quiz completed"},
+  sharp:{n:"⚡ Tez Tarrar",d:"10 answers under 5 seconds"},
+  perfect:{n:"💯 Sadiq",d:"100% in a 10-question quiz"},
+  streak7:{n:"🔥 Lagan",d:"7-day streak"},
+  scholar:{n:"🎓 Ustad",d:"5,000 total points"},
+  daily:{n:"📅 Paband",d:"Complete a Daily Challenge"}
+};
+/* ============ STORAGE ============ */
+const LS='jqc_';
+const store={
+  get(k,d){try{const v=localStorage.getItem(LS+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}}
+};
+let settings=Object.assign({dark:false,sound:true,vib:true,timer:20},store.get('settings',{}));
+let stats=Object.assign({coins:0,streak:0,lastDay:'',best:0,played:0,correct:0,totalPts:0,fast:0},store.get('stats',{}));
+let catStats=store.get('catStats',{});
+let badges=store.get('badges',[]);
+let bests=store.get('bests',[]);
+let dailyDone=store.get('dailyDone','');
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2200)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');window.scrollTo(0,0)}
+function navGo(id,btn){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(id==='s-progress')renderProgress();show(id)}
+function goHome(){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));document.querySelector('nav button').classList.add('on');renderHome();show('s-home')}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function seededShuffle(a,seed){a=a.slice();let s=seed||1;for(let i=a.length-1;i>0;i--){s=(s*9301+49297)%233280;const j=Math.floor(s/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function daySeed(){return [...todayStr()].reduce((a,c)=>a+c.charCodeAt(0),0)}
+function vibrate(ms){if(settings.vib&&navigator.vibrate){try{navigator.vibrate(ms)}catch(e){}}}
+/* sound via WebAudio */
+let AC=null;
+function beep(ok){if(!settings.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=ok?660:200;o.type='sine';g.gain.setValueAtTime(.18,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.28);o.start();o.stop(AC.currentTime+.3)}catch(e){}}
+/* ============ HOME ============ */
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function renderHome(){
+  $('hCoins').textContent=stats.coins;$('hStreak').textContent=stats.streak;
+  $('dStreak').textContent=stats.streak;$('dBest').textContent=stats.best;$('dPlayed').textContent=stats.played;
+  const d=new Date();$('dateLine').textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const h=new Date().getHours();$('welcomeMsg').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', Challenger! 👋';
+  const hc=$('homeCats');hc.innerHTML='';
+  Object.keys(CATS).forEach(k=>{const c=CATS[k];const d2=document.createElement('div');d2.className='cat';d2.innerHTML='<span class="ic">'+c.ic+'</span>'+c.n;d2.onclick=()=>goSetup('category',k);hc.appendChild(d2)});
+  const hb=$('homeBadges');hb.innerHTML='';
+  $('noBadges').style.display=badges.length?'none':'block';
+  badges.slice(-4).forEach(b=>{const s=document.createElement('span');s.className='nbadge';s.textContent=BADGES[b].n;hb.appendChild(s)});
+}
+function awardBadge(id){
+  if(badges.includes(id))return false;
+  badges.push(id);store.set('badges',badges);
+  const r=$('rBadges');if(r){const s=document.createElement('span');s.className='nbadge';s.textContent='🏅 '+BADGES[id].n;r.appendChild(s)}
+  toast('🏅 Badge earned: '+BADGES[id].n);vibrate(60);return true;
+}
+/* ============ SETUP ============ */
+let setupMode='quick',setupCat='all',setupDiff=0;
+function goSetup(mode,cat){
+  setupMode=mode;setupCat=cat||'all';
+  const titles={quick:'⚡ Quick Quiz (10 Q)',daily:'📅 Daily Challenge (10 Q)',practice:'📖 Practice Mode (no timer)',category:'📚 Category Challenge'};
+  $('setupTitle').textContent=titles[mode]||'Quiz Setup';
+  const sc=$('setupCats');sc.innerHTML='';
+  const mk=(k,n,ic)=>{const d=document.createElement('div');d.className='cat'+(setupCat===k?' sel':'');d.innerHTML='<span class="ic">'+ic+'</span>'+n;d.onclick=()=>{setupCat=k;[...sc.children].forEach(c=>c.classList.remove('sel'));d.classList.add('sel')};sc.appendChild(d)};
+  mk('all','🎲 All Mixed','🎲');
+  Object.keys(CATS).forEach(k=>mk(k,CATS[k].n,CATS[k].ic));
+  document.querySelectorAll('#setupDiff .cat').forEach(c=>c.classList.remove('sel'));
+  document.querySelector('#setupDiff .cat').classList.add('sel');setupDiff=0;
+  document.querySelectorAll('#setupDiff .cat').forEach(c=>c.onclick=()=>{document.querySelectorAll('#setupDiff .cat').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');setupDiff=+c.dataset.d});
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  show('s-setup');
+}
+/* ============ QUIZ ENGINE ============ */
+let QZ=null;
+function pickQuestions(mode,cat,diff){
+  let pool=QB.slice(),seed=0;
+  if(mode==='daily'){
+    seed=daySeed();
+    pool=pool.filter((_,i)=>(i*7+seed)%3!==2).slice(0,60);
+  }
+  if(cat!=='all')pool=pool.filter(q=>q[0]===cat);
+  if(diff>0)pool=pool.filter(q=>q[1]===diff);
+  pool=mode==='daily'?seededShuffle(pool,seed):shuffle(pool);
+  const n=mode==='category'?15:10;
+  return pool.slice(0,Math.min(n,pool.length));
+}
+function startQuiz(retryList){
+  let qs;
+  if(retryList){qs=retryList}
+  else{
+    if(setupMode==='daily'&&dailyDone===todayStr()){toast('📅 Daily challenge already done today!');return}
+    qs=pickQuestions(setupMode,setupCat,setupDiff);
+  }
+  if(!qs.length){toast('No questions found');return}
+  const dSeed=setupMode==='daily'?daySeed():0;
+  let qi=0;
+  QZ={qs:qs.map(q=>({c:q[0],d:q[1],q:q[2],opts:(dSeed?seededShuffle(q[3].map((t,i)=>({t:t,ok:i===q[4]})),dSeed+(qi++)):shuffle(q[3].map((t,i)=>({t:t,ok:i===q[4]})))),exp:q[5]})),
+      i:0,score:0,correct:0,wrong:0,answers:[],locked:false,timerOn:setupMode!=='practice',tLeft:settings.timer,tInt:null,mode:setupMode,cat:setupCat,startT:Date.now()};
+  show('s-quiz');renderQ();
+}
+function renderQ(){
+  const q=QZ.qs[QZ.i];QZ.locked=false;
+  $('qProg').textContent='Q '+(QZ.i+1)+'/'+QZ.qs.length;
+  $('qCat').textContent=CATS[q.c].ic+' '+CATS[q.c].n+' • '+DIFFN[q.d];
+  $('qText').textContent=q.q;
+  const box=$('qOpts');box.innerHTML='';$('qExplain').innerHTML='';$('nextBtn').style.display='none';
+  q.opts.forEach((o,idx)=>{
+    const b=document.createElement('button');b.className='opt';
+    b.innerHTML='<b style="color:var(--cyan-d);margin-right:8px">'+'ABCD'[idx]+'.</b> '+escapeHtml(o.t);
+    b.onclick=()=>answer(idx);box.appendChild(b);
+  });
+  if(QZ.timerOn){startTimer()}else{$('qTimer').textContent='∞';$('tFill').style.width='100%'}
+}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function startTimer(){
+  clearInterval(QZ.tInt);QZ.tLeft=settings.timer;
+  const total=settings.timer;
+  const tick=()=>{
+    $('qTimer').textContent=QZ.tLeft;
+    $('tFill').style.width=(QZ.tLeft/total*100)+'%';
+    $('qTimer').classList.toggle('low',QZ.tLeft<=5);
+    if(QZ.tLeft<=0){clearInterval(QZ.tInt);timeUp();return}
+    QZ.tLeft--;
+  };
+  tick();QZ.tInt=setInterval(tick,1000);
+}
+function timeUp(){
+  if(QZ.locked)return;QZ.locked=true;
+  const q=QZ.qs[QZ.i];
+  [...$('qOpts').children].forEach((b,idx)=>{b.disabled=true;if(q.opts[idx].ok)b.classList.add('correct');else b.classList.add('dim')});
+  $('qExplain').innerHTML='<div class="explain">⏰ <b>Time up!</b> Correct answer: <b>'+escapeHtml(q.opts.find(o=>o.ok).t)+'</b><br>'+escapeHtml(q.exp)+'</div>';
+  QZ.wrong++;QZ.answers.push({q:q,ok:false,picked:-1});
+  beep(false);vibrate(120);
+  $('nextBtn').style.display='block';$('nextBtn').textContent=QZ.i+1<QZ.qs.length?'Next →':'See Results 🏁';
+}
+function answer(idx){
+  if(QZ.locked)return;QZ.locked=true;
+  clearInterval(QZ.tInt);
+  const q=QZ.qs[QZ.i],o=q.opts[idx],ok=o.ok;
+  const elapsed=settings.timer-QZ.tLeft;
+  const btns=[...$('qOpts').children];
+  btns.forEach((b,i)=>{b.disabled=true;if(q.opts[i].ok)b.classList.add('correct');else if(i===idx)b.classList.add('wrong');else b.classList.add('dim')});
+  let pts=0;
+  if(ok){
+    pts=100+Math.round(QZ.tLeft/settings.timer*50);
+    QZ.score+=pts;QZ.correct++;
+    if(elapsed<=5){stats.fast++;if(stats.fast>=10)awardBadge('sharp')}
+    beep(true);vibrate(30);
+  }else{QZ.wrong++;beep(false);vibrate(120)}
+  QZ.answers.push({q:q,ok:ok,picked:idx,pts:pts});
+  $('qExplain').innerHTML='<div class="explain">'+(ok?'✅ <b>Correct! +'+pts+' pts</b>':'❌ <b>Wrong.</b> Correct: <b>'+escapeHtml(q.opts.find(x=>x.ok).t)+'</b>')+'<br>'+escapeHtml(q.exp)+'</div>';
+  $('nextBtn').style.display='block';$('nextBtn').textContent=QZ.i+1<QZ.qs.length?'Next →':'See Results 🏁';
+}
+function nextQ(){QZ.i++;if(QZ.i<QZ.qs.length)renderQ();else finishQuiz()}
+function pauseQuiz(){$('pauseOv').classList.add('on');clearInterval(QZ.tInt)}
+function resumeQuiz(){$('pauseOv').classList.remove('on');if(QZ.timerOn&&!QZ.locked)startTimer()}
+function restartQuiz(){$('pauseOv').classList.remove('on');startQuiz()}
+function quitQuiz(){$('pauseOv').classList.remove('on');clearInterval(QZ.tInt);goHome()}
+/* ============ RESULTS ============ */
+function finishQuiz(){
+  clearInterval(QZ.tInt);
+  const n=QZ.qs.length,pct=Math.round(QZ.correct/n*100);
+  const coinsEarn=QZ.correct*10+(pct===100?50:0)+(QZ.mode==='daily'?30:0);
+  stats.coins+=coinsEarn;stats.played++;stats.correct+=QZ.correct;stats.totalPts+=QZ.score;
+  if(QZ.score>stats.best)stats.best=QZ.score;
+  const td=todayStr();
+  if(stats.lastDay!==td){stats.lastDay=td;stats.streak++;if(stats.streak>=7)awardBadge('streak7')}
+  if(QZ.mode==='daily'){dailyDone=td;store.set('dailyDone',td);awardBadge('daily')}
+  awardBadge('first');
+  if(n===10&&pct===100)awardBadge('perfect');
+  if(stats.totalPts>=5000)awardBadge('scholar');
+  bests.push({m:QZ.mode,s:QZ.score,d:td});bests=bests.sort((a,b)=>b.s-a.s).slice(0,10);
+  store.set('bests',bests);
+  const ck=QZ.cat==='all'?'mixed':QZ.cat;
+  catStats[ck]=catStats[ck]||{p:0,c:0};catStats[ck].p++;catStats[ck].c+=QZ.correct;
+  store.set('catStats',catStats);store.set('stats',stats);
+  $('rBadges').innerHTML='';
+  let sc=0;const target=QZ.score;
+  const iv=setInterval(()=>{sc+=Math.max(1,Math.round(target/40));if(sc>=target){sc=target;clearInterval(iv)}$('rScore').textContent=sc},28);
+  $('rCorrect').textContent=QZ.correct;$('rWrong').textContent=QZ.wrong;
+  $('rPct').textContent=pct+'%';$('rCoins').textContent='+'+coinsEarn;
+  show('s-results');renderHome();
+  if(pct>=80)toast('🎉 Excellent!');else if(pct>=50)toast('👍 Good effort!');else toast('💪 Keep practicing!');
+}
+function playAgain(){startQuiz()}
+function showReview(){
+  const L=$('revList');L.innerHTML='';
+  QZ.answers.forEach((a,i)=>{
+    const d=document.createElement('div');d.className='rev';
+    d.innerHTML='<div class="q">'+(i+1)+'. '+escapeHtml(a.q.q)+'</div>'+
+      (a.ok?'<div class="a">✅ '+escapeHtml(a.q.opts.find(o=>o.ok).t)+'</div>'
+           :'<div class="w">❌ Your answer: '+escapeHtml(a.picked>=0?a.q.opts[a.picked].t:'(time up)')+'</div><div class="a">✔ Correct: '+escapeHtml(a.q.opts.find(o=>o.ok).t)+'</div>')+
+      '<div class="e">'+escapeHtml(a.q.exp)+'</div>';
+    L.appendChild(d);
+  });
+  show('s-review');
+}
+function retryWrong(){
+  const w=QZ.answers.filter(a=>!a.ok).map(a=>({c:a.q.c,d:a.q.d,q:a.q.q,opts:a.q.opts.map(o=>({t:o.t,ok:o.ok})),exp:a.q.exp}));
+  if(!w.length){toast('No wrong answers — perfect! 🎉');return}
+  QZ=null;
+  const qs=w.map(x=>({c:x.c,d:x.d,q:x.q,opts:shuffle(x.opts),exp:x.exp}));
+  QZ={qs:qs,i:0,score:0,correct:0,wrong:0,answers:[],locked:false,timerOn:setupMode!=='practice',tLeft:settings.timer,tInt:null,mode:'retry',cat:'all',startT:Date.now()};
+  show('s-quiz');renderQ();
+}
+/* ============ PROGRESS ============ */
+function renderProgress(){
+  $('pBest').textContent=stats.best;$('pPlayed').textContent=stats.played;
+  $('pCorrect').textContent=stats.correct;$('pStreak').textContent=stats.streak;
+  const cp=$('catProg');cp.innerHTML='';
+  const keys=Object.keys(catStats);
+  if(!keys.length)cp.innerHTML='<div class="empty">Play quizzes to see category stats!</div>';
+  keys.forEach(k=>{
+    const s=catStats[k],nm=k==='mixed'?'🎲 All Mixed':(CATS[k]?CATS[k].ic+' '+CATS[k].n:k);
+    const d=document.createElement('div');d.style.marginBottom='10px';
+    d.innerHTML='<div class="prow"><span>'+nm+'</span><span class="muted">'+s.c+' correct / '+s.p+' quizzes</span></div>';
+    cp.appendChild(d);
+  });
+  const ab=$('allBadges');ab.innerHTML='';
+  Object.keys(BADGES).forEach(id=>{
+    const got=badges.includes(id);
+    const s=document.createElement('span');s.className='nbadge';s.style.opacity=got?1:.35;s.style.filter=got?'none':'grayscale(1)';
+    s.title=BADGES[id].d;s.textContent=BADGES[id].n;ab.appendChild(s);
+  });
+  const bl=$('bestList');bl.innerHTML='';
+  if(!bests.length)bl.innerHTML='<div class="empty">No scores yet!</div>';
+  bests.slice(0,5).forEach((b,i)=>{
+    const d=document.createElement('div');d.className='prow';
+    d.innerHTML='<span>'+['🥇','🥈','🥉','4️⃣','5️⃣'][i]+' '+b.m+' • '+b.d+'</span><b>'+b.s+' pts</b>';
+    bl.appendChild(d);
+  });
+}
+/* ============ SETTINGS ============ */
+function applySettings(){
+  document.body.classList.toggle('dark',settings.dark);
+  $('swDark').classList.toggle('on',settings.dark);
+  $('swSound').classList.toggle('on',settings.sound);
+  $('swVib').classList.toggle('on',settings.vib);
+  $('selTimer').value=settings.timer;
+}
+function toggleSet(k){settings[k]=!settings[k];store.set('settings',settings);applySettings()}
+function setTimer(v){settings.timer=+v;store.set('settings',settings);toast('⏱ Timer set to '+v+'s')}
+function resetAll(){if(confirm('Reset ALL progress? This cannot be undone.')){Object.keys(localStorage).filter(k=>k.startsWith(LS)).forEach(k=>localStorage.removeItem(k));location.reload()}}
+/* ============ INIT ============ */
+applySettings();renderHome();
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&QZ&&$('s-quiz').classList.contains('on')&&!QZ.locked)pauseQuiz()});
+/* Android back-button hook (called from native WebView) */
+function appBack(){
+  try{
+    if($('pauseOv').classList.contains('on')){resumeQuiz();return true}
+    const cur=[...document.querySelectorAll('.screen')].find(s=>s.classList.contains('on'));
+    if(cur&&cur.id==='s-quiz'){pauseQuiz();return true}
+    if(cur&&cur.id!=='s-home'){goHome();return true}
+  }catch(e){}
+  return false;
+}
+</script>
+</body>
+</html>
