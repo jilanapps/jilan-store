@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Waqt — Bachon Ka Waqt, Aap Ke Haath</title>
+<style>
+:root{--teal:#0D9488;--teal-d:#0B7C72;--org:#FB923C;--org-d:#F97316;--bg:#F8FAFC;--card:#FFFFFF;--txt:#1F2937;--mut:#6B7280;--line:#E5E7EB;--danger:#EF4444;--ok:#10B981;--warn:#F59E0B;--nav:#FFFFFF}
+body.dark{--bg:#111827;--card:#1F2937;--txt:#F3F4F6;--mut:#9CA3AF;--line:#374151;--nav:#1F2937}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:76px}
+.demobanner{position:sticky;top:0;z-index:200;background:linear-gradient(90deg,#0D9488,#FB923C);color:#fff;text-align:center;font-size:12px;font-weight:700;padding:7px;letter-spacing:.5px}
+.honest{background:#FEF3C7;border:1px solid #FCD34D;color:#92400E;border-radius:12px;padding:10px 12px;font-size:12.5px;margin:10px 14px;line-height:1.5}
+body.dark .honest{background:#3a2f0b;border-color:#8a6d1a;color:#fcd34d}
+.screen{display:none;padding-bottom:10px}
+.screen.on{display:block}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.logo{font-size:22px;font-weight:800;color:var(--teal)}
+.logo span{color:var(--org)}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1}
+.mut{color:var(--mut);font-size:13px}
+.btn{display:inline-block;border:none;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;background:var(--teal);color:#fff;width:100%;margin:6px 0}
+.btn.org{background:var(--org)}
+.btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+.btn.danger{background:var(--danger)}
+.btn.sm{padding:8px 10px;font-size:13px;width:auto}
+.btnrow{display:flex;gap:8px}.btnrow .btn{margin:4px 0}
+input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-size:15px;margin:6px 0;background:var(--card);color:var(--txt)}
+input[type=range]{padding:0}
+input[type=time]{width:auto}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--teal)}
+.chip{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--bg);border:1.5px solid var(--line);font-size:13px;font-weight:600;margin:4px 4px 4px 0;cursor:pointer}
+.chip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:linear-gradient(135deg,var(--teal),var(--org));color:#fff;font-weight:800;flex-shrink:0}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--org));transition:width .4s}
+.pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+.pill.ok{background:#D1FAE5;color:#065F46}.pill.warn{background:#FEF3C7;color:#92400E}.pill.bad{background:#FEE2E2;color:#991B1B}.pill.info{background:#DBEAFE;color:#1E40AF}
+body.dark .pill.ok{background:#064e3b;color:#a7f3d0}body.dark .pill.warn{background:#3a2f0b;color:#fcd34d}body.dark .pill.bad{background:#450a0a;color:#fca5a5}body.dark .pill.info{background:#1e3a8a;color:#bfdbfe}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--nav);border-top:1px solid var(--line);display:flex;z-index:100}
+.bottomnav button{flex:1;background:none;border:none;padding:9px 4px 10px;font-size:10.5px;color:var(--mut);cursor:pointer;font-weight:600}
+.bottomnav button .ic{font-size:21px;display:block;margin-bottom:2px}
+.bottomnav button.on{color:var(--teal)}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin:8px 0}
+.seg button{flex:1;border:none;background:none;padding:9px;border-radius:9px;font-weight:700;font-size:13px;color:var(--mut);cursor:pointer}
+.seg button.on{background:var(--card);color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv:last-child{border:none}
+canvas.chart{width:100%;height:170px;display:block}
+.slidebox{text-align:center;padding:40px 26px}
+.slidebox .big{font-size:64px;margin-bottom:14px}
+h2.st{font-size:19px;margin:6px 0}h3.st{font-size:16px;margin:8px 0}
+.req{border-left:4px solid var(--org);background:var(--bg);border-radius:0 12px 12px 0;padding:10px 12px;margin:8px 0;font-size:14px}
+.tgl{position:relative;width:46px;height:26px;background:var(--line);border-radius:999px;cursor:pointer;flex-shrink:0;transition:.2s}
+.tgl.on{background:var(--teal)}
+.tgl::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tgl.on::after{left:23px}
+.alert{background:#FEF3C7;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:13.5px;border:1px solid #FCD34D}
+body.dark .alert{background:#3a2f0b;border-color:#8a6d1a;color:#fde68a}
+.timer{font-size:44px;font-weight:800;color:var(--teal);text-align:center;margin:10px 0}
+.sosbtn{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#FCA5A5,#EF4444);color:#fff;font-size:17px;font-weight:800;border:6px solid #FEE2E2;margin:14px auto;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(239,68,68,.4)}
+.center{text-align:center}
+.hidden{display:none!important}
+.approw{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.approw:last-child{border:none}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+select.kidsel{margin:0}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div id="app"></div>
+<nav class="bottomnav hidden" id="bnav">
+<button data-s="dash" class="on"><span class="ic">📊</span><span data-t="nav_dash">Dashboard</span></button>
+<button data-s="kids"><span class="ic">👧</span><span data-t="nav_kids">Bachay</span></button>
+<button data-s="rules"><span class="ic">⚙️</span><span data-t="nav_rules">Usool</span></button>
+<button data-s="reports"><span class="ic">📈</span><span data-t="nav_rep">Reports</span></button>
+<button data-s="profile"><span class="ic">👤</span><span data-t="nav_prof">Profile</span></button>
+</nav>
+<script>
+'use strict';
+/* ============ 3-DAY DEMO EXPIRY ============ */
+(function(){
+  var KEY='waqt_demo_start',DAYS=3;
+  try{
+    var s=localStorage.getItem(KEY),now=Date.now();
+    if(!s){localStorage.setItem(KEY,String(now));}
+    else if(now-parseInt(s,10)>DAYS*864e5){
+      document.addEventListener('DOMContentLoaded',function(){
+        document.getElementById('bnav').classList.add('hidden');
+        document.getElementById('app').innerHTML='<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px"><div style="font-size:64px">⏰</div><h2>Demo Expired</h2><p class="mut" style="max-width:320px">Is demo ki 3-din ki muddat khatam ho gayi hai.<br>Poori app ke liye Jilan Apps se rabta karein.</p><div class="pill info">DEMO by Jilan Apps</div></div>';
+      });
+      window.__expired=true;
+    }
+  }catch(e){}
+})();
+</script>
+<script>
+'use strict';
+/* ============ I18N ============ */
+var I18N={
+en:{nav_dash:'Dashboard',nav_kids:'Kids',nav_rules:'Rules',nav_rep:'Reports',nav_prof:'Profile',
+honest:'⚠️ Demo mode — this demo does NOT lock any real device. Real screen-time control needs a native Android app (UsageStats / Device Admin APIs).',
+hello:'Assalam-o-Alaikum',today:'Today',used:'used',of:'of',remaining:'remaining',over:'over limit',locked:'Locked (demo)',bedtime:'Bedtime',ok:'OK',
+alerts:'Alerts',quick:'Quick Actions',lock:'🔒 Lock',extend:'⏱ +15 min',msg:'💬 Message',unlock:'🔓 Unlock',
+askmore:'🙏 Ask for more time',send:'Send',cancel:'Cancel',save:'Save',back:'← Back',add:'Add',
+rules_for:'Rules for',daily:'Daily limit',bed:'Bedtime',from:'From',to:'To',school:'School hours lock',applim:'Per-app limits',
+blocked:'Blocked apps',allowed:'Always allowed',hw:'Homework mode (only educational)',reqs:'Pending requests',nomsg:'No pending requests',
+rep_for:'Report',day:'Day',week:'Week',month:'Month',total:'Total',avg:'Daily avg',topapps:'Top apps',reco:'Recommendations',
+profile:'Profile',family:'Family',devices:'Devices (demo)',lang:'Language',darkm:'Dark mode',reset:'Reset demo',about:'About',
+norep:'No data yet',pairt:'Pair code (demo)',kname:'Child name',age:'Age',addkid:'+ Add child',start:'Start',next:'Next →',skip:'Skip »',
+msgsent:'Message sent (demo)',extended:'+15 min given (demo)',lockedt:'Locked (demo)',unlockedt:'Unlocked (demo)',reqsent:'Request sent to parent (demo)',
+approve:'Approve',reject:'Reject',approved:'Approved ✅',rejected:'Rejected',min:'min',hrs:'h', bednow:'Bedtime is ON now (demo)',
+sos:'SOS',sosnote:'Demo SOS — real emergency call needs native dialer. Pakistan: 15 (Police), 1122 (Rescue), 16 (Fire).',
+moret:'Ask for more time',howmuch:'How many minutes?',brk:'Break reminder',timeron:'Timer running (demo)',edu:'Educational',ent:'Entertainment',soc:'Social',gam:'Games',com:'Communication',
+yt:'YouTube',games:'Games',social:'Social media',eduapp:'Educational',other:'Other'},
+ur:{nav_dash:'Dashboard',nav_kids:'Bachay',nav_rules:'Usool',nav_rep:'Reports',nav_prof:'Profile',
+honest:'⚠️ Demo mode — ye demo kisi asal device ko lock NAHI karta. Asal screen-time control ke liye native Android app chahiye (UsageStats / Device Admin APIs).',
+hello:'Assalam-o-Alaikum',today:'Aaj',used:'istemaal',of:'/',remaining:'baqi',over:'limit se zyada',locked:'Lock (demo)',bedtime:'Sone ka waqt',ok:'Theek',
+alerts:'Alerts',quick:'Fori Amal',lock:'🔒 Lock',extend:'⏱ +15 min',msg:'💬 Paigham',unlock:'🔓 Unlock',
+askmore:'🙏 Aur waqt mangein',send:'Bhejein',cancel:'Cancel',save:'Save',back:'← Wapas',add:'Add',
+rules_for:'Usool — ',daily:'Roz ka limit',bed:'Sone ka waqt',from:'Se',to:'Tak',school:'School hours lock',applim:'Har app ka limit',
+blocked:'Band apps',allowed:'Hamesha ijazat',hw:'Homework mode (sirf taleemi)',reqs:'Zer-e-ghor darkhwastein',nomsg:'Koi darkhwast nahi',
+rep_for:'Report',day:'Din',week:'Hafta',month:'Mahina',total:'Kul',avg:'Roz ka ausat',topapps:'Top apps',reco:'Sifarishat',
+profile:'Profile',family:'Khandan',devices:'Devices (demo)',lang:'Zuban',darkm:'Dark mode',reset:'Demo reset',about:'About',
+norep:'Abhi data nahi',pairt:'Pair code (demo)',kname:'Bachay ka naam',age:'Umar',addkid:'+ Bachay add karein',start:'Shuru karein',next:'Agay →',skip:'Skip »',
+msgsent:'Paigham bhej diya (demo)',extended:'+15 min de diye (demo)',lockedt:'Lock kar diya (demo)',unlockedt:'Unlock kar diya (demo)',reqsent:'Walidain ko darkhwast bhej di (demo)',
+approve:'Manzoor',reject:'Radd',approved:'Manzoor ✅',rejected:'Radd kar diya',min:'min',hrs:'h', bednow:'Abhi sone ka waqt hai (demo)',
+sos:'SOS',sosnote:'Demo SOS — asal emergency call ke liye native dialer chahiye. Pakistan: 15 (Police), 1122 (Rescue), 16 (Fire).',
+moret:'Aur waqt mangein',howmuch:'Kitne minute?',brk:'Break reminder',timeron:'Timer chal raha hai (demo)',edu:'Taleemi',ent:'Tafreeh',soc:'Social',gam:'Games',com:'Rabta',
+yt:'YouTube',games:'Games',social:'Social media',eduapp:'Taleemi',other:'Deegar'}};
+function t(k){try{return (I18N[S.lang]&&I18N[S.lang][k])||I18N.ur[k]||k;}catch(e){return k;}}
+
+/* ============ STATE ============ */
+var LS='waqt_demo_v1';
+var APPS=[{id:'youtube',n:'YouTube',c:'#EF4444',cat:'ent'},{id:'games',n:'Games',c:'#8B5CF6',cat:'gam'},{id:'social',n:'Social media',c:'#EC4899',cat:'soc'},{id:'edu',n:'Taleemi apps',c:'#0D9488',cat:'edu'},{id:'other',n:'Deegar',c:'#9CA3AF',cat:'com'}];
+var S=null;
+function todayStr(off){var d=new Date();d.setDate(d.getDate()+(off||0));return d.toISOString().slice(0,10);}
+function seedUsage(kid){
+  // deterministic demo data for last 7 days
+  var u={},h=0;for(var i=0;i<kid.name.length;i++)h+=kid.name.charCodeAt(i);
+  for(var d=6;d>=0;d--){
+    var ds=todayStr(-d),r=function(x){return (h*37+d*13+x*7)%x;};
+    var yt=30+r(70),gm=20+r(50),sc=10+r(40),ed=15+r(30),ot=5+r(20);
+    if(d===0){yt=45;gm=35;sc=20;ed=25;ot=10;}
+    u[ds]={youtube:yt,games:gm,social:sc,edu:ed,other:ot};
+  }
+  return u;
+}
+function defKid(name,age,i){
+  var av=['👦','👧','🧒','👶'][i%4];
+  return {id:'k'+Date.now()+i,name:name,age:age,avatar:av,dailyLimit:120,bedStart:'21:00',bedEnd:'07:00',
+    school:{on:true,start:'08:00',end:'14:00'},appLimits:{youtube:60,games:30,social:0},
+    blocked:[],allowed:['edu'],hw:false,extra:0,locked:false,usage:{}};
+}
+function load(){try{var s=localStorage.getItem(LS);if(s){S=JSON.parse(s);return;}}catch(e){}
+  S={lang:'ur',dark:false,onboarded:false,parent:{name:''},kids:[],requests:[],msgs:[],view:'dash',rkid:null,rper:'week',obStep:0,obKids:[{name:'',age:''}],kidView:null};}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+function kid(id){for(var i=0;i<S.kids.length;i++)if(S.kids[i].id===id)return S.kids[i];return null;}
+function kidUsage(k,ds){if(!k.usage[ds])k.usage[ds]=seedUsage(k)[ds];return k.usage[ds];}
+function dayTotal(k,ds){var u=kidUsage(k,ds),s=0;for(var a in u)s+=u[a];return s;}
+function fmtM(m){if(m<60)return m+' '+t('min');return Math.floor(m/60)+t('hrs')+' '+(m%60)+' '+t('min');}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function isBed(k){try{var n=new Date(),cur=n.getHours()*60+n.getMinutes();
+  var a=k.bedStart.split(':'),b=k.bedEnd.split(':');
+  var s=+a[0]*60+ +a[1],e=+b[0]*60+ +b[1];
+  return s<=e?(cur>=s&&cur<e):(cur>=s||cur<e);}catch(e){return false;}}
+function toast(m){var d=document.createElement('div');d.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1F2937;color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;z-index:999;font-weight:600';d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove();},2200);}
+</script>
+<script>
+'use strict';
+/* ============ ONBOARDING ============ */
+var OBSLIDES=[
+ {e:'⏰',h:'Bachon Ka Waqt,<br>Aap Ke Haath',p:'Screen time ko pyar se manage karein — dant nahi, samajhdari se.'},
+ {e:'📊',h:'Har App Par Nazar',p:'Kaun sa app kitna chala — sab kuch ek dashboard me.'},
+ {e:'🌙',h:'Sukoon Bhari Neend',p:'Bedtime mode aur school-hours lock ke sath.'}];
+function renderOnboard(){
+  var A=document.getElementById('app'),st=S.obStep;
+  if(st<3){var s=OBSLIDES[st];
+    A.innerHTML='<div class="slidebox"><div class="big">'+s.e+'</div><h2>'+s.h+'</h2><p class="mut">'+s.p+'</p>'
+    +'<div class="center mut">'+(st+1)+' / 3</div>'
+    +'<div style="max-width:320px;margin:26px auto"><button class="btn" onclick="S.obStep++;save();renderOnboard()">'+t('next')+'</button>'
+    +'<button class="btn ghost" onclick="S.obStep=3;save();renderOnboard()">'+t('skip')+'</button></div></div>';
+    return;}
+  if(st===3){
+    A.innerHTML='<div class="card" style="margin-top:30px"><h2 class="st">👨‍👩‍👧 '+t('profile')+'</h2><p class="mut">Walid/Valida ka naam</p>'
+    +'<input id="pname" placeholder="Aap ka naam" value="'+esc(S.parent.name)+'">'
+    +'<button class="btn" onclick="S.parent.name=document.getElementById(\'pname\').value||\'Walidain\';S.obStep=4;save();renderOnboard()">'+t('next')+'</button></div>';
+    return;}
+  if(st===4){
+    var rows='';S.obKids.forEach(function(k,i){
+      rows+='<div class="row"><input class="grow" id="kn'+i+'" placeholder="'+t('kname')+'" value="'+esc(k.name)+'"><input id="ka'+i+'" type="number" min="3" max="18" style="width:76px" placeholder="'+t('age')+'" value="'+esc(k.age)+'"></div>';});
+    A.innerHTML='<div class="card" style="margin-top:30px"><h2 class="st">👧 '+t('nav_kids')+'</h2>'+rows
+    +'<button class="btn ghost sm" onclick="S.obKids.push({name:\'\',age:\'\'});save();renderOnboard()">'+t('addkid')+'</button>'
+    +'<button class="btn" onclick="obKidsNext()">'+t('next')+'</button></div>';
+    return;}
+  // pair code
+  var code=S.pairCode||(S.pairCode=String(Math.floor(100000+Math.random()*900000)));
+  A.innerHTML='<div class="card center" style="margin-top:30px"><div class="big" style="font-size:52px">📲</div><h2 class="st">'+t('pairt')+'</h2>'
+  +'<div style="font-size:34px;font-weight:800;letter-spacing:8px;color:var(--teal)">'+code+'</div>'
+  +'<p class="mut">Bachay ke phone par ye code dalein (demo)</p>'
+  +'<button class="btn" onclick="S.onboarded=true;S.obStep=9;save();boot()">'+t('start')+' 🚀</button></div>';
+}
+function obKidsNext(){
+  var kids=[];S.obKids.forEach(function(k,i){
+    var n=(document.getElementById('kn'+i)||{}).value||'',a=(document.getElementById('ka'+i)||{}).value||'';
+    if(n.trim())kids.push(defKid(n.trim(),parseInt(a,10)||8,i));});
+  if(!kids.length)kids.push(defKid('Ali',10,0));
+  S.kids=kids;S.kids.forEach(function(k){k.usage=seedUsage(k);});
+  S.obStep=5;save();renderOnboard();
+}
+
+/* ============ DASHBOARD ============ */
+function statusOf(k,ds){
+  if(k.locked)return{cls:'bad',txt:t('locked')};
+  if(isBed(k))return{cls:'info',txt:t('bedtime')};
+  var tot=dayTotal(k,ds),lim=k.dailyLimit+k.extra;
+  if(tot>lim)return{cls:'bad',txt:t('over')};
+  if(tot>lim*0.8)return{cls:'warn',txt:'80%+'};
+  return{cls:'ok',txt:t('ok')};
+}
+function renderDash(){
+  var A=document.getElementById('app'),ds=todayStr(0),h='';
+  h+='<div class="topbar"><div class="logo">⏰ Wa<span>qt</span></div><div class="mut">'+t('hello')+', '+esc(S.parent.name)+'</div></div>';
+  h+='<div class="honest">'+t('honest')+'</div>';
+  // alerts from requests
+  var pend=S.requests.filter(function(r){return r.status==='pending';});
+  if(pend.length){h+='<div class="card"><h3 class="st">🔔 '+t('reqs')+' ('+pend.length+')</h3>';
+    pend.forEach(function(r){var k=kid(r.kidId);if(!k)return;
+      h+='<div class="req"><b>'+esc(k.name)+'</b> — '+r.mins+' '+t('min')+' '+t('moret')
+      +'<div class="btnrow"><button class="btn sm" onclick="reqDo(\''+r.id+'\',1)">'+t('approve')+'</button><button class="btn sm ghost" onclick="reqDo(\''+r.id+'\',0)">'+t('reject')+'</button></div></div>';});
+    h+='</div>';}
+  S.kids.forEach(function(k){
+    var tot=dayTotal(k,ds),lim=k.dailyLimit+k.extra,st=statusOf(k,ds),pct=Math.min(100,Math.round(tot/lim*100));
+    h+='<div class="card"><div class="row"><div class="avatar">'+k.avatar+'</div><div class="grow"><b>'+esc(k.name)+'</b> <span class="mut">'+k.age+'y</span><br><span class="mut">'+t('today')+': '+fmtM(tot)+' '+t('of')+' '+fmtM(lim)+'</span></div><span class="pill '+st.cls+'">'+st.txt+'</span></div>'
+    +'<div class="bar"><i style="width:'+pct+'%"></i></div>'
+    +'<div class="btnrow"><button class="btn sm '+(k.locked?'org':'danger')+'" onclick="kidLock(\''+k.id+'\')">'+(k.locked?t('unlock'):t('lock'))+'</button>'
+    +'<button class="btn sm org" onclick="kidExtend(\''+k.id+'\')">'+t('extend')+'</button>'
+    +'<button class="btn sm ghost" onclick="kidMsg(\''+k.id+'\')">'+t('msg')+'</button></div></div>';
+  });
+  // app breakdown (first kid)
+  if(S.kids.length){var k0=S.kids[0],u=kidUsage(k0,ds),tot=dayTotal(k0,ds)||1;
+    h+='<div class="card"><h3 class="st">📱 '+t('topapps')+' — '+esc(k0.name)+'</h3>';
+    APPS.forEach(function(a){var m=u[a.id]||0,p=Math.round(m/tot*100);
+      h+='<div class="approw"><span class="dot" style="background:'+a.c+'"></span><span class="grow">'+t(a.id==='youtube'?'yt':a.id)+'</span><b>'+fmtM(m)+'</b><span class="mut">'+p+'%</span></div>'
+      +'<div class="bar" style="margin:2px 0 8px"><i style="width:'+p+'%;background:'+a.c+'"></i></div>';});
+    h+='</div>';
+    // alerts
+    h+='<div class="card"><h3 class="st">⚠️ '+t('alerts')+'</h3>';
+    var al=[];S.kids.forEach(function(k){var tt=dayTotal(k,ds);
+      if(tt>k.dailyLimit+k.extra)al.push('🔴 '+esc(k.name)+' ne limit cross ki: '+fmtM(tt));
+      else if(tt>(k.dailyLimit+k.extra)*0.8)al.push('🟡 '+esc(k.name)+' 80% limit par hai');});
+    h+=al.length?al.map(function(x){return '<div class="alert">'+x+'</div>';}).join(''):'<p class="mut">'+t('ok')+' ✅</p>';
+    h+='</div>';
+    // SOS
+    h+='<div class="card center"><div class="sosbtn" onclick="sosGo()">'+t('sos')+'</div><p class="mut">'+t('sosnote')+'</p></div>';
+  }
+  A.innerHTML=h;
+}
+function kidLock(id){var k=kid(id);if(!k)return;k.locked=!k.locked;save();toast(k.locked?t('lockedt'):t('unlockedt'));renderDash();}
+function kidExtend(id){var k=kid(id);if(!k)return;k.extra+=15;save();toast(t('extended'));renderDash();}
+function kidMsg(id){var k=kid(id);if(!k)return;var m=prompt('💬 '+esc(k.name)+' ko paigham:','Khana kha lo!');if(m){S.msgs.push({kidId:id,txt:m,ts:Date.now()});save();toast(t('msgsent'));}}
+function reqDo(rid,ok){for(var i=0;i<S.requests.length;i++)if(S.requests[i].id===rid){var r=S.requests[i];r.status=ok?'approved':'rejected';if(ok){var k=kid(r.kidId);if(k)k.extra+=r.mins;}break;}save();toast(ok?t('approved'):t('rejected'));renderDash();}
+function sosGo(){if(confirm('🚨 SOS (demo) — 15 / 1122 / 16'))toast('📞 Demo call');}
+</script>
+<script>
+'use strict';
+/* ============ KIDS / CHILD VIEW ============ */
+function renderKids(){
+  var A=document.getElementById('app'),h='<div class="topbar"><div class="logo">👧 '+t('nav_kids')+'</div></div>';
+  if(!S.kidView){
+    S.kids.forEach(function(k){var ds=todayStr(0),tot=dayTotal(k,ds),lim=k.dailyLimit+k.extra;
+      h+='<div class="card row" onclick="S.kidView=\''+k.id+'\';save();renderKids()" style="cursor:pointer"><div class="avatar">'+k.avatar+'</div><div class="grow"><b>'+esc(k.name)+'</b><br><span class="mut">'+fmtM(tot)+' / '+fmtM(lim)+'</span></div><span>›</span></div>';});
+    h+='<div class="card"><button class="btn ghost" onclick="addKidP()">'+t('addkid')+'</button></div>';
+  }else{
+    var k=kid(S.kidView);if(!k){S.kidView=null;save();return renderKids();}
+    var ds=todayStr(0),tot=dayTotal(k,ds),lim=k.dailyLimit+k.extra,rem=Math.max(0,lim-tot);
+    h+='<div class="card"><button class="btn sm ghost" onclick="S.kidView=null;save();renderKids()">'+t('back')+'</button></div>';
+    h+='<div class="card center"><div class="avatar" style="margin:0 auto 8px">'+k.avatar+'</div><h2 class="st">'+esc(k.name)+'</h2><p class="mut">Bachay ka view (demo)</p>'
+    +'<div class="timer">'+fmtM(rem)+'</div><p class="mut">'+t('remaining')+' '+t('today')+'</p>'
+    +'<div class="bar"><i style="width:'+Math.min(100,Math.round(tot/lim*100))+'%"></i></div>'
+    +'<p class="mut">'+t('timeron')+'</p>'
+    +'<button class="btn org" onclick="askMore(\''+k.id+'\')">'+t('askmore')+'</button></div>';
+    h+='<div class="card"><div class="row"><span class="grow">🔔 '+t('brk')+'</span><div class="tgl'+(k.brk?' on':'')+'" onclick="tglBrk(\''+k.id+'\')"></div></div></div>';
+    var mine=S.msgs.filter(function(m){return m.kidId===k.id;}).slice(-3).reverse();
+    if(mine.length){h+='<div class="card"><h3 class="st">💬 Walidain ke paighamat</h3>'+mine.map(function(m){return '<div class="alert">💬 '+esc(m.txt)+'</div>';}).join('')+'</div>';}
+  }
+  A.innerHTML=h;
+}
+function addKidP(){var n=prompt(t('kname')+':');if(!n)return;var a=parseInt(prompt(t('age')+':','8'),10)||8;var k=defKid(n,a,S.kids.length);k.usage=seedUsage(k);S.kids.push(k);save();renderKids();}
+function tglBrk(id){var k=kid(id);if(!k)return;k.brk=!k.brk;save();toast(k.brk?'🔔 ON':'🔕 OFF');renderKids();}
+function askMore(id){var m=parseInt(prompt(t('howmuch'),'15'),10);if(!m||m<1)return;S.requests.push({id:'r'+Date.now(),kidId:id,mins:m,status:'pending'});save();toast(t('reqsent'));}
+
+/* ============ RULES ============ */
+function renderRules(){
+  var A=document.getElementById('app'),h='<div class="topbar"><div class="logo">⚙️ '+t('nav_rules')+'</div></div>';
+  if(!S.rkid&&S.kids.length)S.rkid=S.kids[0].id;
+  h+='<div class="card"><select class="kidsel" onchange="S.rkid=this.value;save();renderRules()">'+S.kids.map(function(k){return '<option value="'+k.id+'"'+(k.id===S.rkid?' selected':'')+'>'+esc(k.name)+'</option>';}).join('')+'</select></div>';
+  var k=kid(S.rkid);if(!k){A.innerHTML=h;return;}
+  h+='<div class="card"><h3 class="st">'+t('rules_for')+esc(k.name)+'</h3>'
+  +'<div class="kv"><span>⏱ '+t('daily')+'</span><b id="dlv">'+k.dailyLimit+' '+t('min')+'</b></div>'
+  +'<input type="range" min="30" max="360" step="15" value="'+k.dailyLimit+'" oninput="document.getElementById(\'dlv\').textContent=this.value+\' '+t('min')+'\';updRule(\'dailyLimit\','+ 'this.value)">'
+  +'<div class="kv"><span>🌙 '+t('bed')+'</span><span><input type="time" value="'+k.bedStart+'" onchange="updRule(\'bedStart\',this.value)"> '+t('to')+' <input type="time" value="'+k.bedEnd+'" onchange="updRule(\'bedEnd\',this.value)"></span></div>'
+  +'<div class="kv"><span>🏫 '+t('school')+' ('+k.school.start+'–'+k.school.end+')</span><div class="tgl'+(k.school.on?' on':'')+'" onclick="updTgl(\'school\')"></div></div>'
+  +'<h3 class="st">📱 '+t('applim')+'</h3>';
+  [['youtube',t('yt')],['games',t('games')],['social',t('social')]].forEach(function(p){
+    h+='<div class="kv"><span>'+p[1]+'</span><b>'+(k.appLimits[p[0]]===0?'🚫 0':k.appLimits[p[0]]+' '+t('min'))+'</b></div>'
+    +'<input type="range" min="0" max="180" step="15" value="'+k.appLimits[p[0]]+'" oninput="updApp(\''+p[0]+'\',this.value)">';});
+  h+='<h3 class="st">🚫 '+t('blocked')+'</h3><div>'
+  +['TikTok','PUBG','Instagram','Snapchat'].map(function(a){var on=k.blocked.indexOf(a)>=0;
+    return '<span class="chip'+(on?' on':'')+'" onclick="tglBlock(\''+a+'\')">'+a+'</span>';}).join('')+'</div>'
+  +'<h3 class="st">✅ '+t('allowed')+'</h3><div>'
+  +[['edu',t('eduapp')],['com',t('com')]].map(function(a){var on=k.allowed.indexOf(a[0])>=0;
+    return '<span class="chip'+(on?' on':'')+'" onclick="tglAllow(\''+a[0]+'\')">'+a[1]+'</span>';}).join('')+'</div>'
+  +'<div class="kv" style="margin-top:10px"><span>📚 '+t('hw')+'</span><div class="tgl'+(k.hw?' on':'')+'" onclick="updTgl(\'hw\')"></div></div>'
+  +'<p class="mut" style="font-size:12px">ℹ️ '+t('honest')+'</p></div>';
+  A.innerHTML=h;
+}
+function updRule(f,v){var k=kid(S.rkid);if(!k)return;k[f]=f==='dailyLimit'?parseInt(v,10):v;save();}
+function updApp(a,v){var k=kid(S.rkid);if(!k)return;k.appLimits[a]=parseInt(v,10);save();renderRules();}
+function updTgl(f){var k=kid(S.rkid);if(!k)return;if(f==='school')k.school.on=!k.school.on;else k.hw=!k.hw;save();renderRules();}
+function tglBlock(a){var k=kid(S.rkid);if(!k)return;var i=k.blocked.indexOf(a);if(i>=0)k.blocked.splice(i,1);else k.blocked.push(a);save();renderRules();}
+function tglAllow(a){var k=kid(S.rkid);if(!k)return;var i=k.allowed.indexOf(a);if(i>=0)k.allowed.splice(i,1);else k.allowed.push(a);save();renderRules();}
+</script>
+<script>
+'use strict';
+/* ============ REPORTS ============ */
+function renderReports(){
+  var A=document.getElementById('app'),h='<div class="topbar"><div class="logo">📈 '+t('nav_rep')+'</div></div>';
+  if(!S.rkid&&S.kids.length)S.rkid=S.kids[0].id;
+  h+='<div class="card"><select class="kidsel" onchange="S.rkid=this.value;save();renderReports()">'+S.kids.map(function(k){return '<option value="'+k.id+'"'+(k.id===S.rkid?' selected':'')+'>'+esc(k.name)+'</option>';}).join('')+'</select>'
+  +'<div class="seg">'+['day','week','month'].map(function(p){return '<button class="'+(S.rper===p?'on':'')+'" onclick="S.rper=\''+p+'\';save();renderReports()">'+t(p)+'</button>';}).join('')+'</div></div>';
+  var k=kid(S.rkid);if(!k){A.innerHTML=h;return;}
+  var n=S.rper==='day'?1:S.rper==='week'?7:30,labels=[],vals=[],tot=0,top={};
+  for(var d=n-1;d>=0;d--){var ds=todayStr(-d),tt=dayTotal(k,ds),u=kidUsage(k,ds);
+    labels.push(ds.slice(5));vals.push(tt);tot+=tt;
+    for(var a in u)top[a]=(top[a]||0)+u[a];}
+  var avg=Math.round(tot/n),lim=k.dailyLimit,over=vals.filter(function(v){return v>lim;}).length;
+  h+='<div class="card"><div class="row"><div class="grow"><div class="mut">'+t('total')+'</div><b style="font-size:20px">'+fmtM(tot)+'</b></div>'
+  +'<div class="grow"><div class="mut">'+t('avg')+'</div><b style="font-size:20px">'+fmtM(avg)+'</b></div>'
+  +'<div class="grow"><div class="mut">Limit cross</div><b style="font-size:20px;color:var(--danger)">'+over+'/'+n+'</b></div></div>'
+  +'<canvas class="chart" id="ch1"></canvas></div>';
+  h+='<div class="card"><h3 class="st">📱 '+t('topapps')+'</h3>';
+  Object.keys(top).sort(function(a,b){return top[b]-top[a];}).slice(0,4).forEach(function(a){
+    var ai=APPS.filter(function(x){return x.id===a;})[0]||{c:'#999',id:a};
+    h+='<div class="approw"><span class="dot" style="background:'+ai.c+'"></span><span class="grow">'+t(a==='youtube'?'yt':a)+'</span><b>'+fmtM(top[a])+'</b></div>';});
+  h+='</div><div class="card"><h3 class="st">💡 '+t('reco')+'</h3>';
+  var rc=[];
+  if(avg>lim)rc.push('⚠️ Ausat limit se zyada hai — roz ka limit barhayein ya app limits sakht karein.');
+  else rc.push('✅ Ausat limit ke andar hai — bohat khoob!');
+  var tk=Object.keys(top).sort(function(a,b){return top[b]-top[a];})[0];
+  if(tk==='games'&&top[tk]>avg*0.4)rc.push('🎮 Games ka hissa zyada hai — games ka per-app limit kam karein.');
+  if(top.social>60)rc.push('📱 Social media zyada hai — blocked list me add karein.');
+  if(top.edu>top.youtube)rc.push('📚 Taleemi apps sab se zyada — behtareen rujhan!');
+  h+=rc.map(function(x){return '<div class="alert">'+x+'</div>';}).join('')+'</div>';
+  A.innerHTML=h;
+  drawBars('ch1',labels,vals,lim);
+}
+function drawBars(id,labels,vals,lim){
+  var c=document.getElementById(id);if(!c)return;var dpr=window.devicePixelRatio||1;
+  var W=c.clientWidth||320,H=170;c.width=W*dpr;c.height=H*dpr;var x=c.getContext('2d');if(!x)return;x.scale(dpr,dpr);
+  var mx=Math.max.apply(null,vals.concat([lim]))*1.15||1,bw=Math.min(34,(W-20)/vals.length-6);
+  vals.forEach(function(v,i){var bx=14+i*((W-28)/vals.length),bh=(H-40)*(v/mx),by=H-24-bh;
+    x.fillStyle=v>lim?'#EF4444':'#0D9488';x.beginPath();
+    if(x.roundRect)x.roundRect(bx,by,Math.max(8,bw),bh,4);else x.rect(bx,by,Math.max(8,bw),bh);x.fill();
+    if(vals.length<=7){x.fillStyle='#9CA3AF';x.font='9px sans-serif';x.textAlign='center';x.fillText(labels[i],bx+Math.max(8,bw)/2,H-10);}});
+  x.strokeStyle='#FB923C';x.setLineDash([5,4]);x.beginPath();
+  var ly=H-24-(H-40)*(lim/mx);x.moveTo(10,ly);x.lineTo(W-10,ly);x.stroke();x.setLineDash([]);
+}
+
+/* ============ BEDTIME (in rules/profile area) ============ */
+function bedtimeCard(){
+  var h='<div class="card"><h3 class="st">🌙 '+t('bed')+'</h3>';
+  S.kids.forEach(function(k){var on=isBed(k);
+    h+='<div class="kv"><span>'+k.avatar+' '+esc(k.name)+' <span class="mut">'+k.bedStart+' – '+k.bedEnd+'</span></span><span class="pill '+(on?'info':'ok')+'">'+(on?t('bednow'):t('ok'))+'</span></div>';});
+  h+='<p class="mut" style="font-size:12px">Demo — asal auto-lock ke liye native app chahiye.</p></div>';
+  return h;
+}
+
+/* ============ PROFILE ============ */
+function renderProfile(){
+  var A=document.getElementById('app'),h='<div class="topbar"><div class="logo">👤 '+t('profile')+'</div></div>';
+  h+='<div class="card"><div class="row"><div class="avatar">👨‍👩‍👧</div><div class="grow"><b>'+esc(S.parent.name)+'</b><br><span class="mut">'+S.kids.length+' bachay</span></div></div></div>';
+  h+='<div class="card"><h3 class="st">👨‍👩‍👧‍👦 '+t('family')+'</h3>'+S.kids.map(function(k){return '<div class="kv"><span>'+k.avatar+' '+esc(k.name)+' <span class="mut">'+k.age+'y</span></span><span class="mut">'+fmtM(k.dailyLimit)+' / '+t('day')+'</span></div>';}).join('')+'</div>';
+  h+=bedtimeCard();
+  h+='<div class="card"><h3 class="st">📲 '+t('devices')+'</h3><div class="kv"><span>📱 Parent phone</span><span class="pill ok">Connected</span></div><div class="kv"><span>📱 Bachay ka phone (demo)</span><span class="pill warn">Demo</span></div></div>';
+  h+='<div class="card"><h3 class="st">⚙️ Settings</h3>'
+  +'<div class="kv"><span>🌐 '+t('lang')+'</span><span><button class="btn sm'+(S.lang==='ur'?'':' ghost')+'" onclick="setLang(\'ur\')">اردو</button> <button class="btn sm'+(S.lang==='en'?'':' ghost')+'" onclick="setLang(\'en\')">EN</button></span></div>'
+  +'<div class="kv"><span>🌙 '+t('darkm')+'</span><div class="tgl'+(S.dark?' on':'')+'" onclick="S.dark=!S.dark;save();applyTheme();renderProfile()"></div></div>'
+  +'<button class="btn ghost" onclick="if(confirm(\'Reset?\')){localStorage.removeItem(\''+LS+'\');location.reload();}">'+t('reset')+'</button></div>';
+  h+='<div class="card"><h3 class="st">ℹ️ '+t('about')+'</h3><p class="mut" style="font-size:13px">Waqt v1.0 — DEMO by Jilan Apps.<br>'+t('honest')+'</p></div>';
+  A.innerHTML=h;
+}
+function setLang(l){S.lang=l;save();applyNav();boot();}
+
+/* ============ NAV / BOOT ============ */
+function applyTheme(){document.body.classList.toggle('dark',!!S.dark);}
+function applyNav(){var d={nav_dash:0,nav_kids:1,nav_rules:2,nav_rep:3,nav_prof:4};document.querySelectorAll('#bnav [data-t]').forEach(function(el){el.textContent=t(el.getAttribute('data-t'));});}
+function go(v){S.view=v;save();boot();}
+document.getElementById('bnav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  document.querySelectorAll('#bnav button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');go(b.getAttribute('data-s'));});
+function boot(){
+  if(window.__expired)return;
+  applyTheme();applyNav();
+  if(!S.onboarded){document.getElementById('bnav').classList.add('hidden');renderOnboard();return;}
+  document.getElementById('bnav').classList.remove('hidden');
+  document.querySelectorAll('#bnav button').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-s')===S.view);});
+  if(S.view==='dash')renderDash();else if(S.view==='kids')renderKids();else if(S.view==='rules')renderRules();else if(S.view==='reports')renderReports();else renderProfile();
+}
+load();boot();
+</script>
+</body>
+</html>
