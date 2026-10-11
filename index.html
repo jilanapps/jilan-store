@@ -275,11 +275,22 @@
     .topbar-search input {
       width: 100%; height: 42px; border: 1px solid var(--line); border-radius: 999px;
       background: var(--surface); color: var(--ink); padding: 0 38px 0 38px; font-size: 14px;
+      -webkit-appearance: none; appearance: none;
+      -webkit-text-fill-color: var(--ink);
+      caret-color: var(--brand);
+      opacity: 1;
     }
+    .topbar-search input::placeholder { color: var(--muted); opacity: 1; }
+    .topbar-search input::-webkit-input-placeholder { color: var(--muted); opacity: 1; }
+    .topbar-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+    .topbar-search input::-ms-clear { display: none; }
     .topbar-search input:focus { border-color: var(--brand); outline: 0; box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent); }
     .topbar-search .search-clear { width: 32px; height: 32px; right: 5px; }
     .topbar .social-link.hide-sm { display: inline-flex; }
     @media (max-width: 720px) { .topbar .social-link.hide-sm { display: none; } }
+
+    /* Product catalog section — stable scroll target for Browse Products button */
+    #catalog { scroll-margin-top: 84px; }
 
     /* Category pills */
     .cat-section { margin: 6px 0 4px; }
@@ -632,7 +643,7 @@ button.oos{opacity:.5;cursor:not-allowed}
         <h1 id="pageTitle">Jilan Online Shopping Store</h1>
         <p>Fashion, beauty, electronics & home essentials — order easily on WhatsApp with Cash on Delivery.</p>
         <div class="hero-actions">
-          <a class="primary-link" href="#catalog">Browse products <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 14 0m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="primary-link" id="browseProducts" href="#catalog">Browse products <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 14 0m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           <a class="secondary-link" href="https://wa.me/923007379385" target="_blank" rel="noopener">Ask on WhatsApp</a>
         </div>
       </div>
@@ -1218,6 +1229,20 @@ button.oos{opacity:.5;cursor:not-allowed}
           order_type: directOrderId !== null ? 'order_now' : 'cart'
         });
         window.open('https://wa.me/923007379385?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+      }
+
+      /* Browse Products: reliable JS scroll to the real product listing (#catalog) */
+      var browseBtn = document.getElementById('browseProducts');
+      if (browseBtn) {
+        browseBtn.addEventListener('click', function (event) {
+          event.preventDefault();
+          var catalog = document.getElementById('catalog');
+          if (catalog && catalog.scrollIntoView) {
+            catalog.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            window.location.hash = 'catalog';
+          }
+        });
       }
 
       catPills.addEventListener('click', function (event) {
