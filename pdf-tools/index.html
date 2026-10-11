@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Jilan PDF Tools — Convert • Edit • Scan • Manage</title>
+<meta name="description" content="Jilan PDF Tools — Your All-in-One Document Solution. Convert, edit, scan and manage PDFs on your phone.">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#dc2626">
+<link rel="stylesheet" href="styles.css">
+<!-- Real processing libraries (CDN). All processing happens locally on your device. -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://unpkg.com/tesseract.js@5.1.1/dist/tesseract.min.js" defer></script>
+<script src="https://unpkg.com/docx@9.5.1/dist/index.umd.cjs" defer></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ======= TOP HEADER ======= -->
+  <header id="topbar">
+    <button id="backBtn" class="icon-btn hidden" aria-label="Back">←</button>
+    <div id="brandMini">
+      <img src="assets/icon-192.png" alt="Jilan PDF Tools" id="brandIcon">
+      <div><b>Jilan <span class="red">PDF Tools</span></b></div>
+    </div>
+    <button id="themeBtn" class="icon-btn" aria-label="Theme">🌙</button>
+  </header>
+
+  <!-- ======= HOME SCREEN ======= -->
+  <main id="screen-home" class="screen active">
+    <div class="hero">
+      <img src="assets/logo-branding.png" alt="Jilan PDF Tools — Your All-in-One Document Solution" id="heroImg">
+    </div>
+    <div class="search-wrap">
+      <input id="toolSearch" type="search" placeholder="Search PDF tools" autocomplete="off">
+    </div>
+    <div id="netWarn" class="warn hidden">⚠️ Internet needed on first use (libraries load from CDN). All file processing stays on your device.</div>
+
+    <h2 class="sec-title" data-i18n="recent">Recent files</h2>
+    <div id="recentFiles" class="file-list"><p class="empty" data-i18n="noRecent">No files yet. Processed files will appear here.</p></div>
+
+    <h2 class="sec-title" data-i18n="favTools">Favourite tools</h2>
+    <div id="favTools" class="tool-grid"><p class="empty" data-i18n="noFav">Tap ⭐ on any tool to pin it here.</p></div>
+
+    <div id="toolSections"></div>
+  </main>
+
+  <!-- ======= TOOL SCREEN ======= -->
+  <main id="screen-tool" class="screen">
+    <div id="toolHead">
+      <h2 id="toolTitle"></h2>
+      <button id="favToolBtn" class="icon-btn" aria-label="Favourite">☆</button>
+    </div>
+    <p id="toolDesc" class="muted"></p>
+    <div id="toolBody"></div>
+  </main>
+
+  <!-- ======= FILES SCREEN ======= -->
+  <main id="screen-files" class="screen">
+    <h2 data-i18n="files">Files</h2>
+    <div class="row">
+      <input id="fileSearch" type="search" placeholder="Search files">
+      <select id="fileSort">
+        <option value="date" data-i18n="sortDate">Date</option>
+        <option value="name" data-i18n="sortName">Name</option>
+        <option value="size" data-i18n="sortSize">Size</option>
+      </select>
+    </div>
+    <div class="chip-row" id="fileCats">
+      <button class="chip active" data-cat="all" data-i18n="all">All</button>
+      <button class="chip" data-cat="pdf">PDF</button>
+      <button class="chip" data-cat="image" data-i18n="images">Images</button>
+      <button class="chip" data-cat="doc" data-i18n="docs">Docs</button>
+      <button class="chip" data-cat="fav" data-i18n="favs">★ Favourites</button>
+    </div>
+    <div id="fileList" class="file-list"></div>
+  </main>
+
+  <!-- ======= HISTORY SCREEN ======= -->
+  <main id="screen-history" class="screen">
+    <h2 data-i18n="history">History</h2>
+    <button id="clearHistory" class="btn danger-outline" data-i18n="clearHistory">Clear history</button>
+    <div id="historyList" class="file-list"></div>
+  </main>
+
+  <!-- ======= SETTINGS SCREEN ======= -->
+  <main id="screen-settings" class="screen">
+    <h2 data-i18n="settings">Settings</h2>
+    <div class="card">
+      <label data-i18n="language">Language</label>
+      <select id="langSel"><option value="en">English</option><option value="ur">اردو</option></select>
+    </div>
+    <div class="card">
+      <label data-i18n="theme">Theme</label>
+      <select id="themeSel"><option value="light" data-i18n="light">Light</option><option value="dark" data-i18n="dark">Dark</option></select>
+    </div>
+    <div class="card">
+      <label data-i18n="ocrLang">OCR language</label>
+      <select id="ocrLangSel"><option value="eng">English</option><option value="urd">اردو (beta)</option></select>
+      <p class="muted small" data-i18n="ocrNote">Urdu OCR is experimental. If it fails, a clear message is shown.</p>
+    </div>
+    <div class="card">
+      <button id="privacyBtn" class="btn outline full" data-i18n="privacy">Privacy policy</button>
+      <button id="aboutBtn" class="btn outline full" data-i18n="about">About Jilan PDF Tools</button>
+      <button id="wipeBtn" class="btn danger-outline full" data-i18n="wipe">Delete all app data</button>
+    </div>
+    <p class="muted small center">Jilan PDF Tools v1.0 • All processing on-device</p>
+  </main>
+
+  <!-- ======= BOTTOM NAV ======= -->
+  <nav id="bottomnav">
+    <button data-nav="home" class="active">🏠<span data-i18n="home">Home</span></button>
+    <button data-nav="tools">🧰<span data-i18n="tools">Tools</span></button>
+    <button data-nav="files">📁<span data-i18n="files">Files</span></button>
+    <button data-nav="history">🕘<span data-i18n="history">History</span></button>
+    <button data-nav="settings">⚙️<span data-i18n="settings">Settings</span></button>
+  </nav>
+</div>
+
+<!-- ======= MODALS ======= -->
+<div id="modal" class="hidden"><div id="modalCard"><h3 id="modalTitle"></h3><div id="modalBody"></div><div class="row"><button id="modalOk" class="btn primary">OK</button><button id="modalCancel" class="btn outline hidden">Cancel</button></div></div></div>
+<div id="toast" class="hidden"></div>
+<div id="loader" class="hidden"><div class="spin"></div><p id="loaderText">Working…</p><div class="pbar"><div id="pfill"></div></div></div>
+
+<script src="js/app.js" defer></script>
+<script src="js/tools.js" defer></script>
+</body>
+</html>
