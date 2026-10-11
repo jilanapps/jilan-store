@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4c1d95">
+<title>Jilan Puzzle Master</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="royal" data-tiles="classic">
+<div id="app">
+  <header id="topbar">
+    <div class="logo-mini">🧩</div>
+    <div class="spacer"></div>
+    <div id="coins">🪙 <span id="coinCount">0</span></div>
+    <button id="btnSoundTop" class="icon-btn" aria-label="Sound on/off">🔊</button>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="scr-home" class="screen active">
+      <div class="logo-big">🧩</div>
+      <h1>Jilan <span>Puzzle Master</span></h1>
+      <p class="tagline">Match &bull; Pop &bull; Win!</p>
+      <button id="btnPlay" class="btn big">▶ Play</button>
+      <button id="btnDaily" class="btn">📅 Daily Challenge</button>
+      <div class="btn-row">
+        <button id="btnShop" class="btn small">🛍 Shop</button>
+        <button id="btnSettings" class="btn small">⚙ Settings</button>
+      </div>
+      <div id="homeProgress"></div>
+    </section>
+
+    <!-- LEVEL SELECT -->
+    <section id="scr-levels" class="screen">
+      <h2>Select Level</h2>
+      <div id="levelGrid"></div>
+      <button class="btn ghost" data-go="home">← Back</button>
+    </section>
+
+    <!-- GAME -->
+    <section id="scr-game" class="screen">
+      <div id="hud">
+        <div id="hudLevel">Level 1</div>
+        <div id="scoreWrap">
+          <div id="scoreBar"><div id="scoreFill"></div></div>
+          <span id="hudScore">0 / 0</span>
+        </div>
+        <div id="hudMoves">Moves: 0</div>
+        <button id="btnPause" class="icon-btn" aria-label="Pause">⏸</button>
+      </div>
+      <div id="boardWrap">
+        <div id="board" aria-label="Puzzle board"></div>
+        <div id="comboBanner"></div>
+      </div>
+      <div id="gameMsg"></div>
+      <button id="btnShuffle" class="btn hidden">🔀 Shuffle (no moves!)</button>
+    </section>
+
+    <!-- SHOP -->
+    <section id="scr-shop" class="screen">
+      <h2>🛍 Shop</h2>
+      <p style="text-align:center">🪙 Coins: <b id="shopCoins">0</b></p>
+      <div class="shop-sec">
+        <h3>Themes</h3>
+        <div id="themeList"></div>
+      </div>
+      <div class="shop-sec">
+        <h3>Tile Styles</h3>
+        <div id="tileList"></div>
+      </div>
+      <p class="fine">🪙 Virtual coins are earned by playing. They have no cash value and cannot be bought, sold, or exchanged for real money.</p>
+      <button class="btn ghost" data-go="home">← Back</button>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="scr-settings" class="screen">
+      <h2>⚙ Settings</h2>
+      <div class="set-row"><span>🔊 Sound</span><button id="tgSound" class="toggle" aria-label="Sound"></button></div>
+      <div class="set-row"><span>📳 Vibration</span><button id="tgVibrate" class="toggle" aria-label="Vibration"></button></div>
+      <div class="set-row"><span>🔲 High contrast tiles</span><button id="tgContrast" class="toggle" aria-label="High contrast"></button></div>
+      <div class="set-row"><span>🗑 Reset all progress</span><button id="btnReset" class="buy-btn danger">Reset</button></div>
+      <button class="btn ghost" data-go="home">← Back</button>
+      <p class="about">Jilan Puzzle Master v1.0<br>by Jilan Apps<br>Progress is saved on this device only.</p>
+    </section>
+  </main>
+
+  <!-- PAUSE MODAL -->
+  <div id="modal-pause" class="modal hidden">
+    <div class="modal-card">
+      <h2>⏸ Paused</h2>
+      <button id="btnResume" class="btn">▶ Resume</button>
+      <button id="btnRestartP" class="btn ghost">🔄 Restart level</button>
+      <button id="btnQuitP" class="btn ghost">🏠 Quit to home</button>
+    </div>
+  </div>
+
+  <!-- END MODAL -->
+  <div id="modal-end" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="endTitle">Level Complete!</h2>
+      <div id="endStars" class="stars-big"></div>
+      <p id="endScore"></p>
+      <p id="endCoins" class="coin-earn"></p>
+      <button id="btnNext" class="btn">Next level →</button>
+      <button id="btnReplay" class="btn ghost">🔄 Replay</button>
+      <button id="btnHomeE" class="btn ghost">🏠 Home</button>
+    </div>
+  </div>
+</div>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
