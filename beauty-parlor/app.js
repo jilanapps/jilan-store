@@ -350,10 +350,28 @@ function closeModal(){$('modalBg').classList.remove('show');}
 
 /* ---------- boot ---------- */
 function toggleLang(){LANG=LANG==='en'?'ur':'en';try{localStorage.setItem('jbp_lang',LANG);}catch(e){}render();}
+/* ---------- 3-DAY DEMO EXPIRY ---------- */
+var DEMO_MS = 3 * 86400000;
+function demoSince(){ try{ var v = localStorage.getItem('jbp_demo_since'); return v ? parseInt(v, 10) : 0; }catch(e){ return 0; } }
+function ensureDemoSince(){ if (!demoSince()){ try{ localStorage.setItem('jbp_demo_since', String(Date.now())); }catch(e){} } }
+function demoDaysLeft(){ var s = demoSince(); if (!s) return 3; var left = DEMO_MS - (Date.now() - s); return Math.max(0, Math.ceil(left / 86400000)); }
+function demoExpired(){ var s = demoSince(); return s > 0 && (Date.now() - s) > DEMO_MS; }
+function demoCountdownTxt(){ return '⏳ DEMO by Jilan Apps · ' + (LANG === 'ur' ? 'باقی: ' + demoDaysLeft() + ' دن' : demoDaysLeft() + ' day(s) left'); }
+function showDemoLock(){
+  document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#101418;color:#fff;font-family:system-ui,Segoe UI,Arial;padding:24px;box-sizing:border-box">' +
+    '<div style="max-width:380px;text-align:center">' +
+    '<div style="font-size:52px;margin-bottom:12px">⏰</div>' +
+    '<h2 style="margin:0 0 8px">' + (LANG === 'ur' ? 'ڈیمو ختم ہو گیا' : 'Demo expired') + '</h2>' +
+    '<p style="color:#b9c2c9;line-height:1.6">' + (LANG === 'ur' ? '3 دن کا ڈیمو مکمل ہو گیا۔ مکمل ورژن کے لیے جیلان ایپس سے رابطہ کریں۔' : 'The 3-day demo has ended. Contact Jilan Apps for the full version.') + '</p>' +
+    '<div style="display:inline-block;background:#c2185b;color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;margin-top:8px">🏷️ DEMO by Jilan Apps</div>' +
+    '</div></div>';
+}
 document.addEventListener('DOMContentLoaded',function(){
   try{LANG=localStorage.getItem('jbp_lang')||'en';}catch(e){}
+  ensureDemoSince();
+  if (demoExpired()) { showDemoLock(); return; }
   load();
-  document.body.insertAdjacentHTML('afterbegin','<div class="demo-banner">🏷️ DEMO by Jilan Apps</div>');
+  document.body.insertAdjacentHTML('afterbegin','<div class="demo-banner">🏷️ ' + demoCountdownTxt() + '</div>');
   $('waFab').onclick=function(){openWa(encodeURIComponent('Assalam-o-Alaikum! Jilan Beauty Parlor'));};
   render();
 });

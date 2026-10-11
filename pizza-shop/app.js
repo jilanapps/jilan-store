@@ -136,7 +136,7 @@ function go(v){
   if(v==='checkout') renderCheckoutSum(); if(v==='orders') renderOrders(); if(v==='account') renderAccount();
   window.scrollTo(0,0);
 }
-function toggleLang(){ LANG = LANG==='en'?'ur':'en'; localStorage.setItem('jps_lang',LANG); applyLang(); }
+function toggleLang(){ LANG = LANG==='en'?'ur':'en'; localStorage.setItem('jps_lang',LANG); applyLang(); updateDemoBar(); }
 function applyLang(){
   document.body.classList.toggle('rtl',LANG==='ur');
   document.documentElement.lang = LANG==='ur'?'ur':'en';
@@ -470,5 +470,25 @@ function saveCfg(){
   toast(T('saved'));
 }
 
+/* ---------- 3-DAY DEMO EXPIRY ---------- */
+var DEMO_MS = 3 * 86400000;
+function demoSince(){ try{ var v = localStorage.getItem('jps_demo_since'); return v ? parseInt(v, 10) : 0; }catch(e){ return 0; } }
+function ensureDemoSince(){ if (!demoSince()){ try{ localStorage.setItem('jps_demo_since', String(Date.now())); }catch(e){} } }
+function demoDaysLeft(){ var s = demoSince(); if (!s) return 3; var left = DEMO_MS - (Date.now() - s); return Math.max(0, Math.ceil(left / 86400000)); }
+function demoExpired(){ var s = demoSince(); return s > 0 && (Date.now() - s) > DEMO_MS; }
+function demoCountdownTxt(){ return '⏳ DEMO by Jilan Apps · ' + (LANG === 'ur' ? 'باقی: ' + demoDaysLeft() + ' دن' : demoDaysLeft() + ' day(s) left'); }
+function updateDemoBar(){ var db = document.querySelector('.demo-bar'); if (db) db.textContent = '🍕 ' + demoCountdownTxt() + ' — ' + (LANG === 'ur' ? 'نمونہ قیمتیں، صرف ڈیمو ڈیٹا' : 'Sample prices, demo data only'); }
+function showDemoLock(){
+  document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#101418;color:#fff;font-family:system-ui,Segoe UI,Arial;padding:24px;box-sizing:border-box">' +
+    '<div style="max-width:380px;text-align:center">' +
+    '<div style="font-size:52px;margin-bottom:12px">⏰</div>' +
+    '<h2 style="margin:0 0 8px">' + (LANG === 'ur' ? 'ڈیمو ختم ہو گیا' : 'Demo expired') + '</h2>' +
+    '<p style="color:#b9c2c9;line-height:1.6">' + (LANG === 'ur' ? '3 دن کا ڈیمو مکمل ہو گیا۔ مکمل ورژن کے لیے جیلان ایپس سے رابطہ کریں۔' : 'The 3-day demo has ended. Contact Jilan Apps for the full version.') + '</p>' +
+    '<div style="display:inline-block;background:#c0392b;color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;margin-top:8px">🏷️ DEMO by Jilan Apps</div>' +
+    '</div></div>';
+}
+
 /* ---------- INIT ---------- */
-applyLang(); updateCartBadge(); renderHome();
+ensureDemoSince();
+if (demoExpired()) { showDemoLock(); }
+else { applyLang(); updateCartBadge(); renderHome(); updateDemoBar(); }
