@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Jilan English Challenge</title>
+<meta name="theme-color" content="#1e3a8a">
+<style>
+:root{--blue:#1e3a8a;--blue2:#2b4acb;--teal:#14b8a6;--bg:#f1f5f9;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--fs:16px;--ok:#16a34a;--bad:#dc2626;--gold:#d4a017;}
+body.dark{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:#334155;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Segoe UI',system-ui,'Jameel Noori Nastaleeq',sans-serif;background:var(--bg);color:var(--text);font-size:var(--fs);transition:background .3s}
+body.rtl{direction:rtl}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+header h1{margin:0;font-size:1.25em}
+header .sub{font-size:.8em;opacity:.85}
+main{padding:14px 14px 90px;max-width:640px;margin:0 auto}
+.page{display:none;animation:fade .25s}
+.page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card h3{margin:.2em 0 .6em}
+.btn{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:1em;cursor:pointer;font-weight:600;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+body.dark .btn.ghost{color:var(--teal);border-color:var(--teal)}
+.btn.sm{padding:7px 12px;font-size:.9em;border-radius:10px}
+.btn.ok{background:var(--ok)}
+.btn.danger{background:var(--bad)}
+.btn:disabled{opacity:.5}
+.chip{display:inline-block;margin:4px;padding:8px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--text);cursor:pointer;font-size:.9em;font-family:inherit}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.icbtn{background:none;border:none;font-size:1.3em;cursor:pointer;color:var(--gold)}
+.icbtn.on{color:var(--gold)}
+input[type=text],input[type=search],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:1em;margin:6px 0;font-family:inherit}
+input[type=range]{width:100%}
+/* dashboard */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center}
+.stat .n{font-size:1.5em;font-weight:800;color:var(--blue)}
+body.dark .stat .n{color:var(--teal)}
+.stat .l{font-size:.78em;color:var(--muted)}
+.goalwrap{display:flex;align-items:center;gap:14px}
+.ring{--p:0;width:76px;height:76px;border-radius:50%;background:conic-gradient(var(--teal) calc(var(--p)*1%),var(--border) 0);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ring::before{content:'';position:absolute;width:60px;height:60px;border-radius:50%;background:var(--card)}
+.ring span{position:relative;font-weight:800;font-size:.85em}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.act{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 6px;cursor:pointer;font-family:inherit;color:var(--text);font-size:.85em}
+.act .aico{font-size:1.8em;display:block;margin-bottom:4px}
+.act:active{transform:scale(.96)}
+.secttl{display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px}
+.secttl h3{margin:0}
+/* word cards */
+.wcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0;cursor:pointer}
+.wtop{display:flex;justify-content:space-between;align-items:center}
+.weng{font-size:1.25em;font-weight:800;color:var(--blue)}
+body.dark .weng{color:var(--teal)}
+.wur{font-size:1.2em;direction:rtl;text-align:right;margin:4px 0}
+.wrm{color:var(--muted);font-style:italic;font-size:.9em}
+.wex{margin-top:6px;font-size:.95em}
+.wexu{direction:rtl;text-align:right;color:var(--muted);font-size:.9em}
+.wmeta{font-size:.78em;color:var(--muted);margin-top:6px}
+.wbtns{display:flex;gap:8px;margin-top:8px}
+/* flashcards */
+.fccard{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-radius:20px;min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;margin:12px 0;cursor:pointer;box-shadow:0 6px 20px rgba(30,58,138,.3);position:relative}
+.fccount{position:absolute;top:12px;right:16px;opacity:.8;font-size:.85em}
+.fcmain{font-size:2em;font-weight:800;text-align:center}
+.fcsub{margin-top:10px;opacity:.85;font-size:.95em;text-align:center}
+.fcbts{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+/* quiz */
+.qprog{font-size:.85em;color:var(--muted);margin-bottom:6px}
+.qtype{display:inline-block;background:var(--teal);color:#fff;font-size:.75em;padding:3px 10px;border-radius:12px;margin-bottom:8px}
+.qq{font-size:1.15em;font-weight:700;margin:8px 0}
+.qopt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:12px;margin:8px 0;font-size:1em;cursor:pointer;color:var(--text);font-family:inherit}
+body.rtl .qopt{text-align:right}
+.qopt.ok{border-color:var(--ok);background:#f0fdf4}
+.qopt.bad{border-color:var(--bad);background:#fef2f2}
+body.dark .qopt.ok{background:#052e16}body.dark .qopt.bad{background:#450a0a}
+.qfb{font-weight:700;margin:10px 0;font-size:1.1em}
+.qfb.ok{color:var(--ok)}.qfb.bad{color:var(--bad)}
+.qexp{background:var(--bg);border-radius:10px;padding:10px;margin:8px 0;font-size:.92em}
+.qdone{text-align:center;padding:20px}
+.bigscore{font-size:3em;font-weight:800;color:var(--blue)}
+body.dark .bigscore{color:var(--teal)}
+.pct{font-size:1.4em;color:var(--gold);font-weight:700}
+.qmsg{font-size:1.1em;margin:8px 0}
+.hrow{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:.9em}
+/* grammar/speaking */
+.gcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
+.grow{display:flex;justify-content:space-between;align-items:center}
+.gsub{color:var(--muted);font-size:.9em}
+.gbody p{line-height:1.7}
+.gex{background:var(--bg);border-radius:10px;padding:10px;margin:8px 0}
+.dline{margin:10px 0;padding:10px;background:var(--bg);border-radius:10px}
+.den{font-weight:600}
+.dur{direction:rtl;text-align:right;color:var(--muted);font-size:.92em}
+.phr{margin:6px 0}
+.tip{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px;margin:8px 0;color:#92400e}
+body.dark .tip{background:#451a03;color:#fde68a;border-color:#92400e}
+.note{font-size:.82em;color:var(--muted);margin-top:10px}
+/* progress */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 6px;text-align:center}
+.pnum{font-size:1.6em;font-weight:800;color:var(--blue)}
+body.dark .pnum{color:var(--teal)}
+.plbl{font-size:.78em;color:var(--muted)}
+.week{display:flex;gap:6px;margin:8px 0}
+.wday{flex:1;text-align:center;padding:10px 0;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:.85em}
+.wday.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.wday.td{outline:2px solid var(--gold)}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;min-width:80px;opacity:.45}
+.badge.got{opacity:1;border-color:var(--gold)}
+.bico{font-size:1.8em}.blbl{font-size:.72em;color:var(--muted)}
+/* settings */
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.setrow label{font-weight:600}
+.ver{text-align:center;color:var(--muted);font-size:.8em;margin-top:14px}
+.empty{text-align:center;color:var(--muted);padding:24px}
+/* bottom nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:6px 2px calc(6px + env(safe-area-inset-bottom));z-index:20;overflow-x:auto}
+.navbtn{flex:1;min-width:64px;background:none;border:none;color:var(--muted);font-size:.68em;cursor:pointer;padding:6px 2px;font-family:inherit}
+.navbtn span{font-size:1.6em;display:block}
+.navbtn.on{color:var(--blue);font-weight:700}
+body.dark .navbtn.on{color:var(--teal)}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;color:#fff;padding:10px 20px;border-radius:24px;opacity:0;transition:all .3s;z-index:99;font-size:.9em;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header><h1 id="appTitle">Jilan English Challenge</h1><div class="sub">Jilan Apps • Learn English Daily</div></header>
+<main>
+ <!-- HOME -->
+ <section class="page" id="pg-home">
+  <div class="card"><h3 id="homeTitle"></h3><div class="note" id="homeTag"></div></div>
+  <div class="card"><div class="goalwrap">
+   <div class="ring" id="goalRing"><span id="goalTxt"></span></div>
+   <div><b id="goalLbl">🎯 Daily Goal</b><div class="note" id="goalMsg"></div></div>
+  </div></div>
+  <div class="stats">
+   <div class="stat"><div class="n" id="streakNum">0</div><div class="l">🔥 Streak</div></div>
+   <div class="stat"><div class="n" id="learnedNum">0</div><div class="l">📝 Words</div></div>
+   <div class="stat"><div class="n" id="streakLong">0</div><div class="l">🏆 Best</div></div>
+  </div>
+  <div class="secttl"><h3 id="secWords"></h3><button class="btn sm ghost" id="viewAllWords"></button></div>
+  <div id="homeWords"></div>
+  <div class="secttl"><h3 id="secActions"></h3></div>
+  <div class="acts" id="homeActions"></div>
+  <div class="card" id="quizQuick" style="margin-top:14px"></div>
+ </section>
+ <!-- WORDS -->
+ <section class="page" id="pg-words">
+  <input type="search" id="wordsSearch">
+  <div id="wordsCats"></div><div id="wordsFFilter"></div><div id="wordsList"></div>
+ </section>
+ <section class="page" id="pg-worddetail"><div id="wordDetail"></div></section>
+ <!-- FLASHCARDS -->
+ <section class="page" id="pg-cards">
+  <div id="fcDir"></div><div id="fcMode"></div>
+  <div class="fccard" id="fcCard"></div>
+  <div class="fcbts">
+   <button class="btn sm ghost" id="fcPrev"></button>
+   <button class="btn sm ok" id="fcKnow"></button>
+   <button class="btn sm danger" id="fcNeed"></button>
+   <button class="btn sm ghost" id="fcNextB"></button>
+  </div>
+  <div class="fcbts"><button class="btn sm ghost" id="fcShuffle"></button></div>
+ </section>
+ <!-- QUIZ -->
+ <section class="page" id="pg-quiz">
+  <div class="card"><h3 id="chooseLvlLbl"></h3><div id="quizLevels"></div>
+  <button class="btn" id="quizStart" style="margin-top:10px"></button></div>
+  <div class="card" id="quizHist"></div>
+ </section>
+ <section class="page" id="pg-quizplay"><div id="quizPlay"></div></section>
+ <!-- GRAMMAR -->
+ <section class="page" id="pg-grammar"><div id="grammarList"></div></section>
+ <section class="page" id="pg-grammardetail"><div id="grammarDetail"></div></section>
+ <!-- SPEAKING -->
+ <section class="page" id="pg-speak"><div id="speakList"></div></section>
+ <section class="page" id="pg-speakdetail"><div id="speakDetail"></div></section>
+ <!-- DICT -->
+ <section class="page" id="pg-dict"><input type="search" id="dictSearch"><div id="dictList"></div></section>
+ <!-- PROGRESS -->
+ <section class="page" id="pg-progress"><div id="progressBody"></div></section>
+ <!-- SETTINGS -->
+ <section class="page" id="pg-settings"><div class="card" id="setBody"></div></section>
+</main>
+<nav id="bottomNav"></nav>
+<div id="toast"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
