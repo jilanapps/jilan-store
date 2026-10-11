@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sukoon — Saans Lo, Sukoon Pao</title>
+<link rel="icon" href="icon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --peach:#ffd9b8;--lav:#d9c8f5;--sky:#bfe3ff;
+  --ink:#4a4458;--ink2:#7a7390;--card:rgba(255,255,255,.78);
+  --accent:#a78bfa;--accent2:#f9a8d4;--good:#7fd8b6;
+}
+body.dark{--ink:#efeaf7;--ink2:#b9b2cc;--card:rgba(46,40,70,.82);
+  background:linear-gradient(160deg,#2b2440,#3a2c55 45%,#24344d)!important;color:var(--ink)}
+html,body{margin:0;padding:0;min-height:100%}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;
+  background:linear-gradient(160deg,var(--peach),var(--lav) 48%,var(--sky));
+  background-attachment:fixed;color:var(--ink);touch-action:manipulation;overscroll-behavior:none}
+[dir=rtl] body{font-family:'Noto Nastaliq Urdu',system-ui,sans-serif}
+.demobanner{position:sticky;top:0;z-index:60;background:#1e1b2e;color:#ffd166;text-align:center;
+  font-size:12px;font-weight:700;letter-spacing:1px;padding:7px 8px}
+.screen{display:none;min-height:100vh;padding:14px 14px 96px;max-width:560px;margin:0 auto}
+.screen.on{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:26px;margin:8px 0 2px;font-weight:800}
+h2{font-size:19px;margin:14px 0 8px;font-weight:700}
+.sub{color:var(--ink2);font-size:14px;margin:0 0 10px}
+.card{background:var(--card);backdrop-filter:blur(8px);border-radius:22px;padding:16px;margin:12px 0;
+  box-shadow:0 8px 24px rgba(120,100,180,.14)}
+.btn{display:block;width:100%;border:none;border-radius:18px;padding:15px;font-size:17px;font-weight:700;
+  color:#fff;background:linear-gradient(135deg,#b79df7,#8b7cf6);margin:10px 0;cursor:pointer;
+  box-shadow:0 6px 16px rgba(139,124,246,.35)}
+.btn:active{transform:scale(.98)}
+.btn.soft{background:rgba(255,255,255,.65);color:var(--ink);box-shadow:none;border:1.5px solid rgba(139,124,246,.35)}
+.btn.pink{background:linear-gradient(135deg,#f9a8d4,#f472b6);box-shadow:0 6px 16px rgba(244,114,182,.3)}
+.btn.red{background:linear-gradient(135deg,#f87171,#ef4444);box-shadow:0 6px 16px rgba(239,68,68,.35)}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+input,select,textarea{width:100%;border:1.5px solid rgba(139,124,246,.3);border-radius:14px;
+  padding:12px;font-size:16px;margin:6px 0;background:rgba(255,255,255,.8);color:var(--ink);font-family:inherit}
+body.dark input,body.dark select,body.dark textarea{background:rgba(255,255,255,.08)}
+textarea{min-height:70px;resize:vertical}
+.chip{display:inline-block;padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.6);
+  border:1.5px solid rgba(139,124,246,.3);margin:4px;font-size:14px;cursor:pointer;color:var(--ink)}
+body.dark .chip{background:rgba(255,255,255,.07)}
+.chip.sel{background:linear-gradient(135deg,#b79df7,#8b7cf6);color:#fff;border-color:transparent}
+.listitem{background:var(--card);border-radius:18px;padding:14px;margin:9px 0;display:flex;align-items:center;
+  gap:12px;cursor:pointer;box-shadow:0 4px 12px rgba(120,100,180,.1)}
+.listitem .ico{font-size:30px;flex:0 0 auto}
+.listitem .tx{flex:1}.listitem .tx b{display:block;font-size:16px}.listitem .tx small{color:var(--ink2);font-size:13px}
+.listitem .go{color:var(--ink2);font-size:20px}
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(139,124,246,.2);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+body.dark .nav{background:rgba(35,30,55,.92)}
+.nav button{flex:1;border:none;background:none;font-size:11px;color:var(--ink2);cursor:pointer;padding:6px 2px}
+.nav button .e{font-size:23px;display:block}
+.nav button.sel{color:#8b7cf6;font-weight:700}
+/* breathing circle */
+.breathwrap{display:flex;flex-direction:column;align-items:center;padding:18px 0}
+.bcircle{width:190px;height:190px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff8,#ffffff00 60%),linear-gradient(135deg,#c4b5fd,#f9a8d4,#93c5fd);
+  box-shadow:0 0 60px rgba(167,139,250,.45);display:flex;align-items:center;justify-content:center;
+  transition:transform 4s ease-in-out}
+.bcircle span{font-size:20px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+@keyframes breatheIdle{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.breathIdle{animation:breatheIdle 8s ease-in-out infinite}
+.ring{transform:rotate(-90deg)}
+.ringbg{stroke:rgba(139,124,246,.18)}
+.ringfg{stroke:url(#grad1);stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+/* range slider */
+input[type=range]{-webkit-appearance:none;background:transparent;padding:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;
+  background:linear-gradient(90deg,#f9a8d4,#b79df7,#93c5fd)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;
+  background:#fff;border:3px solid #8b7cf6;margin-top:-10px;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.emoji-big{font-size:52px;text-align:center;margin:8px 0}
+.affirm{font-size:20px;font-style:italic;text-align:center;line-height:1.6}
+.streak{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}
+.dot{width:14px;height:14px;border-radius:50%;background:rgba(139,124,246,.25);display:inline-block;margin:2px}
+.dot.on{background:linear-gradient(135deg,#f9a8d4,#8b7cf6)}
+.tag{display:inline-block;background:#ede9fe;color:#6d5bd0;border-radius:999px;padding:6px 12px;
+  font-size:13px;margin:3px;cursor:pointer}
+body.dark .tag{background:#3d3460;color:#cfc2ff}
+.tag.sel{background:#8b7cf6;color:#fff}
+.kv{display:flex;justify-content:space-between;padding:8px 2px;font-size:15px;border-bottom:1px dashed rgba(139,124,246,.25)}
+.kv:last-child{border:none}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#2e2a45;color:#fff;
+  padding:12px 20px;border-radius:999px;font-size:14px;z-index:99;display:none;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.sosbtn{width:150px;height:150px;border-radius:50%;font-size:22px;font-weight:800;margin:14px auto;display:block;
+  background:radial-gradient(circle at 35% 30%,#fca5a5,#ef4444);color:#fff;border:6px solid #fecaca;
+  box-shadow:0 0 40px rgba(239,68,68,.5);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.guide-step{background:rgba(255,255,255,.5);border-radius:16px;padding:14px;margin:8px 0;font-size:15px;line-height:1.7}
+body.dark .guide-step{background:rgba(255,255,255,.06)}
+.guide-step b{color:#8b7cf6}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.backbtn{border:none;background:rgba(255,255,255,.6);width:42px;height:42px;border-radius:50%;font-size:20px;cursor:pointer;color:var(--ink)}
+body.dark .backbtn{background:rgba(255,255,255,.1)}
+.helpline{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:16px;padding:14px;margin:8px 0;color:#92400e}
+body.dark .helpline{background:#4a3a12;color:#fde68a}
+.hidden{display:none!important}
+.center{text-align:center}
+.small{font-size:12.5px;color:var(--ink2)}
+.progressbar{height:12px;border-radius:6px;background:rgba(139,124,246,.18);overflow:hidden;margin:8px 0}
+.progressbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#f9a8d4,#8b7cf6);transition:width .3s}
+select.lang{width:auto}
+.switchrow{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;font-size:16px}
+.toggle{width:52px;height:30px;border-radius:15px;background:rgba(139,124,246,.3);position:relative;cursor:pointer;flex:0 0 auto}
+.toggle.on{background:#8b7cf6}
+.toggle::after{content:'';position:absolute;width:24px;height:24px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.toggle.on::after{left:25px}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div class="toast" id="toast"></div>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="scr-splash" class="screen on">
+  <div class="breathwrap" style="padding-top:60px">
+    <div class="bcircle breathIdle" style="width:170px;height:170px"><span>☁️</span></div>
+  </div>
+  <h1 class="center" data-i="appname">Sukoon</h1>
+  <p class="sub center" data-i="tagline">Saans Lo, Sukoon Pao</p>
+  <div class="card center" id="obCard">
+    <div class="emoji-big" id="obEmoji">🌿</div>
+    <h2 id="obTitle"></h2>
+    <p class="sub" id="obText"></p>
+    <div class="center small" id="obDots"></div>
+  </div>
+  <button class="btn" data-i="getstarted" onclick="obNext()">Get Started</button>
+  <button class="btn soft" data-i="needhelp" onclick="goPanic(true)">🆘 I need help now</button>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="scr-home" class="screen">
+  <h1 data-i="greet">Assalam-o-Alaikum 🌸</h1>
+  <p class="sub" data-i="homesub">Aaj aap kaise mehsoos kar rahe hain?</p>
+  <div class="card">
+    <b data-i="anxlevel">Anxiety level (1–10)</b>
+    <div class="center" style="font-size:34px;font-weight:800" id="anxVal">5</div>
+    <input type="range" id="anxRange" min="1" max="10" value="5" oninput="anxUpdate(this.value)">
+    <div style="display:flex;justify-content:space-between" class="small"><span>😌</span><span>😟</span></div>
+    <div class="guide-step" id="anxSuggest" style="margin-top:10px"></div>
+  </div>
+  <div class="card center">
+    <div class="emoji-big">💜</div>
+    <div class="affirm" id="affirmTxt"></div>
+    <div class="small" data-i="affirmlabel">Today's affirmation</div>
+  </div>
+  <div class="row2">
+    <button class="btn pink" onclick="quickCalm()">🌬️ <span data-i="quickcalm">60-sec calm</span></button>
+    <button class="btn red" onclick="goPanic(true)">🆘 <span data-i="panic">Panic</span></button>
+  </div>
+  <div class="card">
+    <div class="streak">🔥 <span id="streakN">0</span> <span data-i="streakdays">calm days</span></div>
+    <div class="small" data-i="streaksub">Roz ek session = streak barhta hai</div>
+  </div>
+  <div class="card">
+    <b data-i="recent">Recent sessions</b>
+    <div id="recentList" class="small" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<!-- ============ BREATHE LIST ============ -->
+<div id="scr-breathe" class="screen">
+  <h1 data-i="breathe">Breathe 🌬️</h1>
+  <p class="sub" data-i="breathesub">Technique chunein, circle ke sath saans lein</p>
+  <div id="techList"></div>
+  <div class="card small" data-i="voicenote">📝 Voice instructions ki jagah screen par likhi hidayat milengi (audio voice nahi hai).</div>
+</div>
+
+<!-- ============ BREATHE SESSION ============ -->
+<div id="scr-bsession" class="screen">
+  <div class="topbar"><button class="backbtn" onclick="stopSession();show('scr-breathe')">‹</button>
+    <h2 id="bsTech" style="margin:0"></h2></div>
+  <div class="breathwrap">
+    <svg class="ring" width="250" height="250" viewBox="0 0 250 250">
+      <defs><linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f9a8d4"/><stop offset="1" stop-color="#8b7cf6"/></linearGradient></defs>
+      <circle class="ringbg" cx="125" cy="125" r="112" fill="none" stroke-width="10"/>
+      <circle class="ringfg" id="ringFg" cx="125" cy="125" r="112" fill="none" stroke-width="10"
+        stroke-dasharray="703.7" stroke-dashoffset="0"/>
+    </svg>
+    <div class="bcircle" id="bsCircle" style="position:absolute"><span id="bsPhase">…</span></div>
+  </div>
+  <div class="center" style="font-size:44px;font-weight:800" id="bsCount">–</div>
+  <div class="center sub" id="bsHint"></div>
+  <div class="card">
+    <b data-i="duration">Duration</b><br>
+    <span class="chip" data-d="60" onclick="setDur(60,this)">1 min</span>
+    <span class="chip sel" data-d="120" onclick="setDur(120,this)">2 min</span>
+    <span class="chip" data-d="180" onclick="setDur(180,this)">3 min</span>
+    <span class="chip" data-d="300" onclick="setDur(300,this)">5 min</span>
+  </div>
+  <button class="btn" id="bsStartBtn" onclick="startSession()">▶ <span data-i="start">Start</span></button>
+  <button class="btn soft hidden" id="bsStopBtn" onclick="stopSession()">⏹ <span data-i="stop">Stop</span></button>
+  <div class="progressbar"><i id="bsProg" style="width:0%"></i></div>
+</div>
+
+<!-- ============ SOUNDS ============ -->
+<div id="scr-sounds" class="screen">
+  <h1 data-i="sounds">Sounds 🎧</h1>
+  <p class="sub" data-i="soundsub">Qudrati mahol — ye awazein app me banai gayi hain (koi recording nahi)</p>
+  <div id="soundGrid"></div>
+  <div class="card">
+    <b data-i="mix">Mix two sounds</b>
+    <div class="small" data-i="mixsub">Channel A</div><input type="range" id="volA" min="0" max="100" value="70" oninput="mixVol()">
+    <div class="small" data-i="mixsub2">Channel B</div><input type="range" id="volB" min="0" max="100" value="50" oninput="mixVol()">
+  </div>
+  <div class="card">
+    <b data-i="sleeptimer">Sleep timer</b><br>
+    <span class="chip" onclick="sleepTimer(0,this)" data-i="off">Off</span>
+    <span class="chip" onclick="sleepTimer(5,this)">5 min</span>
+    <span class="chip" onclick="sleepTimer(15,this)">15 min</span>
+    <span class="chip" onclick="sleepTimer(30,this)">30 min</span>
+    <span class="chip" onclick="sleepTimer(60,this)">60 min</span>
+  </div>
+  <button class="btn soft" onclick="stopAllSounds()">⏹ <span data-i="stopall">Stop all</span></button>
+</div>
+
+<!-- ============ GROUNDING ============ -->
+<div id="scr-ground" class="screen">
+  <h1 data-i="ground">Grounding 🌱</h1>
+  <p class="sub" data-i="groundsub">Khud ko maujooda lamhe me wapas layein</p>
+  <div class="listitem" onclick="show('scr-g54321')"><div class="ico">🔢</div>
+    <div class="tx"><b data-i="g54321">5-4-3-2-1 Technique</b><small data-i="g54321s">Dekho, chhuo, suno, sungho, chakho</small></div><div class="go">›</div></div>
+  <div class="listitem" onclick="guidedEx('body')"><div class="ico">🧘</div>
+    <div class="tx"><b data-i="bodyscan">Body Scan</b><small data-i="bodyscans">Sar se paon tak dheela chhoro</small></div><div class="go">›</div></div>
+  <div class="listitem" onclick="guidedEx('muscle')"><div class="ico">💪</div>
+    <div class="tx"><b data-i="muscle">Muscle Relaxation</b><small data-i="muscles">Kaso phir dheela chhoro</small></div><div class="go">›</div></div>
+  <div class="listitem" onclick="guidedEx('safe')"><div class="ico">🏝️</div>
+    <div class="tx"><b data-i="safeplace">Safe Place</b><small data-i="safeplaces">Apni pur-sukoon jagah tasawwur karo</small></div><div class="go">›</div></div>
+</div>
+
+<!-- ============ 5-4-3-2-1 ============ -->
+<div id="scr-g54321" class="screen">
+  <div class="topbar"><button class="backbtn" onclick="show('scr-ground')">‹</button><h2 style="margin:0" data-i="g54321">5-4-3-2-1 Technique</h2></div>
+  <div class="card center">
+    <div class="emoji-big" id="g54321Emoji">👀</div>
+    <h2 id="g54321Step">5</h2>
+    <p id="g54321Text" style="font-size:17px;line-height:1.7"></p>
+  </div>
+  <div class="progressbar"><i id="g54321Prog" style="width:0%"></i></div>
+  <button class="btn" onclick="g54321Next()"><span data-i="done_next">Ho gaya — Agla ›</span></button>
+</div>
+
+<!-- ============ GUIDED EXERCISE ============ -->
+<div id="scr-gex" class="screen">
+  <div class="topbar"><button class="backbtn" onclick="gexStop();show('scr-ground')">‹</button><h2 style="margin:0" id="gexTitle"></h2></div>
+  <div class="card center">
+    <div class="emoji-big" id="gexEmoji">🧘</div>
+    <p id="gexText" style="font-size:18px;line-height:1.8"></p>
+    <div style="font-size:40px;font-weight:800" id="gexCount"></div>
+  </div>
+  <div class="progressbar"><i id="gexProg" style="width:0%"></i></div>
+  <button class="btn" id="gexStartBtn" onclick="gexStart()">▶ <span data-i="start">Start</span></button>
+</div>
+
+<!-- ============ PANIC ============ -->
+<div id="scr-panic" class="screen">
+  <h1 class="center" data-i="panicmode">Panic Mode 🆘</h1>
+  <p class="sub center" data-i="panicsub">Ghabrayein nahi — mere sath saans lein</p>
+  <button class="sosbtn" id="panicBtn" onclick="panicRescue()">🫁<br><span style="font-size:15px" data-i="start_rescue">Start rescue</span></button>
+  <div id="panicArea" class="hidden">
+    <div class="breathwrap"><div class="bcircle" id="panicCircle" style="width:170px;height:170px"><span id="panicPhase">…</span></div></div>
+    <div class="center" style="font-size:40px;font-weight:800" id="panicCount">60</div>
+    <div class="center sub" data-i="panic_hint">Naak se saans andar, munh se bahar</div>
+  </div>
+  <div class="card">
+    <b data-i="helplines">Helplines (Pakistan)</b>
+    <div class="helpline">📞 <b>Umang</b> — 0311-7786264 <span class="small">(mental health)</span></div>
+    <div class="helpline">📞 <b>Rescue</b> — 1122</div>
+    <button class="btn soft" onclick="show('scr-g54321')">🌱 <span data-i="tryground">Grounding try karein</span></button>
+  </div>
+  <button class="btn soft" onclick="goHome()">🏠 <span data-i="backhome">Back to home</span></button>
+</div>
+
+<!-- ============ MOOD ============ -->
+<div id="scr-mood" class="screen">
+  <h1 data-i="mood">Mood Log 📝</h1>
+  <div class="card">
+    <b data-i="logepi">Anxiety episode log karein</b>
+    <div class="center" style="font-size:32px;font-weight:800" id="moodVal">5</div>
+    <input type="range" id="moodRange" min="1" max="10" value="5" oninput="document.getElementById('moodVal').textContent=this.value">
+    <div class="small" data-i="triggers">Triggers</div>
+    <div id="trigTags"></div>
+    <textarea id="moodNote" data-i-ph="noteph" placeholder="Note (optional)"></textarea>
+    <button class="btn" onclick="saveMood()">💾 <span data-i="savelog">Save log</span></button>
+  </div>
+  <h2 data-i="weekview">Is haftay</h2>
+  <div class="card" id="moodWeek"></div>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="scr-profile" class="screen">
+  <h1 data-i="profile">Profile 👤</h1>
+  <div class="card center">
+    <div class="emoji-big">🌸</div>
+    <b data-i="guest">Guest user</b>
+    <div class="small" data-i="privacynote">🔒 Aap ka data sirf is phone me rehta hai — kahin nahi bheja jata.</div>
+  </div>
+  <div class="card">
+    <b data-i="mystats">Meri stats</b>
+    <div class="kv"><span data-i="totalsess">Sessions</span><b id="stSessions">0</b></div>
+    <div class="kv"><span data-i="totalmin">Minutes calm</span><b id="stMinutes">0</b></div>
+    <div class="kv"><span data-i="streak">Streak</span><b id="stStreak">0</b></div>
+    <div class="kv"><span data-i="favtech">Favorite technique</span><b id="stFav">–</b></div>
+  </div>
+  <div class="card">
+    <b data-i="favtechs">Favorite techniques</b>
+    <div id="favList" class="small"></div>
+  </div>
+  <div class="card">
+    <div class="switchrow"><span data-i="language">Language / زبان</span>
+      <select class="lang" id="langSel" onchange="setLang(this.value)">
+        <option value="en">English</option><option value="ur">اردو</option></select></div>
+    <div class="switchrow"><span data-i="darkmode">Soft dark mode</span>
+      <div class="toggle" id="darkTgl" onclick="toggleDark()"></div></div>
+    <div class="switchrow"><span data-i="reminder">Daily reminder</span>
+      <div class="toggle" id="remTgl" onclick="toggleRem()"></div></div>
+  </div>
+  <div class="card">
+    <b data-i="helplines">Helplines</b>
+    <div class="helpline">📞 <b>Umang</b> — 0311-7786264</div>
+    <div class="helpline">📞 <b>Rescue</b> — 1122</div>
+  </div>
+  <button class="btn soft" onclick="resetAll()">🗑️ <span data-i="resetdata">Reset my data</span></button>
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<nav class="nav" id="mainNav">
+  <button data-s="scr-home" onclick="goTab('scr-home',this)"><span class="e">🏠</span><span data-i="n_home">Home</span></button>
+  <button data-s="scr-breathe" onclick="goTab('scr-breathe',this)"><span class="e">🌬️</span><span data-i="n_breathe">Breathe</span></button>
+  <button data-s="scr-sounds" onclick="goTab('scr-sounds',this)"><span class="e">🎧</span><span data-i="n_sounds">Sounds</span></button>
+  <button data-s="scr-ground" onclick="goTab('scr-ground',this)"><span class="e">🌱</span><span data-i="n_ground">Ground</span></button>
+  <button data-s="scr-profile" onclick="goTab('scr-profile',this)"><span class="e">👤</span><span data-i="n_profile">Profile</span></button>
+</nav>
+
+<script>
+/* ================= STORE ================= */
+var store={
+  get:function(k,d){try{var v=localStorage.getItem('sukoon_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem('sukoon_'+k,JSON.stringify(v));}catch(e){}}
+};
+var LANG=store.get('lang','en');
+var DARK=store.get('dark',false);
+
+/* ================= I18N ================= */
+var I18N={
+en:{appname:'Sukoon',tagline:'Saans Lo, Sukoon Pao',getstarted:'Get Started',needhelp:'🆘 I need help now',
+greet:'Assalam-o-Alaikum 🌸',homesub:'How are you feeling today?',anxlevel:'Anxiety level (1–10)',
+affirmlabel:"Today's affirmation",quickcalm:'60-sec calm',panic:'Panic',streakdays:'calm days',
+streaksub:'One session a day keeps the streak alive',recent:'Recent sessions',breathe:'Breathe 🌬️',
+breathesub:'Choose a technique, follow the circle',voicenote:'📝 On-screen written guidance is provided instead of voice instructions (no audio voice).',
+sounds:'Sounds 🎧',soundsub:'Generated ambience — created in-app (not real recordings)',mix:'Mix two sounds',
+mixsub:'Channel A',mixsub2:'Channel B',sleeptimer:'Sleep timer',off:'Off',stopall:'Stop all',stop:'Stop',start:'Start',
+duration:'Duration',ground:'Grounding 🌱',groundsub:'Bring yourself back to this moment',
+g54321:'5-4-3-2-1 Technique',g54321s:'See, touch, hear, smell, taste',bodyscan:'Body Scan',bodyscans:'Release head to toe',
+muscle:'Muscle Relaxation',muscles:'Tense, then release',safeplace:'Safe Place',safeplaces:'Imagine your calm place',
+done_next:'Done — Next ›',panicmode:'Panic Mode 🆘',panicsub:"Don't worry — breathe with me",
+start_rescue:'Start rescue',panic_hint:'In through nose, out through mouth',helplines:'Helplines (Pakistan)',
+tryground:'Try grounding',backhome:'Back to home',mood:'Mood Log 📝',logepi:'Log an anxiety episode',
+triggers:'Triggers',noteph:'Note (optional)',savelog:'Save log',weekview:'This week',profile:'Profile 👤',
+guest:'Guest user',privacynote:'🔒 Your data stays only on this phone — never sent anywhere.',
+mystats:'My stats',totalsess:'Sessions',totalmin:'Minutes calm',streak:'Streak',favtech:'Favorite technique',
+favtechs:'Favorite techniques',language:'Language / زبان',darkmode:'Soft dark mode',reminder:'Daily reminder',
+resetdata:'Reset my data',n_home:'Home',n_breathe:'Breathe',n_sounds:'Sounds',n_ground:'Ground',n_profile:'Profile',
+inhale:'Breathe IN',hold:'HOLD',exhale:'Breathe OUT',sessiondone:'Session complete 🌸',welldone:'Well done!',
+nosess:'No sessions yet — start with a 60-sec calm 🌿',work:'Work',family:'Family',health:'Health',sleep:'Sleep',other:'Other',
+expired_t:'Demo Expired',expired_s:'This 3-day demo has ended. Contact Jilan Apps for the full app.'},
+ur:{appname:'سکون',tagline:'سانس لو، سکون پاؤ',getstarted:'شروع کریں',needhelp:'🆘 مجھے ابھی مدد چاہیے',
+greet:'السلام علیکم 🌸',homesub:'آج آپ کیسا محسوس کر رہے ہیں؟',anxlevel:'بے چینی کا درجہ (1–10)',
+affirmlabel:'آج کا مثبت جملہ',quickcalm:'60 سیکنڈ سکون',panic:'پینک',streakdays:'پرسکون دن',
+streaksub:'روز ایک سیشن = سلسلہ جاری',recent:'حالیہ سیشنز',breathe:'سانس 🌬️',
+breathesub:'تکنیک چنیں، دائرے کے ساتھ سانس لیں',voicenote:'📝 آواز کی ہدایات کی بجائے اسکرین پر تحریری رہنمائی ملے گی۔',
+sounds:'آوازیں 🎧',soundsub:'ایپ میں بنائی گئی فضا — اصل ریکارڈنگ نہیں',mix:'دو آوازیں ملائیں',
+mixsub:'چینل A',mixsub2:'چینل B',sleeptimer:'نیند کا ٹائمر',off:'بند',stopall:'سب بند کرو',stop:'روکو',start:'شروع',
+duration:'دورانیہ',ground:'گراؤنڈنگ 🌱',groundsub:'خود کو اس لمحے میں واپس لائیں',
+g54321:'5-4-3-2-1 تکنیک',g54321s:'دیکھو، چھوؤ، سنو، سونگھو، چکھو',bodyscan:'باڈی اسکین',bodyscans:'سر سے پاؤں تک ڈھیلا چھوڑو',
+muscle:'پٹھوں کا آرام',muscles:'کھینچو پھر ڈھیلا چھوڑو',safeplace:'محفوظ جگہ',safeplaces:'اپنی پرسکون جگہ تصور کرو',
+done_next:'ہو گیا — اگلا ›',panicmode:'پینک موڈ 🆘',panicsub:'گھبرائیں نہیں — میرے ساتھ سانس لیں',
+start_rescue:'بچاؤ شروع کرو',panic_hint:'ناک سے اندر، منہ سے باہر',helplines:'ہیلپ لائنز (پاکستان)',
+tryground:'گراؤنڈنگ آزمائیں',backhome:'ہوم پر واپس',mood:'موڈ لاگ 📝',logepi:'بے چینی کا واقعہ لکھیں',
+triggers:'محرکات',noteph:'نوٹ (اختیاری)',savelog:'محفوظ کرو',weekview:'اس ہفتے',profile:'پروفائل 👤',
+guest:'مہمان صارف',privacynote:'🔒 آپ کا ڈیٹا صرف اس فون میں رہتا ہے — کہیں نہیں بھیجا جاتا۔',
+mystats:'میرے اعداد',totalsess:'سیشنز',totalmin:'پرسکون منٹ',streak:'سلسلہ',favtech:'پسندیدہ تکنیک',
+favtechs:'پسندیدہ تکنیکس',language:'Language / زبان',darkmode:'نرم ڈارک موڈ',reminder:'روزانہ یاددہانی',
+resetdata:'میرا ڈیٹا صاف کرو',n_home:'ہوم',n_breathe:'سانس',n_sounds:'آوازیں',n_ground:'گراؤنڈ',n_profile:'پروفائل',
+inhale:'سانس اندر',hold:'روکو',exhale:'سانس باہر',sessiondone:'سیشن مکمل 🌸',welldone:'شاباش!',
+nosess:'ابھی کوئی سیشن نہیں — 60 سیکنڈ سکون سے شروع کرو 🌿',work:'کام',family:'خاندان',health:'صحت',sleep:'نیند',other:'دیگر',
+expired_t:'ڈیمو ختم',expired_s:'اس 3 دن کے ڈیمو کی مدت ختم ہو گئی۔ مکمل ایپ کے لیے Jilan Apps سے رابطہ کریں۔'}
+};
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;}
+function applyLang(){
+  document.querySelectorAll('[data-i]').forEach(function(e){e.textContent=t(e.getAttribute('data-i'));});
+  document.querySelectorAll('[data-i-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-i-ph'));});
+  document.documentElement.lang=LANG;document.documentElement.dir=(LANG==='ur'?'rtl':'ltr');
+  document.getElementById('langSel').value=LANG;
+}
+function setLang(v){LANG=v;store.set('lang',v);applyLang();renderAll();}
+function toggleDark(){DARK=!DARK;store.set('dark',DARK);applyDark();}
+function applyDark(){document.body.classList.toggle('dark',DARK);var el=document.getElementById('darkTgl');if(el)el.classList.toggle('on',DARK);}
+function toggleRem(){var r=!store.get('rem',false);store.set('rem',r);document.getElementById('remTgl').classList.toggle('on',r);
+  toast(r?(LANG==='ur'?'یاددہانی آن':'Reminder on'):(LANG==='ur'?'یاددہانی آف':'Reminder off'));}
+function toast(m){var d=document.getElementById('toast');d.textContent=m;d.style.display='block';
+  clearTimeout(d._t);d._t=setTimeout(function(){d.style.display='none';},2200);}
+
+/* ================= NAV ================= */
+window.stack=[];
+function show(id,skipPush){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  var el=document.getElementById(id);if(el)el.classList.add('on');
+  if(!skipPush){if(window.stack[window.stack.length-1]!==id)window.stack.push(id);}
+  document.getElementById('mainNav').style.display=(id==='scr-splash')?'none':'flex';
+  window.scrollTo(0,0);
+  if(id==='scr-home')renderHome();if(id==='scr-mood')renderMood();if(id==='scr-profile')renderProfile();
+}
+window.__goBack=function(){
+  stopAllSounds();stopSession();
+  if(window.stack.length>1){window.stack.pop();show(window.stack[window.stack.length-1],true);}
+};
+function goTab(id,btn){
+  window.stack=['scr-home',id];
+  document.querySelectorAll('#mainNav button').forEach(function(b){b.classList.remove('sel');});
+  if(btn)btn.classList.add('sel');show(id,true);
+}
+function goHome(){goTab('scr-home',document.querySelector('#mainNav button'));}
+
+/* ================= ONBOARDING ================= */
+var OBS=[
+ {e:'🌿',te:'Instant calm in 60 seconds',tu:'60 سیکنڈ میں فوری سکون',de:'A short breathing session melts tension fast.',du:'مختصر سانس کا سیشن تناؤ جلدی ختم کرتا ہے۔'},
+ {e:'🌬️',te:'Guided breathing',tu:'رہنمائی والی سانس',de:'6 proven techniques with a gentle animated guide.',du:'6 آزمودہ تکنیکس، نرم متحرک رہنمائی کے ساتھ۔'},
+ {e:'🛟',te:'Panic-proof tools',tu:'پینک سے بچاؤ',de:'Rescue mode, grounding & helplines — always ready.',du:'ریسکیو موڈ، گراؤنڈنگ اور ہیلپ لائنز — ہمیشہ تیار۔'}
+];
+var obi=0;
+function obRender(){var o=OBS[obi];
+  document.getElementById('obEmoji').textContent=o.e;
+  document.getElementById('obTitle').textContent=(LANG==='ur'?o.tu:o.te);
+  document.getElementById('obText').textContent=(LANG==='ur'?o.du:o.de);
+  var d='';for(var i=0;i<OBS.length;i++)d+=(i===obi?'●':'○')+' ';document.getElementById('obDots').textContent=d;
+}
+function obNext(){obi++;if(obi>=OBS.length){store.set('onb',1);goHome();}else obRender();}
+
+/* ================= AFFIRMATIONS ================= */
+var AFF=[
+ ['You are safe right now.','آپ اس وقت محفوظ ہیں۔'],
+ ['This feeling will pass.','یہ کیفیت گزر جائے گی۔'],
+ ['One breath at a time.','ایک وقت میں ایک سانس۔'],
+ ['You have survived 100% of hard days.','آپ ہر مشکل دن سے نکل آئے ہیں۔'],
+ ['Slow down. You are doing enough.','آہستہ ہو جاؤ۔ آپ کافی کر رہے ہو۔'],
+ ['Your mind needs rest, not answers.','آپ کے ذہن کو جواب نہیں، آرام چاہیے۔'],
+ ['Let go of what you cannot control.','جو قابو سے باہر ہے اسے چھوڑ دو۔'],
+ ['You are stronger than this wave.','آپ اس لہر سے مضبوط ہیں۔'],
+ ['Peace begins with a single breath.','سکون ایک سانس سے شروع ہوتا ہے۔'],
+ ['Be kind to yourself today.','آج اپنے ساتھ نرمی کرو۔']
+];
+function dailyAffirm(){var d=new Date();var i=(d.getFullYear()*372+d.getMonth()*31+d.getDate())%AFF.length;
+  return LANG==='ur'?AFF[i][1]:AFF[i][0];}
+
+/* ================= HOME ================= */
+function anxUpdate(v){document.getElementById('anxVal').textContent=v;
+  var s=document.getElementById('anxSuggest');
+  var msg=v<=3?(LANG==='ur'?'آپ ٹھیک لگ رہے ہیں 🌸 ہلکی سانس یا اچھی بات جاری رکھیں۔':'You seem okay 🌸 Keep up gentle breathing or an affirmation.')
+    :v<=6?(LANG==='ur'?'درمیانی بے چینی — 2 منٹ باکس بریتھنگ آزمائیں۔':'Moderate anxiety — try 2 min of box breathing.')
+    :(LANG==='ur'?'شدید بے چینی — 4-7-8 سانس یا پینک موڈ آزمائیں۔ آپ اکیلے نہیں۔':'High anxiety — try 4-7-8 breathing or Panic Mode. You are not alone.');
+  s.innerHTML=msg;}
+function dayKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function getStreak(){var days=store.get('sessdays',{});var n=0;var d=new Date();
+  if(!days[dayKey(d)])d.setDate(d.getDate()-1);
+  while(days[dayKey(d)]){n++;d.setDate(d.getDate()-1);}return n;}
+function renderHome(){
+  anxUpdate(document.getElementById('anxRange').value);
+  document.getElementById('affirmTxt').textContent='“'+dailyAffirm()+'”';
+  document.getElementById('streakN').textContent=getStreak();
+  var ss=store.get('sessions',[]).slice(-4).reverse();
+  document.getElementById('recentList').innerHTML=ss.length?ss.map(function(x){
+    return '<div>🌿 '+(x.tech||'')+' — '+Math.round(x.secs/60*10)/10+' min • '+x.date+'</div>';}).join('')
+    :t('nosess');
+}
+function quickCalm(){startTech('coherent',60);}
+
+/* ================= BREATHE ================= */
+var TECHS=[
+ {id:'478',e:'😮‍💨',en:'4-7-8 Breathing',ur:'4-7-8 سانس',d_en:'Calms nerves fast',d_ur:'اعصاب جلدی پرسکون',
+  ph:[['in',4],['hold',7],['out',8]]},
+ {id:'box',e:'🟦',en:'Box Breathing',ur:'باکس بریتھنگ',d_en:'4-4-4-4 steady rhythm',d_ur:'4-4-4-4 مستحکم ردھم',
+  ph:[['in',4],['hold',4],['out',4],['hold',4]]},
+ {id:'belly',e:'🤰',en:'Deep Belly Breathing',ur:'گہری پیٹ کی سانس',d_en:'Slow & deep',d_ur:'آہستہ اور گہری',
+  ph:[['in',5],['out',5]]},
+ {id:'nostril',e:'👃',en:'Alternate Nostril',ur:'متبادل نتھنا',d_en:'Balances the mind',d_ur:'ذہن متوازن کرے',
+  ph:[['in',4,'L'],['hold',4],['out',4,'R'],['in',4,'R'],['hold',4],['out',4,'L']]},
+ {id:'ocean',e:'🌊',en:'Ocean Breath',ur:'سمندری سانس',d_en:'Long soothing exhale',d_ur:'لمبی پرسکون سانس باہر',
+  ph:[['in',4],['out',6]]},
+ {id:'coherent',e:'💗',en:'Coherent Breathing',ur:'ہم آہنگ سانس',d_en:'5-5 heart rhythm',d_ur:'5-5 دل کی ردھم',
+  ph:[['in',5],['out',5]]}
+];
+function techName(id){var x=TECHS.filter(function(z){return z.id===id;})[0];return x?(LANG==='ur'?x.ur:x.en):id;}
+function renderBreathe(){
+  document.getElementById('techList').innerHTML=TECHS.map(function(x){
+    var favs=store.get('favs',[]);
+    return '<div class="listitem"><div class="ico">'+x.e+'</div><div class="tx" onclick="startTech(\''+x.id+'\')">'
+    +'<b>'+(LANG==='ur'?x.ur:x.en)+'</b><small>'+(LANG==='ur'?x.d_ur:x.d_en)+'</small></div>'
+    +'<div style="font-size:24px" onclick="toggleFav(\''+x.id+'\',event)">'+(favs.indexOf(x.id)>=0?'⭐':'☆')+'</div></div>';
+  }).join('');
+}
+function toggleFav(id,ev){if(ev)ev.stopPropagation();var f=store.get('favs',[]);
+  var i=f.indexOf(id);if(i>=0)f.splice(i,1);else f.push(id);store.set('favs',f);renderBreathe();}
+var bsTimer=null,bsPhaseT=null,bsTech=null,bsDur=120,bsElapsed=0,bsTotal=0;
+function setDur(s,el){bsDur=s;document.querySelectorAll('#scr-bsession .chip').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');}
+function startTech(id,dur){bsTech=id;if(dur)bsDur=dur;else bsDur=120;
+  document.getElementById('bsTech').textContent=techName(id);
+  document.getElementById('bsProg').style.width='0%';
+  document.getElementById('bsStartBtn').classList.remove('hidden');
+  document.getElementById('bsStopBtn').classList.add('hidden');
+  document.getElementById('bsCount').textContent='–';document.getElementById('bsPhase').textContent='…';
+  show('scr-bsession');}
+function phaseLabel(a){return a==='in'?t('inhale'):a==='hold'?t('hold'):t('exhale');}
+function startSession(){
+  stopSession();bsElapsed=0;bsTotal=bsDur;
+  document.getElementById('bsStartBtn').classList.add('hidden');
+  document.getElementById('bsStopBtn').classList.remove('hidden');
+  var tech=TECHS.filter(function(x){return x.id===bsTech;})[0];
+  var pi=0,left=0;
+  function nextPhase(){
+    if(bsElapsed>=bsTotal){finishSession();return;}
+    var p=tech.ph[pi%tech.ph.length];pi++;
+    var act=p[0],dur=p[1],side=p[2];
+    left=dur;
+    document.getElementById('bsPhase').textContent=phaseLabel(act)+(side?(side==='L'?(LANG==='ur'?' (بایاں)':' (left)'):(LANG==='ur'?' (دایاں)':' (right)')):'');
+    document.getElementById('bsHint').textContent=act==='in'?(LANG==='ur'?'ناک سے آہستہ سانس اندر':'Slowly in through the nose')
+      :act==='out'?(LANG==='ur'?'منہ سے آہستہ باہر':'Gently out through the mouth')
+      :(LANG==='ur'?'سانس روکے رکھیں':'Keep the air in');
+    var c=document.getElementById('bsCircle');
+    c.style.transition='transform '+dur+'s ease-in-out';
+    if(act==='in')c.style.transform='scale(1.45)';
+    else if(act==='out')c.style.transform='scale(1)';
+    document.getElementById('bsCount').textContent=left;
+    clearInterval(bsPhaseT);
+    bsPhaseT=setInterval(function(){left--;bsElapsed++;
+      if(left>=0)document.getElementById('bsCount').textContent=left;
+      var pct=Math.min(100,bsElapsed/bsTotal*100);
+      document.getElementById('bsProg').style.width=pct+'%';
+      document.getElementById('ringFg').style.strokeDashoffset=(703.7*(1-pct/100)).toFixed(1);
+      if(left<=0){clearInterval(bsPhaseT);nextPhase();}
+    },1000);
+  }
+  nextPhase();
+}
+function stopSession(){clearInterval(bsPhaseT);bsPhaseT=null;
+  var c=document.getElementById('bsCircle');if(c){c.style.transition='';c.style.transform='scale(1)';}
+  var s=document.getElementById('bsStartBtn');if(s)s.classList.remove('hidden');
+  var e=document.getElementById('bsStopBtn');if(e)e.classList.add('hidden');}
+function finishSession(){
+  stopSession();
+  var ss=store.get('sessions',[]);ss.push({tech:techName(bsTech),secs:bsTotal,date:new Date().toLocaleDateString()});
+  store.set('sessions',ss);
+  var dd=store.get('sessdays',{});dd[dayKey(new Date())]=1;store.set('sessdays',dd);
+  document.getElementById('bsPhase').textContent='🌸';
+  document.getElementById('bsCount').textContent='✓';
+  document.getElementById('bsHint').textContent=t('sessiondone')+' '+t('welldone');
+  toast(t('sessiondone'));
+}
+</script>
+
+<script>
+/* ================= SOUNDS (WebAudio generated — honest: no recordings) ================= */
+var AC=null, noiseBuf=null, activeSounds={}, sleepTO=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} 
+  if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function getNoise(c){if(!noiseBuf){noiseBuf=c.createBuffer(1,c.sampleRate*2,c.sampleRate);
+  var d=noiseBuf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;}return noiseBuf;}
+function mkGain(c,v){var g=c.createGain();g.gain.value=v;return g;}
+var SOUNDDEFS=[
+ {id:'rain',e:'🌧️',en:'Rain on Window',ur:'کھڑکی پر بارش'},
+ {id:'ocean',e:'🌊',en:'Ocean Waves',ur:'سمندر کی لہریں'},
+ {id:'forest',e:'🌳',en:'Forest Birds',ur:'جنگل کے پرندے'},
+ {id:'white',e:'📻',en:'White Noise',ur:'وائٹ نائز'},
+ {id:'wind',e:'🍃',en:'Soft Wind',ur:'ہلکی ہوا'},
+ {id:'night',e:'🦗',en:'Night Crickets',ur:'رات کے جھینگر'},
+ {id:'fire',e:'🔥',en:'Fireplace',ur:'آتش دان'},
+ {id:'drone',e:'🕉️',en:'Deep Drone',ur:'گہری دھن'}
+];
+function sndName(id){var x=SOUNDDEFS.filter(function(z){return z.id===id;})[0];return x?(LANG==='ur'?x.ur:x.en):id;}
+function renderSounds(){
+  document.getElementById('soundGrid').innerHTML=SOUNDDEFS.map(function(x){
+    var on=!!activeSounds[x.id];
+    return '<div class="listitem" onclick="toggleSound(\''+x.id+'\')"><div class="ico">'+x.e+'</div>'
+    +'<div class="tx"><b>'+(LANG==='ur'?x.ur:x.en)+'</b><small>'+(on?(LANG==='ur'?'چل رہا ہے':'Playing'):(LANG==='ur'?'بند':'Off'))+'</small></div>'
+    +'<div style="font-size:22px">'+(on?'⏸':'▶')+'</div></div>';
+  }).join('');
+}
+function startSound(id,ch){
+  var c=ac();if(!c){toast('Audio not supported');return;}
+  stopSound(id,true);
+  var master=mkGain(c,0.0);master.connect(c.destination);
+  var N=getNoise(c),nodes=[],timers=[];
+  function src(fType,freq,q){var s=c.createBufferSource();s.buffer=N;s.loop=true;
+    var f=c.createBiquadFilter();f.type=fType;f.frequency.value=freq;f.Q.value=q||1;
+    s.connect(f);f.connect(master);s.start();nodes.push(s);return f;}
+  if(id==='rain'){src('bandpass',2000,0.8);}
+  else if(id==='white'){var s=c.createBufferSource();s.buffer=N;s.loop=true;s.connect(master);s.start();nodes.push(s);}
+  else if(id==='ocean'){var f=src('lowpass',600,0.7);var lfo=c.createOscillator(),lg=c.createGain();
+    lfo.frequency.value=0.12;lg.gain.value=250;lfo.connect(lg);lg.connect(f.frequency);lfo.start();nodes.push(lfo);}
+  else if(id==='wind'){var f2=src('lowpass',420,0.5);var lfo2=c.createOscillator(),lg2=c.createGain();
+    lfo2.frequency.value=0.07;lg2.gain.value=220;lfo2.connect(lg2);lg2.connect(f2.frequency);lfo2.start();nodes.push(lfo2);}
+  else if(id==='forest'){src('highpass',3200,0.7);
+    var chirpT=setInterval(function(){try{var o=c.createOscillator(),g=mkGain(c,0);
+      o.type='sine';var f0=2800+Math.random()*1800;o.frequency.setValueAtTime(f0,c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(f0*1.4,c.currentTime+0.12);
+      g.gain.setValueAtTime(0.05,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.25);
+      o.connect(g);g.connect(master);o.start();o.stop(c.currentTime+0.3);}catch(e){}},900+Math.random()*1600);
+    timers.push(chirpT);}
+  else if(id==='night'){var o2=c.createOscillator();o2.type='square';o2.frequency.value=4300;
+    var g2=mkGain(c,0);var lfo3=c.createOscillator(),lg3=c.createGain();
+    lfo3.frequency.value=14;lg3.gain.value=0.012;lfo3.connect(lg3);lg3.connect(g2.gain);
+    o2.connect(g2);g2.connect(master);o2.start();lfo3.start();nodes.push(o2,lfo3);}
+  else if(id==='fire'){src('lowpass',900,0.6);
+    var cr=setInterval(function(){try{var b=c.createBuffer(1,c.sampleRate*0.06,c.sampleRate);
+      var dd=b.getChannelData(0);for(var i=0;i<dd.length;i++)dd[i]=(Math.random()*2-1)*Math.pow(1-i/dd.length,2);
+      var s2=c.createBufferSource();s2.buffer=b;var g3=mkGain(c,0.25);s2.connect(g3);g3.connect(master);s2.start();}catch(e){}},180+Math.random()*420);
+    timers.push(cr);}
+  else if(id==='drone'){[110,165,220.5].forEach(function(fr,i){var o3=c.createOscillator();o3.type='sine';
+    o3.frequency.value=fr;var g4=mkGain(c,0.05/(i+1));o3.connect(g4);g4.connect(master);o3.start();nodes.push(o3);});}
+  master.gain.linearRampToValueAtTime(ch==='A'?0.5:0.35,c.currentTime+1.2);
+  activeSounds[id]={nodes:nodes,timers:timers,master:master,ch:ch||'A'};
+  mixVol();renderSounds();
+}
+function stopSound(id,silent){
+  var s=activeSounds[id];if(!s)return;
+  try{
+    for(var ti=0;ti<s.timers.length;ti++){clearInterval(s.timers[ti]);}
+    s.master.gain.linearRampToValueAtTime(0.0001,AC.currentTime+0.4);
+    setTimeout(function(){
+      for(var ni=0;ni<s.nodes.length;ni++){try{s.nodes[ni].stop();}catch(e){}}
+      try{s.master.disconnect();}catch(e2){}
+    },500);
+  }catch(e3){}
+  delete activeSounds[id];
+  if(!silent)renderSounds();
+}
+function toggleSound(id){
+  if(activeSounds[id]){stopSound(id);}
+  else{var keys=Object.keys(activeSounds);
+    if(keys.length>=2){stopSound(keys[0],true);}
+    var ch=activeSounds[keys[0]]&&activeSounds[keys[0]].ch==='A'?'B':'A';
+    if(keys.length===0)ch='A';
+    startSound(id,ch);}
+  renderSounds();
+}
+function mixVol(){var a=document.getElementById('volA').value/100,b=document.getElementById('volB').value/100;
+  Object.keys(activeSounds).forEach(function(id){var s=activeSounds[id];
+    try{s.master.gain.linearRampToValueAtTime(s.ch==='A'?a*0.6:b*0.6,AC.currentTime+0.2);}catch(e){}});}
+function stopAllSounds(){Object.keys(activeSounds).forEach(function(id){stopSound(id,true);});renderSounds();
+  if(sleepTO){clearTimeout(sleepTO);sleepTO=null;}}
+function sleepTimer(min,el){
+  document.querySelectorAll('#scr-sounds .chip').forEach(function(c){c.classList.remove('sel');});
+  if(el)el.classList.add('sel');
+  if(sleepTO){clearTimeout(sleepTO);sleepTO=null;}
+  if(min>0){sleepTO=setTimeout(function(){stopAllSounds();toast(LANG==='ur'?'ٹائمر ختم — آوازیں بند':'Timer done — sounds off');},min*60000);
+    toast((LANG==='ur'?'ٹائمر: ':'Timer: ')+min+' min');}
+}
+
+/* ================= GROUNDING ================= */
+var G54321=[
+ {n:5,e:'👀',en:'Name 5 things you can SEE around you',ur:'اپنے اردگرد 5 چیزیں بتائیں جو آپ دیکھ سکتے ہیں'},
+ {n:4,e:'✋',en:'Touch 4 things — feel their texture',ur:'4 چیزوں کو چھوئیں — ان کی ساخت محسوس کریں'},
+ {n:3,e:'👂',en:'Listen for 3 sounds',ur:'3 آوازیں سنیں'},
+ {n:2,e:'👃',en:'Notice 2 smells',ur:'2 خوشبوؤں کو محسوس کریں'},
+ {n:1,e:'👅',en:'Notice 1 taste in your mouth',ur:'منہ میں 1 ذائقہ محسوس کریں'}
+];
+var g5i=0;
+function show54321(){g5i=0;g5Render();}
+function g5Render(){var g=G54321[g5i];
+  document.getElementById('g54321Emoji').textContent=g.e;
+  document.getElementById('g54321Step').textContent=(g5i+1)+' / 5';
+  document.getElementById('g54321Text').textContent=(LANG==='ur'?g.ur:g.en);
+  document.getElementById('g54321Prog').style.width=(g5i/5*100)+'%';}
+function g54321Next(){g5i++;
+  if(g5i>=G54321.length){document.getElementById('g54321Prog').style.width='100%';
+    document.getElementById('g54321Text').textContent=LANG==='ur'?'🌸 شاباش! آپ اس لمحے میں واپس آ گئے۔':'🌸 Well done! You are back in this moment.';
+    document.getElementById('g54321Step').textContent='✓';
+    logSession('5-4-3-2-1',60);return;}
+  g5Render();}
+var GEX={
+ body:{e:'🧘',te:'Body Scan',tu:'باڈی اسکین',steps:[
+   ['Close your eyes. Breathe slowly.','آنکھیں بند کریں۔ آہستہ سانس لیں۔',8],
+   ['Relax your forehead and jaw.','پیشانی اور جبڑا ڈھیلا چھوڑیں۔',10],
+   ['Drop your shoulders down.','کندھے نیچے ڈھیلے چھوڑیں۔',10],
+   ['Unclench your hands. Feel them heavy.','ہاتھ کھولیں۔ بھاری محسوس کریں۔',10],
+   ['Relax your stomach and legs.','پیٹ اور ٹانگیں ڈھیلی چھوڑیں۔',10],
+   ['Feel your whole body calm and still.','پورا جسم پرسکون محسوس کریں۔',12]]},
+ muscle:{e:'💪',te:'Muscle Relaxation',tu:'پٹھوں کا آرام',steps:[
+   ['Make tight fists… hold…','مٹھیاں بھینچیں… روکیں…',8],
+   ['Release! Feel the warmth.','چھوڑیں! گرمی محسوس کریں۔',8],
+   ['Scrunch shoulders to ears… hold…','کندھے کانوں تک اٹھائیں… روکیں…',8],
+   ['Drop them. Feel the relief.','گرائیں۔ سکون محسوس کریں۔',8],
+   ['Tighten legs and toes… hold…','ٹانگیں اور انگلیاں کھینچیں… روکیں…',8],
+   ['Release everything. Breathe.','سب چھوڑیں۔ سانس لیں۔',12]]},
+ safe:{e:'🏝️',te:'Safe Place',tu:'محفوظ جگہ',steps:[
+   ['Close your eyes gently.','آہستہ سے آنکھیں بند کریں۔',8],
+   ['Picture a place where you feel safe.','ایسی جگہ تصور کریں جہاں آپ محفوظ ہوں۔',12],
+   ['What do you see there?','وہاں آپ کیا دیکھتے ہیں؟',10],
+   ['What sounds are around?','کیسی آوازیں ہیں؟',10],
+   ['Feel the calm filling you.','سکون کو اپنے اندر بھرتا محسوس کریں۔',12],
+   ['Stay here as long as you like.','جتنا چاہیں یہیں رہیں۔',12]]}
+};
+var gexT=null,gexKey=null;
+function guidedEx(k){gexKey=k;var g=GEX[k];
+  document.getElementById('gexTitle').textContent=LANG==='ur'?g.tu:g.te;
+  document.getElementById('gexEmoji').textContent=g.e;
+  document.getElementById('gexText').textContent=LANG==='ur'?'تیار ہیں؟ نیچے دبائیں۔':'Ready? Press below.';
+  document.getElementById('gexCount').textContent='';document.getElementById('gexProg').style.width='0%';
+  document.getElementById('gexStartBtn').classList.remove('hidden');
+  show('scr-gex');}
+function gexStart(){gexStop();var g=GEX[gexKey];var i=0;var total=g.steps.reduce(function(a,s){return a+s[2];},0);var done=0;
+  document.getElementById('gexStartBtn').classList.add('hidden');
+  function step(){if(i>=g.steps.length){
+    document.getElementById('gexText').textContent=LANG==='ur'?'🌸 مکمل!':'🌸 Complete!';
+    document.getElementById('gexCount').textContent='✓';
+    document.getElementById('gexProg').style.width='100%';
+    logSession(GEX[gexKey].te,total);return;}
+    var s=g.steps[i];i++;
+    document.getElementById('gexText').textContent=LANG==='ur'?s[1]:s[0];
+    var left=s[2];document.getElementById('gexCount').textContent=left;
+    gexT=setInterval(function(){left--;done++;
+      document.getElementById('gexCount').textContent=Math.max(0,left);
+      document.getElementById('gexProg').style.width=(done/total*100)+'%';
+      if(left<=0){clearInterval(gexT);step();}},1000);}
+  step();}
+function gexStop(){if(gexT)clearInterval(gexT);gexT=null;}
+function logSession(tech,secs){var ss=store.get('sessions',[]);ss.push({tech:tech,secs:secs,date:new Date().toLocaleDateString()});
+  store.set('sessions',ss);var dd=store.get('sessdays',{});dd[dayKey(new Date())]=1;store.set('sessdays',dd);}
+
+/* ================= PANIC ================= */
+var panicT=null;
+function goPanic(fromSplash){stopAllSounds();show('scr-panic');
+  document.getElementById('panicArea').classList.add('hidden');
+  document.getElementById('panicBtn').style.display='block';}
+function panicRescue(){
+  document.getElementById('panicBtn').style.display='none';
+  document.getElementById('panicArea').classList.remove('hidden');
+  var left=60;var c=document.getElementById('panicCircle');
+  document.getElementById('panicCount').textContent=left;
+  var phase='in',pl=0;
+  clearInterval(panicT);
+  function tick(){
+    document.getElementById('panicPhase').textContent=phaseLabel(phase);
+    c.style.transition='transform 4s ease-in-out';
+    c.style.transform=phase==='in'?'scale(1.35)':'scale(1)';
+    pl=0;
+    panicT=setInterval(function(){pl++;left--;
+      document.getElementById('panicCount').textContent=Math.max(0,left);
+      if(left<=0){clearInterval(panicT);
+        document.getElementById('panicPhase').textContent='🌸';
+        document.getElementById('panicCount').textContent='✓';
+        logSession('Panic rescue',60);
+        toast(t('welldone'));return;}
+      if(pl>=4){clearInterval(panicT);phase=(phase==='in'?'out':'in');tick();}
+    },1000);
+  }
+  tick();
+}
+
+/* ================= MOOD ================= */
+var TRIGS=['work','family','health','sleep','other'];var selTrig=[];
+function renderMood(){
+  document.getElementById('trigTags').innerHTML=TRIGS.map(function(x){
+    return '<span class="tag'+(selTrig.indexOf(x)>=0?' sel':'')+'" onclick="tgT(\''+x+'\')">'+t(x)+'</span>';}).join('');
+  var logs=store.get('mood',[]);var html='';var d=new Date();
+  for(var i=6;i>=0;i--){var dd=new Date();dd.setDate(d.getDate()-i);
+    var k=dayKey(dd);var day=logs.filter(function(l){return l.day===k;});
+    var avg=day.length?Math.round(day.reduce(function(a,l){return a+l.v;},0)/day.length):null;
+    html+='<div class="kv"><span>'+dd.toLocaleDateString()+'</span><b>'+(avg==null?'–':avg+'/10 '+(avg<=3?'😌':avg<=6?'😐':'😟'))+'</b></div>';}
+  document.getElementById('moodWeek').innerHTML=html;
+}
+function tgT(x){var i=selTrig.indexOf(x);if(i>=0)selTrig.splice(i,1);else selTrig.push(x);renderMood();}
+function saveMood(){var v=parseInt(document.getElementById('moodRange').value,10);
+  var logs=store.get('mood',[]);
+  logs.push({day:dayKey(new Date()),v:v,tr:selTrig.slice(),note:document.getElementById('moodNote').value});
+  store.set('mood',logs);selTrig=[];document.getElementById('moodNote').value='';
+  toast(LANG==='ur'?'محفوظ ہو گیا':'Saved');renderMood();}
+
+/* ================= PROFILE ================= */
+function renderProfile(){
+  var ss=store.get('sessions',[]);
+  document.getElementById('stSessions').textContent=ss.length;
+  document.getElementById('stMinutes').textContent=Math.round(ss.reduce(function(a,x){return a+x.secs;},0)/60);
+  document.getElementById('stStreak').textContent=getStreak();
+  var cnt={};ss.forEach(function(x){cnt[x.tech]=(cnt[x.tech]||0)+1;});
+  var fav='–',mx=0;Object.keys(cnt).forEach(function(k){if(cnt[k]>mx){mx=cnt[k];fav=k;}});
+  document.getElementById('stFav').textContent=fav;
+  var fl=store.get('favs',[]);
+  document.getElementById('favList').innerHTML=fl.length?fl.map(function(id){return '⭐ '+techName(id);}).join('<br>'):(LANG==='ur'?'ابھی کوئی نہیں':'None yet');
+  document.getElementById('remTgl').classList.toggle('on',!!store.get('rem',false));
+}
+function resetAll(){if(confirm(LANG==='ur'?'سارا ڈیٹا صاف کر دیں؟':'Clear all data?')){
+  ['sessions','sessdays','mood','favs','onb'].forEach(function(k){try{localStorage.removeItem('sukoon_'+k);}catch(e){}});
+  location.reload();}}
+
+/* ================= RENDER ALL / INIT ================= */
+function renderAll(){renderBreathe();renderSounds();renderHome();applyDark();}
+function checkExpiry(){
+  var KEY='sukoon_demo_start',DAYS=3,now=Date.now(),start=store.get('demo_start',0);
+  if(!start){store.set('demo_start',now);return;}
+  if(now-start>DAYS*24*60*60*1000){
+    document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#ffd9b8,#d9c8f5);color:#4a4458;font-family:system-ui;text-align:center;padding:24px">'
+    +'<div style="font-size:64px;margin-bottom:16px">🌸</div><h1>'+t('expired_t')+'</h1>'
+    +'<p style="max-width:320px">'+t('expired_s')+'</p>'
+    +'<div style="margin-top:20px;padding:10px 22px;background:#1e1b2e;color:#ffd166;border-radius:12px;font-weight:bold;font-size:13px">DEMO by Jilan Apps</div></div>';
+    throw new Error('expired');
+  }
+}
+try{checkExpiry();}catch(e){/* expired */}
+applyLang();applyDark();obRender();renderAll();
+if(store.get('onb',0)){show('scr-home');document.querySelector('#mainNav button').classList.add('sel');}
+else{show('scr-splash');}
+show54321();
+</script>
+</body>
+</html>
