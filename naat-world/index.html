@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jilan Naat World</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0b3d2e; --bg2:#0e4d3a; --card:#104f3b; --card2:#0d4433;
+  --gold:#c9a227; --gold2:#e8c85a; --txt:#f5f1e6; --mut:#b9c9bf;
+  --bar:#082e23; --danger:#c0392b; --ok:#27ae60; --shadow:0 4px 14px rgba(0,0,0,.35);
+}
+body.light{
+  --bg:#f4f1e8; --bg2:#ffffff; --card:#ffffff; --card2:#f9f6ec;
+  --txt:#1e3a2f; --mut:#5c6f64; --bar:#0b3d2e; --shadow:0 2px 8px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;
+  background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--txt);min-height:100vh;
+  touch-action:manipulation;padding-bottom:150px}
+h1{font-size:24px;margin:14px 16px 4px} h2{font-size:18px;margin:18px 16px 8px}
+.sub{color:var(--mut);font-size:13px;margin:0 16px 8px}
+.screen{display:none;max-width:640px;margin:0 auto;padding-bottom:20px}
+.screen.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+/* splash */
+#splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 35%,#0e5a43,#072a20);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;transition:opacity .5s}
+#splash img{width:190px;height:190px;border-radius:44px;box-shadow:0 8px 30px rgba(201,162,39,.4);border:3px solid var(--gold)}
+#splash .t{font-size:30px;font-weight:800;color:var(--gold2);margin-top:18px;letter-spacing:1px}
+#splash .s{color:var(--mut);font-size:13px;margin-top:6px}
+/* topbar */
+#topbar{position:sticky;top:0;z-index:100;background:var(--bar);padding:10px 12px;
+  display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+#topbar img{width:40px;height:40px;border-radius:12px;border:2px solid var(--gold)}
+#topbar .tt{font-weight:800;color:var(--gold2);font-size:17px;flex:1}
+.icobtn{background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.4);color:var(--gold2);
+  border-radius:12px;font-size:19px;padding:7px 11px;cursor:pointer}
+/* banner */
+.banner{margin:12px 16px;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(201,162,39,.5)}
+.banner img{width:100%;height:150px;object-fit:cover;display:block}
+.banner .ov{position:absolute;inset:auto 0 0 0;padding:12px 14px;background:linear-gradient(0deg,rgba(4,25,18,.92),transparent);color:#ffe9a8}
+.banner .ov b{font-size:18px}
+/* search */
+.srch{margin:10px 16px;display:flex;gap:8px}
+.srch input{flex:1;padding:13px 14px;border-radius:14px;border:1px solid rgba(201,162,39,.4);
+  background:var(--card);color:var(--txt);font-size:15px}
+/* cards & rows */
+.card{background:var(--card);border:1px solid rgba(201,162,39,.25);border-radius:16px;margin:10px 16px;padding:12px;box-shadow:var(--shadow)}
+.rowitem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;cursor:pointer;margin:6px 0;background:var(--card);border:1px solid rgba(201,162,39,.18)}
+.rowitem:active{transform:scale(.98)}
+.thumb{width:52px;height:52px;border-radius:14px;object-fit:cover;flex-shrink:0;background:#0a2c21;border:1px solid rgba(201,162,39,.4)}
+.rowitem .nm{font-weight:700;font-size:15px}
+.rowitem .mt{font-size:12px;color:var(--mut)}
+.rowitem .grow{flex:1;min-width:0}
+.badge{font-size:10px;background:#7a5c00;color:#ffe9a8;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.badge.ok{background:#14532d;color:#bbf7d0}
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px}
+.chip{flex-shrink:0;background:var(--card);border:1px solid rgba(201,162,39,.4);color:var(--txt);
+  border-radius:999px;padding:9px 16px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--gold);color:#08281d;font-weight:700}
+/* horizontal scrollers */
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px}
+.khwan{flex-shrink:0;width:104px;text-align:center;cursor:pointer}
+.khwan img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);background:#0a2c21}
+.khwan .n{font-size:12px;margin-top:6px;font-weight:600}
+/* buttons */
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;
+  color:#08281d;background:linear-gradient(180deg,var(--gold2),var(--gold));margin:8px 0;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.btn.ghost{background:var(--card);color:var(--txt);border:1px solid rgba(201,162,39,.4)}
+.btn.danger{background:linear-gradient(180deg,#e05a4b,#b03a2c);color:#fff}
+.btn.sm{padding:9px;font-size:13px;width:auto;display:inline-block;margin:4px 6px 4px 0}
+.row2{display:flex;gap:8px}.row2 .btn{flex:1}
+/* mini player */
+#mini{position:fixed;left:0;right:0;bottom:64px;z-index:900;background:var(--bar);
+  border-top:2px solid var(--gold);display:none;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 -4px 16px rgba(0,0,0,.4)}
+#mini img{width:46px;height:46px;border-radius:10px;border:1px solid var(--gold)}
+#mini .mi{flex:1;min-width:0}#mini .mn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffe9a8}
+#mini .mk{font-size:11px;color:var(--mut)}
+#mini button{background:none;border:none;font-size:22px;color:var(--gold2);cursor:pointer;padding:6px}
+/* bottom nav */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:950;background:var(--bar);display:flex;
+  border-top:1px solid rgba(201,162,39,.4);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#nav button{flex:1;background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:6px 2px}
+#nav button .e{font-size:21px;display:block}
+#nav button.on{color:var(--gold2)}
+/* fullscreen player */
+#fs{position:fixed;inset:0;z-index:1500;background:linear-gradient(180deg,#072a20,#0b3d2e);display:none;
+  flex-direction:column;align-items:center;padding:20px 18px 30px;overflow-y:auto}
+#fs img.art{width:230px;height:230px;border-radius:28px;border:4px solid var(--gold);box-shadow:0 10px 40px rgba(201,162,39,.35);margin-top:26px;object-fit:cover}
+#fs .ft{font-size:21px;font-weight:800;color:#ffe9a8;margin:18px 8px 2px;text-align:center}
+#fs .fk{color:var(--mut);font-size:14px}
+.seek{width:100%;margin:16px 0 4px}input[type=range]{width:100%;accent-color:var(--gold)}
+.times{display:flex;justify-content:space-between;width:100%;font-size:12px;color:var(--mut)}
+.pctl{display:flex;align-items:center;gap:14px;margin:14px 0}
+.pctl button{background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.5);color:var(--gold2);
+  border-radius:50%;width:58px;height:58px;font-size:24px;cursor:pointer}
+.pctl button.big{width:78px;height:78px;font-size:32px;background:var(--gold);color:#08281d;border:none}
+.prow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.pill{background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.4);color:var(--txt);border-radius:999px;
+  padding:8px 14px;font-size:13px;cursor:pointer}
+.pill.on{background:var(--gold);color:#08281d;font-weight:700}
+#fsClose{position:absolute;top:14px;left:14px}
+/* forms */
+.inp{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(201,162,39,.4);background:var(--card);color:var(--txt);font-size:14px;margin:6px 0}
+select.inp{appearance:auto}
+.lbl{font-size:12px;color:var(--mut);margin:8px 0 2px}
+/* toast + err */
+#toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:#08281d;color:#ffe9a8;
+  border:1px solid var(--gold);padding:11px 20px;border-radius:999px;font-size:14px;z-index:3000;display:none;box-shadow:var(--shadow)}
+#err{position:fixed;top:0;left:0;right:0;background:#a00;color:#fff;padding:10px;z-index:4000;display:none;font-size:13px;text-align:center}
+/* admob placeholders */
+.adslot{margin:10px 16px;border:1px dashed rgba(201,162,39,.5);border-radius:12px;padding:14px;text-align:center;
+  color:var(--mut);font-size:12px;display:none}
+/* misc */
+.empty{text-align:center;color:var(--mut);padding:30px 20px;font-size:14px}
+.spin{width:34px;height:34px;border:4px solid rgba(201,162,39,.3);border-top-color:var(--gold);border-radius:50%;
+  animation:sp 1s linear infinite;margin:20px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hdr{display:flex;align-items:center;gap:8px;margin:0 16px}
+.hdr h2{margin:14px 0;flex:1}
+.prog{height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:6px}
+.prog i{display:block;height:100%;background:var(--gold);width:0%}
+.stbar{font-size:12px;color:var(--mut);margin-top:4px}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(201,162,39,.15);font-size:14px}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<div id="splash">
+  <img src="logo.png" alt="Jilan Naat World">
+  <div class="t">Jilan Naat World</div>
+  <div class="s" id="splashSub">Har Naat Khwan ki Naatein — Ek Hi Jagah</div>
+</div>
+
+<div id="topbar">
+  <img src="icon-192.png" alt="logo">
+  <div class="tt">Jilan Naat World</div>
+  <button class="icobtn" onclick="go('search')" title="Search">🔍</button>
+  <button class="icobtn" onclick="go('settings')" title="Settings">⚙️</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen on">
+  <div class="banner"><img src="banner.png" alt="Green Dome"><div class="ov"><b>🕌 Jilan Naat World</b><br>Har Naat Khwan ki Naatein — Ek Hi Jagah</div></div>
+  <div class="srch"><input id="homeQ" placeholder="Naat ya Naat Khwan talash karein…" onkeydown="if(event.key==='Enter')doSearch(this.value)"></div>
+  <div id="homeRecent"></div>
+  <div class="hdr"><h2>🎤 Mashhoor Naat Khwan</h2><button class="btn sm ghost" onclick="go('khwans')">Sab Dekhein</button></div>
+  <div class="hscroll" id="homeKhwans"></div>
+  <div class="hdr"><h2>⭐ Featured Naatein</h2></div>
+  <div id="homeFeat"></div>
+  <div class="hdr"><h2>📂 Categories</h2></div>
+  <div class="chips" id="homeCats"></div>
+  <div class="hdr"><h2>❤️ Pasandeeda</h2><button class="btn sm ghost" onclick="go('favs')">Sab</button></div>
+  <div id="homeFavs"></div>
+  <div class="adslot" id="adHome">AdMob Banner (disabled — config me enable karein)</div>
+</div>
+
+<!-- ALL KHWANS -->
+<div id="khwans" class="screen">
+  <h1>🎤 Tamam Naat Khwan</h1>
+  <div class="srch"><input id="khwanQ" placeholder="Naat Khwan ka naam…" oninput="renderKhwans(this.value)"></div>
+  <div id="khwanList"></div>
+</div>
+
+<!-- KHWAN DETAIL -->
+<div id="khwan" class="screen">
+  <div id="khwanHead"></div>
+  <div class="srch"><input id="khwanNQ" placeholder="Is Naat Khwan ki naat talash karein…" oninput="renderKhwanNaats(this.value)"></div>
+  <div class="row2" style="margin:0 16px">
+    <button class="btn sm" onclick="playAllKhwan()">▶️ Play All</button>
+    <button class="btn sm ghost" onclick="shuffleKhwan()">🔀 Shuffle</button>
+  </div>
+  <div id="khwanNaats"></div>
+</div>
+
+<!-- CATEGORIES -->
+<div id="cats" class="screen">
+  <h1>📂 Categories</h1>
+  <div id="catList"></div>
+</div>
+<div id="catd" class="screen">
+  <div id="catHead"></div>
+  <div id="catNaats"></div>
+</div>
+
+<!-- SEARCH -->
+<div id="search" class="screen">
+  <h1>🔍 Talash</h1>
+  <div class="srch"><input id="searchQ" placeholder="Naat, Naat Khwan, category…" oninput="doSearch(this.value)">
+  <button class="btn sm ghost" onclick="clearSearch()">✖</button></div>
+  <div id="searchRes"></div>
+</div>
+
+<!-- FAVORITES -->
+<div id="favs" class="screen">
+  <h1>❤️ Pasandeeda Naatein</h1>
+  <div id="favList"></div>
+</div>
+
+<!-- PLAYLISTS -->
+<div id="plists" class="screen">
+  <div class="hdr"><h2>📝 Playlists</h2><button class="btn sm" onclick="newPlaylist()">＋ Nayi</button></div>
+  <div id="plistList"></div>
+</div>
+<div id="plistd" class="screen">
+  <div id="plistHead"></div>
+  <div id="plistNaats"></div>
+</div>
+
+<!-- DOWNLOADS -->
+<div id="dls" class="screen">
+  <h1>⬇️ Downloaded Naatein</h1>
+  <div class="card"><div class="kv"><span>Storage istemal</span><b id="dlSize">…</b></div>
+  <div class="stbar">Sirf wohi audio download hoti hai jo server ijazat de (CORS). Local sample files hamesha download ho sakti hain.</div></div>
+  <div id="dlList"></div>
+</div>
+
+<!-- HISTORY -->
+<div id="hist" class="screen">
+  <div class="hdr"><h2>🕐 Tareekh (History)</h2><button class="btn sm danger" onclick="clearHistory()">Saaf Karein</button></div>
+  <div id="histList"></div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminlogin" class="screen">
+  <h1>🔐 Admin Login</h1>
+  <div class="card">
+    <div class="lbl">PIN darj karein (default: 1234)</div>
+    <input class="inp" id="adminPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN">
+    <button class="btn" onclick="adminLogin()">Login</button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin" class="screen">
+  <div class="hdr"><h2>🛠️ Admin Dashboard</h2><button class="btn sm ghost" onclick="adminLogout()">Logout</button></div>
+  <div class="card">
+    <div class="lbl">PIN tabdeel karein</div>
+    <div class="row2"><input class="inp" id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="Naya PIN">
+    <button class="btn sm" onclick="changePin()">Save</button></div>
+  </div>
+  <div class="hdr"><h2>🎤 Naat Khwan</h2><button class="btn sm" onclick="khwanForm()">＋ Naya</button></div>
+  <div id="adminKhwans"></div>
+  <div class="hdr"><h2>🎵 Naatein</h2><button class="btn sm" onclick="naatForm()">＋ Nayi Naat</button></div>
+  <div id="adminNaats"></div>
+  <div class="card"><div class="stbar">Stats: <span id="adminStats"></span></div>
+  <div class="stbar">Note: Tamam data is device par mehfooz hai (localStorage). Mustaqbil me Firebase jor kar cloud admin banaya ja sakta hai.</div></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen">
+  <h1>⚙️ Settings</h1>
+  <div class="card">
+    <div class="kv"><span>🌙 Dark Mode</span><button class="pill" id="themeTgl" onclick="toggleTheme()">Toggle</button></div>
+    <div class="kv"><span>🌐 Zuban / Language</span>
+      <span><button class="pill" onclick="setLang('ur')">اردو</button>
+      <button class="pill" onclick="setLang('ro')">Roman</button>
+      <button class="pill" onclick="setLang('en')">EN</button></span></div>
+    <div class="kv"><span>⏾ Sleep Timer (min)</span>
+      <span><input class="inp" id="sleepMin" type="number" min="0" max="180" style="width:80px;display:inline" placeholder="0">
+      <button class="pill" onclick="setSleepUI()">Set</button></span></div>
+  </div>
+  <div class="card">
+    <button class="btn ghost" onclick="go('dls')">⬇️ Downloads</button>
+    <button class="btn ghost" onclick="go('hist')">🕐 History</button>
+    <button class="btn ghost" onclick="go('adminlogin')">🛠️ Admin Panel</button>
+  </div>
+  <div class="card">
+    <div class="kv"><span>Version</span><b>Jilan Naat World v1.0</b></div>
+    <div class="stbar">Background playback WebView me mehdood hai — screen on rakhne par behtareen chalta hai. Tamaam sample audio sirf testing ke liye hai; asal recordings admin ke zariye authorized URLs se shamil karein.</div>
+  </div>
+</div>
+
+<!-- MINI PLAYER -->
+<div id="mini" onclick="openFS(event)">
+  <img id="miniArt" src="icon-192.png">
+  <div class="mi"><div class="mn" id="miniName">—</div><div class="mk" id="miniKhwan">—</div></div>
+  <button onclick="togglePlay(event)">⏯</button>
+  <button onclick="nextTrack(event)">⏭</button>
+</div>
+
+<!-- FULLSCREEN PLAYER -->
+<div id="fs">
+  <button class="icobtn" id="fsClose" onclick="closeFS()">⬇</button>
+  <img class="art" id="fsArt" src="icon-192.png">
+  <div class="ft" id="fsTitle">—</div>
+  <div class="fk" id="fsKhwan">—</div>
+  <div id="fsLoad"><div class="spin"></div></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="1000" value="0" oninput="seekTo(this.value)"></div>
+  <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+  <div class="pctl">
+    <button onclick="toggleShuffle()" id="btnShuf" title="Shuffle">🔀</button>
+    <button onclick="prevTrack()">⏮</button>
+    <button class="big" onclick="togglePlay()" id="btnPlay">▶</button>
+    <button onclick="nextTrack()">⏭</button>
+    <button onclick="cycleRepeat()" id="btnRep" title="Repeat">🔁</button>
+  </div>
+  <div class="prow">
+    <button class="pill" id="pillFav" onclick="toggleFav(currentId)">🤍 Favorite</button>
+    <button class="pill" onclick="addToPlaylistUI(currentId)">📝 Playlist</button>
+    <button class="pill" onclick="downloadNaat(currentId)">⬇️ Download</button>
+    <button class="pill" id="pillSleep" onclick="sleepQuick()">⏾ Sleep</button>
+  </div>
+  <div class="prow"><span class="stbar" id="fsNote"></span></div>
+  <div class="adslot" id="adFs">AdMob Interstitial (disabled)</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="nav">
+  <button data-s="home" class="on" onclick="go('home')"><span class="e">🏠</span>Home</button>
+  <button data-s="khwans" onclick="go('khwans')"><span class="e">🎤</span>Khwan</button>
+  <button data-s="cats" onclick="go('cats')"><span class="e">📂</span>Cat</button>
+  <button data-s="favs" onclick="go('favs')"><span class="e">❤️</span>Fav</button>
+  <button data-s="plists" onclick="go('plists')"><span class="e">📝</span>Lists</button>
+</div>
+
+<div id="toast"></div>
+<audio id="au" preload="metadata"></audio>
+
+<script>
+/* ================= JILAN NAAT WORLD v1.0 ================= */
+'use strict';
+/* AdMob config — DISABLED by default. Fill IDs to enable. */
+var ADMOB={enabled:false,bannerId:'',interstitialId:''};
+
+var CATS=['Hamd','Naat-e-Rasool ﷺ','Salam','Manqabat','Milad','Ramadan','Urdu','Punjabi','Arabic'];
+var LANGS=['Urdu','Punjabi','Arabic','English'];
+
+/* ---- Seed data: SAMPLE audio only, clearly labeled. No real recordings claimed. ---- */
+function seedKhwans(){return [
+ {id:'k1',name:'Owais Raza Qadri',bio:'Bulbul-e-Madina — sample collection'},
+ {id:'k2',name:'Muhammad Taha Al Junaid',bio:'Sample collection'},
+ {id:'k3',name:'Farhan Ali Qadri',bio:'Sample collection'},
+ {id:'k4',name:'Hafiz Tahir Qadri',bio:'Sample collection'},
+ {id:'k5',name:'Jilan Studio',bio:'Demo / sample naatein'}
+];}
+function seedNaats(){return [
+ {id:'n1',khwanId:'k1',title:'Sample Naat 1 (demo)',cat:'Naat-e-Rasool ﷺ',lang:'Urdu',url:'audio/sample1.mp3',featured:true,sample:true},
+ {id:'n2',khwanId:'k1',title:'Sample Hamd 1 (demo)',cat:'Hamd',lang:'Urdu',url:'audio/sample2.mp3',featured:false,sample:true},
+ {id:'n3',khwanId:'k2',title:'Sample Naat 2 (demo)',cat:'Naat-e-Rasool ﷺ',lang:'Urdu',url:'audio/sample3.mp3',featured:true,sample:true},
+ {id:'n4',khwanId:'k3',title:'Sample Salam (demo)',cat:'Salam',lang:'Urdu',url:'audio/sample4.mp3',featured:false,sample:true},
+ {id:'n5',khwanId:'k4',title:'Sample Manqabat (demo)',cat:'Manqabat',lang:'Urdu',url:'audio/sample1.mp3',featured:false,sample:true},
+ {id:'n6',khwanId:'k5',title:'Sample Milad Naat (demo)',cat:'Milad',lang:'Punjabi',url:'audio/sample2.mp3',featured:true,sample:true},
+ {id:'n7',khwanId:'k5',title:'Sample Ramadan (demo)',cat:'Ramadan',lang:'Arabic',url:'audio/sample3.mp3',featured:false,sample:true},
+ {id:'n8',khwanId:'k2',title:'Sample Naat 3 (demo)',cat:'Urdu',lang:'Urdu',url:'audio/sample4.mp3',featured:false,sample:true}
+];}
+
+/* ---- Store ---- */
+var S={favs:[],playlists:[],history:[],recent:[],settings:{theme:'dark',lang:'ro',pin:'1234',sleep:0},
+       khwans:[],naats:[],admin:false};
+function save(){try{localStorage.setItem('jnw1',JSON.stringify({favs:S.favs,playlists:S.playlists,history:S.history,recent:S.recent,settings:S.settings,khwans:S.khwans,naats:S.naats}));}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem('jnw1')||'null');
+ if(d){S.favs=d.favs||[];S.playlists=d.playlists||[];S.history=d.history||[];S.recent=d.recent||[];
+  S.settings=Object.assign(S.settings,d.settings||{});S.khwans=d.khwans||[];S.naats=d.naats||[];}}catch(e){}
+ if(!S.khwans.length)S.khwans=seedKhwans();
+ if(!S.naats.length)S.naats=seedNaats();
+}
+function khwanName(id){var k=S.khwans.find(function(x){return x.id===id;});return k?k.name:'—';}
+function naatById(id){return S.naats.find(function(x){return x.id===id;});}
+
+/* ---- helpers ---- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},2200);}
+function showErr(m){var e=$('err');e.textContent='⚠️ '+m;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
+function fmtT(s){if(!isFinite(s)||s<0)s=0;s=Math.floor(s);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+function sampleBadge(n){return n.sample?'<span class="badge">SAMPLE</span>':'';}
+function artFor(n){return n.art||'icon-192.png';}
+
+/* ---- Router ---- */
+var stack=['home'];
+function go(id){var cur=stack[stack.length-1];if(cur!==id)stack.push(id);render(id);
+ var btns=document.querySelectorAll('#nav button');for(var i=0;i<btns.length;i++)btns[i].classList.toggle('on',btns[i].dataset.s===id);
+ window.scrollTo(0,0);}
+function goBack(){if(stack.length>1){stack.pop();var id=stack[stack.length-1];render(id);} }
+window.__atMenu=function(){return stack[stack.length-1]==='home';};
+window.__goMenu=function(){stack=['home'];render('home');};
+function render(id){
+ var ss=document.querySelectorAll('.screen');for(var i=0;i<ss.length;i++)ss[i].classList.remove('on');
+ var el=$(id);if(el)el.classList.add('on');
+ if(id==='home')renderHome();else if(id==='khwans')renderKhwans($('khwanQ').value||'');
+ else if(id==='cats')renderCats();else if(id==='favs')renderFavs();
+ else if(id==='plists')renderPlists();else if(id==='dls')renderDls();
+ else if(id==='hist')renderHist();else if(id==='admin')renderAdmin();
+ var btns=document.querySelectorAll('#nav button');for(var j=0;j<btns.length;j++)btns[j].classList.toggle('on',btns[j].dataset.s===id);
+}
+
+/* ---- Home ---- */
+function naatRow(n,extra){
+ return '<div class="rowitem" onclick="playNaat(\''+n.id+'\')">'
+ +'<img class="thumb" src="'+esc(artFor(n))+'" onerror="this.src=\'icon-192.png\'">'
+ +'<div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
+ +'<div class="mt">'+esc(khwanName(n.khwanId))+' • '+esc(n.cat)+'</div></div>'
+ +(extra||'')+'<button class="icobtn" onclick="toggleFav(\''+n.id+'\',event)">'+(S.favs.indexOf(n.id)>=0?'❤️':'🤍')+'</button></div>';
+}
+function renderHome(){
+ var r=S.recent.map(naatById).filter(Boolean).slice(0,5);
+ $('homeRecent').innerHTML=r.length?'<div class="hdr"><h2>🕐 Haal me Suni</h2></div>'+r.map(function(n){return naatRow(n);}).join(''):'';
+ $('homeKhwans').innerHTML=S.khwans.slice(0,8).map(function(k){
+  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
+  return '<div class="khwan" onclick="openKhwan(\''+k.id+'\')"><img src="icon-192.png" onerror="this.src=\'icon-192.png\'"><div class="n">'+esc(k.name)+'<br><span style="color:var(--mut);font-size:11px">'+c+' naatein</span></div></div>';}).join('');
+ $('homeFeat').innerHTML=S.naats.filter(function(n){return n.featured;}).slice(0,5).map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi featured naat nahi</div>';
+ $('homeCats').innerHTML=CATS.map(function(c){return '<button class="chip" onclick="openCat(\''+esc(c)+'\')">'+esc(c)+'</button>';}).join('');
+ var f=S.favs.map(naatById).filter(Boolean).slice(0,3);
+ $('homeFavs').innerHTML=f.length?f.map(function(n){return naatRow(n);}).join(''):'<div class="empty">Abhi koi pasandeeda nahi — 🤍 dabayein</div>';
+ $('adHome').style.display=ADMOB.enabled?'block':'none';
+}
+
+/* ---- Khwans ---- */
+var curKhwan=null;
+function renderKhwans(q){
+ q=(q||'').toLowerCase();
+ var list=S.khwans.filter(function(k){return k.name.toLowerCase().indexOf(q)>=0;});
+ $('khwanList').innerHTML=list.map(function(k){
+  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
+  return '<div class="rowitem" onclick="openKhwan(\''+k.id+'\')"><img class="thumb" style="border-radius:50%" src="icon-192.png">'
+  +'<div class="grow"><div class="nm">'+esc(k.name)+'</div><div class="mt">'+esc(k.bio||'')+' • '+c+' naatein</div></div><span>›</span></div>';}).join('')
+  ||'<div class="empty">Koi Naat Khwan nahi mila</div>';
+}
+function openKhwan(id){curKhwan=id;$('khwanNQ').value='';renderKhwanHead();renderKhwanNaats('');go('khwan');}
+function renderKhwanHead(){var k=S.khwans.find(function(x){return x.id===curKhwan;});if(!k)return;
+ var c=S.naats.filter(function(n){return n.khwanId===curKhwan;}).length;
+ $('khwanHead').innerHTML='<div class="card" style="text-align:center"><img src="icon-192.png" style="width:110px;height:110px;border-radius:50%;border:3px solid var(--gold)">'
+ +'<h2 style="margin:10px 0 4px">'+esc(k.name)+'</h2><div class="sub">'+esc(k.bio||'')+' • '+c+' naatein</div>'
+ +'<div class="stbar">Demo audio — asal recordings admin authorized URLs se shamil karega.</div></div>';
+}
+function renderKhwanNaats(q){
+ q=(q||'').toLowerCase();
+ var list=S.naats.filter(function(n){return n.khwanId===curKhwan&&n.title.toLowerCase().indexOf(q)>=0;});
+ $('khwanNaats').innerHTML=list.map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi naat nahi mili</div>';
+}
+function playAllKhwan(){var l=S.naats.filter(function(n){return n.khwanId===curKhwan;});if(l.length)playQueue(l.map(function(n){return n.id;}));}
+function shuffleKhwan(){var l=S.naats.filter(function(n){return n.khwanId===curKhwan;}).map(function(n){return n.id;});
+ for(var i=l.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=l[i];l[i]=l[j];l[j]=t;}
+ if(l.length)playQueue(l);}
+
+/* ---- Categories ---- */
+var curCat=null;
+function renderCats(){$('catList').innerHTML=CATS.map(function(c){
+ var n=S.naats.filter(function(x){return x.cat===c;}).length;
+ return '<div class="rowitem" onclick="openCat(\''+esc(c)+'\')"><div class="grow"><div class="nm">'+esc(c)+'</div><div class="mt">'+n+' naatein</div></div><span>›</span></div>';}).join('');}
+function openCat(c){curCat=c;$('catHead').innerHTML='<h1>📂 '+esc(c)+'</h1>';
+ var l=S.naats.filter(function(n){return n.cat===c;});
+ $('catNaats').innerHTML=l.map(function(n){return naatRow(n);}).join('')||'<div class="empty">Is category me koi naat nahi</div>';go('catd');}
+
+/* ---- Search ---- */
+function doSearch(q){q=(q||'').trim();$('homeQ').value=q;
+ if(stack[stack.length-1]!=='search')go('search');$('searchQ').value=q;
+ q=q.toLowerCase();
+ if(!q){$('searchRes').innerHTML='<div class="empty">Naat, Naat Khwan ya category likhein</div>';return;}
+ var nk=S.naats.filter(function(n){return n.title.toLowerCase().indexOf(q)>=0;});
+ var kk=S.khwans.filter(function(k){return k.name.toLowerCase().indexOf(q)>=0;});
+ var cc=CATS.filter(function(c){return c.toLowerCase().indexOf(q)>=0;});
+ var h='';
+ if(kk.length)h+='<h2>🎤 Naat Khwan</h2>'+kk.map(function(k){return '<div class="rowitem" onclick="openKhwan(\''+k.id+'\')"><img class="thumb" style="border-radius:50%" src="icon-192.png"><div class="grow"><div class="nm">'+esc(k.name)+'</div></div><span>›</span></div>';}).join('');
+ if(cc.length)h+='<h2>📂 Categories</h2><div class="chips">'+cc.map(function(c){return '<button class="chip" onclick="openCat(\''+esc(c)+'\')">'+esc(c)+'</button>';}).join('')+'</div>';
+ if(nk.length)h+='<h2>🎵 Naatein</h2>'+nk.map(function(n){return naatRow(n);}).join('');
+ $('searchRes').innerHTML=h||'<div class="empty">Kuch nahi mila — alfaaz badal kar dekhein</div>';
+}
+function clearSearch(){$('searchQ').value='';$('homeQ').value='';doSearch('');}
+
+/* ---- Favorites / Playlists / History ---- */
+function toggleFav(id,ev){if(ev)ev.stopPropagation();
+ var i=S.favs.indexOf(id);if(i>=0){S.favs.splice(i,1);toast('🤍 Favorite se hataya');}
+ else{S.favs.push(id);toast('❤️ Favorite me shamil');}save();render(stack[stack.length-1]);syncFavPill();}
+function renderFavs(){var l=S.favs.map(naatById).filter(Boolean);
+ $('favList').innerHTML=l.length?l.map(function(n){return naatRow(n);}).join(''):'<div class="empty">Abhi koi pasandeeda nahi</div>';}
+function newPlaylist(){var nm=prompt('Playlist ka naam:');if(!nm||!nm.trim())return;
+ S.playlists.push({id:'p'+Date.now(),name:nm.trim(),ids:[]});save();renderPlists();toast('📝 Playlist ban gayi');}
+function renderPlists(){$('plistList').innerHTML=S.playlists.map(function(p){
+ return '<div class="rowitem" onclick="openPlist(\''+p.id+'\')"><div class="grow"><div class="nm">'+esc(p.name)+'</div><div class="mt">'+p.ids.length+' naatein</div></div><span>›</span></div>';}).join('')
+ ||'<div class="empty">Koi playlist nahi — nayi banayein</div>';}
+var curPlist=null;
+function openPlist(id){curPlist=id;renderPlistHead();go('plistd');}
+function renderPlistHead(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(!p)return;
+ $('plistHead').innerHTML='<div class="hdr"><h2>📝 '+esc(p.name)+'</h2>'
+ +'<button class="btn sm ghost" onclick="renamePlist()">✏️</button><button class="btn sm danger" onclick="delPlist()">🗑</button></div>'
+ +'<div class="row2" style="margin:0 16px"><button class="btn sm" onclick="playPlist()">▶️ Play</button></div>';
+ $('plistNaats').innerHTML=p.ids.map(naatById).filter(Boolean).map(function(n){
+  return naatRow(n,'<button class="icobtn" onclick="rmFromPlist(\''+n.id+'\',event)">✖</button>');}).join('')||'<div class="empty">Khaali playlist</div>';}
+function renamePlist(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(!p)return;
+ var nm=prompt('Naya naam:',p.name);if(nm&&nm.trim()){p.name=nm.trim();save();renderPlistHead();}}
+function delPlist(){if(!confirm('Playlist delete karein?'))return;
+ S.playlists=S.playlists.filter(function(x){return x.id!==curPlist;});save();goBack();}
+function playPlist(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(p&&p.ids.length)playQueue(p.ids.slice());}
+function rmFromPlist(nid,ev){ev.stopPropagation();var p=S.playlists.find(function(x){return x.id===curPlist;});
+ p.ids=p.ids.filter(function(x){return x!==nid;});save();renderPlistHead();}
+function addToPlaylistUI(nid){
+ if(!S.playlists.length){toast('Pehle playlist banayein');go('plists');return;}
+ var names=S.playlists.map(function(p,i){return (i+1)+'. '+p.name;}).join('\n');
+ var c=prompt('Kis playlist me shamil karein?\n'+names);if(!c)return;
+ var i=parseInt(c,10)-1;if(S.playlists[i]){if(S.playlists[i].ids.indexOf(nid)<0){S.playlists[i].ids.push(nid);save();toast('📝 Playlist me shamil');}else toast('Pehle se maujood hai');}}
+function pushHist(id){S.history=S.history.filter(function(x){return x!==id;});S.history.unshift(id);S.history=S.history.slice(0,100);
+ S.recent=S.recent.filter(function(x){return x!==id;});S.recent.unshift(id);S.recent=S.recent.slice(0,20);save();}
+function renderHist(){$('histList').innerHTML=S.history.map(naatById).filter(Boolean).map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi tareekh nahi</div>';}
+function clearHistory(){if(confirm('Tareekh saaf karein?')){S.history=[];save();renderHist();}}
+
+/* ---- Offline downloads (IndexedDB) ---- */
+var idb=null;
+function idbOpen(){return new Promise(function(res,rej){try{
+ var r=indexedDB.open('jnw_dl',1);
+ r.onupgradeneeded=function(){r.result.createObjectStore('blobs');};
+ r.onsuccess=function(){idb=r.result;res();};r.onerror=function(){rej(r.error);};}catch(e){rej(e);}});}
+function idbPut(k,v){return new Promise(function(res,rej){try{var t=idb.transaction('blobs','readwrite');t.objectStore('blobs').put(v,k);t.oncomplete=res;t.onerror=function(){rej(t.error);};}catch(e){rej(e);}});}
+function idbGet(k){return new Promise(function(res,rej){try{var t=idb.transaction('blobs','readonly');var q=t.objectStore('blobs').get(k);q.onsuccess=function(){res(q.result);};q.onerror=function(){rej(q.error);};}catch(e){rej(e);}});}
+function idbDel(k){return new Promise(function(res){try{var t=idb.transaction('blobs','readwrite');t.objectStore('blobs').delete(k);t.oncomplete=res;t.onerror=res;}catch(e){res();}});}
+function idbKeys(){return new Promise(function(res){try{var t=idb.transaction('blobs','readonly');var q=t.objectStore('blobs').getAllKeys();q.onsuccess=function(){res(q.result||[]);};q.onerror=function(){res([]);};}catch(e){res([]);}});}
+var dlState={}; // id -> {pct, done, size, err}
+function isLocalUrl(u){return u&&u.indexOf('http')!==0;}
+function downloadNaat(id){
+ var n=naatById(id);if(!n){toast('Naat nahi mili');return;}
+ if(!idb){showErr('Downloads is browser me supported nahi (IndexedDB).');return;}
+ if(dlState[id]&&dlState[id].done){toast('Pehle se downloaded hai');return;}
+ dlState[id]={pct:0,done:false};
+ toast('⬇️ Download shuru…');
+ var done=function(blob){
+  idbPut('dl_'+id,blob).then(function(){
+   dlState[id]={pct:100,done:true,size:blob.size};save();renderDls();toast('✅ Download mukammal');
+  }).catch(function(){dlState[id].err='save fail';toast('❌ Save fail');});
+ };
+ if(isLocalUrl(n.url)){
+  fetch(n.url).then(function(r){if(!r.ok)throw 0;return r.blob();}).then(done)
+   .catch(function(){dlState[id].err='fetch fail';showErr('Download fail: file nahi mili');});
+ }else{
+  // remote: needs CORS
+  fetch(n.url).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();}).then(done)
+   .catch(function(e){dlState[id].err=String(e&&e.message||e);
+    showErr('Download nahi ho saka — server ijazat nahi deta (CORS).');});
+ }
+ // fake-ish progress for UX honesty: update on complete only
+}
+function renderDls(){
+ if(!idb){$('dlList').innerHTML='<div class="empty">Downloads is browser me supported nahi</div>';$('dlSize').textContent='—';return;}
+ idbKeys().then(function(keys){
+  var ids=keys.map(function(k){return String(k).replace(/^dl_/,'');}).filter(function(id){return naatById(id);});
+  var total=0;
+  var rows=ids.map(function(id){
+   var n=naatById(id);var st=dlState[id]||{};
+   return '<div class="rowitem" onclick="playDownloaded(\''+id+'\')">'
+   +'<img class="thumb" src="'+esc(artFor(n))+'" onerror="this.src=\'icon-192.png\'">'
+   +'<div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
+   +'<div class="mt">'+esc(khwanName(n.khwanId))+' • offline ✅</div></div>'
+   +'<button class="icobtn" onclick="delDownload(\''+id+'\',event)">🗑</button></div>';});
+  $('dlList').innerHTML=rows.join('')||'<div class="empty">Koi downloaded naat nahi</div>';
+  // size estimate
+  var ps=ids.map(function(id){return idbGet('dl_'+id).then(function(b){return b?b.size:0;}).catch(function(){return 0;});});
+  Promise.all(ps).then(function(ss){var t=ss.reduce(function(a,b){return a+b;},0);
+   $('dlSize').textContent=(t/1048576).toFixed(2)+' MB';});
+ });
+}
+function delDownload(id,ev){ev.stopPropagation();if(!confirm('Download delete karein?'))return;
+ idbDel('dl_'+id).then(function(){delete dlState[id];renderDls();toast('🗑 Delete ho gaya');});}
+function playDownloaded(id){idbGet('dl_'+id).then(function(b){
+ if(!b){toast('File nahi mili');return;}
+ var url=URL.createObjectURL(b);var n=naatById(id);
+ startPlayback({id:id,title:n.title,khwan:khwanName(n.khwanId),art:artFor(n),sample:n.sample,url:url,objectUrl:true});
+});}
+
+/* ---- Audio engine ---- */
+var au=$('au'),queue=[],qi=-1,currentId=null,repeatMode=0,shuffleOn=false,sleepTO=null,sleepEnd=0;
+function playNaat(id){var n=naatById(id);if(!n){toast('Naat nahi mili');return;}
+ queue=[id];qi=0;playAt(0);}
+function playQueue(ids){queue=ids.slice();qi=0;playAt(0);}
+function playAt(i){
+ if(i<0||i>=queue.length)return;qi=i;var id=queue[i];var n=naatById(id);
+ if(!n){nextTrack();return;}
+ if(n.url){startPlayback({id:id,title:n.title,khwan:khwanName(n.khwanId),art:artFor(n),sample:n.sample,url:n.url});}
+ else{showErr('Is naat ka audio maujood nahi (unavailable).');nextTrack();}
+}
+function startPlayback(t){
+ currentId=t.id;$('fsLoad').style.display='block';
+ $('fsTitle').textContent=t.title;$('fsKhwan').textContent=t.khwan;
+ $('fsArt').src=t.art;$('fsArt').onerror=function(){this.src='icon-192.png';};
+ $('miniArt').src=t.art;$('miniName').textContent=t.title;$('miniKhwan').textContent=t.khwan;
+ $('mini').style.display='flex';
+ $('fsNote').textContent=t.sample?'⚠️ SAMPLE AUDIO — sirf testing ke liye':'';
+ if(t.objectUrl){au.src=t.url;}
+ else if(!idb){au.src=t.url;}
+ else{
+  // check downloaded first
+  idbGet('dl_'+t.id).then(function(b){
+   if(b){au.src=URL.createObjectURL(b);}else{au.src=t.url;}
+   au.play().catch(function(e){$('fsLoad').style.display='none';showErr('Audio nahi chal saka');});
+  });
+  return;
+ }
+ au.play().catch(function(e){$('fsLoad').style.display='none';showErr('Audio nahi chal saka');});
+ pushHist(t.id);syncFavPill();updatePills();
+}
+au.addEventListener('canplay',function(){$('fsLoad').style.display='none';});
+au.addEventListener('waiting',function(){$('fsLoad').style.display='block';});
+au.addEventListener('playing',function(){$('fsLoad').style.display='none';$('btnPlay').textContent='⏸';});
+au.addEventListener('pause',function(){$('btnPlay').textContent='▶';});
+au.addEventListener('error',function(){
+ $('fsLoad').style.display='none';
+ var n=naatById(currentId);
+ showErr('Audio load nahi ho saka'+(n&&n.url?' (unavailable link)':'')+'.');
+});
+au.addEventListener('timeupdate',function(){
+ if(au.duration){$('seek').value=Math.floor(au.currentTime/au.duration*1000);
+  $('tCur').textContent=fmtT(au.currentTime);$('tDur').textContent=fmtT(au.duration);}
+});
+au.addEventListener('ended',function(){
+ if(repeatMode===1){au.currentTime=0;au.play().catch(function(){});return;}
+ nextTrack(true);
+});
+function togglePlay(ev){if(ev)ev.stopPropagation();if(!currentId){toast('Pehle koi naat chalayein');return;}
+ if(au.paused)au.play().catch(function(){});else au.pause();}
+function nextTrack(auto){
+ if(!queue.length)return;
+ if(shuffleOn&&queue.length>1){var n;do{n=Math.floor(Math.random()*queue.length);}while(n===qi);playAt(n);return;}
+ var nx=qi+1;if(nx>=queue.length){if(repeatMode===2){playAt(0);}else if(!auto){playAt(0);}return;}
+ playAt(nx);
+ if(auto&&repeatMode!==2&&nx>=queue.length){/* stop */}
+}
+function prevTrack(){if(au.currentTime>3){au.currentTime=0;return;}playAt(qi>0?qi-1:0);}
+function seekTo(v){if(au.duration)au.currentTime=v/1000*au.duration;}
+function cycleRepeat(){repeatMode=(repeatMode+1)%3;updatePills();
+ toast(['Repeat off','🔂 Ek dohrayein','🔁 Sab dohrayein'][repeatMode]);}
+function toggleShuffle(){shuffleOn=!shuffleOn;updatePills();toast(shuffleOn?'🔀 Shuffle on':'🔀 Shuffle off');}
+function updatePills(){$('btnRep').textContent=repeatMode===1?'🔂':repeatMode===2?'🔁':'🔁';
+ $('btnRep').classList.toggle('on',repeatMode>0);$('btnShuf').classList.toggle('on',shuffleOn);}
+function syncFavPill(){var on=currentId&&S.favs.indexOf(currentId)>=0;$('pillFav').textContent=on?'❤️ Favorite':'🤍 Favorite';}
+function openFS(ev){if(ev&&ev.target.tagName==='BUTTON')return;$('fs').style.display='flex';}
+function closeFS(){$('fs').style.display='none';}
+/* sleep timer */
+function setSleepUI(){var m=parseInt($('sleepMin').value||'0',10);setSleep(m);}
+function setSleep(m){
+ if(sleepTO){clearTimeout(sleepTO);sleepTO=null;}
+ if(m>0){sleepTO=setTimeout(function(){au.pause();toast('⏾ Sleep timer: audio rok diya');sleepTO=null;},m*60000);
+  toast('⏾ Sleep timer: '+m+' min');}else toast('⏾ Sleep timer off');
+ $('pillSleep').textContent=m>0?'⏾ '+m+'m':'⏾ Sleep';
+}
+function sleepQuick(){var c=prompt('Sleep timer (minutes, 0 = off):','15');if(c===null)return;setSleep(parseInt(c,10)||0);}
+
+/* ---- Admin ---- */
+function adminLogin(){var p=$('adminPin').value;
+ if(p===S.settings.pin){S.admin=true;go('admin');toast('✅ Admin login');}else toast('❌ Ghalat PIN');}
+function adminLogout(){S.admin=false;$('adminPin').value='';go('settings');}
+function changePin(){var p=$('newPin').value.trim();
+ if(p.length<4){toast('PIN kam az kam 4 hindse');return;}
+ S.settings.pin=p;save();$('newPin').value='';toast('✅ PIN tabdeel ho gaya');}
+function renderAdmin(){
+ if(!S.admin){go('adminlogin');return;}
+ $('adminKhwans').innerHTML=S.khwans.map(function(k){
+  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
+  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(k.name)+'</div><div class="mt">'+c+' naatein</div></div>'
+  +'<button class="icobtn" onclick="khwanForm(\''+k.id+'\')">✏️</button>'
+  +'<button class="icobtn" onclick="delKhwan(\''+k.id+'\')">🗑</button></div>';}).join('');
+ $('adminNaats').innerHTML=S.naats.map(function(n){
+  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
+  +'<div class="mt">'+esc(khwanName(n.khwanId))+' • '+esc(n.cat)+(n.featured?' • ⭐':'')+'</div></div>'
+  +'<button class="icobtn" onclick="naatForm(\''+n.id+'\')">✏️</button>'
+  +'<button class="icobtn" onclick="delNaat(\''+n.id+'\')">🗑</button></div>';}).join('');
+ $('adminStats').textContent=S.khwans.length+' khwan, '+S.naats.length+' naatein, '+S.favs.length+' favorites';
+}
+function khwanForm(id){
+ var k=id?S.khwans.find(function(x){return x.id===id;}):{name:'',bio:''};
+ var nm=prompt('Naat Khwan ka naam:',k.name||'');if(nm===null)return;nm=nm.trim();if(!nm)return;
+ var bio=prompt('Tafseel (bio):',k.bio||'')||'';
+ if(id){k.name=nm;k.bio=bio;}else{S.khwans.push({id:'k'+Date.now(),name:nm,bio:bio});}
+ save();renderAdmin();toast('✅ Mehfooz ho gaya');
+}
+function delKhwan(id){if(!confirm('Naat Khwan aur uski naatein delete karein?'))return;
+ S.khwans=S.khwans.filter(function(x){return x.id!==id;});
+ S.naats=S.naats.filter(function(x){return x.khwanId!==id;});save();renderAdmin();}
+function naatForm(id){
+ var n=id?naatById(id):{title:'',khwanId:S.khwans[0]?S.khwans[0].id:'',cat:CATS[1],lang:'Urdu',url:'',featured:false,sample:false};
+ var title=prompt('Naat ka naam:',n.title||'');if(title===null)return;title=title.trim();if(!title)return;
+ var kh=prompt('Naat Khwan (list):\n'+S.khwans.map(function(k,i){return (i+1)+'. '+k.name;}).join('\n'), '1');
+ var ki=Math.max(0,parseInt(kh||'1',10)-1);var khwanId=S.khwans[ki]?S.khwans[ki].id:n.khwanId;
+ var cat=prompt('Category:\n'+CATS.map(function(c,i){return (i+1)+'. '+c;}).join('\n'), String(CATS.indexOf(n.cat)+1||2));
+ var ci=Math.max(0,parseInt(cat||'2',10)-1);
+ var url=prompt('Audio URL (https://… ya khaali = unavailable):',n.url||'');
+ if(url===null)return;
+ var feat=confirm('Featured (home par) dikhayein? OK=Yes, Cancel=No');
+ if(id){n.title=title;n.khwanId=khwanId;n.cat=CATS[ci]||n.cat;n.url=url.trim();n.featured=feat;n.sample=false;}
+ else{S.naats.push({id:'n'+Date.now(),title:title,khwanId:khwanId,cat:CATS[ci]||CATS[1],lang:'Urdu',url:url.trim(),featured:feat,sample:false});}
+ save();renderAdmin();toast('✅ Naat mehfooz');
+}
+function delNaat(id){if(!confirm('Naat delete karein?'))return;
+ S.naats=S.naats.filter(function(x){return x.id!==id;});
+ S.favs=S.favs.filter(function(x){return x!==id;});save();renderAdmin();}
+
+/* ---- Settings ---- */
+function toggleTheme(){S.settings.theme=S.settings.theme==='dark'?'light':'dark';save();applyTheme();}
+function applyTheme(){document.body.classList.toggle('light',S.settings.theme==='light');}
+function setLang(l){S.settings.lang=l;save();applyLang();toast('🌐 Language: '+l);}
+function applyLang(){/* labels Roman Urdu default; hook for future */}
+function admobSlots(){var d=ADMOB.enabled?'block':'none';$('adHome').style.display=d;$('adFs').style.display=d;}
+
+/* ---- Init ---- */
+window.onerror=function(m){showErr('Error: '+m);};
+document.addEventListener('DOMContentLoaded',function(){
+ load();applyTheme();admobSlots();
+ idbOpen().then(function(){renderDls();}).catch(function(){});
+ render('home');
+ setTimeout(function(){var s=$('splash');s.style.opacity='0';setTimeout(function(){s.style.display='none';},500);},1600);
+});
+</script>
+</body>
+</html>
