@@ -509,6 +509,11 @@ button.oos{opacity:.5;cursor:not-allowed}
 #updateCard .t{font-weight:700;font-size:16px;margin-bottom:6px}
 #updateCard .n{font-size:13px;color:#666;margin-bottom:10px}
 #updateCard a{display:inline-block;background:#1a5c3f;color:#fff;padding:10px 24px;border-radius:25px;text-decoration:none;font-weight:bold}
+#updateCard button#updateDlBtn{display:inline-block;background:#1a5c3f;color:#fff;padding:10px 24px;border-radius:25px;font-weight:bold;border:none;font-size:1em;cursor:pointer;font-family:inherit;min-width:220px}
+#updateCard button#updateDlBtn:active{transform:scale(.97)}
+#updateCard button#updateDlBtn:disabled{opacity:.7;cursor:wait}
+#updateCard .spin{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:usp 0.7s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes usp{to{transform:rotate(360deg)}}
 
 /* ---- Jilan Reseller Network ---- */
 #refBanner{display:none;background:linear-gradient(135deg,#14532d,#1a5c3f);color:#fff;padding:10px 14px;font-size:13px;text-align:center;position:sticky;top:0;z-index:70}
@@ -524,7 +529,8 @@ button.oos{opacity:.5;cursor:not-allowed}
 <div id="updateCard">
 <div class="t">🎉 Naya version available hai!</div>
 <div class="n" id="updateNotes">Nai products aur features ke liye update karein</div>
-<a href="https://jilanapps.github.io/jilan-store/jilan-store.apk" download="jilan-store.apk">📥 Update Download Karein</a>
+<button id="updateDlBtn" type="button" aria-label="Update download karein">📥 Update Download Karein</button>
+<div class="n" id="updateDlMsg" style="display:none;margin-top:8px"></div>
 </div>
 
   <header class="topbar">
@@ -1291,17 +1297,54 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();})
 <script src="admin/firebase-config.js"></script>
 <script>
 const JILAN_APP_VERSION='3.0';
+let JILAN_APK_URL='https://jilanapps.github.io/jilan-store/jilan-store.apk';
 async function jilanCheckUpdate(){
   try{
     const r=await fetch('store-version.json?t='+Date.now());
     if(!r.ok)return;
     const v=await r.json();
+    if(v.apkUrl&&/^https:\/\//i.test(v.apkUrl))JILAN_APK_URL=v.apkUrl;
     if(v.version&&v.version!==JILAN_APP_VERSION){
       document.getElementById('updateCard').style.display='block';
       if(v.notes)document.getElementById('updateNotes').textContent=v.notes;
     }
   }catch(e){}
 }
+function jilanDlMsg(t,ok){
+  const m=document.getElementById('updateDlMsg');
+  m.style.display='block';
+  m.style.color=ok?'#1a5c3f':'#b3261e';
+  m.textContent=t;
+}
+document.getElementById('updateDlBtn').addEventListener('click',function(){
+  const btn=this,orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>Download ho raha hai...';
+  document.getElementById('updateDlMsg').style.display='none';
+  let opened=false;
+  try{
+    const a=document.createElement('a');
+    a.href=JILAN_APK_URL;
+    a.download='jilan-store.apk';
+    a.rel='noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    opened=true;
+  }catch(e){}
+  setTimeout(function(){
+    if(!opened){
+      try{window.open(JILAN_APK_URL,'_blank');opened=true;}catch(e2){}
+    }
+    if(opened){
+      jilanDlMsg('✅ Download shuru! Complete hone par Install dabayein.',true);
+    }else{
+      jilanDlMsg('⚠️ Download nahi hui. Ye link copy karke Chrome me kholein: '+JILAN_APK_URL,false);
+    }
+    btn.disabled=false;
+    btn.innerHTML=orig;
+  },1200);
+});
 setTimeout(jilanCheckUpdate,2500);
 </script>
 </body>
