@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jilan Homeopathic Clinic — DEMO by Jilan Apps</title>
+<meta name="theme-color" content="#0d7377">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hdr">
+  <div class="logo-badge">🌿</div>
+  <div><h1 id="hdrName">Jilan Homeopathic Clinic</h1><small id="hdrTag">Natural Healing, Trusted Care</small></div>
+  <div class="sp"></div>
+  <button class="lang-btn" id="langBtn" onclick="toggleLang()">اردو</button>
+</header>
+<main id="view"></main>
+<nav class="bnav" id="bnav"></nav>
+<button class="wa-fab" id="waFab" aria-label="WhatsApp">💬</button>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBody"></div></div>
+<script src="app.js"></script>
+</body>
+</html>
