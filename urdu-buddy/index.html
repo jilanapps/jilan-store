@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Urdu Buddy — اردو سیکھو، کھیلو، جیتو!</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Jameel Noori Nastaleeq','Noto Nastaliq Urdu',system-ui,sans-serif;margin:0;background:linear-gradient(180deg,#FFF7DC,#FFEFC2);color:#3a2c00;min-height:100vh;touch-action:manipulation;user-select:none}
+.demobanner{position:sticky;top:0;z-index:9999;background:#111;color:#ffd94d;text-align:center;font-size:12px;padding:6px;letter-spacing:1px;font-family:system-ui}
+.screen{display:none;max-width:520px;margin:0 auto;padding:14px 14px 92px;min-height:100vh}
+.screen.on{display:block;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+h1{font-size:30px;margin:8px 0;text-align:center;color:#b45309}
+h2{font-size:24px;margin:10px 0;text-align:center}
+.sub{text-align:center;opacity:.75;margin-bottom:12px;font-size:16px}
+.card{background:#fff;border-radius:22px;padding:16px;margin:10px 0;box-shadow:0 6px 18px rgba(0,0,0,.08);border:3px solid #fde68a}
+.btn{display:block;width:100%;border:none;border-radius:20px;padding:16px;font-size:20px;font-weight:bold;color:#fff;margin:10px 0;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.18);font-family:inherit}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.b-y{background:linear-gradient(180deg,#FCD34D,#f59e0b);color:#5b3a00}
+.b-r{background:linear-gradient(180deg,#f87171,#EF4444)}
+.b-b{background:linear-gradient(180deg,#60a5fa,#3B82F6)}
+.b-g{background:linear-gradient(180deg,#34d399,#10B981)}
+.b-p{background:linear-gradient(180deg,#c084fc,#8b5cf6)}
+.b-o{background:linear-gradient(180deg,#fdba74,#f97316)}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ltr{direction:ltr;unicode-bidi:embed}
+.big-letter{font-size:110px;text-align:center;line-height:1.2;background:#fff;border-radius:24px;border:4px dashed #f59e0b;margin:8px 0;padding:6px}
+.alpha-tile{background:#fff;border-radius:18px;font-size:44px;padding:10px 0;text-align:center;cursor:pointer;border:3px solid #fde68a;box-shadow:0 3px 0 rgba(0,0,0,.12);position:relative}
+.alpha-tile:active{transform:scale(.93)}
+.alpha-tile.done{border-color:#10B981;background:#ecfdf5}
+.alpha-tile .st{position:absolute;top:2px;left:6px;font-size:14px}
+.word-card{background:#fff;border-radius:18px;padding:12px;text-align:center;cursor:pointer;border:3px solid #bfdbfe;box-shadow:0 3px 0 rgba(0,0,0,.1)}
+.word-card .em{font-size:52px}
+.word-card .wd{font-size:22px;font-weight:bold;margin-top:4px}
+.cat-card{border-radius:20px;padding:18px;color:#fff;text-align:center;font-size:22px;font-weight:bold;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.cat-card .em{font-size:44px;display:block}
+.opt{background:#fff;border:3px solid #e5e7eb;border-radius:16px;padding:14px;font-size:24px;text-align:center;cursor:pointer;margin:8px 0;font-weight:bold}
+.opt:active{transform:scale(.97)}
+.opt.right{border-color:#10B981;background:#ecfdf5}
+.opt.wrong{border-color:#EF4444;background:#fef2f2}
+#bottomnav{position:fixed;bottom:0;right:0;left:0;z-index:900;background:#fff;border-top:3px solid #fde68a;display:flex;max-width:520px;margin:0 auto;box-shadow:0 -4px 14px rgba(0,0,0,.08)}
+#bottomnav button{flex:1;border:none;background:none;padding:10px 2px 12px;font-size:11px;cursor:pointer;color:#92400e;font-family:inherit}
+#bottomnav button .ic{font-size:26px;display:block}
+#bottomnav button.act{color:#dc2626;font-weight:bold}
+#trace{width:100%;height:260px;background:#fff;border-radius:20px;border:4px dashed #3B82F6;touch-action:none;display:block}
+.badge{background:linear-gradient(180deg,#fde68a,#f59e0b);border-radius:18px;padding:12px;text-align:center;font-weight:bold;margin:8px 0;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.badge.locked{filter:grayscale(1);opacity:.5}
+.stars-row{text-align:center;font-size:22px;margin:6px 0}
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mem-card{aspect-ratio:.8;background:linear-gradient(180deg,#c084fc,#8b5cf6);border-radius:14px;font-size:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.mem-card.open{background:#fff;color:#1f2937;border:3px solid #8b5cf6}
+.mem-card.won{background:#ecfdf5;border-color:#10B981}
+.story-p{background:#fff;border-radius:14px;padding:12px;margin:8px 0;font-size:19px;line-height:2}
+.moral{background:#fef3c7;border:3px solid #f59e0b;border-radius:16px;padding:12px;font-size:19px;text-align:center;font-weight:bold}
+input.pin{width:100%;padding:14px;font-size:22px;border-radius:14px;border:3px solid #e5e7eb;text-align:center;margin:8px 0;font-family:inherit}
+.chotu{width:150px;height:150px;margin:0 auto;display:block;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.slide-dot{width:10px;height:10px;border-radius:50%;background:#d1d5db;display:inline-block;margin:0 4px}
+.slide-dot.act{background:#EF4444}
+.confetti{position:fixed;top:-10px;z-index:9998;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+#toast{position:fixed;bottom:110px;right:50%;transform:translateX(50%);background:#1f2937;color:#fff;padding:12px 20px;border-radius:14px;font-size:17px;z-index:9999;display:none;max-width:90%;text-align:center}
+table.rep{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;font-size:16px}
+table.rep td,table.rep th{padding:10px;border-bottom:2px solid #fef3c7;text-align:right}
+.cert{background:#fffdf5;border:6px double #b45309;border-radius:20px;padding:24px;text-align:center;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div id="toast"></div>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="onb" class="screen on">
+  <div id="obSlides"></div>
+  <div style="text-align:center;margin:8px" id="obDots"></div>
+  <div class="row2">
+    <button class="btn b-y" onclick="obNext()">آگے ➜</button>
+    <button class="btn b-b" onclick="finishOnb()">چھوڑو ⏭</button>
+  </div>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="home" class="screen">
+  <h1>🦜 اردو بڈی</h1>
+  <div id="chotuHome"></div>
+  <div class="sub" id="homeHi">السلام علیکم!</div>
+  <div class="card" style="text-align:center">
+    <div style="font-size:18px">⭐ ستارے: <b id="hStars">0</b> &nbsp; 🔥 <b id="hStreak">0</b> دن</div>
+    <div style="margin-top:8px;font-size:17px">آج کا حرف: <b id="lotd" style="font-size:30px;color:#dc2626"></b></div>
+  </div>
+  <button class="btn b-g" onclick="continueLearning()">📖 سیکھنا جاری رکھو</button>
+  <h2>🎮 جلدی کھیلو</h2>
+  <div class="grid3">
+    <div class="cat-card" style="background:linear-gradient(180deg,#60a5fa,#3B82F6)" onclick="startLMatch()">🔤<br>حرف ملاؤ</div>
+    <div class="cat-card" style="background:linear-gradient(180deg,#c084fc,#8b5cf6)" onclick="startMemory()">🃏<br>یاد داشت</div>
+    <div class="cat-card" style="background:linear-gradient(180deg,#34d399,#10B981)" onclick="startListen()">👂<br>سنو چنو</div>
+  </div>
+  <button class="btn b-p" onclick="gateOpen()">👨‍👩‍👧 والدین کا حصہ</button>
+</div>
+
+<!-- ============ ALPHABETS ============ -->
+<div id="alpha" class="screen">
+  <h1>🔤 حروفِ تہجی</h1>
+  <div class="sub">حرف پر ٹیپ کرو — سنو، لکھو، سیکھو!</div>
+  <div class="stars-row">سیکھے: <b id="alphaCount">0</b> / 38</div>
+  <div class="grid4" id="alphaGrid"></div>
+</div>
+
+<!-- ============ LETTER DETAIL ============ -->
+<div id="letter" class="screen">
+  <h1 id="ltTitle">حرف</h1>
+  <div class="big-letter" id="ltBig" onclick="speak(curLetter.l)">ا</div>
+  <div class="row2">
+    <button class="btn b-b" onclick="speak(curLetter.l)">🔊 سنو</button>
+    <button class="btn b-g" onclick="speak(curLetter.w)">🔊 <span id="ltWord">لفظ</span></button>
+  </div>
+  <div class="card" style="text-align:center">
+    <div style="font-size:64px" id="ltEmoji">🍎</div>
+    <div style="font-size:24px;font-weight:bold" id="ltWord2">انار</div>
+  </div>
+  <h2>✏️ انگلی سے لکھو</h2>
+  <canvas id="trace"></canvas>
+  <div class="row2">
+    <button class="btn b-o" onclick="traceClear()">🧽 صاف کرو</button>
+    <button class="btn b-g" onclick="traceDone()">✅ ہو گیا!</button>
+  </div>
+  <button class="btn b-p" onclick="letterQuiz()">🎯 کوئز</button>
+  <div id="ltQuiz"></div>
+</div>
+
+<!-- ============ WORDS ============ -->
+<div id="words" class="screen">
+  <h1>📝 الفاظ</h1>
+  <div class="sub">زمرہ چنو!</div>
+  <div id="wordCats"></div>
+</div>
+
+<!-- ============ WORD CATEGORY ============ -->
+<div id="wordcat" class="screen">
+  <h1 id="wcTitle">زمرہ</h1>
+  <div class="grid3" id="wcGrid"></div>
+</div>
+
+<!-- ============ WORD DETAIL/GAME ============ -->
+<div id="wgame" class="screen">
+  <h1 id="wgTitle">لفظ</h1>
+  <div class="card" style="text-align:center">
+    <div style="font-size:90px" id="wgEmoji">🐱</div>
+    <div style="font-size:34px;font-weight:bold" id="wgWord">بلی</div>
+    <button class="btn b-b" onclick="speak(curWord.w)">🔊 سنو</button>
+  </div>
+  <h2>🧩 ہجے مکمل کرو</h2>
+  <div class="sub" id="wgSpellQ"></div>
+  <div id="wgOpts"></div>
+  <button class="btn b-g" onclick="wordKnown()">⭐ مجھے آتا ہے!</button>
+</div>
+
+<!-- ============ STORIES ============ -->
+<div id="stories" class="screen">
+  <h1>📖 کہانیاں</h1>
+  <div class="sub">کہانی چنو اور پڑھو!</div>
+  <div id="storyList"></div>
+</div>
+
+<!-- ============ STORY READER ============ -->
+<div id="story" class="screen">
+  <h1 id="stTitle" style="font-size:24px">کہانی</h1>
+  <div style="text-align:center;font-size:70px" id="stEmoji">🐦</div>
+  <div id="stBody"></div>
+  <div class="moral" id="stMoral"></div>
+  <div class="row2">
+    <button class="btn b-b" onclick="storySpeak()">🔊 کہانی سنو</button>
+    <button class="btn b-g" onclick="storyDone()">⭐ پڑھ لی!</button>
+  </div>
+</div>
+
+<!-- ============ GAMES MENU ============ -->
+<div id="games" class="screen">
+  <h1>🎮 کھیل</h1>
+  <div class="sub">کھیلو اور ستارے جیتو!</div>
+  <button class="btn b-b" onclick="startLMatch()">🔤 حرف ملاؤ</button>
+  <button class="btn b-p" onclick="startMemory()">🃏 یاد داشت کارڈ</button>
+  <button class="btn b-g" onclick="startListen()">👂 سنو اور چنو</button>
+</div>
+
+<!-- ============ LETTER MATCH GAME ============ -->
+<div id="lmatch" class="screen">
+  <h1>🔤 حرف ملاؤ</h1>
+  <div class="sub" id="lmScore">اسکور: 0</div>
+  <div class="big-letter" id="lmQ">ا</div>
+  <div class="sub">صحیح حرف چنو 👇</div>
+  <div id="lmOpts"></div>
+</div>
+
+<!-- ============ MEMORY GAME ============ -->
+<div id="memory" class="screen">
+  <h1>🃏 یاد داشت</h1>
+  <div class="sub" id="memInfo">جوڑے ملاؤ!</div>
+  <div class="mem-grid" id="memGrid"></div>
+</div>
+
+<!-- ============ LISTEN GAME ============ -->
+<div id="listen" class="screen">
+  <h1>👂 سنو اور چنو</h1>
+  <div class="sub" id="liScore">اسکور: 0</div>
+  <div style="text-align:center"><button class="btn b-b" style="font-size:60px;padding:20px" onclick="listenPlay()">🔊</button></div>
+  <div class="sub">کیا سنا؟ صحیح تصویر چنو 👇</div>
+  <div class="grid3" id="liOpts"></div>
+</div>
+
+<!-- ============ REWARDS ============ -->
+<div id="rewards" class="screen">
+  <h1>🏆 انعامات</h1>
+  <div class="card" style="text-align:center">
+    <div style="font-size:60px">⭐</div>
+    <div style="font-size:28px;font-weight:bold"><span id="rwStars">0</span> ستارے</div>
+    <div>🔥 <span id="rwStreak">0</span> دن کی لگاتار محنت!</div>
+  </div>
+  <h2>🎖️ بیجز</h2>
+  <div id="badgeList"></div>
+  <button class="btn b-y" onclick="showCert()">📜 سند دیکھو</button>
+  <div id="certBox"></div>
+  <button class="btn b-p" onclick="gateOpen()">👨‍👩‍👧 والدین کی رپورٹ</button>
+</div>
+
+<!-- ============ PARENT GATE ============ -->
+<div id="gate" class="screen">
+  <h1>👨‍👩‍👧 والدین</h1>
+  <div class="card" style="text-align:center">
+    <div style="font-size:20px">بچوں کے لیے نہیں! یہ حل کرو:</div>
+    <div style="font-size:44px;font-weight:bold;margin:12px" id="gateQ" class="ltr">3 + 4 = ?</div>
+    <div class="grid3" id="gateOpts"></div>
+  </div>
+</div>
+
+<!-- ============ PARENT ZONE ============ -->
+<div id="parent" class="screen">
+  <h1>👨‍👩‍👧 والدین کا حصہ</h1>
+  <div id="pinBox">
+    <div class="sub">PIN درج کرو (پہلی بار: 1234)</div>
+    <input class="pin ltr" id="pinIn" type="password" inputmode="numeric" maxlength="4" placeholder="****">
+    <button class="btn b-b" onclick="pinCheck()">کھولو 🔓</button>
+  </div>
+  <div id="parentMain" style="display:none">
+    <h2>📊 رپورٹ</h2>
+    <table class="rep">
+      <tr><th>چیز</th><th>حاصل</th></tr>
+      <tr><td>⭐ ستارے</td><td id="rpStars">0</td></tr>
+      <tr><td>🔤 حروف سیکھے</td><td id="rpAlpha">0 / 38</td></tr>
+      <tr><td>📝 الفاظ</td><td id="rpWords">0</td></tr>
+      <tr><td>📖 کہانیاں</td><td id="rpStories">0 / 4</td></tr>
+      <tr><td>🔥 لگاتار دن</td><td id="rpStreak">0</td></tr>
+    </table>
+    <h2>⚙️ ترتیبات</h2>
+    <button class="btn b-o" onclick="changePin()">🔑 PIN بدلو</button>
+    <button class="btn b-r" onclick="resetData()">🗑️ ڈیٹا صاف کرو</button>
+    <div class="sub" style="margin-top:14px">آواز: <span id="voiceNote">براؤزر کی آواز (اصلی استاد کی آواز نہیں)</span></div>
+  </div>
+</div>
+
+<nav id="bottomnav" style="display:none">
+  <button data-s="home" onclick="nav('home',this)"><span class="ic">🏠</span>ہوم</button>
+  <button data-s="alpha" onclick="nav('alpha',this)"><span class="ic">🔤</span>حروف</button>
+  <button data-s="words" onclick="nav('words',this)"><span class="ic">📝</span>الفاظ</button>
+  <button data-s="stories" onclick="nav('stories',this)"><span class="ic">📖</span>کہانیاں</button>
+  <button data-s="rewards" onclick="nav('rewards',this)"><span class="ic">🏆</span>انعامات</button>
+</nav>
+
+<script>
+/* ================= DATA ================= */
+var LETTERS=[
+{l:'ا',w:'انار',e:'🍎'},{l:'ب',w:'بلی',e:'🐱'},{l:'پ',w:'پرندہ',e:'🐦'},
+{l:'ت',w:'تتلی',e:'🦋'},{l:'ٹ',w:'ٹماٹر',e:'🍅'},{l:'ث',w:'ثمر',e:'🍇'},
+{l:'ج',w:'جہاز',e:'🚢'},{l:'چ',w:'چاند',e:'🌙'},{l:'ح',w:'حلوہ',e:'🧁'},
+{l:'خ',w:'خرگوش',e:'🐰'},{l:'د',w:'درخت',e:'🌳'},{l:'ڈ',w:'ڈاکیا',e:'📮'},
+{l:'ذ',w:'ذرہ',e:'✨'},{l:'ر',w:'ریل',e:'🚂'},{l:'ڑ',w:'پہاڑ',e:'⛰️'},
+{l:'ز',w:'زمین',e:'🌍'},{l:'ژ',w:'ژالہ',e:'🧊'},{l:'س',w:'سورج',e:'☀️'},
+{l:'ش',w:'شیر',e:'🦁'},{l:'ص',w:'صندوق',e:'📦'},{l:'ض',w:'وضو',e:'🕌'},
+{l:'ط',w:'طوطا',e:'🦜'},{l:'ظ',w:'ظروف',e:'🍽️'},{l:'ع',w:'عید',e:'🎉'},
+{l:'غ',w:'غبارہ',e:'🎈'},{l:'ف',w:'پھل',e:'🍇'},{l:'ق',w:'قلم',e:'✏️'},
+{l:'ک',w:'کتاب',e:'📖'},{l:'گ',w:'گھوڑا',e:'🐴'},{l:'ل',w:'لیموں',e:'🍋'},
+{l:'م',w:'مچھلی',e:'🐟'},{l:'ن',w:'ناریل',e:'🥥'},{l:'و',w:'وزیر',e:'🤴'},
+{l:'ہ',w:'ہاتھی',e:'🐘'},{l:'ھ',w:'بھالو',e:'🐻'},{l:'ء',w:'آئینہ',e:'🪞'},
+{l:'ی',w:'یخ',e:'🧊'},{l:'ے',w:'بچے',e:'👶'}];
+var WCATS=[
+{n:'گھر 🏠',c:'#3B82F6',words:[['ماں','👩'],['باپ','👨'],['بھائی','👦'],['بہن','👧'],['گھر','🏠'],['دروازہ','🚪']]},
+{n:'جانور 🐾',c:'#10B981',words:[['بلی','🐱'],['کتا','🐶'],['گائے','🐄'],['بکری','🐐'],['گھوڑا','🐴'],['خرگوش','🐰']]},
+{n:'پھل 🍎',c:'#EF4444',words:[['آم','🥭'],['سیب','🍎'],['کیلا','🍌'],['انگور','🍇'],['نارنگی','🍊'],['تربوز','🍉']]},
+{n:'رنگ 🎨',c:'#8b5cf6',words:[['لال','🔴'],['نیلا','🔵'],['پیلا','🟡'],['ہرا','🟢'],['کالا','⚫'],['سفید','⚪']]},
+{n:'جسم 🧍',c:'#f97316',words:[['آنکھ','👁️'],['ناک','👃'],['ہاتھ','✋'],['پاؤں','🦶'],['کان','👂'],['منہ','👄']]},
+{n:'کھانا 🍽️',c:'#eab308',words:[['روٹی','🫓'],['چاول','🍚'],['دال','🥣'],['سبزی','🥗'],['دودھ','🥛'],['انڈا','🥚']]}];
+var STORIES=[
+{t:'پیاسا کوا 🐦',e:'🐦',m:'عقل سے ہر مشکل آسان ہو جاتی ہے!',
+ p:['ایک گرمی کا دن تھا۔ ایک کوا بہت پیاسا تھا۔','وہ پانی کی تلاش میں ادھر ادھر اڑتا رہا۔','آخر اسے ایک گھڑا نظر آیا۔','مگر پانی بہت نیچے تھا۔ کوے کی چونچ نہ پہنچ سکی۔','کوے نے سوچا اور کنکریاں اٹھا کر گھڑے میں ڈالنے لگا۔','آہستہ آہستہ پانی اوپر آ گیا!','کوے نے مزے سے پانی پیا اور خوش ہو کر اڑ گیا۔']},
+{t:'شیر اور چوہا 🦁',e:'🦁',m:'چھوٹی مدد بھی بہت بڑی ہو سکتی ہے!',
+ p:['جنگل میں ایک شیر سویا ہوا تھا۔','ایک چوہا کھیلتے کھیلتے اس پر چڑھ گیا۔','شیر جاگ گیا اور چوہے کو پکڑ لیا۔','چوہا بولا: مجھے چھوڑ دو، کبھی کام آؤں گا!','شیر ہنسا مگر اسے چھوڑ دیا۔','ایک دن شیر شکاری کے جال میں پھنس گیا۔','چوہے نے جال کتر دیا اور شیر آزاد ہو گیا!']},
+{t:'لومڑی اور انگور 🦊',e:'🦊',m:'جو چیز نہ ملے، اسے برا مت کہو!',
+ p:['ایک لومڑی بہت بھوکی تھی۔','اسے بیل پر لٹکے رسیلے انگور نظر آئے۔','لومڑی نے چھلانگ لگائی مگر انگور نہ پہنچ سکی۔','اس نے بار بار کوشش کی، مگر ناکام رہی۔','آخر تھک کر بولی: یہ انگور تو کھٹے ہیں!','اور وہاں سے چلی گئی۔']},
+{t:'چھوٹی چڑیا 🐤',e:'🐤',m:'ہمت کرو، کوشش کبھی ضائع نہیں جاتی!',
+ p:['ایک چھوٹی چڑیا گھونسلے میں رہتی تھی۔','وہ اڑنا چاہتی تھی مگر ڈرتی تھی۔','امی چڑیا نے کہا: ہمت کرو بیٹی!','چڑیا نے پر پھڑپھڑائے اور چھلانگ لگائی۔','پہلے وہ لڑکھڑائی، پھر سنبھل گئی!','اب وہ روز آسمان میں اڑتی ہے اور خوش رہتی ہے۔']}];
+var BADGES=[
+{id:'b1',n:'🔤 حروف کے استاد',d:'10 حروف سیکھو',check:function(){return countLearned()>=10}},
+{id:'b2',n:'🌟 ستارہ شکاری',d:'50 ستارے کماؤ',check:function(){return S.stars>=50}},
+{id:'b3',n:'📖 کہانی دوست',d:'4 کہانیاں پڑھو',check:function(){return storyCount()>=4}},
+{id:'b4',n:'🔥 ہمت والا',d:'3 دن لگاتار کھیلو',check:function(){return S.streak>=3}},
+{id:'b5',n:'📝 لفظ جادوگر',d:'20 الفاظ سیکھو',check:function(){return wordCount()>=20}},
+{id:'b6',n:'🏅 مکمل حروف',d:'38 حروف سیکھو',check:function(){return countLearned()>=38}}];
+/* ================= STATE ================= */
+var S={stars:0,streak:0,lastDay:'',learned:{},words:{},stories:{},badges:[],pin:'1234',onb:false};
+function save(){try{localStorage.setItem('ubuddy',JSON.stringify(S))}catch(e){}}
+function load(){try{var d=localStorage.getItem('ubuddy');if(d){var o=JSON.parse(d);for(var k in o)S[k]=o[k]}}catch(e){}}
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._x);t._x=setTimeout(function(){t.style.display='none'},2200)}
+function speak(t){try{
+  if(!('speechSynthesis' in window)){toast('🔇 آواز دستیاب نہیں');return}
+  speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ur-PK';u.rate=.85;speechSynthesis.speak(u);
+}catch(e){toast('🔇 آواز دستیاب نہیں')}}
+/* ================= NAV ================= */
+var stack=['onb'];
+function show(id){var ss=document.querySelectorAll('.screen');for(var i=0;i<ss.length;i++)ss[i].classList.remove('on');var el=$(id);if(!el){toast('اسکرین نہیں ملی');return}$(id).classList.add('on');window.scrollTo(0,0);
+  var main=['home','alpha','words','stories','rewards'];
+  $('bottomnav').style.display=(main.indexOf(id)>=0)?'flex':'none';
+  var bs=document.querySelectorAll('#bottomnav button');for(var j=0;j<bs.length;j++)bs[j].classList.toggle('act',bs[j].getAttribute('data-s')===id);}
+function nav(id){stack.push(id);show(id)}
+function __goBack(){if(stack.length>1){stack.pop();show(stack[stack.length-1])}}
+/* stars */
+function addStars(n,why){S.stars+=n;save();updStars();if(n>0)confetti();checkBadges();if(why)toast('⭐ +'+n+' '+why)}
+function updStars(){$('hStars').textContent=S.stars;$('hStreak').textContent=S.streak;$('rwStars').textContent=S.stars;$('rwStreak').textContent=S.streak}
+function confetti(){var cs=['#FCD34D','#EF4444','#3B82F6','#10B981','#c084fc'];for(var i=0;i<24;i++){var d=document.createElement('div');d.className='confetti';d.style.right=(Math.random()*100)+'vw';d.style.background=cs[i%5];d.style.width=d.style.height=(6+Math.random()*8)+'px';d.style.animationDuration=(1.5+Math.random()*1.5)+'s';document.body.appendChild(d);setTimeout((function(x){return function(){x.remove()}})(d),3200)}}
+/* streak */
+function bumpStreak(){var t=new Date().toDateString();if(S.lastDay!==t){var y=new Date(Date.now()-864e5).toDateString();S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;save()}}
+/* badges */
+function checkBadges(){for(var i=0;i<BADGES.length;i++){var b=BADGES[i];if(S.badges.indexOf(b.id)<0&&b.check()){S.badges.push(b.id);save();toast('🎖️ نیا بیج: '+b.n);confetti()}}}
+function countLearned(){var n=0;for(var k in S.learned)if(S.learned[k])n++;return n}
+function wordCount(){var n=0;for(var k in S.words)if(S.words[k])n++;return n}
+function storyCount(){var n=0;for(var k in S.stories)if(S.stories[k])n++;return n}
+/* ================= CHOTU SVG ================= */
+var CHOTU='<svg class="chotu" viewBox="0 0 150 150"><ellipse cx="75" cy="80" rx="42" ry="48" fill="#4ade80"/><ellipse cx="75" cy="80" rx="26" ry="32" fill="#bbf7d0"/><circle cx="60" cy="62" r="7" fill="#fff"/><circle cx="62" cy="62" r="3.5" fill="#1f2937"/><circle cx="90" cy="62" r="7" fill="#fff"/><circle cx="88" cy="62" r="3.5" fill="#1f2937"/><path d="M68 78 Q75 88 82 78 Q75 82 68 78" fill="#f97316"/><ellipse cx="40" cy="90" rx="12" ry="24" fill="#22c55e" transform="rotate(20 40 90)"/><ellipse cx="110" cy="90" rx="12" ry="24" fill="#22c55e" transform="rotate(-20 110 90)"/><path d="M60 34 Q75 10 90 34 Q75 24 60 34" fill="#ef4444"/><path d="M70 28 Q75 8 80 28" stroke="#ef4444" stroke-width="5" fill="none"/></svg>';
+/* ================= ONBOARDING ================= */
+var OB=[
+ {e:CHOTU,t:'اردو بڈی!',d:'میں ہوں چھوٹو طوطا! آؤ اردو سیکھیں!'},
+ {e:'<div style="font-size:90px;text-align:center">🔤</div>',t:'حروف سیکھو',d:'38 حروف — سنو، لکھو، کھیلو!'},
+ {e:'<div style="font-size:90px;text-align:center">⭐</div>',t:'ستارے جیتو',d:'کھیل کھیلو، بیج حاصل کرو!'}];
+var obI=0;
+function obRender(){$('obSlides').innerHTML='<div class="card" style="text-align:center;min-height:340px">'+OB[obI].e+'<h2>'+OB[obI].t+'</h2><div class="sub">'+OB[obI].d+'</div></div>';
+ var dots='';for(var i=0;i<OB.length;i++)dots+='<span class="slide-dot'+(i===obI?' act':'')+'"></span>';$('obDots').innerHTML=dots}
+function obNext(){if(obI<OB.length-1){obI++;obRender()}else finishOnb()}
+function finishOnb(){S.onb=true;save();stack=['home'];show('home');homeRender()}
+/* ================= HOME ================= */
+function letterOfDay(){return LETTERS[new Date().getDate()%38].l}
+function continueLearning(){for(var i=0;i<LETTERS.length;i++){if(!S.learned[LETTERS[i].l]){openLetter(LETTERS[i].l);return}}toast('🎉 سب حروف سیکھ لیے! شاباش!')}
+function homeRender(){$('chotuHome').innerHTML=CHOTU;
+ var h=new Date().getHours();$('homeHi').textContent=(h<12?'صبح بخیر!':h<17?'دوپہر بخیر!':'شام بخیر!')+' میں ہوں چھوٹو! 🦜';
+ $('lotd').textContent=letterOfDay();updStars()}
+/* ================= ALPHABET ================= */
+function renderAlpha(){var g='';for(var i=0;i<LETTERS.length;i++){var L=LETTERS[i];var dn=S.learned[L.l];g+='<div class="alpha-tile'+(dn?' done':'')+'" onclick="openLetter(\''+L.l+'\')">'+(dn?'<span class="st">⭐</span>':'')+L.l+'</div>'}
+ $('alphaGrid').innerHTML=g;$('alphaCount').textContent=countLearned()}
+var curLetter=null;
+function openLetter(l){for(var i=0;i<LETTERS.length;i++)if(LETTERS[i].l===l)curLetter=LETTERS[i];
+ $('ltTitle').textContent='حرف '+curLetter.l;$('ltBig').textContent=curLetter.l;
+ $('ltWord').textContent=curLetter.w;$('ltWord2').textContent=curLetter.w;$('ltEmoji').textContent=curLetter.e;
+ $('ltQuiz').innerHTML='';traceClear();stack.push('letter');show('letter');traceInit()}
+/* tracing */
+var tcv,tctx,tdraw=false;
+function traceInit(){tcv=$('trace');try{var r=tcv.getBoundingClientRect();tcv.width=r.width||300;tcv.height=260;tctx=tcv.getContext('2d');if(!tctx)return;}catch(e){tctx=null;return}
+tctx.lineWidth=14;tctx.lineCap='round';tctx.strokeStyle='#3B82F6';
+ tctx.font='bold 200px serif';tctx.fillStyle='#e5e7eb';tctx.textAlign='center';tctx.fillText(curLetter.l,tcv.width/2,200);
+ var pos=function(e){var b=tcv.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return[t.clientX-b.left,t.clientY-b.top]};
+ tcv.onmousedown=tcv.ontouchstart=function(e){e.preventDefault();tdraw=true;var p=pos(e);tctx.beginPath();tctx.moveTo(p[0],p[1])};
+ tcv.onmousemove=tcv.ontouchmove=function(e){if(!tdraw)return;e.preventDefault();var p=pos(e);tctx.lineTo(p[0],p[1]);tctx.stroke()};
+ var up=function(){tdraw=false};tcv.onmouseup=up;tcv.ontouchend=up}
+function traceClear(){if(tctx&&tcv){try{traceInit()}catch(e){}}}
+function traceDone(){if(!S.learned[curLetter.l]){S.learned[curLetter.l]=1;save();addStars(2,'حرف '+curLetter.l+' سیکھا!');renderAlpha()}else toast('شاباش! پہلے سے سیکھا ہوا ہے ⭐')}
+/* letter quiz */
+function letterQuiz(){var opts=[curLetter.l];while(opts.length<4){var c=LETTERS[Math.floor(Math.random()*38)].l;if(opts.indexOf(c)<0)opts.push(c)}
+ opts.sort(function(){return Math.random()-.5});
+ var h='<h2>🎯 "'+curLetter.l+'" کہاں ہے؟</h2>';for(var i=0;i<4;i++)h+='<div class="opt" onclick="lqAns(this,\''+opts[i]+'\')">'+opts[i]+'</div>';
+ $('ltQuiz').innerHTML=h}
+function lqAns(el,c){if(c===curLetter.l){el.classList.add('right');speak('شاباش!');addStars(1,'صحیح جواب!')}else{el.classList.add('wrong');speak('دوبارہ کوشش کرو')}}
+/* ================= WORDS ================= */
+function renderWCats(){var h='';for(var i=0;i<WCATS.length;i++){var c=WCATS[i];h+='<div class="cat-card" style="background:'+c.c+';margin:10px 0" onclick="openWCat('+i+')"><span class="em">'+c.n.split(' ')[1]+'</span>'+c.n.split(' ')[0]+'</div>'}$('wordCats').innerHTML=h}
+var curCat=0,curWord=null;
+function openWCat(i){curCat=i;var c=WCATS[i];$('wcTitle').textContent=c.n;var g='';for(var j=0;j<c.words.length;j++){var w=c.words[j];g+='<div class="word-card" onclick="openWord('+i+','+j+')"><div class="em">'+w[1]+'</div><div class="wd">'+w[0]+'</div>'+(S.words[w[0]]?'<div>⭐</div>':'')+'</div>'}$('wcGrid').innerHTML=g;stack.push('wordcat');show('wordcat')}
+function openWord(ci,wi){var w=WCATS[ci].words[wi];curWord={w:w[0],e:w[1],ci:ci};
+ $('wgEmoji').textContent=w[1];$('wgWord').textContent=w[0];$('wgTitle').textContent=w[0];
+ /* spelling quiz: blank one letter */
+ var word=w[0];var bi=Math.floor(Math.random()*word.length);var ans=word[bi];
+ var shown='';for(var k=0;k<word.length;k++)shown+=(k===bi?'_ ':word[k]+' ');
+ $('wgSpellQ').textContent='خالی جگہ پُر کرو: '+shown;
+ var opts=[ans];var pool='ابپتٹثجچحخدرڑزژسشصضطعغفقکگلمنوہھءیے';
+ while(opts.length<3){var c=pool[Math.floor(Math.random()*pool.length)];if(opts.indexOf(c)<0)opts.push(c)}
+ opts.sort(function(){return Math.random()-.5});
+ var h='';for(var q=0;q<3;q++)h+='<div class="opt" onclick="wgAns(this,\''+opts[q]+'\',\''+ans+'\')">'+opts[q]+'</div>';
+ $('wgOpts').innerHTML=h;stack.push('wgame');show('wgame')}
+function wgAns(el,c,ans){if(c===ans){el.classList.add('right');speak('شاباش!');addStars(1,'ہجے صحیح!')}else{el.classList.add('wrong');speak('دوبارہ کوشش کرو')}}
+function wordKnown(){if(!S.words[curWord.w]){S.words[curWord.w]=1;save();addStars(2,'لفظ سیکھا: '+curWord.w);openWCat(curCat);stack.pop()}else toast('پہلے سے سیکھا ہوا ہے ⭐')}
+/* ================= STORIES ================= */
+function renderStories(){var h='';for(var i=0;i<STORIES.length;i++){var s=STORIES[i];h+='<div class="card" style="cursor:pointer" onclick="openStory('+i+')"><div style="font-size:50px;text-align:center">'+s.e+'</div><div style="font-size:22px;font-weight:bold;text-align:center">'+s.t+'</div><div style="text-align:center">'+(S.stories[i]?'⭐ پڑھی ہوئی':'📖 پڑھو')+'</div></div>'}$('storyList').innerHTML=h}
+var curStory=0;
+function openStory(i){curStory=i;var s=STORIES[i];$('stTitle').textContent=s.t;$('stEmoji').textContent=s.e;
+ var h='';for(var j=0;j<s.p.length;j++)h+='<div class="story-p" onclick="speak(this.textContent)">'+s.p[j]+'</div>';
+ $('stBody').innerHTML=h;$('stMoral').textContent='💡 سبق: '+s.m;stack.push('story');show('story')}
+function storySpeak(){speak(STORIES[curStory].p.join(' '))}
+function storyDone(){if(!S.stories[curStory]){S.stories[curStory]=1;save();addStars(3,'کہانی پڑھی!')}else toast('پہلے سے پڑھی ہوئی ہے ⭐');renderStories()}
+/* ================= GAMES ================= */
+/* letter match */
+var lmScore=0;
+function startLMatch(){lmScore=0;stack.push('lmatch');show('lmatch');lmQ()}
+function lmQ(){var q=LETTERS[Math.floor(Math.random()*38)];$('lmQ').textContent=q.l;$('lmScore').textContent='اسکور: '+lmScore;
+ var opts=[q.l];while(opts.length<4){var c=LETTERS[Math.floor(Math.random()*38)].l;if(opts.indexOf(c)<0)opts.push(c)}
+ opts.sort(function(){return Math.random()-.5});
+ var h='';for(var i=0;i<4;i++)h+='<div class="opt" style="font-size:40px" onclick="lmAns(this,\''+opts[i]+'\',\''+q.l+'\')">'+opts[i]+'</div>';
+ $('lmOpts').innerHTML=h}
+function lmAns(el,c,ans){if(c===ans){el.classList.add('right');lmScore++;addStars(1,'');speak('شاباش!');setTimeout(lmQ,700)}else{el.classList.add('wrong');speak('دوبارہ کوشش کرو')}}
+/* memory */
+var memFirst=null,memLock=false,memWon=0;
+function startMemory(){var letters=[];while(letters.length<4){var c=LETTERS[Math.floor(Math.random()*38)].l;if(letters.indexOf(c)<0)letters.push(c)}
+ var cards=letters.concat(letters).sort(function(){return Math.random()-.5});
+ var h='';for(var i=0;i<8;i++)h+='<div class="mem-card" data-l="'+cards[i]+'" onclick="memFlip(this)">❓</div>';
+ $('memGrid').innerHTML=h;$('memInfo').textContent='جوڑے ملاؤ!';memFirst=null;memWon=0;stack.push('memory');show('memory')}
+function memFlip(el){if(memLock||el.classList.contains('open'))return;el.classList.add('open');el.textContent=el.getAttribute('data-l');
+ if(!memFirst){memFirst=el;return}
+ if(memFirst.getAttribute('data-l')===el.getAttribute('data-l')){memFirst.classList.add('won');el.classList.add('won');memFirst=null;memWon++;speak('شاباش!');if(memWon>=4){addStars(3,'یاد داشت جیتی!');$('memInfo').textContent='🎉 جیت گئے!';setTimeout(startMemory,1800)}}
+ else{memLock=true;var a=memFirst;memFirst=null;setTimeout(function(){a.classList.remove('open');a.textContent='❓';el.classList.remove('open');el.textContent='❓';memLock=false},800)}}
+/* listen & choose */
+var liScore=0,liWord=null;
+function allWords(){var a=[];for(var i=0;i<WCATS.length;i++)for(var j=0;j<WCATS[i].words.length;j++)a.push(WCATS[i].words[j]);return a}
+function startListen(){liScore=0;stack.push('listen');show('listen');liQ()}
+function liQ(){var ws=allWords();liWord=ws[Math.floor(Math.random()*ws.length)];$('liScore').textContent='اسکور: '+liScore;
+ var opts=[liWord];while(opts.length<4){var c=ws[Math.floor(Math.random()*ws.length)];var dup=false;for(var k=0;k<opts.length;k++)if(opts[k][0]===c[0])dup=true;if(!dup)opts.push(c)}
+ opts.sort(function(){return Math.random()-.5});
+ var h='';for(var i=0;i<4;i++)h+='<div class="word-card" onclick="liAns(this,\''+opts[i][0]+'\')"><div class="em">'+opts[i][1]+'</div></div>';
+ $('liOpts').innerHTML=h;listenPlay()}
+function listenPlay(){speak(liWord[0])}
+function liAns(el,w){if(w===liWord[0]){el.style.borderColor='#10B981';el.style.background='#ecfdf5';liScore++;addStars(1,'');speak('شاباش!');setTimeout(liQ,700)}else{el.style.borderColor='#EF4444';speak('دوبارہ سنو')}}
+/* ================= REWARDS ================= */
+function renderRewards(){updStars();var h='';for(var i=0;i<BADGES.length;i++){var b=BADGES[i];var got=S.badges.indexOf(b.id)>=0;h+='<div class="badge'+(got?'':' locked')+'">'+(got?'✅ ':'🔒 ')+b.n+'<div style="font-size:14px;font-weight:normal">'+b.d+'</div></div>'}$('badgeList').innerHTML=h;$('certBox').innerHTML=''}
+function showCert(){var nm='پیارے بچے';$('certBox').innerHTML='<div class="cert"><div style="font-size:50px">🎓</div><h2>تعریفی سند</h2><div style="font-size:22px">'+nm+'</div><div>نے اردو سیکھنے میں</div><div style="font-size:40px;color:#b45309;font-weight:bold">'+S.stars+' ⭐</div><div>ستارے حاصل کیے!</div><div style="margin-top:8px">🦜 چھوٹو کی طرف سے شاباش!</div><div style="font-size:13px;opacity:.6">DEMO by Jilan Apps</div></div>';speak('مبارک ہو! تم نے سند حاصل کی!')}
+/* ================= PARENT GATE ================= */
+var gateA=0;
+function gateOpen(){var a=2+Math.floor(Math.random()*7),b=2+Math.floor(Math.random()*7);gateA=a+b;
+ $('gateQ').textContent=a+' + '+b+' = ?';
+ var opts=[gateA];while(opts.length<3){var c=gateA-4+Math.floor(Math.random()*9);if(c>0&&opts.indexOf(c)<0)opts.push(c)}
+ opts.sort(function(){return Math.random()-.5});
+ var h='';for(var i=0;i<3;i++)h+='<div class="opt ltr" onclick="gateAns('+opts[i]+')">'+opts[i]+'</div>';
+ $('gateOpts').innerHTML=h;stack.push('gate');show('gate')}
+function gateAns(c){if(c===gateA){stack.push('parent');show('parent')}else toast('❌ غلط جواب — بچوں کے لیے نہیں!')}
+/* parent PIN */
+function pinCheck(){var v=$('pinIn').value;if(v===S.pin){$('pinBox').style.display='none';$('parentMain').style.display='block';parentReport()}else{toast('❌ غلط PIN');$('pinIn').value=''}}
+function parentReport(){$('rpStars').textContent=S.stars;$('rpAlpha').textContent=countLearned()+' / 38';$('rpWords').textContent=wordCount();$('rpStories').textContent=storyCount()+' / 4';$('rpStreak').textContent=S.streak}
+function changePin(){var n=prompt('نیا 4 ہندسوں کا PIN:');if(n&&/^\d{4}$/.test(n)){S.pin=n;save();toast('✅ PIN بدل گیا')}else toast('❌ 4 ہندسے لکھو')}
+function resetData(){if(confirm('کیا واقعی سارا ڈیٹا صاف کرنا ہے؟')){localStorage.removeItem('ubuddy');location.reload()}}
+/* ================= DEMO EXPIRY (3 din) ================= */
+(function(){var KEY='ubuddy_demo_start',DAYS=3;try{var s=localStorage.getItem(KEY),now=Date.now();
+ if(!s){localStorage.setItem(KEY,String(now))}else if(now-parseInt(s,10)>DAYS*864e5){
+  document.addEventListener('DOMContentLoaded',function(){document.body.innerHTML='<div class="demobanner">DEMO by Jilan Apps</div><div style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:system-ui"><div style="font-size:70px">🦜</div><h1>ڈیمو ختم!</h1><p>اس ڈیمو کی 3 دن کی مدت پوری ہو گئی۔<br>مکمل ایپ کے لیے Jilan Apps سے رابطہ کریں۔</p></div>'});return}}catch(e){}})();
+/* ================= INIT ================= */
+window.__goBack=__goBack;
+document.addEventListener('DOMContentLoaded',function(){
+ load();bumpStreak();checkBadges();
+ if(!S.onb){obRender();show('onb')}else{show('home');homeRender()}
+ renderAlpha();renderWCats();renderStories();renderRewards();
+});
+</script>
+</body>
+</html>
