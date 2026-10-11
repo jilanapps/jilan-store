@@ -269,7 +269,9 @@
 
     /* Compact header search */
     .topbar-search { flex: 1 1 auto; min-width: 0; max-width: 420px; position: relative; }
-    .topbar-search > svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--brand); pointer-events: none; }
+    .topbar-search .search-go { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--brand); display: grid; place-items: center; cursor: pointer; padding: 0; }
+    .topbar-search .search-go:hover { background: var(--surface-2); }
+    .topbar-search .search-go svg { display: block; }
     .topbar-search input {
       width: 100%; height: 42px; border: 1px solid var(--line); border-radius: 999px;
       background: var(--surface); color: var(--ink); padding: 0 38px 0 38px; font-size: 14px;
@@ -586,7 +588,7 @@ button.oos{opacity:.5;cursor:not-allowed}
     <div class="topbar-inner">
       <div class="wordmark" aria-label="Jilan Online Shopping Store"><img src="logo-192.png" alt="Jilan Store logo" width="46" height="46" fetchpriority="high" /><span class="wm-text"><strong>Jilan</strong><span>ONLINE SHOPPING STORE</span></span></div>
       <div class="topbar-search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <button class="search-go" id="searchGo" type="button" aria-label="Search products"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <label class="sr-only" for="searchInput">Search products</label>
         <input id="searchInput" type="search" placeholder="Search products…" autocomplete="off" enterkeyhint="search" aria-describedby="resultCount" />
         <button class="search-clear" id="clearSearch" type="button" aria-label="Clear product search" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -871,15 +873,18 @@ button.oos{opacity:.5;cursor:not-allowed}
       };
       function groupOf(p) { return CATEGORY_MAP[p.category] || p.category; }
       var groups = [];
-      products.forEach(function (p) {
-        var g = groupOf(p);
-        if (groups.indexOf(g) === -1) groups.push(g);
-      });
-      groups.sort(function (a, b) {
-        var ca = products.filter(function (p) { return groupOf(p) === a; }).length;
-        var cb = products.filter(function (p) { return groupOf(p) === b; }).length;
-        return cb - ca;
-      });
+      function computeGroups() {
+        groups = [];
+        products.forEach(function (p) {
+          var g = groupOf(p);
+          if (groups.indexOf(g) === -1) groups.push(g);
+        });
+        groups.sort(function (a, b) {
+          var ca = products.filter(function (p) { return groupOf(p) === a; }).length;
+          var cb = products.filter(function (p) { return groupOf(p) === b; }).length;
+          return cb - ca;
+        });
+      }
       var activeGroup = "All";
       var showAllGroups = false;
       var GROUP_PREVIEW = 8;
@@ -1036,12 +1041,16 @@ button.oos{opacity:.5;cursor:not-allowed}
       function renderProducts() {
         var q = searchTerm.trim().toLowerCase();
         var visible = products.filter(function (p) {
-          return (activeGroup === 'All' || groupOf(p) === activeGroup) && (!q || p.name.toLowerCase().includes(q));
+          if (q) {
+            var hay = (p.name + ' ' + (p.category || '')).toLowerCase();
+            return hay.indexOf(q) !== -1;
+          }
+          return (activeGroup === 'All' || groupOf(p) === activeGroup);
         });
         var shown = visible.slice(0, visibleLimit);
         resultCount.textContent = visible.length + (visible.length === 1 ? ' product' : ' products') + ' available';
         if (!visible.length) {
-          grid.innerHTML = '<div class="empty-results"><strong>No matching products</strong><br>Try another word or category.</div>';
+          grid.innerHTML = '<div class="empty-results"><strong>No products found.</strong><br>Try another search.</div>';
           catalogMore.hidden = true;
           return;
         }
@@ -1247,11 +1256,22 @@ button.oos{opacity:.5;cursor:not-allowed}
         supportDock.classList.toggle('hidden-dock', busy);
         if (busy) supportDock.classList.remove('expanded');
       }
+      var searchDebounce = null;
+      function runSearch(scrollToResults) {
+        searchTerm = searchInput.value;
+        clearSearch.hidden = !searchTerm;
+        visibleLimit = pageSize;
+        renderProducts();
+        if (scrollToResults) {
+          var catalog = document.getElementById('catalog');
+          if (catalog && catalog.scrollIntoView) catalog.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
       searchInput.addEventListener('input', function (event) {
         searchTerm = event.target.value;
-        visibleLimit = pageSize;
         clearSearch.hidden = !searchTerm;
-        renderProducts();
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(function () { runSearch(false); }, 200);
         clearTimeout(searchAnalyticsTimer);
         if (searchTerm.trim()) {
           searchAnalyticsTimer = setTimeout(function () {
@@ -1259,11 +1279,24 @@ button.oos{opacity:.5;cursor:not-allowed}
           }, 700);
         }
       });
+      searchInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          clearTimeout(searchDebounce);
+          runSearch(true);
+        }
+      });
+      document.getElementById('searchGo').addEventListener('click', function () {
+        searchInput.focus();
+        clearTimeout(searchDebounce);
+        runSearch(true);
+      });
       clearSearch.addEventListener('click', function () {
         searchTerm = '';
         visibleLimit = pageSize;
         searchInput.value = '';
         clearSearch.hidden = true;
+        clearTimeout(searchDebounce);
         renderProducts();
         searchInput.focus();
       });
@@ -1339,6 +1372,7 @@ button.oos{opacity:.5;cursor:not-allowed}
         else if (chatPanel.classList.contains('open')) closeChat();
       });
 
+      computeGroups();
       renderCatPills();
       renderShowcases();
       renderProducts();
