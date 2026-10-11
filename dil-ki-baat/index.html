@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Dil Ki Baat — Mood Diary</title>
+<style>
+:root{--pink:#F9A8D4;--purple:#7C3AED;--purple-d:#5b21b6;--cream:#FFF7ED;--ink:#3b2d4d;--muted:#8b7a9e;--card:#ffffff;--line:#f3e4f5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Noto Nastaliq Urdu',sans-serif;background:linear-gradient(160deg,#FFF7ED 0%,#FDE8F3 45%,#EDE9FE 100%);color:var(--ink);min-height:100vh;touch-action:manipulation}
+.hand{font-family:'Segoe Print','Comic Sans MS','Chalkboard SE',cursive}
+.screen{display:none;min-height:100vh;padding-bottom:96px}
+.screen.on{display:block;animation:fadein .25s}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,247,237,.92);backdrop-filter:blur(8px);padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.topbar h2{margin:0;font-size:20px;color:var(--purple-d)}
+.topbar .sp{flex:1}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:12px 16px;box-shadow:0 6px 20px rgba(124,58,237,.10);border:1px solid var(--line)}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:15px;font-size:17px;font-weight:bold;color:#fff;background:linear-gradient(135deg,var(--purple),#a855f7);margin:10px 0;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,.3)}
+.btn.pink{background:linear-gradient(135deg,#ec4899,var(--pink));box-shadow:0 4px 12px rgba(236,72,153,.3);color:#fff}
+.btn.ghost{background:#fff;color:var(--purple-d);border:2px solid var(--purple);box-shadow:none}
+.btn.small{padding:10px;font-size:15px}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+input,textarea,select{width:100%;border:2px solid var(--line);border-radius:14px;padding:13px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink);margin:6px 0}
+textarea{min-height:150px;resize:vertical;line-height:1.7}
+.paper{background:repeating-linear-gradient(#fff,#fff 30px,#fbe9f3 30px,#fbe9f3 31px);border-radius:16px;padding:18px}
+.moodrow{display:flex;justify-content:space-around;margin:10px 0}
+.mood{font-size:38px;cursor:pointer;filter:grayscale(.7);opacity:.55;transition:.15s;border-radius:50%;padding:4px}
+.mood.sel{filter:none;opacity:1;transform:scale(1.25)}
+.chip{display:inline-block;background:#f5e9ff;color:var(--purple-d);border-radius:20px;padding:7px 14px;margin:4px;font-size:14px;cursor:pointer;border:2px solid transparent}
+.chip.sel{background:var(--purple);color:#fff}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+.tab{flex:1;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;padding:4px}
+.tab .ic{font-size:24px;display:block}
+.tab.on{color:var(--purple-d);font-weight:bold}
+.demobanner{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(90deg,#7C3AED,#ec4899);color:#fff;text-align:center;font-size:12px;font-weight:bold;padding:5px;letter-spacing:1px}
+.hasdemo{padding-top:26px}
+.bubble{max-width:82%;padding:12px 15px;border-radius:18px;margin:8px 0;line-height:1.6;font-size:15px}
+.bubble.me{background:var(--purple);color:#fff;margin-left:auto;border-bottom-right-radius:6px}
+.bubble.ai{background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.chatbox{display:flex;gap:8px;padding:10px 14px;background:#fff;border-top:1px solid var(--line);position:sticky;bottom:76px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal div{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;background:#f7f2fb;cursor:pointer}
+.cal div.has{font-weight:bold;color:#fff}
+.entry{border-left:4px solid var(--pink);padding:10px 12px;margin:10px 0;background:#fffdf9;border-radius:0 14px 14px 0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.entry .t{font-size:13px;color:var(--muted)}
+.pinrow{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pindot{width:18px;height:18px;border-radius:50%;border:2px solid var(--purple);background:#fff}
+.pindot.f{background:var(--purple)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto}
+.numpad button{font-size:24px;padding:16px;border-radius:16px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.streak{font-size:15px;color:#b45309;font-weight:bold}
+canvas.chart{width:100%;height:150px}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.hidden{display:none!important}
+.note{font-size:13px;color:var(--muted);background:#faf5ff;border-radius:12px;padding:10px 12px;margin:10px 16px;line-height:1.6}
+.obslide{text-align:center;padding:60px 30px}
+.obslide .big{font-size:80px;margin-bottom:20px}
+.dots{display:flex;gap:8px;justify-content:center;margin:20px}
+.dot{width:10px;height:10px;border-radius:50%;background:#e5d5f5}
+.dot.on{background:var(--purple)}
+.tag{font-size:12px;background:#fdf2f8;color:#be185d;border-radius:10px;padding:3px 10px;margin-right:6px}
+img.thumb{max-width:100%;border-radius:12px;margin-top:8px}
+audio{width:100%;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div class="hasdemo">
+
+<!-- ============ ONBOARDING ============ -->
+<div id="ob" class="screen">
+  <div class="obslide" id="ob1">
+    <div class="big">💗</div>
+    <h1 class="hand" style="color:var(--purple-d)">Dil Ki Baat,<br>AI Ke Saath</h1>
+    <p data-i="ob1">Likhein azaad dil se — koi judgment nahi.</p>
+  </div>
+  <div class="obslide hidden" id="ob2">
+    <div class="big">🧠</div>
+    <h1 class="hand" style="color:var(--purple-d)">Patterns Samjhein</h1>
+    <p data-i="ob2">Demo companion aap ke mood ke rujhanat batata hai.</p>
+  </div>
+  <div class="obslide hidden" id="ob3">
+    <div class="big">🔒</div>
+    <h1 class="hand" style="color:var(--purple-d)">Privacy Promise</h1>
+    <p data-i="ob3">Sab kuch sirf aap ke phone me rehta hai. Kahin upload nahi hota.</p>
+    <div class="card" style="text-align:left">
+      <label data-i="rem">Daily reminder time</label>
+      <input type="time" id="obRem" value="21:00">
+    </div>
+  </div>
+  <div style="padding:0 30px">
+    <div class="dots"><div class="dot on" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+    <button class="btn" id="obBtn" onclick="obNext()">Next →</button>
+    <button class="btn ghost" onclick="obSkip()" data-i="skip">Skip</button>
+  </div>
+</div>
+
+<!-- ============ PIN LOCK ============ -->
+<div id="lock" class="screen">
+  <div class="obslide">
+    <div class="big">🔐</div>
+    <h2 class="hand" style="color:var(--purple-d)" data-i="pinlock">Diary locked</h2>
+    <p data-i="pinenter">Apna PIN dalein</p>
+    <div class="pinrow"><div class="pindot" id="pd0"></div><div class="pindot" id="pd1"></div><div class="pindot" id="pd2"></div><div class="pindot" id="pd3"></div></div>
+    <div class="numpad">
+      <button onclick="pinKey('1')">1</button><button onclick="pinKey('2')">2</button><button onclick="pinKey('3')">3</button>
+      <button onclick="pinKey('4')">4</button><button onclick="pinKey('5')">5</button><button onclick="pinKey('6')">6</button>
+      <button onclick="pinKey('7')">7</button><button onclick="pinKey('8')">8</button><button onclick="pinKey('9')">9</button>
+      <button onclick="pinClear()">⌫</button><button onclick="pinKey('0')">0</button><button onclick="pinOk()">✓</button>
+    </div>
+    <p id="pinMsg" style="color:#dc2626;min-height:20px"></p>
+  </div>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="home" class="screen">
+  <div class="topbar"><h2>💗 <span data-i="appname">Dil Ki Baat</span></h2><div class="sp"></div><span id="streakTop" class="streak"></span></div>
+  <div class="card">
+    <div class="hand" style="font-size:22px" id="greet">Assalam-o-Alaikum!</div>
+    <div style="margin-top:6px" data-i="howfeel">Aaj aap kaisa mehsoos kar rahe hain?</div>
+    <div class="moodrow" id="moodRow">
+      <span class="mood" data-m="1" onclick="quickMood(1)">😢</span>
+      <span class="mood" data-m="2" onclick="quickMood(2)">😟</span>
+      <span class="mood" data-m="3" onclick="quickMood(3)">😐</span>
+      <span class="mood" data-m="4" onclick="quickMood(4)">🙂</span>
+      <span class="mood" data-m="5" onclick="quickMood(5)">😄</span>
+    </div>
+  </div>
+  <div class="card">
+    <b data-i="insightday">💡 Aaj ki insight</b>
+    <p id="insightDay" class="hand" style="font-size:18px;margin:8px 0"></p>
+  </div>
+  <div class="card">
+    <b data-i="weekmood">📊 Is haftay ka mood</b>
+    <canvas class="chart" id="weekChart" width="600" height="150"></canvas>
+  </div>
+  <div class="card">
+    <b data-i="recent">📝 Haal ki entries</b>
+    <div id="recentList"></div>
+    <button class="btn small pink" onclick="go('journal');openEditor()" data-i="write">✍️ Likhein</button>
+  </div>
+</div>
+
+<!-- ============ JOURNAL ============ -->
+<div id="journal" class="screen">
+  <div class="topbar"><h2>📓 <span data-i="journal">Journal</span></h2><div class="sp"></div><button class="btn small pink" style="width:auto;margin:0;padding:8px 14px" onclick="openEditor()">＋</button></div>
+  <div style="padding:0 16px"><input id="jSearch" placeholder="🔍 Search entries..." oninput="renderJournal()"></div>
+  <div class="card"><b data-i="cal">📅 Calendar</b><div class="cal" id="calGrid" style="margin-top:8px"></div>
+    <div class="row2" style="margin-top:8px"><button class="btn small ghost" onclick="calShift(-1)">‹</button><button class="btn small ghost" onclick="calShift(1)">›</button></div>
+  </div>
+  <div id="entryList" style="padding:0 4px"></div>
+</div>
+
+<!-- ============ EDITOR ============ -->
+<div id="editor" class="screen">
+  <div class="topbar"><span style="font-size:24px;cursor:pointer" onclick="go('journal')">‹</span><h2 data-i="newentry">✍️ Nayi entry</h2></div>
+  <div class="card">
+    <div data-i="moodtoday">Mood:</div>
+    <div class="moodrow" id="edMood">
+      <span class="mood" data-m="1" onclick="edMoodSet(1)">😢</span><span class="mood" data-m="2" onclick="edMoodSet(2)">😟</span><span class="mood" data-m="3" onclick="edMoodSet(3)">😐</span><span class="mood" data-m="4" onclick="edMoodSet(4)">🙂</span><span class="mood" data-m="5" onclick="edMoodSet(5)">😄</span>
+    </div>
+    <div id="tagRow"></div>
+    <input id="edTitle" data-i-ph="title" placeholder="Title (optional)">
+    <div class="paper"><textarea id="edText" class="hand" data-i-ph="writetext" placeholder="Dil ki baat likhein..." style="border:none;background:transparent;font-size:19px"></textarea></div>
+    <div class="row2">
+      <button class="btn small ghost" id="recBtn" onclick="toggleRec()">🎤 Record</button>
+      <label class="btn small ghost" style="text-align:center">📷 Photo<input type="file" id="edPhoto" accept="image/*" class="hidden" onchange="photoPick(event)"></label>
+    </div>
+    <div id="edMedia"></div>
+    <button class="btn" onclick="saveEntry()" data-i="save">💾 Save</button>
+    <button class="btn ghost" id="delBtn" onclick="delEntry()" data-i="delete">🗑 Delete</button>
+  </div>
+</div>
+
+<!-- ============ AI CHAT ============ -->
+<div id="aichat" class="screen">
+  <div class="topbar"><h2>💬 <span data-i="aichat">AI Chat</span></h2></div>
+  <div class="note" data-i="aidisclose">⚠️ Ye demo companion hai — rule-based jawab deta hai, asal AI nahi. Aap ki baatein sirf is phone me rehti hain.</div>
+  <div id="chatLog" style="padding:6px 16px;min-height:40vh"></div>
+  <div class="chatbox"><input id="chatIn" data-i-ph="chatph" placeholder="Apne dil ki baat kahein..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn small" style="width:auto;margin:0" onclick="sendChat()">➤</button></div>
+</div>
+
+<!-- ============ INSIGHTS ============ -->
+<div id="insights" class="screen">
+  <div class="topbar"><h2>📈 <span data-i="insights">Insights</span></h2></div>
+  <div class="card"><b data-i="m30">📊 Aakhri 30 din</b><canvas class="chart" id="monthChart" width="600" height="150"></canvas></div>
+  <div class="card"><b data-i="triggers">🏷 Triggers</b><div id="trigList"></div></div>
+  <div class="card"><b data-i="bestworst">🌟 Best / 🌧 Worst days</b><div id="bwList"></div></div>
+  <div class="card"><b data-i="words">☁️ Aksar alfaz</b><div id="wordCloud" style="line-height:2.2"></div></div>
+  <div class="card"><b data-i="weeklysum">🗓 Weekly summary</b><p id="weekSum" class="hand" style="font-size:17px"></p></div>
+  <button class="btn" style="margin:12px 16px" onclick="printView()" data-i="print">🖨 Print / PDF (therapist ke liye)</button>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="profile" class="screen">
+  <div class="topbar"><h2>👤 <span data-i="profile">Profile</span></h2></div>
+  <div class="card">
+    <label data-i="name">Naam</label><input id="pfName" placeholder="Aap ka naam">
+    <label data-i="goal">Maqsad</label><input id="pfGoal" placeholder="e.g. Roz likhna, sukoon pana">
+    <label data-i="lang">Zubaan / Language</label>
+    <select id="pfLang" onchange="setLang(this.value)"><option value="ur">Roman Urdu</option><option value="en">English</option></select>
+    <button class="btn small" onclick="saveProfile()" data-i="save">💾 Save</button>
+  </div>
+  <div class="card">
+    <b>🔐 PIN Lock</b>
+    <p style="font-size:13px;color:var(--muted)" data-i="pindesc">4-digit PIN se diary lock karein.</p>
+    <div class="row2"><button class="btn small ghost" onclick="pinMode='set';pinBuf='';go('lock');pinMsg('')" data-i="setpin">Set/Change PIN</button><button class="btn small ghost" onclick="clearPin()" data-i="removepin">Remove</button></div>
+  </div>
+  <div class="card">
+    <b data-i="data">📦 Data</b>
+    <div class="row2"><button class="btn small ghost" onclick="exportData()" data-i="export">Export JSON</button><button class="btn small ghost" onclick="wipeData()" data-i="delall" style="color:#dc2626">Delete all</button></div>
+  </div>
+  <div class="note" data-i="privnote">🔒 Privacy: sab data sirf is phone ke browser me hai. Koi server, koi upload nahi.</div>
+  <div class="card" style="text-align:center;color:var(--muted);font-size:13px">Dil Ki Baat v1.0<br>DEMO by Jilan Apps</div>
+</div>
+
+</div><!-- /hasdemo -->
+
+<div class="tabbar" id="tabbar">
+  <div class="tab on" data-t="home" onclick="go('home')"><span class="ic">🏠</span><span data-i="thome">Home</span></div>
+  <div class="tab" data-t="journal" onclick="go('journal')"><span class="ic">📓</span><span data-i="tjour">Journal</span></div>
+  <div class="tab" data-t="aichat" onclick="go('aichat')"><span class="ic">💬</span><span data-i="tchat">AI Chat</span></div>
+  <div class="tab" data-t="insights" onclick="go('insights')"><span class="ic">📈</span><span data-i="tins">Insights</span></div>
+  <div class="tab" data-t="profile" onclick="go('profile')"><span class="ic">👤</span><span data-i="tpro">Profile</span></div>
+</div>
+
+<script>
+/* ================= DEMO EXPIRY (3 days) ================= */
+(function(){try{var k='dkb_demo_start',n=Date.now(),s=localStorage.getItem(k);if(!s){localStorage.setItem(k,String(n));}else if(n-parseInt(s,10)>3*864e5){document.addEventListener('DOMContentLoaded',function(){document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#7C3AED,#ec4899);color:#fff;text-align:center;padding:24px;font-family:system-ui"><div style="font-size:64px">💗</div><h1>Dil Ki Baat</h1><p>Demo muddat (3 din) khatam.<br>Full version ke liye Jilan Apps se rabta karein.</p></div>';});}}catch(e){}})();
+/* ================= I18N ================= */
+var I18N={
+ur:{appname:'Dil Ki Baat',skip:'Skip',rem:'Daily reminder time',pinlock:'Diary locked',pinenter:'Apna PIN dalein',howfeel:'Aaj aap kaisa mehsoos kar rahe hain?',insightday:'💡 Aaj ki insight',weekmood:'📊 Is haftay ka mood',recent:'📝 Haal ki entries',write:'✍️ Likhein',journal:'Journal',cal:'📅 Calendar',newentry:'✍️ Nayi entry',moodtoday:'Mood:',title:'Title (optional)',writetext:'Dil ki baat likhein...',save:'💾 Save',delete:'🗑 Delete',aichat:'AI Chat',aidisclose:'⚠️ Ye demo companion hai — rule-based jawab deta hai, asal AI nahi. Aap ki baatein sirf is phone me rehti hain.',chatph:'Apne dil ki baat kahein...',insights:'Insights',m30:'📊 Aakhri 30 din',triggers:'🏷 Triggers',bestworst:'🌟 Best / 🌧 Worst days',words:'☁️ Aksar alfaz',weeklysum:'🗓 Weekly summary',print:'🖨 Print / PDF (therapist ke liye)',profile:'Profile',name:'Naam',goal:'Maqsad',lang:'Zubaan / Language',setpin:'Set/Change PIN',removepin:'Remove',pindesc:'4-digit PIN se diary lock karein.',data:'📦 Data',export:'Export JSON',delall:'Delete all',privnote:'🔒 Privacy: sab data sirf is phone ke browser me hai. Koi server, koi upload nahi.',thome:'Home',tjour:'Journal',tchat:'AI Chat',tins:'Insights',tpro:'Profile',ob1:'Likhein azaad dil se — koi judgment nahi.',ob2:'Demo companion aap ke mood ke rujhanat batata hai.',ob3:'Sab kuch sirf aap ke phone me rehta hai. Kahin upload nahi hota.'},
+en:{appname:'Dil Ki Baat',skip:'Skip',rem:'Daily reminder time',pinlock:'Diary locked',pinenter:'Enter your PIN',howfeel:'How are you feeling today?',insightday:'💡 Today\'s insight',weekmood:'📊 This week\'s mood',recent:'📝 Recent entries',write:'✍️ Write',journal:'Journal',cal:'📅 Calendar',newentry:'✍️ New entry',moodtoday:'Mood:',title:'Title (optional)',writetext:'Write from your heart...',save:'💾 Save',delete:'🗑 Delete',aichat:'AI Chat',aidisclose:'⚠️ This is a demo companion — rule-based replies, not real AI. Your words stay only on this phone.',chatph:'Speak your heart...',insights:'Insights',m30:'📊 Last 30 days',triggers:'🏷 Triggers',bestworst:'🌟 Best / 🌧 Worst days',words:'☁️ Frequent words',weeklysum:'🗓 Weekly summary',print:'🖨 Print / PDF (for therapist)',profile:'Profile',name:'Name',goal:'Goal',lang:'Language',setpin:'Set/Change PIN',removepin:'Remove',pindesc:'Lock diary with a 4-digit PIN.',data:'📦 Data',export:'Export JSON',delall:'Delete all',privnote:'🔒 Privacy: all data stays in this phone\'s browser. No server, no upload.',thome:'Home',tjour:'Journal',tchat:'AI Chat',tins:'Insights',tpro:'Profile',ob1:'Write freely — no judgment here.',ob2:'The demo companion shows your mood patterns.',ob3:'Everything stays only on your phone. Nothing is uploaded.'}};
+var LANG='ur';
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.ur[k]||k;}
+function applyLang(){document.querySelectorAll('[data-i]').forEach(function(e){e.textContent=t(e.getAttribute('data-i'));});document.querySelectorAll('[data-i-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-i-ph'));});}
+function setLang(v){LANG=v;saveSettings();applyLang();renderHome();}
+/* ================= STORE ================= */
+function LS(k,d){try{var v=localStorage.getItem('dkb_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function SV(k,v){try{localStorage.setItem('dkb_'+k,JSON.stringify(v));}catch(e){}}
+var entries=LS('entries',[]),moods=LS('moods',{}),chatH=LS('chat',[]),st=LS('settings',{name:'',goal:'',lang:'ur',pin:'',rem:'21:00',ob:0});
+LANG=st.lang||'ur';
+var TAGS=['Work','Family','Love','Health','Dreams','Sleep'];
+var MOOD_E={1:'😢',2:'😟',3:'😐',4:'🙂',5:'😄'};
+var MOOD_C={1:'#ef4444',2:'#f59e0b',3:'#a78bfa',4:'#34d399',5:'#22c55e'};
+/* ================= NAV ================= */
+var cur='home';
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});var el=document.getElementById(id);if(el)el.classList.add('on');window.scrollTo(0,0);}
+function go(id){cur=id;show(id);document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-t')===id);});document.getElementById('tabbar').style.display=(id==='ob'||id==='lock'||id==='editor')?'none':'flex';
+if(id==='home')renderHome();if(id==='journal')renderJournal();if(id==='insights')renderInsights();if(id==='aichat')renderChat();}
+window.__atMenu=function(){return cur==='home';};window.__goMenu=function(){go('home');};
+/* ================= ONBOARDING ================= */
+var obStep=1;
+function obNext(){if(obStep<3){obStep++;for(var i=1;i<=3;i++){document.getElementById('ob'+i).classList.toggle('hidden',i!==obStep);document.getElementById('d'+i).classList.toggle('on',i===obStep);}if(obStep===3)document.getElementById('obBtn').textContent='Start 💗';}else{obSkip();}}
+function obSkip(){st.rem=document.getElementById('obRem').value||'21:00';st.ob=1;SV('settings',st);enterApp();}
+function enterApp(){if(st.pin){pinMode='check';pinBuf='';go('lock');}else{go('home');}}
+/* ================= PIN ================= */
+var pinMode='check',pinBuf='';
+function pinKey(d){if(pinBuf.length<4){pinBuf+=d;pinDraw();}}
+function pinClear(){pinBuf=pinBuf.slice(0,-1);pinDraw();}
+function pinDraw(){for(var i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('f',i<pinBuf.length);}
+function pinMsg(m){document.getElementById('pinMsg').textContent=m;}
+function pinOk(){
+ if(pinBuf.length!==4){pinMsg(LANG==='ur'?'4 digit dalein':'Enter 4 digits');return;}
+ if(pinMode==='check'){if(pinBuf===st.pin){pinBuf='';pinDraw();go('home');}else{pinMsg(LANG==='ur'?'Ghalat PIN':'Wrong PIN');pinBuf='';pinDraw();}}
+ else{st.pin=pinBuf;SV('settings',st);pinBuf='';pinDraw();pinMsg('');alert(LANG==='ur'?'PIN set ho gaya':'PIN set');go('profile');}}
+function clearPin(){st.pin='';SV('settings',st);alert(LANG==='ur'?'PIN hata diya':'PIN removed');}
+/* ================= HOME ================= */
+function todayKey(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function quickMood(v){moods[todayKey()]=v;SV('moods',moods);updStreak();renderHome();}
+function edMoodSet(v){edMood=v;document.querySelectorAll('#edMood .mood').forEach(function(m){m.classList.toggle('sel',m.getAttribute('data-m')==v);});}
+function updStreak(){var n=0,d=new Date();while(moods[todayKey(d)]){n++;d.setDate(d.getDate()-1);}SV('streak',n);return n;}
+function greet(){var h=new Date().getHours();if(LANG==='ur'){return h<12?'Subah Bakhair!':h<17?'Assalam-o-Alaikum!':'Sham Bakhair!';}return h<12?'Good morning!':h<17?'Good afternoon!':'Good evening!';}
+function renderHome(){
+ document.getElementById('greet').textContent=(st.name?st.name+', ':'')+greet();
+ var s=updStreak();document.getElementById('streakTop').textContent=s>0?'🔥 '+s:'';
+ document.querySelectorAll('#moodRow .mood').forEach(function(m){m.classList.toggle('sel',moods[todayKey()]==m.getAttribute('data-m'));});
+ document.getElementById('insightDay').textContent=dailyInsight();
+ var rl=document.getElementById('recentList');rl.innerHTML='';
+ var e2=entries.slice().sort(function(a,b){return b.ts-a.ts;}).slice(0,3);
+ if(!e2.length)rl.innerHTML='<p style="color:var(--muted)">'+(LANG==='ur'?'Abhi koi entry nahi.':'No entries yet.')+'</p>';
+ e2.forEach(function(e){rl.appendChild(entryCard(e));});
+ drawWeek('weekChart');
+}
+function entryCard(e){var d=document.createElement('div');d.className='entry';d.onclick=function(){openEditor(e.id);};
+ d.innerHTML='<b>'+(e.title||(LANG==='ur'?'Untitled':'Untitled'))+'</b> '+(MOOD_E[e.mood]||'')+'<div class="t">'+new Date(e.ts).toLocaleDateString()+' · '+(e.tags||[]).join(', ')+'</div><div class="hand" style="font-size:15px">'+esc(e.text).slice(0,90)+'…</div>';return d;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function dailyInsight(){
+ var vals=Object.keys(moods).sort().slice(-7).map(function(k){return moods[k];});
+ if(!vals.length)return LANG==='ur'?'Aaj pehla mood log karein 💗':'Log your first mood today 💗';
+ var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+ if(avg>=4)return LANG==='ur'?'Aap ka hafta roshan lag raha hai! ✨':'Your week looks bright! ✨';
+ if(avg>=3)return LANG==='ur'?'Sukoon se aagay barhein 🌿':'Keep going steadily 🌿';
+ return LANG==='ur'?'Thora waqt khud ko dein — likhna madad karta hai 💗':'Be gentle with yourself — writing helps 💗';}
+function drawWeek(cid){var cv=document.getElementById(cid);if(!cv)return;var ctx=cv.getContext('2d');ctx.clearRect(0,0,600,150);
+ var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);days.push({k:todayKey(d),v:moods[todayKey(d)]||0,l:'SMTWTFS'[d.getDay()]});}
+ var bw=600/7;days.forEach(function(x,i){var h=x.v?x.v*24:6;ctx.fillStyle=x.v?MOOD_C[x.v]:'#e9e2f5';var bx=i*bw+14;ctx.beginPath();ctx.roundRect(bx,140-h,bw-28,h,8);ctx.fill();ctx.fillStyle='#8b7a9e';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText(x.l,bx+(bw-28)/2,148);});}
+/* ================= JOURNAL ================= */
+var calY,calM,edId=null,edMood=3,edTags=[],edAudio=null,edPhoto=null;
+(function(){var n=new Date();calY=n.getFullYear();calM=n.getMonth();})();
+function renderJournal(){
+ var q=(document.getElementById('jSearch').value||'').toLowerCase();
+ var list=document.getElementById('entryList');list.innerHTML='';
+ var e2=entries.slice().sort(function(a,b){return b.ts-a.ts;}).filter(function(e){return !q||(e.title+' '+e.text+' '+(e.tags||[]).join(' ')).toLowerCase().indexOf(q)>=0;});
+ if(!e2.length)list.innerHTML='<p style="color:var(--muted);text-align:center">'+(LANG==='ur'?'Koi entry nahi mili.':'No entries found.')+'</p>';
+ e2.forEach(function(e){list.appendChild(entryCard(e));});
+ var g=document.getElementById('calGrid');g.innerHTML='';
+ var first=new Date(calY,calM,1).getDay(),dim=new Date(calY,calM+1,0).getDate();
+ for(var i=0;i<first;i++){g.appendChild(document.createElement('div'));}
+ var byDay={};entries.forEach(function(e){var d=new Date(e.ts);if(d.getFullYear()===calY&&d.getMonth()===calM){var k=d.getDate();(byDay[k]=byDay[k]||[]).push(e);}});
+ for(var d2=1;d2<=dim;d2++){var c=document.createElement('div');c.textContent=d2;
+  if(byDay[d2]){var avg=Math.round(byDay[d2].reduce(function(a,e){return a+e.mood;},0)/byDay[d2].length);c.className='has';c.style.background=MOOD_C[avg];c.title=byDay[d2].length+' entries';}
+  g.appendChild(c);}
+}
+function calShift(d){calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderJournal();}
+function openEditor(id){
+ edId=id||null;edMood=3;edTags=[];edAudio=null;edPhoto=null;
+ document.getElementById('edMedia').innerHTML='';
+ var e=id?entries.filter(function(x){return x.id===id;})[0]:null;
+ document.getElementById('edTitle').value=e?e.title:'';
+ document.getElementById('edText').value=e?e.text:'';
+ if(e){edMood=e.mood;edTags=(e.tags||[]).slice();edAudio=e.audio||null;edPhoto=e.photo||null;showMedia();}
+ edMoodSet(edMood);renderTags();
+ document.getElementById('delBtn').style.display=e?'block':'none';
+ go('editor');}
+function renderTags(){var r=document.getElementById('tagRow');r.innerHTML='';TAGS.forEach(function(tg){var s=document.createElement('span');s.className='chip'+(edTags.indexOf(tg)>=0?' sel':'');s.textContent=tg;s.onclick=function(){var i=edTags.indexOf(tg);if(i>=0)edTags.splice(i,1);else edTags.push(tg);renderTags();};r.appendChild(s);});}
+function showMedia(){var m=document.getElementById('edMedia');m.innerHTML='';
+ if(edAudio){var a=document.createElement('audio');a.controls=true;a.src=edAudio;m.appendChild(a);}
+ if(edPhoto){var im=document.createElement('img');im.className='thumb';im.src=edPhoto;m.appendChild(im);}}
+function photoPick(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){edPhoto=r.result;showMedia();};r.readAsDataURL(f);}
+var mr=null,mrChunks=[];
+function toggleRec(){
+ if(mr&&mr.state==='recording'){mr.stop();return;}
+ try{
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(st2){mr=new MediaRecorder(st2);mrChunks=[];
+   mr.ondataavailable=function(e){mrChunks.push(e.data);};
+   mr.onstop=function(){var b=new Blob(mrChunks,{type:'audio/webm'});var r=new FileReader();r.onload=function(){edAudio=r.result;showMedia();};r.readAsDataURL(b);st2.getTracks().forEach(function(tr){tr.stop();});document.getElementById('recBtn').textContent='🎤 Record';};
+   mr.start();document.getElementById('recBtn').textContent='⏹ Stop ('+(LANG==='ur'?'record ho raha':'recording')+')';
+   setTimeout(function(){if(mr&&mr.state==='recording')mr.stop();},30000);
+  }).catch(function(){alert(LANG==='ur'?'Mic ki ijazat nahi mili':'Mic permission denied');});
+ }catch(e){alert('Recording not supported');}}
+function saveEntry(){
+ var txt=document.getElementById('edText').value.trim();
+ if(!txt&&!edAudio&&!edPhoto){alert(LANG==='ur'?'Kuch likhein ya record karein':'Write or record something');return;}
+ var now=Date.now();
+ if(edId){var e=entries.filter(function(x){return x.id===edId;})[0];e.title=document.getElementById('edTitle').value;e.text=txt;e.mood=edMood;e.tags=edTags.slice();e.audio=edAudio;e.photo=edPhoto;e.ts=now;}
+ else{entries.push({id:'e'+now,title:document.getElementById('edTitle').value,text:txt,mood:edMood,tags:edTags.slice(),audio:edAudio,photo:edPhoto,ts:now});}
+ SV('entries',entries);updStreak();go('journal');}
+function delEntry(){if(!edId)return;if(confirm(LANG==='ur'?'Delete karein?':'Delete?')){entries=entries.filter(function(x){return x.id!==edId;});SV('entries',entries);go('journal');}}
+/* ================= AI CHAT (rule-based demo) ================= */
+function renderChat(){var l=document.getElementById('chatLog');l.innerHTML='';
+ if(!chatH.length)aiSay(LANG==='ur'?'Assalam-o-Alaikum 💗 Main aap ka demo companion hoon. Aaj dil me kya hai?':'Hello 💗 I am your demo companion. What is on your heart today?');
+ chatH.forEach(function(m){bubble(m.who,m.text);});}
+function bubble(who,txt){var l=document.getElementById('chatLog');var d=document.createElement('div');d.className='bubble '+who;d.textContent=txt;l.appendChild(d);l.scrollTop=l.scrollHeight;}
+function aiSay(t2){chatH.push({who:'ai',text:t2});SV('chat',chatH);bubble('ai',t2);}
+function meSay(t2){chatH.push({who:'me',text:t2});SV('chat',chatH);bubble('me',t2);}
+function sendChat(){var i=document.getElementById('chatIn'),v=i.value.trim();if(!v)return;i.value='';meSay(v);
+ var crisis=/(khudkushi|suicide|mar jana|marna chahta|die|kill myself|self harm)/i.test(v);
+ setTimeout(function(){aiSay(crisis?crisisMsg():botReply(v));},500);}
+function crisisMsg(){return LANG==='ur'?'Aap ki baat sun kar fikar hui. Agar khud ko nuqsan ka khayal aaye to foran madad lein — Umang Helpline: 0311-7786264 (24/7). Aap akele nahi hain 💗':'I am concerned hearing this. If you have thoughts of harming yourself, please reach out now — Umang Helpline: 0311-7786264 (24/7). You are not alone 💗';}
+function botReply(v){
+ var s=v.toLowerCase(),ur=LANG==='ur';
+ var sad=/(sad|udas|dukhi|ro|rona|depress|tanha|akela|dard|gham|pareshan|tension|stress|gussa|angry|dar|fear|thak|tired)/.test(s);
+ var happy=/(khush|happy|maza|achha laga|great|awesome|kamiyab|success|mubarak)/.test(s);
+ var love=/(mohabbat|love|pyaar|shadi|dost|friend)/.test(s);
+ var work=/(boss|kaam|work|office|job|naukri|exam|parhai|study)/.test(s);
+ var fam=/(ami|abu|ghar|family|bhai|behan|rishta)/.test(s);
+ var thx=/(shukriya|thanks|thank)/.test(s);
+ if(sad)return ur?'Ye sun kar bura laga 💗 Kya aap batana chahenge ke kya hua? Main sun raha hoon.':'I am sorry to hear that 💗 Would you like to share what happened? I am listening.';
+ if(happy)return ur?'MashaAllah! Khushi ki baat hai ✨ Is lamhe ko journal me likh lein taake yaad rahe.':'Wonderful! ✨ Capture this moment in your journal so you remember it.';
+ if(love)return ur?'Dil ke mamlaat nazuk hote hain 💗 Thora tafseel se batayenge?':'Matters of the heart are delicate 💗 Would you like to tell me more?';
+ if(work)return ur?'Kaam ka dabao sab par aata hai. Aaj ka sab se mushkil hissa kya tha?':'Work pressure gets to everyone. What was the hardest part of today?';
+ if(fam)return ur?'Ghar walon ke sath waqt qeemti hota hai. Kya baat dil me hai?':'Time with family is precious. What is on your heart?';
+ if(thx)return ur?'Khush aamdeed 💗 Main hamesha yahin hoon.':'You are welcome 💗 I am always here.';
+ var R=ur?['Hmm, samajh raha hoon. Aur batayenge? 💗','Dil ki baat kehna achhi baat hai. Mazeed kahein.','Main sun raha hoon... aagay?']:['I see. Tell me more? 💗','Sharing helps. Go on.','I am listening... and then?'];
+ return R[Math.floor(Math.random()*R.length)];}
+/* ================= INSIGHTS ================= */
+function lastDays(n){var r=[];for(var i=n-1;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);r.push({k:todayKey(d),d:d});}return r;}
+function renderInsights(){
+ var days=lastDays(30),cv=document.getElementById('monthChart'),ctx=cv.getContext('2d');ctx.clearRect(0,0,600,150);
+ var bw=600/30;days.forEach(function(x,i){var v=moods[x.k]||0,h=v?v*24:4;ctx.fillStyle=v?MOOD_C[v]:'#e9e2f5';ctx.beginPath();ctx.roundRect(i*bw+2,140-h,bw-4,h,3);ctx.fill();});
+ var tc={};entries.forEach(function(e){(e.tags||[]).forEach(function(tg){tc[tg]=(tc[tg]||0)+1;});});
+ var tl=document.getElementById('trigList');tl.innerHTML='';
+ Object.keys(tc).sort(function(a,b){return tc[b]-tc[a];}).slice(0,6).forEach(function(k){tl.innerHTML+='<div class="kv"><span>🏷 '+k+'</span><b>'+tc[k]+'</b></div>';});
+ if(!Object.keys(tc).length)tl.innerHTML='<p style="color:var(--muted)">'+(LANG==='ur'?'Abhi koi tag nahi.':'No tags yet.')+'</p>';
+ var bl=document.getElementById('bwList');bl.innerHTML='';
+ var wk=lastDays(7).filter(function(x){return moods[x.k];});
+ if(wk.length){var srt=wk.slice().sort(function(a,b){return moods[a.k]-moods[b.k];});
+  bl.innerHTML='<div class="kv"><span>🌟 Best</span><b>'+srt[srt.length-1].d.toLocaleDateString()+' '+MOOD_E[moods[srt[srt.length-1].k]]+'</b></div><div class="kv"><span>🌧 Tough</span><b>'+srt[0].d.toLocaleDateString()+' '+MOOD_E[moods[srt[0].k]]+'</b></div>';}
+ var wc={},stop='ke ki ka ko se mein main aur hai tha thi ke liye par bhi ye wo aap the and the a to of in is'.split(' ');
+ entries.forEach(function(e){String(e.text||'').toLowerCase().replace(/[^\u0600-\u06FFa-z ]/g,' ').split(/\s+/).forEach(function(w){if(w.length>2&&stop.indexOf(w)<0)wc[w]=(wc[w]||0)+1;});});
+ var wcl=document.getElementById('wordCloud');wcl.innerHTML='';
+ Object.keys(wc).sort(function(a,b){return wc[b]-wc[a];}).slice(0,20).forEach(function(w){var sz=13+Math.min(wc[w]*2,20);wcl.innerHTML+='<span style="font-size:'+sz+'px;margin:0 8px;color:#7C3AED">'+esc(w)+'</span>';});
+ document.getElementById('weekSum').textContent=weeklySummary();
+}
+function weeklySummary(){
+ var wk=lastDays(7),vs=wk.map(function(x){return moods[x.k];}).filter(Boolean);
+ if(!vs.length)return LANG==='ur'?'Is haftay koi mood log nahi.':'No moods logged this week.';
+ var avg=(vs.reduce(function(a,b){return a+b;},0)/vs.length).toFixed(1);
+ var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],byD={};
+ wk.forEach(function(x){if(moods[x.k]){(byD[days[x.d.getDay()]]=byD[days[x.d.getDay()]]||[]).push(moods[x.k]);}});
+ var worst=null,wa=99;Object.keys(byD).forEach(function(d){var a=byD[d].reduce(function(x,y){return x+y;},0)/byD[d].length;if(a<wa){wa=a;worst=d;}});
+ var s=LANG==='ur'?'Is haftay ausat mood '+avg+'/5 raha. ':'Average mood this week: '+avg+'/5. ';
+ if(worst&&wa<3)s+=LANG==='ur'?worst+' ko thora stress zyada lagta hai.':'Moods dip on '+worst+'s.';
+ s+=LANG==='ur'?' Likhna jari rakhein 💗':' Keep writing 💗';
+ return s;}
+function printView(){var w=window.open('','_blank');if(!w){alert('Popup blocked');return;}
+ var h='<html><head><title>Dil Ki Baat — Summary</title><style>body{font-family:serif;max-width:700px;margin:20px auto;color:#333}h1{color:#7C3AED}.e{border-bottom:1px solid #ddd;padding:10px 0}</style></head><body><h1>💗 Dil Ki Baat — Summary</h1><p>'+weeklySummary()+'</p>';
+ entries.slice().sort(function(a,b){return b.ts-a.ts;}).slice(0,30).forEach(function(e){h+='<div class="e"><b>'+esc(e.title||'')+'</b> ('+new Date(e.ts).toLocaleDateString()+')<br>'+esc(e.text).replace(/\n/g,'<br>')+'</div>';});
+ h+='<script>window.print()<\/script></body></html>';w.document.write(h);w.document.close();}
+/* ================= PROFILE ================= */
+function saveProfile(){st.name=document.getElementById('pfName').value;st.goal=document.getElementById('pfGoal').value;SV('settings',st);alert(LANG==='ur'?'Save ho gaya':'Saved');renderHome();}
+function saveSettings(){st.lang=LANG;SV('settings',st);}
+function exportData(){var b=new Blob([JSON.stringify({entries:entries,moods:moods,exported:new Date().toISOString()},null,1)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dil-ki-baat-backup.json';a.click();}
+function wipeData(){if(confirm(LANG==='ur'?'Sara data delete? Ye wapas nahi aayega!':'Delete ALL data? Cannot be undone!')){['entries','moods','chat','streak'].forEach(function(k){try{localStorage.removeItem('dkb_'+k);}catch(e){}});entries=[];moods={};chatH=[];go('home');}}
+/* ================= BOOT ================= */
+(function(){applyLang();
+ document.getElementById('pfName').value=st.name||'';document.getElementById('pfGoal').value=st.goal||'';document.getElementById('pfLang').value=LANG;
+ if(st.ob){enterApp();}else{show('ob');document.getElementById('tabbar').style.display='none';}
+})();
+</script>
+</body>
+</html>
