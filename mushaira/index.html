@@ -51,12 +51,27 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
 .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:16px}
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--maroon);color:var(--cream);padding:12px 22px;border-radius:30px;font-size:15px;display:none;z-index:99;border:1px solid var(--gold)}
 .quizscore{font-size:22px;text-align:center;color:var(--maroon);font-weight:bold}
+/* voice panel */
+#vpanel{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid var(--gold);border-radius:18px 18px 0 0;z-index:80;padding:14px 16px 22px;box-shadow:0 -4px 20px rgba(0,0,0,.25);display:none;max-width:640px;margin:0 auto}
+#vpanel.on{display:block;animation:vup .25s}
+@keyframes vup{from{transform:translateY(60px);opacity:0}to{}}
+.vhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.vhead b{color:var(--maroon);font-size:17px}
+.vx{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)}
+.vvoices{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.vrow{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:15px}
+.vrow label{min-width:52px;color:var(--maroon);font-weight:bold}
+.vrow input[type=range]{flex:1;accent-color:var(--maroon)}
+.vrow .vv{min-width:48px;text-align:left;color:var(--muted);font-size:13px}
+.vctl{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+#vbackdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:79;display:none}
+#vbackdrop.on{display:block}
 </style>
 </head>
 <body>
 <header>
   <div class="hrow">
-    <div class="logo">م</div>
+    <img class="logo" src="logo-new.png" alt="Jilan Mushaira logo" style="background:none">
     <div><h1>جِلان مشاعرہ</h1><p class="sub">اردو شاعری کی محفل</p></div>
     <div style="flex:1"></div>
     <button class="btn gold small" id="sbtn" onclick="toggleSearch()">🔍 تلاش</button>
@@ -83,7 +98,7 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
     <div class="card"><p><b>جِلان مشاعرہ</b> اردو شاعری کی ایک محفل ہے۔</p>
     <p>📖 کلاسیکی شعرا (غالب، اقبال، میر، درد، ظفر، مومن، ذوق، انیس، داغ، اکبر) کا کلام <b>پبلک ڈومین</b> ہے۔</p>
     <p>⚖️ جدید شعرا کے صرف مختصر اقتباسات شامل ہیں — مکمل کلام کے لیے ان کی کتاب خریدیں۔</p>
-    <p style="color:var(--muted);font-size:14px">جِلان مشاعرہ v2.0 — تمام مواد صرف تعلیمی مقصد کے لیے۔</p></div>
+    <p style="color:var(--muted);font-size:14px">جِلان مشاعرہ v3.0 — تمام مواد صرف تعلیمی مقصد کے لیے۔</p></div>
   </section>
 </main>
 <nav>
@@ -94,6 +109,21 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
   <button id="n-my" onclick="go('my')"><span class="ic">✍️</span>میرا شعر</button>
 </nav>
 <div id="toast"></div>
+<div id="vbackdrop" onclick="vClose()"></div>
+<div id="vpanel">
+  <div class="vhead"><b>🎙 اردو آواز</b><button class="vx" onclick="vClose()">✕</button></div>
+  <div class="vvoices" id="vvoices"></div>
+  <div class="vrow"><label>پیش نظارہ</label><button class="btn gold small" onclick="vPreview()">▶ سنو</button><span class="vv" id="vcur"></span></div>
+  <div class="vrow"><label>رفتار</label><input type="range" id="vrate" min="50" max="200" value="95" oninput="vSetRate(this.value)"><span class="vv" id="vratev">0.95x</span></div>
+  <div class="vrow"><label>آواز</label><input type="range" id="vvol" min="0" max="100" value="100" oninput="vSetVol(this.value)"><span class="vv" id="vvolv">100%</span></div>
+  <div class="vctl">
+    <button class="btn maroon small" id="vplay" onclick="vPlay()">▶ چلاؤ</button>
+    <button class="btn ghost small" id="vpause" onclick="vPause()">⏸ توقف</button>
+    <button class="btn ghost small" id="vres" onclick="vResume()">⏯ جاری</button>
+    <button class="btn ghost small" onclick="vStop()">⏹ بند</button>
+  </div>
+  <div class="note" id="vnote" style="display:none"></div>
+</div>
 <script src="ashaar.js"></script>
 <script>
 var navStack=["home"];
@@ -108,21 +138,87 @@ function favKey(p,i){return p+":"+i}
 function getFav(){try{return JSON.parse(localStorage.getItem("mush_fav")||"[]")}catch(e){return[]}}
 function isFav(k){return getFav().indexOf(k)>=0}
 function toggleFav(p,i){var f=getFav(),k=favKey(p,i),ix=f.indexOf(k);if(ix>=0)f.splice(ix,1);else f.push(k);localStorage.setItem("mush_fav",JSON.stringify(f));toast(ix>=0?"⭐ ہٹا دیا":"⭐ پسندیدہ میں شامل");if(document.getElementById("s-fav").classList.contains("on"))renderFav();else refreshCards()}
-/* ---- TTS ---- */
-var speaking=false;
-function ttsSpeak(text){
-  stopTts();
-  if(window.JilanTts&&JilanTts.speak){var st="";try{st=JilanTts.urduStatus()}catch(e){}
-    if(st==="ok"){JilanTts.speak(text);speaking=true;toast("🔊 سنا رہے ہیں…");return}
-    if(st==="missing_data"){toast("⚠️ اردو آواز انسٹال کریں: Settings → Text-to-Speech → اردو ڈیٹا");return}}
-  if("speechSynthesis" in window){var u=new SpeechSynthesisUtterance(text);u.lang="ur-PK";
-    var vs=speechSynthesis.getVoices(),uv=null;
-    for(var i=0;i<vs.length;i++){if(vs[i].lang&&vs[i].lang.toLowerCase().indexOf("ur")===0){uv=vs[i];break}}
-    if(uv){u.voice=uv;speechSynthesis.speak(u);speaking=true;toast("🔊 سنا رہے ہیں…")}
-    else toast("⚠️ اردو آواز دستیاب نہیں — ڈیوائس میں اردو TTS انسٹال کریں");
-  } else toast("⚠️ اس ڈیوائس پر آواز دستیاب نہیں");
+/* ---- TTS (dual voice — honest, no fake male/female) ---- */
+var vBackend="none", vVoices=[], vSel=0, vText="", vRate=0.95, vVol=1.0, vPaused=false;
+function vNative(){try{return (typeof JilanTts!=="undefined"&&JilanTts!==null)}catch(e){return false}}
+function vDetect(){
+  vVoices=[];vBackend="none";
+  if(vNative()){
+    var st="";try{st=JilanTts.urduStatus()}catch(e){}
+    if(st==="ok"){
+      vBackend="native";
+      try{var j=JSON.parse(JilanTts.getUrduVoices());for(var i=0;i<j.length;i++)vVoices.push({name:j[i].name,label:j[i].name});}catch(e){}
+    } else if(st==="missing_data"){vBackend="native-missing";}
+  }
+  if(vBackend==="none"&&"speechSynthesis" in window){
+    var vs=[];try{vs=speechSynthesis.getVoices()}catch(e){}
+    for(var k=0;k<vs.length;k++){var L=(vs[k].lang||"").toLowerCase();
+      if(L.indexOf("ur")===0)vVoices.push({name:vs[k].name,label:vs[k].name+" ("+vs[k].lang+")"});}
+    if(vVoices.length)vBackend="web";
+  }
 }
-function stopTts(){speaking=false;try{if(window.JilanTts&&JilanTts.stopTts)JilanTts.stopTts()}catch(e){}
+function vRenderVoices(){
+  var w=document.getElementById("vvoices"),h="";
+  document.getElementById("vplay").disabled=false;
+  if(vBackend==="native-missing"||vBackend==="none"){
+    h='<div class="empty" style="padding:10px">⚠️ اردو آواز دستیاب نہیں۔<br>حل: <b>Settings → Language → Text-to-Speech → Google Text-to-Speech → اردو (Urdu) ڈیٹا انسٹال</b> کریں، پھر ایپ دوبارہ کھولیں۔</div>';
+    document.getElementById("vplay").disabled=true;
+  } else if(vVoices.length===1){
+    h='<div class="note" style="margin:0">🎙 <b>'+esc(vVoices[0].label)+'</b><br>اردو کے لیے آپ کی ڈیوائس میں صرف <b>1 آواز</b> دستیاب ہے — اسی لیے مردانہ/زنانہ کا جھوٹا انتخاب نہیں دیا گیا۔</div>';
+  } else if(vVoices.length>1){
+    for(var i=0;i<vVoices.length;i++){
+      h+='<button class="btn small '+(i===vSel?"maroon":"ghost")+'" onclick="vPick('+i+')">🎙 '+esc(vVoices[i].label)+'</button>';
+    }
+    h+='<div class="note" style="margin:0;width:100%">ℹ️ یہ آپ کی ڈیوائس کی اصل آوازیں ہیں — ہر ایک کا پیش نظارہ سن کر منتخب کریں۔</div>';
+  }
+  w.innerHTML=h;
+}
+function vPick(i){vSel=i;vRenderVoices();
+  if(vBackend==="native"){try{JilanTts.setVoiceByName(vVoices[vSel].name)}catch(e){}}
+  vPreview();
+}
+function openVoice(text){
+  vText=text;vSel=0;vDetect();vRenderVoices();
+  if(vBackend==="native"&&vVoices.length){try{JilanTts.setVoiceByName(vVoices[0].name)}catch(e){}}
+  document.getElementById("vpanel").classList.add("on");
+  document.getElementById("vbackdrop").classList.add("on");
+}
+function vClose(){document.getElementById("vpanel").classList.remove("on");document.getElementById("vbackdrop").classList.remove("on")}
+function vSpeak(t){
+  stopTts();
+  if(vBackend==="native"){
+    try{JilanTts.setRate(vRate);JilanTts.setVolume(vVol);JilanTts.speak(t);vPaused=false;return true}catch(e){return false}
+  }
+  if(vBackend==="web"){
+    try{
+      var u=new SpeechSynthesisUtterance(t);u.lang="ur-PK";u.rate=vRate;u.volume=vVol;
+      var vs=speechSynthesis.getVoices();
+      for(var i=0;i<vs.length;i++){if(vs[i].name===vVoices[vSel].name){u.voice=vs[i];break}}
+      speechSynthesis.cancel();speechSynthesis.speak(u);vPaused=false;return true;
+    }catch(e){return false}
+  }
+  return false;
+}
+function vPreview(){if(!vSpeak("السلام علیکم! یہ جِلان مشاعرہ کی اردو آواز کا پیش نظارہ ہے۔"))toast("⚠️ آواز دستیاب نہیں")}
+function vPlay(){if(!vText){toast("پہلے کوئی شعر منتخب کریں");return}if(!vSpeak(vText))toast("⚠️ آواز دستیاب نہیں");else vClose()}
+function vPause(){
+  if(vBackend==="native"){try{JilanTts.pauseTts()}catch(e){}}
+  else if(vBackend==="web"){try{speechSynthesis.pause()}catch(e){}}
+  vPaused=true;toast("⏸ توقف");
+}
+function vResume(){
+  if(vBackend==="native"){try{JilanTts.resumeTts()}catch(e){}}
+  else if(vBackend==="web"){try{speechSynthesis.resume()}catch(e){}}
+  vPaused=false;toast("⏯ جاری");
+}
+function vStop(){vClose();stopTts()}
+function vSetRate(v){vRate=v/100;document.getElementById("vratev").textContent=vRate.toFixed(2)+"x";
+  if(vBackend==="native"){try{JilanTts.setRate(vRate)}catch(e){}}}
+function vSetVol(v){vVol=v/100;document.getElementById("vvolv").textContent=v+"%";
+  if(vBackend==="native"){try{JilanTts.setVolume(vVol)}catch(e){}}}
+/* legacy entry points (cards) */
+function ttsSpeak(text){openVoice(text)}
+function stopTts(){vPaused=false;try{if(vNative()&&JilanTts.stopTts)JilanTts.stopTts()}catch(e){}
  try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}}
 function sherText(p,i){var a=POETS.filter(function(x){return x.id===p})[0].ashaar[i];return a[0]+(a[1]?" ۔ "+a[1]:"")}
 /* ---- share ---- */
@@ -159,7 +255,10 @@ function init(){
  var g=document.getElementById("guides");var gh="";
  GUIDES.forEach(function(x){gh+='<div class="card"><h2>'+x.t+'</h2><p style="line-height:2.2;font-size:16px">'+x.b+'</p></div>'});
  g.innerHTML=gh;
- if("speechSynthesis" in window){try{speechSynthesis.getVoices()}catch(e){}}
+ if("speechSynthesis" in window){try{speechSynthesis.getVoices()}catch(e){}
+  try{speechSynthesis.onvoiceschanged=function(){
+    if(document.getElementById("vpanel").classList.contains("on")&&vBackend!=="native"){vDetect();vRenderVoices()}
+  }}catch(e){}}
 }
 var poetShown=0,poetCur=null;
 function openPoet(id){poetCur=id;poetShown=10;var p=POETS.filter(function(x){return x.id===id})[0];
