@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#4a0e18">
-<title>جیلن مشاعرہ — Jilan Mushaira</title>
+<title>جِلان مشاعرہ — Jilan Mushaira</title>
 <style>
 :root{--maroon:#4a0e18;--maroon2:#5c1a24;--gold:#d4af37;--gold2:#b8942a;--cream:#faf3e3;--cream2:#f3e8d0;--ink:#3a2415;--muted:#8a6f55}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -57,7 +57,7 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
 <header>
   <div class="hrow">
     <div class="logo">م</div>
-    <div><h1>جیلن مشاعرہ</h1><p class="sub">اردو شاعری کی محفل</p></div>
+    <div><h1>جِلان مشاعرہ</h1><p class="sub">اردو شاعری کی محفل</p></div>
     <div style="flex:1"></div>
     <button class="btn gold small" id="sbtn" onclick="toggleSearch()">🔍 تلاش</button>
   </div>
@@ -67,9 +67,8 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
   <section class="screen on" id="s-home">
     <div class="card"><h2>📜 آج کا شعر</h2><div id="sotd"></div></div>
     <h2 class="st">شعرا</h2>
+    <div class="actions" id="catchips" style="justify-content:flex-start;margin-bottom:12px"></div>
     <div class="poetgrid" id="poetgrid"></div>
-    <div class="card" style="margin-top:14px"><h2>🎭 مشہور اقتباسات</h2><div id="excerpts"></div>
-    <div class="note">یہ صرف مختصر اقتباسات ہیں۔ مکمل کلام کے لیے شاعر کی کتاب خریدیں۔</div></div>
   </section>
   <section class="screen" id="s-poet"><div id="poetpage"></div></section>
   <section class="screen" id="s-learn"><h2 class="st">🎓 شاعری سیکھیں</h2><div id="guides"></div></section>
@@ -81,10 +80,10 @@ h2.st{color:var(--maroon);border-bottom:2px solid var(--gold);padding-bottom:6px
     <div id="mysherlist"></div>
   </section>
   <section class="screen" id="s-about"><h2 class="st">ℹ️ تعارف</h2>
-    <div class="card"><p><b>جیلن مشاعرہ</b> اردو شاعری کی ایک محفل ہے۔</p>
-    <p>📖 غالب، اقبال اور میر کا کلام <b>پبلک ڈومین</b> ہے (ان کے انتقال کو 50 سال سے زیادہ ہو چکے)۔</p>
-    <p>⚖️ احمد فراز، جون ایلیا اور ساغر صدیقی کے صرف مختصر اقتباسات شامل ہیں۔</p>
-    <p style="color:var(--muted);font-size:14px">Jilan Mushaira v1.0 — تمام مواد صرف تعلیمی مقصد کے لیے۔</p></div>
+    <div class="card"><p><b>جِلان مشاعرہ</b> اردو شاعری کی ایک محفل ہے۔</p>
+    <p>📖 کلاسیکی شعرا (غالب، اقبال، میر، درد، ظفر، مومن، ذوق، انیس، داغ، اکبر) کا کلام <b>پبلک ڈومین</b> ہے۔</p>
+    <p>⚖️ جدید شعرا کے صرف مختصر اقتباسات شامل ہیں — مکمل کلام کے لیے ان کی کتاب خریدیں۔</p>
+    <p style="color:var(--muted);font-size:14px">جِلان مشاعرہ v2.0 — تمام مواد صرف تعلیمی مقصد کے لیے۔</p></div>
   </section>
 </main>
 <nav>
@@ -127,24 +126,33 @@ function stopTts(){speaking=false;try{if(window.JilanTts&&JilanTts.stopTts)Jilan
  try{if("speechSynthesis" in window)speechSynthesis.cancel()}catch(e){}}
 function sherText(p,i){var a=POETS.filter(function(x){return x.id===p})[0].ashaar[i];return a[0]+(a[1]?" ۔ "+a[1]:"")}
 /* ---- share ---- */
-function shareSher(p,i){var t="📜 "+sherText(p,i)+"\n— جیلن مشاعرہ";
+function poetName(p){var x=POETS.filter(function(y){return y.id===p})[0];return x?x.name:p}
+function shareSher(p,i){var t="📜 "+sherText(p,i)+"\n— "+poetName(p)+"\nجِلان مشاعرہ";
  if(navigator.share){navigator.share({text:t}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("📋 کاپی ہو گیا")})}else toast("شیئر دستیاب نہیں")}
 /* ---- cards ---- */
 function card(p,i){var a=POETS.filter(function(x){return x.id===p})[0].ashaar[i];
  var h='<div class="card" data-card="'+p+':'+i+'"><div class="sher"><span class="misra">'+esc(a[0])+"</span>"+(a[1]?'<span class="misra">'+esc(a[1])+"</span>":"")+"</div>";
+ if(a[2])h+='<div class="poetline">— '+esc(a[2])+'</div>';
  h+='<div class="actions"><button class="btn ghost small" onclick="toggleFav(\''+p+'\','+i+')">'+(isFav(favKey(p,i))?"⭐":"☆")+'</button>';
  h+='<button class="btn gold small" onclick="ttsSpeak(sherText(\''+p+'\','+i+'))">🔊 سناؤ</button>';
  h+='<button class="btn maroon small" onclick="shareSher(\''+p+'\','+i+')">📤 شیئر</button>';
  h+='<button class="btn ghost small" onclick="stopTts()">⏹</button></div></div>';return h}
 function refreshCards(){var cs=document.querySelectorAll("[data-card]");for(var i=0;i<cs.length;i++){var k=cs[i].getAttribute("data-card").split(":");cs[i].outerHTML=card(k[0],+k[1])}}
+/* ---- categories ---- */
+var curCat="all";
+var CATS=[["all","سب"],["classical","کلاسیکی شاعری"],["modern","جدید شاعری"],["nazm","نظم"],["hamd","حمد و نعت"]];
+function catMatch(p){if(curCat==="all")return true;if(curCat==="classical"||curCat==="modern")return p.era===curCat;return p.id===curCat}
+function renderChips(){var h="";CATS.forEach(function(c){h+='<button class="btn small '+(curCat===c[0]?"maroon":"ghost")+'" onclick="setCat(\''+c[0]+'\')">'+c[1]+'</button>'});document.getElementById("catchips").innerHTML=h}
+function setCat(c){curCat=c;renderPoetGrid();renderChips()}
+function renderPoetGrid(){var pg=document.getElementById("poetgrid");var h="";
+ POETS.forEach(function(p){if(!catMatch(p))return;
+  var sub=p.era==="modern"?"جدید":(p.era==="classical"?"کلاسیکی":"");
+  h+='<div class="poetcard" onclick="openPoet(\''+p.id+'\')"><div class="pn">'+p.name+'</div><div class="py">'+p.years+'</div><div style="font-size:13px;margin-top:6px">'+p.ashaar.length+' اشعار'+(sub?' • '+sub:'')+'</div></div>'});
+ pg.innerHTML=h}
+function poetCardMini(p){return '<div class="poetcard" onclick="openPoet(\''+p.id+'\')" style="margin-bottom:10px"><div class="pn">'+p.name+'</div><div class="py">'+p.years+'</div><div style="font-size:13px;margin-top:6px">'+p.ashaar.length+' اشعار</div></div>'}
 /* ---- home ---- */
 function init(){
- var pg=document.getElementById("poetgrid");var h="";
- POETS.forEach(function(p){h+='<div class="poetcard" onclick="openPoet(\''+p.id+'\')"><div class="pn">'+p.name+'</div><div class="py">'+p.years+'</div><div style="font-size:13px;margin-top:6px">'+p.ashaar.length+' اشعار</div></div>'});
- pg.innerHTML=h;
- var ex=document.getElementById("excerpts");var eh="";
- EXCERPTS.forEach(function(e){e.ashaar.forEach(function(a){eh+='<div class="sher" style="font-size:17px"><span class="misra">'+esc(a[0])+'</span><span class="misra">'+esc(a[1])+'</span></div><div class="poetline">— '+e.poet+' (اقتباس)</div>'})});
- ex.innerHTML=eh;
+ renderChips();renderPoetGrid();
  var all=[];POETS.forEach(function(p){p.ashaar.forEach(function(a,i){all.push([p.id,i])})});
  var day=Math.floor(Date.now()/86400000)%all.length;var d=all[day];
  document.getElementById("sotd").innerHTML=card(d[0],d[1]);
@@ -153,14 +161,28 @@ function init(){
  g.innerHTML=gh;
  if("speechSynthesis" in window){try{speechSynthesis.getVoices()}catch(e){}}
 }
-function openPoet(id){var p=POETS.filter(function(x){return x.id===id})[0];var h='<button class="btn ghost small" onclick="onAndroidBack()">← واپس</button>';
- h+='<div class="card" style="margin-top:10px"><h2>'+p.name+'</h2><div class="poetline">'+p.en+' • '+p.years+'</div><p style="line-height:2.2">'+p.bio+'</p></div>';
- p.ashaar.forEach(function(a,i){h+=card(id,i)});
- document.getElementById("poetpage").innerHTML=h;navStack.push("poet");show("poet")}
+var poetShown=0,poetCur=null;
+function openPoet(id){poetCur=id;poetShown=10;var p=POETS.filter(function(x){return x.id===id})[0];
+ var h='<button class="btn ghost small" onclick="onAndroidBack()">← واپس</button>';
+ h+='<div class="card" style="margin-top:10px"><h2>'+p.name+'</h2><div class="poetline">'+p.en+(p.years?' • '+p.years:'')+'</div><p style="line-height:2.2">'+p.bio+'</p>';
+ if(p.books)h+='<div class="poetline" style="margin-top:6px">📚 '+esc(p.books)+'</div>';
+ if(p.note)h+='<div class="note">'+esc(p.note)+'</div>';
+ h+='</div><div id="poetash"></div><div id="poetmore" style="text-align:center;margin:10px 0"></div>';
+ document.getElementById("poetpage").innerHTML=h;renderPoetAsh();navStack.push("poet");show("poet")}
+function renderPoetAsh(){var p=POETS.filter(function(x){return x.id===poetCur})[0];var h="";
+ for(var i=0;i<Math.min(poetShown,p.ashaar.length);i++)h+=card(poetCur,i);
+ document.getElementById("poetash").innerHTML=h;
+ var m=document.getElementById("poetmore");
+ if(poetShown<p.ashaar.length)m.innerHTML='<button class="btn gold" onclick="moreAsh()">مزید اشعار ('+(p.ashaar.length-poetShown)+')</button>';else m.innerHTML=""}
+function moreAsh(){poetShown+=10;renderPoetAsh()}
 /* ---- search ---- */
 function toggleSearch(){var b=document.getElementById("searchbar");b.classList.toggle("on");if(b.classList.contains("on"))document.getElementById("q").focus()}
 function doSearch(q){q=q.trim();if(!q){document.getElementById("poetpage").innerHTML="";return}
+ var ql=q.toLowerCase();
  var h='<button class="btn ghost small" onclick="onAndroidBack()">← واپس</button><h2 class="st">تلاش: '+esc(q)+'</h2>';var n=0;
+ POETS.forEach(function(p){
+  if(p.name.indexOf(q)>=0||(p.en&&p.en.toLowerCase().indexOf(ql)>=0)){h+=poetCardMini(p);n++}
+ });
  POETS.forEach(function(p){p.ashaar.forEach(function(a,i){if((a[0]+(a[1]||"")).indexOf(q)>=0){h+=card(p.id,i)+'<div class="poetline">— '+p.name+'</div>';n++}})});
  if(!n)h+='<div class="empty">کوئی شعر نہیں ملا۔ کچھ اور لکھ کر دیکھیں۔</div>';
  document.getElementById("poetpage").innerHTML=h;if(navStack[navStack.length-1]!=="poet"){navStack.push("poet");show("poet")}else show("poet")}
