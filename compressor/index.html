@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Jilan Photo & Video Compressor</title>
+<meta name="description" content="Smaller Files. Original Quality. Free photo compressor — 100% private, on-device.">
+<style>
+:root{
+  --navy:#0f172a; --navy2:#1e293b; --navy3:#334155;
+  --teal:#14b8a6; --teal-d:#0d9488; --teal-l:#5eead4;
+  --white:#ffffff; --ink:#0f172a; --mut:#64748b;
+  --bg:#0f172a; --card:#1e293b; --card2:#243349; --line:#334155;
+  --txt:#f1f5f9; --txt2:#94a3b8;
+  --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+  --r:16px; --sh:0 8px 24px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f1f5f9; --card:#ffffff; --card2:#f8fafc; --line:#e2e8f0;
+  --txt:#0f172a; --txt2:#64748b; --sh:0 8px 24px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Nastaliq Urdu",sans-serif;
+  background:var(--bg); color:var(--txt); min-height:100vh;
+  padding-bottom:calc(86px + env(safe-area-inset-bottom));
+  transition:background .25s,color .25s;
+}
+header.top{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(135deg,#0f172a,#134e4a);
+  color:#fff; padding:14px 16px calc(12px + env(safe-area-inset-top));
+  padding-top:calc(14px + env(safe-area-inset-top));
+  display:flex; align-items:center; gap:12px;
+  box-shadow:var(--sh);
+}
+.logo{width:46px;height:46px;border-radius:14px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--teal),#0ea5e9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px; box-shadow:0 4px 12px rgba(20,184,166,.4);}
+.h-titles{flex:1;min-width:0;}
+.h-titles h1{margin:0;font-size:17px;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.h-titles p{margin:2px 0 0;font-size:11.5px;color:#99f6e4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.iconbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;
+  width:40px;height:40px;border-radius:12px;font-size:18px;cursor:pointer;flex:0 0 auto;}
+.iconbtn:active{transform:scale(.94);}
+.wrap{max-width:860px;margin:0 auto;padding:14px 14px 0;}
+.tabs{position:sticky;top:0;z-index:40;display:flex;gap:8px;padding:10px 0;
+  background:var(--bg);}
+.tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--txt);
+  border-radius:14px;padding:11px 6px;font-size:13.5px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab.active{background:linear-gradient(135deg,var(--teal),#0ea5e9);color:#04211d;border-color:transparent;}
+[data-theme="light"] .tab.active{color:#fff;}
+.page{display:none;animation:fade .25s ease;}
+.page.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;margin:0 0 14px;box-shadow:var(--sh);}
+.card h2{margin:0 0 4px;font-size:17px;}
+.card .sub{margin:0 0 12px;color:var(--txt2);font-size:13px;line-height:1.55;}
+.drop{border:2px dashed var(--teal);border-radius:var(--r);padding:30px 16px;text-align:center;
+  cursor:pointer;background:rgba(20,184,166,.06);transition:.2s;}
+.drop:active,.drop.over{background:rgba(20,184,166,.16);transform:scale(.99);}
+.drop .big{font-size:42px;}
+.drop p{margin:8px 0 0;color:var(--txt2);font-size:13.5px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:14px;padding:13px 20px;font-size:15px;font-weight:700;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal),#0ea5e9);color:#04211d;min-height:50px;}
+[data-theme="light"] .btn{color:#fff;}
+.btn:active{transform:scale(.97);}
+.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line);}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;}
+.btn.small{padding:9px 14px;font-size:13.5px;min-height:42px;border-radius:11px;}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.btnrow .btn{flex:1;min-width:140px;}
+label.f{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;}
+select,input[type=text],input[type=number]{width:100%;background:var(--card2);border:1px solid var(--line);
+  color:var(--txt);border-radius:12px;padding:12px 14px;font-size:15px;min-height:50px;}
+input[type=range]{width:100%;accent-color:var(--teal);height:34px;}
+.seg{display:flex;gap:8px;flex-wrap:wrap;}
+.seg button{flex:1;min-width:100px;border:1px solid var(--line);background:var(--card2);color:var(--txt);
+  border-radius:12px;padding:11px 8px;font-size:13px;font-weight:700;cursor:pointer;}
+.seg button.on{background:rgba(20,184,166,.18);border-color:var(--teal);color:var(--teal);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.chk{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:14.5px;cursor:pointer;}
+.chk input{width:22px;height:22px;accent-color:var(--teal);}
+.fcard{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;}
+.fcard .frow{display:flex;gap:12px;}
+.thumb{width:92px;height:92px;border-radius:10px;object-fit:cover;flex:0 0 auto;background:#000;}
+.finfo{flex:1;min-width:0;font-size:13px;}
+.finfo .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.finfo .mt{color:var(--txt2);margin-top:4px;line-height:1.6;}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;
+  background:rgba(20,184,166,.15);color:var(--teal);margin:2px 4px 2px 0;}
+.badge.warn{background:rgba(245,158,11,.15);color:var(--warn);}
+.badge.ok{background:rgba(34,197,94,.15);color:var(--ok);}
+.prog{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0;}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),#0ea5e9);transition:width .2s;}
+.cmp{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px;user-select:none;}
+.cmp img{display:block;width:100%;height:auto;max-height:60vh;object-fit:contain;background:#000;}
+.cmp .after{position:absolute;inset:0;overflow:hidden;}
+.cmp .after img{width:100%;height:100%;object-fit:contain;}
+.cmp input{position:absolute;left:0;right:0;bottom:6px;width:calc(100% - 20px);margin:0 10px;}
+.cmp .tag{position:absolute;top:8px;font-size:11px;font-weight:800;background:rgba(0,0,0,.65);color:#fff;
+  padding:4px 10px;border-radius:8px;}
+.cmp .tag.b{left:8px;} .cmp .tag.a{right:8px;}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed var(--line);font-size:14px;}
+.stat:first-of-type{border-top:none;}
+.stat b{font-size:15px;}
+.save{color:var(--ok);font-weight:800;}
+.note{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:12px;
+  padding:12px 14px;font-size:13.5px;line-height:1.6;margin:12px 0;color:var(--txt);}
+.note.blue{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.4);}
+.note.green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);}
+.spin{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--teal);
+  border-radius:50%;animation:sp 1s linear infinite;margin:14px auto;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.empty{text-align:center;color:var(--txt2);padding:34px 10px;font-size:14px;}
+.empty .big{font-size:46px;}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;}
+.kv:last-child{border-bottom:none;}
+.kv span{color:var(--txt2);} .kv b{text-align:right;}
+.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom));}
+.bnav{flex:1;background:none;border:none;color:var(--txt2);font-size:11px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;cursor:pointer;border-radius:10px;}
+.bnav .ic{font-size:21px;}
+.bnav.active{color:var(--teal);}
+video.prev{width:100%;border-radius:12px;background:#000;max-height:50vh;}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:110px;z-index:99;
+  background:#0f172a;color:#fff;border:1px solid var(--teal);border-radius:12px;
+  padding:12px 18px;font-size:14px;max-width:88%;box-shadow:var(--sh);display:none;}
+.toast.show{display:block;animation:fade .2s;}
+details.pol{margin:10px 0;}
+details.pol summary{cursor:pointer;font-weight:700;padding:10px 0;font-size:15px;}
+details.pol .body{font-size:13.5px;line-height:1.7;color:var(--txt2);}
+html[dir="rtl"] .h-titles{text-align:right;}
+html[dir="rtl"] .finfo .nm{direction:ltr;text-align:right;}
+@media (min-width:700px){ .row2{grid-template-columns:1fr 1fr;} .thumb{width:120px;height:120px;} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">🗜️</div>
+  <div class="h-titles">
+    <h1 data-i="appName">Jilan Photo &amp; Video Compressor</h1>
+    <p data-i="tagline">Smaller Files. Original Quality.</p>
+  </div>
+  <button class="iconbtn" id="langBtn" title="Language / زبان">🌐</button>
+  <button class="iconbtn" id="themeBtn" title="Theme">🌙</button>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" data-p="pPhoto">📷 <span data-i="tPhoto">Photo</span></button>
+    <button class="tab" data-p="pVideo">🎬 <span data-i="tVideo">Video</span></button>
+    <button class="tab" data-p="pFiles">📁 <span data-i="tFiles">My Files</span></button>
+    <button class="tab" data-p="pSet">⚙️ <span data-i="tSet">Settings</span></button>
+  </div>
+
+  <!-- PHOTO -->
+  <div class="page active" id="pPhoto">
+    <div class="card">
+      <h2 data-i="phTitle">📷 Photo Compressor</h2>
+      <p class="sub" data-i="phSub">Real on-device compression. Your photos never leave your phone. Originals are never modified.</p>
+      <div class="drop" id="pDrop">
+        <div class="big">🖼️</div>
+        <p data-i="phDrop">Tap to select photos (JPEG, PNG, WebP)</p>
+        <input type="file" id="pFile" accept="image/jpeg,image/png,image/webp" multiple hidden>
+      </div>
+    </div>
+
+    <div class="card" id="optCard" style="display:none">
+      <h2 data-i="setTitle2">⚙️ Compression Settings</h2>
+      <p class="sub" data-i="setSub">Applies to the next compression.</p>
+
+      <label class="f" data-i="fPreset">Quality preset</label>
+      <div class="seg" id="presetSeg">
+        <button data-q="1" data-i="qOrig">Original</button>
+        <button data-q="0.85" class="on" data-i="qHigh">High</button>
+        <button data-q="0.7" data-i="qBal">Balanced</button>
+        <button data-q="0.5" data-i="qSmall">Smaller</button>
+      </div>
+
+      <label class="f"><span data-i="fQual">Custom quality</span>: <b id="qVal">85%</b></label>
+      <input type="range" id="qRange" min="10" max="100" value="85">
+
+      <label class="f" data-i="fFmt">Output format</label>
+      <div class="seg" id="fmtSeg">
+        <button data-f="keep" class="on" data-i="fKeep">Keep original</button>
+        <button data-f="jpeg">JPEG</button>
+        <button data-f="png">PNG</button>
+        <button data-f="webp">WebP</button>
+      </div>
+      <div class="note" id="fmtNote" style="display:none"></div>
+
+      <label class="f" data-i="fTarget">Target size (optional)</label>
+      <div class="row2">
+        <input type="number" id="tSize" min="10" placeholder="e.g. 500">
+        <select id="tUnit"><option value="KB">KB</option><option value="MB">MB</option></select>
+      </div>
+      <p class="sub" style="margin:6px 0 0" data-i="fTargetH">Leave empty for preset quality. We find the best quality under your target — honestly.</p>
+
+      <label class="chk"><input type="checkbox" id="doResize"> <span data-i="fResize">Resize image</span></label>
+      <div id="rzBox" style="display:none">
+        <div class="row2">
+          <div><label class="f" data-i="fW">Width (px)</label><input type="number" id="rW" min="16" placeholder="auto"></div>
+          <div><label class="f" data-i="fH">Height (px)</label><input type="number" id="rH" min="16" placeholder="auto"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="rLock" checked> <span data-i="fLock">Lock aspect ratio</span></label>
+        <label class="f" data-i="fSocial">Social presets</label>
+        <div class="seg" id="socSeg">
+          <button data-w="1080" data-h="1080">Instagram Post</button>
+          <button data-w="1080" data-h="1920">Story / Status</button>
+          <button data-w="512" data-h="512">WhatsApp DP</button>
+          <button data-w="1280" data-h="720">YouTube Thumb</button>
+          <button data-w="820" data-h="312">FB Cover</button>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn" id="cmpAll">🗜️ <span data-i="cmpAll">Compress All</span></button>
+      </div>
+    </div>
+
+    <div id="pList"></div>
+  </div>
+
+  <!-- VIDEO -->
+  <div class="page" id="pVideo">
+    <div class="card">
+      <h2 data-i="vdTitle">🎬 Video Compressor</h2>
+      <p class="sub" data-i="vdSub">Check any video's real details below. Compression engine status is shown honestly.</p>
+      <div class="drop" id="vDrop">
+        <div class="big">🎞️</div>
+        <p data-i="vdDrop">Tap to select a video (info only for now)</p>
+        <input type="file" id="vFile" accept="video/*" hidden>
+      </div>
+    </div>
+    <div class="note blue" id="vStatusNote">ℹ️ <b data-i="vNoteT">Honest status:</b> <span data-i="vNote">Real video compression needs a native Android video encoder. The web version shows your video's true details (size, duration, resolution) and preview — compression arrives with the native APK update. No fake progress, no fake savings.</span></div>
+    <div id="vList"></div>
+  </div>
+
+  <!-- FILES -->
+  <div class="page" id="pFiles">
+    <div class="card">
+      <h2 data-i="flTitle">📁 My Files</h2>
+      <p class="sub" data-i="flSub">Compressed files from this session. Originals are never touched.</p>
+      <div class="btnrow">
+        <button class="btn ghost small" id="clrHist">🧹 <span data-i="flClear">Clear history</span></button>
+      </div>
+      <div id="fList"><div class="empty"><div class="big">📂</div><p data-i="flEmpty">Nothing here yet — compress a photo first.</p></div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="pSet">
+    <div class="card">
+      <h2 data-i="sTitle">⚙️ Settings</h2>
+      <label class="f" data-i="sTheme">Theme</label>
+      <div class="seg" id="themeSeg">
+        <button data-t="dark" data-i="sDark">🌙 Dark</button>
+        <button data-t="light" data-i="sLight">☀️ Light</button>
+      </div>
+      <label class="f" data-i="sLang">Language / زبان</label>
+      <div class="seg" id="langSeg">
+        <button data-l="en">English</button>
+        <button data-l="ur">اردو</button>
+      </div>
+      <div class="kv" style="margin-top:14px"><span data-i="sVer">App version</span><b>1.0</b></div>
+      <div class="kv"><span data-i="sProc">Processing</span><b data-i="sProcV">100% on-device</b></div>
+    </div>
+    <div class="card">
+      <h2 data-i="ppTitle">🔒 Privacy Policy</h2>
+      <details class="pol" open><summary data-i="ppS1">What we collect</summary><div class="body" data-i="ppB1">Nothing. Jilan Photo &amp; Video Compressor processes all files locally on your device using your browser's built-in image engine. No photos, videos, or personal data are uploaded, transmitted, or stored on any server. There is no account, no analytics, and no tracking.</div></details>
+      <details class="pol"><summary data-i="ppS2">Your files</summary><div class="body" data-i="ppB2">Original files are never modified or overwritten. Compressed copies are created as new files in the current session only and are removed when you clear history or close the app. Saving a file writes it to your device's Downloads folder (or your chosen location) only when you tap Save.</div></details>
+      <details class="pol"><summary data-i="ppS3">Permissions</summary><div class="body" data-i="ppB3">The app only asks to read the media files you explicitly select, and to save files you choose to keep. In the Android app these use the standard system file picker and Downloads folder.</div></details>
+      <details class="pol"><summary data-i="ppS4">Metadata</summary><div class="body" data-i="ppB4">For your privacy, compressed photos are re-encoded without EXIF metadata (location, camera info). This is intentional.</div></details>
+    </div>
+    <div class="card">
+      <h2 data-i="abTitle">ℹ️ About</h2>
+      <p class="sub"><b>Jilan Photo &amp; Video Compressor</b> — <span data-i="tagline">Smaller Files. Original Quality.</span><br><span data-i="abBy">Made by Jilan Apps • v1.0</span></p>
+    </div>
+  </div>
+</div>
+
+<nav class="bottomnav">
+  <button class="bnav active" data-p="pPhoto"><span class="ic">📷</span><span data-i="tPhoto">Photo</span></button>
+  <button class="bnav" data-p="pVideo"><span class="ic">🎬</span><span data-i="tVideo">Video</span></button>
+  <button class="bnav" data-p="pFiles"><span class="ic">📁</span><span data-i="tFiles">My Files</span></button>
+  <button class="bnav" data-p="pSet"><span class="ic">⚙️</span><span data-i="tSet">Settings</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* ============ helpers ============ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+function fmtSize(b){if(b<0)return "—";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(2)+" MB";return (b/1073741824).toFixed(2)+" GB";}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function fmtOf(file){const t=(file.type||"").toLowerCase();if(t.includes("png"))return"PNG";if(t.includes("webp"))return"WebP";if(t.includes("jpeg")||t.includes("jpg"))return"JPEG";return (file.name.split(".").pop()||"?").toUpperCase();}
+
+/* ============ i18n ============ */
+const I18N={
+en:{appName:"Jilan Photo & Video Compressor",tagline:"Smaller Files. Original Quality.",tPhoto:"Photo",tVideo:"Video",tFiles:"My Files",tSet:"Settings",
+phTitle:"📷 Photo Compressor",phSub:"Real on-device compression. Your photos never leave your phone. Originals are never modified.",phDrop:"Tap to select photos (JPEG, PNG, WebP)",
+setTitle2:"⚙️ Compression Settings",setSub:"Applies to the next compression.",fPreset:"Quality preset",qOrig:"Original",qHigh:"High",qBal:"Balanced",qSmall:"Smaller",
+fQual:"Custom quality",fFmt:"Output format",fKeep:"Keep original",fTarget:"Target size (optional)",fTargetH:"Leave empty for preset quality. We find the best quality under your target — honestly.",
+fResize:"Resize image",fW:"Width (px)",fH:"Height (px)",fLock:"Lock aspect ratio",fSocial:"Social presets",cmpAll:"Compress All",
+vdTitle:"🎬 Video Compressor",vdSub:"Check any video's real details below. Compression engine status is shown honestly.",vdDrop:"Tap to select a video (info only for now)",
+vNoteT:"Honest status:",vNote:"Real video compression needs a native Android video encoder. The web version shows your video's true details (size, duration, resolution) and preview — compression arrives with the native APK update. No fake progress, no fake savings.",
+flTitle:"📁 My Files",flSub:"Compressed files from this session. Originals are never touched.",flClear:"Clear history",flEmpty:"Nothing here yet — compress a photo first.",
+sTitle:"⚙️ Settings",sTheme:"Theme",sDark:"🌙 Dark",sLight:"☀️ Light",sLang:"Language / زبان",sVer:"App version",sProc:"Processing",sProcV:"100% on-device",
+ppTitle:"🔒 Privacy Policy",ppS1:"What we collect",ppB1:"Nothing. Jilan Photo & Video Compressor processes all files locally on your device using your browser's built-in image engine. No photos, videos, or personal data are uploaded, transmitted, or stored on any server. There is no account, no analytics, and no tracking.",
+ppS2:"Your files",ppB2:"Original files are never modified or overwritten. Compressed copies are created as new files in the current session only and are removed when you clear history or close the app. Saving a file writes it to your device's Downloads folder (or your chosen location) only when you tap Save.",
+ppS3:"Permissions",ppB3:"The app only asks to read the media files you explicitly select, and to save files you choose to keep. In the Android app these use the standard system file picker and Downloads folder.",
+ppS4:"Metadata",ppB4:"For your privacy, compressed photos are re-encoded without EXIF metadata (location, camera info). This is intentional.",
+abTitle:"ℹ️ About",abBy:"Made by Jilan Apps • v1.0"},
+ur:{appName:"جیلان فوٹو و ویڈیو کمپریسر",tagline:"چھوٹی فائلز۔ اصل کوالٹی۔",tPhoto:"فوٹو",tVideo:"ویڈیو",tFiles:"میری فائلز",tSet:"سیٹنگز",
+phTitle:"📷 فوٹو کمپریسر",phSub:"اصل آن ڈیوائس کمپریشن۔ آپ کی تصاویر فون سے باہر نہیں جاتیں۔ اصل فائل کبھی تبدیل نہیں ہوتی۔",phDrop:"تصاویر منتخب کریں (JPEG، PNG، WebP)",
+setTitle2:"⚙️ کمپریشن سیٹنگز",setSub:"اگلی کمپریشن پر لاگو ہوگا۔",fPreset:"کوالٹی پری سیٹ",qOrig:"اصل",qHigh:"اعلیٰ",qBal:"متوازن",qSmall:"چھوٹی",
+fQual:"اپنی کوالٹی",fFmt:"آؤٹ پٹ فارمیٹ",fKeep:"اصل رکھیں",fTarget:"ہدف سائز (اختیاری)",fTargetH:"پری سیٹ کوالٹی کے لیے خالی چھوڑیں۔ ہم آپ کے ہدف کے تحت بہترین کوالٹی تلاش کرتے ہیں — ایمانداری سے۔",
+fResize:"تصویر کا سائز بدلیں",fW:"چوڑائی (px)",fH:"اونچائی (px)",fLock:"تناسب برقرار رکھیں",fSocial:"سوشل پری سیٹ",cmpAll:"سب کمپریس کریں",
+vdTitle:"🎬 ویڈیو کمپریسر",vdSub:"نیچے کسی بھی ویڈیو کی اصل تفصیلات دیکھیں۔ انجن کی صورتحال ایمانداری سے بتائی گئی ہے۔",vdDrop:"ویڈیو منتخب کریں (فی الحال صرف معلومات)",
+vNoteT:"ایماندارانہ صورتحال:",vNote:"اصل ویڈیو کمپریشن کے لیے نیٹو اینڈرائیڈ ویڈیو انکوڈر درکار ہے۔ ویب ورژن آپ کی ویڈیو کی درست تفصیلات (سائز، دورانیہ، ریزولوشن) اور پیش نظارہ دکھاتا ہے — کمپریشن نیٹو APK اپڈیٹ کے ساتھ آئے گی۔ کوئی جعلی پیش رفت نہیں، کوئی جعلی بچت نہیں۔",
+flTitle:"📁 میری فائلز",flSub:"اس سیشن کی کمپریس شدہ فائلز۔ اصل فائلز کو ہاتھ نہیں لگایا جاتا۔",flClear:"ہسٹری صاف کریں",flEmpty:"ابھی کچھ نہیں — پہلے کوئی فوٹو کمپریس کریں۔",
+sTitle:"⚙️ سیٹنگز",sTheme:"تھیم",sDark:"🌙 ڈارک",sLight:"☀️ لائٹ",sLang:"زبان / Language",sVer:"ایپ ورژن",sProc:"پروسیسنگ",sProcV:"100% ڈیوائس پر",
+ppTitle:"🔒 پرائیویسی پالیسی",ppS1:"ہم کیا جمع کرتے ہیں",ppB1:"کچھ نہیں۔ جیلان فوٹو و ویڈیو کمپریسر آپ کے براؤزر کے بلٹ ان امیج انجن سے تمام فائلز آپ کی ڈیوائس پر ہی پروسیس کرتا ہے۔ کوئی تصویر، ویڈیو یا ذاتی ڈیٹا اپ لوڈ، منتقل یا کسی سرور پر محفوظ نہیں ہوتا۔ کوئی اکاؤنٹ، اینالیٹکس یا ٹریکنگ نہیں۔",
+ppS2:"آپ کی فائلز",ppB2:"اصل فائلز کبھی تبدیل یا اوور رائٹ نہیں ہوتیں۔ کمپریس شدہ کاپیاں صرف اس سیشن میں نئی فائلز کے طور پر بنتی ہیں اور ہسٹری صاف کرنے یا ایپ بند کرنے پر ہٹ جاتی ہیں۔ محفوظ کرنا صرف Save دبانے پر آپ کے ڈاؤن لوڈز فولڈر میں لکھتا ہے۔",
+ppS3:"اجازتیں",ppB3:"ایپ صرف ان میڈیا فائلز کو پڑھنے کی اجازت مانگتی ہے جو آپ خود منتخب کریں، اور صرف وہ فائلز محفوظ کرتی ہے جنہیں آپ رکھنا چاہیں۔ اینڈرائیڈ ایپ میں یہ معیاری سسٹم فائل پکر اور ڈاؤن لوڈز فولڈر استعمال ہوتا ہے۔",
+ppS4:"میٹا ڈیٹا",ppB4:"آپ کی پرائیویسی کے لیے کمپریس شدہ تصاویر EXIF میٹا ڈیٹا (لوکیشن، کیمرہ معلومات) کے بغیر دوبارہ انکوڈ ہوتی ہیں۔ یہ جان بوجھ کر ہے۔",
+abTitle:"ℹ️ تعارف",abBy:"جیلان ایپس کی پیشکش • v1.0"}};
+let LANG=localStorage.getItem("jc_lang")||"en";
+function applyLang(){const d=I18N[LANG]||I18N.en;$$("[data-i]").forEach(el=>{const k=el.getAttribute("data-i");if(d[k])el.innerHTML=d[k];});
+document.documentElement.lang=LANG;document.documentElement.dir=LANG==="ur"?"rtl":"ltr";
+$$("#langSeg button").forEach(b=>b.classList.toggle("on",b.dataset.l===LANG));}
+
+/* ============ theme ============ */
+function applyTheme(){const t=localStorage.getItem("jc_theme")||"dark";document.documentElement.dataset.theme=t;
+$("#themeBtn").textContent=t==="dark"?"🌙":"☀️";$$("#themeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));}
+
+/* ============ navigation ============ */
+function go(p){$$(".page").forEach(x=>x.classList.toggle("active",x.id===p));
+$$(".tab").forEach(t=>t.classList.toggle("active",t.dataset.p===p));
+$$(".bnav").forEach(t=>t.classList.toggle("active",t.dataset.p===p));
+window.scrollTo({top:0});}
+$$(".tab,.bnav").forEach(b=>b.addEventListener("click",()=>go(b.dataset.p)));
+
+/* ============ state ============ */
+const state={photos:[],videos:[],files:[],q:0.85,fmt:"keep",seq:0};
+
+/* ============ PHOTO ============ */
+const pDrop=$("#pDrop"),pFile=$("#pFile");
+pDrop.addEventListener("click",()=>pFile.click());
+["dragover","dragenter"].forEach(e=>pDrop.addEventListener(e,ev=>{ev.preventDefault();pDrop.classList.add("over");}));
+["dragleave","drop"].forEach(e=>pDrop.addEventListener(e,ev=>{ev.preventDefault();pDrop.classList.remove("over");}));
+pDrop.addEventListener("drop",ev=>{if(ev.dataTransfer.files.length)addPhotos(ev.dataTransfer.files);});
+pFile.addEventListener("change",()=>{addPhotos(pFile.files);pFile.value="";});
+
+async function addPhotos(list){
+  for(const f of list){
+    if(!/^image\/(jpeg|png|webp)$/.test(f.type)){toast("⚠️ "+f.name+": only JPEG/PNG/WebP supported");continue;}
+    if(f.size>40*1048576){toast("⚠️ "+f.name+": too large (>40MB), skipped");continue;}
+    try{
+      const bmp=await createImageBitmap(f);
+      const id="p"+(++state.seq);
+      state.photos.push({id,file:f,url:URL.createObjectURL(f),w:bmp.width,h:bmp.height,fmt:fmtOf(f),size:f.size,bmp,result:null,working:false});
+      bmp.close&&bmp.close();
+    }catch(e){toast("⚠️ Could not read "+f.name);}
+  }
+  renderPhotos();
+  if(state.photos.length)$("#optCard").style.display="block";
+}
+
+function renderPhotos(){
+  const el=$("#pList");el.innerHTML="";
+  for(const p of state.photos){
+    const r=p.result;
+    const card=document.createElement("div");card.className="fcard";card.id="card-"+p.id;
+    let html=`<div class="frow"><img class="thumb" src="${p.url}" alt="">
+      <div class="finfo"><div class="nm">${esc(p.file.name)}</div>
+      <div class="mt">${p.fmt} • ${p.w}×${p.h}px • ${fmtSize(p.size)}<br>
+      <span class="badge">original</span><span class="badge ok">never modified</span></div></div></div>`;
+    if(p.working){html+=`<div class="spin"></div><p style="text-align:center;color:var(--txt2);font-size:13px">Compressing…</p>`;}
+    if(r){
+      const saved=p.size-r.size, pct=p.size?Math.round(saved/p.size*100):0;
+      const savedCls=saved>=0?"save":"";
+      html+=`<div style="margin-top:10px">
+        <div class="stat"><span>Original</span><b>${fmtSize(p.size)} (${p.w}×${p.h})</b></div>
+        <div class="stat"><span>Compressed</span><b>${fmtSize(r.size)} (${r.w}×${r.h})</b></div>
+        <div class="stat"><span>Saved</span><b class="${savedCls}">${saved>=0?"−":"+"}${fmtSize(Math.abs(saved))} (${saved>=0?"":"−"}${Math.abs(pct)}%)</b></div>
+        <div class="stat"><span>Format</span><b>${r.fmt}${r.lossless?' <span class="badge ok">lossless</span>':""}</b></div>
+      </div>`;
+      if(r.warn)html+=`<div class="note">${r.warn}</div>`;
+      html+=`<div class="cmp" id="cmp-${p.id}">
+          <img src="${p.url}" alt="before"><span class="tag b">BEFORE</span>
+          <div class="after" style="width:50%"><img src="${r.url}" alt="after"></div><span class="tag a">AFTER</span>
+          <input type="range" min="0" max="100" value="50" aria-label="compare">
+        </div>
+        <div class="btnrow">
+          <button class="btn small" data-act="save">💾 Save</button>
+          <button class="btn small ghost" data-act="share">📤 Share</button>
+          <button class="btn small ghost" data-act="copy">📋 Copy info</button>
+          <button class="btn small ghost" data-act="rm">🗑️</button>
+        </div>`;
+    }else if(!p.working){
+      html+=`<div class="btnrow"><button class="btn small" data-act="go">🗜️ Compress</button>
+        <button class="btn small ghost" data-act="rm">🗑️ Remove</button></div>`;
+    }
+    card.innerHTML=html;
+    const slider=card.querySelector(".cmp input");
+    if(slider)slider.addEventListener("input",()=>{card.querySelector(".cmp .after").style.width=slider.value+"%";});
+    card.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>photoAct(p,b.dataset.act)));
+    el.appendChild(card);
+  }
+}
+
+async function photoAct(p,act){
+  if(act==="rm"){state.photos=state.photos.filter(x=>x.id!==p.id);URL.revokeObjectURL(p.url);renderPhotos();return;}
+  if(act==="go"){compressOne(p);return;}
+  const r=p.result;if(!r)return;
+  if(act==="save")saveBlob(r.blob,r.name,r.mime);
+  else if(act==="share")shareBlob(r.blob,r.name,r.mime);
+  else if(act==="copy"){
+    const t=`${r.name}\nOriginal: ${fmtSize(p.size)} (${p.w}x${p.h} ${p.fmt})\nCompressed: ${fmtSize(r.size)} (${r.w}x${r.h} ${r.fmt})\nSaved: ${fmtSize(Math.max(0,p.size-r.size))}`;
+    try{await navigator.clipboard.writeText(t);toast("📋 Copied");}catch(e){toast("⚠️ Copy not available");}
+  }
+}
+
+$("#cmpAll").addEventListener("click",async()=>{
+  for(const p of state.photos){if(!p.result&&!p.working)await compressOne(p);}
+});
+
+/* settings wiring */
+$("#presetSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  $$("#presetSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  state.q=parseFloat(b.dataset.q);$("#qRange").value=Math.round(state.q*100);$("#qVal").textContent=Math.round(state.q*100)+"%";});
+$("#qRange").addEventListener("input",e=>{state.q=e.target.value/100;$("#qVal").textContent=e.target.value+"%";
+  $$("#presetSeg button").forEach(x=>x.classList.remove("on"));});
+$("#fmtSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  $$("#fmtSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");state.fmt=b.dataset.f;fmtNote();});
+function fmtNote(){const n=$("#fmtNote");
+  if(state.fmt==="png"){n.style.display="block";n.className="note green";n.innerHTML="✅ <b>PNG = truly lossless.</b> Pixel-perfect, larger files. Transparency preserved.";}
+  else if(state.fmt==="jpeg"){n.style.display="block";n.className="note";n.innerHTML="⚠️ <b>JPEG is lossy</b> (never labelled lossless). Transparency becomes white. Metadata removed for privacy.";}
+  else if(state.fmt==="webp"){n.style.display="block";n.className="note blue";n.innerHTML="ℹ️ <b>WebP:</b> excellent quality at small sizes. Transparency preserved. Older apps may not open WebP.";}
+  else{n.style.display="none";}}
+$("#doResize").addEventListener("change",e=>{$("#rzBox").style.display=e.target.checked?"block":"none";});
+$("#rLock").addEventListener("change",()=>{});
+$("#socSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  $("#doResize").checked=true;$("#rzBox").style.display="block";
+  $("#rW").value=b.dataset.w;$("#rH").value=b.dataset.h;
+  $$("#socSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});
+
+/* ---- core compression: 100% real, Canvas API ---- */
+function drawToCanvas(bmp,W,H){
+  const c=document.createElement("canvas");c.width=W;c.height=H;
+  const x=c.getContext("2d");x.drawImage(bmp,0,0,W,H);return c;
+}
+function hasAlpha(canvas){
+  try{const d=canvas.getContext("2d").getImageData(0,0,Math.min(canvas.width,64),Math.min(canvas.height,64)).data;
+  for(let i=3;i<d.length;i+=4)if(d[i]<250)return true;}catch(e){}
+  return false;
+}
+function toBlobP(canvas,mime,q){return new Promise(res=>canvas.toBlob(b=>res(b),mime,q));}
+function outName(orig,fmt,outFmt){const base=orig.replace(/\.[^.]+$/,"");
+  const ext={jpeg:"jpg",png:"png",webp:"webp"}[outFmt];return base+"-compressed."+ext;}
+function outMime(outFmt){return{jpeg:"image/jpeg",png:"image/png",webp:"image/webp"}[outFmt];}
+
+function targetDims(p){
+  let W=p.w,H=p.h;
+  if($("#doResize").checked){
+    let w=parseInt($("#rW").value)||0,h=parseInt($("#rH").value)||0;
+    const lock=$("#rLock").checked,ar=p.w/p.h;
+    if(w&&h){if(lock){if(w/h>ar)w=Math.round(h*ar);else h=Math.round(w/ar);}W=w;H=h;}
+    else if(w&&!h){W=w;H=Math.round(w/ar);}
+    else if(h&&!w){H=h;W=Math.round(h*ar);}
+    W=Math.max(16,W);H=Math.max(16,H);
+  }
+  return{W,H};
+}
+
+async function compressOne(p){
+  p.working=true;renderPhotos();
+  try{
+    const bmp=await createImageBitmap(p.file);
+    const{W,H}=targetDims(p);
+    let outFmt=state.fmt==="keep"?(p.fmt==="PNG"?"png":p.fmt==="WebP"?"webp":"jpeg"):state.fmt;
+    const canvas=drawToCanvas(bmp,W,H);
+    const alpha=hasAlpha(canvas);
+    const warns=[];
+    if(alpha&&outFmt==="jpeg")warns.push("⚠️ Transparency was flattened to white (JPEG has no alpha channel).");
+    const tVal=parseFloat($("#tSize").value),tUnit=$("#tUnit").value;
+    const targetBytes=tVal>0?Math.round(tVal*(tUnit==="MB"?1048576:1024)):0;
+    let blob,qUsed=state.q,lossless=false;
+
+    if(outFmt==="png"){
+      blob=await toBlobP(canvas,"image/png");
+      lossless=true;
+      if(targetBytes&&blob.size>targetBytes)warns.push("ℹ️ PNG is lossless — target size "+fmtSize(targetBytes)+" cannot be forced without quality loss. Kept lossless at "+fmtSize(blob.size)+".");
+    }else{
+      const mime=outMime(outFmt);
+      if(state.q>=1){qUsed=1;}
+      if(targetBytes>0){
+        /* honest binary search for best quality under target */
+        let lo=0.05,hi=qUsed,best=null,bestQ=0;
+        for(let i=0;i<7;i++){const mid=(lo+hi)/2;const b=await toBlobP(canvas,mime,mid);
+          if(b&&b.size<=targetBytes){best=b;bestQ=mid;lo=mid;}else{hi=mid;}}
+        if(best){blob=best;qUsed=bestQ;}
+        else{blob=await toBlobP(canvas,mime,0.05);qUsed=0.05;
+          warns.push("⚠️ Target "+fmtSize(targetBytes)+" unreachable even at minimum quality — kept closest result ("+fmtSize(blob.size)+"). Try a bigger target or Smaller preset.");}
+      }else{
+        blob=await toBlobP(canvas,mime,qUsed);
+      }
+      if(!blob)throw new Error("encode failed");
+    }
+    bmp.close&&bmp.close();
+    const name=outName(p.file.name,p.fmt,outFmt);
+    p.result={blob,url:URL.createObjectURL(blob),size:blob.size,w:W,h:H,fmt:outFmt.toUpperCase(),
+      mime:outMime(outFmt),name,lossless,warn:warns.join(" "),q:qUsed};
+    p.working=false;
+    state.files.unshift({kind:"photo",name,url:p.result.url,size:blob.size,blob,mime:p.result.mime,thumb:p.result.url});
+    renderPhotos();renderFiles();
+    toast("✅ "+name+" — "+fmtSize(blob.size));
+  }catch(e){p.working=false;renderPhotos();toast("❌ Compression failed: "+e.message);}
+}
+
+/* ---- save / share (APK bridge + web fallback) ---- */
+function b64(blob){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.readAsDataURL(blob);});}
+async function saveBlob(blob,name,mime){
+  if(window.JilanBridge&&window.JilanBridge.saveFile){
+    try{const d=await b64(blob);window.JilanBridge.saveFile(d,name,mime);toast("💾 Saving… check Downloads");return;}
+    catch(e){/* fall through */}
+  }
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+  toast("💾 "+name);
+}
+async function shareBlob(blob,name,mime){
+  const file=new File([blob],name,{type:mime});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:name});return;}catch(e){if(e.name==="AbortError")return;}
+  }
+  toast("⚠️ Sharing not available — use Save instead");
+}
+
+/* ============ VIDEO (honest info only — no fake compression) ============ */
+const vDrop=$("#vDrop"),vFile=$("#vFile");
+vDrop.addEventListener("click",()=>vFile.click());
+vFile.addEventListener("change",()=>{addVideo(vFile.files[0]);vFile.value="";});
+function addVideo(f){
+  if(!f)return;
+  const url=URL.createObjectURL(f);
+  const v=document.createElement("video");v.preload="metadata";v.muted=true;v.src=url;
+  v.onloadedmetadata=()=>{
+    state.videos.unshift({file:f,url,w:v.videoWidth,h:v.videoHeight,dur:v.duration});
+    renderVideos();URL.revokeObjectURL(url);
+  };
+  v.onerror=()=>{toast("⚠️ Could not read video");URL.revokeObjectURL(url);};
+}
+function renderVideos(){
+  const el=$("#vList");el.innerHTML="";
+  for(const x of state.videos){
+    const d=document.createElement("div");d.className="fcard";
+    const dur=x.dur&&isFinite(x.dur)?Math.round(x.dur)+"s":"—";
+    d.innerHTML=`<video class="prev" src="${x.url}" controls playsinline preload="metadata"></video>
+      <div class="finfo" style="margin-top:8px"><div class="nm">${esc(x.file.name)}</div>
+      <div class="mt"><span class="badge">${fmtSize(x.file.size)}</span><span class="badge">${dur}</span><span class="badge">${x.w||"?"}×${x.h||"?"}</span></div></div>
+      <div class="note blue" style="margin-bottom:0">🎬 <b>Compression coming in the native APK update.</b> Real video encoding needs Android's native encoder — the web version will not fake it. Your original is untouched.</div>`;
+    el.appendChild(d);
+  }
+}
+
+/* ============ FILES ============ */
+function renderFiles(){
+  const el=$("#fList");
+  if(!state.files.length){el.innerHTML=`<div class="empty"><div class="big">📂</div><p data-i="flEmpty">${(I18N[LANG]||I18N.en).flEmpty}</p></div>`;return;}
+  el.innerHTML="";
+  for(const f of state.files){
+    const d=document.createElement("div");d.className="fcard";
+    d.innerHTML=`<div class="frow"><img class="thumb" src="${f.thumb}" alt="">
+      <div class="finfo"><div class="nm">${esc(f.name)}</div>
+      <div class="mt">${fmtSize(f.size)} • ${(f.mime||"").split("/")[1]||""}</div></div></div>
+      <div class="btnrow"><button class="btn small" data-a="save">💾 Save</button>
+      <button class="btn small ghost" data-a="share">📤 Share</button>
+      <button class="btn small ghost" data-a="rm">🗑️</button></div>`;
+    d.querySelector('[data-a="save"]').addEventListener("click",()=>saveBlob(f.blob,f.name,f.mime));
+    d.querySelector('[data-a="share"]').addEventListener("click",()=>shareBlob(f.blob,f.name,f.mime));
+    d.querySelector('[data-a="rm"]').addEventListener("click",()=>{state.files=state.files.filter(y=>y!==f);renderFiles();});
+    el.appendChild(d);
+  }
+}
+$("#clrHist").addEventListener("click",()=>{
+  if(!state.files.length){toast("Nothing to clear");return;}
+  if(confirm("Clear all compressed files from this session? Originals are never affected.")){
+    state.files.forEach(f=>URL.revokeObjectURL(f.url));state.files=[];renderFiles();toast("🧹 Cleared");}
+});
+
+/* ============ SETTINGS ============ */
+$("#themeBtn").addEventListener("click",()=>{
+  const t=document.documentElement.dataset.theme==="dark"?"light":"dark";
+  localStorage.setItem("jc_theme",t);applyTheme();});
+$("#themeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  localStorage.setItem("jc_theme",b.dataset.t);applyTheme();});
+$("#langBtn").addEventListener("click",()=>{LANG=LANG==="en"?"ur":"en";localStorage.setItem("jc_lang",LANG);applyLang();renderFiles();});
+$("#langSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  LANG=b.dataset.l;localStorage.setItem("jc_lang",LANG);applyLang();renderFiles();});
+
+/* ============ init ============ */
+applyTheme();applyLang();fmtNote();
+document.addEventListener("backbutton",()=>{},false);
+</script>
+</body>
+</html>
