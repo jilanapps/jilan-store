@@ -73,6 +73,7 @@ input[type=text]{width:100%;padding:15px;border-radius:14px;border:none;font-siz
 
 <!-- ============ MENU ============ -->
 <div id="menu" class="screen on">
+  <div style="text-align:center;font-size:11px;opacity:.6;margin-bottom:4px">Jilan Games v7</div>
   <h1>🎮 Jilan Games</h1>
   <div class="sub">Khel chunein aur maza karein!</div>
   <div class="card">
@@ -334,7 +335,9 @@ function awardWin(w){
   saveState();
 }
 var cur='menu';
-function show(id){cur=id;var s=document.querySelectorAll('.screen');for(var i=0;i<s.length;i++)s[i].classList.remove('on');document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
+function show(id){cur=id;var el=document.getElementById(id);if(!el){showErr('Screen "'+id+'" nahi mili!');return;}var s=document.querySelectorAll('.screen');for(var i=0;i<s.length;i++)s[i].classList.remove('on');el.classList.add('on');try{window.scrollTo(0,0);}catch(e){}}
+function showErr(msg){var d=document.getElementById('jgErr');if(!d){d=document.createElement('div');d.id='jgErr';d.style.cssText='position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:12px;font-size:14px;z-index:9999;text-align:center';document.body.appendChild(d);}d.textContent='⚠️ '+msg;d.style.display='block';setTimeout(function(){d.style.display='none';},5000);}
+window.onerror=function(m,s,l,c){showErr('Error: '+m+' (line '+l+')');};
 function goMenu(){refreshMenu();show('menu');}
 window.__atMenu=function(){return cur==='menu';};
 window.__goMenu=function(){goMenu();};
@@ -1302,6 +1305,13 @@ function suGameOver(msg){
 }
 
 
+
+// Safe-launch wrapper: catches errors from game buttons and shows them visibly
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-safe]');
+  if(!t)return;
+  try{ /* handler already ran via onclick */ }catch(err){showErr(err.message);}
+},true);
 loadState();refreshMenu();
 </script>
 </body>
