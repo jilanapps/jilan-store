@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Naam — Baby Name Finder</title>
+<style>
+:root{--pink:#F9A8D4;--pink-d:#ec7fb8;--blue:#93C5FD;--blue-d:#6aa8f5;--cream:#FEF3C7;--ink:#4a3b52;--mut:#8a7a95;--card:#ffffff;--gold:#f5b942}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#FEF3C7 0%,#fde8f3 45%,#e8f1fe 100%);color:var(--ink);min-height:100vh;touch-action:manipulation;user-select:none}
+body.rtl{direction:rtl}
+#demoBanner{position:sticky;top:0;z-index:999;background:#222;color:#fff;text-align:center;font-size:12px;padding:6px;letter-spacing:1px}
+.screen{display:none;min-height:calc(100vh - 130px);padding:16px 16px 90px;animation:fade .25s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:26px;margin-bottom:4px}
+.sub{color:var(--mut);font-size:14px;margin-bottom:14px}
+.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 4px 18px rgba(160,90,140,.10)}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;margin:8px 0;color:#fff;background:linear-gradient(135deg,var(--pink-d),#d66ba0)}
+.btn.blue{background:linear-gradient(135deg,var(--blue-d),#5b8def)}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid #f0d9e8}
+.btn.small{padding:10px;font-size:14px;width:auto;display:inline-block;margin:4px}
+.row{display:flex;gap:8px;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select,textarea{width:100%;padding:13px;border-radius:14px;border:2px solid #f0d9e8;font-size:15px;margin:6px 0;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--pink-d)}
+.chip{display:inline-block;padding:8px 14px;border-radius:999px;background:#fff;border:2px solid #f3d6e8;font-size:13px;margin:4px;cursor:pointer}
+.chip.on{background:var(--pink);border-color:var(--pink-d);color:#fff;font-weight:700}
+.chip.blue.on{background:var(--blue);border-color:var(--blue-d)}
+/* bottom nav */
+#nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #f0d9e8;z-index:900;box-shadow:0 -4px 16px rgba(160,90,140,.08)}
+#nav button{flex:1;border:none;background:none;padding:10px 4px 12px;font-size:11px;color:var(--mut);cursor:pointer}
+#nav button .ic{font-size:22px;display:block;margin-bottom:2px}
+#nav button.on{color:var(--pink-d);font-weight:700}
+/* swipe card */
+#swipeWrap{position:relative;height:440px;margin:10px 0}
+.swipeCard{position:absolute;top:0;left:0;right:0;background:#fff;border-radius:26px;box-shadow:0 10px 30px rgba(160,90,140,.18);padding:26px 20px;text-align:center;transition:transform .25s,opacity .25s;touch-action:none}
+.swipeCard .nm-ur{font-size:44px;font-weight:800;color:#b04a7e;margin:6px 0}
+.swipeCard .nm-en{font-size:24px;font-weight:700;margin-bottom:6px}
+.swipeCard .mean{font-size:16px;color:var(--ink);background:var(--cream);border-radius:14px;padding:10px;margin:10px 0}
+.swipeCard .mean-ur{font-size:18px;color:#7a5a68;margin-bottom:8px}
+.tag{display:inline-block;background:#eef4ff;color:#5b8def;border-radius:999px;padding:4px 12px;font-size:12px;margin:3px}
+.stamp{position:absolute;top:18px;font-size:30px;font-weight:800;padding:6px 14px;border:4px solid;border-radius:12px;opacity:0;transform:rotate(-18deg)}
+.stamp.like{left:16px;color:#22c55e;border-color:#22c55e}
+.stamp.nope{right:16px;color:#ef4444;border-color:#ef4444;transform:rotate(18deg)}
+.swipeBtns{display:flex;justify-content:center;gap:18px;margin-top:8px}
+.sbtn{width:64px;height:64px;border-radius:50%;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.sbtn.no{background:#fff;color:#ef4444}
+.sbtn.yes{background:linear-gradient(135deg,#4ade80,#22c55e);color:#fff}
+/* name list */
+.nrow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:12px;margin-bottom:8px;box-shadow:0 2px 10px rgba(160,90,140,.08);cursor:pointer}
+.nrow .nu{font-size:26px;font-weight:800;color:#b04a7e;min-width:70px;text-align:center}
+.nrow .inf{flex:1}
+.nrow .ne{font-weight:700;font-size:16px}
+.nrow .nm2{font-size:13px;color:var(--mut)}
+.heart{font-size:24px;cursor:pointer;background:none;border:none}
+/* detail */
+#dUr{font-size:52px;font-weight:800;color:#b04a7e;text-align:center;margin:8px 0}
+#dEn{text-align:center;font-size:22px;font-weight:700}
+.stars{font-size:28px;cursor:pointer;text-align:center;letter-spacing:4px}
+/* match */
+#matchAnim{text-align:center;font-size:70px;animation:pop .5s}
+@keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* announcement */
+#annCanvas{width:100%;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.hidden{display:none!important}
+.center{text-align:center}
+.mt{margin-top:12px}
+.pill{background:var(--cream);border-radius:999px;padding:6px 14px;font-size:13px;display:inline-block;margin:3px}
+.progress{height:10px;background:#f0e4ee;border-radius:99px;overflow:hidden;margin:8px 0}
+.progress>div{height:100%;background:linear-gradient(90deg,var(--pink-d),var(--blue-d))}
+.voteBar{display:flex;gap:6px;margin-top:6px}
+.voteBar button{flex:1;border:none;border-radius:10px;padding:8px;font-size:14px;cursor:pointer}
+select.lang{position:fixed;top:34px;right:10px;z-index:950;width:auto;padding:6px 10px;font-size:12px;border-radius:10px}
+</style>
+</head>
+<body>
+<div id="demoBanner">DEMO by Jilan Apps</div>
+<select class="lang" id="langSel" onchange="setLang(this.value)">
+<option value="en">English</option><option value="ur">اردو</option>
+</select>
+
+<!-- ONBOARDING -->
+<div id="scr-onboard" class="screen on">
+<div class="center" style="padding-top:30px">
+<div style="font-size:70px">👶💗</div>
+<h1 id="obT">Naam</h1>
+<div class="sub" id="obS">Apne Bachay Ka Naam, Mohabbat Se</div>
+<div class="card" style="text-align:left">
+<div style="font-weight:700;margin-bottom:6px" id="obG">Baby:</div>
+<div><span class="chip blue" data-g="b" onclick="pickG('b',this)">👦 Boy</span><span class="chip" data-g="g" onclick="pickG('g',this)">👧 Girl</span><span class="chip" data-g="both" onclick="pickG('both',this)">👶 Both</span></div>
+<div style="font-weight:700;margin:10px 0 6px" id="obR">Style:</div>
+<div><span class="chip on" data-r="islamic" onclick="pickR('islamic',this)">🕌 Islamic</span><span class="chip" data-r="modern" onclick="pickR('modern',this)">✨ Modern</span><span class="chip" data-r="traditional" onclick="pickR('traditional',this)">📿 Traditional</span></div>
+</div>
+<button class="btn" onclick="finishOnboard()" id="obGo">Shuru Karein 💗</button>
+<div class="sub center" style="margin-top:10px">Curated collection of beautiful names — honest meanings, no fake claims.</div>
+</div></div>
+
+<!-- DISCOVER -->
+<div id="scr-discover" class="screen">
+<h1 id="tDiscover">Discover 💗</h1>
+<div class="sub" id="dCount"></div>
+<div id="swipeWrap"></div>
+<div class="swipeBtns">
+<button class="sbtn no" onclick="swipe('no')">✕</button>
+<button class="sbtn" style="background:#fff;color:var(--gold);width:54px;height:54px;font-size:22px" onclick="openDetail(curSwipe)">ℹ️</button>
+<button class="sbtn yes" onclick="swipe('yes')">♥</button>
+</div>
+<div class="center mt"><span class="chip" onclick="resetDeck()">🔄 Dobara shuru</span></div>
+</div>
+
+<!-- SEARCH -->
+<div id="scr-search" class="screen">
+<h1 id="tSearch">Search 🔍</h1>
+<input id="q" placeholder="Naam ya meaning likhein… (e.g. noor, khushi)" oninput="doSearch()">
+<div class="sub" style="margin-top:8px" id="tAlpha">Alphabet:</div>
+<div id="alphaRow"></div>
+<div class="sub" style="margin-top:8px" id="tOrigin">Origin:</div>
+<div id="originRow"></div>
+<div class="sub" style="margin-top:8px">⭐ Editor's Picks</div>
+<div id="picks"></div>
+<div class="sub" style="margin-top:8px">🔥 Trending</div>
+<div id="trending"></div>
+<div id="sResults"></div>
+</div>
+
+<!-- SHORTLIST -->
+<div id="scr-short" class="screen">
+<h1 id="tShort">Shortlist ♥</h1>
+<div class="sub" id="shortInfo"></div>
+<div id="shortList"></div>
+<div class="card hidden" id="compareBox">
+<div style="font-weight:700;margin-bottom:8px">Compare (side by side)</div>
+<div id="compareGrid" class="grid2"></div>
+</div>
+</div>
+
+<!-- MATCH -->
+<div id="scr-match" class="screen">
+<h1 id="tMatch">Match 💑</h1>
+<div class="sub">Partner ke saath mil kar naam chunein (demo: isi device par)</div>
+<div class="card">
+<div style="font-weight:700">Aap ka code:</div>
+<div id="myCode" style="font-size:32px;letter-spacing:6px;font-weight:800;color:#b04a7e"></div>
+<button class="btn blue small" onclick="newCode()">Naya code</button>
+</div>
+<div class="card">
+<div style="font-weight:700">Partner mode:</div>
+<div class="row"><button class="btn small" onclick="startPartner(1)">Partner 1 👤</button><button class="btn blue small" onclick="startPartner(2)">Partner 2 👤</button></div>
+<div id="pSwipeInfo" class="sub"></div>
+<div id="pCard"></div>
+<div class="row hidden" id="pBtns"><button class="sbtn no" onclick="pSwipe('no')">✕</button><button class="sbtn yes" onclick="pSwipe('yes')">♥</button></div>
+</div>
+<div id="matchResult"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="scr-profile" class="screen">
+<h1 id="tProfile">Profile 👤</h1>
+<div class="card">
+<div style="font-weight:700;margin-bottom:6px">Baby info:</div>
+<input id="babyName" placeholder="Baby ka naam (agar decide ho gaya)">
+<div class="row"><select id="babyGender"><option value="">Gender…</option><option value="b">Boy</option><option value="g">Girl</option></select><input id="dueDate" type="date"></div>
+<button class="btn small" onclick="saveBaby()">Save 💾</button>
+</div>
+<div class="card">
+<div style="font-weight:700;margin-bottom:6px">🎉 Announcement Card:</div>
+<canvas id="annCanvas" width="1080" height="1080"></canvas>
+<div class="row mt"><button class="btn small" onclick="drawAnn()">Banayein 🎨</button><button class="btn blue small" onclick="dlAnn()">Download ⬇️</button><button class="btn ghost small" onclick="shareAnn()">Share 📤</button></div>
+</div>
+<div class="card">
+<div style="font-weight:700">Family voting members:</div>
+<div id="famList"></div>
+<div class="row"><input id="famName" placeholder="Naam (e.g. Dadi)"><button class="btn small" onclick="addFam()">Add ➕</button></div>
+</div>
+<button class="btn ghost" onclick="resetAll()">Reset demo 🔄</button>
+</div>
+
+<!-- DETAIL (overlay screen) -->
+<div id="scr-detail" class="screen">
+<button class="btn ghost small" onclick="goBack()">← Wapas</button>
+<div id="dUr"></div><div id="dEn"></div>
+<div class="card">
+<div class="row"><span class="pill" id="dGender"></span><span class="pill" id="dOrigin"></span><span class="pill" id="dPop"></span></div>
+<div style="font-weight:700;margin-top:10px">Meaning:</div><div id="dMean"></div>
+<div style="font-weight:700;margin-top:8px">مطلب (اردو):</div><div id="dMeanUr"></div>
+<div style="font-weight:700;margin-top:8px">Nickname ideas:</div><div id="dNick" class="sub"></div>
+</div>
+<div class="center"><div style="font-weight:700">Rate this name:</div><div class="stars" id="dStars"></div></div>
+<div class="row mt">
+<button class="btn small" onclick="speakName()">🔊 Pronounce</button>
+<button class="btn small" onclick="toggleFav(curDetail,'detail')">♥ <span id="dFavT">Shortlist</span></button>
+<button class="btn blue small" onclick="shareName()">📤 Share</button>
+</div>
+<div class="sub" id="ttsNote"></div>
+<div style="font-weight:700;margin-top:10px">Similar names:</div>
+<div id="dSimilar"></div>
+</div>
+
+<nav id="nav">
+<button data-s="discover" class="on" onclick="nav('discover')"><span class="ic">💗</span><span class="nl">Discover</span></button>
+<button data-s="search" onclick="nav('search')"><span class="ic">🔍</span><span class="nl">Search</span></button>
+<button data-s="short" onclick="nav('short')"><span class="ic">♥</span><span class="nl">Shortlist</span></button>
+<button data-s="match" onclick="nav('match')"><span class="ic">💑</span><span class="nl">Match</span></button>
+<button data-s="profile" onclick="nav('profile')"><span class="ic">👤</span><span class="nl">Profile</span></button>
+</nav>
+<div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;display:none;z-index:999"></div>
+<script>
+/* NAMES DATA: [name, urdu, g, meaning_en, meaning_ur, origin, cats, pop] */
+var NAMES=[
+/* ===== BOYS: Prophets & Quranic ===== */
+["Muhammad","محمد","b","Highly praised","بہت تعریف کیا گیا","Arabic","prophet,quranic,islamic",5],
+["Ahmad","احمد","b","Most praiseworthy","سب سے زیادہ قابلِ تعریف","Arabic","prophet,quranic,islamic",5],
+["Ibrahim","ابراہیم","b","Father of nations","قوموں کا باپ","Arabic","prophet,quranic,islamic",5],
+["Ismail","اسماعیل","b","God has heard","اللہ نے سن لیا","Arabic","prophet,quranic,islamic",4],
+["Ishaq","اسحاق","b","Laughter, joy","ہنسی، خوشی","Arabic","prophet,quranic,islamic",3],
+["Yaqub","یعقوب","b","Protected by God","اللہ کی حفاظت میں","Arabic","prophet,quranic,islamic",3],
+["Yusuf","یوسف","b","God increases","اللہ بڑھاتا ہے","Arabic","prophet,quranic,islamic",5],
+["Musa","موسیٰ","b","Drawn from water","پانی سے نکالا گیا","Arabic","prophet,quranic,islamic",4],
+["Harun","ہارون","b","Exalted, lofty","بلند مرتبہ","Arabic","prophet,quranic,islamic",3],
+["Dawud","داؤد","b","Beloved","محبوب","Arabic","prophet,quranic,islamic",3],
+["Sulaiman","سلیمان","b","Man of peace","امن والا","Arabic","prophet,quranic,islamic",4],
+["Ayyub","ایوب","b","Patient, enduring","صبر کرنے والا","Arabic","prophet,quranic,islamic",3],
+["Yunus","یونس","b","Dove","کبوتر","Arabic","prophet,quranic,islamic",3],
+["Zakariya","زکریا","b","Remembered by God","اللہ کا یاد کیا ہوا","Arabic","prophet,quranic,islamic",4],
+["Yahya","یحییٰ","b","Alive, living","زندہ رہنے والا","Arabic","prophet,quranic,islamic",4],
+["Isa","عیسیٰ","b","Jesus, the Messiah","حضرت عیسیٰ","Arabic","prophet,quranic,islamic",3],
+["Idris","ادریس","b","Studious, learned","علم والا","Arabic","prophet,quranic,islamic",3],
+["Nuh","نوح","b","Rest, comfort","آرام، سکون","Arabic","prophet,quranic,islamic",3],
+["Hud","ہود","b","Guidance","ہدایت","Arabic","prophet,quranic,islamic",2],
+["Salih","صالح","b","Righteous, virtuous","نیک، صالح","Arabic","prophet,quranic,islamic",4],
+["Shuaib","شعیب","b","Eloquent","فصیح البیان","Arabic","prophet,quranic,islamic",2],
+["Lut","لوط","b","Attached, devoted","وابستہ","Arabic","prophet,quranic,islamic",2],
+["Ilyas","الیاس","b","The Lord is God","اللہ ہی معبود ہے","Arabic","prophet,quranic,islamic",3],
+["Alyasa","الیسع","b","God is salvation","اللہ نجات دینے والا ہے","Arabic","prophet,quranic,islamic",2],
+["Zulkifl","ذوالکفل","b","Owner of responsibility","ذمہ داری والا","Arabic","prophet,quranic,islamic",2],
+["Imran","عمران","b","Prosperity","خوشحالی","Arabic","quranic,islamic",4],
+["Luqman","لقمان","b","Wise counselor","دانا","Arabic","quranic,islamic",3],
+["Uzair","عزیر","b","Helper, beloved","مددگار","Arabic","quranic,islamic",3],
+["Talut","طالوت","b","Tall, mighty","بلند قامت","Arabic","quranic,islamic",1],
+["Jalut","جالوت","b","Strong warrior","مضبوط جنگجو","Arabic","quranic,islamic",1],
+["Haman","ہامان","b","Faithful minister","وفادار وزیر","Arabic","quranic,islamic",1],
+["Qarun","قارون","b","Wealthy","مالدار","Arabic","quranic,islamic",1],
+["Azar","آزر","b","Fire, helper","آگ، مددگار","Arabic","quranic,islamic",1],
+/* ===== BOYS: Sahaba & family ===== */
+["Ali","علی","b","Exalted, noble","بلند مرتبہ","Arabic","sahaba,islamic",5],
+["Hassan","حسن","b","Handsome, virtuous","خوبصورت، نیک","Arabic","sahaba,islamic",5],
+["Hussain","حسین","b","Beautiful, good","خوبصورت","Arabic","sahaba,islamic",5],
+["Umar","عمر","b","Long-lived, flourishing","لمبی عمر والا","Arabic","sahaba,islamic",5],
+["Usman","عثمان","b","Wise, devoted","عقلمند","Arabic","sahaba,islamic",5],
+["Hamza","حمزہ","b","Strong, steadfast","مضبوط","Arabic","sahaba,islamic",5],
+["Talha","طلحہ","b","Fruitful tree","پھل دار درخت","Arabic","sahaba,islamic",4],
+["Zubair","زبیر","b","Strong, intelligent","مضبوط، ذہین","Arabic","sahaba,islamic",4],
+["Bilal","بلال","b","Fresh, moist","تازہ","Arabic","sahaba,islamic",5],
+["Salman","سلمان","b","Safe, peaceful","سلامتی والا","Arabic","sahaba,islamic",4],
+["Ammar","عمار","b","Long-lived, pious","لمبی عمر والا","Arabic","sahaba,islamic",4],
+["Saad","سعد","b","Good fortune","خوش بختی","Arabic","sahaba,islamic",4],
+["Zayd","زید","b","Abundance, growth","کثرت، بڑھوتری","Arabic","sahaba,islamic",4],
+["Anas","انس","b","Affection, friendliness","محبت، الفت","Arabic","sahaba,islamic",4],
+["Muaz","معاذ","b","Protected, refuge","پناہ، محفوظ","Arabic","sahaba,islamic",4],
+["Owais","اویس","b","Little wolf","چھوٹا بھیڑیا","Arabic","sahaba,islamic",3],
+["Jafar","جعفر","b","Stream, rivulet","چھوٹی نہر","Arabic","sahaba,islamic",4],
+["Abbas","عباس","b","Stern, lion","شیر، رعب والا","Arabic","sahaba,islamic",4],
+["Aqil","عقیل","b","Wise, intelligent","عقلمند","Arabic","sahaba,islamic",3],
+["Haris","حارث","b","Guardian, cultivator","نگہبان","Arabic","sahaba,islamic",3],
+["Hisham","ہشام","b","Generous","سخی","Arabic","sahaba,islamic",3],
+["Suhaib","صہیب","b","Reddish","سرخی مائل","Arabic","sahaba,islamic",3],
+["Abu Huraira","ابوہریرہ","b","Father of the kitten","بلی کے بچے والا","Arabic","sahaba,islamic",2],
+["Khabbab","خباب","b","Swift","تیز رفتار","Arabic","sahaba,islamic",2],
+["Miqdad","مقداد","b","Brave","بہادر","Arabic","sahaba,islamic",2],
+["Hudhaifa","حذیفہ","b","Old, sage","دانا بزرگ","Arabic","sahaba,islamic",2],
+["Abdullah","عبداللہ","b","Servant of Allah","اللہ کا بندہ","Arabic","sahaba,islamic",5],
+["Abdur Rahman","عبدالرحمن","b","Servant of the Merciful","رحمن کا بندہ","Arabic","sahaba,islamic",5],
+["Abdul Aziz","عبدالعزیز","b","Servant of the Mighty","عزیز کا بندہ","Arabic","islamic",4],
+["Abdul Malik","عبدالمالک","b","Servant of the King","مالک کا بندہ","Arabic","islamic",4],
+["Abdul Qadir","عبدالقادر","b","Servant of the Capable","قادر کا بندہ","Arabic","islamic",4],
+["Abdul Basit","عبدالباسط","b","Servant of the Generous","باسط کا بندہ","Arabic","islamic",3],
+["Abdul Hadi","عبدالہادی","b","Servant of the Guide","ہادی کا بندہ","Arabic","islamic",3],
+["Abdul Karim","عبدالکریم","b","Servant of the Generous","کریم کا بندہ","Arabic","islamic",4],
+["Abdul Rahim","عبدالرحیم","b","Servant of the Merciful","رحیم کا بندہ","Arabic","islamic",4],
+["Abdul Latif","عبداللطیف","b","Servant of the Gentle","لطیف کا بندہ","Arabic","islamic",3],
+["Abdul Majid","عبدالمجید","b","Servant of the Glorious","مجید کا بندہ","Arabic","islamic",3],
+["Abdul Hamid","عبدالحمید","b","Servant of the Praiseworthy","حمید کا بندہ","Arabic","islamic",3],
+["Abdul Rashid","عبدالرشید","b","Servant of the Guide","رشید کا بندہ","Arabic","islamic",3],
+["Abdul Nasir","عبدالناصر","b","Servant of the Helper","ناصر کا بندہ","Arabic","islamic",3],
+["Abdul Wahab","عبدالوہاب","b","Servant of the Giver","وہاب کا بندہ","Arabic","islamic",3],
+["Abdul Rauf","عبدالرؤف","b","Servant of the Kind","رؤف کا بندہ","Arabic","islamic",3],
+["Abdul Mannan","عبدالمنان","b","Servant of the Benefactor","منان کا بندہ","Arabic","islamic",3],
+["Abdul Ghani","عبدالغنی","b","Servant of the Rich","غنی کا بندہ","Arabic","islamic",3],
+["Abdul Bari","عبدالباری","b","Servant of the Creator","باری کا بندہ","Arabic","islamic",3],
+["Abdul Saboor","عبدالصبور","b","Servant of the Patient","صبور کا بندہ","Arabic","islamic",3],
+["Abdul Shakur","عبدالشکور","b","Servant of the Thankful","شکور کا بندہ","Arabic","islamic",2],
+/* ===== BOYS: Virtues & attributes ===== */
+["Adil","عادل","b","Just, fair","انصاف کرنے والا","Arabic","islamic,virtue",4],
+["Amin","امین","b","Trustworthy","امانت دار","Arabic","islamic,virtue",4],
+["Sadiq","صادق","b","Truthful","سچا","Arabic","islamic,virtue",4],
+["Karim","کریم","b","Generous, noble","سخی","Arabic","islamic,virtue",4],
+["Rahim","رحیم","b","Merciful","رحم کرنے والا","Arabic","islamic,virtue",4],
+["Latif","لطیف","b","Gentle, kind","نرم، مہربان","Arabic","islamic,virtue",3],
+["Majid","ماجد","b","Glorious","بزرگ، شان والا","Arabic","islamic,virtue",3],
+["Hamid","حامد","b","Praising (God)","تعریف کرنے والا","Arabic","islamic,virtue",4],
+["Mahmud","محمود","b","Praised","قابلِ تعریف","Arabic","islamic,virtue",4],
+["Rashid","راشد","b","Rightly guided","ہدایت یافتہ","Arabic","islamic,virtue",4],
+["Nasir","ناصر","b","Helper, supporter","مددگار","Arabic","islamic,virtue",3],
+["Mansur","منصور","b","Victorious","فاتح","Arabic","islamic,virtue",3],
+["Qadir","قادر","b","Capable, powerful","قادر، طاقتور","Arabic","islamic,virtue",3],
+["Sabir","صابر","b","Patient","صبر کرنے والا","Arabic","islamic,virtue",4],
+["Shakir","شاکر","b","Thankful","شکر گزار","Arabic","islamic,virtue",3],
+["Zahid","زاہد","b","Ascetic, devout","زاہد، پرہیزگار","Arabic","islamic,virtue",3],
+["Abid","عابد","b","Worshipper","عبادت گزار","Arabic","islamic,virtue",4],
+["Arif","عارف","b","Knowledgeable, wise","عارف، دانا","Arabic","islamic,virtue",4],
+["Asif","آصف","b","Forgiving","معاف کرنے والا","Arabic","islamic",4],
+["Kashif","کاشف","b","Discoverer, revealer","ظاہر کرنے والا","Arabic","islamic",4],
+["Atif","عاطف","b","Compassionate","مہربان","Arabic","islamic",4],
+["Asim","عاصم","b","Protector","محافظ","Arabic","islamic",4],
+["Akram","اکرم","b","Most generous","سب سے سخی","Arabic","islamic",4],
+["Azam","اعظم","b","Greatest","سب سے بڑا","Arabic","islamic",4],
+["Afzal","افضل","b","Most virtuous","سب سے بہتر","Arabic","islamic",3],
+["Akmal","اکمل","b","Perfect, complete","مکمل","Arabic","islamic",3],
+["Ashfaq","اشفاق","b","Compassion","شفقت کرنے والا","Arabic","islamic",3],
+["Anwar","انور","b","Radiant, luminous","روشن","Arabic","islamic",4],
+["Munir","منیر","b","Luminous","روشن کرنے والا","Arabic","islamic",3],
+["Bashir","بشیر","b","Bringer of good news","خوشخبری دینے والا","Arabic","islamic",4],
+["Nazir","نذیر","b","Warner, observer","ڈرانے والا، دیکھنے والا","Arabic","islamic",3],
+["Tahir","طاہر","b","Pure","پاک","Arabic","islamic",4],
+["Zahir","ظاہر","b","Manifest, evident","ظاہر، واضح","Arabic","islamic",3],
+["Waqar","وقار","b","Dignity","وقار والا","Arabic","islamic,virtue",4],
+["Waqas","وقاص","b","Warrior","جنگجو","Arabic","islamic",3],
+["Shahid","شاہد","b","Witness, martyr","گواہ، شہید","Arabic","islamic",4],
+["Sajid","ساجد","b","Prostrating","سجدہ کرنے والا","Arabic","islamic",4],
+["Faris","فارس","b","Knight, horseman","سوار، گھڑسوار","Arabic","islamic",3],
+["Amir","عامر","b","Prince, commander","امیر، سردار","Arabic","islamic",4],
+["Waleed","ولید","b","Newborn","نومولود","Arabic","islamic",4],
+["Qasim","قاسم","b","Divider, distributor","تقسیم کرنے والا","Arabic","islamic",4],
+["Aqib","عاقب","b","Successor","جانشین","Arabic","islamic",3],
+["Umair","عمیر","b","Long-lived","لمبی عمر والا","Arabic","islamic",3],
+["Ubaid","عبید","b","Little servant","چھوٹا بندہ","Arabic","islamic",3],
+["Junaid","جنید","b","Warrior, soldier","سپاہی","Arabic","islamic",4],
+["Farhan","فرحان","b","Merry, joyful","خوش، مسرور","Arabic","islamic",5],
+["Imtiaz","امتیاز","b","Distinction","امتیاز والا","Arabic","islamic",4],
+["Irfan","عرفان","b","Knowledge, wisdom","عرفان، دانش","Arabic","islamic",4],
+["Ehsan","احسان","b","Kindness, favor","احسان کرنے والا","Arabic","islamic",4],
+["Fahim","فہیم","b","Intelligent","سمجھدار","Arabic","islamic",4],
+["Nadeem","ندیم","b","Friend, companion","دوست","Arabic","islamic",4],
+["Saleem","سلیم","b","Safe, sound","صحیح سالم","Arabic","islamic",4],
+["Kalim","کلیم","b","Speaker","بات کرنے والا","Arabic","islamic",3],
+["Halim","حلیم","b","Gentle, forbearing","حلیم، بردبار","Arabic","islamic",3],
+["Azim","عظیم","b","Great","عظیم","Arabic","islamic",3],
+["Aleem","علیم","b","Learned, scholar","عالم","Arabic","islamic",3],
+["Hakeem","حکیم","b","Wise","حکیم، دانا","Arabic","islamic",3],
+["Sameer","سمیر","b","Entertaining companion","دل لگی کرنے والا","Arabic","islamic",4],
+["Tanveer","تنویر","b","Enlightenment","روشن کرنے والا","Arabic","islamic",4],
+["Danish","دانش","b","Wisdom","دانش مند","Persian","islamic",4],
+["Shayan","شایان","b","Worthy, deserving","لائق","Persian","modern",3],
+["Sarmad","سرمد","b","Eternal","ابدی","Arabic","islamic",3],
+["Wahab","وہاب","b","Generous giver","بہت دینے والا","Arabic","islamic",3],
+["Raza","رضا","b","Contentment","رضا مند","Arabic","islamic",4],
+["Mustafa","مصطفیٰ","b","Chosen","چنا ہوا","Arabic","islamic",5],
+["Mujtaba","مجتبیٰ","b","Chosen, selected","منتخب","Arabic","islamic",4],
+["Murtaza","مرتضیٰ","b","Approved, chosen","پسندیدہ","Arabic","islamic",4],
+["Baqir","باقر","b","Deeply learned","علم میں گہرا","Arabic","islamic",3],
+["Kazim","کاظم","b","One who controls anger","غصہ قابو کرنے والا","Arabic","islamic",3],
+["Mahdi","مہدی","b","Guided one","ہدایت یافتہ","Arabic","islamic",4],
+["Naqi","نقی","b","Pure","پاک","Arabic","islamic",3],
+["Taqi","تقی","b","Pious, righteous","متقی","Arabic","islamic",3],
+["Askari","عسکری","b","Military, soldierly","فوجی","Arabic","islamic",2],
+/* ===== BOYS: Titles of respect (Deen) ===== */
+["Qutbuddin","قطب الدین","b","Pole of religion","دین کا قطب","Arabic","islamic,traditional",3],
+["Shamsuddin","شمس الدین","b","Sun of religion","دین کا سورج","Arabic","islamic,traditional",3],
+["Nooruddin","نورالدین","b","Light of religion","دین کا نور","Arabic","islamic,traditional",4],
+["Salahuddin","صلاح الدین","b","Righteousness of religion","دین کی نیکی","Arabic","islamic,traditional",4],
+["Jalaluddin","جلال الدین","b","Glory of religion","دین کی شان","Arabic","islamic,traditional",3],
+["Bahauddin","بہاؤالدین","b","Splendor of religion","دین کی رونق","Arabic","islamic,traditional",3],
+["Ruknuddin","رکن الدین","b","Pillar of religion","دین کا ستون","Arabic","islamic,traditional",2],
+["Saifuddin","سیف الدین","b","Sword of religion","دین کی تلوار","Arabic","islamic,traditional",3],
+["Nizamuddin","نظام الدین","b","Order of religion","دین کا نظام","Arabic","islamic,traditional",3],
+["Moinuddin","معین الدین","b","Helper of religion","دین کا مددگار","Arabic","islamic,traditional",4],
+["Fakhruddin","فخرالدین","b","Pride of religion","دین کا فخر","Arabic","islamic,traditional",3],
+["Sirajuddin","سراج الدین","b","Lamp of religion","دین کا چراغ","Arabic","islamic,traditional",3],
+["Ziauddin","ضیاءالدین","b","Light of religion","دین کی روشنی","Arabic","islamic,traditional",3],
+["Kamaluddin","کمال الدین","b","Perfection of religion","دین کا کمال","Arabic","islamic,traditional",2],
+["Jamaluddin","جمال الدین","b","Beauty of religion","دین کا حسن","Arabic","islamic,traditional",2],
+["Imaduddin","عمادالدین","b","Pillar of religion","دین کا ستون","Arabic","islamic,traditional",2],
+["Shihabuddin","شہاب الدین","b","Flame of religion","دین کا شعلہ","Arabic","islamic,traditional",2],
+["Asaduddin","اسدالدین","b","Lion of religion","دین کا شیر","Arabic","islamic,traditional",2],
+/* ===== BOYS: Persian / Turkish ===== */
+["Arsalan","ارسلان","b","Lion","شیر","Persian","persian,islamic",4],
+["Rustam","رستم","b","Strong hero","بہادر پہلوان","Persian","persian,traditional",3],
+["Sohrab","سہراب","b","Illustrious","روشن، نامور","Persian","persian,traditional",3],
+["Farhad","فرہاد","b","Joy, happiness","خوشی","Persian","persian",3],
+["Behram","بہرام","b","Victorious","فاتح","Persian","persian,traditional",2],
+["Khusrau","خسرو","b","King, monarch","بادشاہ","Persian","persian,traditional",2],
+["Kamran","کامران","b","Successful, prosperous","کامیاب","Persian","persian,islamic",4],
+["Shahryar","شہریار","b","King, royal","بادشاہ","Persian","persian,traditional",3],
+["Shahzaib","شاہ زیب","b","King's ornament","بادشاہ کی زینت","Persian","persian,modern",4],
+["Shahzad","شہزاد","b","Prince","شہزادہ","Persian","persian",4],
+["Jahanzaib","جہاں زیب","b","Adorner of the world","دنیا کی زینت","Persian","persian",3],
+["Alamgir","عالمگیر","b","Conqueror of the world","دنیا کا فاتح","Persian","persian,traditional",3],
+["Aurangzeb","اورنگزیب","b","Ornament of the throne","تخت کی زینت","Persian","persian,traditional",2],
+["Babar","بابر","b","Tiger, lion","شیر","Turkish","turkish,traditional",4],
+["Timur","تیمور","b","Iron","لوہا","Turkish","turkish,traditional",2],
+["Javed","جاوید","b","Eternal, immortal","ہمیشہ رہنے والا","Persian","persian,islamic",4],
+["Parvez","پرویز","b","Victorious, fortunate","کامیاب","Persian","persian",4],
+["Khurram","خرم","b","Happy, joyful","خوش","Persian","persian",4],
+["Shahbaz","شاہباز","b","Royal falcon","شاہین","Persian","persian",4],
+["Sikandar","سکندر","b","Defender of men","محافظ","Persian","persian,traditional",3],
+["Mehmet","محمت","b","Highly praised","بہت تعریف کیا گیا","Turkish","turkish,islamic",3],
+["Kemal","کمال","b","Perfection","کمال","Turkish","turkish",3],
+["Cemal","جمال","b","Beauty","خوبصورتی","Turkish","turkish",2],
+["Burak","براق","b","Heavenly steed","آسمانی سواری","Turkish","turkish,islamic",3],
+["Deniz","دنیز","b","Sea","سمندر","Turkish","turkish,modern,nature",2],
+/* ===== BOYS: Modern / popular ===== */
+["Ayaan","ایان","b","Gift of God","اللہ کا تحفہ","Arabic","modern,islamic",5],
+["Arham","ارحم","b","Most merciful","سب سے رحم کرنے والا","Arabic","modern,islamic",4],
+["Azlan","ازلان","b","Lion","شیر","Arabic","modern",4],
+["Zayan","زیان","b","Bright, graceful","روشن","Arabic","modern",4],
+["Rayyan","ریان","b","Lush, well-watered","سرسبز","Arabic","modern,islamic",5],
+["Daniyal","دانیال","b","God is my judge","اللہ میرا منصف","Arabic","modern,islamic",4],
+["Mikael","میکائیل","b","Who is like God","اللہ جیسا کون","Arabic","modern,islamic",3],
+["Jibreel","جبریل","b","God's strength","اللہ کی قوت","Arabic","islamic",2],
+["Ridwan","رضوان","b","Paradise, acceptance","جنت، رضا","Arabic","islamic",3],
+["Malik","مالک","b","King, owner","بادشاہ","Arabic","islamic",3],
+["Basit","باسط","b","Generous, extender","سخی","Arabic","islamic",3],
+["Hadi","ہادی","b","Guide","ہدایت دینے والا","Arabic","islamic",4],
+["Talib","طالب","b","Seeker","طالب علم","Arabic","islamic",3],
+["Faris","فارس","b","Knight","سوار","Arabic","modern,islamic",3],
+/* ===== GIRLS: Prophet's family & Sahabiyat ===== */
+["Fatima","فاطمہ","g","One who abstains (from evil)","برائی سے بچنے والی","Arabic","sahaba,islamic",5],
+["Aisha","عائشہ","g","Alive, living","زندہ رہنے والی","Arabic","sahaba,islamic",5],
+["Khadija","خدیجہ","g","Trustworthy","قابلِ اعتماد","Arabic","sahaba,islamic",5],
+["Maryam","مریم","g","Beloved, pure","محبوب، پاک","Arabic","quranic,islamic",5],
+["Zainab","زینب","g","Fragrant flower","خوشبودار پھول","Arabic","sahaba,islamic",5],
+["Ruqayya","رقیہ","g","Gentle, kind","نرم، مہربان","Arabic","sahaba,islamic",4],
+["Hafsa","حفصہ","g","Young lioness","شیرنی","Arabic","sahaba,islamic",4],
+["Maymuna","میمونہ","g","Blessed","مبارک","Arabic","sahaba,islamic",3],
+["Safiyya","صفیہ","g","Pure, chosen","پاک، منتخب","Arabic","sahaba,islamic",4],
+["Juwairiya","جویریہ","g","Young maiden","نوجوان لڑکی","Arabic","sahaba,islamic",3],
+["Asma","اسماء","g","Exalted, lofty","بلند مرتبہ","Arabic","sahaba,islamic",4],
+["Sumayya","سمیہ","g","High, exalted","بلند","Arabic","sahaba,islamic",4],
+["Nusayba","نسیبہ","g","Noble lineage","شریف خاندان والی","Arabic","sahaba,islamic",2],
+["Shifa","شفا","g","Healing, cure","شفا دینے والی","Arabic","islamic",4],
+["Afiya","عافیہ","g","Health, well-being","صحت والی","Arabic","islamic",4],
+["Amina","آمنہ","g","Trustworthy, safe","امانت دار","Arabic","sahaba,islamic",5],
+["Halima","حلیمہ","g","Gentle, patient","نرم، بردبار","Arabic","sahaba,islamic",4],
+["Barakah","برکت","g","Blessing","برکت والی","Arabic","islamic",3],
+["Rahma","رحمہ","g","Mercy","رحمت والی","Arabic","islamic",3],
+/* ===== GIRLS: Light, faith, virtue ===== */
+["Noor","نور","g","Light","روشنی","Arabic","islamic,virtue",5],
+["Huda","ہدیٰ","g","Guidance","ہدایت","Arabic","islamic,virtue",4],
+["Iman","ایمان","g","Faith","ایمان والی","Arabic","islamic,virtue",5],
+["Taqwa","تقویٰ","g","Piety","تقویٰ والی","Arabic","islamic,virtue",3],
+["Sabira","صابرہ","g","Patient","صبر کرنے والی","Arabic","islamic,virtue",3],
+["Shakira","شاکرہ","g","Thankful","شکر گزار","Arabic","islamic,virtue",3],
+["Abida","عابدہ","g","Worshipper","عبادت گزار","Arabic","islamic,virtue",4],
+["Zahida","زاہدہ","g","Devout","زاہدہ","Arabic","islamic,virtue",3],
+["Arifa","عارفہ","g","Wise","عارفہ","Arabic","islamic,virtue",3],
+["Alima","عالمہ","g","Scholar","عالمہ","Arabic","islamic,virtue",4],
+["Hafiza","حافظہ","g","Guardian, memorizer of Quran","قرآن کی حافظہ","Arabic","islamic,virtue",4],
+["Qaria","قاریہ","g","Reciter","قرآن پڑھنے والی","Arabic","islamic,virtue",3],
+["Sadiqa","صادقہ","g","Truthful","سچی","Arabic","islamic,virtue",4],
+["Karima","کریمہ","g","Generous","سخی","Arabic","islamic,virtue",3],
+["Rahima","رحیمہ","g","Merciful","رحم کرنے والی","Arabic","islamic,virtue",3],
+["Latifa","لطیفہ","g","Gentle","نرم","Arabic","islamic,virtue",3],
+["Tahira","طاہرہ","g","Pure","پاک","Arabic","islamic,virtue",4],
+["Zahira","ظاہرہ","g","Bright, evident","روشن","Arabic","islamic,virtue",3],
+["Munira","منیرہ","g","Luminous","روشن کرنے والی","Arabic","islamic,virtue",3],
+["Basima","باسمہ","g","Smiling","مسکرانے والی","Arabic","islamic,virtue",3],
+["Wajeeha","وجیہہ","g","Distinguished","ممتاز","Arabic","islamic",3],
+["Adeeba","ادیبہ","g","Learned, literary","ادیبہ","Arabic","islamic",3],
+["Fazila","فاضلہ","g","Virtuous, learned","فاضلہ","Arabic","islamic",3],
+["Kamila","کاملہ","g","Perfect","کامل","Arabic","islamic",3],
+["Bushra","بشریٰ","g","Good news","خوشخبری","Arabic","islamic",4],
+["Mubashira","مبشرہ","g","Bringer of good news","خوشخبری دینے والی","Arabic","islamic",3],
+["Dua","دعا","g","Prayer","دعا","Arabic","islamic,modern",5],
+["Ilma","علمہ","g","Knowledge","علم والی","Arabic","islamic,modern",3],
+["Jannat","جنت","g","Paradise","جنت","Arabic","islamic",4],
+["Firdous","فردوس","g","Paradise","جنت","Arabic","islamic",4],
+["Tasnim","تسنیم","g","Fountain of paradise","جنت کا چشمہ","Arabic","islamic",4],
+["Kausar","کوثر","g","Abundance, river of paradise","حوضِ کوثر","Arabic","islamic",4],
+["Salsabil","سلسبیل","g","Spring of paradise","جنت کا چشمہ","Arabic","islamic",2],
+["Sidra","سدرہ","g","Lote tree of paradise","بیری کا درخت","Arabic","islamic",4],
+["Tuba","طوبیٰ","g","Blessedness","مبارک","Arabic","islamic",3],
+["Hoor","حور","g","Nymph of paradise","حور","Arabic","islamic",2],
+["Iram","ارم","g","Paradise garden","جنت کا باغ","Arabic","islamic",3],
+["Minahil","مناہل","g","Fountains, springs","چشمے","Arabic","islamic,modern",4],
+["Eshal","ایشل","g","Flower of paradise","جنت کا پھول","Arabic","modern,islamic",4],
+["Anaya","عنایہ","g","Care, protection","عنایت، حفاظت","Arabic","modern,islamic",5],
+["Hira","حرا","g","Sacred cave","غارِ حرا","Arabic","islamic",3],
+["Sara","سارہ","g","Pure, princess","شہزادی","Arabic","islamic",4],
+["Maham","ماہم","g","Moon","چاند","Persian","modern",4],
+/* ===== GIRLS: Flowers & beauty ===== */
+["Jamila","جمیلہ","g","Beautiful","خوبصورت","Arabic","islamic",4],
+["Hasina","حسینہ","g","Beautiful","خوبصورت","Arabic","islamic",3],
+["Husna","حسنیٰ","g","Most beautiful","سب سے خوبصورت","Arabic","islamic",4],
+["Warda","وردہ","g","Rose","گلاب","Arabic","islamic,nature",3],
+["Zahra","زہرہ","g","Radiant, blooming","روشن، کھلتی ہوئی","Arabic","islamic",5],
+["Yasmin","یاسمین","g","Jasmine flower","چنبیلی کا پھول","Persian","persian,nature",5],
+["Nargis","نرگس","g","Narcissus flower","نرگس کا پھول","Persian","persian,nature",4],
+["Gulnar","گلنار","g","Pomegranate flower","انار کا پھول","Persian","persian,nature",4],
+["Gulshan","گلشن","g","Rose garden","گلشن","Persian","persian,nature",3],
+["Gulnaz","گلناز","g","Delicate rose","نازک پھول","Persian","persian,nature",3],
+["Nasreen","نسرین","g","Wild rose","جنگلی گلاب","Persian","persian,nature",4],
+["Shireen","شیریں","g","Sweet","میٹھی","Persian","persian",4],
+["Nilofar","نیلوفر","g","Water lily","کنول کا پھول","Persian","persian,nature",4],
+["Banafsha","بنفشہ","g","Violet flower","بنفشے کا پھول","Persian","persian,nature",2],
+["Gulbahar","گل بہار","g","Spring flower","بہار کا پھول","Persian","persian,nature",3],
+["Bahar","بہار","g","Spring","بہار","Persian","persian,nature",3],
+["Areeba","عریبہ","g","Smart, witty","ذہین","Arabic","modern",4],
+["Areej","اریج","g","Fragrant","خوشبودار","Arabic","modern",4],
+["Abeer","عبیر","g","Fragrance","خوشبو","Arabic","modern",3],
+["Mehak","مہک","g","Fragrance","خوشبو","Urdu","urdu,modern,nature",4],
+["Khushbu","خوشبو","g","Fragrance","خوشبو","Urdu","urdu,nature",3],
+["Itrat","عترت","g","Fragrance","خوشبو","Arabic","islamic",3],
+/* ===== GIRLS: Moon, stars, royalty (Persian) ===== */
+["Mahjabeen","مہ جبین","g","Moon-faced","چاند جیسا چہرہ","Persian","persian",4],
+["Mahnoor","مہ نور","g","Moonlight","چاندنی","Persian","persian,modern",5],
+["Mahwash","مہ وش","g","Moon-like","چاند جیسی","Persian","persian",3],
+["Mahreen","مہرین","g","Bright as the moon","چاند جیسی روشن","Persian","persian,modern",4],
+["Mehrunnisa","مہر النساء","g","Sun among women","عورتوں کا سورج","Persian","persian,traditional",3],
+["Mumtaz","ممتاز","g","Distinguished, excellent","ممتاز","Arabic","islamic,traditional",4],
+["Jahanara","جہاں آرا","g","Adorner of the world","دنیا کی زینت","Persian","persian,traditional",3],
+["Zebunnisa","زیب النساء","g","Ornament of women","عورتوں کی زینت","Persian","persian,traditional",3],
+["Roshanara","روشن آرا","g","Light of the assembly","محفل کی روشنی","Persian","persian,traditional",2],
+["Noor Jahan","نور جہاں","g","Light of the world","دنیا کا نور","Persian","persian,traditional",3],
+["Arjumand","ارجمند","g","Noble, precious","قیمتی","Persian","persian",2],
+["Gauhar","گوہر","g","Pearl, jewel","موتی","Persian","persian",3],
+["Marjan","مرجان","g","Coral, pearl","موتی","Persian","persian,nature",3],
+["Durdana","دردانہ","g","Single pearl","اکیلا موتی","Persian","persian",3],
+["Parveen","پروین","g","Pleiades star cluster","ثریا ستارے","Persian","persian,nature",3],
+["Sitara","ستارہ","g","Star","ستارہ","Persian","persian,urdu,nature",4],
+["Mahpara","مہ پارا","g","Moon fragment","چاند کا ٹکڑا","Persian","persian",3],
+["Shabnam","شبنم","g","Dew","شبنم","Persian","persian,nature",4],
+["Shabana","شبانہ","g","Belonging to the night","رات والی","Persian","persian",3],
+["Rukhsana","رخسانہ","g","Bright, shining","روشن","Persian","persian",3],
+["Farhana","فرحانہ","g","Joyful","خوش","Arabic","islamic",4],
+["Shahnaz","شہناز","g","Pride of the king","بادشاہ کا فخر","Persian","persian",3],
+["Shahzadi","شہزادی","g","Princess","شہزادی","Persian","persian,urdu",3],
+["Malika","ملکہ","g","Queen","ملکہ","Arabic","islamic",3],
+["Amira","امیرہ","g","Princess","شہزادی","Arabic","islamic",4],
+["Sultana","سلطانہ","g","Queen, ruler","ملکہ","Arabic","islamic",3],
+["Begum","بیگم","g","Lady, queen","بیگم","Turkish","turkish,traditional",2],
+["Khatun","خاتون","g","Lady","خاتون","Turkish","turkish,traditional",2],
+["Bano","بانو","g","Lady, princess","بانو","Persian","persian,traditional",3],
+["Dilnasheen","دلنشین","g","Heart-pleasing","دل کو بھانے والی","Persian","persian,urdu",3],
+["Dilshad","دلشاد","g","Happy-hearted","خوش دل","Persian","persian",3],
+["Dilara","دلارا","g","Beloved","دلربا","Persian","persian",3],
+["Dilkash","دلکش","g","Attractive","دلکش","Persian","persian,urdu",3],
+["Nazneen","نازنین","g","Delicate, beloved","نازک، پیاری","Persian","persian",4],
+["Nazia","نازیہ","g","Proud","فخر والی","Arabic","islamic",3],
+["Nadia","نادیہ","g","Caller, announcer","پکارنے والی","Arabic","islamic",3],
+["Naila","نائلہ","g","Winner, acquirer","حاصل کرنے والی","Arabic","islamic",3],
+/* ===== GIRLS: Joy, music, nature (Urdu) ===== */
+["Farah","فرح","g","Joy, happiness","خوشی","Arabic","islamic",4],
+["Hina","حنا","g","Henna","مہندی","Arabic","islamic,nature",4],
+["Ghazal","غزل","g","Love poem","محبت کی نظم","Arabic","urdu",3],
+["Naghma","نغمہ","g","Melody, song","نغمہ","Persian","urdu",3],
+["Tarannum","ترنم","g","Melody","ترنم","Arabic","urdu",2],
+["Suroor","سرور","g","Joy, delight","سرور","Arabic","urdu",2],
+["Khushi","خوشی","g","Happiness","خوشی","Urdu","urdu,modern",4],
+["Muskan","مسکان","g","Smile","مسکراہٹ","Urdu","urdu,modern",5],
+["Chandni","چاندنی","g","Moonlight","چاندنی","Urdu","urdu,nature",4],
+["Roshni","روشنی","g","Light","روشنی","Urdu","urdu",4],
+["Ujala","اجالا","g","Brightness","اجالا","Urdu","urdu",3],
+["Savera","سویرا","g","Morning","صبح سویرا","Urdu","urdu,nature",3],
+["Fiza","فضا","g","Atmosphere, breeze","فضا","Arabic","modern,nature",4],
+["Hawa","ہوا","g","Air, breeze","ہوا","Arabic","nature",2],
+["Barish","بارش","g","Rain","بارش","Urdu","urdu,modern,nature",2],
+["Rimjhim","رم جھم","g","Drizzle","بوندا باندی","Urdu","urdu,nature",2],
+["Anmol","انمول","g","Priceless","انمول","Urdu","urdu,modern",4],
+["Nayab","نایاب","g","Rare, precious","نایاب","Urdu","urdu,modern",4],
+["Komal","کومل","g","Tender, soft","نرم","Urdu","urdu",3],
+/* ===== GIRLS: Turkish ===== */
+["Elif","الف","g","First letter of alphabet","حروف کا پہلا حرف","Turkish","turkish",3],
+["Zeynep","زینب","g","Fragrant flower","خوشبودار پھول","Turkish","turkish,islamic",3],
+["Fatma","فاطمہ","g","One who abstains","برائی سے بچنے والی","Turkish","turkish,islamic",3],
+["Ayse","عائشہ","g","Alive, living","زندہ رہنے والی","Turkish","turkish,islamic",3],
+["Hatice","خدیجہ","g","Trustworthy","قابلِ اعتماد","Turkish","turkish,islamic",2],
+["Meryem","مریم","g","Beloved, pure","محبوب، پاک","Turkish","turkish,islamic",3],
+["Emine","امینہ","g","Trustworthy, safe","امانت دار","Turkish","turkish,islamic",2],
+["Aylin","آئلن","g","Moon halo","چاند کا ہالہ","Turkish","turkish,modern,nature",3],
+["Defne","دفنہ","g","Laurel","تیز پات","Turkish","turkish,nature",2],
+["Derya","دریا","g","Sea","سمندر","Turkish","turkish,nature",2],
+["Su","سو","g","Water","پانی","Turkish","turkish,nature",2]
+];
+/* ============ STATE ============ */
+var S={prefs:{g:'both',r:'islamic'},deck:[],idx:0,favs:{},ratings:{},notes:{},votes:{},fam:['Ami','Abu'],p1:{},p2:{},pMode:0,baby:{},lang:'en',backStack:[]};
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){}}
+function lj(k,v){try{if(v===undefined){var x=localStorage.getItem(k);return x?JSON.parse(x):null;}localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+function load(){var p=lj('naam_prefs');if(p)S.prefs=p;var f=lj('naam_favs');if(f)S.favs=f;var r=lj('naam_ratings');if(r)S.ratings=r;var n=lj('naam_notes');if(n)S.notes=n;var v=lj('naam_votes');if(v)S.votes=v;var fm=lj('naam_fam');if(fm)S.fam=fm;var b=lj('naam_baby');if(b)S.baby=b;var l=ls('naam_lang');if(l)S.lang=l;}
+function save(){lj('naam_prefs',S.prefs);lj('naam_favs',S.favs);lj('naam_ratings',S.ratings);lj('naam_notes',S.notes);lj('naam_votes',S.votes);lj('naam_fam',S.fam);lj('naam_baby',S.baby);ls('naam_lang',S.lang);}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},2200);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+/* ============ NAV ============ */
+var cur='onboard';
+function nav(s){cur=s;var a=document.querySelectorAll('.screen');for(var i=0;i<a.length;i++)a[i].classList.remove('on');document.getElementById('scr-'+s).classList.add('on');var nb=document.querySelectorAll('#nav button');for(var j=0;j<nb.length;j++)nb[j].classList.toggle('on',nb[j].dataset.s===s);window.scrollTo(0,0);if(s==='discover')renderDeck();if(s==='short')renderShort();if(s==='profile')renderProfile();}
+window.__atMenu=function(){return cur==='discover';};
+window.__goMenu=function(){nav('discover');};
+function goBack(){nav('discover');}
+
+/* ============ ONBOARDING ============ */
+function pickG(g,el){S.prefs.g=g;var c=el.parentNode.querySelectorAll('.chip');for(var i=0;i<c.length;i++)c[i].classList.remove('on');el.classList.add('on');}
+function pickR(r,el){S.prefs.r=r;var c=el.parentNode.querySelectorAll('.chip');for(var i=0;i<c.length;i++)c[i].classList.remove('on');el.classList.add('on');}
+function finishOnboard(){save();buildDeck();nav('discover');}
+
+/* ============ DISCOVER / SWIPE ============ */
+function filtered(pool){var g=S.prefs.g,r=S.prefs.r;return NAMES.filter(function(n){if(g!=='both'&&n[2]!==g)return false;if(r==='islamic'&&n[6].indexOf('islamic')<0&&n[6].indexOf('quranic')<0&&n[6].indexOf('sahaba')<0&&n[6].indexOf('prophet')<0)return false;if(r==='traditional'&&n[6].indexOf('modern')>=0)return false;return true;});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function buildDeck(){S.deck=shuffle(filtered());S.idx=0;renderDeck();}
+function resetDeck(){buildDeck();toast('🔄 Deck dobara shuru');}
+var curSwipe=-1;
+function renderDeck(){
+  var w=document.getElementById('swipeWrap');w.innerHTML='';
+  document.getElementById('dCount').textContent=S.deck.length?((S.idx+1)+' / '+S.deck.length+' — swipe ♥ ya ✕'):'Koi naam nahi mila. Preferences badlein.';
+  if(S.idx>=S.deck.length){w.innerHTML='<div class="card center">🎉 Sab naam dekh liye!<br><button class="btn small" onclick="resetDeck()">Dobara 🔄</button></div>';curSwipe=-1;return;}
+  var n=S.deck[S.idx];curSwipe=NAMES.indexOf(n);
+  var d=document.createElement('div');d.className='swipeCard';d.id='swipeCard';
+  d.innerHTML='<div class="stamp like">♥ LIKE</div><div class="stamp nope">✕ NO</div>'
+  +'<div style="font-size:14px;color:var(--mut)">'+(n[2]==='b'?'👦 Boy':'👧 Girl')+' • '+esc(n[5])+'</div>'
+  +'<div class="nm-ur">'+esc(n[1])+'</div><div class="nm-en">'+esc(n[0])+'</div>'
+  +'<div class="mean">'+esc(n[3])+'</div><div class="mean-ur">'+esc(n[4])+'</div>'
+  +'<div>'+('★'.repeat(n[7]))+'</div>';
+  w.appendChild(d);bindSwipe(d);
+}
+function bindSwipe(el){
+  var sx=0,dx=0;
+  el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;dx=0;},{passive:true});
+  el.addEventListener('touchmove',function(e){dx=e.touches[0].clientX-sx;el.style.transform='translateX('+dx+'px) rotate('+(dx/12)+'deg)';var L=el.querySelector('.like'),N=el.querySelector('.nope');if(L)L.style.opacity=Math.max(0,Math.min(1,dx/90));if(N)N.style.opacity=Math.max(0,Math.min(1,-dx/90));e.preventDefault();},{passive:false});
+  el.addEventListener('touchend',function(){if(dx>90)swipe('yes');else if(dx<-90)swipe('no');else{el.style.transform='';var L=el.querySelector('.like'),N=el.querySelector('.nope');if(L)L.style.opacity=0;if(N)N.style.opacity=0;}});
+}
+function swipe(dir){
+  if(S.idx>=S.deck.length)return;
+  var n=S.deck[S.idx];var key=n[0];
+  if(dir==='yes'){S.favs[key]={t:Date.now()};save();toast('♥ Shortlist me save!');}
+  S.idx++;renderDeck();
+}
+
+/* ============ SEARCH ============ */
+var URDU_ALPHA="اآبپتٹثجچحخدرڑزژسشصضطظعغفقکگلمنوہھءیے".split("");
+function initSearch(){
+  var ar=document.getElementById('alphaRow');URDU_ALPHA.forEach(function(a){var s=document.createElement('span');s.className='chip';s.textContent=a;s.onclick=function(){alphaSearch(a);};ar.appendChild(s);});
+  var orgs=['Arabic','Persian','Turkish','Urdu'];var or=document.getElementById('originRow');orgs.forEach(function(o){var s=document.createElement('span');s.className='chip blue';s.textContent=o;s.onclick=function(){originSearch(o);};or.appendChild(s);});
+  renderPicks();
+}
+function nameRow(n,idx){
+  return '<div class="nrow" onclick="openDetail('+idx+')"><div class="nu">'+esc(n[1])+'</div><div class="inf"><div class="ne">'+esc(n[0])+'</div><div class="nm2">'+esc(n[3])+' • '+esc(n[5])+'</div></div><button class="heart" onclick="event.stopPropagation();toggleFav('+idx+',\'row\')">'+(S.favs[n[0]]?'❤️':'🤍')+'</button></div>';
+}
+function renderPicks(){
+  var picks=NAMES.filter(function(n){return n[7]>=5;}).slice(0,8);
+  document.getElementById('picks').innerHTML=picks.map(function(n){return nameRow(n,NAMES.indexOf(n));}).join('');
+  var tr=shuffle(NAMES.filter(function(n){return n[7]>=4;})).slice(0,8);
+  document.getElementById('trending').innerHTML=tr.map(function(n){return nameRow(n,NAMES.indexOf(n));}).join('');
+}
+function doSearch(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  var box=document.getElementById('sResults');
+  if(q.length<2){box.innerHTML='';return;}
+  var res=NAMES.filter(function(n){return n[0].toLowerCase().indexOf(q)>=0||n[3].toLowerCase().indexOf(q)>=0||n[4].indexOf(document.getElementById('q').value.trim())>=0||n[1].indexOf(document.getElementById('q').value.trim())>=0;}).slice(0,40);
+  box.innerHTML='<div class="sub mt">'+res.length+' nataij:</div>'+res.map(function(n){return nameRow(n,NAMES.indexOf(n));}).join('');
+}
+function alphaSearch(a){var res=NAMES.filter(function(n){return n[1].charAt(0)===a;}).slice(0,40);document.getElementById('sResults').innerHTML='<div class="sub mt">حرف "'+a+'" se shuru ('+res.length+'):</div>'+(res.map(function(n){return nameRow(n,NAMES.indexOf(n));}).join('')||'<div class="sub">Koi naam nahi mila.</div>');}
+function originSearch(o){var res=NAMES.filter(function(n){return n[5]===o;}).slice(0,40);document.getElementById('sResults').innerHTML='<div class="sub mt">'+o+' names ('+res.length+'):</div>'+res.map(function(n){return nameRow(n,NAMES.indexOf(n));}).join('');}
+
+/* ============ FAVS / SHORTLIST ============ */
+function toggleFav(idx,from){
+  var n=typeof idx==='number'?NAMES[idx]:NAMES.find(function(x){return x[0]===idx;});
+  if(!n)return;var key=n[0];
+  if(S.favs[key]){delete S.favs[key];toast('🤍 Hataya gaya');}else{S.favs[key]={t:Date.now()};toast('♥ Shortlist me!');}
+  save();
+  if(cur==='short')renderShort();
+  if(cur==='search'){doSearch();}
+  if(cur==='detail'&&typeof idx==='number')openDetail(idx);
+  if(cur==='discover')renderDeck();
+}
+function favList(){return Object.keys(S.favs).map(function(k){return NAMES.find(function(n){return n[0]===k;});}).filter(Boolean);}
+function renderShort(){
+  var list=favList();
+  document.getElementById('shortInfo').textContent=list.length+' naam save hain ♥';
+  var box=document.getElementById('shortList');
+  box.innerHTML=list.map(function(n){
+    var idx=NAMES.indexOf(n);var v=S.votes[n[0]]||{};
+    var vy=Object.keys(v).filter(function(k){return v[k]==='y';}).length;
+    var vn=Object.keys(v).filter(function(k){return v[k]==='n';}).length;
+    var cmp=S._cmp&&S._cmp.indexOf(n[0])>=0;
+    return '<div class="card"><div class="nrow" style="box-shadow:none;margin:0" onclick="openDetail('+idx+')">'
+    +'<div class="nu">'+esc(n[1])+'</div><div class="inf"><div class="ne">'+esc(n[0])+'</div><div class="nm2">'+esc(n[3])+'</div></div>'
+    +'<button class="heart" onclick="event.stopPropagation();toggleFav('+idx+',\'row\')">❤️</button></div>'
+    +'<div class="row"><input id="note-'+idx+'" placeholder="Note (e.g. Dadi ko pasand)" value="'+esc(S.notes[n[0]]||'')+'" onchange="saveNote(\''+n[0].replace(/'/g,"\\'")+'\',this.value)" style="margin:4px 0"></div>'
+    +'<div class="sub">Family voting: 👍 '+vy+' / 👎 '+vn+'</div><div class="voteBar">'
+    +S.fam.map(function(f){return '<button style="background:#eef4ff" onclick="vote(\''+n[0].replace(/'/g,"\\'")+'\',\''+f.replace(/'/g,"\\'")+'\',\'y\')">'+esc(f)+' 👍</button><button style="background:#ffeef2" onclick="vote(\''+n[0].replace(/'/g,"\\'")+'\',\''+f.replace(/'/g,"\\'")+'\',\'n\')">👎</button>';}).join('')
+    +'</div><div class="row mt"><button class="btn small" onclick="toggleCmp(\''+n[0].replace(/'/g,"\\'")+'\')">'+(cmp?'✓ Compare':'⇄ Compare')+'</button>'
+    +'<button class="btn blue small" onclick="waShare(\''+n[0].replace(/'/g,"\\'")+'\')">WhatsApp 📤</button></div></div>';
+  }).join('')||'<div class="card center">Abhi koi naam shortlist nahi.<br>Discover me ♥ dabayein!</div>';
+  renderCompare();
+}
+function saveNote(key,val){S.notes[key]=val;save();toast('📝 Note save!');}
+function toggleCmp(key){S._cmp=S._cmp||[];var i=S._cmp.indexOf(key);if(i>=0)S._cmp.splice(i,1);else{if(S._cmp.length>=2)S._cmp.shift();S._cmp.push(key);}renderShort();}
+function renderCompare(){
+  var box=document.getElementById('compareBox');
+  if(!S._cmp||S._cmp.length<2){box.classList.add('hidden');return;}
+  box.classList.remove('hidden');
+  document.getElementById('compareGrid').innerHTML=S._cmp.map(function(k){var n=NAMES.find(function(x){return x[0]===k;});if(!n)return '';return '<div class="card" style="margin:0"><div style="font-size:30px;font-weight:800;color:#b04a7e">'+esc(n[1])+'</div><div style="font-weight:700">'+esc(n[0])+'</div><div class="sub">'+esc(n[3])+'</div><div class="sub">⭐ '+(S.ratings[k]||'—')+'</div></div>';}).join('');
+}
+function vote(key,fam,yn){S.votes[key]=S.votes[key]||{};S.votes[key][fam]=yn;save();renderShort();}
+function waShare(key){var n=NAMES.find(function(x){return x[0]===key;});if(!n)return;var t='💗 Naam suggestion: '+n[0]+' ('+n[1]+') — '+n[3]+' — via Naam App';window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}
+
+/* ============ MATCH ============ */
+function newCode(){var c='';for(var i=0;i<6;i++)c+=Math.floor(Math.random()*10);S.myCode=c;document.getElementById('myCode').textContent=c;}
+function startPartner(p){
+  S.pMode=p;S['p'+p]={};S.pIdx=0;S.pDeck=shuffle(filtered());
+  document.getElementById('pSwipeInfo').textContent='Partner '+p+' — ♥ = pasand, ✕ = skip ('+S.pDeck.length+' naam)';
+  document.getElementById('pBtns').classList.remove('hidden');renderPCard();
+}
+function renderPCard(){
+  var box=document.getElementById('pCard');
+  if(S.pIdx>=S.pDeck.length){box.innerHTML='<div class="card center">Partner '+S.pMode+' done! ✅</div>';checkMatch();return;}
+  var n=S.pDeck[S.pIdx];
+  box.innerHTML='<div class="card center"><div style="font-size:40px;font-weight:800;color:#b04a7e">'+esc(n[1])+'</div><div style="font-size:20px;font-weight:700">'+esc(n[0])+'</div><div class="sub">'+esc(n[3])+'</div></div>';
+}
+function pSwipe(dir){var n=S.pDeck[S.pIdx];if(dir==='yes')S['p'+S.pMode][n[0]]=1;S.pIdx++;renderPCard();}
+function checkMatch(){
+  var a=Object.keys(S.p1),b=Object.keys(S.p2);
+  var mutual=a.filter(function(k){return b.indexOf(k)>=0;});
+  var box=document.getElementById('matchResult');
+  if(a.length&&b.length){
+    box.innerHTML='<div class="card center"><div id="matchAnim">💑</div><h1>It\'s a Match!</h1><div class="sub">'+mutual.length+' naam dono ko pasand! 🎉</div>'
+    +mutual.map(function(k){var n=NAMES.find(function(x){return x[0]===k;});return '<div class="pill" style="font-size:16px">💗 '+esc(n[1])+' '+esc(n[0])+'</div>';}).join('')+'</div>';
+  } else box.innerHTML='<div class="sub center">Dono partners swipe karein, phir match dekhein.</div>';
+}
+
+/* ============ DETAIL ============ */
+var curDetail=-1;
+function openDetail(idx){curDetail=idx;var n=NAMES[idx];if(!n)return;
+  document.getElementById('dUr').textContent=n[1];
+  document.getElementById('dEn').textContent=n[0];
+  document.getElementById('dGender').textContent=n[2]==='b'?'👦 Boy':'👧 Girl';
+  document.getElementById('dOrigin').textContent='🌍 '+n[5];
+  document.getElementById('dPop').textContent='⭐'.repeat(n[7]);
+  document.getElementById('dMean').textContent=n[3];
+  document.getElementById('dMeanUr').textContent=n[4];
+  document.getElementById('dFavT').textContent=S.favs[n[0]]?'Saved ♥':'Shortlist';
+  var nick=n[0].split(' ')[0].slice(0,Math.min(4,n[0].length));
+  document.getElementById('dNick').textContent=nick+', '+nick+'u';
+  renderStars(n[0]);
+  var sim=NAMES.filter(function(x){return x!==n&&(x[5]===n[5]||x[3].split(' ')[0]===n[3].split(' ')[0])&&x[2]===n[2];}).slice(0,6);
+  document.getElementById('dSimilar').innerHTML=sim.map(function(x){return nameRow(x,NAMES.indexOf(x));}).join('');
+  nav('detail');
+}
+function renderStars(key){var box=document.getElementById('dStars');var r=S.ratings[key]||0;box.innerHTML='';for(var i=1;i<=5;i++){var s=document.createElement('span');s.textContent=i<=r?'⭐':'☆';(function(i){s.onclick=function(){S.ratings[key]=i;save();renderStars(key);toast('⭐ '+i+' stars!');};})(i);box.appendChild(s);}}
+function speakName(){
+  var n=NAMES[curDetail];if(!n)return;
+  var note=document.getElementById('ttsNote');
+  try{
+    if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(n[0]);u.lang='ur-PK';speechSynthesis.cancel();speechSynthesis.speak(u);note.textContent='🔊 Pronouncing… (device voice)';}
+    else{note.textContent='⚠️ Audio pronunciation is device par available nahi.';}
+  }catch(e){note.textContent='⚠️ Audio pronunciation available nahi.';}
+}
+function shareName(){var n=NAMES[curDetail];if(!n)return;var t='💗 '+n[0]+' ('+n[1]+') — '+n[3];if(navigator.share){navigator.share({title:'Naam',text:t}).catch(function(){});}else{window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}}
+
+/* ============ PROFILE ============ */
+function renderProfile(){
+  document.getElementById('babyName').value=S.baby.name||'';
+  document.getElementById('babyGender').value=S.baby.gender||'';
+  document.getElementById('dueDate').value=S.baby.due||'';
+  var fl=document.getElementById('famList');fl.innerHTML=S.fam.map(function(f){return '<div class="pill">'+esc(f)+' <span style="cursor:pointer" onclick="delFam(\''+f.replace(/'/g,"\\'")+'\')">✕</span></div>';}).join('');
+}
+function saveBaby(){S.baby={name:document.getElementById('babyName').value,gender:document.getElementById('babyGender').value,due:document.getElementById('dueDate').value};save();toast('💾 Save ho gaya!');}
+function addFam(){var v=document.getElementById('famName').value.trim();if(!v)return;S.fam.push(v);document.getElementById('famName').value='';save();renderProfile();}
+function delFam(f){S.fam=S.fam.filter(function(x){return x!==f;});save();renderProfile();}
+function resetAll(){if(confirm('Reset demo data?')){Object.keys(localStorage).filter(function(k){return k.indexOf('naam_')===0;}).forEach(function(k){localStorage.removeItem(k);});location.reload();}}
+function drawAnn(){
+  var c=document.getElementById('annCanvas'),x=c.getContext('2d');
+  var name=S.baby.name||'Baby';var g=S.baby.gender;
+  var grd=x.createLinearGradient(0,0,1080,1080);grd.addColorStop(0,'#FEF3C7');grd.addColorStop(.5,'#F9A8D4');grd.addColorStop(1,'#93C5FD');
+  x.fillStyle=grd;x.fillRect(0,0,1080,1080);
+  x.fillStyle='#fff';x.beginPath();x.arc(540,540,430,0,7);x.fill();
+  x.fillStyle='#b04a7e';x.font='bold 90px serif';x.textAlign='center';
+  x.fillText('👶',540,330);
+  x.font='bold 110px serif';x.fillText(name,540,560);
+  x.fillStyle='#8a7a95';x.font='48px sans-serif';
+  x.fillText(g==='b'?'It\'s a Boy! 💙':g==='g'?'It\'s a Girl! 💗':'Welcome Baby! 💛',540,680);
+  x.fillStyle='#b04a7e';x.font='bold 40px sans-serif';x.fillText('— with love, via Naam App 💗 —',540,800);
+  toast('🎨 Card ban gaya!');
+}
+function dlAnn(){var c=document.getElementById('annCanvas');var a=document.createElement('a');a.download='naam-announcement.png';a.href=c.toDataURL('image/png');a.click();}
+function shareAnn(){var c=document.getElementById('annCanvas');c.toBlob(function(b){if(navigator.share&&navigator.canShare){var f=new File([b],'naam.png',{type:'image/png'});if(navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Naam'}).catch(function(){});return;}}dlAnn();});}
+
+/* ============ LANG ============ */
+var I18N={en:{discover:'Discover 💗',search:'Search 🔍',short:'Shortlist ♥',match:'Match 💑',profile:'Profile 👤'},ur:{discover:'دریافت 💗',search:'تلاش 🔍',short:'پسندیدہ ♥',match:'میچ 💑',profile:'پروفائل 👤'}};
+function setLang(l){S.lang=l;save();applyLang();}
+function applyLang(){var t=I18N[S.lang]||I18N.en;document.getElementById('tDiscover').textContent=t.discover;document.getElementById('tSearch').textContent=t.search;document.getElementById('tShort').textContent=t.short;document.getElementById('tMatch').textContent=t.match;document.getElementById('tProfile').textContent=t.profile;document.body.classList.toggle('rtl',S.lang==='ur');document.getElementById('langSel').value=S.lang;var nl=document.querySelectorAll('#nav .nl');var keys=['discover','search','short','match','profile'];nl.forEach(function(el,i){el.textContent=t[keys[i]].replace(/ [^ ]+$/,'');});}
+
+/* ============ EXPIRY (3-day demo) ============ */
+(function(){try{var k='naam_demo_start',now=Date.now(),s=localStorage.getItem(k);if(!s){localStorage.setItem(k,String(now));}else if(now-parseInt(s,10)>3*24*3600*1000){document.addEventListener('DOMContentLoaded',function(){document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#F9A8D4,#93C5FD);color:#4a3b52;font-family:system-ui;text-align:center;padding:24px"><div style="font-size:64px">👶</div><h1>Demo Expired</h1><p>Is demo ki 3-din ki muddat khatam ho gayi.<br>Full app ke liye Jilan Apps se rabta karein.</p><div style="margin-top:16px;background:#222;color:#fff;padding:8px 20px;border-radius:99px;font-size:12px;letter-spacing:1px">DEMO by Jilan Apps</div></div>';});}}catch(e){}})();
+
+/* ============ INIT ============ */
+load();applyLang();newCode();
+if(lj('naam_prefs')){document.getElementById('scr-onboard').classList.remove('on');buildDeck();nav('discover');}
+initSearch();
+window.addEventListener('error',function(e){/* silent in demo */});
+</script>
+</body>
+</html>
