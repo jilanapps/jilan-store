@@ -1,986 +1,630 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="ur" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jilan Naat World</title>
+<title>نعتیہ کلام — Jilan Naat World</title>
 <link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b3d2e; --bg2:#0e4d3a; --card:#104f3b; --card2:#0d4433;
-  --gold:#c9a227; --gold2:#e8c85a; --txt:#f5f1e6; --mut:#b9c9bf;
-  --bar:#082e23; --danger:#c0392b; --ok:#27ae60; --shadow:0 4px 14px rgba(0,0,0,.35);
+  --bg:#f6f4ec; --bg2:#ffffff; --card:#ffffff; --head1:#2e7d32; --head2:#43a047;
+  --gold:#c9a227; --gold2:#e8c85a; --txt:#1e3a2f; --mut:#5c6f64;
+  --bar:#0b3d2e; --danger:#c0392b; --ok:#1e8e3e; --shadow:0 2px 10px rgba(0,0,0,.12);
+  --chip:#eaf3e8;
 }
-body.light{
-  --bg:#f4f1e8; --bg2:#ffffff; --card:#ffffff; --card2:#f9f6ec;
-  --txt:#1e3a2f; --mut:#5c6f64; --bar:#0b3d2e; --shadow:0 2px 8px rgba(0,0,0,.12);
+body.dark{
+  --bg:#0b3d2e; --bg2:#0e4d3a; --card:#104f3b; --head1:#0e4d3a; --head2:#166b4e;
+  --txt:#f5f1e6; --mut:#b9c9bf; --chip:#0d4433; --shadow:0 4px 14px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;
-  background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--txt);min-height:100vh;
-  touch-action:manipulation;padding-bottom:150px}
-h1{font-size:24px;margin:14px 16px 4px} h2{font-size:18px;margin:18px 16px 8px}
-.sub{color:var(--mut);font-size:13px;margin:0 16px 8px}
-.screen{display:none;max-width:640px;margin:0 auto;padding-bottom:20px}
+  background:var(--bg);color:var(--txt);min-height:100vh;touch-action:manipulation;padding-bottom:86px}
+.nastaliq{font-family:'Noto Nastaliq Urdu',serif;line-height:2.1}
+h1{font-size:22px;margin:14px 16px 4px} h2{font-size:17px;margin:16px 16px 8px}
+.sub{color:var(--mut);font-size:12.5px;margin:0 16px 8px}
+.screen{display:none;max-width:640px;margin:0 auto}
 .screen.on{display:block;animation:fade .25s}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
 /* splash */
 #splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 35%,#0e5a43,#072a20);
   display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;transition:opacity .5s}
-#splash img{width:190px;height:190px;border-radius:44px;box-shadow:0 8px 30px rgba(201,162,39,.4);border:3px solid var(--gold)}
-#splash .t{font-size:30px;font-weight:800;color:var(--gold2);margin-top:18px;letter-spacing:1px}
-#splash .s{color:var(--mut);font-size:13px;margin-top:6px}
-/* topbar */
-#topbar{position:sticky;top:0;z-index:100;background:var(--bar);padding:10px 12px;
+#splash img{width:170px;height:170px;border-radius:40px;box-shadow:0 8px 30px rgba(201,162,39,.4);border:3px solid var(--gold)}
+#splash .t{font-family:'Noto Nastaliq Urdu',serif;font-size:30px;font-weight:700;color:var(--gold2);margin-top:16px}
+#splash .s{color:#b9c9bf;font-size:13px;margin-top:6px}
+/* header (Naatiya Kalam style) */
+#hdr{background:linear-gradient(135deg,var(--head1),var(--head2));color:#fff;
+  padding:14px 12px 36px;position:relative;overflow:hidden}
+#hdr::before{content:'';position:absolute;inset:0;opacity:.14;
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,.35) 18px,rgba(255,255,255,.35) 20px)}
+#hdr .row{display:flex;align-items:center;gap:10px;position:relative;z-index:2}
+#hdr .tt{flex:1;text-align:center;font-family:'Noto Nastaliq Urdu',serif;font-size:32px;font-weight:700;
+  text-shadow:0 2px 6px rgba(0,0,0,.3)}
+#hdr .curve{position:absolute;bottom:-2px;right:0;left:0;height:36px;background:var(--bg);
+  border-radius:50% 50% 0 0/100% 100% 0 0;z-index:1}
+.icobtn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff;
+  border-radius:12px;font-size:19px;padding:7px 11px;cursor:pointer;position:relative;z-index:2}
+/* book grid */
+.secT{display:flex;align-items:center;gap:12px;margin:4px 16px 12px}
+.secT .ln{flex:1;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
+.secT b{font-family:'Noto Nastaliq Urdu',serif;font-size:26px;color:var(--gold)}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 14px}
+.bcard{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;
+  border:1px solid rgba(201,162,39,.35);transition:transform .15s}
+.bcard:active{transform:scale(.97)}
+.bcard svg{width:100%;height:auto;display:block}
+.bcard .bt{padding:8px 6px 10px;text-align:center}
+.bcard .bt .n{font-family:'Noto Nastaliq Urdu',serif;font-size:15px;font-weight:700;line-height:1.9}
+.bcard .bt .p{font-size:10.5px;color:var(--mut)}
+.badge{display:inline-block;font-size:10px;background:var(--chip);color:var(--txt);border-radius:8px;padding:2px 8px;margin-top:4px}
+/* book view */
+#bookbar{position:sticky;top:0;z-index:100;background:var(--bar);color:#fff;padding:10px 12px;
   display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
-#topbar img{width:40px;height:40px;border-radius:12px;border:2px solid var(--gold)}
-#topbar .tt{font-weight:800;color:var(--gold2);font-size:17px;flex:1}
-.icobtn{background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.4);color:var(--gold2);
-  border-radius:12px;font-size:19px;padding:7px 11px;cursor:pointer}
-/* banner */
-.banner{margin:12px 16px;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid rgba(201,162,39,.5)}
-.banner img{width:100%;height:150px;object-fit:cover;display:block}
-.banner .ov{position:absolute;inset:auto 0 0 0;padding:12px 14px;background:linear-gradient(0deg,rgba(4,25,18,.92),transparent);color:#ffe9a8}
-.banner .ov b{font-size:18px}
-/* search */
-.srch{margin:10px 16px;display:flex;gap:8px}
-.srch input{flex:1;padding:13px 14px;border-radius:14px;border:1px solid rgba(201,162,39,.4);
-  background:var(--card);color:var(--txt);font-size:15px}
-/* cards & rows */
-.card{background:var(--card);border:1px solid rgba(201,162,39,.25);border-radius:16px;margin:10px 16px;padding:12px;box-shadow:var(--shadow)}
-.rowitem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;cursor:pointer;margin:6px 0;background:var(--card);border:1px solid rgba(201,162,39,.18)}
-.rowitem:active{transform:scale(.98)}
-.thumb{width:52px;height:52px;border-radius:14px;object-fit:cover;flex-shrink:0;background:#0a2c21;border:1px solid rgba(201,162,39,.4)}
-.rowitem .nm{font-weight:700;font-size:15px}
-.rowitem .mt{font-size:12px;color:var(--mut)}
-.rowitem .grow{flex:1;min-width:0}
-.badge{font-size:10px;background:#7a5c00;color:#ffe9a8;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:middle}
-.badge.ok{background:#14532d;color:#bbf7d0}
-/* chips */
-.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px}
-.chip{flex-shrink:0;background:var(--card);border:1px solid rgba(201,162,39,.4);color:var(--txt);
-  border-radius:999px;padding:9px 16px;font-size:14px;cursor:pointer}
-.chip.on{background:var(--gold);color:#08281d;font-weight:700}
-/* horizontal scrollers */
-.hscroll{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px}
-.khwan{flex-shrink:0;width:104px;text-align:center;cursor:pointer}
-.khwan img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);background:#0a2c21}
-.khwan .n{font-size:12px;margin-top:6px;font-weight:600}
-/* buttons */
-.btn{display:block;width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;
-  color:#08281d;background:linear-gradient(180deg,var(--gold2),var(--gold));margin:8px 0;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.btn.ghost{background:var(--card);color:var(--txt);border:1px solid rgba(201,162,39,.4)}
-.btn.danger{background:linear-gradient(180deg,#e05a4b,#b03a2c);color:#fff}
-.btn.sm{padding:9px;font-size:13px;width:auto;display:inline-block;margin:4px 6px 4px 0}
-.row2{display:flex;gap:8px}.row2 .btn{flex:1}
-/* mini player */
-#mini{position:fixed;left:0;right:0;bottom:64px;z-index:900;background:var(--bar);
-  border-top:2px solid var(--gold);display:none;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 -4px 16px rgba(0,0,0,.4)}
-#mini img{width:46px;height:46px;border-radius:10px;border:1px solid var(--gold)}
-#mini .mi{flex:1;min-width:0}#mini .mn{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffe9a8}
-#mini .mk{font-size:11px;color:var(--mut)}
-#mini button{background:none;border:none;font-size:22px;color:var(--gold2);cursor:pointer;padding:6px}
-/* bottom nav */
-#nav{position:fixed;left:0;right:0;bottom:0;z-index:950;background:var(--bar);display:flex;
-  border-top:1px solid rgba(201,162,39,.4);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-#nav button{flex:1;background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:6px 2px}
-#nav button .e{font-size:21px;display:block}
-#nav button.on{color:var(--gold2)}
-/* fullscreen player */
-#fs{position:fixed;inset:0;z-index:1500;background:linear-gradient(180deg,#072a20,#0b3d2e);display:none;
-  flex-direction:column;align-items:center;padding:20px 18px 30px;overflow-y:auto}
-#fs img.art{width:230px;height:230px;border-radius:28px;border:4px solid var(--gold);box-shadow:0 10px 40px rgba(201,162,39,.35);margin-top:26px;object-fit:cover}
-#fs .ft{font-size:21px;font-weight:800;color:#ffe9a8;margin:18px 8px 2px;text-align:center}
-#fs .fk{color:var(--mut);font-size:14px}
-.seek{width:100%;margin:16px 0 4px}input[type=range]{width:100%;accent-color:var(--gold)}
-.times{display:flex;justify-content:space-between;width:100%;font-size:12px;color:var(--mut)}
-.pctl{display:flex;align-items:center;gap:14px;margin:14px 0}
-.pctl button{background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.5);color:var(--gold2);
-  border-radius:50%;width:58px;height:58px;font-size:24px;cursor:pointer}
-.pctl button.big{width:78px;height:78px;font-size:32px;background:var(--gold);color:#08281d;border:none}
-.prow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
-.pill{background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.4);color:var(--txt);border-radius:999px;
-  padding:8px 14px;font-size:13px;cursor:pointer}
-.pill.on{background:var(--gold);color:#08281d;font-weight:700}
-#fsClose{position:absolute;top:14px;left:14px}
-/* forms */
-.inp{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(201,162,39,.4);background:var(--card);color:var(--txt);font-size:14px;margin:6px 0}
-select.inp{appearance:auto}
-.lbl{font-size:12px;color:var(--mut);margin:8px 0 2px}
-/* toast + err */
-#toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);background:#08281d;color:#ffe9a8;
-  border:1px solid var(--gold);padding:11px 20px;border-radius:999px;font-size:14px;z-index:3000;display:none;box-shadow:var(--shadow)}
-#err{position:fixed;top:0;left:0;right:0;background:#a00;color:#fff;padding:10px;z-index:4000;display:none;font-size:13px;text-align:center}
-/* admob placeholders */
-.adslot{margin:10px 16px;border:1px dashed rgba(201,162,39,.5);border-radius:12px;padding:14px;text-align:center;
-  color:var(--mut);font-size:12px;display:none}
-/* misc */
+#bookbar .tt{flex:1;min-width:0}
+#bookbar .tt b{display:block;font-family:'Noto Nastaliq Urdu',serif;font-size:17px;color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bookbar .tt span{font-size:11px;color:#cfe3d4}
+#bookbar .cov{width:44px;height:58px;border-radius:6px;overflow:hidden;border:2px solid var(--gold);flex-shrink:0}
+#bookbar .cov svg{width:100%;height:100%;display:block}
+.alpha{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
+.alpha button{flex-shrink:0;min-width:42px;height:42px;border-radius:12px;border:1px solid rgba(201,162,39,.5);
+  background:var(--card);color:var(--txt);font-family:'Noto Nastaliq Urdu',serif;font-size:18px;cursor:pointer;padding:0 8px}
+.alpha button.on{background:var(--gold);color:#3a2c00;border-color:var(--gold);font-weight:700}
+.krow{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;
+  padding:10px 12px;margin:8px 14px;box-shadow:var(--shadow);cursor:pointer;border:1px solid rgba(201,162,39,.25)}
+.krow:active{transform:scale(.99)}
+.num{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#a8871d);
+  color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+.krow .grow{flex:1;min-width:0}
+.krow .nm{font-family:'Noto Nastaliq Urdu',serif;font-size:16px;line-height:1.9}
+.krow .mt{font-size:11px;color:var(--mut)}
+.vbadge{font-size:10px;border-radius:8px;padding:1px 7px;margin-right:6px;white-space:nowrap}
+.vok{background:#e6f4ea;color:#1e8e3e}.vpend{background:#fff4d6;color:#8a6d00}
 .empty{text-align:center;color:var(--mut);padding:30px 20px;font-size:14px}
-.spin{width:34px;height:34px;border:4px solid rgba(201,162,39,.3);border-top-color:var(--gold);border-radius:50%;
-  animation:sp 1s linear infinite;margin:20px auto}
-@keyframes sp{to{transform:rotate(360deg)}}
-.hdr{display:flex;align-items:center;gap:8px;margin:0 16px}
-.hdr h2{margin:14px 0;flex:1}
-.prog{height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:6px}
-.prog i{display:block;height:100%;background:var(--gold);width:0%}
-.stbar{font-size:12px;color:var(--mut);margin-top:4px}
-.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(201,162,39,.15);font-size:14px}
-/* written naats */
-.nastaliq{font-family:'Noto Nastaliq Urdu','Noto Nastaliq Urdu Draft',serif;direction:rtl;text-align:right;line-height:2.4}
-.poet-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#0d4a38,#0a3527);
-  border:2px solid var(--gold);border-radius:18px;margin:10px 16px;padding:16px;cursor:pointer;box-shadow:var(--shadow)}
-.poet-card .pc-n{font-weight:800;font-size:17px;color:var(--gold2)}
-.poet-card .pc-s{font-size:12px;color:var(--mut)}
-.poet-card .pc-c{font-size:12px;color:var(--gold2);margin-top:4px}
-.poet-card .pc-e{font-size:30px;flex-shrink:0}
-.reader-box{background:var(--card);border:1px solid rgba(201,162,39,.4);border-radius:18px;margin:12px 16px;padding:22px 18px;box-shadow:var(--shadow)}
-.reader-title{font-size:20px;font-weight:800;color:var(--gold2);text-align:center;margin-bottom:4px}
-.reader-poet{text-align:center;color:var(--mut);font-size:13px;margin-bottom:12px}
-.fctl{display:flex;gap:8px;justify-content:center;align-items:center;margin:10px 0;flex-wrap:wrap}
-.fbtn{background:var(--card);border:1px solid rgba(201,162,39,.5);color:var(--gold2);border-radius:12px;font-size:15px;padding:8px 13px;cursor:pointer}
-.warnbox{background:rgba(160,60,20,.16);border:1px solid #b06a2c;color:#f0c890;border-radius:12px;padding:10px 14px;margin:10px 0;font-size:13px}
-.okbadge{font-size:10px;background:#14532d;color:#bbf7d0;border-radius:8px;padding:2px 7px;margin-left:6px;white-space:nowrap}
-.pendbadge{font-size:10px;background:#6b4a00;color:#ffe9a8;border-radius:8px;padding:2px 7px;margin-left:6px;white-space:nowrap}
-.srcnote{font-size:12px;color:var(--mut);margin-top:14px;border-top:1px solid rgba(201,162,39,.2);padding-top:10px}
+/* reader */
+#rdr{background:var(--card);margin:12px 14px;border-radius:16px;box-shadow:var(--shadow);
+  border:1px solid rgba(201,162,39,.4);padding:18px 16px}
+#wrTitle{font-family:'Noto Nastaliq Urdu',serif;font-size:24px;font-weight:700;text-align:center;color:var(--gold);line-height:2}
+#wrPoet{text-align:center;color:var(--mut);font-size:13px;margin:4px 0 10px}
+#wrUrdu{font-family:'Noto Nastaliq Urdu',serif;line-height:2.4;text-align:center;white-space:pre-wrap;margin:14px 0}
+#wrRoman{display:none;white-space:pre-wrap;text-align:center;color:var(--mut);margin:10px 0;line-height:1.9;font-style:italic}
+.rtools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.tbtn{background:var(--chip);border:1px solid rgba(201,162,39,.4);color:var(--txt);border-radius:12px;
+  padding:9px 14px;font-size:14px;cursor:pointer}
+.tbtn.on{background:var(--gold);color:#3a2c00}
+.meta{font-size:12px;color:var(--mut);background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:12px;line-height:1.9}
+.warnbox{background:#fff4d6;color:#6b5300;border:1px solid #e8c85a;border-radius:12px;padding:10px 12px;
+  font-size:12.5px;margin:10px 14px;line-height:1.9}
+.darkhwast{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);color:#1b5e20;border:1px solid #81c784;
+  border-radius:12px;padding:12px;font-size:13px;margin:12px 14px;line-height:2;text-align:center}
+body.dark .darkhwast{background:#0d4433;color:#d8ecd9;border-color:#2e7d32}
+/* search */
+.srch{margin:10px 14px;display:flex;gap:8px}
+.srch input{flex:1;padding:13px 14px;border-radius:14px;border:1px solid rgba(201,162,39,.4);
+  background:var(--card);color:var(--txt);font-size:15px;font-family:inherit}
+/* admin */
+.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 14px;box-shadow:var(--shadow);border:1px solid rgba(201,162,39,.25)}
+.btn{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#3a2c00;border:none;border-radius:12px;
+  padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer;margin:4px}
+.btn.sm{padding:8px 12px;font-size:13px}
+.btn.ghost{background:var(--chip);color:var(--txt);border:1px solid rgba(201,162,39,.4)}
+.btn.danger{background:#e57373;color:#fff}
+.rowitem{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid rgba(0,0,0,.06)}
+.rowitem .grow{flex:1;min-width:0}.rowitem .nm{font-weight:700;font-size:14px}.rowitem .mt{font-size:11px;color:var(--mut)}
+textarea.ta{width:100%;min-height:150px;border-radius:12px;border:1px solid rgba(201,162,39,.4);
+  background:var(--bg);color:var(--txt);padding:10px;font-family:inherit;font-size:13px}
+select.sel,input.inp{padding:10px 12px;border-radius:12px;border:1px solid rgba(201,162,39,.4);
+  background:var(--bg);color:var(--txt);font-size:14px;font-family:inherit;margin:4px 0;max-width:100%}
+/* bottom nav */
+#nav{position:fixed;bottom:0;right:0;left:0;z-index:100;background:var(--bar);display:flex;
+  border-top:2px solid var(--gold);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#nav button{flex:1;background:none;border:none;color:#cfe3d4;font-size:11px;cursor:pointer;padding:6px 2px}
+#nav button .e{font-size:21px;display:block}
+#nav button.on{color:var(--gold2);font-weight:700}
+#toast{position:fixed;bottom:100px;right:50%;transform:translateX(50%);background:#222;color:#fff;
+  padding:10px 18px;border-radius:24px;display:none;z-index:3000;font-size:14px;max-width:90%}
+#err{position:fixed;top:8px;right:12px;left:12px;background:#c0392b;color:#fff;padding:10px;
+  border-radius:12px;display:none;z-index:3000;font-size:13px}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin:14px 16px 6px}
+.hdr h2{margin:0}
+.morebtn{display:block;width:calc(100% - 28px);margin:10px 14px}
+.intekhab{margin:8px 14px 0;font-size:11.5px;color:#8a6d00;background:#fff8e1;border:1px dashed #c9a227;
+  border-radius:10px;padding:8px 12px;text-align:center}
+body.dark .intekhab{color:#e8c85a;background:#2a230f}
 </style>
 </head>
 <body>
 <div id="err"></div>
 <div id="splash">
   <img src="logo.png" alt="Jilan Naat World">
-  <div class="t">Jilan Naat World</div>
-  <div class="s" id="splashSub">Har Naat Khwan ki Naatein — Ek Hi Jagah</div>
+  <div class="t">نعتیہ کلام</div>
+  <div class="s">Jilan Naat World — کتابی سلسلہ</div>
 </div>
 
-<div id="topbar">
-  <img src="icon-192.png" alt="logo">
-  <div class="tt">Jilan Naat World</div>
-  <button class="icobtn" onclick="go('search')" title="Search">🔍</button>
-  <button class="icobtn" onclick="go('settings')" title="Settings">⚙️</button>
-</div>
-
-<!-- HOME -->
-<div id="home" class="screen on">
-  <div class="banner"><img src="banner.png" alt="Green Dome"><div class="ov"><b>🕌 Jilan Naat World</b><br>Har Naat Khwan ki Naatein — Ek Hi Jagah</div></div>
-  <div class="srch"><input id="homeQ" placeholder="Naat ya Naat Khwan talash karein…" onkeydown="if(event.key==='Enter')doSearch(this.value)"></div>
-  <div id="homeRecent"></div>
-  <div class="hdr"><h2>🎤 Mashhoor Naat Khwan</h2><button class="btn sm ghost" onclick="go('khwans')">Sab Dekhein</button></div>
-  <div class="hscroll" id="homeKhwans"></div>
-  <div class="hdr"><h2>⭐ Featured Naatein</h2></div>
-  <div id="homeFeat"></div>
-  <div class="hdr"><h2>📂 Categories</h2></div>
-  <div class="chips" id="homeCats"></div>
-  <div class="hdr"><h2>❤️ Pasandeeda</h2><button class="btn sm ghost" onclick="go('favs')">Sab</button></div>
-  <div id="homeFavs"></div>
-  <div class="card" onclick="go('wnaats')" style="cursor:pointer;background:linear-gradient(135deg,#0d4a38,#0a3527);border:2px solid var(--gold)">
-    <div style="font-size:18px;font-weight:800;color:var(--gold2)">📖 تحریری نعتیں</div>
-    <div class="stbar">Naat Lyrics &amp; Kalam — Aala Hazrat, Ameer-e-Ahle Sunnat aur deegar shora ka kalam</div>
-  </div>
-  <div class="adslot" id="adHome">AdMob Banner (disabled — config me enable karein)</div>
-</div>
-
-<!-- ALL KHWANS -->
-<div id="khwans" class="screen">
-  <h1>🎤 Tamam Naat Khwan</h1>
-  <div class="srch"><input id="khwanQ" placeholder="Naat Khwan ka naam…" oninput="renderKhwans(this.value)"></div>
-  <div id="khwanList"></div>
-</div>
-
-<!-- KHWAN DETAIL -->
-<div id="khwan" class="screen">
-  <div id="khwanHead"></div>
-  <div class="srch"><input id="khwanNQ" placeholder="Is Naat Khwan ki naat talash karein…" oninput="renderKhwanNaats(this.value)"></div>
-  <div class="row2" style="margin:0 16px">
-    <button class="btn sm" onclick="playAllKhwan()">▶️ Play All</button>
-    <button class="btn sm ghost" onclick="shuffleKhwan()">🔀 Shuffle</button>
-  </div>
-  <div id="khwanNaats"></div>
-</div>
-
-<!-- CATEGORIES -->
-<div id="cats" class="screen">
-  <h1>📂 Categories</h1>
-  <div id="catList"></div>
-</div>
-<div id="catd" class="screen">
-  <div id="catHead"></div>
-  <div id="catNaats"></div>
-</div>
-
-<!-- SEARCH -->
-<div id="search" class="screen">
-  <h1>🔍 Talash</h1>
-  <div class="srch"><input id="searchQ" placeholder="Naat, Naat Khwan, category…" oninput="doSearch(this.value)">
-  <button class="btn sm ghost" onclick="clearSearch()">✖</button></div>
-  <div id="searchRes"></div>
-</div>
-
-<!-- FAVORITES -->
-<div id="favs" class="screen">
-  <h1>❤️ Pasandeeda Naatein</h1>
-  <div id="favList"></div>
-</div>
-
-<!-- PLAYLISTS -->
-<div id="plists" class="screen">
-  <div class="hdr"><h2>📝 Playlists</h2><button class="btn sm" onclick="newPlaylist()">＋ Nayi</button></div>
-  <div id="plistList"></div>
-</div>
-<div id="plistd" class="screen">
-  <div id="plistHead"></div>
-  <div id="plistNaats"></div>
-</div>
-
-<!-- DOWNLOADS -->
-<div id="dls" class="screen">
-  <h1>⬇️ Downloaded Naatein</h1>
-  <div class="card"><div class="kv"><span>Storage istemal</span><b id="dlSize">…</b></div>
-  <div class="stbar">Sirf wohi audio download hoti hai jo server ijazat de (CORS). Local sample files hamesha download ho sakti hain.</div></div>
-  <div id="dlList"></div>
-</div>
-
-<!-- HISTORY -->
-<div id="hist" class="screen">
-  <div class="hdr"><h2>🕐 Tareekh (History)</h2><button class="btn sm danger" onclick="clearHistory()">Saaf Karein</button></div>
-  <div id="histList"></div>
-</div>
-
-<!-- ADMIN LOGIN -->
-<div id="adminlogin" class="screen">
-  <h1>🔐 Admin Login</h1>
-  <div class="card">
-    <div class="lbl">PIN darj karein (default: 1234)</div>
-    <input class="inp" id="adminPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN">
-    <button class="btn" onclick="adminLogin()">Login</button>
-  </div>
-</div>
-
-<!-- ADMIN DASHBOARD -->
-<div id="admin" class="screen">
-  <div class="hdr"><h2>🛠️ Admin Dashboard</h2><button class="btn sm ghost" onclick="adminLogout()">Logout</button></div>
-  <div class="card">
-    <div class="lbl">PIN tabdeel karein</div>
-    <div class="row2"><input class="inp" id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="Naya PIN">
-    <button class="btn sm" onclick="changePin()">Save</button></div>
-  </div>
-  <div class="hdr"><h2>🎤 Naat Khwan</h2><button class="btn sm" onclick="khwanForm()">＋ Naya</button></div>
-  <div id="adminKhwans"></div>
-  <div class="hdr"><h2>🎵 Naatein</h2><button class="btn sm" onclick="naatForm()">＋ Nayi Naat</button></div>
-  <div id="adminNaats"></div>
-  <div class="hdr"><h2>📖 Tehreeri Naatein</h2></div>
-  <div id="wAdminBox"></div>
-  <div class="card"><div class="stbar">Stats: <span id="adminStats"></span></div>
-  <div class="stbar">Note: Tamam data is device par mehfooz hai (localStorage). Mustaqbil me Firebase jor kar cloud admin banaya ja sakta hai.</div></div>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" class="screen">
-  <h1>⚙️ Settings</h1>
-  <div class="card">
-    <div class="kv"><span>🌙 Dark Mode</span><button class="pill" id="themeTgl" onclick="toggleTheme()">Toggle</button></div>
-    <div class="kv"><span>🌐 Zuban / Language</span>
-      <span><button class="pill" onclick="setLang('ur')">اردو</button>
-      <button class="pill" onclick="setLang('ro')">Roman</button>
-      <button class="pill" onclick="setLang('en')">EN</button></span></div>
-    <div class="kv"><span>⏾ Sleep Timer (min)</span>
-      <span><input class="inp" id="sleepMin" type="number" min="0" max="180" style="width:80px;display:inline" placeholder="0">
-      <button class="pill" onclick="setSleepUI()">Set</button></span></div>
-  </div>
-  <div class="card">
-    <button class="btn ghost" onclick="go('dls')">⬇️ Downloads</button>
-    <button class="btn ghost" onclick="go('hist')">🕐 History</button>
-    <button class="btn ghost" onclick="go('adminlogin')">🛠️ Admin Panel</button>
-  </div>
-  <div class="card">
-    <div class="kv"><span>Version</span><b>Jilan Naat World v1.0</b></div>
-    <div class="stbar">Background playback WebView me mehdood hai — screen on rakhne par behtareen chalta hai. Tamaam sample audio sirf testing ke liye hai; asal recordings admin ke zariye authorized URLs se shamil karein.</div>
-  </div>
-</div>
-
-<!-- WRITTEN NAATS HOME -->
-<div id="wnaats" class="screen">
-  <h1>📖 تحریری نعتیں</h1>
-  <div class="sub">Naat Lyrics &amp; Kalam — mashhoor shora ka kalam</div>
-  <div class="hdr"><h2>🔖</h2><button class="btn sm ghost" onclick="go('wfavs')">Meri Bookmarks</button></div>
-  <div id="wPoets"></div>
-  <div class="hdr"><h2>🌐 Zuban / Category</h2></div>
-  <div class="chips" id="wLangCats"></div>
-  <div id="wFilterList"></div>
-</div>
-
-<!-- POET DETAIL -->
-<div id="wpoet" class="screen"><div id="wPoetHead"></div><div id="wPoetList"></div></div>
-
-<!-- READER -->
-<div id="wreader" class="screen">
-  <div class="reader-box">
-    <div class="reader-title" id="wrTitle"></div>
-    <div class="reader-poet" id="wrPoet"></div>
-    <div id="wrStatus" style="text-align:center"></div>
-    <div class="fctl">
-      <button class="fbtn" onclick="wFont(-2)" title="Chhota">A−</button>
-      <button class="fbtn" onclick="wFont(2)" title="Bara">A+</button>
-      <button class="fbtn" id="wrBm" onclick="wToggleBm()" title="Bookmark">🔖</button>
-      <button class="fbtn" onclick="wCopy()" title="Copy">📋</button>
-      <button class="fbtn" onclick="wShare()" title="Share">📤</button>
-      <button class="fbtn" id="wrRomanBtn" onclick="wToggleRoman()" title="Roman Urdu">Roman</button>
+<!-- ============ HOME ============ -->
+<div id="scr-home" class="screen on">
+  <div id="hdr">
+    <div class="row">
+      <button class="icobtn" onclick="go('search')" title="تلاش">🔍</button>
+      <div class="tt">نعتیہ کلام</div>
+      <button class="icobtn" onclick="go('menu')" title="مینیو">☰</button>
     </div>
-    <div class="nastaliq" id="wrUrdu"></div>
-    <div id="wrRoman" style="display:none;margin-top:14px;font-size:15px;line-height:1.9;color:var(--txt)"></div>
-    <div id="wrMeta"></div>
+    <div class="curve"></div>
+  </div>
+  <div class="secT"><span class="ln"></span><b>کتابیں</b><span class="ln"></span></div>
+  <div class="bgrid" id="bookGrid"></div>
+  <div class="intekhab">📖 ہر کتاب میں <b>منتخب کلام (انتخاب)</b> پیش کیا گیا ہے — یہ مکمل کتاب نہیں۔ مزید کلام بتدریج شامل ہوگا۔</div>
+  <div class="darkhwast">📸 <b>درخواست:</b> اگر آپ کے پاس کتاب کے صفحات کی <b>تصویر</b> ہو تو بھیج دیں — ہم اسے ٹائپ کر کے ایپ میں شامل کر دیں گے۔</div>
+</div>
+
+<!-- ============ BOOK ============ -->
+<div id="scr-book" class="screen">
+  <div id="bookbar">
+    <button class="icobtn" onclick="goBack()" title="واپس">‹</button>
+    <div class="cov" id="bookCov"></div>
+    <div class="tt"><b id="bookTitle"></b><span id="bookPoet"></span></div>
+    <button class="icobtn" onclick="toggleBSearch()" title="تلاش">🔍</button>
+  </div>
+  <div class="intekhab">📖 <b>انتخاب</b> — مکمل کتاب نہیں • <span id="bookCount"></span> کلام</div>
+  <div class="srch" id="bSearchBox" style="display:none">
+    <input id="bSearchQ" placeholder="اس کتاب میں تلاش کریں…" oninput="renderBookList()">
+  </div>
+  <div class="alpha" id="alphaBar"></div>
+  <div id="bookList"></div>
+  <button class="btn ghost morebtn" id="moreBtn" onclick="bookPage++;renderBookList(true)">مزید دکھائیں ⬇</button>
+</div>
+
+<!-- ============ READER ============ -->
+<div id="scr-reader" class="screen">
+  <div id="bookbar">
+    <button class="icobtn" onclick="goBack()" title="واپس">‹</button>
+    <div class="tt"><b id="rdCrumb">مطالعہ</b><span id="rdCrumbSub"></span></div>
+    <button class="icobtn" id="rdBm" onclick="toggleBm()" title="بک مارک">📑</button>
+  </div>
+  <div id="rdr">
+    <div id="wrTitle"></div>
+    <div id="wrPoet"></div>
+    <div style="text-align:center" id="wrStatus"></div>
+    <div id="wrUrdu"></div>
+    <div id="wrRoman"></div>
+    <div class="rtools">
+      <button class="tbtn" onclick="wFont(2)">A+</button>
+      <button class="tbtn" onclick="wFont(-2)">A−</button>
+      <button class="tbtn" id="romanBtn" onclick="toggleRoman()">Roman</button>
+      <button class="tbtn" onclick="wCopy()">📋 کاپی</button>
+      <button class="tbtn" onclick="wShare()">📤 شیئر</button>
+    </div>
+    <div class="meta" id="wrMeta"></div>
+  </div>
+  <div class="darkhwast">📸 کتاب کے صفحے کی <b>تصویر بھیجیں</b> — ہم ٹائپ کر کے ایپ میں شامل کر دیں گے۔</div>
+</div>
+
+<!-- ============ SEARCH ============ -->
+<div id="scr-search" class="screen">
+  <div id="bookbar">
+    <button class="icobtn" onclick="goBack()" title="واپس">‹</button>
+    <div class="tt"><b>🔍 تلاش</b><span>تمام کتابوں میں</span></div>
+  </div>
+  <div class="srch"><input id="gSearchQ" placeholder="نعت، شاعر یا مصرع لکھیں…" oninput="debSearch()"></div>
+  <div id="gSearchRes"></div>
+</div>
+
+<!-- ============ BOOKMARKS ============ -->
+<div id="scr-bm" class="screen">
+  <div id="bookbar">
+    <button class="icobtn" onclick="goBack()" title="واپس">‹</button>
+    <div class="tt"><b>🔖 بک مارکس</b><span>محفوظ کلام</span></div>
+  </div>
+  <div id="bmList"></div>
+</div>
+
+<!-- ============ MENU ============ -->
+<div id="scr-menu" class="screen">
+  <div id="bookbar">
+    <button class="icobtn" onclick="goBack()" title="واپس">‹</button>
+    <div class="tt"><b>☰ مینیو</b><span>Jilan Naat World</span></div>
+  </div>
+  <div class="card">
+    <div class="hdr"><h2>⚙️ ترتیبات</h2></div>
+    <button class="btn ghost" onclick="toggleTheme()">🌙 / ☀️ تھیم بدلیں</button>
+    <div class="sub" style="margin:8px 0 0">موجودہ تھیم: <b id="themeName"></b></div>
+  </div>
+  <div class="card">
+    <div class="hdr"><h2>🔐 ایڈمن</h2></div>
+    <div id="adminGate">
+      <input class="inp" id="adminPin" type="password" inputmode="numeric" placeholder="ایڈمن PIN">
+      <button class="btn" onclick="adminLogin()">لاگ اِن</button>
+      <div class="sub" style="margin:6px 0 0">ڈیفالٹ PIN: 1234</div>
+    </div>
+    <div id="adminBody" style="display:none"></div>
+  </div>
+  <div class="card">
+    <div class="hdr"><h2>ℹ️ معلومات</h2></div>
+    <div class="sub" style="margin:0;line-height:2">نعتیہ کلام v2.0 — کتابی سلسلہ<br>تمام مواد صرف <b>منتخب کلام (انتخاب)</b> ہے، مکمل کتاب نہیں۔<br>📸 کتاب کے صفحات کی تصاویر بھیج کر کلام شامل کروائیں۔</div>
   </div>
 </div>
 
-<!-- WRITTEN LIST -->
-<div id="wlist" class="screen"><div id="wListHead"></div><div id="wListBody"></div></div>
-
-<!-- WRITTEN BOOKMARKS -->
-<div id="wfavs" class="screen"><h1>🔖 Meri Bookmarks</h1><div id="wFavList"></div></div>
-
-<!-- MINI PLAYER -->
-<div id="mini" onclick="openFS(event)">
-  <img id="miniArt" src="icon-192.png">
-  <div class="mi"><div class="mn" id="miniName">—</div><div class="mk" id="miniKhwan">—</div></div>
-  <button onclick="togglePlay(event)">⏯</button>
-  <button onclick="nextTrack(event)">⏭</button>
-</div>
-
-<!-- FULLSCREEN PLAYER -->
-<div id="fs">
-  <button class="icobtn" id="fsClose" onclick="closeFS()">⬇</button>
-  <img class="art" id="fsArt" src="icon-192.png">
-  <div class="ft" id="fsTitle">—</div>
-  <div class="fk" id="fsKhwan">—</div>
-  <div id="fsLoad"><div class="spin"></div></div>
-  <div class="seek"><input type="range" id="seek" min="0" max="1000" value="0" oninput="seekTo(this.value)"></div>
-  <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
-  <div class="pctl">
-    <button onclick="toggleShuffle()" id="btnShuf" title="Shuffle">🔀</button>
-    <button onclick="prevTrack()">⏮</button>
-    <button class="big" onclick="togglePlay()" id="btnPlay">▶</button>
-    <button onclick="nextTrack()">⏭</button>
-    <button onclick="cycleRepeat()" id="btnRep" title="Repeat">🔁</button>
-  </div>
-  <div class="prow">
-    <button class="pill" id="pillFav" onclick="toggleFav(currentId)">🤍 Favorite</button>
-    <button class="pill" onclick="addToPlaylistUI(currentId)">📝 Playlist</button>
-    <button class="pill" onclick="downloadNaat(currentId)">⬇️ Download</button>
-    <button class="pill" id="pillSleep" onclick="sleepQuick()">⏾ Sleep</button>
-  </div>
-  <div class="prow"><span class="stbar" id="fsNote"></span></div>
-  <div class="adslot" id="adFs">AdMob Interstitial (disabled)</div>
-</div>
-
-<!-- BOTTOM NAV -->
 <div id="nav">
-  <button data-s="home" class="on" onclick="go('home')"><span class="e">🏠</span>Home</button>
-  <button data-s="khwans" onclick="go('khwans')"><span class="e">🎤</span>Khwan</button>
-  <button data-s="cats" onclick="go('cats')"><span class="e">📂</span>Cat</button>
-  <button data-s="favs" onclick="go('favs')"><span class="e">❤️</span>Fav</button>
-  <button data-s="plists" onclick="go('plists')"><span class="e">📝</span>Lists</button>
-  <button data-s="wnaats" onclick="go('wnaats')"><span class="e">📖</span>Kalam</button>
+  <button id="nv-home" class="on" onclick="go('home')"><span class="e">📚</span>کتابیں</button>
+  <button id="nv-search" onclick="go('search')"><span class="e">🔍</span>تلاش</button>
+  <button id="nv-bm" onclick="go('bm')"><span class="e">🔖</span>بک مارک</button>
+  <button id="nv-menu" onclick="go('menu')"><span class="e">☰</span>مینیو</button>
 </div>
-
 <div id="toast"></div>
-<audio id="au" preload="metadata"></audio>
-
 <script>
-/* ================= JILAN NAAT WORLD v1.0 ================= */
 'use strict';
-/* AdMob config — DISABLED by default. Fill IDs to enable. */
-var ADMOB={enabled:false,bannerId:'',interstitialId:''};
-
-var CATS=['Hamd','Naat-e-Rasool ﷺ','Salam','Manqabat','Milad','Ramadan','Urdu','Punjabi','Arabic'];
-var LANGS=['Urdu','Punjabi','Arabic','English'];
-
-/* ---- Seed data: SAMPLE audio only, clearly labeled. No real recordings claimed. ---- */
-function seedKhwans(){return [
- {id:'k1',name:'Owais Raza Qadri',bio:'Bulbul-e-Madina — sample collection'},
- {id:'k2',name:'Muhammad Taha Al Junaid',bio:'Sample collection'},
- {id:'k3',name:'Farhan Ali Qadri',bio:'Sample collection'},
- {id:'k4',name:'Hafiz Tahir Qadri',bio:'Sample collection'},
- {id:'k5',name:'Jilan Studio',bio:'Demo / sample naatein'}
+/* ================= STATE ================= */
+var S={books:[],kalam:[],bm:[],font:20,theme:'light',admin:false,pin:'1234'};
+var stack=['home'], curBook=null, curLetter='سب', bookPage=0, curKalam=null, romanOn=false;
+var PAGE=60;
+var ALPHA=['سب','آ','ا','ب','پ','ت','ٹ','ث','ج','چ','ح','خ','د','ڈ','ذ','ر','ڑ','ز','ژ','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ہ','ھ','ء','ی','ے'];
+var SCHEMES=[
+ {bg1:'#0e5a43',bg2:'#072a20',acc:'#c9a227',dome:'#e8c85a'},
+ {bg1:'#1565c0',bg2:'#0d2c54',acc:'#e8c85a',dome:'#ffe9a8'},
+ {bg1:'#6a1b3a',bg2:'#3a0e20',acc:'#e8c85a',dome:'#ffd9a8'},
+ {bg1:'#00695c',bg2:'#00332e',acc:'#c9a227',dome:'#b2ffe0'},
+ {bg1:'#4a148c',bg2:'#220a40',acc:'#e8c85a',dome:'#e3c8ff'}
+];
+/* ============ SEEDS (verified opening verses, 2+ web sources) ============ */
+function seedBooks(){return [
+ {id:'b1',title:'حدائقِ بخشش',poetShort:'اعلیٰ حضرت',poetName:'امام احمد رضا خان',honor:'رحمۃ اللہ علیہ',
+  bio:'مجددِ دین و ملت — اردو نعت کے عظیم شاعر',scheme:0,ord:1},
+ {id:'b2',title:'وسائلِ بخشش',poetShort:'امیرِ اہلِ سنت',poetName:'مولانا محمد الیاس عطار قادری',honor:'دامت برکاتہم العالیہ',
+  bio:'بانیِ دعوتِ اسلامی',scheme:1,ord:2}
 ];}
-function seedNaats(){return [
- {id:'n1',khwanId:'k1',title:'Sample Naat 1 (demo)',cat:'Naat-e-Rasool ﷺ',lang:'Urdu',url:'audio/sample1.mp3',featured:true,sample:true},
- {id:'n2',khwanId:'k1',title:'Sample Hamd 1 (demo)',cat:'Hamd',lang:'Urdu',url:'audio/sample2.mp3',featured:false,sample:true},
- {id:'n3',khwanId:'k2',title:'Sample Naat 2 (demo)',cat:'Naat-e-Rasool ﷺ',lang:'Urdu',url:'audio/sample3.mp3',featured:true,sample:true},
- {id:'n4',khwanId:'k3',title:'Sample Salam (demo)',cat:'Salam',lang:'Urdu',url:'audio/sample4.mp3',featured:false,sample:true},
- {id:'n5',khwanId:'k4',title:'Sample Manqabat (demo)',cat:'Manqabat',lang:'Urdu',url:'audio/sample1.mp3',featured:false,sample:true},
- {id:'n6',khwanId:'k5',title:'Sample Milad Naat (demo)',cat:'Milad',lang:'Punjabi',url:'audio/sample2.mp3',featured:true,sample:true},
- {id:'n7',khwanId:'k5',title:'Sample Ramadan (demo)',cat:'Ramadan',lang:'Arabic',url:'audio/sample3.mp3',featured:false,sample:true},
- {id:'n8',khwanId:'k2',title:'Sample Naat 3 (demo)',cat:'Urdu',lang:'Urdu',url:'audio/sample4.mp3',featured:false,sample:true}
+function seedKalam(){return [
+ {id:'k1',bookId:'b1',title:'مصطفیٰ جانِ رحمت پہ لاکھوں سلام',lang:'Urdu',cat:'نعتِ رسول ﷺ',
+  urdu:'مصطفیٰ جانِ رحمت پہ لاکھوں سلام\nشمعِ بزمِ ہدایت پہ لاکھوں سلام\nہم غریبوں کے آقا پہ بے حد درود\nہم فقیروں کی ثروت پہ لاکھوں سلام',
+  roman:'Mustafa Jaan-e-Rehmat pe lakhon salaam\nSham-e bazm-e hidayat pe lakhon salaam\nHum ghareebon ke Aaqa pe behad durood\nHum faqeeron ki sarwat pe lakhon salaam',
+  source:'مشہور ابتدائی اشعار — متعدد ویب ذرائع سے تصدیق شدہ',status:'verified',
+  note:'انتخاب — مکمل کلام نہیں، مزید اشعار جلد',copyright:'کلاسیکی کلام'},
+ {id:'k2',bookId:'b1',title:'سب سے اولیٰ و اعلیٰ ہمارا نبی',lang:'Urdu',cat:'نعتِ رسول ﷺ',
+  urdu:'سب سے اولیٰ و اعلیٰ ہمارا نبی\nسب سے بالا و والا ہمارا نبی\nاپنے مولیٰ کا پیارا ہمارا نبی\nدونوں عالم کا دولھا ہمارا نبی',
+  roman:'Sab se aula-o-aala hamara Nabi\nSab se bala-o-wala hamara Nabi\nApne Maula ka pyara hamara Nabi\nDonon aalam ka dulha hamara Nabi',
+  source:'مشہور ابتدائی اشعار — متعدد ویب ذرائع سے تصدیق شدہ',status:'verified',
+  note:'انتخاب — مکمل کلام نہیں، مزید اشعار جلد',copyright:'کلاسیکی کلام'},
+ {id:'k3',bookId:'b1',title:'وہ سوئے لالہ زار پھرتے ہیں',lang:'Urdu',cat:'نعتِ رسول ﷺ',
+  urdu:'وہ سوئے لالہ زار پھرتے ہیں\nتیرے دن اے بہار پھرتے ہیں\nجو ترے در سے یار پھرتے ہیں\nدر بدر یوں ہی خوار پھرتے ہیں',
+  roman:'Woh sooe lalazaar phirte hain\nTere din ae bahaar phirte hain\nJo tere dar se yaar phirte hain\nDar badar yoon hi khwaar phirte hain',
+  source:'مشہور ابتدائی اشعار — متعدد ویب ذرائع سے تصدیق شدہ (حدائقِ بخشش)',status:'verified',
+  note:'انتخاب — مکمل کلام نہیں، مزید اشعار جلد',copyright:'کلاسیکی کلام'},
+ {id:'k4',bookId:'b1',title:'لم یاتِ نظیرُک فی نظر',lang:'Arabic',cat:'نعتِ رسول ﷺ',
+  urdu:'لَمْ يَأْتِ نَظِيرُكَ فِي نَظَرٍ\nمثلِ تو نہ شد پیدا جانا',
+  roman:'Lam yati nazeeruka fi nazarin\nMisl-e tu na shud paida jaana',
+  source:'مشہور عربی مصرع — تصدیق شدہ',status:'verified',
+  note:'انتخاب',copyright:'کلاسیکی کلام'}
 ];}
-
-/* ---- Store ---- */
-var S={favs:[],playlists:[],history:[],recent:[],settings:{theme:'dark',lang:'ro',pin:'1234',sleep:0},
-       khwans:[],naats:[],admin:false};
-function save(){try{localStorage.setItem('jnw1',JSON.stringify({favs:S.favs,playlists:S.playlists,history:S.history,recent:S.recent,settings:S.settings,khwans:S.khwans,naats:S.naats}));}catch(e){}}
-function load(){try{var d=JSON.parse(localStorage.getItem('jnw1')||'null');
- if(d){S.favs=d.favs||[];S.playlists=d.playlists||[];S.history=d.history||[];S.recent=d.recent||[];
-  S.settings=Object.assign(S.settings,d.settings||{});S.khwans=d.khwans||[];S.naats=d.naats||[];}}catch(e){}
- if(!S.khwans.length)S.khwans=seedKhwans();
- if(!S.naats.length)S.naats=seedNaats();
+/* ============ PERSISTENCE ============ */
+var LSKEY='jnwb1';
+function save(){try{localStorage.setItem(LSKEY,JSON.stringify({books:S.books,kalam:S.kalam,bm:S.bm,font:S.font,theme:S.theme,pin:S.pin}));}catch(e){}}
+function load(){
+ try{var d=JSON.parse(localStorage.getItem(LSKEY)||'null');
+  if(d){if(d.books&&d.books.length)S.books=d.books;if(d.kalam&&d.kalam.length)S.kalam=d.kalam;
+   if(d.bm)S.bm=d.bm;if(d.font)S.font=d.font;if(d.theme)S.theme=d.theme;if(d.pin)S.pin=d.pin;}
+ }catch(e){}
+ /* migrate from old v1 (wpoets/wnaats) */
+ try{var o=JSON.parse(localStorage.getItem('jnw1')||'null');
+  if(o&&!S._migrated){
+   if(o.wpoets&&o.wpoets.length&&(!S.books||!S.books.length)){
+    S.books=o.wpoets.map(function(p,i){return {id:p.id,title:p.short,poetShort:p.short,poetName:p.name,honor:p.honor||'',bio:p.bio||'',scheme:i%SCHEMES.length,ord:p.ord||99};});
+   }
+   if(o.wnaats&&o.wnaats.length&&(!S.kalam||!S.kalam.length)){
+    S.kalam=o.wnaats.map(function(w,i){return {id:w.id,bookId:w.poetId,title:w.title,urdu:w.urdu,roman:w.roman||'',lang:w.lang||'Urdu',cat:w.cat||'نعتِ رسول ﷺ',source:w.source||'',status:w.status||'pending',note:'',copyright:w.copyright||''};});
+   }
+   if(o.wfavs&&o.wfavs.length)S.bm=o.wfavs;
+   S._migrated=true;
+  }
+ }catch(e){}
+ if(!S.books||!S.books.length)S.books=seedBooks();
+ if(!S.kalam||!S.kalam.length)S.kalam=seedKalam();
+ S.bm=S.bm||[];S.font=S.font||20;S.theme=S.theme||'light';S.pin=S.pin||'1234';
+ save();
 }
-function khwanName(id){var k=S.khwans.find(function(x){return x.id===id;});return k?k.name:'—';}
-function naatById(id){return S.naats.find(function(x){return x.id===id;});}
-
-/* ---- helpers ---- */
+/* ============ HELPERS ============ */
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},2200);}
 function showErr(m){var e=$('err');e.textContent='⚠️ '+m;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
-function fmtT(s){if(!isFinite(s)||s<0)s=0;s=Math.floor(s);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
-function sampleBadge(n){return n.sample?'<span class="badge">SAMPLE</span>':'';}
-function artFor(n){return n.art||'icon-192.png';}
-
-/* ---- Router ---- */
-var stack=['home'];
-function go(id){var cur=stack[stack.length-1];if(cur!==id)stack.push(id);render(id);
- var btns=document.querySelectorAll('#nav button');for(var i=0;i<btns.length;i++)btns[i].classList.toggle('on',btns[i].dataset.s===id);
- window.scrollTo(0,0);}
-function goBack(){if(stack.length>1){stack.pop();var id=stack[stack.length-1];render(id);} }
-window.__atMenu=function(){return stack[stack.length-1]==='home';};
-window.__goMenu=function(){stack=['home'];render('home');};
-window.__goBack=function(){goBack();};
+function bookById(id){return S.books.find(function(b){return b.id===id;});}
+function kalamById(id){return S.kalam.find(function(k){return k.id===id;});}
+function kalamCount(bid){return S.kalam.filter(function(k){return k.bookId===bid;}).length;}
+function vBadge(k){return k.status==='verified'?'<span class="vbadge vok">✅</span>':'<span class="vbadge vpend">⏳</span>';}
+/* ============ BOOK COVER (original SVG art, emerald/gold) ============ */
+function coverSVG(b){
+ var sc=SCHEMES[(b.scheme||0)%SCHEMES.length];
+ var t=esc(b.title||''), p=esc(b.poetShort||'');
+ return '<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+t+'">'
+ +'<defs><linearGradient id="g'+b.id+'" x1="0" y1="0" x2="0" y2="1">'
+ +'<stop offset="0" stop-color="'+sc.bg1+'"/><stop offset="1" stop-color="'+sc.bg2+'"/></linearGradient></defs>'
+ +'<rect x="0" y="0" width="200" height="260" rx="10" fill="url(#g'+b.id+')"/>'
+ +'<rect x="8" y="8" width="184" height="244" rx="8" fill="none" stroke="'+sc.acc+'" stroke-width="3"/>'
+ +'<rect x="16" y="16" width="168" height="228" rx="5" fill="none" stroke="'+sc.acc+'" stroke-width="1" opacity=".5"/>'
+ /* minarets */
+ +'<rect x="34" y="70" width="10" height="70" fill="'+sc.dome+'" opacity=".9"/>'
+ +'<circle cx="39" cy="64" r="7" fill="'+sc.dome+'" opacity=".9"/><rect x="37.5" y="48" width="3" height="12" fill="'+sc.dome+'"/>'
+ +'<rect x="156" y="70" width="10" height="70" fill="'+sc.dome+'" opacity=".9"/>'
+ +'<circle cx="161" cy="64" r="7" fill="'+sc.dome+'" opacity=".9"/><rect x="159.5" y="48" width="3" height="12" fill="'+sc.dome+'"/>'
+ /* dome */
+ +'<path d="M100 40 C 70 60, 62 84, 62 100 L138 100 C138 84, 130 60, 100 40 Z" fill="'+sc.dome+'"/>'
+ +'<rect x="60" y="100" width="80" height="42" fill="'+sc.dome+'" opacity=".92"/>'
+ +'<rect x="97" y="28" width="6" height="16" fill="'+sc.acc+'"/><circle cx="100" cy="26" r="4" fill="'+sc.acc+'"/>'
+ +'<rect x="60" y="96" width="80" height="6" fill="'+sc.acc+'" opacity=".7"/>'
+ /* arch */
+ +'<path d="M30 150 Q100 128 170 150" fill="none" stroke="'+sc.acc+'" stroke-width="2.5" opacity=".8"/>'
+ /* title */
+ +'<text x="100" y="196" text-anchor="middle" font-family="\'Noto Nastaliq Urdu\',serif" font-size="24" font-weight="700" fill="#ffffff">'+t+'</text>'
+ +'<text x="100" y="232" text-anchor="middle" font-family="\'Noto Nastaliq Urdu\',serif" font-size="14" fill="'+sc.acc+'">'+p+'</text>'
+ +'</svg>';
+}
+/* ============ NAV ============ */
+function go(id){var cur=stack[stack.length-1];if(cur!==id){stack.push(id);}render(id);
+ var nv={home:'nv-home',search:'nv-search',bm:'nv-bm',menu:'nv-menu'};
+ Object.keys(nv).forEach(function(k){$(nv[k]).classList.toggle('on',k===id);});}
+function goBack(){if(stack.length>1){stack.pop();var id=stack[stack.length-1];render(id);
+ var nv={home:'nv-home',search:'nv-search',bm:'nv-bm',menu:'nv-menu'};
+ Object.keys(nv).forEach(function(k){$(nv[k]).classList.toggle('on',k===id);});}}
 function render(id){
- var ss=document.querySelectorAll('.screen');for(var i=0;i<ss.length;i++)ss[i].classList.remove('on');
- var el=$(id);if(el)el.classList.add('on');
- if(id==='home')renderHome();else if(id==='khwans')renderKhwans($('khwanQ').value||'');
- else if(id==='cats')renderCats();else if(id==='favs')renderFavs();
- else if(id==='plists')renderPlists();else if(id==='dls')renderDls();
- else if(id==='hist')renderHist();else if(id==='admin')renderAdmin();
- var btns=document.querySelectorAll('#nav button');for(var j=0;j<btns.length;j++)btns[j].classList.toggle('on',btns[j].dataset.s===id);
+ document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+ var el=$('scr-'+id);if(el)el.classList.add('on');else{showErr('Screen "'+id+'" nahi mili');return;}
+ window.scrollTo(0,0);
+ if(id==='home')renderHome();
+ else if(id==='book')renderBook();
+ else if(id==='reader')renderReader();
+ else if(id==='search'){$('gSearchQ').value='';$('gSearchRes').innerHTML='';}
+ else if(id==='bm')renderBm();
+ else if(id==='menu')renderMenu();
 }
-
-/* ---- Home ---- */
-function naatRow(n,extra){
- return '<div class="rowitem" onclick="playNaat(\''+n.id+'\')">'
- +'<img class="thumb" src="'+esc(artFor(n))+'" onerror="this.src=\'icon-192.png\'">'
- +'<div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
- +'<div class="mt">'+esc(khwanName(n.khwanId))+' • '+esc(n.cat)+'</div></div>'
- +(extra||'')+'<button class="icobtn" onclick="toggleFav(\''+n.id+'\',event)">'+(S.favs.indexOf(n.id)>=0?'❤️':'🤍')+'</button></div>';
-}
+/* ============ HOME ============ */
 function renderHome(){
- var r=S.recent.map(naatById).filter(Boolean).slice(0,5);
- $('homeRecent').innerHTML=r.length?'<div class="hdr"><h2>🕐 Haal me Suni</h2></div>'+r.map(function(n){return naatRow(n);}).join(''):'';
- $('homeKhwans').innerHTML=S.khwans.slice(0,8).map(function(k){
-  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
-  return '<div class="khwan" onclick="openKhwan(\''+k.id+'\')"><img src="icon-192.png" onerror="this.src=\'icon-192.png\'"><div class="n">'+esc(k.name)+'<br><span style="color:var(--mut);font-size:11px">'+c+' naatein</span></div></div>';}).join('');
- $('homeFeat').innerHTML=S.naats.filter(function(n){return n.featured;}).slice(0,5).map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi featured naat nahi</div>';
- $('homeCats').innerHTML=CATS.map(function(c){return '<button class="chip" onclick="openCat(\''+esc(c)+'\')">'+esc(c)+'</button>';}).join('');
- var f=S.favs.map(naatById).filter(Boolean).slice(0,3);
- $('homeFavs').innerHTML=f.length?f.map(function(n){return naatRow(n);}).join(''):'<div class="empty">Abhi koi pasandeeda nahi — 🤍 dabayein</div>';
- $('adHome').style.display=ADMOB.enabled?'block':'none';
+ var books=S.books.slice().sort(function(a,b){return (a.ord||99)-(b.ord||99);});
+ $('bookGrid').innerHTML=books.map(function(b){
+  var c=kalamCount(b.id);
+  return '<div class="bcard" onclick="openBook(\''+b.id+'\')">'
+  +coverSVG(b)
+  +'<div class="bt"><div class="n">'+esc(b.title)+'</div>'
+  +'<div class="p">'+esc(b.poetShort||'')+'</div>'
+  +'<span class="badge">📖 '+c+' کلام • انتخاب</span></div></div>';
+ }).join('')||'<div class="empty">کوئی کتاب نہیں — ایڈمن نئی کتاب شامل کرے</div>';
 }
-
-/* ---- Khwans ---- */
-var curKhwan=null;
-function renderKhwans(q){
- q=(q||'').toLowerCase();
- var list=S.khwans.filter(function(k){return k.name.toLowerCase().indexOf(q)>=0;});
- $('khwanList').innerHTML=list.map(function(k){
-  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
-  return '<div class="rowitem" onclick="openKhwan(\''+k.id+'\')"><img class="thumb" style="border-radius:50%" src="icon-192.png">'
-  +'<div class="grow"><div class="nm">'+esc(k.name)+'</div><div class="mt">'+esc(k.bio||'')+' • '+c+' naatein</div></div><span>›</span></div>';}).join('')
-  ||'<div class="empty">Koi Naat Khwan nahi mila</div>';
+/* ============ BOOK VIEW ============ */
+function openBook(bid){curBook=bid;curLetter='سب';bookPage=0;$('bSearchQ').value='';$('bSearchBox').style.display='none';go('book');}
+function toggleBSearch(){var b=$('bSearchBox');b.style.display=b.style.display==='none'?'flex':'none';if(b.style.display!=='none')$('bSearchQ').focus();}
+function firstLetter(t){
+ t=String(t||'').trim();if(!t)return '';
+ var ch=t.charAt(0);
+ if(ch==='آ'||ch==='أ'||ch==='إ')ch='ا';
+ return ch;
 }
-function openKhwan(id){curKhwan=id;$('khwanNQ').value='';renderKhwanHead();renderKhwanNaats('');go('khwan');}
-function renderKhwanHead(){var k=S.khwans.find(function(x){return x.id===curKhwan;});if(!k)return;
- var c=S.naats.filter(function(n){return n.khwanId===curKhwan;}).length;
- $('khwanHead').innerHTML='<div class="card" style="text-align:center"><img src="icon-192.png" style="width:110px;height:110px;border-radius:50%;border:3px solid var(--gold)">'
- +'<h2 style="margin:10px 0 4px">'+esc(k.name)+'</h2><div class="sub">'+esc(k.bio||'')+' • '+c+' naatein</div>'
- +'<div class="stbar">Demo audio — asal recordings admin authorized URLs se shamil karega.</div></div>';
-}
-function renderKhwanNaats(q){
- q=(q||'').toLowerCase();
- var list=S.naats.filter(function(n){return n.khwanId===curKhwan&&n.title.toLowerCase().indexOf(q)>=0;});
- $('khwanNaats').innerHTML=list.map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi naat nahi mili</div>';
-}
-function playAllKhwan(){var l=S.naats.filter(function(n){return n.khwanId===curKhwan;});if(l.length)playQueue(l.map(function(n){return n.id;}));}
-function shuffleKhwan(){var l=S.naats.filter(function(n){return n.khwanId===curKhwan;}).map(function(n){return n.id;});
- for(var i=l.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=l[i];l[i]=l[j];l[j]=t;}
- if(l.length)playQueue(l);}
-
-/* ---- Categories ---- */
-var curCat=null;
-function renderCats(){$('catList').innerHTML=CATS.map(function(c){
- var n=S.naats.filter(function(x){return x.cat===c;}).length;
- return '<div class="rowitem" onclick="openCat(\''+esc(c)+'\')"><div class="grow"><div class="nm">'+esc(c)+'</div><div class="mt">'+n+' naatein</div></div><span>›</span></div>';}).join('');}
-function openCat(c){curCat=c;$('catHead').innerHTML='<h1>📂 '+esc(c)+'</h1>';
- var l=S.naats.filter(function(n){return n.cat===c;});
- $('catNaats').innerHTML=l.map(function(n){return naatRow(n);}).join('')||'<div class="empty">Is category me koi naat nahi</div>';go('catd');}
-
-/* ---- Search ---- */
-function doSearch(q){q=(q||'').trim();$('homeQ').value=q;
- if(stack[stack.length-1]!=='search')go('search');$('searchQ').value=q;
- q=q.toLowerCase();
- if(!q){$('searchRes').innerHTML='<div class="empty">Naat, Naat Khwan ya category likhein</div>';return;}
- var nk=S.naats.filter(function(n){return n.title.toLowerCase().indexOf(q)>=0;});
- var kk=S.khwans.filter(function(k){return k.name.toLowerCase().indexOf(q)>=0;});
- var cc=CATS.filter(function(c){return c.toLowerCase().indexOf(q)>=0;});
- var h='';
- if(kk.length)h+='<h2>🎤 Naat Khwan</h2>'+kk.map(function(k){return '<div class="rowitem" onclick="openKhwan(\''+k.id+'\')"><img class="thumb" style="border-radius:50%" src="icon-192.png"><div class="grow"><div class="nm">'+esc(k.name)+'</div></div><span>›</span></div>';}).join('');
- if(cc.length)h+='<h2>📂 Categories</h2><div class="chips">'+cc.map(function(c){return '<button class="chip" onclick="openCat(\''+esc(c)+'\')">'+esc(c)+'</button>';}).join('')+'</div>';
- if(nk.length)h+='<h2>🎵 Naatein</h2>'+nk.map(function(n){return naatRow(n);}).join('');
- $('searchRes').innerHTML=h||'<div class="empty">Kuch nahi mila — alfaaz badal kar dekhein</div>';
-}
-function clearSearch(){$('searchQ').value='';$('homeQ').value='';doSearch('');}
-
-/* ---- Favorites / Playlists / History ---- */
-function toggleFav(id,ev){if(ev)ev.stopPropagation();
- var i=S.favs.indexOf(id);if(i>=0){S.favs.splice(i,1);toast('🤍 Favorite se hataya');}
- else{S.favs.push(id);toast('❤️ Favorite me shamil');}save();render(stack[stack.length-1]);syncFavPill();}
-function renderFavs(){var l=S.favs.map(naatById).filter(Boolean);
- $('favList').innerHTML=l.length?l.map(function(n){return naatRow(n);}).join(''):'<div class="empty">Abhi koi pasandeeda nahi</div>';}
-function newPlaylist(){var nm=prompt('Playlist ka naam:');if(!nm||!nm.trim())return;
- S.playlists.push({id:'p'+Date.now(),name:nm.trim(),ids:[]});save();renderPlists();toast('📝 Playlist ban gayi');}
-function renderPlists(){$('plistList').innerHTML=S.playlists.map(function(p){
- return '<div class="rowitem" onclick="openPlist(\''+p.id+'\')"><div class="grow"><div class="nm">'+esc(p.name)+'</div><div class="mt">'+p.ids.length+' naatein</div></div><span>›</span></div>';}).join('')
- ||'<div class="empty">Koi playlist nahi — nayi banayein</div>';}
-var curPlist=null;
-function openPlist(id){curPlist=id;renderPlistHead();go('plistd');}
-function renderPlistHead(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(!p)return;
- $('plistHead').innerHTML='<div class="hdr"><h2>📝 '+esc(p.name)+'</h2>'
- +'<button class="btn sm ghost" onclick="renamePlist()">✏️</button><button class="btn sm danger" onclick="delPlist()">🗑</button></div>'
- +'<div class="row2" style="margin:0 16px"><button class="btn sm" onclick="playPlist()">▶️ Play</button></div>';
- $('plistNaats').innerHTML=p.ids.map(naatById).filter(Boolean).map(function(n){
-  return naatRow(n,'<button class="icobtn" onclick="rmFromPlist(\''+n.id+'\',event)">✖</button>');}).join('')||'<div class="empty">Khaali playlist</div>';}
-function renamePlist(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(!p)return;
- var nm=prompt('Naya naam:',p.name);if(nm&&nm.trim()){p.name=nm.trim();save();renderPlistHead();}}
-function delPlist(){if(!confirm('Playlist delete karein?'))return;
- S.playlists=S.playlists.filter(function(x){return x.id!==curPlist;});save();goBack();}
-function playPlist(){var p=S.playlists.find(function(x){return x.id===curPlist;});if(p&&p.ids.length)playQueue(p.ids.slice());}
-function rmFromPlist(nid,ev){ev.stopPropagation();var p=S.playlists.find(function(x){return x.id===curPlist;});
- p.ids=p.ids.filter(function(x){return x!==nid;});save();renderPlistHead();}
-function addToPlaylistUI(nid){
- if(!S.playlists.length){toast('Pehle playlist banayein');go('plists');return;}
- var names=S.playlists.map(function(p,i){return (i+1)+'. '+p.name;}).join('\n');
- var c=prompt('Kis playlist me shamil karein?\n'+names);if(!c)return;
- var i=parseInt(c,10)-1;if(S.playlists[i]){if(S.playlists[i].ids.indexOf(nid)<0){S.playlists[i].ids.push(nid);save();toast('📝 Playlist me shamil');}else toast('Pehle se maujood hai');}}
-function pushHist(id){S.history=S.history.filter(function(x){return x!==id;});S.history.unshift(id);S.history=S.history.slice(0,100);
- S.recent=S.recent.filter(function(x){return x!==id;});S.recent.unshift(id);S.recent=S.recent.slice(0,20);save();}
-function renderHist(){$('histList').innerHTML=S.history.map(naatById).filter(Boolean).map(function(n){return naatRow(n);}).join('')||'<div class="empty">Koi tareekh nahi</div>';}
-function clearHistory(){if(confirm('Tareekh saaf karein?')){S.history=[];save();renderHist();}}
-
-/* ---- Offline downloads (IndexedDB) ---- */
-var idb=null;
-function idbOpen(){return new Promise(function(res,rej){try{
- var r=indexedDB.open('jnw_dl',1);
- r.onupgradeneeded=function(){r.result.createObjectStore('blobs');};
- r.onsuccess=function(){idb=r.result;res();};r.onerror=function(){rej(r.error);};}catch(e){rej(e);}});}
-function idbPut(k,v){return new Promise(function(res,rej){try{var t=idb.transaction('blobs','readwrite');t.objectStore('blobs').put(v,k);t.oncomplete=res;t.onerror=function(){rej(t.error);};}catch(e){rej(e);}});}
-function idbGet(k){return new Promise(function(res,rej){try{var t=idb.transaction('blobs','readonly');var q=t.objectStore('blobs').get(k);q.onsuccess=function(){res(q.result);};q.onerror=function(){rej(q.error);};}catch(e){rej(e);}});}
-function idbDel(k){return new Promise(function(res){try{var t=idb.transaction('blobs','readwrite');t.objectStore('blobs').delete(k);t.oncomplete=res;t.onerror=res;}catch(e){res();}});}
-function idbKeys(){return new Promise(function(res){try{var t=idb.transaction('blobs','readonly');var q=t.objectStore('blobs').getAllKeys();q.onsuccess=function(){res(q.result||[]);};q.onerror=function(){res([]);};}catch(e){res([]);}});}
-var dlState={}; // id -> {pct, done, size, err}
-function isLocalUrl(u){return u&&u.indexOf('http')!==0;}
-function downloadNaat(id){
- var n=naatById(id);if(!n){toast('Naat nahi mili');return;}
- if(!idb){showErr('Downloads is browser me supported nahi (IndexedDB).');return;}
- if(dlState[id]&&dlState[id].done){toast('Pehle se downloaded hai');return;}
- dlState[id]={pct:0,done:false};
- toast('⬇️ Download shuru…');
- var done=function(blob){
-  idbPut('dl_'+id,blob).then(function(){
-   dlState[id]={pct:100,done:true,size:blob.size};save();renderDls();toast('✅ Download mukammal');
-  }).catch(function(){dlState[id].err='save fail';toast('❌ Save fail');});
- };
- if(isLocalUrl(n.url)){
-  fetch(n.url).then(function(r){if(!r.ok)throw 0;return r.blob();}).then(done)
-   .catch(function(){dlState[id].err='fetch fail';showErr('Download fail: file nahi mili');});
- }else{
-  // remote: needs CORS
-  fetch(n.url).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();}).then(done)
-   .catch(function(e){dlState[id].err=String(e&&e.message||e);
-    showErr('Download nahi ho saka — server ijazat nahi deta (CORS).');});
+function filteredKalam(){
+ var q=$('bSearchQ')?$('bSearchQ').value.trim():'';
+ var list=S.kalam.filter(function(k){return k.bookId===curBook;});
+ if(q){var ql=q.toLowerCase();
+  list=list.filter(function(k){return k.title.toLowerCase().indexOf(ql)>=0||k.urdu.indexOf(q)>=0||(k.roman&&k.roman.toLowerCase().indexOf(ql)>=0);});
+ }else if(curLetter!=='سب'){
+  list=list.filter(function(k){return firstLetter(k.title)===curLetter;});
  }
- // fake-ish progress for UX honesty: update on complete only
+ return list;
 }
-function renderDls(){
- if(!idb){$('dlList').innerHTML='<div class="empty">Downloads is browser me supported nahi</div>';$('dlSize').textContent='—';return;}
- idbKeys().then(function(keys){
-  var ids=keys.map(function(k){return String(k).replace(/^dl_/,'');}).filter(function(id){return naatById(id);});
-  var total=0;
-  var rows=ids.map(function(id){
-   var n=naatById(id);var st=dlState[id]||{};
-   return '<div class="rowitem" onclick="playDownloaded(\''+id+'\')">'
-   +'<img class="thumb" src="'+esc(artFor(n))+'" onerror="this.src=\'icon-192.png\'">'
-   +'<div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
-   +'<div class="mt">'+esc(khwanName(n.khwanId))+' • offline ✅</div></div>'
-   +'<button class="icobtn" onclick="delDownload(\''+id+'\',event)">🗑</button></div>';});
-  $('dlList').innerHTML=rows.join('')||'<div class="empty">Koi downloaded naat nahi</div>';
-  // size estimate
-  var ps=ids.map(function(id){return idbGet('dl_'+id).then(function(b){return b?b.size:0;}).catch(function(){return 0;});});
-  Promise.all(ps).then(function(ss){var t=ss.reduce(function(a,b){return a+b;},0);
-   $('dlSize').textContent=(t/1048576).toFixed(2)+' MB';});
- });
+function renderBook(){
+ var b=bookById(curBook);if(!b){goBack();return;}
+ $('bookCov').innerHTML=coverSVG(b);
+ $('bookTitle').textContent=b.title;
+ $('bookPoet').textContent=(b.poetShort||'')+' — '+b.poetName;
+ var total=kalamCount(curBook);
+ $('bookCount').textContent=total;
+ /* alphabet bar: only letters that have entries (plus سب) */
+ var present={};
+ S.kalam.forEach(function(k){if(k.bookId===curBook)present[firstLetter(k.title)]=true;});
+ $('alphaBar').innerHTML=ALPHA.filter(function(l){return l==='سب'||present[l];}).map(function(l){
+  return '<button class="'+(l===curLetter?'on':'')+'" onclick="curLetter=\''+l+'\';bookPage=0;renderBookList()">'+l+'</button>';
+ }).join('');
+ renderBookList();
 }
-function delDownload(id,ev){ev.stopPropagation();if(!confirm('Download delete karein?'))return;
- idbDel('dl_'+id).then(function(){delete dlState[id];renderDls();toast('🗑 Delete ho gaya');});}
-function playDownloaded(id){idbGet('dl_'+id).then(function(b){
- if(!b){toast('File nahi mili');return;}
- var url=URL.createObjectURL(b);var n=naatById(id);
- startPlayback({id:id,title:n.title,khwan:khwanName(n.khwanId),art:artFor(n),sample:n.sample,url:url,objectUrl:true});
-});}
-
-/* ---- Audio engine ---- */
-var au=$('au'),queue=[],qi=-1,currentId=null,repeatMode=0,shuffleOn=false,sleepTO=null,sleepEnd=0;
-function playNaat(id){var n=naatById(id);if(!n){toast('Naat nahi mili');return;}
- queue=[id];qi=0;playAt(0);}
-function playQueue(ids){queue=ids.slice();qi=0;playAt(0);}
-function playAt(i){
- if(i<0||i>=queue.length)return;qi=i;var id=queue[i];var n=naatById(id);
- if(!n){nextTrack();return;}
- if(n.url){startPlayback({id:id,title:n.title,khwan:khwanName(n.khwanId),art:artFor(n),sample:n.sample,url:n.url});}
- else{showErr('Is naat ka audio maujood nahi (unavailable).');nextTrack();}
+function kRow(k,n){
+ return '<div class="krow" onclick="openReader(\''+k.id+'\')">'
+ +'<div class="num">'+n+'</div>'
+ +'<div class="grow"><div class="nm">'+esc(k.title)+vBadge(k)+'</div>'
+ +'<div class="mt">'+esc((k.urdu||'').split('\n')[0].slice(0,60))+'</div></div><span>‹</span></div>';
 }
-function startPlayback(t){
- currentId=t.id;$('fsLoad').style.display='block';
- $('fsTitle').textContent=t.title;$('fsKhwan').textContent=t.khwan;
- $('fsArt').src=t.art;$('fsArt').onerror=function(){this.src='icon-192.png';};
- $('miniArt').src=t.art;$('miniName').textContent=t.title;$('miniKhwan').textContent=t.khwan;
- $('mini').style.display='flex';
- $('fsNote').textContent=t.sample?'⚠️ SAMPLE AUDIO — sirf testing ke liye':'';
- if(t.objectUrl){au.src=t.url;}
- else if(!idb){au.src=t.url;}
- else{
-  // check downloaded first
-  idbGet('dl_'+t.id).then(function(b){
-   if(b){au.src=URL.createObjectURL(b);}else{au.src=t.url;}
-   au.play().catch(function(e){$('fsLoad').style.display='none';showErr('Audio nahi chal saka');});
-  });
-  return;
- }
- au.play().catch(function(e){$('fsLoad').style.display='none';showErr('Audio nahi chal saka');});
- pushHist(t.id);syncFavPill();updatePills();
+function renderBookList(append){
+ var list=filteredKalam();
+ var slice=list.slice(0,(bookPage+1)*PAGE);
+ $('bookList').innerHTML=slice.length
+  ?slice.map(function(k,i){return kRow(k,i+1);}).join('')
+  :'<div class="empty">کوئی کلام نہیں ملا<br><br><span style="font-size:12px">📸 کتاب کے صفحے کی تصویر بھیجیں — ہم ٹائپ کر کے شامل کر دیں گے۔</span></div>';
+ $('moreBtn').style.display=list.length>(bookPage+1)*PAGE?'block':'none';
 }
-au.addEventListener('canplay',function(){$('fsLoad').style.display='none';});
-au.addEventListener('waiting',function(){$('fsLoad').style.display='block';});
-au.addEventListener('playing',function(){$('fsLoad').style.display='none';$('btnPlay').textContent='⏸';});
-au.addEventListener('pause',function(){$('btnPlay').textContent='▶';});
-au.addEventListener('error',function(){
- $('fsLoad').style.display='none';
- var n=naatById(currentId);
- showErr('Audio load nahi ho saka'+(n&&n.url?' (unavailable link)':'')+'.');
-});
-au.addEventListener('timeupdate',function(){
- if(au.duration){$('seek').value=Math.floor(au.currentTime/au.duration*1000);
-  $('tCur').textContent=fmtT(au.currentTime);$('tDur').textContent=fmtT(au.duration);}
-});
-au.addEventListener('ended',function(){
- if(repeatMode===1){au.currentTime=0;au.play().catch(function(){});return;}
- nextTrack(true);
-});
-function togglePlay(ev){if(ev)ev.stopPropagation();if(!currentId){toast('Pehle koi naat chalayein');return;}
- if(au.paused)au.play().catch(function(){});else au.pause();}
-function nextTrack(auto){
- if(!queue.length)return;
- if(shuffleOn&&queue.length>1){var n;do{n=Math.floor(Math.random()*queue.length);}while(n===qi);playAt(n);return;}
- var nx=qi+1;if(nx>=queue.length){if(repeatMode===2){playAt(0);}else if(!auto){playAt(0);}return;}
- playAt(nx);
- if(auto&&repeatMode!==2&&nx>=queue.length){/* stop */}
+/* ============ READER ============ */
+function openReader(kid){curKalam=kid;romanOn=false;go('reader');}
+function renderReader(){
+ var k=kalamById(curKalam);if(!k){goBack();return;}
+ var b=bookById(k.bookId);
+ $('rdCrumb').textContent=k.title.length>28?k.title.slice(0,28)+'…':k.title;
+ $('rdCrumbSub').textContent=b?b.title:'';
+ $('wrTitle').textContent=k.title;
+ $('wrPoet').textContent=b?((b.poetShort||'')+' — '+b.poetName+' '+(b.honor||'')):'';
+ $('wrStatus').innerHTML=k.status==='verified'?'<span class="vbadge vok">✅ تصدیق شدہ</span>':'<span class="vbadge vpend">⏳ تصدیق باقی</span>';
+ $('wrUrdu').textContent=k.urdu;
+ $('wrRoman').textContent=k.roman||'';
+ $('wrRoman').style.display='none';romanOn=false;
+ applyFont();syncBm();
+ /* prominent action row: Copy / Favorite / Share */
+ var bmOn=S.bm.indexOf(curKalam)>=0;
+ document.querySelector('#rdr .rtools').innerHTML=
+  '<button class="tbtn big" onclick="wCopy()">📋 کاپی</button>'
+ +'<button class="tbtn big" id="favBigBtn" onclick="toggleBm()">'+(bmOn?'⭐ محفوظ ہے':'☆ پسند کریں')+'</button>'
+ +'<button class="tbtn big" onclick="wShare()">📤 شیئر</button>'
+ +'<button class="tbtn" onclick="wFont(2)">A+</button>'
+ +'<button class="tbtn" onclick="wFont(-2)">A−</button>'
+ +'<button class="tbtn" id="romanBtn" onclick="toggleRoman()">Roman</button>';
+ var meta='<div class="srcnote">📚 <b>منبع:</b> '+esc(k.source||'—')+'<br>© <b>کاپی رائٹ:</b> '+esc(k.copyright||'—')
+ +'<br>🌐 <b>زبان:</b> '+esc(k.lang||'Urdu')+' • 📂 <b>زمرہ:</b> '+esc(k.cat||'—')+'</div>';
+ if(k.note)meta='<div class="warnbox">📖 <b>'+esc(k.note)+'</b></div>'+meta;
+ if(k.status!=='verified')meta='<div class="warnbox">⏳ <b>تصدیق باقی:</b> صرف تصدیق شدہ ابتدائی اشعار شامل ہیں۔ مکمل مستند متن کی تصدیق باقی ہے — کوئی مصرع خود سے نہیں بنایا گیا۔</div>'+meta;
+ $('wrMeta').innerHTML=meta;
 }
-function prevTrack(){if(au.currentTime>3){au.currentTime=0;return;}playAt(qi>0?qi-1:0);}
-function seekTo(v){if(au.duration)au.currentTime=v/1000*au.duration;}
-function cycleRepeat(){repeatMode=(repeatMode+1)%3;updatePills();
- toast(['Repeat off','🔂 Ek dohrayein','🔁 Sab dohrayein'][repeatMode]);}
-function toggleShuffle(){shuffleOn=!shuffleOn;updatePills();toast(shuffleOn?'🔀 Shuffle on':'🔀 Shuffle off');}
-function updatePills(){$('btnRep').textContent=repeatMode===1?'🔂':repeatMode===2?'🔁':'🔁';
- $('btnRep').classList.toggle('on',repeatMode>0);$('btnShuf').classList.toggle('on',shuffleOn);}
-function syncFavPill(){var on=currentId&&S.favs.indexOf(currentId)>=0;$('pillFav').textContent=on?'❤️ Favorite':'🤍 Favorite';}
-function openFS(ev){if(ev&&ev.target.tagName==='BUTTON')return;$('fs').style.display='flex';}
-function closeFS(){$('fs').style.display='none';}
-/* sleep timer */
-function setSleepUI(){var m=parseInt($('sleepMin').value||'0',10);setSleep(m);}
-function setSleep(m){
- if(sleepTO){clearTimeout(sleepTO);sleepTO=null;}
- if(m>0){sleepTO=setTimeout(function(){au.pause();toast('⏾ Sleep timer: audio rok diya');sleepTO=null;},m*60000);
-  toast('⏾ Sleep timer: '+m+' min');}else toast('⏾ Sleep timer off');
- $('pillSleep').textContent=m>0?'⏾ '+m+'m':'⏾ Sleep';
-}
-function sleepQuick(){var c=prompt('Sleep timer (minutes, 0 = off):','15');if(c===null)return;setSleep(parseInt(c,10)||0);}
-
-/* ---- Admin ---- */
-function adminLogin(){var p=$('adminPin').value;
- if(p===S.settings.pin){S.admin=true;go('admin');toast('✅ Admin login');}else toast('❌ Ghalat PIN');}
-function adminLogout(){S.admin=false;$('adminPin').value='';go('settings');}
-function changePin(){var p=$('newPin').value.trim();
- if(p.length<4){toast('PIN kam az kam 4 hindse');return;}
- S.settings.pin=p;save();$('newPin').value='';toast('✅ PIN tabdeel ho gaya');}
-function renderAdmin(){
- if(!S.admin){go('adminlogin');return;}
- $('adminKhwans').innerHTML=S.khwans.map(function(k){
-  var c=S.naats.filter(function(n){return n.khwanId===k.id;}).length;
-  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(k.name)+'</div><div class="mt">'+c+' naatein</div></div>'
-  +'<button class="icobtn" onclick="khwanForm(\''+k.id+'\')">✏️</button>'
-  +'<button class="icobtn" onclick="delKhwan(\''+k.id+'\')">🗑</button></div>';}).join('');
- $('adminNaats').innerHTML=S.naats.map(function(n){
-  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(n.title)+sampleBadge(n)+'</div>'
-  +'<div class="mt">'+esc(khwanName(n.khwanId))+' • '+esc(n.cat)+(n.featured?' • ⭐':'')+'</div></div>'
-  +'<button class="icobtn" onclick="naatForm(\''+n.id+'\')">✏️</button>'
-  +'<button class="icobtn" onclick="delNaat(\''+n.id+'\')">🗑</button></div>';}).join('');
- $('adminStats').textContent=S.khwans.length+' khwan, '+S.naats.length+' naatein, '+S.favs.length+' favorites';
-}
-function khwanForm(id){
- var k=id?S.khwans.find(function(x){return x.id===id;}):{name:'',bio:''};
- var nm=prompt('Naat Khwan ka naam:',k.name||'');if(nm===null)return;nm=nm.trim();if(!nm)return;
- var bio=prompt('Tafseel (bio):',k.bio||'')||'';
- if(id){k.name=nm;k.bio=bio;}else{S.khwans.push({id:'k'+Date.now(),name:nm,bio:bio});}
- save();renderAdmin();toast('✅ Mehfooz ho gaya');
-}
-function delKhwan(id){if(!confirm('Naat Khwan aur uski naatein delete karein?'))return;
- S.khwans=S.khwans.filter(function(x){return x.id!==id;});
- S.naats=S.naats.filter(function(x){return x.khwanId!==id;});save();renderAdmin();}
-function naatForm(id){
- var n=id?naatById(id):{title:'',khwanId:S.khwans[0]?S.khwans[0].id:'',cat:CATS[1],lang:'Urdu',url:'',featured:false,sample:false};
- var title=prompt('Naat ka naam:',n.title||'');if(title===null)return;title=title.trim();if(!title)return;
- var kh=prompt('Naat Khwan (list):\n'+S.khwans.map(function(k,i){return (i+1)+'. '+k.name;}).join('\n'), '1');
- var ki=Math.max(0,parseInt(kh||'1',10)-1);var khwanId=S.khwans[ki]?S.khwans[ki].id:n.khwanId;
- var cat=prompt('Category:\n'+CATS.map(function(c,i){return (i+1)+'. '+c;}).join('\n'), String(CATS.indexOf(n.cat)+1||2));
- var ci=Math.max(0,parseInt(cat||'2',10)-1);
- var url=prompt('Audio URL (https://… ya khaali = unavailable):',n.url||'');
- if(url===null)return;
- var feat=confirm('Featured (home par) dikhayein? OK=Yes, Cancel=No');
- if(id){n.title=title;n.khwanId=khwanId;n.cat=CATS[ci]||n.cat;n.url=url.trim();n.featured=feat;n.sample=false;}
- else{S.naats.push({id:'n'+Date.now(),title:title,khwanId:khwanId,cat:CATS[ci]||CATS[1],lang:'Urdu',url:url.trim(),featured:feat,sample:false});}
- save();renderAdmin();toast('✅ Naat mehfooz');
-}
-function delNaat(id){if(!confirm('Naat delete karein?'))return;
- S.naats=S.naats.filter(function(x){return x.id!==id;});
- S.favs=S.favs.filter(function(x){return x!==id;});save();renderAdmin();}
-
-/* ---- Settings ---- */
-function toggleTheme(){S.settings.theme=S.settings.theme==='dark'?'light':'dark';save();applyTheme();}
-function applyTheme(){document.body.classList.toggle('light',S.settings.theme==='light');}
-function setLang(l){S.settings.lang=l;save();applyLang();toast('🌐 Language: '+l);}
-function applyLang(){/* labels Roman Urdu default; hook for future */}
-function admobSlots(){var d=ADMOB.enabled?'block':'none';$('adHome').style.display=d;$('adFs').style.display=d;}
-
-/* ---- Init ---- */
-window.onerror=function(m){showErr('Error: '+m);};
-document.addEventListener('DOMContentLoaded',function(){
- load();applyTheme();admobSlots();
- idbOpen().then(function(){renderDls();}).catch(function(){});
- render('home');
- setTimeout(function(){var s=$('splash');s.style.opacity='0';setTimeout(function(){s.style.display='none';},500);},1600);
-});
-</script>
-<script>
-/* ================= WRITTEN NAATS MODULE ================= */
-'use strict';
-/* Honesty: sirf mashhoor ibtedai ashaar jo yaqeen se durust hain. Mukammal kalam 'pending'. */
-function seedWPoets(){return [
- {id:'wp1',short:'Aala Hazrat',name:'Imam Ahmad Raza Khan',honor:'رحمۃ اللہ علیہ',bio:'Mujaddid-e-Deen-o-Millat — Hadaiq-e-Bakhshish ke azeem musannif.'},
- {id:'wp2',short:'Ameer-e-Ahle Sunnat',name:'Maulana Muhammad Ilyas Attar Qadri',honor:'دامت برکاتہم العالیہ',bio:'Bani-e-Dawat-e-Islami.'}
-];}
-function seedWNaats(){return [
- {id:'w1',poetId:'wp1',title:'Mustafa Jaan-e-Rehmat Pe Lakhon Salam',lang:'Urdu',cat:'Naat-e-Rasool ﷺ',
-  urdu:'مصطفیٰ جانِ رحمت پہ لاکھوں سلام\nشمعِ بزمِ ہدایت پہ لاکھوں سلام',
-  roman:'Mustafa Jaan-e-Rehmat pe lakhon salaam\nSham-e bazm-e hidayat pe lakhon salaam',
-  source:'Hadaiq-e-Bakhshish — mashhoor ibtedai ashaar',status:'pending',copyright:'Classic kalam — public domain',audio:''},
- {id:'w2',poetId:'wp1',title:'Sab Se Aula-o-Aala Hamara Nabi',lang:'Urdu',cat:'Naat-e-Rasool ﷺ',
-  urdu:'سب سے اولیٰ و اعلیٰ ہمارا نبی\nسب سے بالا و والا ہمارا نبی',
-  roman:'Sab se aula-o-aala hamara Nabi\nSab se bala-o-wala hamara Nabi',
-  source:'Mashhoor ibtedai ashaar',status:'pending',copyright:'Classic kalam — public domain',audio:''},
- {id:'w3',poetId:'wp1',title:'Woh Sooe Lalazaar Phirte Hain',lang:'Urdu',cat:'Naat-e-Rasool ﷺ',
-  urdu:'وہ سوئے لالہ زار پھرتے ہیں',
-  roman:'Woh sooe lalazaar phirte hain',
-  source:'Mashhoor ibtedai misra',status:'pending',copyright:'Classic kalam — public domain',audio:''},
- {id:'w4',poetId:'wp1',title:'Lam Yati Nazeeruka Fi Nazarin',lang:'Arabic',cat:'Naat-e-Rasool ﷺ',
-  urdu:'لَمْ يَأْتِ نَظِيرُكَ فِي نَظَرٍ',
-  roman:'Lam yati nazeeruka fi nazarin',
-  source:'Mashhoor ibtedai misra (Arabic)',status:'pending',copyright:'Classic kalam — public domain',audio:''}
-];}
-
-/* store extension */
-var _saveW = save;
-save = function(){ _saveW(); try{var d=JSON.parse(localStorage.getItem('jnw1')||'{}');
- d.wpoets=S.wpoets; d.wnaats=S.wnaats; d.wfavs=S.wfavs; d.wfont=S.wfont;
- localStorage.setItem('jnw1',JSON.stringify(d));}catch(e){} };
-document.addEventListener('DOMContentLoaded',function(){
- try{var d=JSON.parse(localStorage.getItem('jnw1')||'null');
-  if(d){ if(d.wpoets&&d.wpoets.length)S.wpoets=d.wpoets; if(d.wnaats&&d.wnaats.length)S.wnaats=d.wnaats;
-   if(d.wfavs)S.wfavs=d.wfavs; if(d.wfont)S.wfont=d.wfont; }
- }catch(e){}
- if(!S.wpoets||!S.wpoets.length)S.wpoets=seedWPoets();
- if(!S.wnaats||!S.wnaats.length)S.wnaats=seedWNaats();
- S.wfavs=S.wfavs||[]; S.wfont=S.wfont||20;
- save();
-});
-
-/* render hook */
-var _renderW = render;
-render = function(id){ _renderW(id);
- if(id==='wnaats')renderWHome(); else if(id==='wpoet')renderWPoet();
- else if(id==='wreader')renderWReader(); else if(id==='wlist')renderWList();
- else if(id==='wfavs')renderWFavs(); };
-
-function wPoetById(pid){return (S.wpoets||[]).find(function(x){return x.id===pid;});}
-function wById(wid){return (S.wnaats||[]).find(function(x){return x.id===wid;});}
-function wStatusBadge(w){return w.status==='verified'?'<span class="okbadge">✅ Verified</span>':'<span class="pendbadge">⏳ Tasdeeq baqi</span>';}
-function wPoetLine(w){var p=wPoetById(w.poetId);return p?(p.short+' — '+p.name):'—';}
-function wRow(w){
- var p=wPoetById(w.poetId);
- return '<div class="rowitem" onclick="openWReader(\''+w.id+'\')">'
- +'<div class="grow"><div class="nm">'+esc(w.title)+wStatusBadge(w)+'</div>'
- +'<div class="mt">'+esc(p?p.short:'')+' • '+esc(w.lang)+' • '+esc(w.cat)+'</div></div><span>›</span></div>';
-}
-
-/* home */
-function renderWHome(){
- var poets=(S.wpoets||[]).slice().sort(function(a,b){return (a.ord||99)-(b.ord||99);});
- var fixed=poets.slice(0,2), others=poets.slice(2);
- var h='';
- fixed.forEach(function(p,i){
-  var c=(S.wnaats||[]).filter(function(w){return w.poetId===p.id;}).length;
-  h+='<div class="poet-card" onclick="openWPoet(\''+p.id+'\')"><div class="pc-e">'+(i===0?'🕌':'🌙')+'</div>'
-  +'<div><div class="pc-n">'+esc(p.short)+' <span class="nastaliq" style="font-size:13px">'+esc(p.honor||'')+'</span></div>'
-  +'<div class="pc-s">'+esc(p.name)+'</div><div class="pc-c">'+c+' kalam</div></div></div>';
- });
- if(others.length){ h+='<div class="hdr"><h2>✒️ Deegar Shora</h2></div>';
-  h+=others.map(function(p){var c=(S.wnaats||[]).filter(function(w){return w.poetId===p.id;}).length;
-   return '<div class="rowitem" onclick="openWPoet(\''+p.id+'\')"><div class="grow"><div class="nm">'+esc(p.short||p.name)+'</div><div class="mt">'+esc(p.name)+' • '+c+' kalam</div></div><span>›</span></div>';}).join('');
- } else { h+='<div class="hdr"><h2>✒️ Deegar Shora</h2></div><div class="empty">Jald shamil honge — admin naye shora add kar sakta hai</div>'; }
- $('wPoets').innerHTML=h;
- var lc=['Urdu','Punjabi','Arabic','English'].concat(CATS.filter(function(c){return['Urdu','Punjabi','Arabic'].indexOf(c)<0;}));
- $('wLangCats').innerHTML=lc.map(function(x){
-  var kind=['Urdu','Punjabi','Arabic','English'].indexOf(x)>=0?'lang':'cat';
-  return '<button class="chip" onclick="openWFilter(\''+kind+'\',\''+esc(x)+'\')">'+esc(x)+'</button>';}).join('');
- $('wFilterList').innerHTML='';
-}
-/* poet detail */
-var curWPoet=null;
-function openWPoet(pid){curWPoet=pid;go('wpoet');}
-function renderWPoet(){var p=wPoetById(curWPoet);if(!p){$('wPoetHead').innerHTML='';$('wPoetList').innerHTML='';return;}
- var list=(S.wnaats||[]).filter(function(w){return w.poetId===curWPoet;});
- $('wPoetHead').innerHTML='<div class="card" style="text-align:center;background:linear-gradient(135deg,#0d4a38,#0a3527);border:2px solid var(--gold)">'
- +'<div style="font-size:20px;font-weight:800;color:var(--gold2)">'+esc(p.short)+'</div>'
- +'<div class="nastaliq" style="color:var(--gold2);font-size:15px;text-align:center">'+esc(p.honor||'')+'</div>'
- +'<div class="sub" style="margin-top:6px">'+esc(p.name)+'</div><div class="stbar">'+esc(p.bio||'')+'</div>'
- +'<div class="warnbox" style="margin:10px 0 0">✒️ <b>Shair</b> (likhne wala) — Naat Khwan (parhne wala) se farq: ye kalam ke musannif hain.</div></div>';
- $('wPoetList').innerHTML=list.length?list.map(wRow).join('')
-  :'<div class="empty">Is shair ka kalam jald shamil kiya jayega — admin verified kalam add karega.</div>';
-}
-/* reader */
-var curW=null, wRomanOn=false;
-function openWReader(wid){curW=wid;wRomanOn=false;go('wreader');}
-function renderWReader(){var w=wById(curW);if(!w)return;
- $('wrTitle').textContent=w.title;
- $('wrPoet').textContent=wPoetLine(w);
- $('wrStatus').innerHTML=wStatusBadge(w);
- $('wrUrdu').textContent=w.urdu;
- $('wrRoman').textContent=w.roman||'';
- $('wrRoman').style.display='none';wRomanOn=false;$('wrRomanBtn').classList.remove('on');
- applyWFont();syncWBm();
- var meta='<div class="srcnote">📚 <b>Manba:</b> '+esc(w.source||'—')+'<br>© <b>Copyright:</b> '+esc(w.copyright||'—')
- +'<br>🌐 <b>Zuban:</b> '+esc(w.lang)+' • 📂 <b>Category:</b> '+esc(w.cat)+'</div>';
- if(w.status!=='verified')meta='<div class="warnbox">⏳ <b>Tasdeeq baqi:</b> sirf mashhoor ibtedai ashaar shamil hain jo yaqeen se durust hain. Mukammal mustanad kalam ki tasdeeq baqi hai — koi misra khud se nahi banaya gaya.</div>'+meta;
- $('wrMeta').innerHTML=meta
- +(w.audio?'<button class="btn" onclick="playWAu()">🎧 Audio Sunein</button>':'');
-}
-function applyWFont(){var u=$('wrUrdu');if(u)u.style.fontSize=(S.wfont||20)+'px';
- var r=$('wrRoman');if(r)r.style.fontSize=Math.max(13,(S.wfont||20)-5)+'px';}
-function wFont(d){S.wfont=Math.min(34,Math.max(14,(S.wfont||20)+d));save();applyWFont();}
-function syncWBm(){$('wrBm').textContent=(S.wfavs||[]).indexOf(curW)>=0?'🔖':'📑';}
-function wToggleBm(){var i=S.wfavs.indexOf(curW);
- if(i>=0){S.wfavs.splice(i,1);toast('🔖 Bookmark hataya');}else{S.wfavs.push(curW);toast('🔖 Bookmark mehfooz');}
- save();syncWBm();}
-function wFullText(){var w=wById(curW);return w.title+'\n'+wPoetLine(w)+'\n\n'+w.urdu;}
-function wCopy(){var t=wFullText();
- if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('📋 Copy ho gaya');}).catch(function(){wCopyFb(t);});}
+function applyFont(){var u=$('wrUrdu');if(u)u.style.fontSize=(S.font||20)+'px';
+ var r=$('wrRoman');if(r)r.style.fontSize=Math.max(13,(S.font||20)-5)+'px';}
+function wFont(d){S.font=Math.min(34,Math.max(14,(S.font||20)+d));save();applyFont();}
+function syncBm(){$('rdBm').textContent=S.bm.indexOf(curKalam)>=0?'🔖':'📑';
+ var f=$('favBigBtn');if(f)f.textContent=S.bm.indexOf(curKalam)>=0?'⭐ محفوظ ہے':'☆ پسند کریں';}
+function toggleBm(){var i=S.bm.indexOf(curKalam);
+ if(i>=0){S.bm.splice(i,1);toast('⭐ پسند سے ہٹایا');}else{S.bm.push(curKalam);toast('⭐ پسند میں محفوظ');}
+ save();syncBm();}
+function fullText(){var k=kalamById(curKalam);var b=bookById(k.bookId);
+ return k.title+'\n'+(b?b.poetShort+' — '+b.poetName:'')+'\n\n'+k.urdu+'\n\n(نعتیہ کلام — Jilan Naat World)';}
+function wCopy(){var t=fullText();
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('📋 کاپی ہو گیا');}).catch(function(){wCopyFb(t);});}
  else wCopyFb(t);}
 function wCopyFb(t){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
- try{document.execCommand('copy');toast('📋 Copy ho gaya');}catch(e){toast('Copy nahi ho saka');}document.body.removeChild(ta);}
-function wShare(){var t=wFullText();
- if(navigator.share){navigator.share({title:wById(curW).title,text:t}).catch(function(){});}
- else wCopy();}
-function wToggleRoman(){wRomanOn=!wRomanOn;$('wrRoman').style.display=wRomanOn?'block':'none';
- $('wrRomanBtn').classList.toggle('on',wRomanOn);}
-function playWAu(){var w=wById(curW);if(!w||!w.audio)return;
- startPlayback({id:'wx_'+w.id,title:w.title,khwan:wPoetLine(w),art:'icon-192.png',sample:false,url:w.audio});}
-/* lang/cat filter list */
-var curWFilter=null;
-function openWFilter(kind,val){curWFilter={kind:kind,val:val};go('wlist');}
-function renderWList(){if(!curWFilter)return;
- $('wListHead').innerHTML='<h1>'+(curWFilter.kind==='lang'?'🌐 ':'📂 ')+esc(curWFilter.val)+'</h1>';
- var list=(S.wnaats||[]).filter(function(w){return curWFilter.kind==='lang'?w.lang===curWFilter.val:w.cat===curWFilter.val;});
- $('wListBody').innerHTML=list.length?list.map(wRow).join(''):'<div class="empty">Koi kalam nahi mila</div>';
+ try{document.execCommand('copy');toast('📋 کاپی ہو گیا');}catch(e){toast('کاپی نہیں ہو سکا');}document.body.removeChild(ta);}
+function wShare(){var t=fullText();
+ if(navigator.share){navigator.share({title:kalamById(curKalam).title,text:t}).catch(function(){});}
+ else{ /* WhatsApp fallback */
+  try{window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');}catch(e){wCopy();}
+  toast('📤 WhatsApp شیئر کھولا گیا');
+ }}
+function toggleRoman(){romanOn=!romanOn;$('wrRoman').style.display=romanOn?'block':'none';
+ var b=$('romanBtn');if(b)b.classList.toggle('on',romanOn);}
+/* ============ GLOBAL SEARCH ============ */
+var _deb=null;
+function debSearch(){clearTimeout(_deb);_deb=setTimeout(doGSearch,250);}
+function doGSearch(){
+ var q=$('gSearchQ').value.trim().toLowerCase();
+ if(!q){$('gSearchRes').innerHTML='';return;}
+ var hits=[];
+ for(var i=0;i<S.kalam.length&&hits.length<60;i++){
+  var k=S.kalam[i],b=bookById(k.bookId);
+  var first=(k.urdu||'').split('\n')[0];
+  if(k.title.toLowerCase().indexOf(q)>=0||k.urdu.indexOf(q)>=0||first.indexOf(q)>=0
+   ||(k.roman&&k.roman.toLowerCase().indexOf(q)>=0)
+   ||(b&&((b.title+' '+(b.poetShort||'')+' '+(b.poetName||'')).toLowerCase().indexOf(q)>=0)))hits.push(k);
+ }
+ $('gSearchRes').innerHTML=hits.length
+  ?hits.map(function(k,i){var b=bookById(k.bookId);
+    return '<div class="krow" onclick="openReader(\''+k.id+'\')"><div class="num">'+(i+1)+'</div>'
+    +'<div class="grow"><div class="nm">'+esc(k.title)+vBadge(k)+'</div>'
+    +'<div class="mt">'+esc(b?b.title:'')+'</div></div><span>‹</span></div>';}).join('')
+  :'<div class="empty">کوئی نتیجہ نہیں ملا</div>';
 }
-/* bookmarks */
-function renderWFavs(){var l=(S.wfavs||[]).map(wById).filter(Boolean);
- $('wFavList').innerHTML=l.length?l.map(wRow).join(''):'<div class="empty">Koi bookmark nahi — reader me 🔖 dabayein</div>';}
-
-/* search integration */
-var _doSearchW = doSearch;
-doSearch = function(q){ _doSearchW(q);
- q=(q||'').trim().toLowerCase(); if(!q)return;
- var hits=(S.wnaats||[]).filter(function(w){
-  var p=wPoetById(w.poetId); var first=(w.urdu||'').split('\n')[0];
-  return w.title.toLowerCase().indexOf(q)>=0 || w.urdu.indexOf(q)>=0 || first.indexOf(q)>=0
-   || (w.roman&&w.roman.toLowerCase().indexOf(q)>=0) || (p&&(p.name+' '+p.short).toLowerCase().indexOf(q)>=0);
+/* ============ BOOKMARKS ============ */
+function renderBm(){
+ var l=S.bm.map(kalamById).filter(Boolean);
+ $('bmList').innerHTML=l.length
+  ?l.map(function(k,i){var b=bookById(k.bookId);
+    return '<div class="krow" onclick="openReader(\''+k.id+'\')"><div class="num">'+(i+1)+'</div>'
+    +'<div class="grow"><div class="nm">'+esc(k.title)+vBadge(k)+'</div>'
+    +'<div class="mt">'+esc(b?b.title:'')+'</div></div><span>‹</span></div>';}).join('')
+  :'<div class="empty">⭐ کوئی پسندیدہ کلام نہیں<br>ریڈر میں ⭐ دبا کر محفوظ کریں</div>';
+}
+/* ============ MENU / THEME ============ */
+function renderMenu(){$('themeName').textContent=S.theme==='dark'?'ڈارک':'لائٹ';
+ if(!S.admin){$('adminGate').style.display='block';$('adminBody').style.display='none';}}
+function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme();renderMenu();}
+function applyTheme(){document.body.classList.toggle('dark',S.theme==='dark');}
+/* ============ ADMIN ============ */
+function adminLogin(){if($('adminPin').value===S.pin){S.admin=true;renderAdminBody();toast('✅ خوش آمدید');}else toast('❌ غلط PIN');}
+function adminLogout(){S.admin=false;$('adminPin').value='';renderMenu();}
+function renderAdminBody(){
+ if(!S.admin)return;
+ $('adminGate').style.display='none';$('adminBody').style.display='block';
+ var bh=S.books.slice().sort(function(a,b){return(a.ord||99)-(b.ord||99);}).map(function(b){
+  var c=kalamCount(b.id);
+  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(b.title)+'</div>'
+  +'<div class="mt">'+esc(b.poetShort||'')+' • '+c+' کلام • ترتیب '+(b.ord||99)+'</div></div>'
+  +'<button class="btn sm ghost" onclick="bookForm(\''+b.id+'\')">✏️</button>'
+  +'<button class="btn sm danger" onclick="delBook(\''+b.id+'\')">🗑</button></div>';
+ }).join('');
+ var kh=S.kalam.slice(0,200).map(function(k){var b=bookById(k.bookId);
+  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(k.title)+vBadge(k)+'</div>'
+  +'<div class="mt">'+esc(b?b.title:'')+'</div></div>'
+  +'<button class="btn sm ghost" onclick="toggleStatus(\''+k.id+'\')">'+(k.status==='verified'?'✅':'⏳')+'</button>'
+  +'<button class="btn sm ghost" onclick="kalamForm(\''+k.id+'\')">✏️</button>'
+  +'<button class="btn sm danger" onclick="delKalam(\''+k.id+'\')">🗑</button></div>';
+ }).join('');
+ $('adminBody').innerHTML='<div class="hdr"><h2>📚 کتابیں</h2><button class="btn sm" onclick="bookForm()">＋ کتاب</button></div>'+bh
+ +'<div class="hdr"><h2>📖 کلام ('+S.kalam.length+')</h2><button class="btn sm" onclick="kalamForm()">＋ کلام</button></div>'
+ +(kh||'<div class="empty">کوئی کلام نہیں</div>')
+ +(S.kalam.length>200?'<div class="sub">پہلے 200 دکھائے گئے — تلاش/کتاب سے مخصوص کلام کھولیں</div>':'')
+ +'<div class="hdr"><h2>📥 بلک امپورٹ</h2></div>'
+ +'<div class="sub">فارمیٹ: ہر کلام — پہلی سطر عنوان، باقی اردو متن۔ کلام "---" لائن سے الگ کریں۔</div>'
+ +'<select class="sel" id="bulkBook">'+S.books.map(function(b){return '<option value="'+b.id+'">'+esc(b.title)+'</option>';}).join('')+'</select>'
+ +'<textarea class="ta" id="bulkText" placeholder="عنوان 1\nمصرع 1\nمصرع 2\n---\nعنوان 2\nمصرع 1"></textarea>'
+ +'<button class="btn" onclick="bulkImport()">📥 امپورٹ کریں</button>'
+ +'<div class="warnbox">⚠️ صرف تصدیق شدہ کلام شامل کریں۔ بلک امپورٹ "⏳ تصدیق باقی" کے ساتھ محفوظ ہوتا ہے۔ کوئی مصرع خود سے نہ بنائیں۔</div>'
+ +'<div class="hdr"><h2>🔑 PIN</h2></div>'
+ +'<button class="btn ghost sm" onclick="changePin()">PIN بدلیں</button> '
+ +'<button class="btn ghost sm" onclick="adminLogout()">لاگ آؤٹ</button>';
+}
+function changePin(){var p=prompt('نیا PIN:',S.pin);if(p&&p.trim()){S.pin=p.trim();save();toast('✅ PIN بدل گیا');}}
+function bookForm(id){
+ var b=id?bookById(id):{title:'',poetShort:'',poetName:'',honor:'',bio:'',scheme:0,ord:99};
+ var t=prompt('کتاب کا عنوان:',b.title||'');if(t===null)return;t=t.trim();if(!t)return;
+ var ps=prompt('شاعر کا مختصر نام:',b.poetShort||'')||'';
+ var pn=prompt('شاعر کا پورا نام:',b.poetName||'')||'';
+ var hn=prompt('اعزازی کلمات:',b.honor||'')||'';
+ var bio=prompt('مختصر تعارف:',b.bio||'')||'';
+ var ord=parseInt(prompt('ترتیب نمبر:',b.ord||99)||'99',10)||99;
+ if(id){b.title=t;b.poetShort=ps;b.poetName=pn;b.honor=hn;b.bio=bio;b.ord=ord;}
+ else S.books.push({id:'b'+Date.now(),title:t,poetShort:ps,poetName:pn,honor:hn,bio:bio,scheme:S.books.length%SCHEMES.length,ord:ord});
+ save();renderAdminBody();renderHome();toast('✅ کتاب محفوظ');
+}
+function delBook(id){
+ var n=kalamCount(id);
+ if(!confirm('کتاب'+(n?' اور اس کے '+n+' کلام':'')+' حذف کریں؟'))return;
+ S.books=S.books.filter(function(x){return x.id!==id;});
+ var delIds=S.kalam.filter(function(k){return k.bookId===id;}).map(function(k){return k.id;});
+ S.kalam=S.kalam.filter(function(k){return k.bookId!==id;});
+ S.bm=S.bm.filter(function(x){return delIds.indexOf(x)<0;});
+ save();renderAdminBody();renderHome();
+}
+function kalamForm(id){
+ var k=id?kalamById(id):{title:'',bookId:(S.books[0]||{}).id||'',urdu:'',roman:'',lang:'Urdu',cat:'نعتِ رسول ﷺ',source:'',status:'pending',note:'',copyright:''};
+ var t=prompt('کلام کا عنوان:',k.title||'');if(t===null)return;t=t.trim();if(!t)return;
+ var bl=S.books.map(function(b,i){return (i+1)+'. '+b.title;}).join('\n');
+ var bi=parseInt(prompt('کتاب منتخب کریں:\n'+bl,'1')||'1',10)-1;
+ var bookId=(S.books[bi]||{}).id||k.bookId;
+ var urdu=prompt('اردو متن (صرف تصدیق شدہ):',k.urdu||'');if(urdu===null)return;
+ var roman=prompt('رومن اردو (اختیاری):',k.roman||'')||'';
+ var lang=prompt('زبان (Urdu/Punjabi/Arabic):',k.lang||'Urdu')||'Urdu';
+ var cat=prompt('زمرہ:',k.cat||'نعتِ رسول ﷺ')||'نعتِ رسول ﷺ';
+ var source=prompt('منبع/حوالہ:',k.source||'')||'';
+ var note=prompt('نوٹ (مثلاً: انتخاب — مزید اشعار جلد):',k.note||'')||'';
+ var ver=confirm('کیا یہ کلام مکمل تصدیق شدہ ہے؟\nOK = تصدیق شدہ، Cancel = تصدیق باقی');
+ if(id){k.title=t;k.bookId=bookId;k.urdu=urdu;k.roman=roman;k.lang=lang;k.cat=cat;k.source=source;k.note=note;k.status=ver?'verified':'pending';}
+ else S.kalam.push({id:'k'+Date.now(),title:t,bookId:bookId,urdu:urdu,roman:roman,lang:lang,cat:cat,source:source,status:ver?'verified':'pending',note:note,copyright:''});
+ save();renderAdminBody();toast('✅ کلام محفوظ ('+(ver?'تصدیق شدہ':'تصدیق باقی')+')');
+}
+function delKalam(id){if(!confirm('کلام حذف کریں؟'))return;
+ S.kalam=S.kalam.filter(function(k){return k.id!==id;});
+ S.bm=S.bm.filter(function(x){return x!==id;});
+ save();renderAdminBody();}
+function toggleStatus(id){var k=kalamById(id);if(!k)return;
+ k.status=k.status==='verified'?'pending':'verified';save();renderAdminBody();
+ toast(k.status==='verified'?'✅ تصدیق شدہ':'⏳ تصدیق باقی');}
+function bulkImport(){
+ var bookId=$('bulkBook').value;
+ var txt=$('bulkText').value.trim();
+ if(!txt){toast('❌ متن خالی ہے');return;}
+ var blocks=txt.split(/\n---+\n/);
+ var n=0;
+ blocks.forEach(function(bl){
+  var lines=bl.split('\n').map(function(s){return s.trim();}).filter(function(s){return s;});
+  if(lines.length<1)return;
+  var title=lines[0],urdu=lines.slice(1).join('\n');
+  S.kalam.push({id:'k'+Date.now()+n,title:title,bookId:bookId,urdu:urdu||'(متن جلد شامل ہوگا)',roman:'',lang:'Urdu',cat:'نعتِ رسول ﷺ',
+   source:'بلک امپورٹ — تصدیق باقی',status:'pending',note:'انتخاب',copyright:''});
+  n++;
  });
- if(hits.length)$('searchRes').innerHTML+='<h2>📖 Tehreeri Naatein</h2>'+hits.map(wRow).join('');
-};
-
-/* admin integration */
-var _renderAdminW = renderAdmin;
-renderAdmin = function(){ _renderAdminW(); if(S.admin)renderWAdmin(); };
-function renderWAdmin(){
- var ph=(S.wpoets||[]).map(function(p){var c=(S.wnaats||[]).filter(function(w){return w.poetId===p.id;}).length;
-  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(p.short)+'</div><div class="mt">'+esc(p.name)+' • '+c+' kalam</div></div>'
-  +'<button class="icobtn" onclick="wPoetForm(\''+p.id+'\')">✏️</button><button class="icobtn" onclick="wDelPoet(\''+p.id+'\')">🗑</button></div>';}).join('');
- var nh=(S.wnaats||[]).map(function(w){
-  return '<div class="rowitem"><div class="grow"><div class="nm">'+esc(w.title)+wStatusBadge(w)+'</div><div class="mt">'+esc(wPoetLine(w))+'</div></div>'
-  +'<button class="icobtn" onclick="wToggleStatus(\''+w.id+'\')" title="Verify toggle">'+(w.status==='verified'?'✅':'⏳')+'</button>'
-  +'<button class="icobtn" onclick="wNaatForm(\''+w.id+'\')">✏️</button><button class="icobtn" onclick="wDelNaat(\''+w.id+'\')">🗑</button></div>';}).join('');
- $('wAdminBox').innerHTML='<div class="hdr"><h2>✒️ Shora</h2><button class="btn sm" onclick="wPoetForm()">＋ Shair</button></div>'+ph
- +'<div class="hdr"><h2>📖 Kalam</h2><button class="btn sm" onclick="wNaatForm()">＋ Kalam</button></div>'+(nh||'<div class="empty">Koi kalam nahi</div>')
- +'<div class="warnbox">⚠️ Sirf tasdeeq-shuda kalam publish karein. ⏳ wale entries users ko "Tasdeeq baqi" badge ke sath nazar aayenge. Koi misra khud se na banayein.</div>';
+ save();$('bulkText').value='';renderAdminBody();
+ toast('✅ '+n+' کلام امپورٹ (تصدیق باقی)');
 }
-function wPoetForm(id){
- var p=id?wPoetById(id):{short:'',name:'',honor:'',bio:''};
- var short=prompt('Mukhtasar naam (misal: Aala Hazrat):',p.short||'');if(short===null)return;short=short.trim();if(!short)return;
- var name=prompt('Poora naam:',p.name||'')||'';
- var honor=prompt('Aizazi kalimaat (misal: رحمۃ اللہ علیہ):',p.honor||'')||'';
- var bio=prompt('Mukhtasar taaruf:',p.bio||'')||'';
- if(id){p.short=short;p.name=name;p.honor=honor;p.bio=bio;}
- else{S.wpoets.push({id:'wp'+Date.now(),short:short,name:name,honor:honor,bio:bio,ord:99});}
- save();renderWAdmin();toast('✅ Shair mehfooz');
-}
-function wDelPoet(id){
- var n=(S.wnaats||[]).filter(function(w){return w.poetId===id;}).length;
- if(!confirm('Shair'+(n?' aur uske '+n+' kalam':'')+' delete karein?'))return;
- S.wpoets=S.wpoets.filter(function(x){return x.id!==id;});
- S.wnaats=S.wnaats.filter(function(x){return x.poetId!==id;});
- save();renderWAdmin();
-}
-function wNaatForm(id){
- var w=id?wById(id):{title:'',poetId:(S.wpoets[0]||{}).id||'',urdu:'',roman:'',lang:'Urdu',cat:'Naat-e-Rasool ﷺ',source:'',status:'pending',copyright:'',audio:''};
- var title=prompt('Kalam ka unwan:',w.title||'');if(title===null)return;title=title.trim();if(!title)return;
- var pl=(S.wpoets||[]).map(function(p,i){return (i+1)+'. '+p.short+' — '+p.name;}).join('\n');
- var pi=parseInt(prompt('Shair chunein:\n'+pl,'1')||'1',10)-1;
- var poetId=(S.wpoets[pi]||{}).id||w.poetId;
- var urdu=prompt('Urdu matn (khalafat yaqeen ho to hi likhein):',w.urdu||'');if(urdu===null)return;
- var roman=prompt('Roman Urdu (ikhtiyari):',w.roman||'')||'';
- var lang=prompt('Zuban (Urdu/Punjabi/Arabic/English):',w.lang||'Urdu')||'Urdu';
- var cat=prompt('Category:',w.cat||'Naat-e-Rasool ﷺ')||'Naat-e-Rasool ﷺ';
- var source=prompt('Manba / hawala:',w.source||'')||'';
- var copyr=prompt('Copyright status:',w.copyright||'')||'';
- var audio=prompt('Audio link (ikhtiyari, khaali = koi audio nahi):',w.audio||'')||'';
- var ver=confirm('Kya ye kalam mukammal tasdeeq-shuda hai? OK=Verified, Cancel=Pending');
- if(id){w.title=title;w.poetId=poetId;w.urdu=urdu;w.roman=roman;w.lang=lang;w.cat=cat;w.source=source;w.copyright=copyr;w.audio=audio.trim();w.status=ver?'verified':'pending';}
- else{S.wnaats.push({id:'w'+Date.now(),title:title,poetId:poetId,urdu:urdu,roman:roman,lang:lang,cat:cat,source:source,status:ver?'verified':'pending',copyright:copyr,audio:audio.trim()});}
- save();renderWAdmin();toast('✅ Kalam mehfooz ('+(ver?'verified':'pending')+')');
-}
-function wDelNaat(id){if(!confirm('Kalam delete karein?'))return;
- S.wnaats=S.wnaats.filter(function(x){return x.id!==id;});
- S.wfavs=(S.wfavs||[]).filter(function(x){return x!==id;});
- save();renderWAdmin();}
-function wToggleStatus(id){var w=wById(id);if(!w)return;
- w.status=w.status==='verified'?'pending':'verified';save();renderWAdmin();
- toast(w.status==='verified'?'✅ Verified':'⏳ Pending');}
+/* ============ INIT ============ */
+window.onerror=function(m){showErr('Error: '+m);};
+document.addEventListener('DOMContentLoaded',function(){
+ load();applyTheme();
+ render('home');
+ setTimeout(function(){var s=$('splash');s.style.opacity='0';setTimeout(function(){s.style.display='none';},500);},1400);
+});
 </script>
 </body>
 </html>
