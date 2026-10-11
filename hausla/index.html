@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Hausla — Khud Pe Yaqeen Karo</title>
+<style>
+:root{--red:#EF4444;--gold:#F59E0B;--black:#111;--white:#fff;--bg:#FFF7F0;--card:#fff;--txt:#1a1a1a;--mut:#6b7280;--shadow:0 6px 20px rgba(0,0,0,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:86px;min-height:100vh}
+.screen{display:none;animation:fade .25s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.wrap{max-width:480px;margin:0 auto;padding:16px}
+h1{font-size:26px;font-weight:900;margin:8px 0}
+h2{font-size:19px;font-weight:800;margin:14px 0 8px}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin:12px 0}
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-size:17px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--red),#d62626);cursor:pointer;margin:10px 0;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#d97706)}
+.btn.ghost{background:#f3f4f6;color:var(--txt);box-shadow:none}
+.btn.small{width:auto;display:inline-block;padding:10px 18px;font-size:15px;margin:6px 4px 0 0}
+.demobanner{position:sticky;top:0;z-index:50;background:#111;color:#F59E0B;text-align:center;font-weight:800;font-size:13px;padding:8px;letter-spacing:1px}
+.hero{background:linear-gradient(135deg,#111 0%,#7f1d1d 60%,var(--red) 100%);color:#fff;border-radius:22px;padding:28px 20px;text-align:center;margin:12px 0;box-shadow:var(--shadow)}
+.hero .flame{font-size:52px;animation:flick 1.2s infinite alternate}
+@keyframes flick{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.12) rotate(3deg)}}
+.streak{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:16px;padding:12px 16px;margin:12px 0;font-weight:800}
+.streak .n{font-size:30px;color:#d97706}
+.chip{display:inline-block;background:#FEE2E2;color:#991B1B;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;margin:4px;cursor:pointer;border:2px solid transparent}
+.chip.sel{border-color:var(--red);background:#FECACA}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+input,textarea,select{width:100%;border:2px solid #e5e7eb;border-radius:12px;padding:12px;font-size:16px;margin:8px 0;font-family:inherit;background:#fff;color:#111}
+textarea{min-height:80px;resize:vertical}
+.prog{height:12px;background:#f3f4f6;border-radius:99px;overflow:hidden;margin:8px 0}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:99px;transition:width .4s}
+.ring{width:110px;height:110px;margin:6px auto}
+.task{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#fafafa;margin:8px 0;cursor:pointer;border:2px solid transparent}
+.task.done{background:#ECFDF5;border-color:#A7F3D0}
+.task .cb{width:26px;height:26px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:#fff}
+.task.done .cb{background:#10B981;border-color:#10B981;color:#fff}
+.task .t{flex:1;font-weight:600;font-size:15px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:2px solid var(--gold);border-radius:999px;padding:8px 14px;font-weight:800;margin:4px;font-size:14px}
+.badge.lock{filter:grayscale(1);opacity:.5}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;z-index:40;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.nav button{flex:1;border:none;background:none;padding:10px 4px 12px;font-size:11px;font-weight:700;color:#9ca3af;cursor:pointer}
+.nav button .ic{font-size:22px;display:block;margin-bottom:2px}
+.nav button.on{color:var(--red)}
+.affirm{background:linear-gradient(135deg,var(--red),#b91c1c);color:#fff;border-radius:20px;padding:26px 18px;text-align:center;font-size:20px;font-weight:800;min-height:130px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);touch-action:pan-y}
+.win{border-left:5px solid var(--gold);background:#FFFBEB;border-radius:12px;padding:12px;margin:8px 0}
+.win .c{font-size:12px;font-weight:800;color:#b45309}
+.tool{border-radius:16px;padding:16px;margin:10px 0;background:#fff;box-shadow:var(--shadow);cursor:pointer}
+.tool .steps{display:none;margin-top:10px;font-size:14px;line-height:1.7;color:#374151}
+.tool.open .steps{display:block}
+.timeline{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.day{width:34px;height:34px;border-radius:10px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#9ca3af;cursor:pointer}
+.day.done{background:#10B981;color:#fff}
+.day.today{border:2px solid var(--red)}
+.slide{display:none;text-align:center;padding:30px 20px}
+.slide.on{display:block;animation:fade .3s}
+.slide .em{font-size:70px}
+.dots{text-align:center;margin:14px 0}
+.dots span{display:inline-block;width:10px;height:10px;border-radius:50%;background:#e5e7eb;margin:0 4px}
+.dots span.on{background:var(--red)}
+canvas#confetti{position:fixed;top:0;left:0;pointer-events:none;z-index:999}
+.rec-dot{width:14px;height:14px;border-radius:50%;background:var(--red);display:inline-block;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.meter{display:flex;gap:4px;margin:10px 0}
+.meter i{flex:1;height:10px;border-radius:99px;background:#f3f4f6}
+.meter i.f{background:var(--gold)}
+.small{font-size:13px;color:var(--mut)}
+.toggle{position:relative;width:52px;height:30px;background:#e5e7eb;border-radius:99px;cursor:pointer;flex-shrink:0}
+.toggle.on{background:#10B981}
+.toggle:after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle.on:after{left:25px}
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f3f4f6}
+.lb{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;margin:6px 0;background:#fafafa}
+.lb.me{background:#FEF3C7;border:2px solid var(--gold)}
+.lb .rk{font-size:20px;font-weight:900;width:30px}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="demobanner">DEMO by Jilan Apps</div>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="scr-onboard" class="screen on">
+<div class="wrap">
+<div class="slide on" data-s="0"><div class="em">🔥</div><h1>Khud Pe Yaqeen Karo</h1><p class="small">Roz chhote challenges, jeet ka track, na tootne wala confidence.</p></div>
+<div class="slide" data-s="1"><div class="em">🏆</div><h1>Daily Challenges</h1><p class="small">30-din ke tracks — Social, Speaking, Self-Love, Career, Body Language.</p></div>
+<div class="slide" data-s="2"><div class="em">🪞</div><h1>Jeet Likho</h1><p class="small">Har chhoti jeet likho. Dekho tum kitni door aa gaye ho.</p></div>
+<div class="dots"><span class="on"></span><span></span><span></span></div>
+<div class="card"><h2 id="ob-q">Kis me mushkil hoti hai? (jo chaho chuno)</h2>
+<div id="ob-struggles">
+<span class="chip" data-v="speaking">🎤 Public Speaking</span>
+<span class="chip" data-v="social">👥 Social Anxiety</span>
+<span class="chip" data-v="doubt">🤔 Self-Doubt</span>
+<span class="chip" data-v="body">🪞 Body Image</span>
+<span class="chip" data-v="career">💼 Career</span>
+</div></div>
+<button class="btn" onclick="obNext()">Aage ➡️</button>
+<button class="btn ghost" onclick="finishOnboard()">Skip</button>
+</div>
+</div>
+
+<!-- ============ TODAY ============ -->
+<div id="scr-today" class="screen">
+<div class="wrap">
+<div class="hero"><div class="flame">🔥</div><h1 style="margin:6px 0">Hausla</h1><div id="today-date" class="small" style="color:#fecaca"></div></div>
+<div class="streak"><span style="font-size:34px">🔥</span><div><div class="n"><span id="streak-n">0</span> din</div><div class="small">Lagatar streak!</div></div></div>
+<h2>☀️ Aaj ka paigham</h2>
+<div class="affirm" id="affirm-box"><span id="affirm-txt"></span></div>
+<div class="small" style="text-align:center">Swipe karo naye paigham ke liye ➡️</div>
+<h2>🎯 Aaj ka challenge</h2>
+<div class="card" id="daily-challenge"></div>
+<h2>🙏 Shukr (3 cheezein)</h2>
+<div class="card">
+<input id="g1" placeholder="1. ..."><input id="g2" placeholder="2. ..."><input id="g3" placeholder="3. ...">
+<button class="btn gold" onclick="saveGratitude()">Save Shukr 🙏</button>
+<div id="g-msg" class="small"></div>
+</div>
+<h2>🧍 Power Pose Reminder</h2>
+<div class="card"><p class="small">2 minute seedha khade ho, haath kamar par — jism dimagh ko confident banata hai!</p>
+<button class="btn small" onclick="startPoseTimer()">⏱️ 2-min Timer Shuru</button>
+<div id="pose-timer" style="font-size:28px;font-weight:900;text-align:center;margin-top:8px"></div></div>
+<h2>⭕ Aaj ki progress</h2>
+<div class="card" style="text-align:center"><svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" stroke-width="10"/><circle id="ring-fg" cx="50" cy="50" r="42" fill="none" stroke="#EF4444" stroke-width="10" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)"/><text id="ring-tx" x="50" y="56" text-anchor="middle" font-size="20" font-weight="900">0%</text></svg>
+<div class="small" id="ring-sub"></div></div>
+</div>
+</div>
+
+<!-- ============ CHALLENGES ============ -->
+<div id="scr-chal" class="screen">
+<div class="wrap">
+<h1>🏁 30-Day Challenges</h1>
+<p class="small">Track chuno, roz ek chhota kaam, badges jeeto!</p>
+<div id="track-list"></div>
+<div id="track-detail"></div>
+</div>
+</div>
+
+<!-- ============ MIRROR ============ -->
+<div id="scr-mirror" class="screen">
+<div class="wrap">
+<h1>🪞 Mirror Talk</h1>
+<div class="card" style="background:linear-gradient(135deg,#111,#7f1d1d);color:#fff">
+<div class="small" style="color:#fecaca">Aaj ka jumla (zor se kaho):</div>
+<div id="mirror-prompt" style="font-size:21px;font-weight:900;margin:10px 0"></div>
+<button class="btn gold" onclick="newMirrorPrompt()">🔄 Naya Jumla</button>
+</div>
+<h2>🎙️ Apni awaz record karo</h2>
+<div class="card">
+<p class="small">Jumla bolo, suno, khud ko rate karo. <b>AI analysis nahi</b> — imandaar self-rating + hosla-afza feedback.</p>
+<button class="btn" id="rec-btn" onclick="toggleRec()">🔴 Record Shuru</button>
+<div id="rec-status" class="small"></div>
+<audio id="rec-play" controls style="width:100%;display:none;margin-top:8px"></audio>
+<div id="rate-box" style="display:none;margin-top:10px">
+<div class="small">Apna confidence rate karo (1-5):</div>
+<div class="meter" id="rate-meter"></div>
+<button class="btn gold" onclick="saveMirrorScore()">Save Score 💪</button>
+<div id="mirror-fb" class="small" style="margin-top:8px"></div>
+</div>
+</div>
+<h2>📈 Mera confidence graph</h2>
+<div class="card"><canvas id="score-chart" width="400" height="160" style="width:100%"></canvas>
+<div class="small" id="score-avg"></div></div>
+</div>
+</div>
+
+<!-- ============ WINS ============ -->
+<div id="scr-wins" class="screen">
+<div class="wrap">
+<h1>🏆 Wins Journal</h1>
+<div class="card">
+<h2 style="margin-top:0">➕ Nayi jeet likho</h2>
+<input id="win-title" placeholder="Jeet kya thi?">
+<select id="win-cat"><option>👥 Social</option><option>💼 Work</option><option>🙂 Personal</option><option>💪 Health</option></select>
+<textarea id="win-note" placeholder="Tafseel (optional)..."></textarea>
+<label class="small">📷 Photo (optional): <input type="file" id="win-photo" accept="image/*" style="margin:4px 0"></label>
+<button class="btn gold" onclick="addWin()">🎉 Jeet Save Karo</button>
+</div>
+<h2>🎤 Voice journaling</h2>
+<div class="card">
+<button class="btn" id="vj-btn" onclick="toggleVJ()">🔴 Voice Note Record</button>
+<div id="vj-status" class="small"></div>
+<audio id="vj-play" controls style="width:100%;display:none;margin-top:8px"></audio>
+</div>
+<h2>📅 Is hafte ki highlights</h2>
+<div id="wins-week"></div>
+<h2>📜 Sab jeetein</h2>
+<div id="wins-all"></div>
+</div>
+</div>
+
+<!-- ============ POWER TOOLS ============ -->
+<div id="scr-tools" class="screen">
+<div class="wrap">
+<h1>⚡ Power Tools</h1>
+<div id="tools-list"></div>
+<h2>👥 Community (demo)</h2>
+<div class="card">
+<div id="comm-feed"></div>
+<input id="comm-input" placeholder="Apni jeet share karo (gumnaam)...">
+<button class="btn gold" onclick="postComm()">Share 🚀</button>
+</div>
+<h2>🏅 Leaderboard (demo)</h2>
+<div class="card" id="leaderboard"></div>
+</div>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="scr-profile" class="screen">
+<div class="wrap">
+<h1>👤 Profile</h1>
+<div class="card" style="text-align:center">
+<div style="font-size:52px">🦁</div>
+<h2 id="pf-name" style="margin:6px 0">Champion</h2>
+<div class="small" id="pf-struggle"></div>
+<div style="margin:10px 0"><span class="badge">💪 Score: <span id="pf-score">0</span></span></div>
+</div>
+<h2>🏅 Badges</h2>
+<div class="card" id="pf-badges"></div>
+<h2>📊 Stats</h2>
+<div class="card">
+<div class="setrow"><span>🔥 Sab se lambi streak</span><b id="st-best">0 din</b></div>
+<div class="setrow"><span>✅ Mukammal din</span><b id="st-days">0</b></div>
+<div class="setrow"><span>🏆 Kul jeetein</span><b id="st-wins">0</b></div>
+<div class="setrow"><span>🙏 Shukr din</span><b id="st-grat">0</b></div>
+</div>
+<h2>⚙️ Settings</h2>
+<div class="card">
+<div class="setrow"><span>🔔 Rozana yaad-dahani</span><div class="toggle" id="tg-rem" onclick="toggleSet('rem')"></div></div>
+<div class="setrow"><span>🌐 Language / زبان</span><button class="btn small" onclick="toggleLang()">EN / اردو</button></div>
+<div class="setrow"><span>📤 Progress share karo</span><button class="btn small gold" onclick="shareProgress()">Share</button></div>
+<div class="setrow"><span>🗑️ Data reset</span><button class="btn small ghost" onclick="resetAll()">Reset</button></div>
+</div>
+<p class="small" style="text-align:center">Hausla Demo • Jilan Apps</p>
+</div>
+</div>
+
+<!-- ============ NAV ============ -->
+<div class="nav">
+<button data-s="today" class="on" onclick="go('today')"><span class="ic">☀️</span><span data-l="navToday">Today</span></button>
+<button data-s="chal" onclick="go('chal')"><span class="ic">🏁</span><span data-l="navChal">Challenges</span></button>
+<button data-s="mirror" onclick="go('mirror')"><span class="ic">🪞</span><span data-l="navMirror">Mirror</span></button>
+<button data-s="wins" onclick="go('wins')"><span class="ic">🏆</span><span data-l="navWins">Wins</span></button>
+<button data-s="tools" onclick="go('tools')"><span class="ic">⚡</span><span data-l="navTools">Tools</span></button>
+<button data-s="profile" onclick="go('profile')"><span class="ic">👤</span><span data-l="navProfile">Profile</span></button>
+</div>
+<script>
+/* ================= STATE ================= */
+var S=null;
+function defState(){return{struggles:[],lang:'en',rem:true,streak:0,best:0,lastDay:'',done:{},wins:[],badges:[],grat:{},mirror:[],comm:[{n:'Anonymous',t:'Aaj meeting me pehli baar bola! 🎉'},{n:'Anonymous',t:'7 din streak — khud par fakhr!'},{n:'Anonymous',t:'Ajnabi ko compliment diya, dono muskuraye 🙂'}],aff:0};}
+function save(){try{localStorage.setItem('hausla_v1',JSON.stringify(S));}catch(e){}}
+function load(){try{var s=localStorage.getItem('hausla_v1');S=s?JSON.parse(s):defState();}catch(e){S=defState();}}
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function touchDay(){var t=todayKey();if(S.lastDay!==t){var y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;if(S.streak>S.best)S.best=S.streak;S.lastDay=t;save();checkBadges();}}
+function doneCount(){var c=0;for(var k in S.done)if(S.done[k])c++;return c;}
+function confScore(){return doneCount()*2+S.wins.length*5+S.streak*3;}
+
+/* ================= I18N (light) ================= */
+var LBL={en:{navToday:'Today',navChal:'Challenges',navMirror:'Mirror',navWins:'Wins',navTools:'Tools',navProfile:'Profile'},ur:{navToday:'آج',navChal:'چیلنجز',navMirror:'آئینہ',navWins:'جیتیں',navTools:'ٹولز',navProfile:'پروفائل'}};
+function applyLang(){var l=LBL[S.lang]||LBL.en;document.querySelectorAll('[data-l]').forEach(function(e){var k=e.getAttribute('data-l');if(l[k])e.textContent=l[k];});}
+
+/* ================= AFFIRMATIONS ================= */
+var AFF=[
+"Main qabil hoon, main kaafi hoon. 💪",
+"Meri awaz ki qadar hai. 🎤",
+"Har din main mazboot hota ja raha hoon. 🔥",
+"Ghaltiyan mujhe sikhati hain, rokti nahi. 🌱",
+"Main apne khwabon ka haqdar hoon. ✨",
+"Confidence practice se aata hai — aur main practice kar raha hoon. 🏋️",
+"میں خود پر یقین رکھتا ہوں۔ 🦁",
+"Log meri baat sunna chahte hain. 👂",
+"Main mushkil se nahi darta. 🛡️",
+"Aaj main kal se behtar hoon. 📈",
+"Meri maujoodgi ahmiyat rakhti hai. 🌟",
+"Main apni manzil khud banata hoon. 🛤️",
+"ڈر عارضی ہے، حوصلہ مستقل۔ 💥",
+"Main apne liye khada hota hoon. 🧍",
+"Har 'na' mujhe 'haan' ke qareeb karta hai. 🚀",
+"میری ہمت میری پہچان ہے۔ 🏆",
+"Main seekhne wala hoon, haarne wala nahi. 📚",
+"Aaj ka din mera hai. ☀️",
+"Main pyaar aur izzat ke laiq hoon. ❤️",
+"Chhote qadam, bari manzil. 👣"
+];
+var MPROMPTS=[
+"Main confident hoon aur meri awaz me dum hai!",
+"Meri raay qeemti hai, main use share karunga!",
+"Main apne aap se pyaar karta hoon!",
+"Log mujhe sunna chahte hain!",
+"Main har challenge ka samna kar sakta hoon!",
+"میں شیر ہوں، ڈر مجھ سے ڈرتا ہے!",
+"Meri body language meri taqat hai!",
+"Aaj main apne comfort zone se bahar niklunga!",
+"Main apne khwabon ke liye ladta hoon!",
+"میں کافی ہوں، میں قابل ہوں!"
+];
+
+/* ================= CHALLENGES DATA (5 tracks x 30) ================= */
+var TRACKS=[
+{name:'👥 Social Confidence',desc:'Logon se baat, naye rishtay',tasks:[
+'Kisi ajnabi ko muskura kar dekhein','Dukaandaar se haal poochein','Aankhon me dekh kar salam kahein','Kisi ko chhoti tareef karein','Lift me kisi se baat shuru karein','Dost ko call karein (text ki bajaye)','Group me apni raay dein','Naam lekar kisi se baat karein','Kisi ki madad ki peshkash karein','5 min chhoti baat-cheet karein','Kisi se mashwara mangein','Padosi se haal poochein','Social event me jayein','Kisi ko chai ki dawat dein','Group photo me shamil hon','Apni hobby ke baare me batayein','Kisi se raasta poochein','Tareef par "shukriya" kahein','Purane dost se raabta karein','Meeting me pehle bolein','Kisi ko apna kaam dikhayein','Naye shakhs se dosti ki koshish','Apni kamyabi share karein','Bheed me confident chalein','Kisi ko thank-you kahein','Apni kahani sunayein','Kisi ki ghalti par narmi se baat','Event me 3 naye logon se milein','Kisi ko hosla dein','Aaj ka sab se bara social challenge khud chunein']},
+{name:'🎤 Public Speaking',desc:'Stage ka dar khatm',tasks:[
+'Aaine ke saamne 1 min bolein','Apni awaz record karke sunein','2-min speech likhein','Family ke saamne bolein','Haathon ke ishare use karein','Slow bolne ki practice karein','Eye contact practice (video)','3-min impromptu topic bolein','Dost ke saamne speech dein','Awaz unchi karke practice','Pause lena seekhein','Kahani sunayein','Sawalon ke jawab ki practice','5-min speech record karein','Body language check (video)','Opening line mazboot banayein','Ending memorable banayein','Halki phulki baat add karein','2-min speech baghair tayyari','Voice modulation practice','Apna elevator pitch tayyar karein','Slides ke saath 5-min talk','Audience se sawal poochein','Kahani + sabaq sunayein','Stage par chalne ki practice','10-min talk record karein','Feedback mangein, sudharein','Chhote group ko kuch sikhayein','Apni best speech dobara bolein','2-min final speech record karein']},
+{name:'💖 Self-Love',desc:'Khud se dosti',tasks:[
+'Apne baare me 3 achi baatein likhein','Aaine me dekh kar muskuraein','Ek kamzori qubool karein','Khud ko khat likhein','Pasandida khana khayein','10-min walk (khud ke liye)','Apni ek jeet yaad karein','Khud ko chhota tohfa dein',"Main kaafi hoon — 10 baar kahein",'Purani tasveer dekh kar safar yaad karein','Apne jism ka shukriya ada karein','Nayi cheez seekhne ki koshish','Apne liye 1 ghanta nikalein','Negative khayal ko challenge karein','Journal me apni tareef likhein','Dost se apni achai poochein','Favorite gaana sun kar khush hon','Khud ko purani ghalti par maaf karein','Ek boundary set karein (na kahein)','Apne sapne likhein','Vision board banayein','Neend/water ka khayal rakhein','Kisi ki madad karke khushi mehsus karein','Apni photo lein aur pasand karein','Apne talents ki list banayein','Khud par fakhr ka lamha guzarein','Future self ko khat likhein','3 cheezein jo aap me khaas hain','Apne liye dua karein','Self-love ka agle mahine ka waada']},
+{name:'💼 Career Confidence',desc:'Kaam me chamak',tasks:[
+'CV update karein','Apni skills ki list banayein','Mentor se feedback mangein','Meeting me idea dein','30-min nayi skill seekhein','Kaam ka portfolio banayein','Apni achievements likhein','Networking message bhejein','Industry article parhein','Apna elevator pitch likhein','Dost se mock interview','1-saal ke goals likhein','Chhota side project shuru karein','Online course ka 1 module','Apne kaam ki tareef mangein','Team me lead lene ki koshish','Kaam par presentation dein','Apna personal brand sochein','Mentor dhoondein','Ek kamzor skill par kaam','Review ki tayyari karein','Naye idea ki proposal likhein','Apna kaam public me share karein','Apni value likhein (company ke liye)','Negotiation practice (dost se)','Network ko thank-you kahein','Agle qadam ka plan banayein','Apne career vision ko revise karein','Apni jeet ka jashn manayein','Apne dream role ka roadmap']},
+{name:'🧍 Body Language',desc:'Jism bole, dil jeete',tasks:[
+'Seedha khade hon (2 min)','Power pose (2 min)','Eye contact practice','Haath jeib se bahar rakhein','Muskurahat practice','Gehri saans + seedhi kamar','Confident walk (video)','Khule andaz me baithein','Baat karte ishare use karein','Sar uncha rakhein','Firm handshake practice','Lehja record karke sunein','Ruk kar bolna seekhein','Khade hote waqt space lein','Mirror me full body check','Kamre me confident entry','Smile + eye contact combo','Kandhe relaxed rakhein','Slow movements practice','Confident hello/wave','Stage presence (video)','Meeting me seedha baithein','Baat karte khuli hatheliyan','Sunte waqt nod karein','Apna power stance dhoondein','Walk + talk practice','Photo me confident pose','Video call presence check','Bheed me calm rehna','Apna signature confident move banayein']}
+];
+
+/* ================= POWER TOOLS ================= */
+var TOOLS=[
+{t:'🧍 Power Poses Guide',d:'2 minute — jism dimagh ko confident banata hai.',s:['Seedha khade hon, paon kandhon jitne khule','Haath kamar par (Superman) ya upar uthayein (Victory)','Thodi unchi, seena bahar, gehri saans lein','2 minute rukein — bechaini kam hogi','Ab apne kaam par jayein!']},
+{t:'🚀 Pre-Event Pump-Up',d:'Interview/meeting se pehle 5-min routine.',s:['1 min: gehri saans (4-7-8)','1 min: power pose','1 min: apni 3 jeetein yaad karein','1 min: zor se kaho "Main tayyar hoon!"','1 min: muskurahat + entry practice']},
+{t:'🛡️ Rejection Therapy',d:'Na sunne ki aadat — dar khatm.',s:['Roz ek chhoti "na" wali koshish karein','Masalan: discount mangein, sawal poochein','Na mile to bhi jeet — koshish ki!','Score rakhein: 10 na = badge','Yaad rakhein: na zaati hamla nahi']},
+{t:'🧠 Negative Self-Talk Buster',d:'Andar ki tanqeedi awaz ko khamosh karein.',s:['Khayal pakrein: "Main nahi kar sakta"','Saboot mangein: kya ye 100% sach hai?','Dost ko ye kahenge? Nahi? To khud ko kyun?','Jumla badlein: "Main seekh raha hoon"','Roz 3 positive jumle likhein']}
+];
+</script>
+
+<script>
+/* ================= NAV ================= */
+var obStep=0,obSel=[];
+function go(s){touchDay();document.querySelectorAll('.screen').forEach(function(e){e.classList.remove('on');});var map={today:'scr-today',chal:'scr-chal',mirror:'scr-mirror',wins:'scr-wins',tools:'scr-tools',profile:'scr-profile'};document.getElementById(map[s]).classList.add('on');document.querySelectorAll('.nav button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-s')===s);});window.scrollTo(0,0);
+if(s==='today')renderToday();if(s==='chal')renderTracks();if(s==='mirror')renderMirror();if(s==='wins')renderWins();if(s==='tools')renderTools();if(s==='profile')renderProfile();}
+
+/* ================= ONBOARDING ================= */
+document.querySelectorAll('#ob-struggles .chip').forEach(function(c){c.onclick=function(){c.classList.toggle('sel');var v=c.getAttribute('data-v');var i=obSel.indexOf(v);if(i<0)obSel.push(v);else obSel.splice(i,1);};});
+function obNext(){obStep++;var slides=document.querySelectorAll('#scr-onboard .slide');var dots=document.querySelectorAll('#scr-onboard .dots span');if(obStep>=slides.length){finishOnboard();return;}slides.forEach(function(s2){s2.classList.toggle('on',+s2.getAttribute('data-s')===obStep);});dots.forEach(function(d,i){d.classList.toggle('on',i===obStep);});}
+function finishOnboard(){S.struggles=obSel;save();document.getElementById('scr-onboard').classList.remove('on');document.querySelector('.nav').style.display='flex';go('today');}
+
+/* ================= TODAY ================= */
+function renderToday(){touchDay();
+document.getElementById('today-date').textContent=new Date().toDateString();
+document.getElementById('streak-n').textContent=S.streak;
+var a=AFF[S.aff%AFF.length];document.getElementById('affirm-txt').textContent=a;
+// daily challenge = first incomplete of first track with progress, else track0 day0
+var dc=findDaily();var box=document.getElementById('daily-challenge');
+if(dc){box.innerHTML='<b>'+dc.track+'</b><div style="margin:8px 0">'+dc.task+'</div><button class="btn gold" onclick="completeDaily('+dc.ti+','+dc.di+')">✅ Ho Gaya!</button>';}
+else{box.innerHTML='<b>🎉 Sab mukammal!</b><div class="small">Aaj ke liye kaafi — kal naya din!</div>';}
+// progress ring
+var total=150,done=doneCount(),pct=Math.min(100,Math.round(done/total*100));
+document.getElementById('ring-fg').style.strokeDashoffset=264-264*pct/100;
+document.getElementById('ring-tx').textContent=pct+'%';
+document.getElementById('ring-sub').textContent=done+' / '+total+' kaam mukammal';
+var g=S.grat[todayKey()];
+document.getElementById('g-msg').textContent=g?'✅ Aaj ka shukr save ho gaya!':'';
+if(g){document.getElementById('g1').value=g[0]||'';document.getElementById('g2').value=g[1]||'';document.getElementById('g3').value=g[2]||'';}
+}
+function findDaily(){for(var ti=0;ti<TRACKS.length;ti++){for(var di=0;di<30;di++){if(!S.done[ti+'-'+di])return{ti:ti,di:di,track:TRACKS[ti].name,task:TRACKS[ti].tasks[di]};}}return null;}
+function completeDaily(ti,di){S.done[ti+'-'+di]=true;touchDay();save();confetti();checkBadges();renderToday();}
+// affirm swipe
+(function(){var b=document.getElementById('affirm-box'),sx=0;b.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});b.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40){S.aff=(S.aff+(dx<0?1:AFF.length-1))%AFF.length;save();document.getElementById('affirm-txt').textContent=AFF[S.aff];}});b.onclick=function(){S.aff=(S.aff+1)%AFF.length;save();document.getElementById('affirm-txt').textContent=AFF[S.aff];};})();
+function saveGratitude(){var a=document.getElementById('g1').value.trim(),b=document.getElementById('g2').value.trim(),c=document.getElementById('g3').value.trim();if(!a&&!b&&!c){document.getElementById('g-msg').textContent='Kuch to likhein! 🙏';return;}S.grat[todayKey()]=[a,b,c];touchDay();save();confetti();document.getElementById('g-msg').textContent='✅ Shukr save! Dil khush!';}
+var poseInt=null;
+function startPoseTimer(){var t=120;clearInterval(poseInt);var el=document.getElementById('pose-timer');poseInt=setInterval(function(){t--;var m=Math.floor(t/60),s=t%60;el.textContent=m+':'+(s<10?'0':'')+s;if(t<=0){clearInterval(poseInt);el.textContent='🎉 Zabardast!';confetti();}},1000);}
+
+/* ================= CHALLENGES ================= */
+var curTrack=-1;
+function renderTracks(){var h='';TRACKS.forEach(function(t,ti){var d=0;for(var i=0;i<30;i++)if(S.done[ti+'-'+i])d++;h+='<div class="card" onclick="openTrack('+ti+')" style="cursor:pointer"><b>'+t.name+'</b><div class="small">'+t.desc+'</div><div class="prog"><i style="width:'+Math.round(d/30*100)+'%"></i></div><div class="small">'+d+'/30 din</div></div>';});document.getElementById('track-list').innerHTML=h;document.getElementById('track-detail').innerHTML='';curTrack=-1;}
+function openTrack(ti){curTrack=ti;var t=TRACKS[ti],h='<button class="btn ghost" onclick="renderTracks()">⬅️ Wapas</button><h2>'+t.name+'</h2>';var d=0;for(var i=0;i<30;i++)if(S.done[ti+'-'+i])d++;h+='<div class="prog"><i style="width:'+Math.round(d/30*100)+'%"></i></div><div class="small">'+d+'/30</div>';h+='<div class="timeline">';for(var j=0;j<30;j++){var dn=S.done[ti+'-'+j];h+='<div class="day'+(dn?' done':'')+'" onclick="toggleDay(event,'+ti+','+j+')">'+(j+1)+'</div>';}h+='</div><div id="day-tasks">';
+for(var k=0;k<30;k++){var dd=S.done[ti+'-'+k];h+='<div class="task'+(dd?' done':'')+'" onclick="toggleTask('+ti+','+k+')"><div class="cb">'+(dd?'✓':'')+'</div><div class="t">Din '+(k+1)+': '+t.tasks[k]+'</div></div>';}
+h+='</div>';document.getElementById('track-detail').innerHTML=h;document.getElementById('track-list').innerHTML='';window.scrollTo(0,0);}
+function toggleTask(ti,k){var key=ti+'-'+k;S.done[key]=!S.done[key];touchDay();save();if(S.done[key])confetti();checkBadges();openTrack(ti);}
+function toggleDay(e,ti,k){e.stopPropagation();toggleTask(ti,k);}
+
+/* ================= BADGES ================= */
+var BADGES=[{id:'b7',n:'🔥 Hafta Warrior',c:function(){return S.streak>=7;}},{id:'b30',n:'👑 30 Din Champion',c:function(){return S.streak>=30;}},{id:'t7',n:'⭐ 7 Kaam',c:function(){return doneCount()>=7;}},{id:'t50',n:'💪 50 Kaam',c:function(){return doneCount()>=50;}},{id:'t150',n:'🏆 150 Kaam — Legend',c:function(){return doneCount()>=150;}},{id:'w10',n:'🎉 10 Jeetein',c:function(){return S.wins.length>=10;}},{id:'g7',n:'🙏 Shukr Star',c:function(){return Object.keys(S.grat).length>=7;}}];
+function checkBadges(){BADGES.forEach(function(b){if(S.badges.indexOf(b.id)<0&&b.c()){S.badges.push(b.id);confetti();setTimeout(function(){alert('🏅 Naya badge: '+b.n);},300);}});save();}
+
+/* ================= MIRROR ================= */
+var curRate=0,recStream=null,mediaRec=null,recChunks=[];
+function renderMirror(){document.getElementById('mirror-prompt').textContent=MPROMPTS[Math.floor(Math.random()*MPROMPTS.length)];drawChart();}
+function newMirrorPrompt(){var p=MPROMPTS[Math.floor(Math.random()*MPROMPTS.length)];document.getElementById('mirror-prompt').textContent=p;}
+function toggleRec(){var btn=document.getElementById('rec-btn');
+if(mediaRec&&mediaRec.state==='recording'){mediaRec.stop();return;}
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){document.getElementById('rec-status').textContent='⚠️ Microphone support nahi mila.';return;}
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){recStream=st;recChunks=[];try{mediaRec=new MediaRecorder(st);}catch(e){document.getElementById('rec-status').textContent='⚠️ Recording support nahi.';return;}
+mediaRec.ondataavailable=function(e){if(e.data.size)recChunks.push(e.data);};
+mediaRec.onstop=function(){var blob=new Blob(recChunks,{type:'audio/webm'});var url=URL.createObjectURL(blob);var a=document.getElementById('rec-play');a.src=url;a.style.display='block';document.getElementById('rec-status').textContent='✅ Record ho gaya — suno aur rate karo!';document.getElementById('rate-box').style.display='block';btn.textContent='🔴 Record Shuru';recStream.getTracks().forEach(function(t){t.stop();});};
+mediaRec.start();btn.textContent='⏹️ Roko';document.getElementById('rec-status').innerHTML='<span class="rec-dot"></span> Recording...';}).catch(function(){document.getElementById('rec-status').textContent='⚠️ Mic permission nahi mili.';});}
+(function(){var m=document.getElementById('rate-meter');if(!m)return;for(var i=1;i<=5;i++){var s=document.createElement('i');s.style.cssText='flex:1;height:22px;border-radius:8px;background:#f3f4f6;cursor:pointer';(function(v){s.onclick=function(){curRate=v;var ch=m.children;for(var j=0;j<5;j++)ch[j].style.background=j<v?'#F59E0B':'#f3f4f6';};})(i);m.appendChild(s);}})();
+function saveMirrorScore(){if(!curRate){document.getElementById('mirror-fb').textContent='Pehle 1-5 rate karo!';return;}S.mirror.push({d:todayKey(),s:curRate});touchDay();save();var fb=curRate>=4?'🔥 Zabardast! Tum me dum hai!':curRate===3?'👍 Acha! Roz practice se aur behtar!':'💪 Koi baat nahi — practice hi jeet hai!';document.getElementById('mirror-fb').textContent=fb+' (Note: ye self-rating hai, AI analysis nahi.)';drawChart();confetti();}
+function drawChart(){try{var c=document.getElementById('score-chart');if(!c)return;var x=c.getContext('2d');if(!x)return;x.clearRect(0,0,400,160);var d=S.mirror.slice(-14);x.strokeStyle='#e5e7eb';x.beginPath();x.moveTo(0,130);x.lineTo(400,130);x.stroke();if(!d.length){x.fillStyle='#9ca3af';x.font='14px sans-serif';x.fillText('Abhi koi score nahi — record karke rate karo!',20,80);document.getElementById('score-avg').textContent='';return;}
+x.strokeStyle='#EF4444';x.lineWidth=3;x.beginPath();d.forEach(function(p,i){var px=20+i*(360/Math.max(1,d.length-1)),py=130-p.s*22;if(i===0)x.moveTo(px,py);else x.lineTo(px,py);x.fillStyle='#F59E0B';x.beginPath();x.arc(px,py,5,0,7);x.fill();});x.stroke();var avg=(d.reduce(function(a,p){return a+p.s;},0)/d.length).toFixed(1);document.getElementById('score-avg').textContent='Average: '+avg+' / 5 (self-rated)';}catch(e){}}
+
+/* ================= WINS ================= */
+function addWin(){var t=document.getElementById('win-title').value.trim();if(!t){alert('Jeet ka unwan likhein!');return;}var w={t:t,c:document.getElementById('win-cat').value,n:document.getElementById('win-note').value.trim(),d:todayKey(),img:null};var f=document.getElementById('win-photo').files[0];
+function done2(){S.wins.unshift(w);touchDay();save();confetti();checkBadges();document.getElementById('win-title').value='';document.getElementById('win-note').value='';renderWins();}
+if(f){var r=new FileReader();r.onload=function(){w.img=r.result;done2();};r.readAsDataURL(f);}else done2();}
+function renderWins(){var wk=S.wins.filter(function(w){return (Date.now()-new Date(w.d).getTime())<7*864e5;});
+document.getElementById('wins-week').innerHTML=wk.length?wk.map(winHTML).join(''):'<div class="card small">Is hafte koi jeet nahi — aaj kuch karo! 💪</div>';
+document.getElementById('wins-all').innerHTML=S.wins.length?S.wins.map(winHTML).join(''):'<div class="card small">Abhi koi jeet nahi likhi.</div>';}
+function winHTML(w){return '<div class="win"><div class="c">'+w.c+' • '+w.d+'</div><b>'+esc(w.t)+'</b>'+(w.n?'<div class="small">'+esc(w.n)+'</div>':'')+(w.img?'<img src="'+w.img+'" style="width:100%;border-radius:10px;margin-top:8px">':'')+'</div>';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// voice journaling
+var vjRec=null,vjChunks=[];
+function toggleVJ(){var btn=document.getElementById('vj-btn');
+if(vjRec&&vjRec.state==='recording'){vjRec.stop();btn.textContent='🔴 Voice Note Record';return;}
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){document.getElementById('vj-status').textContent='⚠️ Mic support nahi.';return;}
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){vjChunks=[];try{vjRec=new MediaRecorder(st);}catch(e){document.getElementById('vj-status').textContent='⚠️ Support nahi.';return;}
+vjRec.ondataavailable=function(e){if(e.data.size)vjChunks.push(e.data);};
+vjRec.onstop=function(){var url=URL.createObjectURL(new Blob(vjChunks,{type:'audio/webm'}));var a=document.getElementById('vj-play');a.src=url;a.style.display='block';document.getElementById('vj-status').textContent='✅ Voice note save!';st.getTracks().forEach(function(t){t.stop();});};
+vjRec.start();btn.textContent='⏹️ Roko';document.getElementById('vj-status').innerHTML='<span class="rec-dot"></span> Recording...';}).catch(function(){document.getElementById('vj-status').textContent='⚠️ Permission nahi mili.';});}
+
+/* ================= TOOLS ================= */
+function renderTools(){var h='';TOOLS.forEach(function(t,i){h+='<div class="tool" onclick="this.classList.toggle(\'open\')"><b>'+t.t+'</b><div class="small">'+t.d+'</div><div class="steps"><ol>'+t.s.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol></div></div>';});document.getElementById('tools-list').innerHTML=h;
+document.getElementById('comm-feed').innerHTML=S.comm.map(function(c){return '<div class="win"><b>'+esc(c.n)+'</b><div>'+esc(c.t)+'</div></div>';}).join('');
+var lb=[['Ali R.',320],['Fatima K.',280],['Usman T.',210],['Ayesha M.',180]];var me=confScore();lb.push(['🏆 Tum',me]);lb.sort(function(a,b){return b[1]-a[1];});
+document.getElementById('leaderboard').innerHTML=lb.map(function(r,i){return '<div class="lb'+(r[0]==='🏆 Tum'?' me':'')+'"><div class="rk">'+(i+1)+'</div><div style="flex:1"><b>'+r[0]+'</b></div><b>'+r[1]+'</b></div>';}).join('');}
+function postComm(){var t=document.getElementById('comm-input').value.trim();if(!t)return;S.comm.unshift({n:'Anonymous',t:t});save();document.getElementById('comm-input').value='';renderTools();confetti();}
+
+/* ================= PROFILE ================= */
+function renderProfile(){document.getElementById('pf-score').textContent=confScore();
+var sm={speaking:'🎤 Public Speaking',social:'👥 Social Anxiety',doubt:'🤔 Self-Doubt',body:'🪞 Body Image',career:'💼 Career'};
+document.getElementById('pf-struggle').textContent=S.struggles.length?('Focus: '+S.struggles.map(function(s){return sm[s];}).join(', ')):'';
+document.getElementById('st-best').textContent=S.best+' din';document.getElementById('st-days').textContent=doneCount();document.getElementById('st-wins').textContent=S.wins.length;document.getElementById('st-grat').textContent=Object.keys(S.grat).length;
+document.getElementById('pf-badges').innerHTML=BADGES.map(function(b){var has=S.badges.indexOf(b.id)>=0;return '<span class="badge'+(has?'':' lock')+'">'+b.n+'</span>';}).join('');
+document.getElementById('tg-rem').classList.toggle('on',!!S.rem);}
+function toggleSet(k){S[k]=!S[k];save();renderProfile();}
+function toggleLang(){S.lang=S.lang==='en'?'ur':'en';save();applyLang();}
+function shareProgress(){var txt='🔥 Mera Hausla Score: '+confScore()+' | Streak: '+S.streak+' din | Jeetein: '+S.wins.length+' — Khud Pe Yaqeen Karo!';if(navigator.share){navigator.share({title:'Hausla',text:txt}).catch(function(){});}else{try{navigator.clipboard.writeText(txt);alert('Copy ho gaya! 📋');}catch(e){alert(txt);}}}
+function resetAll(){if(confirm('SARA data delete?')){localStorage.removeItem('hausla_v1');location.reload();}}
+
+/* ================= CONFETTI ================= */
+function confetti(){try{var c=document.getElementById('confetti');if(!c||!c.getContext)return;var x=c.getContext('2d');if(!x||!window.requestAnimationFrame)return;c.width=innerWidth;c.height=innerHeight;var P=[],cols=['#EF4444','#F59E0B','#10B981','#3B82F6','#A855F7'];for(var i=0;i<120;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*100,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[i%5],v:2+Math.random()*3,r:Math.random()*6.28,vr:(Math.random()-.5)*.3});
+var f=0;(function anim(){x.clearRect(0,0,c.width,c.height);f++;P.forEach(function(p){p.y+=p.v;p.x+=Math.sin(f/10+p.r)*2;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});if(f<120)requestAnimationFrame(anim);else x.clearRect(0,0,c.width,c.height);})();}catch(e){}}
+
+/* ================= INIT ================= */
+load();applyLang();
+if(S.struggles&&S.struggles.length){document.getElementById('scr-onboard').classList.remove('on');go('today');}
+else{document.querySelector('.nav').style.display='none';}
+</script>
+
+<script>
+(function(){
+  var KEY='hausla_demo_start';
+  var DAYS=3;
+  try{
+    var start=localStorage.getItem(KEY);
+    var now=Date.now();
+    if(!start){localStorage.setItem(KEY,String(now));start=now;}
+    else{start=parseInt(start,10);}
+    if(now-start>DAYS*24*60*60*1000){
+      document.addEventListener('DOMContentLoaded',function(){
+        document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#111;color:#F59E0B;font-family:system-ui;text-align:center;padding:24px">'
+        +'<div style="font-size:64px;margin-bottom:16px">🔥</div>'
+        +'<h1 style="margin:0 0 12px">Demo Expired</h1>'
+        +'<p style="opacity:.9;max-width:320px">Is demo ki 3-din ki muddat khatam ho gayi hai.<br>Poori app ke liye Jilan Apps se rabta karein.</p>'
+        +'<div style="margin-top:20px;padding:12px 24px;background:#F59E0B;color:#111;border-radius:12px;font-weight:bold">DEMO by Jilan Apps</div></div>';
+      });
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
