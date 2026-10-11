@@ -527,6 +527,7 @@ button.oos{opacity:.5;cursor:not-allowed}
 <body>
 <div id="refBanner">🤝 Aap <b id="refBannerId"></b> ke referral se aaye hain — shukriya! <button onclick="document.getElementById('refBanner').style.display='none'" aria-label="Band karein">✕</button></div>
 <div id="updateCard">
+<button id="updateDismiss" type="button" aria-label="Band karein" style="float:right;background:none;border:none;font-size:18px;cursor:pointer;color:#999">✕</button>
 <div class="t">🎉 Naya version available hai!</div>
 <div class="n" id="updateNotes">Nai products aur features ke liye update karein</div>
 <button id="updateDlBtn" type="button" aria-label="Update download karein">📥 Update Download Karein</button>
@@ -1305,6 +1306,9 @@ async function jilanCheckUpdate(){
     const v=await r.json();
     if(v.apkUrl&&/^https:\/\//i.test(v.apkUrl))JILAN_APK_URL=v.apkUrl;
     if(v.version&&v.version!==JILAN_APP_VERSION){
+      try{
+        if(localStorage.getItem('jilan_update_dismissed')===v.version)return;
+      }catch(e){}
       document.getElementById('updateCard').style.display='block';
       if(v.notes)document.getElementById('updateNotes').textContent=v.notes;
     }
@@ -1316,6 +1320,14 @@ function jilanDlMsg(t,ok){
   m.style.color=ok?'#1a5c3f':'#b3261e';
   m.textContent=t;
 }
+document.getElementById('updateDismiss').addEventListener('click',function(){
+  document.getElementById('updateCard').style.display='none';
+  try{
+    fetch('store-version.json?t='+Date.now()).then(r=>r.json()).then(v=>{
+      if(v.version)localStorage.setItem('jilan_update_dismissed',v.version);
+    }).catch(()=>{});
+  }catch(e){}
+});
 document.getElementById('updateDlBtn').addEventListener('click',function(){
   const btn=this,orig=btn.innerHTML;
   btn.disabled=true;
@@ -1338,6 +1350,12 @@ document.getElementById('updateDlBtn').addEventListener('click',function(){
     }
     if(opened){
       jilanDlMsg('✅ Download shuru! Complete hone par Install dabayein.',true);
+      try{
+        fetch('store-version.json?t='+Date.now()).then(r=>r.json()).then(v=>{
+          if(v.version)localStorage.setItem('jilan_update_dismissed',v.version);
+        }).catch(()=>{});
+      }catch(e){}
+      setTimeout(function(){document.getElementById('updateCard').style.display='none';},3000);
     }else{
       jilanDlMsg('⚠️ Download nahi hui. Ye link copy karke Chrome me kholein: '+JILAN_APK_URL,false);
     }
