@@ -44,6 +44,7 @@ h2.sec{font-size:1.25rem;margin:18px 4px 10px;color:var(--p1)}
 .a-pink{background:linear-gradient(135deg,#ec4899,#db2777)}
 .a-orange{background:linear-gradient(135deg,#f59e0b,#d97706)}
 .a-purple{background:linear-gradient(135deg,#7c3aed,#6d28d9)}
+.a-teal{background:linear-gradient(135deg,#14b8a6,#0d9488)}
 .list-item{background:#fff;border-radius:14px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .list-item .t{font-weight:bold}
 .list-item .d{font-size:.85rem;color:#888}
@@ -106,8 +107,10 @@ nav button.on{color:var(--p1);font-weight:bold}
     <div class="moral-chip" id="stMoral"></div>
     <div class="action-row">
       <button class="abtn a-green" id="btnSpeak" onclick="speakStory()">🔊 سناؤ</button>
+      <button class="abtn a-teal" id="btnPause" onclick="pauseResumeSpeak()" style="display:none">⏸️ روکو</button>
       <button class="abtn a-pink" id="btnFav" onclick="toggleFav()">⭐ پسند</button>
     </div>
+    <div id="ttsHelp" style="display:none;background:#fff3cd;border:1px solid #e6c200;border-radius:12px;padding:10px;margin:8px 0;font-size:.9rem;color:#664d03"></div>
     <div class="action-row">
       <button class="abtn a-blue" onclick="shareStory()">📤 شیئر</button>
       <button class="abtn a-orange" onclick="makeStory(true)">🎲 نئی کہانی</button>
@@ -235,24 +238,81 @@ function updateFavBtn(){
   $('btnFav').textContent = isFav ? '⭐ پسندیدہ!' : '⭐ پسند';
 }
 
-/* TTS */
-let speaking=false;
+/* TTS — native Android (JilanTts) preferred, browser speechSynthesis fallback */
+let speaking=false, pausedTts=false;
+function hasNativeTts(){ try{ return typeof JilanTts!=='undefined' && JilanTts!==null; }catch(e){ return false; } }
+function ttsText(){ return (currentStory? (currentStory.title+'۔ '+currentStory.text) : ''); }
+function setSpeakUI(state){ // idle | speaking | paused
+  const b=$('btnSpeak'), p=$('btnPause');
+  if(!b) return;
+  if(state==='speaking'){ b.textContent='⏹️ بند کرو'; p.style.display=''; p.textContent='⏸️ توقف'; }
+  else if(state==='paused'){ b.textContent='⏹️ بند کرو'; p.style.display=''; p.textContent='▶️ جاری رکھو'; }
+  else { b.textContent='🔊 سناؤ'; if(p) p.style.display='none'; }
+}
+function showTtsHelp(){
+  const h=$('ttsHelp'); if(!h) return;
+  h.style.display='block';
+  h.innerHTML='⚠️ <b>اردو آواز دستیاب نہیں۔</b><br>حل: موبائل کی <b>Settings → Language → Text-to-Speech → Google Text-to-Speech → اردو (Urdu) وائس انسٹال</b> کریں، پھر ایپ دوبارہ کھولیں۔';
+}
+function hideTtsHelp(){ const h=$('ttsHelp'); if(h) h.style.display='none'; }
+function checkUrduVoice(){
+  hideTtsHelp();
+  if(hasNativeTts()){
+    try{
+      const s=JilanTts.urduStatus();
+      if(s!=='ok'){ showTtsHelp(); return false; }
+      return true;
+    }catch(e){ showTtsHelp(); return false; }
+  }
+  try{
+    const vs=speechSynthesis.getVoices();
+    const ur=vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ur'));
+    if(!ur){ showTtsHelp(); return false; }
+    return true;
+  }catch(e){ showTtsHelp(); return false; }
+}
+window.onTtsEnd=function(){ speaking=false; pausedTts=false; setSpeakUI('idle'); };
 function speakStory(){
   if(speaking){ stopSpeak(); return; }
+  const txt=ttsText(); if(!txt){ toast('پہلے کہانی بناؤ'); return; }
+  if(!checkUrduVoice()) return;
+  if(hasNativeTts()){
+    try{ JilanTts.speak(txt); speaking=true; pausedTts=false; setSpeakUI('speaking'); }
+    catch(e){ toast('آواز دستیاب نہیں'); }
+    return;
+  }
   try{
-    const u = new SpeechSynthesisUtterance(currentStory.title + "۔ " + currentStory.text);
+    const u=new SpeechSynthesisUtterance(txt);
     u.lang='ur-PK'; u.rate=0.9;
-    const vs = speechSynthesis.getVoices();
-    const ur = vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ur')) || vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('hi'));
+    const vs=speechSynthesis.getVoices();
+    const ur=vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ur'))||vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('hi'));
     if(ur) u.voice=ur;
-    u.onend=()=>{speaking=false;$('btnSpeak').textContent='🔊 سناؤ';};
-    u.onerror=()=>{speaking=false;$('btnSpeak').textContent='🔊 سناؤ';};
+    u.onend=()=>{ speaking=false; pausedTts=false; setSpeakUI('idle'); };
+    u.onerror=()=>{ speaking=false; pausedTts=false; setSpeakUI('idle'); };
     speechSynthesis.cancel(); speechSynthesis.speak(u);
-    speaking=true; $('btnSpeak').textContent='⏹️ روکو';
+    speaking=true; pausedTts=false; setSpeakUI('speaking');
   }catch(e){ toast('آواز دستیاب نہیں'); }
 }
-function stopSpeak(){ try{ speechSynthesis.cancel(); }catch(e){} speaking=false; const b=$('btnSpeak'); if(b) b.textContent='🔊 سناؤ'; }
-if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>{}; }
+function pauseResumeSpeak(){
+  if(!speaking) return;
+  if(hasNativeTts()){
+    try{
+      if(pausedTts){ JilanTts.resumeTts(); pausedTts=false; setSpeakUI('speaking'); }
+      else{ JilanTts.pauseTts(); pausedTts=true; setSpeakUI('paused'); }
+    }catch(e){}
+    return;
+  }
+  try{
+    if(pausedTts){ speechSynthesis.resume(); pausedTts=false; setSpeakUI('speaking'); }
+    else{ speechSynthesis.pause(); pausedTts=true; setSpeakUI('paused'); }
+  }catch(e){}
+}
+function stopSpeak(){
+  if(hasNativeTts()){ try{ JilanTts.stopTts(); }catch(e){} }
+  else { try{ speechSynthesis.cancel(); }catch(e){} }
+  speaking=false; pausedTts=false; setSpeakUI('idle');
+}
+if('speechSynthesis' in window){ try{ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>{}; }catch(e){} }
 
 /* Favorites + history */
 function getFavs(){ try{return JSON.parse(localStorage.getItem('kg_favs')||'[]');}catch(e){return[];} }
