@@ -118,6 +118,14 @@ button{font-family:inherit}
 #zoomrow{position:absolute;right:10px;top:38%;z-index:13;display:flex;flex-direction:column;align-items:center;gap:6px}
 #zoomrow input{writing-mode:vertical-lr;direction:rtl;width:26px;height:120px;accent-color:#ec4899}
 #zoomrow span{font-size:11px;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:10px}
+#zoomquick{display:flex;flex-direction:column;gap:4px}
+#zoomquick button{background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;font-size:10px;padding:4px 6px;cursor:pointer}
+#zoomquick button.on{background:var(--grad);border-color:transparent}
+/* premium filter intensity slider */
+#introw{position:absolute;left:12px;right:12px;bottom:118px;z-index:13;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.55);border-radius:14px;padding:7px 12px;font-size:11px}
+#introw input{flex:1;accent-color:#ec4899}
+#introw span:last-child{min-width:38px;text-align:right}
+#v,#fxlayer{touch-action:none}
 /* ---------- Editor ---------- */
 #edwrap{flex:1;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
 #edcanvas{max-width:100%;max-height:100%;touch-action:none}
@@ -240,7 +248,8 @@ button{font-family:inherit}
       <div id="fcat"></div>
       <div id="frow"></div>
     </div>
-    <div id="zoomrow" style="display:none"><span id="zoomval">1.0x</span><input type="range" id="zoomr" min="1" max="5" step="0.1" value="1"></div>
+    <div id="zoomrow" style="display:none"><span id="zoomval">1.0x</span><input type="range" id="zoomr" min="1" max="5" step="0.1" value="1"><div id="zoomquick"></div></div>
+    <div id="introw" style="display:none"><span>🎚️</span><input type="range" id="intr" min="0" max="100" step="1" value="70"><span id="intval">70%</span></div>
     <div id="camctl">
       <div class="sidebtns">
         <button class="iconbtn" id="btnGalleryMini" onclick="go('gal')" title="Gallery">🖼️</button>
@@ -335,12 +344,15 @@ button{font-family:inherit}
       <div class="setrow"><span>اردو / English</span><button class="switch" id="langsw" onclick="toggleLang()"></button></div>
     </div>
     <div class="setcard"><h3>🔐 Permissions</h3><div id="permrows"></div></div>
+    <div class="setcard"><h3>📷 Camera Buttons</h3>
+      <div class="setrow"><span>Volume key = shutter<br><small style="color:var(--mut)">Vol Up/Down: photo in Photo mode, record start/stop in Video mode</small></span><button class="switch" id="volsw" onclick="toggleVolCap()"></button></div>
+    </div>
     <div class="setcard"><h3>💾 Storage</h3>
       <div class="setrow"><span>Media items</span><b id="stcount">0</b></div>
       <div class="setrow"><span>Used space</span><b id="stsize">0 KB</b></div>
       <div class="setrow"><span>Clear all media</span><button class="abtn sec" style="flex:0 0 auto;padding:8px 18px" onclick="clearAllMedia()">Clear</button></div>
     </div>
-    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.4</h3>
+    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.5</h3>
       <p style="color:var(--mut);font-size:13px;line-height:1.7;margin:0">
       <span data-i18n="about1">Face filters use real face landmarks (2D overlays, not 3D AR). Face AI loads on first use — internet required once.</span><br>
       <span data-i18n="about2">Photos/videos sirf aapke phone me rehti hain, kahin upload nahi hotin.</span></p>
@@ -477,9 +489,34 @@ const FILTERS=[
  {id:'f_eyeglow',n:'Eye Glow',ur:'آنکھوں کی چمک',cat:'face',css:'none',emo:'🌟',kind:'canvas',face:'eyeglow'},
  {id:'f_bunny',n:'Bunny',ur:'خرگوش',cat:'face',css:'saturate(1.12)',emo:'🐰',kind:'canvas',face:'bunny'},
  {id:'f_butterfly',n:'Butterflies',ur:'تتلیاں',cat:'face',css:'saturate(1.12)',emo:'🦋',kind:'canvas',face:'butterfly'},
+ // --- Premium (15) — iPhone-inspired natural color grading; cssk(k) scales with intensity 0..1 ---
+ {id:'p_natural',n:'Natural',ur:'قدرتی',cat:'premium',emo:'🍃',cssk:k=>`saturate(${(1+0.10*k).toFixed(3)}) contrast(${(1+0.05*k).toFixed(3)}) brightness(${(1+0.02*k).toFixed(3)})`},
+ {id:'p_vivid',n:'Vivid',ur:'شوخ',cat:'premium',emo:'🌈',cssk:k=>`saturate(${(1+1.05*k).toFixed(3)}) contrast(${(1+0.16*k).toFixed(3)}) brightness(${(1+0.02*k).toFixed(3)})`},
+ {id:'p_vividwarm',n:'Vivid Warm',ur:'شوخ گرم',cat:'premium',emo:'🔥',cssk:k=>`saturate(${(1+1.0*k).toFixed(3)}) contrast(${(1+0.14*k).toFixed(3)}) sepia(${(0.22*k).toFixed(3)}) brightness(${(1+0.03*k).toFixed(3)})`},
+ {id:'p_vividcool',n:'Vivid Cool',ur:'شوخ ٹھنڈا',cat:'premium',emo:'🧊',cssk:k=>`saturate(${(1+1.0*k).toFixed(3)}) contrast(${(1+0.14*k).toFixed(3)}) hue-rotate(${(-14*k).toFixed(1)}deg) brightness(${(1+0.03*k).toFixed(3)})`},
+ {id:'p_dramatic',n:'Dramatic',ur:'ڈرامائی',cat:'premium',emo:'🎭',ov:'vignette',cssk:k=>`contrast(${(1+0.45*k).toFixed(3)}) brightness(${(1-0.07*k).toFixed(3)}) saturate(${(1+0.18*k).toFixed(3)})`},
+ {id:'p_dramwarm',n:'Dramatic Warm',ur:'ڈرامائی گرم',cat:'premium',emo:'🌇',ov:'vignette',cssk:k=>`contrast(${(1+0.42*k).toFixed(3)}) brightness(${(1-0.05*k).toFixed(3)}) sepia(${(0.28*k).toFixed(3)}) saturate(${(1+0.25*k).toFixed(3)})`},
+ {id:'p_dramcool',n:'Dramatic Cool',ur:'ڈرامائی ٹھنڈا',cat:'premium',emo:'🌌',ov:'vignette',cssk:k=>`contrast(${(1+0.42*k).toFixed(3)}) brightness(${(1-0.05*k).toFixed(3)}) hue-rotate(${(12*k).toFixed(1)}deg) saturate(${(1+0.12*k).toFixed(3)})`},
+ {id:'p_mono',n:'Mono',ur:'مونو',cat:'premium',emo:'◼️',cssk:k=>`grayscale(${k.toFixed(3)}) contrast(${(1+0.12*k).toFixed(3)}) brightness(${(1+0.02*k).toFixed(3)})`},
+ {id:'p_silver',n:'Silvertone',ur:'سلور',cat:'premium',emo:'🥈',cssk:k=>`grayscale(${k.toFixed(3)}) sepia(${(0.18*k).toFixed(3)}) contrast(${(1+0.08*k).toFixed(3)}) brightness(${(1+0.06*k).toFixed(3)})`},
+ {id:'p_noir',n:'Noir',ur:'نوار',cat:'premium',emo:'🎬',ov:'vignette',cssk:k=>`grayscale(${k.toFixed(3)}) contrast(${(1+0.45*k).toFixed(3)}) brightness(${(1-0.08*k).toFixed(3)})`},
+ {id:'p_warmport',n:'Warm Portrait',ur:'گرم پورٹریٹ',cat:'premium',emo:'🕯️',cssk:k=>`sepia(${(0.30*k).toFixed(3)}) saturate(${(1+0.22*k).toFixed(3)}) contrast(${(1+0.06*k).toFixed(3)}) brightness(${(1+0.04*k).toFixed(3)})`},
+ {id:'p_coolport',n:'Cool Portrait',ur:'ٹھنڈا پورٹریٹ',cat:'premium',emo:'💧',cssk:k=>`saturate(${(1+0.08*k).toFixed(3)}) hue-rotate(${(-16*k).toFixed(1)}deg) contrast(${(1+0.06*k).toFixed(3)}) brightness(${(1+0.05*k).toFixed(3)})`},
+ {id:'p_golden',n:'Golden Hour',ur:'سنہری گھڑی',cat:'premium',emo:'🌅',ov:'glow',cssk:k=>`sepia(${(0.38*k).toFixed(3)}) saturate(${(1+0.55*k).toFixed(3)}) contrast(${(1+0.08*k).toFixed(3)}) brightness(${(1+0.05*k).toFixed(3)})`},
+ {id:'p_softglow',n:'Soft Glow',ur:'نرم چمک',cat:'premium',emo:'💫',ov:'glow',cssk:k=>`brightness(${(1+0.12*k).toFixed(3)}) saturate(${(1+0.12*k).toFixed(3)}) contrast(${(1-0.06*k).toFixed(3)})`},
+ {id:'p_cine',n:'Cinematic',ur:'سنیمائی',cat:'premium',emo:'🎞️',ov:'cinebars',cssk:k=>`contrast(${(1+0.22*k).toFixed(3)}) saturate(${(1+0.10*k).toFixed(3)}) sepia(${(0.14*k).toFixed(3)}) hue-rotate(${(-6*k).toFixed(1)}deg) brightness(${(1-0.03*k).toFixed(3)})`},
 ];
 const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس'],['face','😎 Face','چہرہ']];
 let curFilter=FILTERS[0], curCat='foryou';
+/* ---- premium filter intensity (0..100, persisted) ---- */
+let premInt=parseInt(localStorage.getItem('jsc_premint')||'70',10);
+if(!(premInt>=0&&premInt<=100))premInt=70;
+function premK(){return premInt/100;}
+/* resolved css filter string for a filter (premium scales with intensity) */
+function fcss(f){try{
+ if(f&&typeof f.cssk==='function'){const s=f.cssk(premK());return s||'none';}
+ return (f&&f.css)||'none';
+}catch(e){return (f&&f.css)||'none';}}
 
 /* ============ SNAPCHAT-STYLE CATEGORY SYSTEM ============
    Extra category membership (filter id -> new-category ids).
@@ -487,6 +524,7 @@ let curFilter=FILTERS[0], curCat='foryou';
    'recent' handled separately via localStorage. */
 const NEWCATS=[
  ['foryou','✨ For You','آپ کے لیے'],
+ ['premium','💎 Premium','پریمیم'],
  ['beauty','💄 Beauty','بیوٹی'],
  ['cute','🐰 Cute','کیوٹ'],
  ['aesthetic','🌸 Aesthetic','ایستھیٹک'],
@@ -922,6 +960,7 @@ function applyLang(){
  if($('scr-flt').classList.contains('on'))buildFiltersScreen();
 }
 function toggleLang(){LANG=LANG==='en'?'ur':'en';localStorage.setItem('jsc_lang',LANG);applyLang();toast(LANG==='ur'?'اردو':'English');}
+function toggleVolCap(){setVolCapEnabled(!volCapEnabled());$('volsw').classList.toggle('on',volCapEnabled());toast(volCapEnabled()?'🔊 Volume shutter ON':'🔇 Volume shutter OFF');}
 
 /* ================= CAMERA ================= */
 let stream=null,curFacing='user',mode='photo',recorder=null,recChunks=[],recStart=0,recTimer=null;
@@ -942,6 +981,7 @@ async function startCamera(){
   setupDeviceCaps();
   startFxLoop();
   toast('📷 '+(LANG==='ur'?'کیمرہ چل پڑا':'Camera on'));
+  syncVolCap();
  }catch(e){
   console.warn(e);
   const n=e&&e.name;
@@ -954,16 +994,35 @@ function camFail(key){
 }
 function stopStream(){try{if(recorder&&recorder.state!=='inactive')recorder.stop();}catch(e){}
  cancelAnimationFrame(recRAF);
- try{if(stream)stream.getTracks().forEach(tr=>tr.stop());}catch(e){}stream=null;}
+ try{if(stream)stream.getTracks().forEach(tr=>tr.stop());}catch(e){}stream=null;
+ syncVolCap();}
 function setupDeviceCaps(){
  try{
   const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};
   $('btnFlash').style.opacity=cap.torch?1:0.35;
   if(cap.zoom){zoomCap={min:cap.zoom.min||1,max:Math.min(cap.zoom.max||5,5),tr};
    $('zoomrow').style.display='flex';const z=$('zoomr');z.min=zoomCap.min;z.max=zoomCap.max;z.value=1;
-   $('zoomval').textContent='1.0x';}
+   $('zoomval').textContent='1.0x';
+   /* quick zoom levels — only show device-supported ones */
+   const q=$('zoomquick');q.innerHTML='';
+   [[0.5,'0.5x'],[1,'1x'],[2,'2x']].forEach(([lv,lb])=>{
+    if(lv>=zoomCap.min-0.01&&lv<=zoomCap.max+0.01){
+     const b=document.createElement('button');b.textContent=lb;b.dataset.zv=lv;
+     b.className=(Math.abs(lv-1)<0.01)?'on':'';
+     b.onclick=()=>setZoom(lv);q.appendChild(b);
+    }});
+  }
   else{$('zoomrow').style.display='none';zoomCap=null;}
  }catch(e){}
+}
+async function setZoom(zv){
+ if(!zoomCap)return;
+ try{
+  const z=Math.max(parseFloat($('zoomr').min),Math.min(parseFloat($('zoomr').max),zv));
+  $('zoomr').value=z;$('zoomval').textContent=(Math.round(z*10)/10)+'x';
+  document.querySelectorAll('#zoomquick button').forEach(b=>b.classList.toggle('on',Math.abs(parseFloat(b.dataset.zv)-zv)<0.01));
+  await zoomCap.tr.applyConstraints({advanced:[{zoom:z}]});
+ }catch(err){}
 }
 async function switchCamera(){
  if(isRecording()&&!recSwitching){await switchCameraDuringRec();return;}
@@ -978,6 +1037,7 @@ async function toggleTorch(){
 }
 $('zoomr').addEventListener('input',async e=>{
  try{const z=parseFloat(e.target.value);$('zoomval').textContent=z.toFixed(1)+'x';
+  document.querySelectorAll('#zoomquick button').forEach(b=>b.classList.toggle('on',Math.abs(parseFloat(b.dataset.zv)-z)<0.06));
   await zoomCap.tr.applyConstraints({advanced:[{zoom:z}]});}catch(err){}
 });
 v.addEventListener('click',e=>{
@@ -985,22 +1045,32 @@ v.addEventListener('click',e=>{
  r.style.left=e.clientX+'px';r.style.top=(e.clientY-$('camwrap').getBoundingClientRect().top)+'px';
  setTimeout(()=>r.style.display='none',700);
 });
-/* pinch-to-zoom on preview (uses hardware zoom when available) */
+/* pinch-to-zoom on preview (uses REAL hardware zoom via applyConstraints).
+   Attached to video + fx layer only (not the filter carousel), touch-action:none
+   in CSS stops the browser from hijacking the gesture. Never triggers capture. */
 let _pinchD=0;
-$('camwrap').addEventListener('touchstart',e=>{
+function _pinchStart(e){
  if(e.touches.length===2)_pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-},{passive:true});
-$('camwrap').addEventListener('touchmove',e=>{
+}
+function _pinchMove(e){
  if(e.touches.length===2&&zoomCap&&_pinchD>0){
+  e.preventDefault(); /* stop page pinch-zoom / scroll during gesture */
   const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
   const z=$('zoomr');
   const nv=clamp(parseFloat(z.value)*(d/_pinchD),parseFloat(z.min),parseFloat(z.max));
   z.value=nv;$('zoomval').textContent=nv.toFixed(1)+'x';
+  document.querySelectorAll('#zoomquick button').forEach(b=>b.classList.toggle('on',Math.abs(parseFloat(b.dataset.zv)-nv)<0.06));
   zoomCap.tr.applyConstraints({advanced:[{zoom:nv}]}).catch(()=>{});
   _pinchD=d;
  }
-},{passive:true});
-$('camwrap').addEventListener('touchend',()=>{_pinchD=0;},{passive:true});
+}
+function _pinchEnd(){_pinchD=0;}
+['v','fxlayer'].forEach(id=>{const el=$(id);if(!el)return;
+ el.addEventListener('touchstart',_pinchStart,{passive:true});
+ el.addEventListener('touchmove',_pinchMove,{passive:false});
+ el.addEventListener('touchend',_pinchEnd,{passive:true});
+ el.addEventListener('touchcancel',_pinchEnd,{passive:true});
+});
 function setMode(m){mode=m;$('modePhoto').classList.toggle('on',m==='photo');
  $('modeVideo').classList.toggle('on',m==='video');$('shutter').classList.toggle('vidmode',m==='video');}
 
@@ -1010,7 +1080,10 @@ let fxRun=false;
 function startFxLoop(){if(fxRun)return;fxRun=true;
  const loop=()=>{if(!fxRun)return;
   try{
-   const w=fx.width=fx.clientWidth,h=fx.height=fx.clientHeight;
+   /* perf: only reallocate the canvas when its display size actually changed */
+   const cw=fx.clientWidth|0,ch=fx.clientHeight|0;
+   if(fx.width!==cw||fx.height!==ch){fx.width=cw;fx.height=ch;}
+   const w=fx.width,h=fx.height;
    fxc.clearRect(0,0,w,h);
    const f=curFilter,t=performance.now()/1000;
    const doSmooth=f.proc==='smooth';
@@ -1018,7 +1091,7 @@ function startFxLoop(){if(fxRun)return;fxRun=true;
    v.style.opacity=needCanvas?'0':'';
    if(needCanvas){
     /* canvas-processed live preview: video frame -> canvas, then REAL processing */
-    if(drawVideoCover(fxc,w,h,f.css)){
+    if(drawVideoCover(fxc,w,h,fcss(f))){
      if(doSmooth)smoothLive(fxc,w,h);
      detectFace();
      if(f.face&&faceLm)paintFace(fxc,faceLm,w,h,f.face,t);
@@ -1036,9 +1109,23 @@ function startFxLoop(){if(fxRun)return;fxRun=true;
  loop();}
 /* apply live css filter */
 function applyLiveFilter(){
- v.style.filter=(curFilter.css&&curFilter.css!=='none')?curFilter.css:'';
+ const s=fcss(curFilter);
+ v.style.filter=(s&&s!=='none')?s:'';
  partKind=''; /* reset particles */
+ refreshIntRow();
 }
+/* ---- premium intensity slider row (visible only for premium filters) ---- */
+function refreshIntRow(){
+ const show=!!(curFilter&&typeof curFilter.cssk==='function');
+ $('introw').style.display=show?'flex':'none';
+ if(show){$('intr').value=premInt;$('intval').textContent=premInt+'%';}
+}
+$('intr').addEventListener('input',e=>{
+ premInt=Math.max(0,Math.min(100,parseInt(e.target.value||'0',10)));
+ try{localStorage.setItem('jsc_premint',String(premInt));}catch(err){}
+ $('intval').textContent=premInt+'%';
+ applyLiveFilter();
+});
 
 /* ---- dedicated Filters screen ---- */
 let fltCat='beauty';
@@ -1053,7 +1140,7 @@ function buildFiltersScreen(){
  list.forEach(f=>{
   const d=document.createElement('div');d.className='fltcard'+(f.id===curFilter.id?' on':'');
   const faved=isFav(f.id);
-  d.innerHTML=`<div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div><span>${LANG==='ur'?f.ur:f.n}</span>`+
+  d.innerHTML=`<div class="demo" style="filter:${(()=>{const _s=fcss(f);return _s&&_s!=='none'?_s:'';})()}">${f.emo}</div><span>${LANG==='ur'?f.ur:f.n}</span>`+
    `<div class="favbtn${faved?' faved':''}" data-fav="${f.id}" style="position:absolute;top:6px;right:6px">${faved?'❤️':'🤍'}</div>`;
   d.style.position='relative';
   d.querySelector('[data-fav]').onclick=(e)=>{e.stopPropagation();toggleFav(f.id);};
@@ -1086,7 +1173,7 @@ function buildFilterUI(){
  list.forEach(f=>{
   const d=document.createElement('div');d.className='fthumb'+(f.id===curFilter.id?' on':'');
   const faved=isFav(f.id);
-  d.innerHTML=`<div class="im"><div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div>`+
+  d.innerHTML=`<div class="im"><div class="demo" style="filter:${(()=>{const _s=fcss(f);return _s&&_s!=='none'?_s:'';})()}">${f.emo}</div>`+
    `<div class="favbtn${faved?' faved':''}" data-fav="${f.id}">${faved?'❤️':'🤍'}</div></div><span>${LANG==='ur'?f.ur:f.n}</span>`;
   d.querySelector('[data-fav]').onclick=(e)=>{e.stopPropagation();toggleFav(f.id);};
   d.onclick=()=>{selectFilter(f);};
@@ -1100,20 +1187,43 @@ function shutterPress(){
  if(mode==='photo')capturePhoto();
  else toggleRecording();
 }
+/* ================= VOLUME BUTTON CAPTURE =================
+   The Android app forwards hardware volume keys here ONLY while the camera
+   screen is active and the user enabled it in Settings (native side gates it
+   via Android.setVolCapture). 800ms debounce stops long-press double shots. */
+let _volLast=0;
+function volCapEnabled(){try{return localStorage.getItem('jsc_volcap')!=='0';}catch(e){return true;}}
+function setVolCapEnabled(on){try{localStorage.setItem('jsc_volcap',on?'1':'0');}catch(e){}syncVolCap();}
+function syncVolCap(){
+ try{
+  const active=(curScreen()==='cam')&&volCapEnabled()&&!!stream;
+  if(typeof Android!=='undefined'&&Android.setVolCapture)Android.setVolCapture(active);
+ }catch(e){}
+}
+window.__volCapture=function(which){
+ /* called by MainActivity.onKeyDown for volume up/down */
+ try{
+  if(curScreen()!=='cam'||!volCapEnabled()||!stream)return 'ignored';
+  const now=Date.now();if(now-_volLast<800)return 'debounced';_volLast=now;
+  shutterPress();
+  return 'captured';
+ }catch(e){return 'error';}
+};
 function drawFilteredFrame(canvas){
  /* draws current video frame with active filter + overlay onto canvas; returns canvas */
  const w=v.videoWidth||1280,h=v.videoHeight||720;
  canvas.width=w;canvas.height=h;
  const c=canvas.getContext('2d');
  const f=curFilter;
+ const css=fcss(f);
  if(f.kind==='canvas'&&f.fx){
    const tmp=document.createElement('canvas');tmp.width=w;tmp.height=h;
    const tc=tmp.getContext('2d');
-   if(f.css&&f.css!=='none')tc.filter=f.css;
+   if(css&&css!=='none')tc.filter=css;
    tc.drawImage(v,0,0,w,h);tc.filter='none';
    applyCanvasFX(tmp,canvas,f.fx);
  }else{
-   if(f.css&&f.css!=='none')c.filter=f.css;
+   if(css&&css!=='none')c.filter=css;
    c.drawImage(v,0,0,w,h);c.filter='none';
  }
  if(f.proc==='smooth')smoothLive(c,w,h);
@@ -1720,6 +1830,7 @@ async function refreshSettings(){
  rows.push(['📱 Android app bridge',typeof Android!=='undefined'&&!!Android.saveMedia]);
  $('permrows').innerHTML=rows.map(([n,ok])=>
   `<div class="setrow"><span>${n}</span><b class="${ok?'ok':'no'}">${ok?'✓':'✕'}</b></div>`).join('');
+ $('volsw').classList.toggle('on',volCapEnabled());
 }
 /* ================= NAV (stack-based, back-safe) ================= */
 let navStack=['cam'];
@@ -1733,6 +1844,7 @@ function renderScreen(s){
  if(s==='flt'){$('scr-flt').classList.add('on');buildFiltersScreen();}
  if(s==='ed'){$('scr-ed').classList.add('on');setTimeout(fitEditorCanvas,80);}
  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+ syncVolCap();
 }
 function go(s){
  if(curScreen()===s){renderScreen(s);return;}
