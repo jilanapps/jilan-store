@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Safar — Har Safar, Yaadgar</title>
+<style>
+:root{
+  --o:#FF6B35; --od:#e55a28; --b:#004E89; --bd:#003a68;
+  --cream:#FFF8E7; --bg:#FFF8E7; --bg2:#fffdf4;
+  --card:#ffffff; --txt:#2b2b2b; --mut:#8a8578; --line:#efe6d2;
+  --shadow:0 4px 18px rgba(120,70,20,.10); --r:18px;
+}
+body.dark{
+  --bg:#101418; --bg2:#161b21; --card:#1a2027; --txt:#f2ede2;
+  --mut:#9a958a; --line:#2a323b; --shadow:0 4px 18px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;touch-action:manipulation;transition:background .25s,color .25s}
+body[dir=rtl]{font-family:'Noto Nastaliq Urdu',system-ui,sans-serif}
+.screen{display:none;min-height:100vh;padding-bottom:92px;animation:fade .22s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes slideup{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* DEMO banner */
+.demobanner{position:sticky;top:0;z-index:300;background:linear-gradient(90deg,#FF6B35,#004E89);color:#fff;text-align:center;font-size:12px;font-weight:700;padding:7px;letter-spacing:.5px}
+/* error strip */
+#safErr{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#c00;color:#fff;padding:12px;font-size:14px;text-align:center}
+/* header */
+.hdr{position:sticky;top:0;z-index:100;background:var(--bg);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.hdr .logo{font-size:22px;font-weight:900;color:var(--o)}
+.hdr .logo span{color:var(--b)}
+body.dark .hdr .logo span{color:#7db8e8}
+.hdr .sp{flex:1}
+.hdr h2{font-size:18px;font-weight:800}
+.icobtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow)}
+.icobtn:active{transform:scale(.93)}
+.backbtn{width:40px;height:40px;border-radius:50%;border:none;background:var(--bg2);color:var(--txt);font-size:20px;cursor:pointer}
+/* bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 4px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(120,70,20,.08)}
+.bnav button{flex:1;border:none;background:none;color:var(--mut);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px}
+.bnav button .ic{font-size:23px}
+.bnav button.act{color:var(--o)}
+/* buttons */
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--o),var(--od));cursor:pointer;box-shadow:0 6px 16px rgba(255,107,53,.35);transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.blue{background:linear-gradient(135deg,var(--b),var(--bd));box-shadow:0 6px 16px rgba(0,78,137,.3)}
+.btn.ghost{background:var(--card);color:var(--o);border:2px solid var(--o);box-shadow:none}
+.btn.grey{background:var(--bg2);color:var(--txt);box-shadow:none;border:1px solid var(--line)}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1}
+/* inputs */
+.inp{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:14px;background:var(--card);color:var(--txt);font-size:15px;outline:none}
+.inp:focus{border-color:var(--o)}
+select.inp{appearance:none}
+.lbl{font-size:13px;font-weight:700;color:var(--mut);margin:14px 0 6px;display:block}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin:12px 16px}
+.sec{padding:0 16px;margin-top:20px}
+.sec h3{font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.sec h3 .more{font-size:13px;color:var(--o);font-weight:700;cursor:pointer}
+/* search */
+.searchbar{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;padding:14px;margin:12px 16px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.searchbar input{flex:1;border:none;background:none;outline:none;font-size:16px;color:var(--txt);font-weight:600}
+/* hero */
+.hero{margin:12px 16px;border-radius:22px;overflow:hidden;position:relative;box-shadow:var(--shadow);min-height:190px;display:flex;align-items:flex-end;background:linear-gradient(135deg,#FF6B35 0%,#d14d1f 40%,#004E89 100%)}
+.hero .art{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:.35;animation:float 4s ease-in-out infinite}
+.hero .txt{position:relative;z-index:2;padding:20px;color:#fff}
+.hero .txt h2{font-size:24px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hero .txt p{font-size:13px;opacity:.95;margin-top:4px}
+/* chips */
+.chips{display:flex;gap:10px;overflow-x:auto;padding:4px 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);border-radius:24px;padding:10px 18px;font-size:14px;font-weight:700;color:var(--txt);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--o);border-color:var(--o);color:#fff}
+/* route cards */
+.rcard{display:flex;gap:12px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin:10px 16px;cursor:pointer;align-items:center;animation:slideup .3s ease}
+.rcard:active{transform:scale(.98)}
+.ric{width:56px;height:56px;flex:0 0 56px;border-radius:16px;background:linear-gradient(135deg,var(--o),var(--b));display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff}
+.rinfo{flex:1}
+.rinfo .rt{font-size:15px;font-weight:800}
+.rinfo .rm{font-size:12px;color:var(--mut);margin-top:3px}
+.rarrow{font-size:20px;color:var(--mut)}
+/* horizontal scroll */
+.hscroll{display:flex;gap:12px;overflow-x:auto;padding:6px 16px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.dcard{flex:0 0 170px;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;background:var(--card);animation:slideup .3s ease}
+.dimg{height:120px;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative}
+.dimg .db{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:3px 8px}
+.dimg .heart{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:16px;cursor:pointer}
+.dimg .heart.fav{color:#ff4d6d}
+.dbody{padding:10px 12px 12px}
+.dname{font-size:14px;font-weight:800}
+.dmeta{font-size:11px;color:var(--mut);margin-top:3px}
+/* quick actions */
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:6px 16px}
+.qbtn{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:var(--shadow);font-size:11px;font-weight:700;color:var(--txt)}
+.qbtn .qi{font-size:26px}
+.qbtn:active{transform:scale(.95)}
+/* weather */
+.wx{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--b),#0066b3);border-radius:var(--r);padding:16px;margin:12px 16px;color:#fff;box-shadow:var(--shadow)}
+.wx .wi{font-size:44px}
+.wx .wt{font-size:28px;font-weight:900}
+.wx .wm{font-size:12px;opacity:.85}
+/* map */
+.mapbox{margin:12px 16px;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);background:var(--card);position:relative}
+.mapbox svg{display:block;width:100%;height:auto}
+.mapnote{font-size:11px;color:var(--mut);text-align:center;padding:8px;background:var(--bg2)}
+/* day breakdown */
+.day{border-left:3px solid var(--o);margin:0 16px 0 26px;padding:10px 0 10px 14px;position:relative}
+.day::before{content:'';position:absolute;left:-8px;top:14px;width:13px;height:13px;border-radius:50%;background:var(--o)}
+.day h4{font-size:15px;font-weight:800}
+.day p{font-size:13px;color:var(--mut);margin-top:4px}
+/* checklist */
+.chk{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;font-size:15px}
+.chk .box{width:24px;height:24px;border-radius:8px;border:2px solid var(--o);flex:0 0 24px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.chk.done .box{background:var(--o)}
+.chk.done .ct{text-decoration:line-through;color:var(--mut)}
+/* expense */
+.eitem{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px;margin:8px 16px}
+.eitem .eic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 44px}
+.eitem .ei{flex:1}
+.eitem .et{font-size:14px;font-weight:700}
+.eitem .em{font-size:11px;color:var(--mut)}
+.eitem .ea{font-size:15px;font-weight:800;color:var(--o)}
+.bar{height:10px;border-radius:5px;background:var(--bg2);overflow:hidden;margin-top:8px}
+.bar>div{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--o),var(--b));transition:width .4s}
+/* stats */
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:6px 16px}
+.stat{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:14px 8px;text-align:center}
+.stat .sv{font-size:20px;font-weight:900;color:var(--o)}
+.stat .sl{font-size:11px;color:var(--mut);margin-top:4px}
+/* onboarding */
+.obwrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1a2a4a 0%,#004E89 45%,#FF6B35 100%)}
+.obslide{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;color:#fff;text-align:center}
+.obslide.on{display:flex;animation:fade .3s ease}
+.obslide .big{font-size:110px;margin-bottom:24px;animation:float 3s ease-in-out infinite}
+.obslide h2{font-size:26px;font-weight:900;margin-bottom:10px}
+.obslide p{font-size:15px;opacity:.9;max-width:300px;line-height:1.6}
+.obdots{display:flex;gap:8px;justify-content:center;padding:16px}
+.obdots span{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.35)}
+.obdots span.on{width:26px;background:#fff}
+/* modal */
+.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 20px 30px;animation:slideup .25s ease}
+.sheet h3{font-size:18px;font-weight:800;margin-bottom:12px}
+/* sos */
+.sosbtn{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ff5a5a,#c00);color:#fff;font-size:16px;font-weight:900;border:6px solid #ffb3b3;margin:20px auto;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 30px rgba(255,0,0,.4);animation:pop .4s ease}
+.emg{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;margin:8px 0}
+.emg .n{flex:1;font-size:15px;font-weight:700}
+.emg .p{font-size:13px;color:var(--mut)}
+.emg a{text-decoration:none;font-size:22px}
+/* toggle */
+.trow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px;font-weight:600}
+.tgl{width:52px;height:30px;border-radius:15px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;flex:0 0 52px}
+.tgl.on{background:var(--o)}
+.tgl::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tgl.on::after{left:25px}
+.empty{text-align:center;padding:50px 30px;color:var(--mut)}
+.empty .big{font-size:60px;margin-bottom:12px}
+.vehgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.veh{border:2px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--card)}
+.veh.on{border-color:var(--o);background:#fff4ee}
+body.dark .veh.on{background:#2b2119}
+.veh .vi{font-size:30px}
+.veh .vn{font-size:12px;font-weight:700;margin-top:6px}
+.veh .vm{font-size:10px;color:var(--mut)}
+.sug{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;font-size:14px}
+.sug .st{font-weight:800;margin-bottom:4px}
+.sug .sm{font-size:12px;color:var(--mut)}
+.timeline{font-size:12px;color:var(--mut);margin-top:6px}
+.prog{font-size:13px;font-weight:800;color:var(--o);margin:14px 16px 0}
+</style>
+</head>
+<body>
+<div id="safErr"></div>
+<div class="demobanner">DEMO by Jilan Apps</div>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="ob" class="screen on" style="padding-bottom:0">
+  <div class="obwrap">
+    <div class="obslide on" id="obs0">
+      <div class="big">🏔️</div>
+      <h2 data-i="ob1t">Har Safar, Yaadgar</h2>
+      <p data-i="ob1d">Pakistan ki khoobsurat vadion ka safar plan karo — asaan, mehfooz aur yaadgar.</p>
+    </div>
+    <div class="obslide" id="obs1">
+      <div class="big">🛣️</div>
+      <h2 data-i="ob2t">Routes Plan Karo</h2>
+      <p data-i="ob2d">Behtreen rasta, petrol kharcha, toll aur aaram ke stops — sab auto-suggest.</p>
+    </div>
+    <div class="obslide" id="obs2">
+      <div class="big">🍛</div>
+      <h2 data-i="ob3t">Dhabay Dhoondo</h2>
+      <p data-i="ob3d">Rastay ke mashhoor dhabay, petrol pump aur hotels — ratings ke sath.</p>
+    </div>
+    <div class="obslide" id="obs3">
+      <div class="big">💰</div>
+      <h2 data-i="ob4t">Kharcha Track Karo</h2>
+      <p data-i="ob4d">Doston ke sath kharcha baanto, budget banao, hisaab rakho.</p>
+    </div>
+    <div class="obdots" id="obdots"><span class="on"></span><span></span><span></span><span></span></div>
+    <div style="padding:0 24px 40px;display:flex;gap:10px">
+      <button class="btn grey" style="flex:1" onclick="finishOb()" data-i="skip">Skip</button>
+      <button class="btn" style="flex:2" id="obnext" onclick="obNext()" data-i="next">Aagay →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="home" class="screen">
+  <div class="hdr"><div class="logo">Saf<span>ar</span></div><div class="sp"></div>
+    <button class="icobtn" onclick="toggleDark()" id="darkBtn">🌙</button>
+    <button class="icobtn" onclick="openSheet('sosSheet')">🆘</button>
+  </div>
+  <div class="searchbar"><span>🔍</span><input id="homeSearch" data-i-ph="whereto" placeholder="Where to? (Kahan jana hai?)" oninput="homeSearchGo(this.value)"></div>
+  <div class="wx"><div class="wi">⛅</div><div><div class="wt">28°C</div><div class="wm" data-i="wxsub">Aaj ka mausam • Safar ke liye behtreen</div></div><div class="sp" style="flex:1"></div><div style="font-size:12px;opacity:.8" data-i="wxdemo">Demo data</div></div>
+  <div class="sec"><h3><span data-i="quick">Quick Actions</span></h3></div>
+  <div class="qgrid">
+    <div class="qbtn" onclick="goTab('plan')"><div class="qi">🗺️</div><span data-i="newtrip">New Trip</span></div>
+    <div class="qbtn" onclick="openSheet('fuelSheet')"><div class="qi">⛽</div><span data-i="fuelcalc">Fuel Calc</span></div>
+    <div class="qbtn" onclick="openSheet('sosSheet')"><div class="qi">🆘</div><span data-i="emg">Emergency</span></div>
+    <div class="qbtn" onclick="show('expenses')"><div class="qi">💰</div><span data-i="exp">Kharcha</span></div>
+  </div>
+  <div class="sec"><h3><span data-i="poproutes">Popular Routes</span><span class="more" onclick="goTab('plan')" data-i="viewall">Sab dekho →</span></h3></div>
+  <div id="popRoutes"></div>
+  <div class="sec"><h3><span data-i="trending">Trending Photos</span></h3></div>
+  <div class="hscroll" id="trendPhotos"></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ PLAN TRIP ============ -->
+<div id="plan" class="screen">
+  <div class="hdr"><h2 data-i="plantrip">Trip Plan Karo</h2><div class="sp"></div></div>
+  <div class="card">
+    <span class="lbl" data-i="from">Kahan se?</span>
+    <select class="inp" id="pFrom"></select>
+    <span class="lbl" data-i="to">Kahan jana hai?</span>
+    <select class="inp" id="pTo"></select>
+    <div class="btnrow" style="margin-top:4px">
+      <div style="flex:1"><span class="lbl" data-i="dep">Rawangi</span><input type="date" class="inp" id="pDep"></div>
+      <div style="flex:1"><span class="lbl" data-i="ret">Wapsi</span><input type="date" class="inp" id="pRet"></div>
+    </div>
+    <span class="lbl" data-i="vehicle">Sawari</span>
+    <div class="vehgrid" id="vehGrid"></div>
+    <div style="height:14px"></div>
+    <button class="btn" onclick="planTrip()" data-i="findroute">Rasta Dhoondo 🛣️</button>
+  </div>
+  <div id="planResult"></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ TRIP DETAIL ============ -->
+<div id="tripdetail" class="screen">
+  <div class="hdr"><button class="backbtn" onclick="__goBack()">←</button><h2 id="tdTitle">Trip</h2><div class="sp"></div>
+    <button class="icobtn" onclick="toggleSaveTrip()" id="tdSave">🤍</button>
+  </div>
+  <div class="mapbox">
+    <svg viewBox="0 0 400 220" id="tdMap"></svg>
+    <div class="mapnote" data-i="mapnote">Illustrative map — asal GPS navigation nahi (demo)</div>
+  </div>
+  <div class="statgrid" id="tdStats"></div>
+  <div class="sec"><h3><span data-i="daywise">Din-wise Plan</span></h3></div>
+  <div id="tdDays" style="margin-top:8px"></div>
+  <div class="sec"><h3><span data-i="suggest">Rastay ki Sahulaten</span></h3></div>
+  <div id="tdSug" style="padding:0 16px"></div>
+  <div class="sec"><h3><span data-i="packing">Packing Checklist</span></h3></div>
+  <div class="card" style="padding:6px 0" id="tdPack"></div>
+  <div class="sec"><h3><span data-i="emgct">Emergency Contacts</span></h3></div>
+  <div class="card" id="tdEmg" style="padding:8px 16px"></div>
+  <div class="card"><div class="btnrow">
+    <button class="btn grey" onclick="openSheet('expSheet');curExpTrip=curTrip.id" data-i="addexp">+ Kharcha</button>
+    <button class="btn blue" onclick="downloadOffline()" data-i="offmap">📥 Offline Map</button>
+  </div></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ EXPLORE ============ -->
+<div id="explore" class="screen">
+  <div class="hdr"><h2 data-i="explore">Explore</h2><div class="sp"></div></div>
+  <div class="searchbar"><span>🔍</span><input id="expSearch" data-i-ph="searchdest" placeholder="Jagah dhoondo..." oninput="renderExplore()"></div>
+  <div class="chips" id="expChips"></div>
+  <div class="sec"><h3><span data-i="hiddengems">Hidden Gems</span></h3></div>
+  <div id="expList"></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ EXPENSES ============ -->
+<div id="expenses" class="screen">
+  <div class="hdr"><button class="backbtn" onclick="__goBack()">←</button><h2 data-i="exptrack">Kharcha Tracker</h2><div class="sp"></div>
+    <button class="icobtn" onclick="openSheet('expSheet')">＋</button>
+  </div>
+  <div class="card">
+    <div class="trow"><span data-i="budget">Budget</span><b id="exBudget">Rs 0</b></div>
+    <div class="trow"><span data-i="spent">Kharch</span><b id="exSpent" style="color:var(--o)">Rs 0</b></div>
+    <div class="bar"><div id="exBar" style="width:0%"></div></div>
+    <div class="timeline" id="exNote"></div>
+    <div style="height:10px"></div>
+    <div class="btnrow">
+      <button class="btn grey" onclick="setBudget()" data-i="setbudget">Budget Set</button>
+      <button class="btn blue" onclick="splitBill()" data-i="split">Doston me Baanto</button>
+    </div>
+  </div>
+  <div class="sec"><h3><span data-i="alleexp">Sab Ikhrajat</span></h3></div>
+  <div id="exList"></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ SAVED ============ -->
+<div id="saved" class="screen">
+  <div class="hdr"><h2 data-i="saved">Saved</h2><div class="sp"></div></div>
+  <div class="sec"><h3><span data-i="mytrips">Meri Trips</span></h3></div>
+  <div id="savedTrips"></div>
+  <div class="sec"><h3><span data-i="wishlist">Wishlist</span></h3></div>
+  <div id="savedWish"></div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="profile" class="screen">
+  <div class="hdr"><h2 data-i="profile">Profile</h2><div class="sp"></div></div>
+  <div class="card" style="display:flex;gap:14px;align-items:center">
+    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--o),var(--b));display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff">🧭</div>
+    <div><div style="font-size:18px;font-weight:800" data-i="traveller">Musafir</div><div style="font-size:12px;color:var(--mut)">Safar Demo User</div></div>
+  </div>
+  <div class="statgrid" id="profStats"></div>
+  <div class="card" style="padding:6px 16px">
+    <div class="trow"><span>🌙 <span data-i="darkmode">Dark Mode (Night Driving)</span></span><div class="tgl" id="tglDark" onclick="toggleDark()"></div></div>
+    <div class="trow"><span>🌐 <span data-i="lang">Zuban / Language</span></span><button class="btn grey" style="width:auto;padding:8px 18px" id="langBtn" onclick="toggleLang()">اردو</button></div>
+    <div class="trow" style="border:none"><span>🔔 <span data-i="notif">Notifications</span></span><div class="tgl" id="tglNotif" onclick="this.classList.toggle('on')"></div></div>
+  </div>
+  <div class="card" style="padding:6px 16px">
+    <div class="trow" style="cursor:pointer" onclick="show('expenses')"><span>💰 <span data-i="exp">Kharcha</span></span><span>→</span></div>
+    <div class="trow" style="cursor:pointer" onclick="shareApp()"><span>📤 <span data-i="shareapp">App Share Karo</span></span><span>→</span></div>
+    <div class="trow" style="cursor:pointer;border:none" onclick="openSheet('helpSheet')"><span>❓ <span data-i="help">Madad</span></span><span>→</span></div>
+  </div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- bottom nav -->
+<nav class="bnav" id="bnav">
+  <button data-t="home" onclick="goTab('home')"><span class="ic">🏠</span><span data-i="nhome">Home</span></button>
+  <button data-t="plan" onclick="goTab('plan')"><span class="ic">🗺️</span><span data-i="nplan">Plan Trip</span></button>
+  <button data-t="explore" onclick="goTab('explore')"><span class="ic">🧭</span><span data-i="nexp">Explore</span></button>
+  <button data-t="saved" onclick="goTab('saved')"><span class="ic">🔖</span><span data-i="nsav">Saved</span></button>
+  <button data-t="profile" onclick="goTab('profile')"><span class="ic">👤</span><span data-i="npro">Profile</span></button>
+</nav>
+
+<!-- ============ SHEETS ============ -->
+<div class="modal" id="fuelSheet"><div class="sheet">
+  <h3 data-i="fuelcalc">⛽ Fuel Calculator</h3>
+  <span class="lbl" data-i="distance">Fasla (km)</span><input type="number" class="inp" id="fDist" value="500">
+  <span class="lbl" data-i="vehicle">Sawari</span><select class="inp" id="fVeh"></select>
+  <span class="lbl" data-i="fuelprice">Petrol price (Rs/L)</span><input type="number" class="inp" id="fPrice" value="260">
+  <div style="height:12px"></div><button class="btn" onclick="calcFuel()" data-i="calculate">Calculate</button>
+  <div id="fOut" style="margin-top:12px"></div>
+  <div style="height:8px"></div><button class="btn grey" onclick="closeSheet('fuelSheet')" data-i="close">Band Karo</button>
+</div></div>
+
+<div class="modal" id="sosSheet"><div class="sheet" style="text-align:center">
+  <h3>🆘 SOS — Emergency</h3>
+  <div class="sosbtn" onclick="sosAlert()">SOS</div>
+  <p style="font-size:13px;color:var(--mut)" data-i="sosnote">Demo: asal emergency call nahi hogi</p>
+  <div style="text-align:left;margin-top:8px">
+    <div class="emg"><div class="n">🚔 Police<div class="p">Madadgar</div></div><a href="tel:15">📞</a></div>
+    <div class="emg"><div class="n">🚑 Ambulance<div class="p">Rescue</div></div><a href="tel:1122">📞</a></div>
+    <div class="emg"><div class="n">🚒 Fire Brigade<div class="p">Aag</div></div><a href="tel:16">📞</a></div>
+    <div class="emg"><div class="n">🛣️ Motorway Police<div class="p">NH&MP</div></div><a href="tel:130">📞</a></div>
+  </div>
+  <div style="height:8px"></div><button class="btn grey" onclick="closeSheet('sosSheet')" data-i="close">Band Karo</button>
+</div></div>
+
+<div class="modal" id="expSheet"><div class="sheet">
+  <h3 data-i="addexp2">+ Kharcha Add Karo</h3>
+  <span class="lbl" data-i="cat">Category</span>
+  <div class="chips" id="expCats" style="padding:4px 0"></div>
+  <span class="lbl" data-i="amount">Raqam (Rs)</span><input type="number" class="inp" id="exAmt" placeholder="0">
+  <span class="lbl" data-i="desc">Tafseel</span><input class="inp" id="exDesc" data-i-ph="exdescph" placeholder="Masalan: PSO petrol...">
+  <div style="height:12px"></div><button class="btn" onclick="addExpense()" data-i="save">Save Karo</button>
+  <div style="height:8px"></div><button class="btn grey" onclick="closeSheet('expSheet')" data-i="close">Band Karo</button>
+</div></div>
+
+<div class="modal" id="helpSheet"><div class="sheet">
+  <h3>❓ <span data-i="help">Madad</span></h3>
+  <p style="font-size:14px;line-height:1.7;color:var(--mut)" data-i="helptext">Safar ek demo road-trip planner hai. Trip plan karo, kharcha track karo, aur Pakistan ki khoobsurat jaghen explore karo. Map illustrative hai — asal navigation ke liye Google Maps use karo.</p>
+  <div style="height:8px"></div><button class="btn grey" onclick="closeSheet('helpSheet')" data-i="close">Band Karo</button>
+</div></div>
+
+<script>
+/* ================= SAFAR APP ================= */
+'use strict';
+/* visible error instead of silent blank */
+function safErr(m){var d=document.getElementById('safErr');if(d){d.style.display='block';d.textContent='⚠️ '+m;}}
+window.onerror=function(m,s,l){safErr('Error: '+m+' (line '+l+')');};
+/* 3-day demo expiry */
+(function(){try{
+  var K='safar_demo_start',D=3*24*3600*1000,now=Date.now(),st=localStorage.getItem(K);
+  if(!st){localStorage.setItem(K,String(now));}
+  else if(now-parseInt(st,10)>D){
+    document.addEventListener('DOMContentLoaded',function(){
+      document.body.innerHTML='<div class="demobanner">DEMO by Jilan Apps</div><div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FF6B35,#004E89);color:#fff;text-align:center;padding:24px;font-family:system-ui"><div style="font-size:64px">🏔️</div><h1>Demo Expired</h1><p style="opacity:.9;max-width:320px;margin-top:10px">Is demo ki 3-din ki muddat khatam ho gayi.<br>Poori app ke liye Jilan Apps se rabta karein.</p></div>';
+    });
+  }
+}catch(e){}})();
+/* ---------- i18n ---------- */
+var I18N={
+en:{skip:'Skip',next:'Next →',ob1t:'Har Safar, Yaadgar',ob1d:'Plan trips across Pakistan\'s beautiful valleys — easy, safe and memorable.',ob2t:'Plan Routes',ob2d:'Best route, fuel cost, tolls and rest stops — all auto-suggested.',ob3t:'Find Dhabas',ob3d:'Famous dhabas, petrol pumps and hotels on your route — with ratings.',ob4t:'Track Expenses',ob4d:'Split costs with friends, set budgets, keep hisaab.',whereto:'Where to? (Kahan jana hai?)',wxsub:'Today\'s weather • Great for travel',wxdemo:'Demo data',quick:'Quick Actions',newtrip:'New Trip',fuelcalc:'Fuel Calc',emg:'Emergency',exp:'Expenses',poproutes:'Popular Routes',viewall:'View all →',trending:'Trending Photos',plantrip:'Plan Trip',from:'From?',to:'Where to?',dep:'Departure',ret:'Return',vehicle:'Vehicle',findroute:'Find Route 🛣️',daywise:'Day-wise Plan',suggest:'On-Route Facilities',packing:'Packing Checklist',emgct:'Emergency Contacts',addexp:'+ Expense',offmap:'📥 Offline Map',explore:'Explore',searchdest:'Search places...',hiddengems:'Hidden Gems',exptrack:'Expense Tracker',budget:'Budget',spent:'Spent',setbudget:'Set Budget',split:'Split Bill',alleexp:'All Expenses',saved:'Saved',mytrips:'My Trips',wishlist:'Wishlist',profile:'Profile',traveller:'Traveller',darkmode:'Dark Mode (Night Driving)',lang:'Language / Zuban',notif:'Notifications',shareapp:'Share App',help:'Help',close:'Close',calculate:'Calculate',distance:'Distance (km)',fuelprice:'Fuel price (Rs/L)',cat:'Category',amount:'Amount (Rs)',desc:'Detail',exdescph:'e.g. PSO petrol...',save:'Save',addexp2:'+ Add Expense',sosnote:'Demo: no real emergency call',nhome:'Home',nplan:'Plan Trip',nexp:'Explore',nsav:'Saved',npro:'Profile',mapnote:'Illustrative map — not real GPS navigation (demo)',helptext:'Safar is a demo road-trip planner. Plan trips, track expenses, and explore Pakistan\'s beautiful places. Map is illustrative — use Google Maps for real navigation.'},
+ur:{skip:'Chhoro',next:'Aagay →',ob1t:'Har Safar, Yaadgar',ob1d:'Pakistan ki khoobsurat vadion ka safar plan karo — asaan, mehfooz aur yaadgar.',ob2t:'Routes Plan Karo',ob2d:'Behtreen rasta, petrol kharcha, toll aur aaram ke stops — sab auto-suggest.',ob3t:'Dhabay Dhoondo',ob3d:'Rastay ke mashhoor dhabay, petrol pump aur hotels — ratings ke sath.',ob4t:'Kharcha Track Karo',ob4d:'Doston ke sath kharcha baanto, budget banao, hisaab rakho.',whereto:'Kahan jana hai? (Where to?)',wxsub:'Aaj ka mausam • Safar ke liye behtreen',wxdemo:'Demo data',quick:'Quick Actions',newtrip:'Nayi Trip',fuelcalc:'Fuel Calc',emg:'Emergency',exp:'Kharcha',poproutes:'Mashhoor Routes',viewall:'Sab dekho →',trending:'Trending Photos',plantrip:'Trip Plan Karo',from:'Kahan se?',to:'Kahan jana hai?',dep:'Rawangi',ret:'Wapsi',vehicle:'Sawari',findroute:'Rasta Dhoondo 🛣️',daywise:'Din-wise Plan',suggest:'Rastay ki Sahulaten',packing:'Packing Checklist',emgct:'Emergency Contacts',addexp:'+ Kharcha',offmap:'📥 Offline Map',explore:'Explore',searchdest:'Jagah dhoondo...',hiddengems:'Hidden Gems',exptrack:'Kharcha Tracker',budget:'Budget',spent:'Kharch',setbudget:'Budget Set',split:'Doston me Baanto',alleexp:'Sab Ikhrajat',saved:'Saved',mytrips:'Meri Trips',wishlist:'Wishlist',profile:'Profile',traveller:'Musafir',darkmode:'Dark Mode (Night Driving)',lang:'Zuban / Language',notif:'Notifications',shareapp:'App Share Karo',help:'Madad',close:'Band Karo',calculate:'Calculate',distance:'Fasla (km)',fuelprice:'Petrol price (Rs/L)',cat:'Category',amount:'Raqam (Rs)',desc:'Tafseel',exdescph:'Masalan: PSO petrol...',save:'Save Karo',addexp2:'+ Kharcha Add Karo',sosnote:'Demo: asal emergency call nahi hogi',nhome:'Home',nplan:'Plan Trip',nexp:'Explore',nsav:'Saved',npro:'Profile',mapnote:'Illustrative map — asal GPS navigation nahi (demo)',helptext:'Safar ek demo road-trip planner hai. Trip plan karo, kharcha track karo, aur Pakistan ki khoobsurat jaghen explore karo. Map illustrative hai — asal navigation ke liye Google Maps use karo.'}};
+var LANG=localStorage.getItem('safar_lang')||'ur';
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;}
+function applyLang(){document.querySelectorAll('[data-i]').forEach(function(e){e.textContent=t(e.getAttribute('data-i'));});
+document.querySelectorAll('[data-i-ph]').forEach(function(e){e.placeholder=t(e.getAttribute('data-i-ph'));});
+document.body.dir=(LANG==='ur')?'rtl':'ltr';var b=document.getElementById('langBtn');if(b)b.textContent=(LANG==='ur')?'English':'اردو';}
+function toggleLang(){LANG=(LANG==='ur')?'en':'ur';localStorage.setItem('safar_lang',LANG);applyLang();renderAll();}
+/* ---------- data ---------- */
+var CITIES=['Karachi','Hyderabad','Multan','Lahore','Faisalabad','Rawalpindi','Islamabad','Peshawar','Quetta','Sukkur'];
+var VEHICLES=[
+ {id:'bike',n:'Bike',ic:'🏍️',mil:45},
+ {id:'car',n:'Car',ic:'🚗',mil:14},
+ {id:'suv',n:'SUV',ic:'🚙',mil:10},
+ {id:'van',n:'Van',ic:'🚐',mil:8}];
+var FUEL_PRICE=260;
+var ROUTES=[
+ {from:'Karachi',to:'Hunza',km:1850,h:30,toll:2500,scenic:1,days:4,stops:['Hyderabad','Sukkur','Multan','Islamabad','Gilgit']},
+ {from:'Lahore',to:'Naran',km:480,h:9,toll:900,scenic:1,days:3,stops:['Islamabad','Mansehra','Balakot']},
+ {from:'Islamabad',to:'Skardu',km:640,h:14,toll:400,scenic:1,days:4,stops:['Mansehra','Chilas','Jaglot']},
+ {from:'Karachi',to:'Gwadar',km:630,h:9,toll:600,scenic:0,days:2,stops:['Winder','Ormara','Pasni']},
+ {from:'Lahore',to:'Murree',km:380,h:7,toll:800,scenic:1,days:2,stops:['Islamabad']},
+ {from:'Islamabad',to:'Swat',km:250,h:5,toll:300,scenic:1,days:3,stops:['Mardan','Mingora']},
+ {from:'Multan',to:'Fort Munro',km:180,h:4,toll:200,scenic:1,days:2,stops:['Dera Ghazi Khan']},
+ {from:'Peshawar',to:'Kalam',km:300,h:7,toll:350,scenic:1,days:3,stops:['Mingora','Bahrain']},
+ {from:'Karachi',to:'Gorakh Hill',km:400,h:8,toll:300,scenic:1,days:2,stops:['Dadu','Wahi Pandi']},
+ {from:'Lahore',to:'Neelum Valley',km:550,h:11,toll:700,scenic:1,days:4,stops:['Islamabad','Muzaffarabad','Athmuqam']}];
+var DESTS=[
+ {n:'Hunza',ic:'🏔️',type:'Mountains',diff:'Medium',bud:'High',rate:4.9,km:1850,season:'May–Oct',d:'Karakoram ki god me pari jannat — Attabad Lake, Baltit Fort.'},
+ {n:'Naran',ic:'🏞️',type:'Mountains',diff:'Easy',bud:'Medium',rate:4.7,km:480,season:'Jun–Sep',d:'Saif-ul-Malook jheel aur babusar top ka rasta.'},
+ {n:'Skardu',ic:'⛰️',type:'Mountains',diff:'Hard',bud:'High',rate:4.8,km:640,season:'May–Oct',d:'Shangrila, Deosai plains aur K2 ka base.'},
+ {n:'Swat',ic:'🌲',type:'Mountains',diff:'Easy',bud:'Medium',rate:4.6,km:250,season:'Apr–Oct',d:'Pakistan ka Switzerland — Malam Jabba, Kalam.'},
+ {n:'Murree',ic:'🌲',type:'Mountains',diff:'Easy',bud:'Medium',rate:4.3,km:380,season:'Year-round',d:'Qareebi hill station — Mall Road, Patriata.'},
+ {n:'Kalam',ic:'🏕️',type:'Mountains',diff:'Medium',bud:'Medium',rate:4.7,km:300,season:'May–Sep',d:'Mahodand Lake aur Ushu forest.'},
+ {n:'Gwadar',ic:'🏖️',type:'Beach',diff:'Easy',bud:'Medium',rate:4.4,km:630,season:'Nov–Mar',d:'Samandari kinara, Hammerhead aur sunset points.'},
+ {n:'Neelum Valley',ic:'💧',type:'Valley',diff:'Medium',bud:'Medium',rate:4.8,km:550,season:'May–Oct',d:'Neelum darya, Keran aur Sharda ki wadi.'},
+ {n:'Fairy Meadows',ic:'✨',type:'Mountains',diff:'Hard',bud:'High',rate:4.9,km:700,season:'Jun–Sep',d:'Nanga Parbat ka deedar — trek lazmi.'},
+ {n:'Shogran',ic:'🌄',type:'Mountains',diff:'Easy',bud:'Low',rate:4.5,km:450,season:'May–Sep',d:'Siri Paye meadows — khandani trip ke liye best.'},
+ {n:'Gorakh Hill',ic:'🏜️',type:'Desert',diff:'Medium',bud:'Low',rate:4.2,km:400,season:'Nov–Feb',d:'Sindh ka Murree — sardi me barf jaisa mausam.'},
+ {n:'Ranikot Fort',ic:'🏰',type:'Historic',diff:'Easy',bud:'Low',rate:4.1,km:300,season:'Nov–Feb',d:'Duniya ka bara qila — dewaron ka shahar.'},
+ {n:'Shandur',ic:'🐎',type:'Mountains',diff:'Hard',bud:'High',rate:4.6,km:900,season:'Jul–Aug',d:'Duniya ka uncha polo ground.'},
+ {n:'Kumrat',ic:'🌲',type:'Valley',diff:'Medium',bud:'Medium',rate:4.7,km:380,season:'May–Sep',d:'Neem jungle, abshar aur thanda pani.'}];
+var DHABAS=['Al-Madina Dhaba ⭐4.5','Lucky Irani Hotel ⭐4.3','Highway Food Point ⭐4.2','Desi Tarka Dhaba ⭐4.6','Chai Khana ⭐4.4'];
+var HOTELS=['PTDC Motel ⭐4.0','Pearl Continental ⭐4.7','Local Guest House ⭐3.8','Camping Pods ⭐4.2'];
+var PACK_BASE=['CNIC / ID card','Mobile charger + power bank','Pani ki bottles','Dry fruits / snacks','First aid box','Warm jacket','Sunglasses','Cash (ATM door ho sakta hai)'];
+var PACK_COLD=['Thermals','Gloves + muffler','Extra socks','Hot water flask'];
+var PACK_BEACH=['Swim wear','Sunscreen','Extra towel','Slippers'];
+var EXPCATS=[{id:'fuel',n:'Fuel',ic:'⛽',c:'#FF6B35'},{id:'food',n:'Food',ic:'🍛',c:'#00D9A5'},{id:'hotel',n:'Hotel',ic:'🏨',c:'#004E89'},{id:'toll',n:'Toll',ic:'🛣️',c:'#9b59b6'},{id:'misc',n:'Misc',ic:'🧳',c:'#e67e22'}];
+/* ---------- state ---------- */
+function LS(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function SV(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var S={trips:LS('safar_trips',[]),exp:LS('safar_exp',[]),wish:LS('safar_wish',[]),budget:LS('safar_budget',50000),veh:LS('safar_veh','car'),pack:LS('safar_pack',{}),past:LS('safar_past',[{r:'Lahore → Murree',km:380},{r:'Karachi → Hyderabad',km:165}])};
+var stack=['ob'],cur='ob',curTrip=null,curExpTrip=null,expCat='fuel',obIdx=0,expFilter='All';
+window.stack=stack;
+/* ---------- nav ---------- */
+function show(id){try{
+  var el=document.getElementById(id);if(!el){safErr('Screen "'+id+'" nahi mili');return;}
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  el.classList.add('on');
+  if(stack[stack.length-1]!==id)stack.push(id);
+  cur=id;window.scrollTo(0,0);
+  document.getElementById('bnav').style.display=(['home','plan','explore','saved','profile'].indexOf(id)>=0)?'flex':'none';
+}catch(e){safErr(e.message);}}
+function __goBack(){try{
+  closeAllSheets();
+  if(stack.length>1){stack.pop();var p=stack[stack.length-1];cur=p;
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+    document.getElementById(p).classList.add('on');window.scrollTo(0,0);
+    document.getElementById('bnav').style.display=(['home','plan','explore','saved','profile'].indexOf(p)>=0)?'flex':'none';
+  }
+}catch(e){}}
+window.__goBack=__goBack;
+function goTab(t){stack=['home'];show(t==='home'?'home':t);
+  document.querySelectorAll('#bnav button').forEach(function(b){b.classList.toggle('act',b.getAttribute('data-t')===t);});
+  if(t==='home')renderHome();if(t==='explore')renderExplore();if(t==='saved')renderSaved();if(t==='profile')renderProfile();if(t==='plan')initPlan();}
+function openSheet(id){document.getElementById(id).classList.add('on');}
+function closeSheet(id){document.getElementById(id).classList.remove('on');}
+function closeAllSheets(){document.querySelectorAll('.modal').forEach(function(m){m.classList.remove('on');});}
+/* ---------- onboarding ---------- */
+function obNext(){if(obIdx<3){obIdx++;obShow();}else finishOb();}
+function obShow(){for(var i=0;i<4;i++){document.getElementById('obs'+i).classList.toggle('on',i===obIdx);}
+  var d=document.getElementById('obdots').children;for(var j=0;j<4;j++)d[j].classList.toggle('on',j===obIdx);
+  document.getElementById('obnext').textContent=(obIdx===3)?(LANG==='ur'?'Shuru Karo 🚀':'Get Started 🚀'):t('next');}
+function finishOb(){try{localStorage.setItem('safar_ob','1');}catch(e){}stack=['home'];show('home');goTab('home');}
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function fmt(n){return 'Rs '+Number(n||0).toLocaleString('en-PK');}
+function findRoute(a,b){a=a.toLowerCase();b=b.toLowerCase();
+  for(var i=0;i<ROUTES.length;i++){if(ROUTES[i].from.toLowerCase()===a&&ROUTES[i].to.toLowerCase()===b)return ROUTES[i];}
+  return null;}
+function vehById(id){for(var i=0;i<VEHICLES.length;i++)if(VEHICLES[i].id===id)return VEHICLES[i];return VEHICLES[1];}
+function fuelCost(km,vid){var v=vehById(vid);var l=km/v.mil;return Math.round(l*FUEL_PRICE);}
+/* ---------- home ---------- */
+function renderHome(){
+  var h='';var picks=ROUTES.slice(0,5);
+  for(var i=0;i<picks.length;i++){var r=picks[i];
+    h+='<div class="rcard" onclick=\'openRoute('+i+')\'><div class="ric">🛣️</div><div class="rinfo"><div class="rt">'+r.from+' → '+r.to+'</div><div class="rm">'+r.km+' km • '+r.h+'h drive • '+fmt(fuelCost(r.km,S.veh))+' fuel</div></div><div class="rarrow">→</div></div>';}
+  document.getElementById('popRoutes').innerHTML=h;
+  var ph='';var pics=['🏔️','🌅','🏞️','⛰️','🌊','🏕️','🌲','✨'];
+  for(var j=0;j<pics.length;j++){ph+='<div class="dcard"><div class="dimg" style="background:linear-gradient(135deg,#FF6B35,#004E89);font-size:64px">'+pics[j]+'</div><div class="dbody"><div class="dname">'+['Hunza Valley','Sunset Point','Saif-ul-Malook','Deosai','Gwadar Beach','Fairy Meadows','Kalam Forest','Shandur'][j]+'</div><div class="dmeta">❤️ '+(120+j*37)+' • 📸 Ali</div></div></div>';}
+  document.getElementById('trendPhotos').innerHTML=ph;
+}
+function homeSearchGo(q){q=(q||'').toLowerCase().trim();if(q.length<2)return;
+  var f=DESTS.filter(function(d){return d.n.toLowerCase().indexOf(q)>=0;});
+  if(f.length){goTab('explore');document.getElementById('expSearch').value=q;renderExplore();}}
+function openRoute(i){buildTrip(ROUTES[i],S.veh);}
+/* ---------- plan ---------- */
+function initPlan(){
+  var f=document.getElementById('pFrom'),tt=document.getElementById('pTo');
+  if(!f.options.length){CITIES.forEach(function(c){f.add(new Option(c,c));tt.add(new Option(c,c));});
+    var destNames=[];DESTS.forEach(function(d){if(CITIES.indexOf(d.n)<0&&destNames.indexOf(d.n)<0){destNames.push(d.n);tt.add(new Option('📍 '+d.n,d.n));}});
+    f.value='Lahore';tt.value='Naran';}
+  var g=document.getElementById('vehGrid');g.innerHTML='';
+  VEHICLES.forEach(function(v){var d=document.createElement('div');d.className='veh'+(S.veh===v.id?' on':'');
+    d.innerHTML='<div class="vi">'+v.ic+'</div><div class="vn">'+v.n+'</div><div class="vm">'+v.mil+' km/l</div>';
+    d.onclick=function(){S.veh=v.id;SV('safar_veh',v.id);initPlan();};g.appendChild(d);});
+  var fv=document.getElementById('fVeh');fv.innerHTML='';
+  VEHICLES.forEach(function(v){fv.add(new Option(v.n+' ('+v.mil+' km/l)',v.id));});fv.value=S.veh;
+}
+function planTrip(){
+  var a=document.getElementById('pFrom').value,b=document.getElementById('pTo').value;
+  if(a===b){safErr(LANG==='ur'?'Manzil aur rawangi alag rakho':'From and To must differ');return;}
+  var r=findRoute(a,b);
+  if(!r){var km=300+Math.floor(Math.random()*400);
+    r={from:a,to:b,km:km,h:Math.round(km/55),toll:400,scenic:0,days:Math.max(2,Math.round(km/400)),stops:['Rastay ke stops']};
+    r.custom=true;}
+  buildTrip(r,S.veh);
+}
+function buildTrip(r,vid){
+  var dep=document.getElementById('pDep').value||'—';
+  var t={id:'t'+Date.now(),r:r,vid:vid,dep:dep,
+    fuel:fuelCost(r.km,vid),toll:r.toll,
+    total:fuelCost(r.km,vid)+r.toll+Math.round(r.days*4000)};
+  curTrip=t;renderTripDetail(t);
+  stack.push('tripdetail');show('tripdetail');
+}
+/* ---------- trip detail ---------- */
+function renderTripDetail(t){
+  var r=t.r;
+  document.getElementById('tdTitle').textContent=r.from+' → '+r.to;
+  document.getElementById('tdSave').textContent=isSaved(t.id)?'❤️':'🤍';
+  /* illustrative SVG map */
+  var pts='',px=[30,90,150,210,270,330],py=[170,130,150,90,110,50];
+  for(var i=0;i<px.length;i++)pts+=px[i]+','+py[i]+' ';
+  var stops='';for(var j=0;j<px.length;j++){stops+='<circle cx="'+px[j]+'" cy="'+py[j]+'" r="7" fill="#FF6B35" stroke="#fff" stroke-width="2.5"/>';}
+  document.getElementById('tdMap').innerHTML=
+   '<rect width="400" height="220" fill="#e8f1f8"/>'+
+   '<path d="M0 200 Q100 170 200 180 T400 150 L400 220 L0 220 Z" fill="#cfe3d0"/>'+
+   '<path d="M0 40 Q120 10 240 30 T400 20 L400 0 L0 0 Z" fill="#d7e8f5"/>'+
+   '<text x="330" y="32" font-size="26">🏔️</text><text x="40" y="200" font-size="22">🌳</text>'+
+   '<polyline points="'+pts+'" fill="none" stroke="#004E89" stroke-width="5" stroke-dasharray="12 7" stroke-linecap="round"/>'+stops+
+   '<text x="14" y="192" font-size="13" font-weight="bold" fill="#004E89">'+esc(r.from)+'</text>'+
+   '<text x="318" y="40" font-size="13" font-weight="bold" fill="#004E89">'+esc(r.to)+'</text>';
+  document.getElementById('tdStats').innerHTML=
+   stat(r.km+' km','Fasla')+stat(r.h+'h','Drive')+stat(fmt(t.total),'Kharcha');
+  function stat(v,l){return '<div class="stat"><div class="sv">'+v+'</div><div class="sl">'+l+'</div></div>';}
+  /* day-wise */
+  var dh='',per=Math.ceil(r.stops.length/Math.max(1,r.days));
+  for(var d=0;d<r.days;d++){var seg=r.stops.slice(d*per,(d+1)*per);
+    dh+='<div class="day"><h4>Din '+(d+1)+'</h4><p>'+(seg.length?esc(seg.join(' → ')):(LANG==='ur'?'Safar jari rakho':'Keep travelling'))+' • ~'+Math.round(r.km/r.days)+' km</p></div>';}
+  document.getElementById('tdDays').innerHTML=dh;
+  /* suggestions */
+  var sg='';
+  sg+=sug('⛽ Petrol Pump','PSO / Shell har ~80km • Rating 4.2+ • Washroom available');
+  sg+=sug('🍛 Dhabay',DHABAS.slice(0,3).join(' • '));
+  sg+=sug('🏨 Stay',HOTELS.slice(0,2).join(' • ')+' • ~Rs 4,000/night');
+  sg+=sug('🛑 Rest Stops','Har 2 ghantay baad 15 min break — chai + stretch');
+  sg+=sug('🛣️ Toll','Total ~'+fmt(r.toll)+' • M-Tag recommended');
+  function sug(tt,mm){return '<div class="sug"><div class="st">'+tt+'</div><div class="sm">'+mm+'</div></div>';}
+  document.getElementById('tdSug').innerHTML=sg;
+  /* packing */
+  var dest=r.to.toLowerCase();var pack=PACK_BASE.slice();
+  if(/hunza|skardu|naran|kalam|murree|swat|fairy|shandur|kumrat|neelum|shogran/i.test(dest))pack=pack.concat(PACK_COLD);
+  if(/gwadar|beach/i.test(dest))pack=pack.concat(PACK_BEACH);
+  var key=t.id;if(!S.pack[key]){S.pack[key]=pack.map(function(){return 0;});}
+  var ph='';pack.forEach(function(p,i){var done=S.pack[key][i];
+    ph+='<div class="chk'+(done?' done':'')+'" onclick="togPack(\''+key+'\','+i+')"><div class="box">'+(done?'✓':'')+'</div><div class="ct">'+p+'</div></div>';});
+  document.getElementById('tdPack').innerHTML=ph;
+  document.getElementById('tdEmg').innerHTML=
+   emg('🚔 Police','15')+emg('🚑 Rescue','1122')+emg('🛣️ Motorway Police','130');
+  function emg(n,p){return '<div class="emg"><div class="n">'+n+'</div><a href="tel:'+p+'">📞 '+p+'</a></div>';}
+}
+function togPack(k,i){S.pack[k][i]=S.pack[k][i]?0:1;SV('safar_pack',S.pack);renderTripDetail(curTrip);}
+function isSaved(id){return S.trips.some(function(x){return x.id===id;});}
+function toggleSaveTrip(){if(!curTrip)return;var i=S.trips.findIndex(function(x){return x.id===curTrip.id;});
+  if(i>=0)S.trips.splice(i,1);else S.trips.push(curTrip);SV('safar_trips',S.trips);
+  document.getElementById('tdSave').textContent=isSaved(curTrip.id)?'❤️':'🤍';}
+function downloadOffline(){alert(LANG==='ur'?'📥 Demo: offline map download yahan simulate hota hai':'📥 Demo: offline map download simulated here');}
+/* ---------- explore ---------- */
+var EXPTYPES=['All','Mountains','Beach','Valley','Desert','Historic'];
+function renderExplore(){
+  var q=(document.getElementById('expSearch').value||'').toLowerCase();
+  var ch='';EXPTYPES.forEach(function(x){ch+='<button class="chip'+(expFilter===x?' on':'')+'" onclick="expFilter=\''+x+'\';renderExplore()">'+x+'</button>';});
+  document.getElementById('expChips').innerHTML=ch;
+  var h='';DESTS.forEach(function(d){
+    if(expFilter!=='All'&&d.type!==expFilter)return;
+    if(q&&d.n.toLowerCase().indexOf(q)<0&&d.d.toLowerCase().indexOf(q)<0)return;
+    var fw=S.wish.indexOf(d.n)>=0;
+    h+='<div class="rcard" onclick=\'openDest("'+d.n+'")\'><div class="ric">'+d.ic+'</div><div class="rinfo"><div class="rt">'+d.n+' <span style="font-size:11px;color:var(--mut)">⭐'+d.rate+'</span></div><div class="rm">'+d.type+' • '+d.diff+' • '+d.bud+' budget • '+d.season+'</div></div><button class="icobtn" style="width:36px;height:36px;font-size:16px;'+(fw?'color:#ff4d6d':'')+'" onclick="event.stopPropagation();togWish(\''+d.n+'\')">'+(fw?'❤️':'🤍')+'</button></div>';});
+  document.getElementById('expList').innerHTML=h||'<div class="empty"><div class="big">🏜️</div><div>Kuch nahi mila</div></div>';
+}
+function togWish(n){var i=S.wish.indexOf(n);if(i>=0)S.wish.splice(i,1);else S.wish.push(n);SV('safar_wish',S.wish);renderExplore();}
+function openDest(n){var d=DESTS.filter(function(x){return x.n===n;})[0];if(!d)return;
+  var r=findRoute('Lahore',n)||findRoute('Islamabad',n)||findRoute('Karachi',n);
+  if(!r)r={from:'Lahore',to:n,km:d.km,h:Math.round(d.km/55),toll:500,scenic:1,days:3,stops:[n],custom:true};
+  buildTrip(r,S.veh);}
+/* ---------- expenses ---------- */
+function renderExpCats(){var h='';EXPCATS.forEach(function(c){h+='<button class="chip'+(expCat===c.id?' on':'')+'" onclick="expCat=\''+c.id+'\';renderExpCats()">'+c.ic+' '+c.n+'</button>';});document.getElementById('expCats').innerHTML=h;}
+function addExpense(){var a=parseFloat(document.getElementById('exAmt').value)||0;if(a<=0){safErr(LANG==='ur'?'Raqam likho':'Enter amount');return;}
+  var c=EXPCATS.filter(function(x){return x.id===expCat;})[0];
+  S.exp.unshift({id:'e'+Date.now(),cat:c.n,ic:c.ic,c:c.c,amt:a,d:document.getElementById('exDesc').value||c.n,dt:new Date().toLocaleDateString()});
+  SV('safar_exp',S.exp);document.getElementById('exAmt').value='';document.getElementById('exDesc').value='';
+  closeSheet('expSheet');renderExpenses();}
+function renderExpenses(){
+  var tot=S.exp.reduce(function(s,e){return s+e.amt;},0);
+  document.getElementById('exBudget').textContent=fmt(S.budget);
+  document.getElementById('exSpent').textContent=fmt(tot);
+  var pc=Math.min(100,Math.round(tot/Math.max(1,S.budget)*100));
+  document.getElementById('exBar').style.width=pc+'%';
+  document.getElementById('exNote').textContent=(tot>S.budget)?(LANG==='ur'?'⚠️ Budget se zyada kharch!':'⚠️ Over budget!'):(LANG==='ur'?'✅ Budget ke andar':'✅ Within budget');
+  var h='';S.exp.forEach(function(e){
+    h+='<div class="eitem"><div class="eic" style="background:'+e.c+'22">'+e.ic+'</div><div class="ei"><div class="et">'+esc(e.d)+'</div><div class="em">'+e.cat+' • '+e.dt+'</div></div><div class="ea">'+fmt(e.amt)+'</div><button class="icobtn" style="width:34px;height:34px;font-size:14px" onclick="delExp(\''+e.id+'\')">🗑️</button></div>';});
+  document.getElementById('exList').innerHTML=h||'<div class="empty"><div class="big">💰</div><div>'+(LANG==='ur'?'Abhi koi kharcha nahi':'No expenses yet')+'</div></div>';
+  renderExpCats();
+}
+function delExp(id){S.exp=S.exp.filter(function(e){return e.id!==id;});SV('safar_exp',S.exp);renderExpenses();}
+function setBudget(){var v=prompt(LANG==='ur'?'Budget (Rs):':'Budget (Rs):',S.budget);v=parseFloat(v);if(v>0){S.budget=v;SV('safar_budget',v);renderExpenses();}}
+function splitBill(){var tot=S.exp.reduce(function(s,e){return s+e.amt;},0);if(!tot){safErr(LANG==='ur'?'Pehle kharcha add karo':'Add expenses first');return;}
+  var n=prompt(LANG==='ur'?'Kitne dost?':'How many friends?',2);n=parseInt(n)||1;
+  alert((LANG==='ur'?'Fi banda: ':'Per person: ')+fmt(Math.round(tot/n))+' ('+n+' '+(LANG==='ur'?'dost':'friends')+')');}
+/* ---------- saved ---------- */
+function renderSaved(){
+  var h='';S.trips.forEach(function(x){var r=x.r;
+    h+='<div class="rcard" onclick=\'curTrip=' +JSON.stringify({id:x.id}).replace(/"/g,'&quot;')+ ';restoreTrip("'+x.id+'")\'><div class="ric">🗺️</div><div class="rinfo"><div class="rt">'+r.from+' → '+r.to+'</div><div class="rm">'+r.km+' km • '+fmt(x.total)+'</div></div><div class="rarrow">→</div></div>';});
+  document.getElementById('savedTrips').innerHTML=h||'<div class="empty"><div class="big">🔖</div><div>'+(LANG==='ur'?'Koi saved trip nahi':'No saved trips')+'</div></div>';
+  var w='';S.wish.forEach(function(n){w+='<div class="rcard" onclick=\'openDest("'+n+'")\'><div class="ric">❤️</div><div class="rinfo"><div class="rt">'+n+'</div></div><div class="rarrow">→</div></div>';});
+  document.getElementById('savedWish').innerHTML=w||'<div class="empty"><div class="big">🤍</div><div>'+(LANG==='ur'?'Wishlist khaali':'Wishlist empty')+'</div></div>';
+}
+function restoreTrip(id){var x=S.trips.filter(function(a){return a.id===id;})[0];if(x){curTrip=x;renderTripDetail(x);show('tripdetail');}}
+/* ---------- profile ---------- */
+function renderProfile(){
+  var km=S.past.reduce(function(s,p){return s+p.km;},0)+S.trips.reduce(function(s,x){return s+(x.r?x.r.km:0);},0);
+  document.getElementById('profStats').innerHTML=
+   '<div class="stat"><div class="sv">'+km.toLocaleString()+'</div><div class="sl">km travelled</div></div>'+
+   '<div class="stat"><div class="sv">'+(S.past.length+S.trips.length)+'</div><div class="sl">trips</div></div>'+
+   '<div class="stat"><div class="sv">'+S.wish.length+'</div><div class="sl">wishlist</div></div>';
+  document.getElementById('tglDark').classList.toggle('on',document.body.classList.contains('dark'));
+}
+function shareApp(){if(navigator.share){navigator.share({title:'Safar',text:'Safar — Har Safar, Yaadgar!'}).catch(function(){});}
+  else alert('Safar — Har Safar, Yaadgar! 🏔️');}
+/* ---------- fuel calc ---------- */
+function calcFuel(){var km=parseFloat(document.getElementById('fDist').value)||0;
+  var v=vehById(document.getElementById('fVeh').value);
+  var p=parseFloat(document.getElementById('fPrice').value)||FUEL_PRICE;
+  var l=km/v.mil,cost=Math.round(l*p);
+  document.getElementById('fOut').innerHTML='<div class="card" style="margin:0"><div class="trow"><span>⛽ Petrol</span><b>'+l.toFixed(1)+' L</b></div><div class="trow"><span>💰 Cost</span><b style="color:var(--o)">'+fmt(cost)+'</b></div><div class="timeline">'+v.n+' • '+v.mil+' km/l • '+km+' km</div></div>';}
+/* ---------- sos ---------- */
+function sosAlert(){alert(LANG==='ur'?'🆘 DEMO: Yahan asal SOS call jayegi (demo me band hai)':'🆘 DEMO: Real SOS call would go here (disabled in demo)');}
+/* ---------- dark ---------- */
+function toggleDark(){document.body.classList.toggle('dark');
+  try{localStorage.setItem('safar_dark',document.body.classList.contains('dark')?'1':'0');}catch(e){}
+  var b=document.getElementById('darkBtn');if(b)b.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+  var tg=document.getElementById('tglDark');if(tg)tg.classList.toggle('on',document.body.classList.contains('dark'));}
+/* ---------- render all / init ---------- */
+function renderAll(){renderHome();renderExplore();renderExpenses();renderSaved();renderProfile();}
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    if(localStorage.getItem('safar_dark')==='1')document.body.classList.add('dark');
+    applyLang();initPlan();renderAll();
+    if(localStorage.getItem('safar_ob')==='1'){stack=['home'];show('home');goTab('home');}
+    else{obShow();document.getElementById('bnav').style.display='none';}
+    var db=document.getElementById('darkBtn');if(db)db.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+  }catch(e){safErr(e.message);}
+});
+</script>
+</body>
+</html>
