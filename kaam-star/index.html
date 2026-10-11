@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kaam Star — Kaam Karo, Stars Jeeto!</title>
+<style>
+:root{--pur:#8B5CF6;--purd:#6D28D9;--yel:#FCD34D;--grn:#10B981;--bg:#F7F3FF;--card:#fff;--txt:#1e1b2e;--mut:#8a86a3;--shadow:0 6px 20px rgba(139,92,246,.14)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Nastaliq Urdu',sans-serif;background:var(--bg);color:var(--txt);padding-bottom:92px;min-height:100vh}
+.screen{display:none;animation:fade .25s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.wrap{max-width:480px;margin:0 auto;padding:16px}
+h1{font-size:26px;font-weight:900;margin:8px 0}
+h2{font-size:19px;font-weight:800;margin:14px 0 8px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin:12px 0}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:15px;font-size:17px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--pur),var(--purd));cursor:pointer;margin:10px 0;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.yel{background:linear-gradient(135deg,#FCD34D,#F59E0B);color:#5b3a00}
+.btn.grn{background:linear-gradient(135deg,#10B981,#059669)}
+.btn.ghost{background:#efeafe;color:var(--purd);box-shadow:none}
+.btn.red{background:linear-gradient(135deg,#EF4444,#b91c1c)}
+.btn.small{width:auto;display:inline-block;padding:10px 18px;font-size:15px;margin:6px 6px 0 0}
+.btn.big{padding:20px;font-size:20px;border-radius:20px}
+.demobanner{position:sticky;top:0;z-index:50;background:#111;color:var(--yel);text-align:center;font-weight:800;font-size:13px;padding:8px;letter-spacing:1px}
+.hero{background:linear-gradient(135deg,var(--purd),var(--pur) 60%,#c4b5fd);color:#fff;border-radius:24px;padding:26px 18px;text-align:center;margin:12px 0;box-shadow:var(--shadow)}
+.hero .star{font-size:56px;animation:spin 4s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FCD34D,#FDE68A);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid #fff;box-shadow:var(--shadow)}
+.avatar.big{width:84px;height:84px;font-size:48px}
+.kidrow{display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;background:#faf8ff;margin:8px 0;cursor:pointer;border:2px solid transparent}
+.kidrow.sel{border-color:var(--pur);background:#f3edff}
+.kidrow .nm{flex:1;font-weight:800}
+.kidrow .st{font-weight:800;color:#b45309}
+.prog{height:14px;background:#efeafe;border-radius:99px;overflow:hidden;margin:8px 0}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--yel),var(--grn));border-radius:99px;transition:width .4s}
+.streak{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:16px;padding:12px 16px;margin:12px 0;font-weight:800}
+.streak .n{font-size:30px;color:#d97706}
+.chore{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:#faf8ff;margin:8px 0;border:2px solid transparent}
+.chore .em{font-size:32px}
+.chore .tx{flex:1}
+.chore .tx .ti{font-weight:800;font-size:15px}
+.chore .tx .sub{font-size:12px;color:var(--mut)}
+.chore .rw{background:linear-gradient(135deg,#FCD34D,#FDE68A);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;color:#92400e;white-space:nowrap}
+.chore.done{opacity:.55}
+.chore.pending{border-color:var(--yel);background:#FFFBEB}
+.tag{font-size:11px;font-weight:800;border-radius:999px;padding:4px 10px;margin-left:6px}
+.tag.pend{background:#FDE68A;color:#92400e}
+.tag.appr{background:#A7F3D0;color:#065f46}
+.tag.rej{background:#FECACA;color:#991b1b}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;z-index:40;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.nav button{flex:1;border:none;background:none;padding:10px 4px 12px;font-size:11px;font-weight:700;color:#9ca3af;cursor:pointer}
+.nav button .ic{font-size:22px;display:block;margin-bottom:2px}
+.nav button.on{color:var(--purd)}
+input,select,textarea{width:100%;border:2px solid #e5e7eb;border-radius:12px;padding:12px;font-size:16px;margin:8px 0;font-family:inherit;background:#fff;color:#111}
+.badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:2px solid var(--yel);border-radius:999px;padding:8px 14px;font-weight:800;margin:4px;font-size:14px}
+.badge.lock{filter:grayscale(1);opacity:.5}
+.reward{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:#faf8ff;margin:8px 0}
+.reward .em{font-size:36px}
+.reward .tx{flex:1;font-weight:700}
+.lead{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;margin:8px 0;background:#faf8ff}
+.lead.first{background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:2px solid var(--yel)}
+.lead .rank{font-size:22px;font-weight:900;width:34px;text-align:center}
+.avpick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.avpick button{font-size:32px;border:3px solid #e5e7eb;background:#fff;border-radius:14px;padding:8px;cursor:pointer;width:58px;height:58px}
+.avpick button.sel{border-color:var(--pur);background:#f3edff}
+.slide{display:none;text-align:center;padding:26px 18px}
+.slide.on{display:block;animation:fade .3s}
+.slide .em{font-size:72px}
+.pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:12px auto}
+.pinpad button{font-size:24px;font-weight:800;border:none;border-radius:16px;padding:16px;background:#efeafe;color:var(--purd);cursor:pointer}
+.pindots{display:flex;gap:10px;justify-content:center;margin:10px}
+.pindots i{width:16px;height:16px;border-radius:50%;background:#e5e7eb}
+.pindots i.f{background:var(--pur)}
+.modebar{display:flex;gap:8px;margin:10px 0}
+.modebar button{flex:1;border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:12px;font-weight:800;cursor:pointer;color:var(--mut)}
+.modebar button.on{border-color:var(--pur);color:var(--purd);background:#f3edff}
+.hist{font-size:13px;color:var(--mut);padding:8px 0;border-bottom:1px dashed #eee}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
+.cheer{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-size:64px;z-index:9998;animation:pop 1.2s forwards;pointer-events:none}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}25%{transform:translate(-50%,-50%) scale(1.25);opacity:1}70%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-60%) scale(1);opacity:0}}
+.small{font-size:13px;color:var(--mut)}
+.center{text-align:center}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="demobanner">DEMO by Jilan Apps</div>
+<div class="wrap">
+
+<!-- ============ ONBOARDING ============ -->
+<div id="scr-onboard" class="screen">
+  <div class="slide on" id="ob0">
+    <div class="em">⭐</div>
+    <h1 data-t="ob_t1">Kaam Karo, Stars Jeeto!</h1>
+    <p class="small" data-t="ob_d1">Bachon ke liye mazedaar kaam tracker — kaam karo, stars jeeto, inaam pao!</p>
+    <button class="btn" onclick="obNext(1)" data-t="next">Aagay →</button>
+  </div>
+  <div class="slide" id="ob1">
+    <div class="em">👨‍👩‍👧</div>
+    <h1 data-t="ob_t2">Waliden ka Control</h1>
+    <p class="small" data-t="ob_d2">Kaam set karein, approve karein, inaam dein — sab PIN se mehfooz.</p>
+    <button class="btn" onclick="obNext(2)" data-t="next">Aagay →</button>
+  </div>
+  <div class="slide" id="ob2">
+    <div class="em">🏆</div>
+    <h1 data-t="ob_t3">Family Leaderboard</h1>
+    <p class="small" data-t="ob_d3">Behen bhaiyon me muqabla — haftay ka winner kaun?</p>
+    <button class="btn grn" onclick="obNext(3)" data-t="start">Shuru Karein 🚀</button>
+  </div>
+  <div class="slide" id="ob3">
+    <h1 data-t="setup_t">Setup</h1>
+    <label data-t="parent_name">Walid/Walida ka naam</label>
+    <input id="ob-pname" maxlength="24" placeholder="Ammi">
+    <label data-t="add_kids">Bachay shamil karein (zyada se zyada 5)</label>
+    <div id="ob-kids"></div>
+    <button class="btn ghost" onclick="obAddKid()" data-t="add_kid">+ Bacha Add Karein</button>
+    <button class="btn grn" onclick="obFinish()" data-t="done_setup">Mukammal ✅</button>
+  </div>
+</div>
+
+<!-- ============ HOME ============ -->
+<div id="scr-home" class="screen">
+  <div class="hero">
+    <span class="star">⭐</span>
+    <h1 style="margin:6px 0" data-t="app_name">Kaam Star</h1>
+    <div id="home-hello" style="opacity:.9"></div>
+  </div>
+  <div id="home-kidpick"></div>
+  <div class="streak"><span style="font-size:30px">🔥</span><div><div class="n" id="home-streak">0</div><div data-t="day_streak">din ka streak</div></div>
+    <div style="margin-left:auto;text-align:right"><div class="n" id="home-stars">0 ⭐</div><div data-t="stars">stars</div></div></div>
+  <h2 data-t="today_chores">Aaj ke Kaam</h2>
+  <div class="prog"><i id="home-prog" style="width:0%"></i></div>
+  <div id="home-chores"></div>
+</div>
+
+<!-- ============ CHORES ============ -->
+<div id="scr-chores" class="screen">
+  <h1 data-t="chores">Kaam 📝</h1>
+  <div id="chores-list"></div>
+  <div id="chores-parent" style="display:none">
+    <h2 data-t="add_chore">Naya Kaam</h2>
+    <div class="card">
+      <input id="nc-title" maxlength="40" placeholder="Kaam ka naam">
+      <div class="row2">
+        <select id="nc-stars"><option value="1">1 ⭐</option><option value="2">2 ⭐</option><option value="3">3 ⭐</option><option value="5">5 ⭐</option></select>
+        <select id="nc-freq"><option value="daily" data-t="daily">Rozana</option><option value="weekly" data-t="weekly">Haftawar</option><option value="once" data-t="once">Ek dafa</option></select>
+      </div>
+      <div class="row2">
+        <select id="nc-kid"></select>
+        <select id="nc-emoji"><option>🧹</option><option>📚</option><option>🍽️</option><option>👕</option><option>💧</option><option>🕌</option><option>🐱</option><option>🛏️</option><option>⚽</option><option>🎨</option></select>
+      </div>
+      <button class="btn" onclick="addChore()" data-t="add">Shamil Karein ➕</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REWARDS ============ -->
+<div id="scr-rewards" class="screen">
+  <h1 data-t="rewards">Inaam 🎁</h1>
+  <div class="card center"><div style="font-size:15px" data-t="my_stars">Mere Stars</div><div style="font-size:40px;font-weight:900;color:#b45309" id="rw-stars">0 ⭐</div></div>
+  <div id="rewards-list"></div>
+  <div id="rewards-parent" style="display:none">
+    <h2 data-t="add_reward">Naya Inaam</h2>
+    <div class="card">
+      <input id="nr-title" maxlength="40" placeholder="Inaam ka naam">
+      <div class="row2"><input id="nr-cost" type="number" min="1" value="10" placeholder="Stars"><select id="nr-emoji"><option>🍦</option><option>🎬</option><option>🧸</option><option>🍕</option><option>🎮</option><option>🚲</option><option>📱</option><option>🍫</option></select></div>
+      <button class="btn" onclick="addReward()" data-t="add">Shamil Karein ➕</button>
+    </div>
+    <h2 data-t="pending_red">Redemption Requests</h2>
+    <div id="red-list"></div>
+  </div>
+</div>
+
+<!-- ============ FAMILY ============ -->
+<div id="scr-family" class="screen">
+  <h1 data-t="family">Family 👨‍👩‍👧‍👦</h1>
+  <h2 data-t="leaderboard">Leaderboard 🏆</h2>
+  <div id="fam-lead"></div>
+  <div class="card">
+    <h2 style="margin-top:0" data-t="fam_goal">Family Goal 🎯</h2>
+    <div id="fam-goal-txt" style="font-weight:700"></div>
+    <div class="prog"><i id="fam-goal-prog" style="width:0%"></i></div>
+    <div id="fam-goal-set" style="display:none">
+      <div class="row2"><input id="fg-target" type="number" min="10" value="100"><input id="fg-reward" maxlength="30" placeholder="Inaam, misal: Pizza party"></div>
+      <button class="btn small" onclick="setGoal()" data-t="save">Save 💾</button>
+    </div>
+  </div>
+  <div id="fam-pending" style="display:none">
+    <h2 data-t="pending_appr">Approve Karein ✅</h2>
+    <div id="pend-list"></div>
+  </div>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div id="scr-profile" class="screen">
+  <h1 data-t="profile">Profile 👤</h1>
+  <div class="card">
+    <div class="modebar">
+      <button id="mode-kid" onclick="setMode('kid')">🧒 <span data-t="kid_mode">Kid Mode</span></button>
+      <button id="mode-parent" onclick="askPin()">👨‍💼 <span data-t="parent_mode">Parent Mode</span></button>
+    </div>
+    <div id="pinbox" style="display:none">
+      <div class="center" data-t="enter_pin">PIN darj karein</div>
+      <div class="pindots" id="pindots"><i></i><i></i><i></i><i></i></div>
+      <div class="pinpad" id="pinpad"></div>
+      <div class="center"><button class="btn ghost small" onclick="hidePin()" data-t="cancel">Cancel</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0" data-t="my_badges">Mere Badges 🏅</h2>
+    <div id="prof-badges"></div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0" data-t="star_hist">Star History 📜</h2>
+    <div id="prof-hist"></div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0" data-t="settings">Settings ⚙️</h2>
+    <button class="btn ghost" onclick="toggleLang()" id="lang-btn">🌐 English</button>
+    <button class="btn ghost" onclick="changePinUI()" id="pin-btn" style="display:none" data-t="change_pin">PIN Tabdeel Karein 🔑</button>
+    <button class="btn ghost" onclick="manageKids()" id="kids-btn" style="display:none" data-t="manage_kids">Bachay Manage Karein 👧</button>
+    <button class="btn red" onclick="resetAll()" data-t="reset">Demo Reset 🔄</button>
+  </div>
+  <div id="kids-mgr" style="display:none" class="card"><h2 style="margin-top:0" data-t="manage_kids">Bachay</h2><div id="kids-mgr-list"></div>
+    <button class="btn ghost" onclick="obAddKid(true)" data-t="add_kid">+ Bacha Add Karein</button>
+    <button class="btn grn" onclick="saveMgrKids()" data-t="save">Save 💾</button></div>
+</div>
+
+<!-- ============ PARENT DASHBOARD ============ -->
+<div id="scr-pdash" class="screen">
+  <h1 data-t="pdash">Parent Dashboard 👨‍💼</h1>
+  <div id="pdash-kids"></div>
+</div>
+
+</div><!-- /wrap -->
+
+<nav class="nav" id="mainnav">
+  <button onclick="go('home')" id="nv-home"><span class="ic">🏠</span><span data-t="nav_home">Home</span></button>
+  <button onclick="go('chores')" id="nv-chores"><span class="ic">📝</span><span data-t="nav_chores">Kaam</span></button>
+  <button onclick="go('rewards')" id="nv-rewards"><span class="ic">🎁</span><span data-t="nav_rewards">Inaam</span></button>
+  <button onclick="go('family')" id="nv-family"><span class="ic">👨‍👩‍👧‍👦</span><span data-t="nav_family">Family</span></button>
+  <button onclick="go('profile')" id="nv-profile"><span class="ic">👤</span><span data-t="nav_profile">Profile</span></button>
+</nav>
+
+<script>
+/* ================= STATE ================= */
+var LSKEY='kaamstar_v1';
+var S=null;
+var AVATARS=['🧒','👧','👦','👩','🧑‍🎤','🦸','🧙','🧚','🐯','🦊','🐼','🐵','🦁','🐸'];
+function todayStr(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function uid(){return 'x'+Math.random().toString(36).slice(2,9);}
+function defChores(){return [
+ {id:uid(),title:'Bed banana',emoji:'🛏️',stars:1,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Daant saaf karna',emoji:'🪥',stars:1,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Homework mukammal',emoji:'📚',stars:2,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Kapre teh karna',emoji:'👕',stars:1,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Bartan dhona',emoji:'🍽️',stars:2,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Room saaf karna',emoji:'🧹',stars:2,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Pani peena (8 glass)',emoji:'💧',stars:1,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Kitab parhna (15 min)',emoji:'📖',stars:2,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Namaz parhna',emoji:'🕌',stars:3,freq:'daily',kidId:'all',active:true},
+ {id:uid(),title:'Pet ko khana dena',emoji:'🐱',stars:1,freq:'daily',kidId:'all',active:true}
+];}
+function defRewards(){return [
+ {id:uid(),title:'Ice cream 🍦',emoji:'🍦',cost:10,active:true},
+ {id:uid(),title:'Movie night 🎬',emoji:'🎬',cost:20,active:true},
+ {id:uid(),title:'Naya khilona 🧸',emoji:'🧸',cost:50,active:true},
+ {id:uid(),title:'Park trip 🛝',emoji:'🛝',cost:100,active:true}
+];}
+function blankState(){return {parentName:'',pin:'1234',lang:'ur',mode:'kid',activeKid:null,
+ kids:[],chores:defChores(),rewards:defRewards(),completions:[],redemptions:[],
+ goal:{target:100,reward:'Pizza party 🍕'},badges:{},hist:[],setupDone:false};}
+function save(){try{localStorage.setItem(LSKEY,JSON.stringify(S));}catch(e){}}
+function load(){try{var r=localStorage.getItem(LSKEY);S=r?JSON.parse(r):blankState();}catch(e){S=blankState();}
+ if(!S.chores)S.chores=defChores();if(!S.rewards)S.rewards=defRewards();
+ if(!S.completions)S.completions=[];if(!S.redemptions)S.redemptions=[];
+ if(!S.goal)S.goal={target:100,reward:'Pizza party 🍕'};if(!S.badges)S.badges={};if(!S.hist)S.hist=[];}
+
+/* ================= I18N ================= */
+var T={
+ur:{app_name:'Kaam Star',next:'Aagay →',start:'Shuru Karein 🚀',ob_t1:'Kaam Karo, Stars Jeeto!',ob_d1:'Bachon ke liye mazedaar kaam tracker — kaam karo, stars jeeto, inaam pao!',ob_t2:'Waliden ka Control',ob_d2:'Kaam set karein, approve karein, inaam dein — sab PIN se mehfooz.',ob_t3:'Family Leaderboard',ob_d3:'Behen bhaiyon me muqabla — haftay ka winner kaun?',setup_t:'Setup',parent_name:'Walid/Walida ka naam',add_kids:'Bachay shamil karein (zyada se zyada 5)',add_kid:'+ Bacha Add Karein',done_setup:'Mukammal ✅',today_chores:'Aaj ke Kaam',day_streak:'din ka streak',stars:'stars',chores:'Kaam 📝',rewards:'Inaam 🎁',family:'Family 👨‍👩‍👧‍👦',profile:'Profile 👤',add_chore:'Naya Kaam',daily:'Rozana',weekly:'Haftawar',once:'Ek dafa',add:'Shamil Karein ➕',my_stars:'Mere Stars',add_reward:'Naya Inaam',pending_red:'Redemption Requests',leaderboard:'Leaderboard 🏆',fam_goal:'Family Goal 🎯',pending_appr:'Approve Karein ✅',kid_mode:'Kid Mode',parent_mode:'Parent Mode',enter_pin:'PIN darj karein',cancel:'Cancel',my_badges:'Mere Badges 🏅',star_hist:'Star History 📜',settings:'Settings ⚙️',change_pin:'PIN Tabdeel Karein 🔑',manage_kids:'Bachay Manage Karein 👧',reset:'Demo Reset 🔄',pdash:'Parent Dashboard 👨‍💼',save:'Save 💾',nav_home:'Home',nav_chores:'Kaam',nav_rewards:'Inaam',nav_family:'Family',nav_profile:'Profile',done:'Ho Gaya ✅',pending:'⏳ Pending',approved:'✅ Approved',redeem:'Redeem 🎁',not_enough:'Stars kam hain!',approve:'Approve ✅',reject:'Reject ❌',new_pin:'Naya 4-digit PIN',wrong_pin:'Ghalat PIN!',kid_name:'Bachay ka naam',age:'Umar',confirm_reset:'Sab data delete ho jayega. Pakka?',yes:'Ji',no:'Nahi',no_chores:'Aaj koi kaam nahi — enjoy! 🎉',all_done:'Sab kaam mukammal! 🎉',proof:'Photo proof (optional)',select_kid:'Bacha chunein',weekly:'Is haftay'},
+en:{app_name:'Kaam Star',next:'Next →',start:'Get Started 🚀',ob_t1:'Do Chores, Win Stars!',ob_d1:'Fun chore tracker for kids — do chores, earn stars, get rewards!',ob_t2:'Parental Control',ob_d2:'Set chores, approve, give rewards — all PIN protected.',ob_t3:'Family Leaderboard',ob_d3:'Sibling rivalry — who wins this week?',setup_t:'Setup',parent_name:'Parent name',add_kids:'Add kids (max 5)',add_kid:'+ Add Kid',done_setup:'Done ✅',today_chores:"Today's Chores",day_streak:'day streak',stars:'stars',chores:'Chores 📝',rewards:'Rewards 🎁',family:'Family 👨‍👩‍👧‍👦',profile:'Profile 👤',add_chore:'New Chore',daily:'Daily',weekly:'Weekly',once:'Once',add:'Add ➕',my_stars:'My Stars',add_reward:'New Reward',pending_red:'Redemption Requests',leaderboard:'Leaderboard 🏆',fam_goal:'Family Goal 🎯',pending_appr:'Approve ✅',kid_mode:'Kid Mode',parent_mode:'Parent Mode',enter_pin:'Enter PIN',cancel:'Cancel',my_badges:'My Badges 🏅',star_hist:'Star History 📜',settings:'Settings ⚙️',change_pin:'Change PIN 🔑',manage_kids:'Manage Kids 👧',reset:'Demo Reset 🔄',pdash:'Parent Dashboard 👨‍💼',save:'Save 💾',nav_home:'Home',nav_chores:'Chores',nav_rewards:'Rewards',nav_family:'Family',nav_profile:'Profile',done:'Done ✅',pending:'⏳ Pending',approved:'✅ Approved',redeem:'Redeem 🎁',not_enough:'Not enough stars!',approve:'Approve ✅',reject:'Reject ❌',new_pin:'New 4-digit PIN',wrong_pin:'Wrong PIN!',kid_name:'Kid name',age:'Age',confirm_reset:'Delete all data? Sure?',yes:'Yes',no:'No',no_chores:'No chores today — enjoy! 🎉',all_done:'All chores done! 🎉',proof:'Photo proof (optional)',select_kid:'Select kid',weekly:'This week'}};
+function t(k){var L=T[S.lang]||T.ur;return L[k]||T.en[k]||k;}
+function applyLang(){document.querySelectorAll('[data-t]').forEach(function(el){el.textContent=t(el.getAttribute('data-t'));});
+ document.getElementById('lang-btn').textContent=S.lang==='ur'?'🌐 English':'🌐 اردو';
+ document.documentElement.lang=S.lang==='ur'?'ur':'en';}
+function toggleLang(){S.lang=S.lang==='ur'?'en':'ur';save();applyLang();renderAll();}
+
+/* ================= NAV ================= */
+var cur='home';
+function go(id){cur=id;document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+ var map={home:'scr-home',chores:'scr-chores',rewards:'scr-rewards',family:'scr-family',profile:'scr-profile',pdash:'scr-pdash'};
+ document.getElementById(map[id]||'scr-home').classList.add('on');
+ document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});
+ var nb=document.getElementById('nv-'+id);if(nb)nb.classList.add('on');
+ renderAll();window.scrollTo(0,0);}
+window.__atMenu=function(){return cur==='home';};
+window.__goMenu=function(){go('home');};
+
+/* ================= HELPERS ================= */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function kidById(id){return S.kids.find(function(k){return k.id===id;});}
+function choreById(id){return S.chores.find(function(c){return c.id===id;});}
+function activeKid(){return kidById(S.activeKid)||S.kids[0]||null;}
+function kidStars(kidId){return S.completions.filter(function(c){return c.kidId===kidId&&c.status==='approved';}).reduce(function(a,c){var ch=choreById(c.choreId);return a+(ch?ch.stars:0);},0)
+ - S.redemptions.filter(function(r){return r.kidId===kidId&&r.status==='approved';}).reduce(function(a,r){var rw=S.rewards.find(function(x){return x.id===r.rewardId;});return a+(rw?rw.cost:0);},0);}
+function kidEarned(kidId){return S.completions.filter(function(c){return c.kidId===kidId&&c.status==='approved';}).reduce(function(a,c){var ch=choreById(c.choreId);return a+(ch?ch.stars:0);},0);}
+function doneToday(kidId){var td=todayStr();var s={};S.completions.forEach(function(c){if(c.kidId===kidId&&c.date===td&&(c.status==='approved'||c.status==='pending'))s[c.choreId]=c.status;});return s;}
+function kidStreak(kidId){var n=0;var d=new Date();var td=todayStr();
+ var hasToday=S.completions.some(function(c){return c.kidId===kidId&&c.date===td&&c.status==='approved';});
+ if(!hasToday)d.setDate(d.getDate()-1);
+ while(true){var ds=todayStr(d);var ok=S.completions.some(function(c){return c.kidId===kidId&&c.date===ds&&c.status==='approved';});
+  if(!ok)break;n++;d.setDate(d.getDate()-1);if(n>365)break;}
+ return n;}
+function choresFor(kidId){return S.chores.filter(function(c){return c.active&&(c.kidId==='all'||c.kidId===kidId);});}
+</script>
+
+<script>
+/* ================= ONBOARDING ================= */
+var obKids=[];
+function obNext(n){for(var i=0;i<4;i++)document.getElementById('ob'+i).classList.remove('on');document.getElementById('ob'+n).classList.add('on');if(n===3)renderObKids();}
+function obAddKid(mgr){if(obKids.length>=5&&!mgr){alert('Max 5');return;}
+ if(mgr&&S.kids.length>=5){alert('Max 5');return;}
+ obKids.push({name:'',age:7,avatar:AVATARS[obKids.length%AVATARS.length]});renderObKids(mgr);}
+function renderObKids(mgr){
+ var box=document.getElementById(mgr?'kids-mgr-list':'ob-kids');if(!box)return;box.innerHTML='';
+ var list=mgr?null:obKids;
+ if(mgr){S.kids.forEach(function(k){
+   var d=document.createElement('div');d.className='kidrow';
+   d.innerHTML='<div class="avatar">'+k.avatar+'</div><div class="nm">'+esc(k.name)+' ('+k.age+')</div><button class="btn red small" onclick="delKid(\''+k.id+'\')">✖</button>';
+   box.appendChild(d);});
+  var nk=document.createElement('div');nk.id='ob-kids';box.appendChild(nk);
+  if(!obKids.length)obKids.push({name:'',age:7,avatar:AVATARS[0]});list=obKids;}
+ list.forEach(function(k,i){
+  var d=document.createElement('div');d.className='card';
+  d.innerHTML='<div class="avpick">'+AVATARS.map(function(a){return '<button class="'+(a===k.avatar?'sel':'')+'" onclick="obKidAv('+i+',\''+a+'\',this)">'+a+'</button>';}).join('')+'</div>'
+  +'<input placeholder="'+t('kid_name')+'" maxlength="20" value="'+esc(k.name)+'" oninput="obKids['+i+'].name=this.value">'
+  +'<div class="row2"><input type="number" min="3" max="16" value="'+k.age+'" placeholder="'+t('age')+'" oninput="obKids['+i+'].age=+this.value||7"></div>';
+  if(!mgr){var rm=document.createElement('button');rm.className='btn ghost small';rm.textContent='✖';rm.onclick=function(){obKids.splice(i,1);renderObKids();};d.appendChild(rm);}
+  box.appendChild(d);});}
+function obKidAv(i,a,btn){obKids[i].avatar=a;btn.parentElement.querySelectorAll('button').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');}
+function obFinish(){
+ var pn=document.getElementById('ob-pname').value.trim();
+ var kids=obKids.filter(function(k){return k.name.trim();}).map(function(k){return {id:uid(),name:k.name.trim(),age:k.age,avatar:k.avatar};});
+ if(!kids.length){alert(t('kid_name'));return;}
+ S.parentName=pn||'Ammi';S.kids=kids;S.activeKid=kids[0].id;S.setupDone=true;save();
+ document.getElementById('mainnav').style.display='flex';go('home');}
+function saveMgrKids(){var kids=obKids.filter(function(k){return k.name.trim();}).map(function(k){return {id:uid(),name:k.name.trim(),age:k.age,avatar:k.avatar};});
+ if(S.kids.length+kids.length>5){alert('Max 5');return;}
+ S.kids=S.kids.concat(kids);if(!S.activeKid&&S.kids[0])S.activeKid=S.kids[0].id;obKids=[];save();renderObKids(true);renderAll();}
+function delKid(id){if(!confirm('Delete?'))return;S.kids=S.kids.filter(function(k){return k.id!==id;});
+ if(S.activeKid===id)S.activeKid=S.kids[0]?S.kids[0].id:null;save();renderObKids(true);renderAll();}
+function manageKids(){var m=document.getElementById('kids-mgr');var show=m.style.display==='none';m.style.display=show?'block':'none';if(show){obKids=[];renderObKids(true);}}
+
+/* ================= HOME ================= */
+function renderHome(){
+ var k=activeKid();
+ document.getElementById('home-hello').textContent=k?(S.lang==='ur'?'Assalam-o-Alaikum, '+k.name+'! 🌙':'Hello, '+k.name+'! 🌙'):'';
+ var pk=document.getElementById('home-kidpick');pk.innerHTML='';
+ S.kids.forEach(function(x){var d=document.createElement('div');d.className='kidrow'+(k&&x.id===k.id?' sel':'');
+  d.innerHTML='<div class="avatar">'+x.avatar+'</div><div class="nm">'+esc(x.name)+'</div><div class="st">⭐ '+kidStars(x.id)+'</div>';
+  d.onclick=function(){S.activeKid=x.id;save();renderAll();};pk.appendChild(d);});
+ if(!k){document.getElementById('home-chores').innerHTML='';return;}
+ document.getElementById('home-stars').textContent=kidStars(k.id)+' ⭐';
+ document.getElementById('home-streak').textContent=kidStreak(k.id);
+ var list=choresFor(k.id);var dt=doneToday(k.id);
+ var done=list.filter(function(c){return dt[c.id]==='approved';}).length;
+ var total=list.length;
+ document.getElementById('home-prog').style.width=(total?Math.round(done/total*100):0)+'%';
+ var box=document.getElementById('home-chores');box.innerHTML='';
+ if(!total){box.innerHTML='<div class="card center">'+t('no_chores')+'</div>';return;}
+ list.forEach(function(c){
+  var st=dt[c.id];var d=document.createElement('div');d.className='chore'+(st==='approved'?' done':st==='pending'?' pending':'');
+  d.innerHTML='<div class="em">'+c.emoji+'</div><div class="tx"><div class="ti">'+esc(c.title)+'</div><div class="sub">'+c.stars+' ⭐ • '+t(c.freq)+'</div></div>'
+   +'<div class="rw">⭐ '+c.stars+'</div>'
+   +(st==='pending'?'<span class="tag pend">'+t('pending')+'</span>':'')
+   +(st==='approved'?'<span class="tag appr">✓</span>':'')
+   +(!st?'<button class="btn grn small" onclick="markDone(\''+c.id+'\')">'+t('done')+'</button>':'');
+  box.appendChild(d);});
+ if(total&&done===total){var m=document.createElement('div');m.className='card center';m.innerHTML='🎉 '+t('all_done');box.appendChild(m);}}
+
+/* ---- mark done + photo proof ---- */
+function markDone(choreId){
+ var k=activeKid();if(!k)return;
+ var w=document.createElement('div');w.className='card';
+ w.innerHTML='<h2 style="margin-top:0">'+t('done')+'</h2><label>'+t('proof')+'</label><input type="file" id="proof-file" accept="image/*"><div class="row2"><button class="btn grn" id="proof-ok">'+t('done')+'</button><button class="btn ghost" id="proof-no">'+t('cancel')+'</button></div>';
+ var box=document.getElementById('home-chores');box.insertBefore(w,box.firstChild);
+ document.getElementById('proof-no').onclick=function(){w.remove();};
+ document.getElementById('proof-ok').onclick=function(){
+  var f=document.getElementById('proof-file').files[0];
+  var finish=function(proof){S.completions.push({id:uid(),kidId:k.id,choreId:choreId,date:todayStr(),status:'pending',proof:proof||null});
+   S.hist.unshift({d:todayStr(),txt:(S.lang==='ur'?'Kaam mukammal (pending): ':'Chore done (pending): ')+choreById(choreId).title+' — '+k.name});
+   save();w.remove();cheer();confetti();renderAll();};
+  if(f){var r=new FileReader();r.onload=function(){shrinkImg(r.result,finish);};r.readAsDataURL(f);}else finish(null);};}
+
+function shrinkImg(dataUrl,cb){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var s=Math.min(1,320/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;try{c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.6));}catch(e){cb(null);}};img.onerror=function(){cb(null);};img.src=dataUrl;}
+
+/* ================= CHORES SCREEN ================= */
+function renderChores(){
+ var k=activeKid();var box=document.getElementById('chores-list');box.innerHTML='';
+ var isP=S.mode==='parent';
+ document.getElementById('chores-parent').style.display=isP?'block':'none';
+ var list=S.chores.filter(function(c){return k&&(c.kidId==='all'||c.kidId===k.id);});
+ if(!list.length)box.innerHTML='<div class="card center">'+t('no_chores')+'</div>';
+ list.forEach(function(c){
+  var d=document.createElement('div');d.className='chore'+(c.active?'':' done');
+  var kidNm=c.kidId==='all'?(S.lang==='ur'?'Sab bachay':'All kids'):((kidById(c.kidId)||{}).name||'');
+  d.innerHTML='<div class="em">'+c.emoji+'</div><div class="tx"><div class="ti">'+esc(c.title)+'</div><div class="sub">'+c.stars+' ⭐ • '+t(c.freq)+' • '+esc(kidNm)+'</div></div>'
+   +(isP?'<button class="btn small '+(c.active?'ghost':'grn')+'" onclick="toggleChore(\''+c.id+'\')">'+(c.active?'⏸':'▶')+'</button><button class="btn small red" onclick="delChore(\''+c.id+'\')">✖</button>':'');
+  box.appendChild(d);});
+ if(isP){var nk=document.getElementById('nc-kid');nk.innerHTML='<option value="all">'+(S.lang==='ur'?'Sab bachay':'All kids')+'</option>'+S.kids.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+'</option>';}).join('');}}
+function addChore(){var ti=document.getElementById('nc-title').value.trim();if(!ti){alert('!');return;}
+ S.chores.push({id:uid(),title:ti,emoji:document.getElementById('nc-emoji').value,stars:+document.getElementById('nc-stars').value,freq:document.getElementById('nc-freq').value,kidId:document.getElementById('nc-kid').value,active:true});
+ document.getElementById('nc-title').value='';save();renderAll();}
+function toggleChore(id){var c=choreById(id);if(c){c.active=!c.active;save();renderAll();}}
+function delChore(id){if(!confirm('Delete?'))return;S.chores=S.chores.filter(function(c){return c.id!==id;});save();renderAll();}
+
+/* ================= REWARDS ================= */
+function renderRewards(){
+ var k=activeKid();var isP=S.mode==='parent';
+ document.getElementById('rewards-parent').style.display=isP?'block':'none';
+ document.getElementById('rw-stars').textContent=(k?kidStars(k.id):0)+' ⭐';
+ var box=document.getElementById('rewards-list');box.innerHTML='';
+ S.rewards.filter(function(r){return r.active;}).forEach(function(r){
+  var d=document.createElement('div');d.className='reward';
+  var can=k&&kidStars(k.id)>=r.cost;
+  d.innerHTML='<div class="em">'+r.emoji+'</div><div class="tx">'+esc(r.title)+'<div class="small">'+r.cost+' ⭐</div></div>'
+   +(isP?'<button class="btn small red" onclick="delReward(\''+r.id+'\')">✖</button>'
+    :'<button class="btn small '+(can?'yel':'ghost')+'" '+(can?'':'disabled')+' onclick="redeem(\''+r.id+'\')">'+t('redeem')+'</button>');
+  box.appendChild(d);});
+ if(isP){var rl=document.getElementById('red-list');rl.innerHTML='';
+  var pend=S.redemptions.filter(function(r){return r.status==='pending';});
+  if(!pend.length)rl.innerHTML='<div class="small center">—</div>';
+  pend.forEach(function(r){var kk=kidById(r.kidId);var rw=S.rewards.find(function(x){return x.id===r.rewardId;});
+   var d=document.createElement('div');d.className='chore pending';
+   d.innerHTML='<div class="em">'+(rw?rw.emoji:'🎁')+'</div><div class="tx"><div class="ti">'+esc(kk?kk.name:'')+' → '+esc(rw?rw.title:'')+'</div></div><button class="btn small grn" onclick="redApprove(\''+r.id+'\',1)">'+t('approve')+'</button><button class="btn small red" onclick="redApprove(\''+r.id+'\',0)">'+t('reject')+'</button>';
+   rl.appendChild(d);});}}
+function addReward(){var ti=document.getElementById('nr-title').value.trim();var cost=+document.getElementById('nr-cost').value||10;
+ S.rewards.push({id:uid(),title:ti||'Inaam',emoji:document.getElementById('nr-emoji').value,cost:cost,active:true});
+ document.getElementById('nr-title').value='';save();renderAll();}
+function delReward(id){if(!confirm('Delete?'))return;S.rewards=S.rewards.filter(function(r){return r.id!==id;});save();renderAll();}
+function redeem(rid){var k=activeKid();var rw=S.rewards.find(function(r){return r.id===rid;});if(!k||!rw)return;
+ if(kidStars(k.id)<rw.cost){alert(t('not_enough'));return;}
+ S.redemptions.push({id:uid(),kidId:k.id,rewardId:rid,date:todayStr(),status:'pending'});save();renderAll();cheer();}
+function redApprove(id,ok){var r=S.redemptions.find(function(x){return x.id===id;});if(!r)return;
+ r.status=ok?'approved':'rejected';save();renderAll();if(ok)confetti();}
+
+/* ================= FAMILY ================= */
+function renderFamily(){
+ var isP=S.mode==='parent';
+ document.getElementById('fam-pending').style.display=isP?'block':'none';
+ document.getElementById('fam-goal-set').style.display=isP?'block':'none';
+ var wk=todayStr();var lead=S.kids.map(function(k){
+  var weekStars=S.completions.filter(function(c){return c.kidId===k.id&&c.status==='approved'&&c.date>=wk.slice(0,8)+'01';}).reduce(function(a,c){var ch=choreById(c.choreId);return a+(ch?ch.stars:0);},0);
+  return {k:k,total:kidEarned(k.id),week:weekStars};}).sort(function(a,b){return b.total-a.total;});
+ var box=document.getElementById('fam-lead');box.innerHTML='';
+ var medals=['🥇','🥈','🥉'];
+ lead.forEach(function(e,i){var d=document.createElement('div');d.className='lead'+(i===0?' first':'');
+  d.innerHTML='<div class="rank">'+(medals[i]||(i+1))+'</div><div class="avatar" style="width:48px;height:48px;font-size:26px">'+e.k.avatar+'</div><div style="flex:1;font-weight:800">'+esc(e.k.name)+'<div class="small">'+t('weekly')+': '+e.week+' ⭐</div></div><div class="st" style="font-weight:900;color:#b45309">⭐ '+e.total+'</div>';
+  box.appendChild(d);});
+ var totEarn=S.kids.reduce(function(a,k){return a+kidEarned(k.id);},0);
+ document.getElementById('fam-goal-txt').textContent=S.goal.target+' ⭐ → '+S.goal.reward+' ('+totEarn+'/'+S.goal.target+')';
+ document.getElementById('fam-goal-prog').style.width=Math.min(100,Math.round(totEarn/S.goal.target*100))+'%';
+ if(isP){var pl=document.getElementById('pend-list');pl.innerHTML='';
+  var pend=S.completions.filter(function(c){return c.status==='pending';});
+  if(!pend.length)pl.innerHTML='<div class="small center">—</div>';
+  pend.forEach(function(c){var kk=kidById(c.kidId);var ch=choreById(c.choreId);
+   var d=document.createElement('div');d.className='chore pending';
+   d.innerHTML='<div class="em">'+(ch?ch.emoji:'📝')+'</div><div class="tx"><div class="ti">'+esc(kk?kk.name:'')+' — '+esc(ch?ch.title:'')+'</div><div class="sub">'+c.date+' • '+(ch?ch.stars:0)+' ⭐</div></div>'
+    +(c.proof?'<button class="btn small ghost" onclick="viewProof(\''+c.id+'\')">📷</button>':'')
+    +'<button class="btn small grn" onclick="approve(\''+c.id+'\',1)">'+t('approve')+'</button><button class="btn small red" onclick="approve(\''+c.id+'\',0)">'+t('reject')+'</button>';
+   pl.appendChild(d);});}}
+function approve(id,ok){var c=S.completions.find(function(x){return x.id===id;});if(!c)return;
+ c.status=ok?'approved':'rejected';
+ if(ok){var ch=choreById(c.choreId);S.hist.unshift({d:todayStr(),txt:'+'+(ch?ch.stars:0)+' ⭐ '+((kidById(c.kidId)||{}).name||'')+' — '+(ch?ch.title:'')});checkBadges(c.kidId);}
+ save();renderAll();if(ok){confetti();cheer();}}
+function viewProof(id){var c=S.completions.find(function(x){return x.id===id;});if(c&&c.proof){var w=window.open('','_blank');if(w)w.document.write('<img src="'+c.proof+'" style="max-width:100%">');}}
+function setGoal(){S.goal.target=+document.getElementById('fg-target').value||100;S.goal.reward=document.getElementById('fg-reward').value||'Pizza party 🍕';save();renderAll();}
+
+/* ================= BADGES ================= */
+var BDEF=[{id:'champ',em:'🏆',ur:'Chore Champion',en:'Chore Champion'},{id:'streak7',em:'🔥',ur:'7-Din Streak',en:'7-Day Streak'},{id:'star50',em:'⭐',ur:'Star Collector',en:'Star Collector'},{id:'helper',em:'🌟',ur:'Madadgaar',en:'Little Helper'}];
+function checkBadges(kidId){
+ var has=S.badges[kidId]||[];var changed=false;
+ var n=S.completions.filter(function(c){return c.kidId===kidId&&c.status==='approved';}).length;
+ if(n>=10&&has.indexOf('champ')<0){has.push('champ');changed=true;}
+ if(kidStreak(kidId)>=7&&has.indexOf('streak7')<0){has.push('streak7');changed=true;}
+ if(kidEarned(kidId)>=50&&has.indexOf('star50')<0){has.push('star50');changed=true;}
+ if(n>=1&&has.indexOf('helper')<0){has.push('helper');changed=true;}
+ if(changed){S.badges[kidId]=has;save();confetti();}}
+
+/* ================= PROFILE / PIN ================= */
+var pinBuf='',pinMode='';
+function setMode(m){if(m==='kid'){S.mode='kid';save();renderAll();}else askPin();}
+function askPin(){document.getElementById('pinbox').style.display='block';pinBuf='';pinMode='login';drawPin();}
+function hidePin(){document.getElementById('pinbox').style.display='none';}
+function drawPin(){var dots=document.getElementById('pindots').children;for(var i=0;i<4;i++)dots[i].className=i<pinBuf.length?'f':'';
+ var pad=document.getElementById('pinpad');pad.innerHTML='';
+ [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(n){var b=document.createElement('button');b.textContent=n;b.onclick=function(){pinTap(n);};pad.appendChild(b);});}
+function pinTap(n){if(n===''){return;}if(n==='⌫'){pinBuf=pinBuf.slice(0,-1);drawPin();return;}
+ if(pinBuf.length>=4)return;pinBuf+=n;drawPin();
+ if(pinBuf.length===4){setTimeout(function(){
+  if(pinMode==='login'){if(pinBuf===S.pin){S.mode='parent';hidePin();save();renderAll();}else{alert(t('wrong_pin'));pinBuf='';drawPin();}}
+  else if(pinMode==='change'){S.pin=pinBuf;hidePin();save();alert('✅');pinBuf='';}},250);}}
+function changePinUI(){document.getElementById('pinbox').style.display='block';pinBuf='';pinMode='change';drawPin();}
+function renderProfile(){
+ document.getElementById('mode-kid').className=S.mode==='kid'?'on':'';
+ document.getElementById('mode-parent').className=S.mode==='parent'?'on':'';
+ var isP=S.mode==='parent';
+ document.getElementById('pin-btn').style.display=isP?'block':'none';
+ document.getElementById('kids-btn').style.display=isP?'block':'none';
+ var k=activeKid();var box=document.getElementById('prof-badges');box.innerHTML='';
+ var has=k?(S.badges[k.id]||[]):[];
+ BDEF.forEach(function(b){var un=has.indexOf(b.id)>=0;var d=document.createElement('span');d.className='badge'+(un?'':' lock');d.textContent=b.em+' '+(S.lang==='ur'?b.ur:b.en);box.appendChild(d);});
+ var h=document.getElementById('prof-hist');h.innerHTML='';
+ S.hist.slice(0,20).forEach(function(x){var d=document.createElement('div');d.className='hist';d.textContent=x.d+' — '+x.txt;h.appendChild(d);});
+ if(!S.hist.length)h.innerHTML='<div class="small center">—</div>';}
+function resetAll(){if(confirm(t('confirm_reset'))){localStorage.removeItem(LSKEY);location.reload();}}
+
+/* ================= CONFETTI & CHEER ================= */
+function confetti(){try{var c=document.getElementById('confetti');var x=c.getContext('2d');if(!x)return;c.width=innerWidth;c.height=innerHeight;
+ var P=[];var cols=['#8B5CF6','#FCD34D','#10B981','#EF4444','#3B82F6'];
+ for(var i=0;i<120;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[i%5],vy:2+Math.random()*3,vx:-1.5+Math.random()*3,r:Math.random()*Math.PI});
+ var t0=Date.now();(function fr(){var dt=Date.now()-t0;x.clearRect(0,0,c.width,c.height);
+  P.forEach(function(p){p.y+=p.vy;p.x+=p.vx+Math.sin(p.y/20);p.r+=.05;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+  if(dt<2600)requestAnimationFrame(fr);else x.clearRect(0,0,c.width,c.height);})();}catch(e){}}
+function cheer(){var d=document.createElement('div');d.className='cheer';d.textContent=['🎉','⭐','🌟','🎊'][Math.floor(Math.random()*4)];document.body.appendChild(d);setTimeout(function(){d.remove();},1300);}
+
+/* ================= RENDER ALL & INIT ================= */
+function renderAll(){applyLang();renderHome();renderChores();renderRewards();renderFamily();renderProfile();}
+function init(){
+ load();applyLang();
+ if(!S.setupDone){document.getElementById('scr-onboard').classList.add('on');document.getElementById('mainnav').style.display='none';obNext(0);}
+ else{document.getElementById('mainnav').style.display='flex';go('home');}}
+init();
+</script>
+
+<script>
+(function(){
+  var KEY='kaamstar_demo_start';var DAYS=3;
+  try{
+    var start=localStorage.getItem(KEY);var now=Date.now();
+    if(!start){localStorage.setItem(KEY,String(now));start=now;}else{start=parseInt(start,10);}
+    if(now-start>DAYS*24*60*60*1000){
+      document.addEventListener('DOMContentLoaded',function(){
+        document.body.innerHTML='<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#111;color:#FCD34D;font-family:system-ui;text-align:center;padding:24px">'
+        +'<div style="font-size:64px;margin-bottom:16px">⭐</div>'
+        +'<h1 style="margin:0 0 12px">Demo Expired</h1>'
+        +'<p style="opacity:.9;max-width:320px">Is demo ki 3-din ki muddat khatam ho gayi hai.<br>Poori app ke liye Jilan Apps se rabta karein.</p>'
+        +'<div style="margin-top:20px;padding:12px 24px;background:#FCD34D;color:#111;border-radius:12px;font-weight:bold">DEMO by Jilan Apps</div></div>';
+      });
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
