@@ -56,6 +56,12 @@ button{font-family:inherit}
 #cammsg{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;align-items:center;
   justify-content:center;background:#0d0d1a;z-index:12;text-align:center;padding:24px}
 #cammsg .big{font-size:46px}
+/* camera back button (top-left) */
+#camback{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;z-index:25;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25)}
+#facestat{position:absolute;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  z-index:25;background:rgba(0,0,0,.55);color:#ffd60a;font-size:12px;padding:6px 14px;border-radius:16px;
+  display:none;pointer-events:none;white-space:nowrap}
 /* filter carousel */
 #filterbar{position:absolute;left:0;right:0;bottom:128px;z-index:13;padding:8px 0;
   background:linear-gradient(transparent,rgba(0,0,0,.72))}
@@ -181,6 +187,8 @@ button{font-family:inherit}
   <div id="camwrap">
     <video id="v" playsinline muted autoplay></video>
     <canvas id="fxlayer"></canvas>
+    <button id="camback" class="iconbtn" onclick="goBack()" title="Back" aria-label="Back">←</button>
+    <div id="facestat"></div>
     <div id="recind"><span class="recdot"></span><span id="rectime">00:00</span></div>
     <div id="focusring"></div>
     <div id="cammsg" style="display:none"><div class="big">📷</div><div id="cammsgtxt" style="font-size:15px;color:#cfd2e6"></div>
@@ -262,11 +270,11 @@ button{font-family:inherit}
     </div>
     <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.0</h3>
       <p style="color:var(--mut);font-size:13px;line-height:1.7;margin:0">
-      <span data-i18n="about1">Filters yahan color-grading aur effects hain — ye face-tracking AR lenses nahi hain.</span><br>
+      <span data-i18n="about1">Face filters use real face landmarks (2D overlays, not 3D AR). Face AI loads on first use — internet required once.</span><br>
       <span data-i18n="about2">Photos/videos sirf aapke phone me rehti hain, kahin upload nahi hotin.</span></p>
       <h3 style="margin-top:12px">⚠️ Limitations</h3>
       <ul class="limlist">
-        <li data-i18n="l1">No real-time face-tracking AR (face-api optional, not bundled)</li>
+        <li data-i18n="l1">Face filters are 2D canvas overlays on detected landmarks — not Snapchat-grade 3D AR</li>
         <li data-i18n="l2">Filtered video uses canvas re-encoding (quality may drop slightly)</li>
         <li data-i18n="l3">Torch/zoom depend on device support</li>
         <li data-i18n="l4">Browser gallery may clear if browser data is cleared</li>
@@ -370,8 +378,19 @@ const FILTERS=[
  {id:'night',n:'Night Mood',ur:'رات',cat:'fx',css:'brightness(0.6) saturate(0.8) hue-rotate(15deg) contrast(1.2)',emo:'🌃',ov:'vignette'},
  {id:'dramatic',n:'Dramatic',ur:'ڈرامائی',cat:'fx',css:'contrast(1.5) brightness(0.9) saturate(1.1)',emo:'🎭',ov:'vignette'},
  {id:'duotone',n:'Duotone',ur:'دو رنگ',cat:'fx',css:'grayscale(1) sepia(0.5) hue-rotate(230deg) saturate(2.5)',emo:'🎷'},
+ // --- Face (10) — real face-landmark overlays (MediaPipe, 2D; needs internet first time) ---
+ {id:'f_sun',n:'Sunglasses',ur:'دھوپ کا چشمہ',cat:'face',css:'saturate(1.1) contrast(1.05)',emo:'🕶️',kind:'canvas',face:'sunglasses'},
+ {id:'f_bigeyes',n:'Big Eyes',ur:'بڑی آنکھیں',cat:'face',css:'saturate(1.08)',emo:'👀',kind:'canvas',face:'bigeyes'},
+ {id:'f_dog',n:'Puppy',ur:'کتا',cat:'face',css:'saturate(1.15)',emo:'🐶',kind:'canvas',face:'dog'},
+ {id:'f_crown',n:'Crown',ur:'تاج',cat:'face',css:'brightness(1.05)',emo:'👑',kind:'canvas',face:'crown'},
+ {id:'f_hearts',n:'Face Hearts',ur:'دل والے',cat:'face',css:'saturate(1.3)',emo:'💖',kind:'canvas',face:'hearts'},
+ {id:'f_spark',n:'Face Sparkles',ur:'چمک',cat:'face',css:'brightness(1.1)',emo:'✨',kind:'canvas',face:'sparkles'},
+ {id:'f_angel',n:'Angel',ur:'فرشتہ',cat:'face',css:'brightness(1.12)',emo:'😇',kind:'canvas',face:'angel'},
+ {id:'f_funny',n:'Funny Face',ur:'مزاحیہ',cat:'face',css:'saturate(1.3)',emo:'🤪',kind:'canvas',face:'funny'},
+ {id:'f_beautypro',n:'Beauty Pro',ur:'بیوٹی پرو',cat:'face',css:'none',emo:'💆',kind:'canvas',face:'beautypro'},
+ {id:'f_eyeglow',n:'Eye Glow',ur:'آنکھوں کی چمک',cat:'face',css:'none',emo:'🌟',kind:'canvas',face:'eyeglow'},
 ];
-const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس']];
+const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس'],['face','😎 Face','چہرہ']];
 let curFilter=FILTERS[0], curCat='beauty';
 
 /* ---- overlay painters (ctx,w,h,t) ---- */
@@ -417,6 +436,206 @@ function paintOverlay(c,w,h,t,kind){
  if(!kind)return;
  if(OV[kind])OV[kind](c,w,h,t);
  else if(['snow','rain','stars','hearts','sparkle'].includes(kind))animOv(c,w,h,t,kind);
+}
+/* ============ FACE FILTERS — MediaPipe FaceLandmarker (honest 2D landmark overlays, NOT 3D AR) ============
+   Landmarks follow the face live. Needs internet on first use (model download). Falls back gracefully. */
+let FL=null, flLoading=false, flReady=false;
+let faceLm=null, faceTs=0, lastDetect=0;
+const FMIRROR=()=>curFacing==='user'&&v.classList.contains('mirror');
+async function ensureFace(){
+ if(flReady||flLoading)return flReady;
+ flLoading=true;updateFaceHint();
+ try{
+  const mod=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+  const vr=await mod.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  FL=await mod.FaceLandmarker.createFromOptions(vr,{baseOptions:{
+   modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+   delegate:'CPU'},runningMode:'VIDEO',numFaces:1,minFaceDetectionConfidence:0.4});
+  flReady=true;
+ }catch(e){flReady=false;}
+ flLoading=false;updateFaceHint();
+ if(!flReady)toast('🌐 '+(LANG==='ur'?'فیس فلٹر کے لیے انٹرنیٹ چاہیے':'Face filters need internet (first load)'));
+ return flReady;
+}
+function detectFace(){
+ if(!flReady||!stream||!v.videoWidth)return;
+ const now=performance.now();
+ if(now-lastDetect<130)return;
+ lastDetect=now;
+ try{
+  const r=FL.detectForVideo(v,now);
+  const lm=(r&&r.faceLandmarks&&r.faceLandmarks[0])||null;
+  if(lm){faceLm=lm;faceTs=now;}
+  else if(now-faceTs>1600)faceLm=null;
+ }catch(e){}
+}
+/* landmark helpers: MediaPipe gives normalized coords; canvas here is pre-mirrored, so no flip needed */
+function avgPt(lm,idx,W,H){let x=0,y=0;for(const i of idx){const p=lm[i];x+=p.x;y+=p.y;}const n=idx.length;return [x/n*W,y/n*H];}
+function faceBox(lm,W,H){
+ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+ for(const p of lm){const x=p.x*W,y=p.y*H;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+ const pw=(x1-x0)*0.14,ph=(y1-y0)*0.14;
+ return [x0-pw,y0-ph,x1+pw,y1+ph];
+}
+function warpBulge(c,cx,cy,R,amt){
+ const x0=Math.max(0,Math.round(cx-R)),y0=Math.max(0,Math.round(cy-R));
+ const x1=Math.min(c.canvas.width,Math.round(cx+R)),y1=Math.min(c.canvas.height,Math.round(cy+R));
+ const w=x1-x0,h=y1-y0;if(w<8||h<8)return;
+ try{
+  const src=c.getImageData(x0,y0,w,h),out=c.createImageData(w,h);
+  const sd=src.data,od=out.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const dx=(x0+x-cx)/R,dy=(y0+y-cy)/R,r=Math.sqrt(dx*dx+dy*dy);
+   let sx=x,sy=y;
+   if(r<1&&r>0.001){const nr=r*(1-amt*(1-r));sx=(cx+dx/r*nr*R)-x0;sy=(cy+dy/r*nr*R)-y0;}
+   sx=clamp(Math.round(sx),0,w-1);sy=clamp(Math.round(sy),0,h-1);
+   const si=(sy*w+sx)*4,di=(y*w+x)*4;
+   od[di]=sd[si];od[di+1]=sd[si+1];od[di+2]=sd[si+2];od[di+3]=255;
+  }
+  c.putImageData(out,x0,y0);
+ }catch(e){}
+}
+function smoothRegion(c,x,y,w,h,amt){
+ x=Math.max(0,Math.round(x));y=Math.max(0,Math.round(y));
+ w=Math.min(c.canvas.width-x,Math.round(w));h=Math.min(c.canvas.height-y,Math.round(h));
+ if(w<10||h<10)return;
+ try{
+  const t2=document.createElement('canvas');t2.width=w;t2.height=h;
+  const tc=t2.getContext('2d');tc.filter='blur(4px) brightness(1.05)';tc.drawImage(c.canvas,x,y,w,h,0,0,w,h);
+  c.save();c.globalAlpha=amt;c.drawImage(t2,x,y,w,h);c.restore();
+ }catch(e){}
+}
+function facePaint(c,lm,W,H,kind,t){
+ const LE=avgPt(lm,[33,133,159,145,153,144],W,H),RE=avgPt(lm,[362,263,386,374,380,373],W,H);
+ const eyeDist=Math.hypot(RE[0]-LE[0],RE[1]-LE[1]);
+ if(kind==='sunglasses'){
+  const dx=RE[0]-LE[0],dy=RE[1]-LE[1],ang=Math.atan2(dy,dx);
+  const lw=eyeDist*0.82,lh=lw*0.52;
+  c.save();c.translate((LE[0]+RE[0])/2,(LE[1]+RE[1])/2);c.rotate(ang);
+  const rr=(x,y,w,h,r)=>{c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();};
+  c.fillStyle='rgba(10,10,18,0.93)';
+  rr(-eyeDist/2-lw/2,-lh/2,lw,lh,lh*0.45);c.fill();
+  rr(eyeDist/2-lw/2,-lh/2,lw,lh,lh*0.45);c.fill();
+  c.fillRect(-eyeDist*0.12,-lh*0.14,eyeDist*0.24,lh*0.18);
+  c.strokeStyle='rgba(255,255,255,0.4)';c.lineWidth=Math.max(1.5,lw*0.035);
+  c.beginPath();c.moveTo(-eyeDist/2-lw*0.32,-lh*0.3);c.lineTo(-eyeDist/2-lw*0.05,-lh*0.02);c.stroke();
+  c.beginPath();c.moveTo(eyeDist/2+lw*0.32,-lh*0.3);c.lineTo(eyeDist/2+lw*0.05,-lh*0.02);c.stroke();
+  c.restore();return;
+ }
+ if(kind==='bigeyes'){
+  for(const exy of [LE,RE]){
+   const ex=exy[0],ey=exy[1],r=eyeDist*0.36;
+   const sx=Math.max(0,ex-r),sy=Math.max(0,ey-r);
+   const sw=Math.min(W-sx,r*2),sh=Math.min(H-sy,r*2);
+   const tmp=document.createElement('canvas');tmp.width=Math.round(sw);tmp.height=Math.round(sh);
+   tmp.getContext('2d').drawImage(c.canvas,sx,sy,sw,sh,0,0,sw,sh);
+   const z=1.5;
+   c.save();c.beginPath();c.ellipse(ex,ey,r*0.9,r*0.75,0,0,7);c.clip();
+   c.drawImage(tmp,ex-sw*z/2,ey-sh*z/2,sw*z,sh*z);
+   c.restore();
+  }
+  return;
+ }
+ if(kind==='dog'){
+  const top=avgPt(lm,[10],W,H),nose=avgPt(lm,[1],W,H);
+  const fw=eyeDist,earW=fw*0.5,earH=fw*1.0;
+  c.save();
+  c.fillStyle='#7a4a21';
+  const ear=(bx,flip)=>{c.beginPath();c.moveTo(bx,top[1]-earH*0.1);
+   c.quadraticCurveTo(bx+flip*earW*0.7,top[1]-earH*0.75,bx+flip*earW*0.28,top[1]-earH);
+   c.quadraticCurveTo(bx+flip*earW*0.05,top[1]-earH*0.5,bx-earW*0.12,top[1]-earH*0.12);c.closePath();c.fill();};
+  ear(top[0]-fw*0.52,-1);ear(top[0]+fw*0.52,1);
+  c.fillStyle='#23232e';
+  c.beginPath();c.ellipse(nose[0],nose[1],fw*0.17,fw*0.12,0,0,7);c.fill();
+  c.fillStyle='rgba(255,255,255,0.35)';
+  c.beginPath();c.ellipse(nose[0]-fw*0.05,nose[1]-fw*0.04,fw*0.05,fw*0.035,0,0,7);c.fill();
+  c.fillStyle='#e0607e';
+  c.beginPath();c.ellipse(nose[0],nose[1]+fw*0.3,fw*0.1,fw*0.16,0,0,7);c.fill();
+  c.restore();return;
+ }
+ if(kind==='crown'){
+  const top=avgPt(lm,[10],W,H);
+  const box=faceBox(lm,W,H);const bw=box[2]-box[0];
+  const cw=bw*0.8,ch=bw*0.52,bx=top[0]-cw/2,by=top[1]-ch*1.5;
+  c.save();
+  const g=c.createLinearGradient(0,by,0,by+ch);
+  g.addColorStop(0,'#ffe27a');g.addColorStop(0.55,'#f5b81f');g.addColorStop(1,'#c47f0e');
+  c.fillStyle=g;c.strokeStyle='#8a5a00';c.lineWidth=2;
+  c.beginPath();
+  c.moveTo(bx,by+ch);c.lineTo(bx,by+ch*0.35);c.lineTo(bx+cw*0.25,by+ch*0.62);
+  c.lineTo(bx+cw*0.5,by);c.lineTo(bx+cw*0.75,by+ch*0.62);c.lineTo(bx+cw,by+ch*0.35);
+  c.lineTo(bx+cw,by+ch);c.closePath();c.fill();c.stroke();
+  c.fillStyle='#e63956';
+  [[0.5,0.32],[0.25,0.66],[0.75,0.66]].forEach(pt=>{
+   c.beginPath();c.arc(bx+cw*pt[0],by+ch*pt[1],bw*0.035,0,7);c.fill();});
+  c.restore();return;
+ }
+ if(kind==='hearts'||kind==='sparkles'){
+  const box=faceBox(lm,W,H);const bw=box[2]-box[0],bh=box[3]-box[1];
+  const n=kind==='hearts'?9:14;
+  c.save();c.textAlign='center';
+  for(let i=0;i<n;i++){
+   const cyc=(t*0.22+i*0.618)%1;
+   const x=box[0]+bw*(0.15+0.7*((i*0.37)%1));
+   const y=box[1]-bh*0.05-cyc*bh*0.9;
+   const s=(kind==='hearts'?bw*0.085:bw*0.06)*(0.65+0.35*Math.sin(t*3+i*1.7));
+   c.globalAlpha=0.35+0.65*(1-cyc);
+   c.font=s+'px serif';
+   c.fillText(kind==='hearts'?'💕':'✦',x,y);
+  }
+  c.restore();return;
+ }
+ if(kind==='angel'){
+  const top=avgPt(lm,[10],W,H);
+  const box=faceBox(lm,W,H);const bw=box[2]-box[0];
+  c.save();
+  const g=c.createRadialGradient(top[0],top[1],8,top[0],top[1],bw*1.1);
+  g.addColorStop(0,'rgba(255,242,205,0.28)');g.addColorStop(1,'rgba(255,242,205,0)');
+  c.fillStyle=g;c.fillRect(top[0]-bw*1.1,top[1]-bw*1.1,bw*2.2,bw*2.2);
+  c.strokeStyle='rgba(255,214,110,0.95)';c.lineWidth=Math.max(3,bw*0.028);
+  c.beginPath();c.ellipse(top[0],top[1]-bw*0.3,bw*0.33,bw*0.1,-0.08,0,7);c.stroke();
+  c.restore();return;
+ }
+ if(kind==='funny'){
+  const box=faceBox(lm,W,H);
+  const cx=(box[0]+box[2])/2,cy=(box[1]+box[3])/2;
+  warpBulge(c,cx,cy,Math.max(box[2]-box[0],box[3]-box[1])*0.62,0.6);
+  return;
+ }
+ if(kind==='beautypro'){
+  const box=faceBox(lm,W,H);
+  smoothRegion(c,box[0],box[1],box[2]-box[0],box[3]-box[1],0.7);
+  return;
+ }
+ if(kind==='eyeglow'){
+  for(const exy of [LE,RE]){
+   const g=c.createRadialGradient(exy[0],exy[1],1,exy[0],exy[1],eyeDist*0.4);
+   g.addColorStop(0,'rgba(255,255,255,0.55)');g.addColorStop(1,'rgba(255,255,255,0)');
+   c.fillStyle=g;c.beginPath();c.arc(exy[0],exy[1],eyeDist*0.4,0,7);c.fill();
+  }
+  return;
+ }
+}
+function paintFace(c,lm,W,H,kind,t){
+ if(!lm)return false;
+ try{facePaint(c,lm,W,H,kind,t);return true;}catch(e){return false;}
+}
+function updateFaceHint(){
+ const el=$('facestat');if(!el)return;
+ if(!curFilter||!curFilter.face){el.style.display='none';return;}
+ el.style.display='block';
+ if(flLoading)el.textContent='⏳ Face AI load…';
+ else if(!flReady)el.textContent='🌐 '+(LANG==='ur'?'فیس فلٹر: انٹرنیٹ چاہیے':'Face filter: needs internet');
+ else if(!faceLm||performance.now()-faceTs>1800)el.textContent=LANG==='ur'?'🙂 چہرہ سامنے لائیں':'🙂 Show your face';
+ else el.style.display='none';
+}
+function drawVideoCover(c,W,H){
+ const vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return false;
+ const s=Math.max(W/vw,H/vh),dw=vw*s,dh=vh*s;
+ c.save();
+ if(FMIRROR()){c.translate(W,0);c.scale(-1,1);}
+ c.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);
+ c.restore();return true;
 }
 /* ---- canvas FX (for capture / filtered video) ---- */
 function applyCanvasFX(src,dst,fxid){
@@ -538,6 +757,22 @@ v.addEventListener('click',e=>{
  r.style.left=e.clientX+'px';r.style.top=(e.clientY-$('camwrap').getBoundingClientRect().top)+'px';
  setTimeout(()=>r.style.display='none',700);
 });
+/* pinch-to-zoom on preview (uses hardware zoom when available) */
+let _pinchD=0;
+$('camwrap').addEventListener('touchstart',e=>{
+ if(e.touches.length===2)_pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+},{passive:true});
+$('camwrap').addEventListener('touchmove',e=>{
+ if(e.touches.length===2&&zoomCap&&_pinchD>0){
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  const z=$('zoomr');
+  const nv=clamp(parseFloat(z.value)*(d/_pinchD),parseFloat(z.min),parseFloat(z.max));
+  z.value=nv;$('zoomval').textContent=nv.toFixed(1)+'x';
+  zoomCap.tr.applyConstraints({advanced:[{zoom:nv}]}).catch(()=>{});
+  _pinchD=d;
+ }
+},{passive:true});
+$('camwrap').addEventListener('touchend',()=>{_pinchD=0;},{passive:true});
 function setMode(m){mode=m;$('modePhoto').classList.toggle('on',m==='photo');
  $('modeVideo').classList.toggle('on',m==='video');$('shutter').classList.toggle('vidmode',m==='video');}
 
@@ -549,10 +784,16 @@ function startFxLoop(){if(fxRun)return;fxRun=true;
   try{
    const w=fx.width=fx.clientWidth,h=fx.height=fx.clientHeight;
    fxc.clearRect(0,0,w,h);
-   const f=curFilter;
-   if(f.ov&&!['vignette','cinebars','dream','glow','lightleak','vhs','rainbow'].includes(f.ov)){
-     paintOverlay(fxc,w,h,performance.now()/1000,f.ov);
-   }else if(f.ov){paintOverlay(fxc,w,h,performance.now()/1000,f.ov);}
+   const f=curFilter,t=performance.now()/1000;
+   if(f.face){
+    /* face filter: render video frame to canvas (cover-fit), then landmark overlays */
+    if(drawVideoCover(fxc,w,h)){
+     detectFace();
+     if(faceLm)paintFace(fxc,faceLm,w,h,f.face,t);
+     updateFaceHint();
+    }
+   }else if(f.ov){paintOverlay(fxc,w,h,t,f.ov);updateFaceHint();}
+   else{updateFaceHint();}
   }catch(e){}
   requestAnimationFrame(loop);};
  loop();}
@@ -572,7 +813,7 @@ function buildFilterUI(){
  FILTERS.filter(f=>f.cat===curCat).forEach(f=>{
   const d=document.createElement('div');d.className='fthumb'+(f.id===curFilter.id?' on':'');
   d.innerHTML=`<div class="im"><div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div></div><span>${LANG==='ur'?f.ur:f.n}</span>`;
-  d.onclick=()=>{curFilter=f;applyLiveFilter();buildFilterUI();};
+  d.onclick=()=>{curFilter=f;applyLiveFilter();buildFilterUI();if(f.face)ensureFace();};
   row.appendChild(d);});
 }
 
@@ -598,6 +839,7 @@ function drawFilteredFrame(canvas){
    c.drawImage(v,0,0,w,h);c.filter='none';
  }
  if(f.ov)paintOverlay(c,w,h,performance.now()/1000,f.ov);
+ if(f.face){detectFace();if(faceLm)paintFace(c,faceLm,w,h,f.face,performance.now()/1000);}
  /* front camera mirror already handled: video element mirrored, drawImage captures unmirrored;
     mirror it for selfie consistency */
  if(curFacing==='user'&&v.classList.contains('mirror')){
@@ -819,7 +1061,10 @@ function saveEdited(){
   closeEditor();go('gal');
  },'image/jpeg',0.92);
 }
-function closeEditor(){go('cam');}
+function closeEditor(){
+ /* return to previous screen (camera or gallery), not always camera */
+ if(curScreen()==='ed'){goBack();}else{go('cam');}
+}
 /* drag text/stickers on editor canvas */
 (function(){
  let sx,sy,moved;
@@ -940,8 +1185,10 @@ async function refreshSettings(){
  $('permrows').innerHTML=rows.map(([n,ok])=>
   `<div class="setrow"><span>${n}</span><b class="${ok?'ok':'no'}">${ok?'✓':'✕'}</b></div>`).join('');
 }
-/* ================= NAV ================= */
-function go(s){
+/* ================= NAV (stack-based, back-safe) ================= */
+let navStack=['cam'];
+function curScreen(){return navStack[navStack.length-1];}
+function renderScreen(s){
  document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));
  $('navbar').style.display=(s==='ed')?'none':'flex';
  if(s==='cam'){$('scr-cam').classList.add('on');}
@@ -950,6 +1197,33 @@ function go(s){
  if(s==='ed'){$('scr-ed').classList.add('on');setTimeout(fitEditorCanvas,80);}
  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
 }
+function go(s){
+ if(curScreen()===s){renderScreen(s);return;}
+ navStack.push(s);renderScreen(s);
+}
+/* goBack: viewer -> dialog -> previous screen -> exit confirm (root only) */
+let _backBusy=false;
+function goBack(){
+ if(_backBusy)return;_backBusy=true;
+ setTimeout(()=>{_backBusy=false;},400);
+ if($('viewer').classList.contains('on')){closeViewer();return;}
+ if($('dlg').classList.contains('on')){$('dlg').classList.remove('on');return;}
+ if(navStack.length>1){navStack.pop();renderScreen(curScreen());return;}
+ askExit();
+}
+async function askExit(){
+ const ok=await dlg(LANG==='ur'?'ایپ بند کریں؟':'Exit app?',LANG==='ur'?'کیا آپ ایپ بند کرنا چاہتے ہیں؟':'Do you want to close the app?','Exit');
+ if(!ok)return;
+ try{if(window.Android&&Android.exitApp){Android.exitApp();return;}}catch(e){}
+ toast(LANG==='ur'?'آپ پہلے ہی ہوم پر ہیں':'Already on home');
+}
+/* called by Android native back button; JS owns the decision */
+window.__jilanBack=function(){
+ if($('viewer').classList.contains('on')){closeViewer();return;}
+ if($('dlg').classList.contains('on')){$('dlg').classList.remove('on');return;}
+ if(navStack.length>1){navStack.pop();renderScreen(curScreen());return;}
+ askExit();
+};
 /* ================= BOOT ================= */
 window.addEventListener('load',async()=>{
  applyLang();
@@ -960,7 +1234,10 @@ window.addEventListener('load',async()=>{
  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){startCamera();}
  else{$('cammsg').style.display='flex';$('cammsgtxt').textContent=t('tap');}
 });
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stopStream();});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){stopStream();}
+ else if(curScreen()==='cam'&&!stream&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){startCamera();}
+});
 window.addEventListener('resize',()=>{if($('scr-ed').classList.contains('on'))fitEditorCanvas();});
 </script>
 </body>
