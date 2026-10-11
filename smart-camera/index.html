@@ -125,7 +125,20 @@ button{font-family:inherit}
 .gitem img,.gitem video{width:100%;height:100%;object-fit:cover}
 .gitem .vdur{position:absolute;bottom:5px;right:6px;background:rgba(0,0,0,.65);font-size:10px;
   padding:2px 7px;border-radius:8px}
+.gitem .favb{position:absolute;top:5px;left:6px;font-size:14px;text-shadow:0 1px 4px #000}
 .gempty{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 20px;font-size:15px}
+/* albums bottom sheet */
+#albumsheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;
+  align-items:flex-end;justify-content:center}
+#albumsheet.on{display:flex}
+#albumsheet .asbox{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:520px;
+  max-height:72%;overflow-y:auto;padding:18px 18px max(18px,env(safe-area-inset-bottom))}
+#albumsheet h3{margin:0 0 10px;font-size:16px}
+.arow{display:flex;align-items:center;gap:12px;width:100%;background:var(--btn);border:none;color:#fff;
+  border-radius:14px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:15px;text-align:left}
+.arow:active{transform:scale(.98)}
+.arow .cnt{margin-left:auto;color:var(--mut);font-size:13px}
+.arow.cur{outline:2px solid #ec4899}
 /* viewer */
 #viewer{position:fixed;inset:0;background:#000;z-index:200;display:none;flex-direction:column}
 #viewer.on{display:flex}
@@ -146,6 +159,14 @@ button{font-family:inherit}
 .switch.on{background:var(--grad)}
 .switch.on::after{left:23px}
 .limlist{margin:6px 0 0;padding-left:18px;color:var(--mut);font-size:13px;line-height:1.7}
+/* ---------- Filters screen ---------- */
+#fltgrid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start}
+.fltcard{background:var(--card);border:2px solid transparent;border-radius:16px;padding:10px 6px;
+  text-align:center;cursor:pointer;color:#fff;font-family:inherit}
+.fltcard.on{border-color:#ec4899;box-shadow:0 0 12px rgba(236,72,153,.6)}
+.fltcard:active{transform:scale(.96)}
+.fltcard .demo{font-size:34px;height:52px;display:flex;align-items:center;justify-content:center}
+.fltcard span{font-size:11px;color:#d7d9e8;display:block;margin-top:4px;line-height:1.3}
 /* bottom nav */
 #navbar{display:flex;background:#12122a;border-top:1px solid rgba(255,255,255,.08);
   padding:6px 4px max(6px,env(safe-area-inset-bottom));z-index:30}
@@ -163,7 +184,7 @@ button{font-family:inherit}
 #dlg.on{display:flex}
 #dlg .box{background:var(--card);border-radius:20px;padding:22px;width:100%;max-width:340px;text-align:center}
 #dlg h3{margin:0 0 8px}
-#dlg p{color:var(--mut);font-size:14px;margin:0 0 16px}
+#dlg p{color:var(--mut);font-size:14px;margin:0 0 16px;white-space:pre-line}
 #dlg .row{display:flex;gap:10px}
 #txtinput{width:100%;background:var(--btn);border:1px solid rgba(255,255,255,.15);color:#fff;
   border-radius:12px;padding:12px;font-size:15px;margin-bottom:14px;font-family:inherit}
@@ -212,6 +233,7 @@ button{font-family:inherit}
       </div>
       <div class="sidebtns">
         <button class="iconbtn" onclick="switchCamera()" title="Switch">🔄</button>
+        <button class="iconbtn" onclick="go('flt')" title="Filters">🎨</button>
         <button class="iconbtn" id="btnImport" onclick="importPhoto()" title="Import">📁</button>
       </div>
     </div>
@@ -241,17 +263,44 @@ button{font-family:inherit}
 
 <!-- ============ GALLERY ============ -->
 <div class="screen" id="scr-gal">
-  <div class="topbar"><h2>🖼️ My Media</h2><button class="iconbtn" onclick="importPhoto()">📁</button></div>
+  <div class="topbar">
+    <button class="iconbtn" onclick="goBack()" title="Back" aria-label="Back">←</button>
+    <h2 id="galtitle">🖼️ My Media</h2>
+    <div style="display:flex;gap:8px">
+      <button class="iconbtn" onclick="openAlbums()" title="Albums / Folders" aria-label="Albums">📁</button>
+      <button class="iconbtn" onclick="importPhoto()" title="Import photo" aria-label="Import">➕</button>
+      <button class="iconbtn" onclick="goHome()" title="Home" aria-label="Home">🏠</button>
+    </div>
+  </div>
+  <div id="galnote" style="display:none;padding:8px 14px;color:var(--mut);font-size:12px;background:rgba(255,255,255,.03)"></div>
   <div id="galgrid"></div>
 </div>
+<!-- albums bottom sheet -->
+<div id="albumsheet">
+  <div class="asbox">
+    <h3>📁 Albums</h3>
+    <div id="albumlist"></div>
+    <button class="abtn sec" style="margin-top:10px" onclick="closeAlbums()">Close</button>
+  </div>
+</div>
 <div id="viewer">
-  <div class="topbar" style="background:#111"><button class="iconbtn" onclick="closeViewer()">✕</button><h2 id="vwt"></h2><span></span></div>
+  <div class="topbar" style="background:#111"><button class="iconbtn" onclick="goBack()" title="Back" aria-label="Back">←</button><h2 id="vwt"></h2><span></span></div>
   <div class="stage" id="vstage"></div>
-  <div class="vbar">
-    <button class="abtn sec" onclick="viewerShare()">📤 Share</button>
-    <button class="abtn sec" onclick="viewerDownload()">⬇️ Save</button>
-    <button class="abtn sec" onclick="viewerEdit()" id="vwEdit">✏️ Edit</button>
-    <button class="abtn sec" style="background:#5b1f2a" onclick="viewerDelete()">🗑️</button>
+  <div class="vbar" id="vbar" style="overflow-x:auto"></div>
+</div>
+
+<!-- ============ FILTERS ============ -->
+<div class="screen" id="scr-flt">
+  <div class="topbar">
+    <button class="iconbtn" onclick="goBack()" title="Back" aria-label="Back">←</button>
+    <h2>🎨 Filters</h2>
+    <button class="iconbtn" onclick="goHome()" title="Home" aria-label="Home">🏠</button>
+  </div>
+  <div style="padding:10px 14px 0"><div id="fltcat" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"></div></div>
+  <div id="fltgrid"></div>
+  <div style="padding:8px 16px max(10px,env(safe-area-inset-bottom));color:var(--mut);font-size:12px;line-height:1.6">
+    😎 Face filters = 2D landmark overlays tracked on your face (not 3D AR).<br>
+    🧖 Skin Smooth = whole-frame soft focus, not skin-segmented.
   </div>
 </div>
 
@@ -278,6 +327,8 @@ button{font-family:inherit}
         <li data-i18n="l2">Filtered video uses canvas re-encoding (quality may drop slightly)</li>
         <li data-i18n="l3">Torch/zoom depend on device support</li>
         <li data-i18n="l4">Browser gallery may clear if browser data is cleared</li>
+        <li>Delete/Trash work inside this app's own storage only — not your phone's system gallery</li>
+        <li>Skin Smooth is whole-frame soft focus, not skin-segmented beautification</li>
       </ul>
     </div>
   </div>
@@ -332,6 +383,8 @@ const FILTERS=[
  {id:'glamour',n:'Glamour',ur:'گلیمر',cat:'beauty',css:'contrast(1.12) saturate(1.3) brightness(1.08)',emo:'💃'},
  {id:'glow',n:'Soft Glow',ur:'چمک',cat:'beauty',css:'brightness(1.14) saturate(1.12) contrast(0.95)',emo:'💫',ov:'glow'},
  {id:'bright',n:'Bright Portrait',ur:'روشن',cat:'beauty',css:'brightness(1.18) contrast(1.05) saturate(1.15)',emo:'☀️'},
+ {id:'skinsmooth',n:'Skin Smooth Pro',ur:'جلد ہموار پرو',cat:'beauty',css:'saturate(1.06) brightness(1.04)',emo:'🧖',proc:'smooth'},
+ {id:'blush',n:'Blush',ur:'سرخی',cat:'beauty',css:'saturate(1.15)',emo:'🌸',ov:'blush'},
  // --- Cinematic (10) ---
  {id:'vintage',n:'Vintage Film',ur:'ونٹیج',cat:'cine',css:'sepia(0.45) contrast(1.08) brightness(0.96) saturate(0.85)',emo:'🎞️',ov:'vignette'},
  {id:'retro',n:'Retro',ur:'ریٹرو',cat:'cine',css:'sepia(0.6) saturate(0.7) contrast(1.1) brightness(1.02)',emo:'📼',ov:'vignette'},
@@ -389,6 +442,8 @@ const FILTERS=[
  {id:'f_funny',n:'Funny Face',ur:'مزاحیہ',cat:'face',css:'saturate(1.3)',emo:'🤪',kind:'canvas',face:'funny'},
  {id:'f_beautypro',n:'Beauty Pro',ur:'بیوٹی پرو',cat:'face',css:'none',emo:'💆',kind:'canvas',face:'beautypro'},
  {id:'f_eyeglow',n:'Eye Glow',ur:'آنکھوں کی چمک',cat:'face',css:'none',emo:'🌟',kind:'canvas',face:'eyeglow'},
+ {id:'f_bunny',n:'Bunny',ur:'خرگوش',cat:'face',css:'saturate(1.12)',emo:'🐰',kind:'canvas',face:'bunny'},
+ {id:'f_butterfly',n:'Butterflies',ur:'تتلیاں',cat:'face',css:'saturate(1.12)',emo:'🦋',kind:'canvas',face:'butterfly'},
 ];
 const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس'],['face','😎 Face','چہرہ']];
 let curFilter=FILTERS[0], curCat='beauty';
@@ -615,6 +670,41 @@ function facePaint(c,lm,W,H,kind,t){
   }
   return;
  }
+ if(kind==='bunny'){
+  /* 2D landmark-tracked bunny ears + nose + whiskers */
+  const top=avgPt(lm,[10],W,H),nose=avgPt(lm,[1],W,H);
+  const ew=eyeDist,earL=ew*0.55,earH=ew*1.15;
+  const sway=Math.sin(t*2.2)*ew*0.03;
+  c.save();
+  const ear=(bx,tilt)=>{c.save();c.translate(bx+sway,top[1]-earH*0.28);c.rotate(tilt);
+   c.fillStyle='#f5f0e8';c.strokeStyle='#d9c8b8';c.lineWidth=Math.max(1.5,ew*0.02);
+   c.beginPath();c.ellipse(0,-earH*0.42,earL*0.32,earH*0.42,0,0,7);c.fill();c.stroke();
+   c.fillStyle='#f7b8c4';
+   c.beginPath();c.ellipse(0,-earH*0.42,earL*0.16,earH*0.26,0,0,7);c.fill();
+   c.restore();};
+  ear(top[0]-ew*0.42,-0.12);ear(top[0]+ew*0.42,0.12);
+  c.fillStyle='#f49ac1';
+  c.beginPath();c.arc(nose[0],nose[1],ew*0.07,0,7);c.fill();
+  c.strokeStyle='rgba(60,60,70,0.7)';c.lineWidth=Math.max(1,ew*0.012);
+  [-1,1].forEach(s=>{for(let i=0;i<3;i++){const y=nose[1]+ew*0.16+i*ew*0.07;
+   c.beginPath();c.moveTo(nose[0]+s*ew*0.1,y);c.lineTo(nose[0]+s*ew*0.55,y+ew*0.03*(i-1));c.stroke();}});
+  c.restore();return;
+ }
+ if(kind==='butterfly'){
+  /* 2D landmark-tracked butterflies fluttering around the head */
+  const box=faceBox(lm,W,H);const bw=box[2]-box[0],bh=box[3]-box[1];
+  c.save();c.textAlign='center';c.textBaseline='middle';
+  for(let i=0;i<5;i++){
+   const cyc=(t*0.35+i*0.2)%1;
+   const x=box[0]+bw*(0.1+0.8*((i*0.618)%1));
+   const y=box[1]-bh*0.1-cyc*bh*0.7;
+   const s=bw*0.11*(0.8+0.2*Math.sin(t*6+i));
+   const flap=0.4+0.6*Math.abs(Math.sin(t*8+i*1.3));
+   c.globalAlpha=0.92;c.font=s+'px serif';
+   c.save();c.translate(x,y);c.scale(flap,1);c.fillText('🦋',0,0);c.restore();
+  }
+  c.restore();return;
+ }
 }
 function paintFace(c,lm,W,H,kind,t){
  if(!lm)return false;
@@ -629,13 +719,45 @@ function updateFaceHint(){
  else if(!faceLm||performance.now()-faceTs>1800)el.textContent=LANG==='ur'?'🙂 چہرہ سامنے لائیں':'🙂 Show your face';
  else el.style.display='none';
 }
-function drawVideoCover(c,W,H){
+function drawVideoCover(c,W,H,css){
  const vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return false;
  const s=Math.max(W/vw,H/vh),dw=vw*s,dh=vh*s;
  c.save();
+ if(css&&css!=='none')c.filter=css;
  if(FMIRROR()){c.translate(W,0);c.scale(-1,1);}
  c.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);
  c.restore();return true;
+}
+/* real whole-frame soft-focus smoothing (honest: not skin-segmented) */
+let skinTmp=null;
+function smoothLive(c,w,h){
+ try{
+  if(!skinTmp)skinTmp=document.createElement('canvas');
+  const sw=Math.max(96,w>>2),sh=Math.max(96,h>>2);
+  if(skinTmp.width!==sw||skinTmp.height!==sh){skinTmp.width=sw;skinTmp.height=sh;}
+  skinTmp.getContext('2d').drawImage(c.canvas,0,0,sw,sh);
+  c.save();c.globalAlpha=0.45;c.filter='blur(2px)';
+  c.drawImage(skinTmp,0,0,w,h);c.restore();c.filter='none';
+ }catch(e){}
+}
+/* blush: landmark-tracked cheeks when a face is found, else a subtle tint (never faked) */
+function paintBlush(c,w,h,lm){
+ try{
+  if(lm){
+   const LE=avgPt(lm,[33,133,159,145,153,144],w,h),RE=avgPt(lm,[362,263,386,374,380,373],w,h);
+   const ed=Math.hypot(RE[0]-LE[0],RE[1]-LE[1]);
+   [[LE,-1],[RE,1]].forEach(([E,s])=>{
+    const cx=E[0]+s*ed*0.28,cy=E[1]+ed*0.5,r=ed*0.32;
+    const g=c.createRadialGradient(cx,cy,1,cx,cy,r);
+    g.addColorStop(0,'rgba(255,110,150,0.35)');g.addColorStop(1,'rgba(255,110,150,0)');
+    c.fillStyle=g;c.beginPath();c.arc(cx,cy,r,0,7);c.fill();
+   });
+  }else{
+   const g=c.createLinearGradient(0,0,0,h);
+   g.addColorStop(0,'rgba(255,120,160,0)');g.addColorStop(1,'rgba(255,120,160,0.10)');
+   c.fillStyle=g;c.fillRect(0,0,w,h);
+  }
+ }catch(e){}
 }
 /* ---- canvas FX (for capture / filtered video) ---- */
 function applyCanvasFX(src,dst,fxid){
@@ -702,6 +824,7 @@ function applyLang(){
  $('langsw').classList.toggle('on',LANG==='ur');
  document.documentElement.dir=LANG==='ur'?'rtl':'ltr';
  buildFilterUI();
+ if($('scr-flt').classList.contains('on'))buildFiltersScreen();
 }
 function toggleLang(){LANG=LANG==='en'?'ur':'en';localStorage.setItem('jsc_lang',LANG);applyLang();toast(LANG==='ur'?'اردو':'English');}
 
@@ -785,15 +908,24 @@ function startFxLoop(){if(fxRun)return;fxRun=true;
    const w=fx.width=fx.clientWidth,h=fx.height=fx.clientHeight;
    fxc.clearRect(0,0,w,h);
    const f=curFilter,t=performance.now()/1000;
-   if(f.face){
-    /* face filter: render video frame to canvas (cover-fit), then landmark overlays */
-    if(drawVideoCover(fxc,w,h)){
+   const doSmooth=f.proc==='smooth';
+   const needCanvas=doSmooth||!!f.face;
+   v.style.opacity=needCanvas?'0':'';
+   if(needCanvas){
+    /* canvas-processed live preview: video frame -> canvas, then REAL processing */
+    if(drawVideoCover(fxc,w,h,f.css)){
+     if(doSmooth)smoothLive(fxc,w,h);
      detectFace();
-     if(faceLm)paintFace(fxc,faceLm,w,h,f.face,t);
-     updateFaceHint();
+     if(f.face&&faceLm)paintFace(fxc,faceLm,w,h,f.face,t);
+     if(f.ov==='blush')paintBlush(fxc,w,h,faceLm);
+     else if(f.ov)paintOverlay(fxc,w,h,t,f.ov);
     }
-   }else if(f.ov){paintOverlay(fxc,w,h,t,f.ov);updateFaceHint();}
-   else{updateFaceHint();}
+    updateFaceHint();
+   }else if(f.ov){
+    if(f.ov==='blush'){detectFace();paintBlush(fxc,w,h,faceLm);}
+    else paintOverlay(fxc,w,h,t,f.ov);
+    updateFaceHint();
+   }else{updateFaceHint();}
   }catch(e){}
   requestAnimationFrame(loop);};
  loop();}
@@ -801,6 +933,27 @@ function startFxLoop(){if(fxRun)return;fxRun=true;
 function applyLiveFilter(){
  v.style.filter=(curFilter.css&&curFilter.css!=='none')?curFilter.css:'';
  partKind=''; /* reset particles */
+}
+
+/* ---- dedicated Filters screen ---- */
+let fltCat='beauty';
+function buildFiltersScreen(){
+ const cc=$('fltcat');cc.innerHTML='';
+ CATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
+  b.className='fcatchip'+(id===fltCat?' on':'');b.textContent=LANG==='ur'?ur:n;
+  b.onclick=()=>{fltCat=id;buildFiltersScreen();};cc.appendChild(b);});
+ const gr=$('fltgrid');gr.innerHTML='';
+ FILTERS.filter(f=>f.cat===fltCat).forEach(f=>{
+  const d=document.createElement('div');d.className='fltcard'+(f.id===curFilter.id?' on':'');
+  d.innerHTML=`<div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div><span>${LANG==='ur'?f.ur:f.n}</span>`;
+  d.onclick=()=>selectFilter(f);
+  gr.appendChild(d);});
+}
+function selectFilter(f){
+ curFilter=f;applyLiveFilter();buildFilterUI();
+ if($('scr-flt').classList.contains('on'))buildFiltersScreen();
+ if(f.face)ensureFace();
+ toast((LANG==='ur'?f.ur:f.n)+' ✓');
 }
 
 /* ---- filter UI ---- */
@@ -838,8 +991,11 @@ function drawFilteredFrame(canvas){
    if(f.css&&f.css!=='none')c.filter=f.css;
    c.drawImage(v,0,0,w,h);c.filter='none';
  }
- if(f.ov)paintOverlay(c,w,h,performance.now()/1000,f.ov);
- if(f.face){detectFace();if(faceLm)paintFace(c,faceLm,w,h,f.face,performance.now()/1000);}
+ if(f.proc==='smooth')smoothLive(c,w,h);
+ if(f.face||f.ov==='blush')detectFace();
+ if(f.face&&faceLm)paintFace(c,faceLm,w,h,f.face,performance.now()/1000);
+ if(f.ov==='blush')paintBlush(c,w,h,faceLm);
+ else if(f.ov)paintOverlay(c,w,h,performance.now()/1000,f.ov);
  /* front camera mirror already handled: video element mirrored, drawImage captures unmirrored;
     mirror it for selfie consistency */
  if(curFacing==='user'&&v.classList.contains('mirror')){
@@ -1086,43 +1242,122 @@ function closeEditor(){
 /* ================= GALLERY (IndexedDB) ================= */
 let db=null;
 function dbOpen(){return new Promise((res,rej)=>{
- const r=indexedDB.open('jsc_gallery',1);
- r.onupgradeneeded=()=>{r.result.createObjectStore('media',{keyPath:'id',autoIncrement:true});};
+ const r=indexedDB.open('jsc_gallery',2);
+ r.onupgradeneeded=()=>{
+  if(!r.result.objectStoreNames.contains('media'))
+   r.result.createObjectStore('media',{keyPath:'id',autoIncrement:true});
+  /* v1 -> v2: existing records keep working; album/fav/deleted read with fallbacks */
+ };
  r.onsuccess=()=>{db=r.result;res(db);};r.onerror=()=>rej(r.error);});}
+function dbPut(rec){return new Promise(res=>{const tx=db.transaction('media','readwrite');
+ tx.objectStore('media').put(rec);tx.oncomplete=()=>res();});}
+function dbDel(id){return new Promise(res=>{const tx=db.transaction('media','readwrite');
+ tx.objectStore('media').delete(id);tx.oncomplete=()=>res();});}
 async function saveMedia(blob,kind,dur){
  await dbOpen();
- return new Promise(res=>{
+ const alb=(curAlbum&&curAlbum!=='__all'&&curAlbum!=='__trash')?curAlbum:'Camera';
+ await new Promise(res=>{
   const tx=db.transaction('media','readwrite');
-  tx.objectStore('media').add({blob,kind,ts:Date.now(),dur:dur||0});
-  tx.oncomplete=()=>{res();refreshSettings();if($('scr-gal').classList.contains('on'))loadGallery();};
- });
+  tx.objectStore('media').add({blob,kind,ts:Date.now(),dur:dur||0,album:alb,fav:0,deleted:0});
+  tx.oncomplete=()=>res();});
+ refreshSettings();if($('scr-gal').classList.contains('on'))loadGallery();
 }
 function dbAll(){return new Promise(res=>{if(!db){res([]);return;}
  const out=[];const rq=db.transaction('media').objectStore('media').openCursor(null,'prev');
  rq.onsuccess=()=>{const c=rq.result;if(c){out.push({id:c.key,...c.value});c.continue();}else res(out);};});}
+/* ---- gallery state: albums + trash ---- */
+let curAlbum='__all'; /* '__all' | album name | '__trash' */
+const albumName=it=>(it&&it.album)||'Camera';
+const TRASH_DAYS=30;
+async function purgeTrash(){
+ /* permanently remove trash older than TRASH_DAYS */
+ try{
+  const items=await dbAll();const cut=Date.now()-TRASH_DAYS*864e5;
+  for(const it of items){if(it.deleted&&it.deletedTs&&it.deletedTs<cut){await dbDel(it.id);}}
+ }catch(e){}
+}
 async function loadGallery(){
- await dbOpen();const items=await dbAll();
+ await dbOpen();await purgeTrash();
+ const items=await dbAll();
+ const trash=curAlbum==='__trash';
+ const list=items.filter(it=>trash?!!it.deleted:!it.deleted)
+  .filter(it=>trash||curAlbum==='__all'||albumName(it)===curAlbum);
  const g=$('galgrid');g.innerHTML='';
- if(!items.length){g.innerHTML=`<div class="gempty">📷<br>${LANG==='ur'?'ابھی کوئی میڈیا نہیں':'No media yet'}</div>`;return;}
- items.forEach(it=>{
+ const note=$('galnote');
+ $('galtitle').textContent=trash?'🗑️ Recently Deleted':(curAlbum==='__all'?'🖼️ My Media':'📁 '+curAlbum);
+ if(trash){
+  note.style.display='block';
+  note.textContent=(LANG==='ur'?'کوڑا دان صرف اس ایپ کے اندر ہے':'Trash is inside this app only')
+   +` • ${TRASH_DAYS} `+(LANG==='ur'?'دن بعد خود ڈیلیٹ':'days auto-delete');
+ }else{note.style.display='none';}
+ if(!list.length){
+  g.innerHTML=`<div class="gempty">📷<br>${trash
+   ?(LANG==='ur'?'کوڑا دان خالی ہے':'Trash is empty')
+   :(LANG==='ur'?'ابھی کوئی میڈیا نہیں':'No media yet')}
+   ${!trash?`<br><br><button class="abtn pri" style="max-width:240px;margin:0 auto" onclick="goHome()">📷 ${LANG==='ur'?'کیمرہ کھولیں':'Open Camera'}</button>`:''}</div>`;
+  return;
+ }
+ list.forEach(it=>{
   const d=document.createElement('div');d.className='gitem';
   const url=URL.createObjectURL(it.blob);
   if(it.kind==='video'){d.innerHTML=`<video src="${url}" preload="metadata" muted playsinline></video>
    <span class="vdur">🎥 ${it.dur||0}s</span>`;}
   else{d.innerHTML=`<img src="${url}" loading="lazy">`;}
+  if(it.fav&&!trash){const s=document.createElement('span');s.className='favb';s.textContent='⭐';d.appendChild(s);}
   d.onclick=()=>openViewer(it);
   g.appendChild(d);
  });
 }
+/* ---- albums sheet ---- */
+async function openAlbums(){
+ await dbOpen();const items=await dbAll();
+ const live=items.filter(i=>!i.deleted),trashN=items.filter(i=>i.deleted).length;
+ const counts={};live.forEach(i=>{const a=albumName(i);counts[a]=(counts[a]||0)+1;});
+ const L=$('albumlist');L.innerHTML='';
+ const row=(label,count,key,icon)=>{
+  const b=document.createElement('button');
+  b.className='arow'+(curAlbum===key?' cur':'');
+  b.innerHTML=`<span>${icon}</span><span>${label}</span><span class="cnt">${count}</span>`;
+  b.onclick=()=>{curAlbum=key;closeAlbums();loadGallery();};
+  L.appendChild(b);};
+ row(LANG==='ur'?'تمام میڈیا':'All Media',live.length,'__all','🖼️');
+ Object.keys(counts).sort().forEach(a=>row(a,counts[a],a,'📁'));
+ const t=document.createElement('button');t.className='arow'+(curAlbum==='__trash'?' cur':'');
+ t.innerHTML=`<span>🗑️</span><span>${LANG==='ur'?'حال ہی میں ڈیلیٹ شدہ':'Recently Deleted'}</span><span class="cnt">${trashN}</span>`;
+ t.onclick=()=>{curAlbum='__trash';closeAlbums();loadGallery();};L.appendChild(t);
+ const nb=document.createElement('button');nb.className='arow';
+ nb.innerHTML=`<span>➕</span><span>${LANG==='ur'?'نیا البم':'New Album'}</span><span class="cnt"></span>`;
+ nb.onclick=async()=>{closeAlbums();
+  const name=await dlg(LANG==='ur'?'نیا البم':'New Album',LANG==='ur'?'البم کا نام':'Album name','Create',true);
+  if(name&&name.trim()){curAlbum=name.trim().slice(0,24);loadGallery();
+   toast('📁 '+curAlbum);}};
+ L.appendChild(nb);
+ $('albumsheet').classList.add('on');
+}
+function closeAlbums(){$('albumsheet').classList.remove('on');}
 /* ---- viewer ---- */
 let curItem=null;
+function viewerBarTrash(){
+ $('vbar').innerHTML=
+  `<button class="abtn pri" style="flex:1" onclick="viewerRestore()">♻️ ${LANG==='ur'?'بحال کریں':'Restore'}</button>
+   <button class="abtn sec" style="flex:1;background:#5b1f2a" onclick="viewerDelete()">🗑️ ${LANG==='ur'?'مستقل ڈیلیٹ':'Delete Forever'}</button>`;
+}
+function viewerBarNormal(){
+ $('vbar').innerHTML=
+  `<button class="abtn sec" onclick="viewerShare()">📤 ${LANG==='ur'?'شیئر':'Share'}</button>
+   <button class="abtn sec" onclick="viewerFav()" id="vwFav">${curItem&&curItem.fav?'🌟':'⭐'}</button>
+   <button class="abtn sec" onclick="viewerDetails()">ℹ️</button>
+   ${curItem&&curItem.kind==='photo'?`<button class="abtn sec" onclick="viewerEdit()">✏️</button>`:''}
+   <button class="abtn sec" onclick="viewerDownload()">💾</button>
+   <button class="abtn sec" style="background:#5b1f2a" onclick="viewerDelete()">🗑️</button>`;
+}
 async function openViewer(it){
  curItem=it;const st=$('vstage');st.innerHTML='';
  const url=URL.createObjectURL(it.blob);
  $('vwt').textContent=new Date(it.ts).toLocaleString();
- if(it.kind==='video'){st.innerHTML=`<video src="${url}" controls playsinline style="max-height:100%"></video>`;
-  $('vwEdit').style.display='none';}
- else{st.innerHTML=`<img src="${url}">`;$('vwEdit').style.display='';}
+ if(it.kind==='video'){st.innerHTML=`<video src="${url}" controls playsinline style="max-height:100%"></video>`;}
+ else{st.innerHTML=`<img src="${url}">`;}
+ if(curAlbum==='__trash')viewerBarTrash();else viewerBarNormal();
  $('viewer').classList.add('on');
 }
 function closeViewer(){$('viewer').classList.remove('on');$('vstage').innerHTML='';curItem=null;}
@@ -1130,9 +1365,10 @@ function viewerDownload(){
  if(!curItem)return;
  const ext=curItem.kind==='video'?'webm':'jpg';
  const name=`jsc_${curItem.ts}.${ext}`;
- if(androidSave&&window.Android&&Android.saveMedia){
+ if(window.Android&&Android.saveMedia){
   const fr=new FileReader();
-  fr.onload=()=>{if(androidSave(fr.result,name,curItem.kind==='video'?'video/webm':'image/jpeg'))toast('💾 ✓');};
+  fr.onload=()=>{try{if(Android.saveMedia(fr.result,name,curItem.kind==='video'?'video/webm':'image/jpeg')){toast('💾 ✓');return;}}catch(e){}
+   download(curItem.blob,name);};
   fr.readAsDataURL(curItem.blob);return;
  }
  download(curItem.blob,name);
@@ -1152,13 +1388,59 @@ function viewerEdit(){
  if(!curItem||curItem.kind!=='photo')return;
  closeViewer();openEditor(curItem.blob,'photo');
 }
+async function viewerFav(){
+ if(!curItem)return;
+ await dbOpen();
+ curItem.fav=curItem.fav?0:1;
+ await dbPut(curItem);
+ const b=$('vwFav');if(b)b.textContent=curItem.fav?'🌟':'⭐';
+ loadGallery();
+ toast(curItem.fav?'⭐':'');
+}
+function imgDims(blob){return new Promise(res=>{
+ const u=URL.createObjectURL(blob);const im=new Image();
+ im.onload=()=>{res(im.width+'×'+im.height);URL.revokeObjectURL(u);};
+ im.onerror=()=>res('—');im.src=u;});}
+async function viewerDetails(){
+ if(!curItem)return;
+ const it=curItem;
+ const size=it.blob.size>1048576?(it.blob.size/1048576).toFixed(1)+' MB':Math.round(it.blob.size/1024)+' KB';
+ const dims=it.kind==='video'?`🎥 ${it.dur||0}s`:(await imgDims(it.blob))+' px';
+ const info=(LANG==='ur'?'نام: ':'Name: ')+`jsc_${it.ts}.${it.kind==='video'?'webm':'jpg'}`+'\n'
+  +(LANG==='ur'?'قسم: ':'Type: ')+(it.kind==='video'?'Video':'Photo')+'\n'
+  +(LANG==='ur'?'تاریخ: ':'Date: ')+new Date(it.ts).toLocaleString()+'\n'
+  +(LANG==='ur'?'سائز: ':'Size: ')+size+'\n'
+  +(LANG==='ur'?'پیمائش: ':'Dimensions: ')+dims+'\n'
+  +(LANG==='ur'?'البم: ':'Album: ')+albumName(it);
+ await dlg('ℹ️ '+(LANG==='ur'?'تفصیل':'Details'),info,'OK');
+}
 async function viewerDelete(){
  if(!curItem)return;
- const ok=await dlg(LANG==='ur'?'ڈیلیٹ کریں؟':'Delete?',LANG==='ur'?'یہ میڈیا ڈیلیٹ ہو جائے گا':'This media will be deleted','Delete');
- if(!ok)return;
  await dbOpen();
- const tx=db.transaction('media','readwrite');tx.objectStore('media').delete(curItem.id);
- tx.oncomplete=()=>{closeViewer();loadGallery();refreshSettings();toast('🗑️');};
+ if(curAlbum==='__trash'){
+  const ok=await dlg(LANG==='ur'?'مستقل ڈیلیٹ؟':'Delete forever?',
+   LANG==='ur'?'یہ واپس نہیں آئے گا':'This cannot be undone','Delete');
+  if(!ok)return;
+  await dbDel(curItem.id);
+  toast('🗑️');
+ }else{
+  const ok=await dlg(LANG==='ur'?'ڈیلیٹ کریں؟':'Move to trash?',
+   LANG==='ur'?'یہ میڈیا کوڑا دان میں جائے گا (30 دن تک بحال ہو سکتا ہے)':'Media moves to Trash (restorable for 30 days)',
+   LANG==='ur'?'کوڑا دان':'Move to Trash');
+  if(!ok)return;
+  curItem.deleted=1;curItem.deletedTs=Date.now();
+  await dbPut(curItem);
+  toast('🗑️ '+(LANG==='ur'?'کوڑا دان میں گیا':'Moved to Trash'));
+ }
+ closeViewer();loadGallery();refreshSettings();
+}
+async function viewerRestore(){
+ if(!curItem)return;
+ await dbOpen();
+ curItem.deleted=0;delete curItem.deletedTs;
+ await dbPut(curItem);
+ toast('♻️ '+(LANG==='ur'?'بحال ہوگیا':'Restored'));
+ closeViewer();loadGallery();refreshSettings();
 }
 /* ---- import ---- */
 function importPhoto(){$('fileimp').click();}
@@ -1194,6 +1476,7 @@ function renderScreen(s){
  if(s==='cam'){$('scr-cam').classList.add('on');}
  if(s==='gal'){$('scr-gal').classList.add('on');loadGallery();}
  if(s==='set'){$('scr-set').classList.add('on');refreshSettings();}
+ if(s==='flt'){$('scr-flt').classList.add('on');buildFiltersScreen();}
  if(s==='ed'){$('scr-ed').classList.add('on');setTimeout(fitEditorCanvas,80);}
  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
 }
@@ -1201,12 +1484,14 @@ function go(s){
  if(curScreen()===s){renderScreen(s);return;}
  navStack.push(s);renderScreen(s);
 }
-/* goBack: viewer -> dialog -> previous screen -> exit confirm (root only) */
+function goHome(){navStack=['cam'];renderScreen('cam');}
+/* goBack: viewer -> albums sheet -> dialog -> previous screen -> exit confirm (root only) */
 let _backBusy=false;
 function goBack(){
  if(_backBusy)return;_backBusy=true;
  setTimeout(()=>{_backBusy=false;},400);
  if($('viewer').classList.contains('on')){closeViewer();return;}
+ if($('albumsheet').classList.contains('on')){closeAlbums();return;}
  if($('dlg').classList.contains('on')){$('dlg').classList.remove('on');return;}
  if(navStack.length>1){navStack.pop();renderScreen(curScreen());return;}
  askExit();
@@ -1220,6 +1505,7 @@ async function askExit(){
 /* called by Android native back button; JS owns the decision */
 window.__jilanBack=function(){
  if($('viewer').classList.contains('on')){closeViewer();return;}
+ if($('albumsheet').classList.contains('on')){closeAlbums();return;}
  if($('dlg').classList.contains('on')){$('dlg').classList.remove('on');return;}
  if(navStack.length>1){navStack.pop();renderScreen(curScreen());return;}
  askExit();
