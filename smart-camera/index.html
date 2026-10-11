@@ -72,12 +72,33 @@ button{font-family:inherit}
 .fcatchip.on{background:var(--grad);border-color:transparent;font-weight:700}
 #frow{display:flex;gap:10px;padding:2px 12px 6px;overflow-x:auto;scrollbar-width:none}
 #frow::-webkit-scrollbar{display:none}
-.fthumb{flex:0 0 auto;width:64px;text-align:center;cursor:pointer}
-.fthumb .im{width:60px;height:60px;border-radius:14px;overflow:hidden;border:2px solid transparent;
-  background:linear-gradient(135deg,#3b3b6e,#23234a);position:relative}
-.fthumb.on .im{border-color:#fff;box-shadow:0 0 12px rgba(236,72,153,.8)}
-.fthumb .im .demo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px}
+.fthumb{flex:0 0 auto;width:68px;text-align:center;cursor:pointer}
+.fthumb .im{width:62px;height:62px;border-radius:50%;overflow:hidden;border:2px solid transparent;
+  background:linear-gradient(135deg,#3b3b6e,#23234a);position:relative;margin:0 auto}
+.fthumb.on .im{border-color:#fff;box-shadow:0 0 14px rgba(236,72,153,.9)}
+.fthumb .im .demo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px}
 .fthumb span{font-size:10px;color:#d7d9e8;display:block;margin-top:3px;line-height:1.25;height:26px;overflow:hidden}
+.fthumb .favbtn{position:absolute;top:-2px;right:2px;width:22px;height:22px;border-radius:50%;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1}
+.fthumb .favbtn.faved{color:#ff4d6d;border-color:#ff4d6d}
+/* camera-switch transition status */
+#switchstat{position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:20;display:none;
+  background:rgba(0,0,0,.78);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:22px;
+  border:1px solid rgba(236,72,153,.5)}
+#switchstat.on{display:block}
+/* video preview modal */
+#vidprev{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);padding:20px}
+#vidprev.on{display:flex}
+#vidprev .box{background:#1c1c2e;border-radius:18px;max-width:420px;width:100%;padding:16px;
+  border:1px solid rgba(255,255,255,.12)}
+#vidprev video{width:100%;border-radius:12px;background:#000;max-height:52vh}
+#vidprev .meta{color:#cfd2e6;font-size:13px;margin:10px 2px}
+#vidprev .row{display:flex;gap:10px;margin-top:10px}
+/* recording pause button */
+#btnPauseRec{display:none}
+#btnPauseRec.on{display:flex}
 /* camera controls */
 #camctl{position:absolute;left:0;right:0;bottom:0;z-index:13;padding:10px 18px 14px;
   padding-bottom:max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));
@@ -211,6 +232,7 @@ button{font-family:inherit}
     <button id="camback" class="iconbtn" onclick="goBack()" title="Back" aria-label="Back">←</button>
     <div id="facestat"></div>
     <div id="recind"><span class="recdot"></span><span id="rectime">00:00</span></div>
+    <div id="switchstat">📷</div>
     <div id="focusring"></div>
     <div id="cammsg" style="display:none"><div class="big">📷</div><div id="cammsgtxt" style="font-size:15px;color:#cfd2e6"></div>
       <button class="abtn pri" style="max-width:240px" onclick="startCamera()">Camera Kholein</button></div>
@@ -223,6 +245,7 @@ button{font-family:inherit}
       <div class="sidebtns">
         <button class="iconbtn" id="btnGalleryMini" onclick="go('gal')" title="Gallery">🖼️</button>
         <button class="iconbtn" id="btnFlash" onclick="toggleTorch()" title="Flash">⚡</button>
+        <button class="iconbtn" id="btnPauseRec" onclick="toggleRecPause()" title="Pause/Resume">⏸️</button>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center">
         <button id="shutter" onclick="shutterPress()"></button>
@@ -317,7 +340,7 @@ button{font-family:inherit}
       <div class="setrow"><span>Used space</span><b id="stsize">0 KB</b></div>
       <div class="setrow"><span>Clear all media</span><button class="abtn sec" style="flex:0 0 auto;padding:8px 18px" onclick="clearAllMedia()">Clear</button></div>
     </div>
-    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.3</h3>
+    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.4</h3>
       <p style="color:var(--mut);font-size:13px;line-height:1.7;margin:0">
       <span data-i18n="about1">Face filters use real face landmarks (2D overlays, not 3D AR). Face AI loads on first use — internet required once.</span><br>
       <span data-i18n="about2">Photos/videos sirf aapke phone me rehti hain, kahin upload nahi hotin.</span></p>
@@ -345,6 +368,16 @@ button{font-family:inherit}
 <div class="row"><button class="abtn sec" id="dlgb1">Cancel</button><button class="abtn pri" id="dlgb2">OK</button></div></div></div>
 <input type="file" id="fileimp" accept="image/*" style="display:none">
 <canvas id="work" style="display:none"></canvas>
+<!-- video preview after recording -->
+<div id="vidprev"><div class="box">
+  <h3 style="margin:0 0 10px;color:#fff" id="vph">🎥 Video Preview</h3>
+  <video id="vpvid" controls playsinline></video>
+  <div class="meta" id="vpmeta"></div>
+  <div class="row">
+    <button class="abtn sec" id="vpdiscard" style="flex:1">🗑️ Discard</button>
+    <button class="abtn pri" id="vpsave" style="flex:1">💾 Save</button>
+  </div>
+</div></div>
 
 <script>
 'use strict';
@@ -446,7 +479,63 @@ const FILTERS=[
  {id:'f_butterfly',n:'Butterflies',ur:'تتلیاں',cat:'face',css:'saturate(1.12)',emo:'🦋',kind:'canvas',face:'butterfly'},
 ];
 const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس'],['face','😎 Face','چہرہ']];
-let curFilter=FILTERS[0], curCat='beauty';
+let curFilter=FILTERS[0], curCat='foryou';
+
+/* ============ SNAPCHAT-STYLE CATEGORY SYSTEM ============
+   Extra category membership (filter id -> new-category ids).
+   'foryou' is a curated mix; 'fav' is user favorites (dynamic);
+   'recent' handled separately via localStorage. */
+const NEWCATS=[
+ ['foryou','✨ For You','آپ کے لیے'],
+ ['beauty','💄 Beauty','بیوٹی'],
+ ['cute','🐰 Cute','کیوٹ'],
+ ['aesthetic','🌸 Aesthetic','ایستھیٹک'],
+ ['cine','🎬 Cinematic','سنیما'],
+ ['color','🌈 Colorful','رنگین'],
+ ['funny','😜 Funny','مزاحیہ'],
+ ['nature','🌿 Nature','فطرت'],
+ ['fav','❤️ Favorites','پسندیدہ']
+];
+const CATX={
+ foryou:['natural','softskin','glow','rosy','warmb','f_bunny','sparkle','vintage','cinewarm','pinkglow','hearts','golden','dreamy','pastel','f_butterfly','blush'],
+ cute:['f_dog','f_bunny','f_butterfly','f_hearts','f_angel','f_bigeyes','blush','rosy','hearts','sparkle','pastel','smooth'],
+ aesthetic:['pastel','dreamy','golden','glow','matte','pinkglow','purpledream','sunset','faded','lightleak','softskin','natural'],
+ funny:['f_funny','f_bigeyes','cartoon','comic','glitch','fisheye','mirror','pixel','f_dog','dramatic'],
+ nature:['nature','ocean','sunset','snow','rainbow','golden','stars','night']
+};
+const FILT_BY_ID={};FILTERS.forEach(f=>{FILT_BY_ID[f.id]=f;});
+function filtersForCat(c){
+ if(c==='fav')return loadFavs().map(id=>FILT_BY_ID[id]).filter(Boolean);
+ const ids=CATX[c]||[];
+ const base=FILTERS.filter(f=>f.cat===(c==='foryou'?'beauty':c));
+ const seen={};const out=[];
+ ids.forEach(id=>{const f=FILT_BY_ID[id];if(f&&!seen[id]){seen[id]=1;out.push(f);}});
+ base.forEach(f=>{if(!seen[f.id]){seen[f.id]=1;out.push(f);}});
+ if(c==='foryou'){
+  /* Recently used first */
+  const rec=loadRecent().map(id=>FILT_BY_ID[id]).filter(Boolean);
+  const rid={};rec.forEach(f=>rid[f.id]=1);
+  return rec.concat(out.filter(f=>!rid[f.id]));
+ }
+ return out;
+}
+/* ---- favorites (persistent) ---- */
+function loadFavs(){try{const a=JSON.parse(localStorage.getItem('jsc_favs')||'[]');return Array.isArray(a)?a.filter(id=>FILT_BY_ID[id]):[];}catch(e){return[];}}
+function saveFavs(a){try{localStorage.setItem('jsc_favs',JSON.stringify(a));}catch(e){}}
+function isFav(id){return loadFavs().indexOf(id)>=0;}
+function toggleFav(id){
+ let a=loadFavs();const i=a.indexOf(id);
+ if(i>=0)a.splice(i,1);else a.unshift(id);
+ saveFavs(a);buildFilterUI();
+ if($('scr-flt').classList.contains('on'))buildFiltersScreen();
+ toast((i>=0?(LANG==='ur'?'پسندیدہ سے ہٹایا':'Removed from favorites'):(LANG==='ur'?'پسندیدہ میں شامل':'Added to favorites'))+' '+(i>=0?'💔':'❤️'));
+}
+/* ---- recently used (persistent, max 12) ---- */
+function loadRecent(){try{const a=JSON.parse(localStorage.getItem('jsc_recent')||'[]');return Array.isArray(a)?a.filter(id=>FILT_BY_ID[id]).slice(0,12):[];}catch(e){return[];}}
+function pushRecent(id){
+ try{let a=loadRecent().filter(x=>x!==id);a.unshift(id);a=a.slice(0,12);
+ localStorage.setItem('jsc_recent',JSON.stringify(a));}catch(e){}
+}
 
 /* ---- overlay painters (ctx,w,h,t) ---- */
 const OV={
@@ -876,7 +965,10 @@ function setupDeviceCaps(){
   else{$('zoomrow').style.display='none';zoomCap=null;}
  }catch(e){}
 }
-async function switchCamera(){curFacing=curFacing==='user'?'environment':'user';await startCamera();}
+async function switchCamera(){
+ if(isRecording()&&!recSwitching){await switchCameraDuringRec();return;}
+ if(recSwitching)return;
+ curFacing=curFacing==='user'?'environment':'user';await startCamera();}
 async function toggleTorch(){
  try{const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};
   if(!cap.torch){toast('⚡ '+(LANG==='ur'?'فلیش سپورٹ نہیں':'No flash support'));return;}
@@ -952,34 +1044,54 @@ function applyLiveFilter(){
 let fltCat='beauty';
 function buildFiltersScreen(){
  const cc=$('fltcat');cc.innerHTML='';
- CATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
+ NEWCATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
   b.className='fcatchip'+(id===fltCat?' on':'');b.textContent=LANG==='ur'?ur:n;
   b.onclick=()=>{fltCat=id;buildFiltersScreen();};cc.appendChild(b);});
  const gr=$('fltgrid');gr.innerHTML='';
- FILTERS.filter(f=>f.cat===fltCat).forEach(f=>{
+ const list=filtersForCat(fltCat);
+ if(!list.length){gr.innerHTML=`<div style="grid-column:1/-1;color:#9aa0b8;font-size:13px;text-align:center;padding:24px">${LANG==='ur'?'کوئی فلٹر نہیں':'No filters yet'}</div>`;return;}
+ list.forEach(f=>{
   const d=document.createElement('div');d.className='fltcard'+(f.id===curFilter.id?' on':'');
-  d.innerHTML=`<div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div><span>${LANG==='ur'?f.ur:f.n}</span>`;
+  const faved=isFav(f.id);
+  d.innerHTML=`<div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div><span>${LANG==='ur'?f.ur:f.n}</span>`+
+   `<div class="favbtn${faved?' faved':''}" data-fav="${f.id}" style="position:absolute;top:6px;right:6px">${faved?'❤️':'🤍'}</div>`;
+  d.style.position='relative';
+  d.querySelector('[data-fav]').onclick=(e)=>{e.stopPropagation();toggleFav(f.id);};
   d.onclick=()=>selectFilter(f);
   gr.appendChild(d);});
 }
 function selectFilter(f){
- curFilter=f;applyLiveFilter();buildFilterUI();
+ curFilter=f;pushRecent(f.id);applyLiveFilter();buildFilterUI();
  if($('scr-flt').classList.contains('on'))buildFiltersScreen();
  if(f.face)ensureFace();
  toast((LANG==='ur'?f.ur:f.n)+' ✓');
 }
 
-/* ---- filter UI ---- */
+/* ---- filter UI: Snapchat-style carousel on camera screen ---- */
 function buildFilterUI(){
  const cat=$('fcat');cat.innerHTML='';
- CATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
+ if(NEWCATS.every(c=>c[0]!==curCat))curCat='foryou';
+ NEWCATS.forEach(([id,n,ur])=>{const b=document.createElement('button');
   b.className='fcatchip'+(id===curCat?' on':'');b.textContent=LANG==='ur'?ur:n;
-  b.onclick=()=>{curCat=id;buildFilterUI();};cat.appendChild(b);});
+  b.onclick=()=>{curCat=id;buildFilterUI();
+   /* scroll selected category into view */
+   try{b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}catch(e){}};
+  cat.appendChild(b);});
  const row=$('frow');row.innerHTML='';
- FILTERS.filter(f=>f.cat===curCat).forEach(f=>{
+ const list=filtersForCat(curCat);
+ if(!list.length){
+  row.innerHTML=`<div style="color:#9aa0b8;font-size:12px;padding:14px">${LANG==='ur'?'کوئی فلٹر نہیں — دل دباکر پسندیدہ بنائیں':'No filters yet — tap ❤ on any filter to favorite it'}</div>`;
+  return;
+ }
+ list.forEach(f=>{
   const d=document.createElement('div');d.className='fthumb'+(f.id===curFilter.id?' on':'');
-  d.innerHTML=`<div class="im"><div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div></div><span>${LANG==='ur'?f.ur:f.n}</span>`;
-  d.onclick=()=>{curFilter=f;applyLiveFilter();buildFilterUI();if(f.face)ensureFace();};
+  const faved=isFav(f.id);
+  d.innerHTML=`<div class="im"><div class="demo" style="filter:${f.css&&f.css!=='none'?f.css:''}">${f.emo}</div>`+
+   `<div class="favbtn${faved?' faved':''}" data-fav="${f.id}">${faved?'❤️':'🤍'}</div></div><span>${LANG==='ur'?f.ur:f.n}</span>`;
+  d.querySelector('[data-fav]').onclick=(e)=>{e.stopPropagation();toggleFav(f.id);};
+  d.onclick=()=>{selectFilter(f);};
+  /* keep selected thumb visible */
+  if(f.id===curFilter.id)setTimeout(()=>{try{d.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}catch(e){}},60);
   row.appendChild(d);});
 }
 
@@ -1026,62 +1138,186 @@ function capturePhoto(){
  }catch(e){toast('Error: '+e.message);}
 }
 
-/* ================= VIDEO RECORDING ================= */
+/* ================= SEGMENTED VIDEO RECORDING =================
+   HONEST NOTE: A web MediaRecorder CANNOT switch camera mid-recording —
+   its source tracks would die and the file would truncate. So we record
+   SEGMENTS: every camera switch safely finalizes the current segment,
+   starts a fresh segment on the new camera, and the session timer keeps
+   running. On stop, segments merge chronologically into ONE video.
+   If merge fails, ALL segments are preserved separately (no lost footage).
+   Audio comes from each segment's own getUserMedia stream, so there are
+   no gaps or duplicates — each segment is a complete webm. */
+let recSegs=[];        /* finalized segment blobs: [{blob,mime}] */
+let recSegStart=0;     /* current segment start (ms) */
+let recSessStart=0;    /* session start for the on-screen timer (ms) */
+let recMime='video/webm';
+let recSwitching=false;
+let recPaused=false;
+let recSuspended=false; /* app went to background mid-recording */
+let segResolve=null;
+
+function isRecording(){return !!(recorder&&(recorder.state==='recording'||recorder.state==='paused'));}
+function isRecPaused(){return !!(recorder&&recorder.state==='paused');}
+
 function toggleRecording(){
- if(recorder&&recorder.state==='recording'){stopRecording();return;}
+ if(isRecording()){stopRecording();return;}
+ if(recSwitching)return;
  if(!stream){toast(t('tap'));return;}
+ startRecording();
+}
+async function startRecording(){
  try{
-  recChunks=[];
-  const f=curFilter;
-  const needsCanvas=(f.css&&f.css!=='none')||f.ov||(f.kind==='canvas');
-  let mstream;
-  if(needsCanvas){
-   /* filtered recording: render through canvas */
-   recCanvas=document.createElement('canvas');
-   recCanvas.width=v.videoWidth||1280;recCanvas.height=v.videoHeight||720;
-   recCtx=recCanvas.getContext('2d');
-   const draw=()=>{
-     if(!recCtx)return;
-     drawFilteredFrame(recCanvas);
-     recRAF=requestAnimationFrame(draw);};
-   draw();
-   recStream=recCanvas.captureStream(30);
-   /* add audio */
-   const at=stream.getAudioTracks()[0];if(at)recStream.addTrack(at);
-   mstream=recStream;
-  }else{
-   mstream=stream;
-  }
-  let mime='video/webm;codecs=vp9,opus';
-  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm;codecs=vp8,opus';
-  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
-  if(!MediaRecorder.isTypeSupported(mime))mime='';
-  recorder=new MediaRecorder(mstream,mime?{mimeType:mime,videoBitsPerSecond:8e6}:undefined);
-  recorder.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data);};
-  recorder.onstop=onRecStop;
-  recorder.start(500);
-  recStart=Date.now();
+  recSegs=[];recPaused=false;recSuspended=false;
+  await startSegment();
+  recSessStart=Date.now();
   $('recind').classList.add('on');$('shutter').classList.add('recording');
-  recTimer=setInterval(()=>{const s=((Date.now()-recStart)/1000)|0;
+  $('btnPauseRec').classList.add('on');$('btnPauseRec').textContent='⏸️';
+  clearInterval(recTimer);
+  recTimer=setInterval(()=>{const s=((Date.now()-recSessStart)/1000)|0;
    $('rectime').textContent=String((s/60)|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},500);
   toast('🔴 '+(LANG==='ur'?'ریکارڈنگ شروع':'Recording started'));
  }catch(e){toast('Error: '+e.message);}
 }
-function stopRecording(){
- try{if(recorder&&recorder.state==='recording')recorder.stop();}catch(e){}
- clearInterval(recTimer);$('recind').classList.remove('on');$('shutter').classList.remove('recording');
- cancelAnimationFrame(recRAF);recCtx=null;
+/* start one recording segment on the CURRENT camera stream */
+function startSegment(){
+ return new Promise((resolve,reject)=>{
+  try{
+   recChunks=[];
+   const f=curFilter;
+   const needsCanvas=(f.css&&f.css!=='none')||f.ov||(f.kind==='canvas');
+   let mstream;
+   if(needsCanvas){
+    /* filtered recording: render through canvas */
+    recCanvas=document.createElement('canvas');
+    recCanvas.width=v.videoWidth||1280;recCanvas.height=v.videoHeight||720;
+    recCtx=recCanvas.getContext('2d');
+    const draw=()=>{
+     if(!recCtx)return;
+     drawFilteredFrame(recCanvas);
+     recRAF=requestAnimationFrame(draw);};
+    draw();
+    recStream=recCanvas.captureStream(30);
+    /* add audio from the live camera stream */
+    const at=stream.getAudioTracks()[0];if(at)recStream.addTrack(at);
+    mstream=recStream;
+   }else{
+    mstream=stream;
+   }
+   recMime='video/webm;codecs=vp9,opus';
+   if(!window.MediaRecorder||!MediaRecorder.isTypeSupported(recMime))recMime='video/webm;codecs=vp8,opus';
+   if(!MediaRecorder.isTypeSupported(recMime))recMime='video/webm';
+   if(!MediaRecorder.isTypeSupported(recMime))recMime='';
+   recorder=new MediaRecorder(mstream,recMime?{mimeType:recMime,videoBitsPerSecond:8e6}:undefined);
+   recMime=recorder.mimeType||recMime||'video/webm';
+   recorder.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data);};
+   recorder.onstop=()=>{
+    cancelAnimationFrame(recRAF);recCtx=null;
+    try{if(recStream)recStream.getTracks().forEach(tr=>tr.stop());}catch(e){}
+    recStream=null;
+    if(segResolve){const r=segResolve;segResolve=null;
+     try{const blob=new Blob(recChunks,{type:recMime});r(blob.size>1000?blob:null);}
+     catch(e){r(null);}
+    }
+   };
+   recorder.start(500);
+   recSegStart=Date.now();
+   resolve(true);
+  }catch(e){reject(e);}
+ });
 }
-function onRecStop(){
- cancelAnimationFrame(recRAF);recCtx=null;
+/* safely finalize the current segment -> resolves with Blob (or null) */
+function stopSegment(){
+ return new Promise(res=>{
+  if(!recorder){res(null);return;}
+  segResolve=res;
+  try{
+   if(recorder.state==='recording'||recorder.state==='paused')recorder.stop();
+   else{segResolve=null;res(null);}
+  }catch(e){segResolve=null;res(null);}
+  /* safety: never hang if onstop never fires */
+  setTimeout(()=>{if(segResolve){segResolve=null;res(null);}},4000);
+  recorder=null;
+ });
+}
+/* ---- camera switch DURING recording: segmented, timer keeps running ---- */
+async function switchCameraDuringRec(){
+ recSwitching=true;
+ const ss=$('switchstat');
+ ss.textContent=LANG==='ur'?'📷 کیمرہ بدل رہا ہے…':'📷 Switching camera…';
+ ss.classList.add('on');
  try{
-  const blob=new Blob(recChunks,{type:recorder.mimeType||'video/webm'});
-  recChunks=[];
-  if(blob.size<1000){toast('⚠️ '+(LANG==='ur'?'ریکارڈنگ ناکام':'Recording failed'));return;}
-  const dur=Math.round((Date.now()-recStart)/1000);
-  saveMedia(blob,'video',dur);
-  toast(t('video'));
+  const blob=await stopSegment();          /* finalize current segment safely */
+  if(blob)recSegs.push({blob:blob,mime:recMime});
+  curFacing=curFacing==='user'?'environment':'user';
+  await startCamera();                      /* new camera stream */
+  if(!stream)throw new Error('no camera');
+  recPaused=false;$('btnPauseRec').textContent='⏸️';
+  await startSegment();                     /* new segment continues the session */
+  toast('📷 '+(LANG==='ur'?'کیمرہ بدل گیا — ریکارڈنگ جاری':'Camera switched — recording continues'));
+ }catch(e){
+  toast('⚠️ '+(LANG==='ur'?'کیمرہ تبدیل ناکام':'Camera switch failed'));
+ }
+ ss.classList.remove('on');
+ recSwitching=false;
+}
+async function stopRecording(){
+ if(!isRecording()&&!recSegs.length)return;
+ try{
+  const blob=await stopSegment();
+  if(blob)recSegs.push({blob:blob,mime:recMime});
+ }catch(e){}
+ clearInterval(recTimer);
+ $('recind').classList.remove('on');$('shutter').classList.remove('recording');
+ $('btnPauseRec').classList.remove('on');
+ recPaused=false;
+ const totalDur=Math.max(1,Math.round((Date.now()-recSessStart)/1000));
+ if(!recSegs.length){toast('⚠️ '+(LANG==='ur'?'ریکارڈنگ ناکام':'Recording failed'));return;}
+ /* merge segments chronologically into one webm */
+ let finalBlob=null;
+ try{
+  finalBlob=new Blob(recSegs.map(s=>s.blob),{type:recSegs[0].mime||'video/webm'});
+  if(finalBlob.size<1000)finalBlob=null;
+ }catch(e){finalBlob=null;}
+ if(finalBlob){
+  showVideoPreview(finalBlob,totalDur,recSegs.length);
+ }else{
+  /* RECOVERY: merge failed — preserve every segment separately, lose nothing */
+  for(let i=0;i<recSegs.length;i++){
+   try{await saveMedia(recSegs[i].blob,'video',0);}catch(e){}
+  }
+  recSegs=[];
+  toast('⚠️ '+(LANG==='ur'?'مرج ناکام — تمام حصے الگ محفوظ کر دیے':'Merge failed — all segments saved separately'));
+ }
+}
+/* ---- pause / resume (where supported) ---- */
+function toggleRecPause(){
+ if(!recorder)return;
+ try{
+  if(recorder.state==='recording'){recorder.pause();recPaused=true;
+   $('btnPauseRec').textContent='▶️';toast('⏸️ '+(LANG==='ur'?'توقف':'Paused'));}
+  else if(recorder.state==='paused'){recorder.resume();recPaused=false;
+   $('btnPauseRec').textContent='⏸️';toast('▶️ '+(LANG==='ur'?'جاری':'Resumed'));}
  }catch(e){toast('Error: '+e.message);}
+}
+/* ---- preview of the final video: verify duration + playback before save ---- */
+function showVideoPreview(blob,dur,nSegs){
+ const url=URL.createObjectURL(blob);
+ const vv=$('vpvid');vv.src=url;
+ $('vpmeta').textContent='⏱ '+(LANG==='ur'?'دورانیہ':'Duration')+': '+dur+'s • '+
+  (LANG==='ur'?'حصے':'Segments')+': '+nSegs+' • '+(blob.size/1048576).toFixed(1)+' MB';
+ $('vph').textContent=LANG==='ur'?'🎥 ویڈیو پیش نظارہ':'🎥 Video Preview';
+ $('vidprev').classList.add('on');
+ $('vpsave').onclick=async()=>{
+  $('vidprev').classList.remove('on');try{vv.pause();}catch(e){}vv.removeAttribute('src');URL.revokeObjectURL(url);
+  await saveMedia(blob,'video',dur);
+  toast(t('video'));
+  recSegs=[];
+ };
+ $('vpdiscard').onclick=()=>{
+  $('vidprev').classList.remove('on');try{vv.pause();}catch(e){}vv.removeAttribute('src');URL.revokeObjectURL(url);
+  recSegs=[];
+  toast(LANG==='ur'?'🗑️ خارج کر دی':'🗑️ Discarded');
+ };
 }
 </script>
 <script>
@@ -1537,9 +1773,29 @@ window.addEventListener('load',async()=>{
  /* camera needs user gesture on some browsers; try anyway (diagnostic if insecure) */
  startCamera();
 });
-document.addEventListener('visibilitychange',()=>{
- if(document.hidden){stopStream();}
- else if(curScreen()==='cam'&&!stream){startCamera();}
+document.addEventListener('visibilitychange',async()=>{
+ if(document.hidden){
+  if(isRecording()){
+   /* app went to background mid-recording: finalize the current segment
+      safely so no footage is lost; session resumes as a new segment */
+   recSuspended=true;
+   try{const blob=await stopSegment();if(blob)recSegs.push({blob:blob,mime:recMime});}catch(e){}
+   stopStream();
+   toast('⏸️ '+(LANG==='ur'?'حصہ محفوظ — واپسی پر ریکارڈنگ جاری':'Segment saved — resumes on return'));
+  }else stopStream();
+ }
+ else if(curScreen()==='cam'){
+  if(recSuspended){
+   /* resume the suspended session with a fresh segment; timer kept running */
+   try{
+    await startCamera();
+    if(stream){await startSegment();recSuspended=false;
+     toast('🔴 '+(LANG==='ur'?'ریکارڈنگ جاری':'Recording resumed'));}
+    else recSuspended=false;
+   }catch(e){recSuspended=false;}
+  }
+  else if(!stream){startCamera();}
+ }
 });
 window.addEventListener('resize',()=>{if($('scr-ed').classList.contains('on'))fitEditorCanvas();});
 </script>
