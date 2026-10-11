@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>جیلان ہومیو اسٹور — Jilan Homeo Store</title>
+<style>
+:root{
+  --teal:#0f766e; --teal-d:#115e59; --teal-l:#ccfbf1;
+  --green:#16a34a; --gold:#b45309; --bg:#f0fdfa; --card:#ffffff;
+  --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --danger:#dc2626;
+  --radius:14px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+body{margin:0; font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:var(--bg); color:var(--ink); padding-bottom:76px;}
+[dir="ltr"] body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;}
+header.top{position:sticky; top:0; z-index:50; background:linear-gradient(135deg,var(--teal-d),var(--teal)); color:#fff; padding:10px 14px; box-shadow:0 2px 10px rgba(0,0,0,.15);}
+.top-row{display:flex; align-items:center; gap:10px;}
+.logo-badge{width:44px; height:44px; border-radius:12px; background:#fff; display:grid; place-items:center; font-size:24px; flex:none;}
+.top-title{flex:1; min-width:0;}
+.top-title h1{margin:0; font-size:18px; font-weight:800;}
+.top-title small{opacity:.85; font-size:11px;}
+.iconbtn{border:0; background:rgba(255,255,255,.18); color:#fff; border-radius:10px; padding:8px 10px; font-size:14px; cursor:pointer;}
+.demo-strip{background:#fef3c7; color:#92400e; text-align:center; font-size:12px; font-weight:700; padding:6px 10px; border-bottom:1px solid #fde68a;}
+.searchbar{padding:10px 14px 4px;}
+.searchbar input{width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:999px; font-size:15px; background:#fff; color:var(--ink);}
+.cat-row{display:flex; gap:8px; overflow-x:auto; padding:10px 14px;}
+.cat{flex:none; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:8px 14px; font-size:13px; cursor:pointer;}
+.cat.on{background:var(--teal); color:#fff; border-color:var(--teal); font-weight:700;}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; padding:10px 14px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px; display:flex; flex-direction:column; gap:6px;}
+.card .mname{font-weight:800; font-size:15px; color:var(--teal-d);}
+.card .muse{font-size:11px; color:var(--muted);}
+.pot-row{display:flex; flex-wrap:wrap; gap:6px;}
+.pot{border:1px solid var(--line); background:#f8fafc; border-radius:8px; padding:6px 8px; font-size:12px; cursor:pointer;}
+.pot.on{background:var(--teal); color:#fff; border-color:var(--teal); font-weight:700;}
+.price{font-weight:800; color:var(--green); font-size:16px;}
+.stock{font-size:11px;}
+.stock.ok{color:var(--green);} .stock.low{color:var(--gold); font-weight:700;} .stock.out{color:var(--danger); font-weight:700;}
+.btn{border:0; border-radius:10px; padding:10px 14px; font-size:14px; font-weight:700; cursor:pointer;}
+.btn-teal{background:var(--teal); color:#fff;}
+.btn-green{background:var(--green); color:#fff;}
+.btn-gold{background:var(--gold); color:#fff;}
+.btn-ghost{background:#fff; color:var(--teal-d); border:1px solid var(--teal);}
+.btn-danger{background:var(--danger); color:#fff;}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.5; cursor:not-allowed;}
+nav.bottom{position:fixed; bottom:0; left:0; right:0; z-index:50; background:#fff; border-top:1px solid var(--line); display:flex;}
+nav.bottom button{flex:1; border:0; background:none; padding:8px 4px 10px; font-size:11px; color:var(--muted); cursor:pointer;}
+nav.bottom button .ic{font-size:20px; display:block;}
+nav.bottom button.on{color:var(--teal); font-weight:800;}
+.view{display:none; padding-bottom:10px;}
+.view.on{display:block;}
+.sec{padding:10px 14px;}
+.sec h3{margin:6px 0 10px; color:var(--teal-d);}
+.bill-item{background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; display:flex; gap:10px; align-items:center;}
+.bill-item .grow{flex:1;}
+.qty{display:flex; align-items:center; gap:8px;}
+.qty button{width:30px; height:30px; border-radius:8px; border:1px solid var(--line); background:#fff; font-size:16px; cursor:pointer;}
+.totals{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; margin:10px 14px;}
+.totals .row{display:flex; justify-content:space-between; padding:4px 0; font-size:14px;}
+.totals .grand{font-weight:800; font-size:18px; color:var(--teal-d); border-top:1px dashed var(--line); margin-top:6px; padding-top:8px;}
+.form{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; margin:10px 14px; display:flex; flex-direction:column; gap:10px;}
+.form label{font-size:12px; color:var(--muted); font-weight:700;}
+.form input,.form select,.form textarea{padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:14px; width:100%; color:var(--ink); background:#fff;}
+.frow{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+table.tbl{width:100%; border-collapse:collapse; font-size:13px; background:#fff;}
+.tbl th,.tbl td{border-bottom:1px solid var(--line); padding:8px 6px; text-align:right;}
+.tbl th{background:var(--teal-l); color:var(--teal-d);}
+.kpi-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 14px;}
+.kpi{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px;}
+.kpi .v{font-size:20px; font-weight:800; color:var(--teal-d);}
+.kpi .l{font-size:11px; color:var(--muted);}
+.modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; display:none; align-items:center; justify-content:center; padding:16px;}
+.modal-bg.on{display:flex;}
+.modal{background:#fff; border-radius:16px; max-width:480px; width:100%; max-height:88vh; overflow:auto; padding:18px;}
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:10px 18px; border-radius:999px; font-size:13px; z-index:200; display:none;}
+.receipt{font-family:monospace; font-size:12px; white-space:pre-wrap; background:#fff; border:1px dashed var(--line); border-radius:10px; padding:14px; margin:10px 14px;}
+.badge{display:inline-block; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;}
+.badge.demo{background:#fef3c7; color:#92400e;}
+.note{background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; border-radius:10px; padding:10px 12px; font-size:12px; margin:10px 14px;}
+@media(min-width:768px){ .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));} .kpi-grid{grid-template-columns:repeat(4,1fr);} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="logo-badge">💊</div>
+    <div class="top-title">
+      <h1 id="appName">جیلان ہومیو اسٹور</h1>
+      <small id="appSub">Homeopathic Medicine Shop</small>
+    </div>
+    <button class="iconbtn" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="iconbtn" id="billBtn" onclick="go('billing')">🧾 <span id="billCount">0</span></button>
+  </div>
+</header>
+<div class="demo-strip">🏷️ DEMO by Jilan Apps — <span id="demoTxt">Sample data, demo only</span></div>
+
+<!-- HOME / CATALOG -->
+<div class="view on" id="v-home">
+  <div class="searchbar"><input id="q" placeholder="🔍 دوا تلاش کریں / Search medicine…" oninput="renderCatalog()"></div>
+  <div class="cat-row" id="cats"></div>
+  <div class="grid" id="catalog"></div>
+</div>
+
+<!-- BILLING -->
+<div class="view" id="v-billing">
+  <div class="sec"><h3 id="tBill">🧾 نیا بل / New Bill</h3></div>
+  <div id="billItems" class="sec"></div>
+  <div class="totals" id="billTotals"></div>
+  <div class="form">
+    <div><label id="lCust">گاہک کا نام / Customer</label><input id="bCust" placeholder="Walk-in"></div>
+    <div class="frow">
+      <div><label id="lDisc">رعایت (Rs) / Discount</label><input id="bDisc" type="number" value="0" min="0" oninput="renderBill()"></div>
+      <div><label id="lPaid">وصول (Rs) / Paid</label><input id="bPaid" type="number" value="0" min="0" oninput="renderBill()"></div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="confirmBill()" id="btnConfirm">✅ بل کنفرم کریں / Confirm Bill</button>
+    <button class="btn btn-ghost btn-block" onclick="shareWA()" id="btnWA">📱 WhatsApp پر بھیجیں</button>
+    <button class="btn btn-ghost btn-block" onclick="printBill()" id="btnPrint">🖨️ پرنٹ / Print</button>
+  </div>
+  <div id="receiptWrap"></div>
+</div>
+
+<!-- SALES -->
+<div class="view" id="v-sales">
+  <div class="sec"><h3 id="tSales">📋 فروخت کی تاریخ / Sales History</h3></div>
+  <div class="sec" id="salesList"></div>
+</div>
+
+<!-- STOCK -->
+<div class="view" id="v-stock">
+  <div class="sec"><h3 id="tStock">📦 اسٹاک / Inventory</h3>
+  <button class="btn btn-teal" onclick="openMedForm()" id="btnAddMed">➕ نئی دوا</button></div>
+  <div class="sec" id="lowList"></div>
+  <div class="sec" id="stockList"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="view" id="v-admin">
+  <div class="sec"><h3 id="tAdmin">🔐 ایڈمن / Admin</h3></div>
+  <div id="adminBody" class="sec"></div>
+</div>
+
+<nav class="bottom">
+  <button class="on" onclick="go('home')" id="n-home"><span class="ic">🏠</span><span class="nl">ہوم</span></button>
+  <button onclick="go('billing')" id="n-billing"><span class="ic">🧾</span><span class="nl">بل</span></button>
+  <button onclick="go('sales')" id="n-sales"><span class="ic">📋</span><span class="nl">فروخت</span></button>
+  <button onclick="go('stock')" id="n-stock"><span class="ic">📦</span><span class="nl">اسٹاک</span></button>
+  <button onclick="go('admin')" id="n-admin"><span class="ic">⚙️</span><span class="nl">ایڈمن</span></button>
+</nav>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
