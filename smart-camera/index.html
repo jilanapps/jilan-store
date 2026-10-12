@@ -352,7 +352,7 @@ button{font-family:inherit}
       <div class="setrow"><span>Used space</span><b id="stsize">0 KB</b></div>
       <div class="setrow"><span>Clear all media</span><button class="abtn sec" style="flex:0 0 auto;padding:8px 18px" onclick="clearAllMedia()">Clear</button></div>
     </div>
-    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.5</h3>
+    <div class="setcard"><h3>ℹ️ Jilan Smart Camera v1.6</h3>
       <p style="color:var(--mut);font-size:13px;line-height:1.7;margin:0">
       <span data-i18n="about1">Face filters use real face landmarks (2D overlays, not 3D AR). Face AI loads on first use — internet required once.</span><br>
       <span data-i18n="about2">Photos/videos sirf aapke phone me rehti hain, kahin upload nahi hotin.</span></p>
@@ -419,7 +419,7 @@ function androidSave(dataUrl,name,mime){
 const FILTERS=[
  // --- Beauty (10) ---
  {id:'original',n:'Original',ur:'اصل',cat:'beauty',css:'none',emo:'🖼️'},
- {id:'natural',n:'Natural Beauty',ur:'قدرتی',cat:'beauty',css:'saturate(1.08) contrast(1.04) brightness(1.03)',emo:'🌸'},
+ {id:'natural',n:'Natural Beauty',ur:'قدرتی',cat:'beauty',css:'saturate(1.12) contrast(1.06) brightness(1.18)',emo:'🌸'},
  {id:'softskin',n:'Soft Skin',ur:'نرم جلد',cat:'beauty',css:'saturate(1.05) contrast(0.96) brightness(1.08)',emo:'🧴'},
  {id:'smooth',n:'Smooth Portrait',ur:'ہموار',cat:'beauty',css:'contrast(0.94) brightness(1.1) saturate(1.1)',emo:'✨'},
  {id:'warmb',n:'Warm Beauty',ur:'گرم',cat:'beauty',css:'sepia(0.18) saturate(1.25) contrast(1.05) brightness(1.04)',emo:'🌤️'},
@@ -507,7 +507,7 @@ const FILTERS=[
  {id:'p_cine',n:'Cinematic',ur:'سنیمائی',cat:'premium',emo:'🎞️',ov:'cinebars',cssk:k=>`contrast(${(1+0.22*k).toFixed(3)}) saturate(${(1+0.10*k).toFixed(3)}) sepia(${(0.14*k).toFixed(3)}) hue-rotate(${(-6*k).toFixed(1)}deg) brightness(${(1-0.03*k).toFixed(3)})`},
 ];
 const CATS=[['beauty','💄 Beauty','بیوٹی'],['cine','🎬 Cinematic','سنیما'],['color','🌈 Colorful','رنگین'],['art','🎨 Artistic','آرٹ'],['fx','✨ Effects','ایفیکٹس'],['face','😎 Face','چہرہ']];
-let curFilter=FILTERS[0], curCat='foryou';
+let curFilter=FILTERS[1], curCat='foryou'; /* v1.6: default to Natural Beauty (Snapchat-like brightness) */
 /* ---- premium filter intensity (0..100, persisted) ---- */
 let premInt=parseInt(localStorage.getItem('jsc_premint')||'70',10);
 if(!(premInt>=0&&premInt<=100))premInt=70;
@@ -1000,6 +1000,19 @@ function setupDeviceCaps(){
  try{
   const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};
   $('btnFlash').style.opacity=cap.torch?1:0.35;
+  /* v1.6: Snapchat-like brightness — try exposure compensation */
+  try{
+    if(cap.exposureCompensation){
+      const ec=cap.exposureCompensation;
+      const target=Math.min(ec.max||0, 1.0);
+      if(target>0) tr.applyConstraints({advanced:[{exposureCompensation:target}]});
+    }
+    if(cap.brightness){
+      const bc=cap.brightness;
+      const target=Math.min(bc.max||128, (bc.max||128)*0.65);
+      tr.applyConstraints({advanced:[{brightness:target}]});
+    }
+  }catch(e){}
   if(cap.zoom){zoomCap={min:cap.zoom.min||1,max:Math.min(cap.zoom.max||5,5),tr};
    $('zoomrow').style.display='flex';const z=$('zoomr');z.min=zoomCap.min;z.max=zoomCap.max;z.value=1;
    $('zoomval').textContent='1.0x';
