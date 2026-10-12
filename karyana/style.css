@@ -290,3 +290,7 @@ a{color:var(--green-dark);}
   body{padding:0; background:#fff;}
 }
 [dir="rtl"] .bill-line{grid-template-columns:1fr 64px 78px 78px 30px;}
+
+/* demo lock-screen hint */
+.demo-hint{color:var(--muted);font-size:13px;margin:12px 0 0;line-height:1.6}
+#demo-skip{margin-top:10px}

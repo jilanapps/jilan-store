@@ -330,6 +330,7 @@ function csvEsc(v){ v = String(v === undefined || v === null ? '' : v); return '
 var pinBuf = '', pinMode = 'set1', pinFirst = '';
 function showLock(){
   $('app-header').style.display = 'none'; $('bottom-nav').style.display = 'none';
+  if (S.demo){ $('banner-text').textContent = 'DEMO by Jilan Apps — ' + (LANG === 'ur' ? 'ڈیمو ڈیٹا' : 'demo data only'); $('demo-banner').style.display = ''; }
   pinBuf = ''; pinMode = S.pinHash ? 'enter' : 'set1';
   renderPin();
 }
@@ -338,12 +339,21 @@ function renderPin(){
   var dots = ''; for (var i=0;i<4;i++) dots += '<span class="' + (i < pinBuf.length ? 'f' : '') + '"></span>';
   var keys = ''; for (var k=1;k<=9;k++) keys += '<button data-k="' + k + '">' + k + '</button>';
   keys += '<button data-k="c">⌫</button><button data-k="0">0</button><button data-k="ok">✓</button>';
+  var demoHint = (pinMode === 'set1')
+    ? '<p class="demo-hint">' + (LANG === 'ur'
+        ? '🛈 ڈیمو ہے — کوئی بھی 4 ہندسے دبا کر آگے بڑھیں'
+        : '🛈 This is a DEMO — press any 4 digits to continue') + '</p>' +
+      '<button class="btn btn-gray btn-sm" id="demo-skip" style="margin-top:10px">' +
+      (LANG === 'ur' ? 'بغیر PIN ڈیمو دیکھیں →' : 'Skip PIN — view demo →') + '</button>'
+    : '';
   view().innerHTML = '<div class="lock-wrap"><div class="logo-badge" style="margin:0 auto 10px;width:56px;height:56px">' +
     '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>' +
     '<h2>' + esc(S.shopName || 'Jilan Karyana Store') + '</h2><p style="color:var(--muted)">' + esc(title) + '</p>' +
-    '<div class="pin-dots">' + dots + '</div><div class="kbd-pin">' + keys + '</div></div>';
+    '<div class="pin-dots">' + dots + '</div><div class="kbd-pin">' + keys + '</div>' + demoHint + '</div>';
   var btns = view().querySelectorAll('.kbd-pin button');
   for (var i=0;i<btns.length;i++) btns[i].onclick = function(){ pinKey(this.getAttribute('data-k')); };
+  var sk = $('demo-skip');
+  if (sk) sk.onclick = function(){ try{sessionStorage.setItem('jksm_unlocked','1');}catch(e){} unlock(); };
 }
 function pinKey(k){
   if (k === 'c'){ pinBuf = pinBuf.slice(0,-1); }
