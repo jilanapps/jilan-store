@@ -137,7 +137,7 @@ paintSound();
 soundBtn.onclick=function(){soundOn=!soundOn;store.set(SOUND_KEY,soundOn);paintSound();if(soundOn)blip(660,0.08,'triangle');};
 
 /* ---------- game state ---------- */
-var WORLD=2600, PELLETS_N=240, BOT_N=6;
+var WORLD=2600, PELLETS_N=330, BOT_N=6;
 var state='menu', paused=false, lastTs=0, cam={x:0,y:0};
 var player=null, bots=[], pellets=[], particles=[];
 var score=0, boostHeld=false, joy={on:false,ox:0,oy:0,dx:0,dy:0};
