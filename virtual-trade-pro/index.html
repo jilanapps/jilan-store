@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Virtual Trade Pro — Paper Trading Simulator</title>
+<meta name="description" content="Virtual Trade Pro — practice crypto trading with $100,000 of virtual money. Educational simulator, no real trading. v1.0">
+<style>
+:root{--bg:#0b1220;--card:#131c2e;--card2:#182439;--txt:#e8eef7;--mut:#8b98ad;--grn:#22c55e;--red:#ef4444;--gold:#f5c542;--acc:#3b82f6}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+#app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-bottom:76px}
+header{padding:14px 16px 10px;background:linear-gradient(160deg,#0f1a30,#0b1220);border-bottom:1px solid #1e2a44;position:sticky;top:0;z-index:5}
+.hrow{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:20px;font-weight:800;letter-spacing:.5px}
+.logo b{color:var(--gold)}
+.vtag{font-size:11px;color:var(--mut);border:1px solid #2a3a5c;border-radius:8px;padding:2px 8px}
+.practice{background:#3a2a10;border:1px solid #8a6a1f;color:#ffd75e;font-size:12px;font-weight:700;text-align:center;padding:7px 10px;border-radius:10px;margin-top:8px}
+.livebadge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.live{background:rgba(34,197,94,.15);color:var(--grn);border:1px solid #1d5c34}
+.sim{background:rgba(245,197,66,.12);color:var(--gold);border:1px solid #6b5518}
+.balcard{margin:12px 16px 4px;background:linear-gradient(150deg,#14213a,#0f1a30);border:1px solid #22345a;border-radius:16px;padding:14px 16px}
+.balcard .lbl{font-size:12px;color:var(--mut)}
+.balcard .amt{font-size:30px;font-weight:800;margin:2px 0}
+.balcard .pnl{font-size:14px;font-weight:700}
+.grn{color:var(--grn)}.red{color:var(--red)}
+main{flex:1;padding:8px 16px}
+.tab{display:none}.tab.on{display:block}
+.coin{display:flex;align-items:center;background:var(--card);border:1px solid #1e2a44;border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
+.coin:active{transform:scale(.99)}
+.cicon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-right:12px;flex-shrink:0}
+.cinfo{flex:1;min-width:0}
+.cinfo .nm{font-weight:700;font-size:15px}
+.cinfo .sym{font-size:12px;color:var(--mut)}
+.cpr{text-align:right}
+.cpr .pr{font-weight:800;font-size:15px}
+.cpr .ch{font-size:12px;font-weight:700}
+canvas.spark{width:84px;height:30px;margin-top:4px}
+.sect{font-size:13px;font-weight:800;color:var(--mut);letter-spacing:1px;margin:14px 0 4px;text-transform:uppercase}
+.hold{background:var(--card);border:1px solid #1e2a44;border-radius:14px;padding:12px;margin:8px 0}
+.hold .top{display:flex;justify-content:space-between;align-items:center}
+.hold .nm{font-weight:800;font-size:15px}
+.hold .qty{font-size:12px;color:var(--mut)}
+.hold .nums{display:flex;justify-content:space-between;margin-top:8px;font-size:13px}
+.empty{text-align:center;color:var(--mut);padding:40px 20px;font-size:14px}
+.hist{background:var(--card);border:1px solid #1e2a44;border-radius:12px;padding:10px 12px;margin:6px 0;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.hist .t{color:var(--mut);font-size:11px}
+.badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:8px}
+.buy{background:rgba(34,197,94,.15);color:var(--grn)}
+.sell{background:rgba(239,68,68,.15);color:var(--red)}
+nav{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#0e1626;border-top:1px solid #1e2a44;display:flex;z-index:10}
+nav button{flex:1;background:none;border:none;color:var(--mut);padding:12px 0 14px;font-size:12px;font-weight:700;cursor:pointer}
+nav button.on{color:var(--gold)}
+nav button .ic{font-size:20px;display:block;margin-bottom:2px}
+/* trade sheet */
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:30}
+#sheet.on{display:flex}
+.sheetcard{background:var(--card2);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 18px 28px;border-top:2px solid #2a3a5c}
+.sheetcard h2{font-size:18px;margin-bottom:2px}
+.sheetcard .pr{font-size:26px;font-weight:800;margin:4px 0 12px}
+.tabs{display:flex;background:#0b1220;border-radius:12px;padding:4px;margin-bottom:12px}
+.tabs button{flex:1;border:none;background:none;color:var(--mut);font-weight:800;font-size:15px;padding:10px;border-radius:9px;cursor:pointer}
+.tabs button.onb{background:rgba(34,197,94,.2);color:var(--grn)}
+.tabs button.ons{background:rgba(239,68,68,.2);color:var(--red)}
+.qtyrow{display:flex;gap:8px;margin-bottom:12px}
+.qtyrow input{flex:1;background:#0b1220;border:1px solid #2a3a5c;color:var(--txt);border-radius:12px;padding:12px;font-size:17px;font-weight:700;width:100%}
+.qbtn{background:#0b1220;border:1px solid #2a3a5c;color:var(--gold);border-radius:10px;padding:8px 12px;font-weight:800;font-size:13px;cursor:pointer}
+.total{font-size:14px;color:var(--mut);margin-bottom:12px}
+.total b{color:var(--txt)}
+.execbtn{width:100%;border:none;border-radius:14px;padding:15px;font-size:17px;font-weight:800;cursor:pointer;color:#fff}
+.execbtn.b{background:var(--grn)}.execbtn.s{background:var(--red)}
+.execbtn:disabled{opacity:.4}
+.closebtn{width:100%;background:none;border:none;color:var(--mut);padding:12px;font-size:14px;cursor:pointer}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:14px}
+footer b{color:var(--gold)}
+#updateCard{display:none;background:#132a1a;border:1px solid #1d5c34;border-radius:14px;padding:14px;margin:10px 16px}
+#updateCard b{color:var(--grn)}
+#updateCard .row{display:flex;gap:8px;margin-top:10px}
+#updateCard button{flex:1;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer}
+#updateDlBtn{background:var(--grn);color:#fff}#updateNoBtn{background:#22345a;color:var(--txt)}
+#resetBtn{background:#1a2340;border:1px solid #2a3a5c;color:var(--red);border-radius:12px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:10px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1c2942;border:1px solid #2a3a5c;color:var(--txt);padding:10px 18px;border-radius:12px;font-size:14px;font-weight:700;z-index:50;display:none}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="hrow">
+    <div class="logo">📈 <b>Virtual</b> Trade Pro</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="liveBadge" class="livebadge live">● LIVE</span>
+      <span class="vtag">v1.0</span>
+    </div>
+  </div>
+  <div class="practice">⚠️ VIRTUAL MONEY — Practice Only. No real trading, no real money.</div>
+</header>
+<div id="updateCard"><b>🔄 New version available!</b><div style="font-size:13px;color:var(--mut)">Tap below to get the latest Virtual Trade Pro.</div><div class="row"><button id="updateDlBtn">Update</button><button id="updateNoBtn">Later</button></div></div>
+<main>
+  <section id="tab-market" class="tab on">
+    <div class="balcard"><div class="lbl">Virtual Balance</div><div class="amt" id="cashAmt">$100,000</div><div class="pnl" id="totalPnl"></div></div>
+    <div class="sect">🏆 Top Movers (24h)</div><div id="movers"></div>
+    <div class="sect">💰 Market</div><div id="coinList"></div>
+  </section>
+  <section id="tab-port" class="tab">
+    <div class="balcard"><div class="lbl">Portfolio Value</div><div class="amt" id="portVal">$100,000</div><div class="pnl" id="portPnl"></div></div>
+    <div id="holdList"></div>
+    <button id="resetBtn">↺ Reset — restore $100,000 virtual</button>
+  </section>
+  <section id="tab-hist" class="tab">
+    <div class="sect">🧾 Trade History</div><div id="histList"></div>
+  </section>
+</main>
+<footer>Made by <b>Jilan Apps Official</b> • v1.0<br><span style="font-size:11px">Educational simulator — not financial advice.</span></footer>
+</div>
+<nav>
+  <button id="nav-market" class="on" onclick="showTab('market')"><span class="ic">📊</span>Market</button>
+  <button id="nav-port" onclick="showTab('port')"><span class="ic">💼</span>Portfolio</button>
+  <button id="nav-hist" onclick="showTab('hist')"><span class="ic">🧾</span>History</button>
+</nav>
+<div id="sheet"><div class="sheetcard">
+  <h2 id="shName">Bitcoin</h2><div style="font-size:12px;color:var(--mut)" id="shSym">BTC / USD</div>
+  <div class="pr" id="shPrice">$0</div>
+  <div class="tabs"><button id="tabBuy" class="onb" onclick="setSide('buy')">BUY</button><button id="tabSell" onclick="setSide('sell')">SELL</button></div>
+  <div class="qtyrow"><input id="qtyIn" type="number" inputmode="decimal" placeholder="Quantity" min="0" step="any"><button class="qbtn" onclick="setMax()">MAX</button></div>
+  <div class="total">Total: <b id="shTotal">$0</b> &nbsp;•&nbsp; Cash: <b id="shCash">$0</b></div>
+  <button class="execbtn b" id="execBtn" onclick="execTrade()">BUY</button>
+  <button class="closebtn" onclick="closeSheet()">Close</button>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* ================= Virtual Trade Pro v1.0 — paper trading simulator ================= */
+const VTP_VERSION="1.0";
+const VTP_APK_URL="https://jilanapps.github.io/jilan-store/virtual-trade-pro/virtual-trade-pro.apk";
+const START_CASH=100000;
+const COINS=[
+ {id:"bitcoin",sym:"BTC",name:"Bitcoin",color:"#f7931a"},
+ {id:"ethereum",sym:"ETH",name:"Ethereum",color:"#627eea"},
+ {id:"binancecoin",sym:"BNB",name:"BNB",color:"#f0b90b"},
+ {id:"solana",sym:"SOL",name:"Solana",color:"#9945ff"},
+ {id:"ripple",sym:"XRP",name:"XRP",color:"#25a4e8"},
+ {id:"dogecoin",sym:"DOGE",name:"Dogecoin",color:"#c2a633"},
+ {id:"cardano",sym:"ADA",name:"Cardano",color:"#3468d1"},
+ {id:"avalanche-2",sym:"AVAX",name:"Avalanche",color:"#e84142"}
+];
+const API="https://api.coingecko.com/api/v3";
+let prices={}, changes={}, sparks={}, simMode=false, lastGood={};
+let state=load()||{cash:START_CASH,hold:{},hist:[],realized:0};
+/* ---------- persistence ---------- */
+function load(){try{const s=localStorage.getItem("vtp_state");return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem("vtp_state",JSON.stringify(state));}catch(e){}}
+/* ---------- trading math (pure, testable) ---------- */
+const TM={
+ buy(st,coin,qty,price){
+  if(!(qty>0)||!(price>0))return{ok:false,err:"Enter a valid quantity"};
+  const cost=qty*price;
+  if(cost>st.cash+1e-9)return{ok:false,err:"Not enough virtual cash"};
+  st.cash-=cost;
+  const h=st.hold[coin]||{qty:0,avg:0};
+  h.avg=(h.qty*h.avg+qty*price)/(h.qty+qty); h.qty+=qty;
+  st.hold[coin]=h;
+  st.hist.unshift({t:Date.now(),coin,qty,price,side:"buy"});
+  return{ok:true};
+ },
+ sell(st,coin,qty,price){
+  if(!(qty>0)||!(price>0))return{ok:false,err:"Enter a valid quantity"};
+  const h=st.hold[coin];
+  if(!h||h.qty<qty-1e-9)return{ok:false,err:"Not enough "+coin+" to sell"};
+  const proceeds=qty*price;
+  st.cash+=proceeds;
+  const pnl=qty*(price-h.avg);
+  st.realized=(st.realized||0)+pnl;
+  h.qty-=qty; if(h.qty<1e-9)delete st.hold[coin];
+  st.hist.unshift({t:Date.now(),coin,qty,price,side:"sell",pnl});
+  return{ok:true,pnl};
+ },
+ portValue(st,px){
+  let v=st.cash;
+  for(const c in st.hold){const p=px[c]||0;v+=st.hold[c].qty*p;}
+  return v;
+ },
+ unreal(st,px){
+  let u=0;
+  for(const c in st.hold){const h=st.hold[c];u+=h.qty*((px[c]||0)-h.avg);}
+  return u;
+ }
+};
+if(typeof module!=="undefined")module.exports={TM,COINS,START_CASH};
+/* ---------- formatting ---------- */
+const fmt$=n=>"$"+Number(n).toLocaleString("en-US",{maximumFractionDigits:2,minimumFractionDigits:2});
+const fmtP=n=>(n>=0?"+":"")+n.toFixed(2)+"%";
+function coinBySym(s){return COINS.find(c=>c.sym===s);}
+/* ---------- prices ---------- */
+async function fetchLive(){
+ try{
+  const ids=COINS.map(c=>c.id).join(",");
+  const r=await fetch(API+"/simple/price?ids="+ids+"&vs_currencies=usd&include_24hr_change=true");
+  if(!r.ok)throw 0;
+  const j=await r.json();
+  COINS.forEach(c=>{const d=j[c.id];if(d&&d.usd){prices[c.sym]=d.usd;changes[c.sym]=d.usd_24h_change||0;lastGood[c.sym]=d.usd;}});
+  setSim(false); return true;
+ }catch(e){ return false; }
+}
+function simTick(){
+ simMode=true;
+ COINS.forEach(c=>{
+  const base=lastGood[c.sym]||prices[c.sym]||100;
+  const drift=(Math.random()-0.5)*0.004;
+  prices[c.sym]=Math.max(base*(1+drift),0.0001);
+  changes[c.sym]=changes[c.sym]||0;
+ });
+ setSim(true);
+}
+function setSim(s){
+ simMode=s;
+ const b=document.getElementById("liveBadge");
+ b.className="livebadge "+(s?"sim":"live");
+ b.textContent=s?"● SIMULATED (offline)":"● LIVE";
+}
+async function fetchSpark(sym){
+ if(sparks[sym])return;
+ try{
+  const c=coinBySym(sym);
+  const r=await fetch(API+"/coins/"+c.id+"/market_chart?vs_currency=usd&days=7");
+  if(!r.ok)throw 0;
+  const j=await r.json();
+  sparks[sym]=(j.prices||[]).map(p=>p[1]).filter((_,i)=>i%6===0);
+ }catch(e){sparks[sym]=[];}
+ render();
+}
+function drawSpark(cv,data,up){
+ const x=cv.getContext("2d"),W=cv.width=168,H=cv.height=60;
+ x.clearRect(0,0,W,H);
+ if(!data||data.length<2){x.strokeStyle="#3a4a66";x.beginPath();x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();return;}
+ const mn=Math.min(...data),mx=Math.max(...data),rg=(mx-mn)||1;
+ x.strokeStyle=up?"#22c55e":"#ef4444";x.lineWidth=3;x.beginPath();
+ data.forEach((v,i)=>{const px=i/(data.length-1)*W,py=H-6-((v-mn)/rg)*(H-12);i?x.lineTo(px,py):x.moveTo(px,py);});
+ x.stroke();
+}
+/* ---------- render ---------- */
+function showTab(t){
+ document.querySelectorAll(".tab").forEach(e=>e.classList.remove("on"));
+ document.getElementById("tab-"+t).classList.add("on");
+ document.querySelectorAll("nav button").forEach(e=>e.classList.remove("on"));
+ document.getElementById("nav-"+t).classList.add("on");
+ render();
+}
+function render(){
+ const pv=TM.portValue(state,prices), un=TM.unreal(state,prices), totPnl=pv-START_CASH;
+ document.getElementById("cashAmt").textContent=fmt$(state.cash);
+ const tp=document.getElementById("totalPnl");
+ tp.innerHTML="Total P&amp;L: <b class='"+(totPnl>=0?"grn":"red")+"'>"+fmt$(totPnl)+"</b>";
+ document.getElementById("portVal").textContent=fmt$(pv);
+ const pp=document.getElementById("portPnl");
+ pp.innerHTML="Unrealized: <b class='"+(un>=0?"grn":"red")+"'>"+fmt$(un)+"</b> &nbsp;•&nbsp; Realized: <b class='"+(state.realized>=0?"grn":"red")+"'>"+fmt$(state.realized||0)+"</b>";
+ /* movers */
+ const mv=[...COINS].sort((a,b)=>(changes[b.sym]||0)-(changes[a.sym]||0)).slice(0,3);
+ document.getElementById("movers").innerHTML=mv.map(c=>{
+  const ch=changes[c.sym]||0;
+  return "<div class='coin' onclick=\"openSheet('"+c.sym+"')\"><div class='cicon' style='background:"+c.color+"22;color:"+c.color+"'>"+c.sym[0]+"</div><div class='cinfo'><div class='nm'>"+c.name+"</div><div class='sym'>"+c.sym+" / USD</div></div><div class='cpr'><div class='pr'>"+fmt$(prices[c.sym]||0)+"</div><div class='ch "+(ch>=0?"grn":"red")+"'>"+fmtP(ch)+"</div></div></div>";
+ }).join("");
+ /* market list */
+ const list=document.getElementById("coinList");
+ list.innerHTML="";
+ COINS.forEach(c=>{
+  const ch=changes[c.sym]||0;
+  const d=document.createElement("div");d.className="coin";
+  d.onclick=()=>openSheet(c.sym);
+  d.innerHTML="<div class='cicon' style='background:"+c.color+"22;color:"+c.color+"'>"+c.sym[0]+"</div><div class='cinfo'><div class='nm'>"+c.name+"</div><div class='sym'>"+c.sym+" / USD</div><canvas class='spark'></canvas></div><div class='cpr'><div class='pr'>"+fmt$(prices[c.sym]||0)+"</div><div class='ch "+(ch>=0?"grn":"red")+"'>"+fmtP(ch)+"</div></div>";
+  list.appendChild(d);
+  const cv=d.querySelector("canvas");
+  if(!sparks[c.sym])fetchSpark(c.sym); else drawSpark(cv,sparks[c.sym],ch>=0);
+ });
+ /* holdings */
+ const hl=document.getElementById("holdList"),ks=Object.keys(state.hold);
+ if(!ks.length){hl.innerHTML="<div class='empty'>No holdings yet.<br>Tap a coin in Market to buy with virtual money.</div>";}
+ else hl.innerHTML=ks.map(sym=>{
+  const c=coinBySym(sym),h=state.hold[sym],px=prices[sym]||0,val=h.qty*px,pnl=h.qty*(px-h.avg),pc=h.avg? (pnl/(h.qty*h.avg)*100):0;
+  return "<div class='hold' onclick=\"openSheet('"+sym+"')\"><div class='top'><div><div class='nm'>"+c.name+" ("+sym+")</div><div class='qty'>"+h.qty+" @ avg "+fmt$(h.avg)+"</div></div><div style='text-align:right'><div style='font-weight:800'>"+fmt$(val)+"</div><div class='"+(pnl>=0?"grn":"red")+"' style='font-weight:700'>"+fmt$(pnl)+" ("+fmtP(pc)+")</div></div></div></div>";
+ }).join("");
+ /* history */
+ const hs=document.getElementById("histList");
+ if(!state.hist.length){hs.innerHTML="<div class='empty'>No trades yet.</div>";}
+ else hs.innerHTML=state.hist.slice(0,60).map(t=>{
+  const d=new Date(t.t);
+  return "<div class='hist'><div><span class='badge "+t.side+"'>"+t.side.toUpperCase()+"</span> <b>"+t.qty+" "+t.coin+"</b> @ "+fmt$(t.price)+"<div class='t'>"+d.toLocaleString()+"</div></div><div style='font-weight:800'>"+fmt$(t.qty*t.price)+"</div></div>";
+ }).join("");
+}
+/* ---------- trade sheet ---------- */
+let shSym=null,shSide="buy";
+function openSheet(sym){
+ shSym=sym;shSide="buy";
+ const c=coinBySym(sym);
+ document.getElementById("shName").textContent=c.name;
+ document.getElementById("shSym").textContent=sym+" / USD";
+ document.getElementById("qtyIn").value="";
+ setSide("buy");updSheet();
+ document.getElementById("sheet").classList.add("on");
+}
+function closeSheet(){document.getElementById("sheet").classList.remove("on");}
+function setSide(s){
+ shSide=s;
+ document.getElementById("tabBuy").className=s==="buy"?"onb":"";
+ document.getElementById("tabSell").className=s==="sell"?"ons":"";
+ const b=document.getElementById("execBtn");
+ b.textContent=s==="buy"?"BUY":"SELL";b.className="execbtn "+(s==="buy"?"b":"s");
+ updSheet();
+}
+function setMax(){
+ const px=prices[shSym]||0;if(!px)return;
+ if(shSide==="buy")document.getElementById("qtyIn").value=(state.cash/px).toFixed(6);
+ else{const h=state.hold[shSym];document.getElementById("qtyIn").value=h?h.qty:"";}
+ updSheet();
+}
+function updSheet(){
+ const px=prices[shSym]||0,q=parseFloat(document.getElementById("qtyIn").value)||0;
+ document.getElementById("shPrice").textContent=fmt$(px);
+ document.getElementById("shTotal").textContent=fmt$(q*px);
+ document.getElementById("shCash").textContent=fmt$(state.cash);
+}
+document.getElementById("qtyIn").addEventListener("input",updSheet);
+function execTrade(){
+ const px=prices[shSym]||0,q=parseFloat(document.getElementById("qtyIn").value)||0;
+ const r=shSide==="buy"?TM.buy(state,shSym,q,px):TM.sell(state,shSym,q,px);
+ if(!r.ok){toast(r.err);return;}
+ save();closeSheet();render();
+ toast(shSide==="buy"?"Bought ":"Sold "+(r.pnl!=null?" • P&L "+fmt$(r.pnl):"")+" "+q+" "+shSym+(shSide==="buy"?"":""));
+}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",2200);}
+document.getElementById("resetBtn").onclick=()=>{
+ if(confirm("Reset paper trading? This clears holdings and history and restores $100,000 virtual.")){
+  state={cash:START_CASH,hold:{},hist:[],realized:0};save();render();toast("Reset complete — $100,000 virtual restored");
+ }
+};
+/* ---------- update checker ---------- */
+async function vtpCheckUpdate(){
+ try{
+  const r=await fetch("virtual-trade-pro-version.json?t="+Date.now());
+  if(!r.ok)return;const v=await r.json();
+  if(v.version&&v.version!==VTP_VERSION){
+   try{if(localStorage.getItem("vtp_update_dismissed")===v.version)return;}catch(e){}
+   document.getElementById("updateCard").style.display="block";
+   document.getElementById("updateDlBtn").onclick=()=>{try{localStorage.setItem("vtp_update_dismissed",v.version);}catch(e){}window.location.href=v.apkUrl||VTP_APK_URL;};
+   document.getElementById("updateNoBtn").onclick=()=>{try{localStorage.setItem("vtp_update_dismissed",v.version);}catch(e){}document.getElementById("updateCard").style.display="none";};
+  }
+ }catch(e){}
+}
+/* ---------- boot ---------- */
+(async function boot(){
+ render();
+ const ok=await fetchLive();
+ if(!ok)simTick();
+ render();
+ setInterval(async()=>{const ok2=await fetchLive();if(!ok2)simTick();render();},60000);
+ setInterval(()=>{if(simMode)simTick();render();},15000);
+ vtpCheckUpdate();
+})();
+window.__atMenu=function(){return true;};
+window.__goMenu=function(){showTab("market");};
+</script>
+</body>
+</html>
