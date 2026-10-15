@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ludo Dangal 💪 Classic Ludo</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;user-select:none;-webkit-user-select:none;background:#0d1030}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 800px at 50% -10%,#2b2f6b 0%,#14173d 55%,#0a0c24 100%)}
+  #game{display:block;touch-action:manipulation;max-width:100vw;max-height:100vh}
+  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,7,20,.78);z-index:20;padding:14px;backdrop-filter:blur(3px)}
+  .hidden{display:none!important}
+  /* ---------- menu card (premium) ---------- */
+  .mcard{position:relative;width:100%;max-width:460px;border-radius:24px;padding:26px 22px 20px;text-align:center;color:#fff;
+    background:linear-gradient(165deg,#3b2a63 0%,#241a45 45%,#171233 100%);
+    border:2px solid rgba(255,215,94,.55);box-shadow:0 0 0 6px rgba(20,12,40,.55),0 24px 70px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.25);
+    max-height:94vh;overflow-y:auto}
+  .mcard::before{content:'';position:absolute;inset:8px;border-radius:16px;border:1px solid rgba(255,215,94,.28);pointer-events:none}
+  #heroCanvas{width:100%;max-width:380px;height:auto;display:block;margin:0 auto 6px;filter:drop-shadow(0 10px 22px rgba(0,0,0,.5))}
+  .gtitle{font-size:52px;font-weight:900;letter-spacing:2px;line-height:1;
+    background:linear-gradient(180deg,#fff6c8 8%,#ffd75e 38%,#e8960c 62%,#fff0a8 92%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 3px 0 #6b3d05) drop-shadow(0 8px 18px rgba(0,0,0,.55));margin:2px 0}
+  .gsub{color:#d9c8ff;font-size:15px;margin-bottom:12px;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .lbl{font-size:12px;color:#cbb8f5;margin:12px 0 6px;letter-spacing:3px;font-weight:bold}
+  .optRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .opt{background:linear-gradient(180deg,#4a3d7d,#342a5c);border:2px solid rgba(255,215,94,.35);color:#efe6ff;border-radius:14px;
+    padding:11px 16px;font-size:15px;font-weight:bold;cursor:pointer;min-width:70px;box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .08s}
+  .opt:active{transform:translateY(2px)}
+  .opt.sel{background:linear-gradient(180deg,#ffe27a,#e8a90c);color:#4a2c08;border-color:#fff2b0;box-shadow:0 0 16px rgba(255,215,94,.65),0 4px 0 #7a4d12}
+  .colorpick{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.25);cursor:pointer;box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 3px 4px 8px rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.4)}
+  .colorpick.sel{border-color:#fff;box-shadow:0 0 18px #fff,inset -4px -6px 10px rgba(0,0,0,.35)}
+  .playbtn{display:block;width:100%;margin:18px 0 6px;padding:17px;font-size:26px;font-weight:900;letter-spacing:3px;color:#3d2503;cursor:pointer;border:none;border-radius:20px;
+    background:linear-gradient(180deg,#fff3b0 0%,#ffd75e 30%,#f0a500 65%,#d18a00 100%);
+    box-shadow:0 6px 0 #7a4d12,0 12px 28px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.8);
+    text-shadow:0 1px 0 rgba(255,255,255,.6);transition:transform .08s}
+  .playbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a4d12,0 6px 14px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.8)}
+  .ghostbtn{background:rgba(255,255,255,.08);border:2px solid rgba(255,215,94,.4);color:#ffe9b8;border-radius:12px;padding:9px 16px;font-size:14px;cursor:pointer;margin-top:8px}
+  #howto{display:none;text-align:left;font-size:13.5px;line-height:1.7;color:#efe6ff;background:rgba(0,0,0,.3);border-radius:12px;padding:12px 14px;margin-top:10px;border:1px solid rgba(255,215,94,.25)}
+  .vtag{margin-top:10px;font-size:11px;color:#8f83c9;letter-spacing:1px}
+  /* ---------- win card ---------- */
+  #winCard h1{font-size:50px;margin-bottom:4px}
+  #winTitle{font-size:36px;font-weight:900;margin:6px 0;
+    background:linear-gradient(180deg,#fff6c8,#ffd75e 45%,#e8960c);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 #6b3d05)}
+  /* ---------- toast / top buttons / update ---------- */
+  #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:rgba(15,10,35,.94);color:#ffe9b8;
+    border:2px solid rgba(255,215,94,.6);border-radius:14px;padding:11px 20px;font-size:16px;font-weight:bold;z-index:30;display:none;max-width:88vw;text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  #topbtns{position:fixed;top:10px;right:10px;z-index:15;display:flex;gap:8px}
+  #topbtns button{width:46px;height:46px;border-radius:14px;border:2px solid rgba(255,215,94,.55);background:rgba(20,14,45,.88);color:#ffd75e;font-size:21px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.4)}
+  #updateCard{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#12300f;border:2px solid #7CFC00;border-radius:12px;padding:10px 14px;color:#eaffd0;z-index:25;display:none;text-align:center;font-size:14px;max-width:92vw}
+  #updateCard button{background:#7CFC00;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;margin:6px 4px 0;cursor:pointer}
+  #rollHint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:14;display:none;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" width="900" height="1320"></canvas></div>
+<div id="topbtns">
+  <button id="muteBtn" title="Sound">🔊</button>
+  <button id="menuBtn" title="Menu">☰</button>
+</div>
+<div id="updateCard">
+  🎉 <b>Ludo Dangal ka naya version aaya hai!</b><br>
+  <button id="updateDlBtn">⬇ Download</button><button id="updateNoBtn">Baad me</button>
+</div>
+<div id="toast"></div>
+
+<div id="menu" class="overlay">
+  <div class="mcard">
+    <canvas id="heroCanvas" width="760" height="400"></canvas>
+    <div class="gtitle">LUDO DANGAL</div>
+    <p class="gsub">💪 Classic Ludo — dangal style muqabla!</p>
+    <div class="lbl">MODE</div>
+    <div class="optRow">
+      <button class="opt sel" id="mPass">👥 Pass &amp; Play</button>
+      <button class="opt" id="mBots">🤖 Vs Bots</button>
+    </div>
+    <div class="lbl" id="countLbl">PLAYERS</div>
+    <div class="optRow" id="countRow">
+      <button class="opt sel" data-n="2">2</button>
+      <button class="opt" data-n="3">3</button>
+      <button class="opt" data-n="4">4</button>
+    </div>
+    <div class="lbl">YOUR COLOR (vs bots)</div>
+    <div class="optRow" id="colorRow">
+      <button class="colorpick sel" data-c="0" style="background:radial-gradient(circle at 35% 30%,#ff7a85,#e63946 60%,#a31621)"></button>
+      <button class="colorpick" data-c="1" style="background:radial-gradient(circle at 35% 30%,#5fd07e,#2a9d48 60%,#1a6b32)"></button>
+      <button class="colorpick" data-c="2" style="background:radial-gradient(circle at 35% 30%,#ffd94d,#f4b400 60%,#b78700)"></button>
+      <button class="colorpick" data-c="3" style="background:radial-gradient(circle at 35% 30%,#6b96ff,#2f6fed 60%,#1d44ad)"></button>
+    </div>
+    <button class="playbtn" id="startBtn">▶ &nbsp;PLAY&nbsp; ◀</button>
+    <button class="ghostbtn" id="howBtn">❓ How to Play</button>
+    <div id="howto">
+      🎲 <b>6</b> aaye to pawn base se nikalo.<br>
+      👆 Chamakte pawn par tap karke chalao.<br>
+      ⚔️ Dushman ke pawn par utro to wo wapas base jayega — <b>★ safe</b> tiles par koi capture nahi.<br>
+      🏠 Ghar pohnchne ke liye <b>exact</b> number chahiye.<br>
+      🎲 6 par extra turn; lagatar 3 six = turn zaya.<br>
+      🏆 Pehle apne 4 pawn ghar pohnchao aur jeeto!
+    </div>
+    <div class="vtag">LUDO DANGAL v1.0 • by Jilan Apps</div>
+  </div>
+</div>
+
+<div id="winOv" class="overlay hidden">
+  <div class="mcard" id="winCard">
+    <h1>🏆</h1>
+    <div id="winTitle">Red Wins!</div>
+    <p class="gsub" id="winSub">Dangal jeet liya!</p>
+    <button class="playbtn" id="againBtn" style="font-size:21px">🔄 PLAY AGAIN</button>
+    <button class="ghostbtn" id="winMenuBtn">☰ Menu</button>
+  </div>
+</div>
+
+<script src="logic.js"></script>
+<script>
+'use strict';
+/* ============================================================
+   LUDO DANGAL v1.0 — premium classic Ludo. Canvas + vanilla JS.
+   ============================================================ */
+const APP_VERSION = '1.0';
+const APK_URL = 'https://jilanapps.github.io/jilan-store/ludo-dangal/ludo-dangal.apk';
+
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+const W = 900, H = 1320;
+
+// layout
+const BX = 30, BY = 250, BS = 840, CELL = BS / 15;   // board
+const PANEL_Y = 1120;                                  // bottom panel top
+
+// ------- state -------
+const G = {
+  screen: 'menu',
+  st: null,
+  phase: 'roll',        // roll | move | anim | over
+  diceVal: 6, diceAnim: 0, diceT: 0,
+  legal: [], hlPulse: 0,
+  turnBanner: '',
+  particles: [],
+  pawnAnims: [],        // {pi, pawn, from:{x,y}, to:{x,y}, t, dur, arc, done}
+  captureFlash: 0,
+  setup: { mode: 'pass', count: 2, color: 0 },
+  muted: false,
+  msg: '', msgT: 0,
+  rollBtn: { x: 590, y: 1130, w: 270, h: 120 },
+  diceRect: { x: 60, y: 1120, s: 150 },
+  shake: 0,
+};
+try { G.muted = localStorage.getItem('ld_muted') === '1'; } catch (e) {}
+
+// ------- audio (WebAudio, no files) -------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function beep(freq, dur, type, vol, when) {
+  if (G.muted) return;
+  const a = ac(); if (!a) return;
+  const t = a.currentTime + (when || 0);
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol || 0.18, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+const sfx = {
+  click()  { beep(660, 0.07, 'triangle', 0.15); },
+  dice()   { for (let i = 0; i < 5; i++) beep(180 + Math.random() * 220, 0.05, 'square', 0.07, i * 0.07); },
+  hop()    { beep(440 + Math.random() * 120, 0.06, 'sine', 0.12); },
+  out()    { beep(523, 0.1, 'triangle', 0.16); beep(784, 0.12, 'triangle', 0.16, 0.09); },
+  capture(){ beep(140, 0.25, 'sawtooth', 0.2); beep(90, 0.3, 'sawtooth', 0.18, 0.08); },
+  safe()   { beep(880, 0.08, 'sine', 0.1); },
+  win()    { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => beep(f, 0.16, 'triangle', 0.18, i * 0.13)); },
+  turn()   { beep(520, 0.06, 'sine', 0.08); },
+};
+function setMute(m) {
+  G.muted = m;
+  document.getElementById('muteBtn').textContent = m ? '🔇' : '🔊';
+  try { localStorage.setItem('ld_muted', m ? '1' : '0'); } catch (e) {}
+}
+setMute(G.muted);
+
+/* ============================================================
+   PREMIUM DRAWING — helpers
+   ============================================================ */
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function grad(x0, y0, x1, y1, stops) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  stops.forEach(s => g.addColorStop(s[0], s[1]));
+  return g;
+}
+function cellXY(c, r) { return { x: BX + c * CELL, y: BY + r * CELL }; }
+
+// glossy pawn with depth: shadow, radial body, rim, specular shine
+function drawPawn(x, y, r, ci, opts) {
+  opts = opts || {};
+  const C = LD.COLOR_HEX[LD.COLORS[ci]], D = LD.COLOR_DARK[LD.COLORS[ci]], L = LD.COLOR_LIGHT[LD.COLORS[ci]];
+  ctx.save();
+  if (opts.glow) {
+    const p = 0.6 + 0.4 * Math.sin(G.hlPulse * 6);
+    ctx.shadowColor = '#ffd75e'; ctx.shadowBlur = 22 * p + 8;
+  } else { ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4; }
+  // shadow ellipse
+  ctx.beginPath(); ctx.ellipse(x, y + r * 0.95, r * 0.85, r * 0.28, 0, 0, 7);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  // body
+  const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r * 1.15);
+  g.addColorStop(0, L); g.addColorStop(0.55, C); g.addColorStop(1, D);
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = g; ctx.fill();
+  // rim
+  ctx.lineWidth = Math.max(2, r * 0.12); ctx.strokeStyle = D; ctx.stroke();
+  ctx.lineWidth = Math.max(1, r * 0.05); ctx.strokeStyle = 'rgba(255,255,255,.65)';
+  ctx.beginPath(); ctx.arc(x, y, r * 0.72, 0, 7); ctx.stroke();
+  // specular shine
+  ctx.beginPath(); ctx.ellipse(x - r * 0.34, y - r * 0.42, r * 0.26, r * 0.16, -0.6, 0, 7);
+  ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
+  if (opts.crown) { ctx.font = (r * 0.9) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('♛', x, y + r * 0.08); }
+  ctx.restore();
+}
+
+// glossy die
+const PIPS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]],
+  4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+  6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
+function drawDie(x, y, s, val, spinning) {
+  ctx.save();
+  ctx.translate(x + s / 2, y + s / 2);
+  if (spinning) ctx.rotate(Math.sin(G.diceT * 30) * 0.12);
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+  const g = grad(-s/2, -s/2, s/2, s/2, [[0, '#ffffff'], [0.5, '#f4f6fb'], [1, '#cfd6e4']]);
+  rr(-s/2, -s/2, s, s, s * 0.18); ctx.fillStyle = g; ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = 3; ctx.strokeStyle = '#8a93a8'; ctx.stroke();
+  // gloss stripe
+  ctx.beginPath(); rr(-s/2 + 6, -s/2 + 6, s - 12, s * 0.32, s * 0.12);
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
+  // pips
+  const v = spinning ? (1 + Math.floor(Math.random() * 6)) : val;
+  const pr = s * 0.085, off = s * 0.26;
+  PIPS[v].forEach(p => {
+    const px = p[0] * off, py = p[1] * off;
+    const pg = ctx.createRadialGradient(px - pr*0.3, py - pr*0.35, pr*0.2, px, py, pr);
+    pg.addColorStop(0, '#4a5266'); pg.addColorStop(1, '#141824');
+    ctx.beginPath(); ctx.arc(px, py, pr, 0, 7); ctx.fillStyle = pg; ctx.fill();
+  });
+  ctx.restore();
+}
+
+/* ============================================================
+   BOARD MAP — precompute 15x15 cell types
+   ============================================================ */
+const CELLMAP = [];
+(function buildMap() {
+  for (let r = 0; r < 15; r++) { CELLMAP[r] = []; for (let c = 0; c < 15; c++) CELLMAP[r][c] = { t: 'empty' }; }
+  // bases
+  const baseDefs = [
+    { c0: 0, r0: 0, ci: 0 }, { c0: 9, r0: 0, ci: 1 },
+    { c0: 9, r0: 9, ci: 2 }, { c0: 0, r0: 9, ci: 3 },
+  ];
+  baseDefs.forEach(b => {
+    for (let r = b.r0; r < b.r0 + 6; r++) for (let c = b.c0; c < b.c0 + 6; c++)
+      CELLMAP[r][c] = { t: 'base', ci: b.ci };
+  });
+  // track
+  LD.TRACK.forEach((cell, ti) => {
+    const info = { t: 'track', ti };
+    if (LD.ENTRY.includes(ti)) { info.ci = LD.ENTRY.indexOf(ti); info.arrow = true; }
+    if (LD.SAFE.has(ti) && !info.arrow) info.star = true;
+    CELLMAP[cell[1]][cell[0]] = info;
+  });
+  // home columns
+  LD.HOME_COL.forEach((col, ci) => col.forEach(cell => { CELLMAP[cell[1]][cell[0]] = { t: 'home', ci }; }));
+  // center 3x3
+  for (let r = 6; r <= 8; r++) for (let c = 6; c <= 8; c++) CELLMAP[r][c] = { t: 'center' };
+})();
+
+function drawStar(cx, cy, r, color) {
+  ctx.save(); ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? r * 0.45 : r;
+    ctx[i ? 'lineTo' : 'moveTo'](cx + Math.cos(a) * rad, cy + Math.sin(a) * rad);
+  }
+  ctx.closePath();
+  ctx.fillStyle = color; ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 3;
+  ctx.fill(); ctx.restore();
+}
+
+function drawTile(c, r) {
+  const info = CELLMAP[r][c], p = cellXY(c, r), s = CELL;
+  const x = p.x + 1.5, y = p.y + 1.5, w = s - 3;
+  if (info.t === 'track' || info.t === 'home') {
+    let fill;
+    if (info.ci != null) {
+      const C = LD.COLOR_HEX[LD.COLORS[info.ci]], L = LD.COLOR_LIGHT[LD.COLORS[info.ci]], D = LD.COLOR_DARK[LD.COLORS[info.ci]];
+      fill = grad(x, y, x, y + w, [[0, L], [0.5, C], [1, D]]);
+    } else {
+      fill = grad(x, y, x, y + w, [[0, '#ffffff'], [0.55, '#f2f5fa'], [1, '#d7deeb']]);
+    }
+    rr(x, y, w, w, w * 0.14); ctx.fillStyle = fill; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(20,25,45,.28)'; ctx.stroke();
+    // top gloss
+    rr(x + 3, y + 3, w - 6, w * 0.3, w * 0.1);
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
+    const cx = x + w / 2, cy = y + w / 2;
+    if (info.star) drawStar(cx, cy, w * 0.3, '#e8a90c');
+    if (info.arrow) {
+      // white arrow pointing along track direction
+      const ti = info.ti;
+      const nxt = LD.TRACK[(ti + 1) % 52];
+      const dx = Math.sign(nxt[0] - c), dy = Math.sign(nxt[1] - r);
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.atan2(dy, dx));
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 2;
+      const a = w * 0.26;
+      ctx.beginPath(); ctx.moveTo(a, 0); ctx.lineTo(-a * 0.4, -a * 0.75); ctx.lineTo(-a * 0.4, -a * 0.3);
+      ctx.lineTo(-a, -a * 0.3); ctx.lineTo(-a, a * 0.3); ctx.lineTo(-a * 0.4, a * 0.3); ctx.lineTo(-a * 0.4, a * 0.75);
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+  }
+}
+
+function drawBase(ci) {
+  const defs = [{ c0: 0, r0: 0 }, { c0: 9, r0: 0 }, { c0: 9, r0: 9 }, { c0: 0, r0: 9 }];
+  const d = defs[ci], p = cellXY(d.c0, d.r0), s = CELL * 6;
+  const C = LD.COLOR_HEX[LD.COLORS[ci]], L = LD.COLOR_LIGHT[LD.COLORS[ci]], D = LD.COLOR_DARK[LD.COLORS[ci]];
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5;
+  rr(p.x + 4, p.y + 4, s - 8, s - 8, 26);
+  ctx.fillStyle = grad(p.x, p.y, p.x, p.y + s, [[0, L], [0.5, C], [1, D]]);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.stroke();
+  // inner white arena circle panel
+  const cx = p.x + s / 2, cy = p.y + s / 2, ir = s * 0.32;
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 7);
+  ctx.fillStyle = grad(cx - ir, cy - ir, cx + ir, cy + ir, [[0, '#ffffff'], [1, '#dbe2ef']]);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+  ctx.lineWidth = 3; ctx.strokeStyle = D; ctx.stroke();
+  // pawn spots
+  LD.BASE_SPOTS[ci].forEach(sp => {
+    const sx = BX + sp[0] * CELL, sy = BY + sp[1] * CELL, sr = CELL * 0.42;
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, 7);
+    ctx.fillStyle = grad(sx - sr, sy - sr, sx + sr, sy + sr, [[0, C], [1, D]]);
+    ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx, sy, sr * 0.55, 0, 7);
+    ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawCenter() {
+  const p = cellXY(6, 6), s = CELL * 3, cx = p.x + s / 2, cy = p.y + s / 2;
+  // triangles: red top, green right, yellow bottom, blue left
+  const tris = [
+    { ci: 0, pts: [[p.x, p.y], [p.x + s, p.y], [cx, cy]] },
+    { ci: 1, pts: [[p.x + s, p.y], [p.x + s, p.y + s], [cx, cy]] },
+    { ci: 2, pts: [[p.x + s, p.y + s], [p.x, p.y + s], [cx, cy]] },
+    { ci: 3, pts: [[p.x, p.y + s], [p.x, p.y], [cx, cy]] },
+  ];
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 10;
+  tris.forEach(t => {
+    const C = LD.COLOR_HEX[LD.COLORS[t.ci]], L = LD.COLOR_LIGHT[LD.COLORS[t.ci]], D = LD.COLOR_DARK[LD.COLORS[t.ci]];
+    ctx.beginPath(); ctx.moveTo(t.pts[0][0], t.pts[0][1]); ctx.lineTo(t.pts[1][0], t.pts[1][1]); ctx.lineTo(cx, cy); ctx.closePath();
+    ctx.fillStyle = grad(p.x, p.y, p.x + s, p.y + s, [[0, L], [0.55, C], [1, D]]);
+    ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.stroke();
+  });
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+  // gold medallion
+  const mg = ctx.createRadialGradient(cx - 8, cy - 10, 6, cx, cy, 34);
+  mg.addColorStop(0, '#fff3b0'); mg.addColorStop(0.6, '#ffd75e'); mg.addColorStop(1, '#c07f00');
+  ctx.beginPath(); ctx.arc(cx, cy, 32, 0, 7); ctx.fillStyle = mg; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = '#7a4d12'; ctx.stroke();
+  ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🏆', cx, cy + 2);
+  ctx.restore();
+}
+
+function drawBoard() {
+  // arena frame: dark wood + gold trim
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  rr(BX - 16, BY - 16, BS + 32, BS + 32, 30);
+  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, '#6b4423'], [0.5, '#4a2c14'], [1, '#2e1a0b']]);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = 4; ctx.strokeStyle = '#d8a83c'; ctx.stroke();
+  rr(BX - 8, BY - 8, BS + 16, BS + 16, 24);
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,215,94,.5)'; ctx.stroke();
+  // board felt background
+  rr(BX, BY, BS, BS, 18);
+  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, '#1c2450'], [1, '#12173a']]);
+  ctx.fill();
+  ctx.restore();
+  // cells
+  for (let r = 0; r < 15; r++) for (let c = 0; c < 15; c++) {
+    const t = CELLMAP[r][c].t;
+    if (t === 'track' || t === 'home') drawTile(c, r);
+  }
+  [0, 1, 2, 3].forEach(drawBase);
+  drawCenter();
+}
+
+/* ============================================================
+   PAWN POSITIONING + HUD + ANIMATIONS + PARTICLES + HERO ART
+   ============================================================ */
+function pawnCellPos(colorIdx, pos) {
+  if (pos === -1) return null;                    // base spot handled separately
+  if (pos <= 50) { const t = LD.TRACK[(LD.ENTRY[colorIdx] + pos) % 52]; return { c: t[0], r: t[1] }; }
+  if (pos <= 55) { const h = LD.HOME_COL[colorIdx][pos - 51]; return { c: h[0], r: h[1] }; }
+  return { c: 7, r: 7, home: true };               // finished -> center
+}
+// pixel center of a cell
+function cellCenter(c, r) { return { x: BX + (c + 0.5) * CELL, y: BY + (r + 0.5) * CELL }; }
+
+// stacking offsets when several pawns share a cell
+function pawnXY(pi, pawnIdx, allPawns) {
+  const pl = G.st.players[pi], colorIdx = pl.color, pos = pl.pawns[pawnIdx];
+  if (pos === -1) {
+    const sp = LD.BASE_SPOTS[colorIdx][pawnIdx];
+    return { x: BX + sp[0] * CELL, y: BY + sp[1] * CELL };
+  }
+  const cp = pawnCellPos(colorIdx, pos);
+  const ctr = cellCenter(cp.c, cp.r);
+  if (cp.home) {
+    // finished pawns arranged around medallion
+    const k = pl.pawns.filter(p => p === 56).indexOf(56);
+    const idx = pl.pawns.slice(0, pawnIdx + 1).filter(p => p === 56).length - 1;
+    const a = -Math.PI / 2 + idx * (Math.PI * 2 / 4);
+    return { x: ctr.x + Math.cos(a) * 24, y: ctr.y + Math.sin(a) * 24 };
+  }
+  // count occupants of same cell
+  const key = cp.c + ',' + cp.r;
+  const occ = [];
+  G.st.players.forEach((p2, qi) => p2.pawns.forEach((pp, qj) => {
+    if (pp === -1 || pp === 56) return;
+    const c2 = pawnCellPos(p2.color, pp);
+    if (c2 && !c2.home && c2.c + ',' + c2.r === key) occ.push([qi, qj]);
+  }));
+  if (occ.length <= 1) return ctr;
+  const oi = occ.findIndex(o => o[0] === pi && o[1] === pawnIdx);
+  const offs = [[-0.22, -0.22], [0.22, -0.22], [-0.22, 0.22], [0.22, 0.22], [0, 0], [-0.3, 0], [0.3, 0], [0, -0.3], [0, 0.3]];
+  const o = offs[oi % offs.length];
+  return { x: ctr.x + o[0] * CELL, y: ctr.y + o[1] * CELL };
+}
+function pawnRadius() { return CELL * 0.36; }
+
+function drawPawns() {
+  if (!G.st) return;
+  const r = pawnRadius();
+  const moving = new Set(G.pawnAnims.map(a => a.pi + ':' + a.pawn));
+  // non-glowing first, then glowing (legal moves) on top
+  const order = [];
+  G.st.players.forEach((pl, pi) => pl.pawns.forEach((_, i) => order.push([pi, i])));
+  order.forEach(([pi, i]) => {
+    if (moving.has(pi + ':' + i)) return;
+    const isLegal = G.phase === 'move' && G.legal.includes(i) && pi === G.st.turn;
+    if (isLegal) return;
+    const p = pawnXY(pi, i); drawPawn(p.x, p.y, r, G.st.players[pi].color, {});
+  });
+  order.forEach(([pi, i]) => {
+    if (moving.has(pi + ':' + i)) return;
+    const isLegal = G.phase === 'move' && G.legal.includes(i) && pi === G.st.turn;
+    if (!isLegal) return;
+    const p = pawnXY(pi, i); drawPawn(p.x, p.y, r * 1.12, G.st.players[pi].color, { glow: true });
+  });
+  // in-flight pawn animations
+  G.pawnAnims.forEach(a => {
+    const from = a.seg === 0 ? a.from : a.path[a.seg - 1];
+    const to = a.path[a.seg];
+    if (!to) return;
+    const t = Math.min(1, a.t / a.dur), e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const x = from.x + (to.x - from.x) * e;
+    const y = from.y + (to.y - from.y) * e - Math.sin(t * Math.PI) * a.arc;
+    drawPawn(x, y, r, a.ci, {});
+  });
+}
+
+// ---- particles ----
+function burst(x, y, colors, n, spd) {
+  for (let i = 0; i < (n || 24); i++) {
+    const a = Math.random() * Math.PI * 2, s = (spd || 260) * (0.4 + Math.random() * 0.8);
+    G.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120,
+      life: 0.9 + Math.random() * 0.5, t: 0, c: colors[i % colors.length], sz: 4 + Math.random() * 6 });
+  }
+}
+function confetti() {
+  const cols = ['#ffd75e', '#e63946', '#2a9d48', '#2f6fed', '#ffffff', '#f4b400'];
+  for (let i = 0; i < 130; i++)
+    G.particles.push({ x: Math.random() * W, y: -20 - Math.random() * 300, vx: (Math.random() - 0.5) * 120,
+      vy: 140 + Math.random() * 160, life: 2.5 + Math.random() * 1.5, t: 0, c: cols[i % cols.length],
+      sz: 5 + Math.random() * 7, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8 });
+}
+function updateParticles(dt) {
+  G.particles = G.particles.filter(p => {
+    p.t += dt; if (p.t > p.life) return false;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 500 * dt;
+    if (p.rot != null) p.rot += p.vr * dt;
+    return true;
+  });
+}
+function drawParticles() {
+  G.particles.forEach(p => {
+    ctx.save(); ctx.globalAlpha = 1 - p.t / p.life;
+    if (p.rot != null) { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.sz/2, -p.sz/3, p.sz, p.sz*0.66); }
+    else { ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz * (1 - p.t / p.life * 0.5), 0, 7); ctx.fill(); }
+    ctx.restore();
+  });
+}
+
+// ---- HUD: top bar + turn banner + bottom panel ----
+function drawTopBar() {
+  // title
+  ctx.save();
+  ctx.font = '900 44px Trebuchet MS'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const tg = ctx.createLinearGradient(0, 30, 0, 80);
+  tg.addColorStop(0, '#fff6c8'); tg.addColorStop(0.5, '#ffd75e'); tg.addColorStop(1, '#e8960c');
+  ctx.fillStyle = tg;
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 8;
+  ctx.fillText('💪 LUDO DANGAL', 30, 62);
+  ctx.restore();
+}
+
+function drawTurnBanner() {
+  if (!G.st || G.screen !== 'board') return;
+  const pl = G.st.players[G.st.turn];
+  const C = LD.COLOR_HEX[LD.COLORS[pl.color]], D = LD.COLOR_DARK[LD.COLORS[pl.color]], L = LD.COLOR_LIGHT[LD.COLORS[pl.color]];
+  const x = 30, y = 128, w = W - 60, h = 96;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+  rr(x, y, w, h, 22);
+  ctx.fillStyle = grad(x, y, x, y + h, [[0, L], [0.55, C], [1, D]]);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.stroke();
+  rr(x + 8, y + 8, w - 16, h * 0.32, 12); ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
+  // pawn mini
+  drawPawn(x + 62, y + h / 2, 30, pl.color, {});
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.font = '900 34px Trebuchet MS';
+  ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 4;
+  let label = pl.name + (pl.isBot ? ' 🤖' : '');
+  ctx.fillText(label + ' ki baari', x + 110, y + h / 2 - 2);
+  // live score dots: finished pawns
+  const done = pl.pawns.filter(p => p === 56).length;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath(); ctx.arc(x + w - 40 - i * 34, y + h / 2, 12, 0, 7);
+    ctx.fillStyle = i < done ? '#fff' : 'rgba(0,0,0,.3)'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBottomPanel() {
+  const y = PANEL_Y;
+  ctx.save();
+  // panel bg
+  rr(30, y, W - 60, H - y - 24, 24);
+  ctx.fillStyle = grad(30, y, 30, H, [[0, 'rgba(38,32,80,.92)'], [1, 'rgba(18,14,45,.94)']]);
+  ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,215,94,.4)'; ctx.stroke();
+  // dice
+  const d = G.diceRect;
+  const spinning = G.diceAnim > 0;
+  drawDie(d.x, d.y + 8, d.s, G.diceVal, spinning);
+  ctx.fillStyle = '#cfd6ea'; ctx.font = 'bold 22px Trebuchet MS'; ctx.textAlign = 'center';
+  ctx.fillText('DICE', d.x + d.s / 2, d.y + d.s + 34);
+  // ROLL button (glossy)
+  const b = G.rollBtn, canRoll = G.phase === 'roll' && !curIsBot();
+  ctx.save();
+  if (!canRoll) ctx.globalAlpha = 0.45;
+  ctx.shadowColor = canRoll ? 'rgba(255,215,94,.55)' : 'transparent'; ctx.shadowBlur = canRoll ? 18 : 0; ctx.shadowOffsetY = 4;
+  rr(b.x, b.y, b.w, b.h, 26);
+  ctx.fillStyle = canRoll
+    ? grad(b.x, b.y, b.x, b.y + b.h, [[0, '#fff3b0'], [0.35, '#ffd75e'], [0.7, '#f0a500'], [1, '#c07f00']])
+    : grad(b.x, b.y, b.x, b.y + b.h, [[0, '#8a8fa3'], [1, '#5a5f73']]);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = 3; ctx.strokeStyle = canRoll ? '#7a4d12' : '#3c3f4d'; ctx.stroke();
+  rr(b.x + 10, b.y + 8, b.w - 20, b.h * 0.3, 14); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
+  ctx.fillStyle = canRoll ? '#4a2c08' : '#e2e5ee'; ctx.font = '900 44px Trebuchet MS'; ctx.textBaseline = 'middle';
+  ctx.fillText('🎲 ROLL', b.x + b.w / 2, b.y + b.h / 2 + 2);
+  ctx.restore();
+  // message
+  ctx.fillStyle = '#ffe9b8'; ctx.font = 'bold 26px Trebuchet MS'; ctx.textAlign = 'center';
+  const mm = G.msg || defaultMsg();
+  ctx.fillText(mm, W / 2 - 40, y + 210 > H - 40 ? H - 46 : y + 96);
+  ctx.restore();
+}
+function defaultMsg() {
+  if (!G.st) return '';
+  if (G.phase === 'roll') return curIsBot() ? 'Bot soch raha hai…' : 'Dice roll karo! 🎲';
+  if (G.phase === 'move') return 'Chamakte pawn par tap karo 👆';
+  return '';
+}
+
+/* ---------- HERO ART for menu (premium) ---------- */
+function drawHero() {
+  const hc = document.getElementById('heroCanvas'), hx = hc.getContext('2d');
+  const w = 760, h = 400;
+  // arena night bg with spotlights
+  const bg = hx.createRadialGradient(w/2, h*0.75, 40, w/2, h/2, 420);
+  bg.addColorStop(0, '#4a3f8f'); bg.addColorStop(0.55, '#2a2560'); bg.addColorStop(1, '#14123a');
+  hx.fillStyle = bg; hx.fillRect(0, 0, w, h);
+  // spotlights
+  [[150, 60], [610, 60], [380, 40]].forEach(s => {
+    const sg = hx.createRadialGradient(s[0], s[1], 4, s[0], s[1], 190);
+    sg.addColorStop(0, 'rgba(255,240,180,.5)'); sg.addColorStop(1, 'rgba(255,240,180,0)');
+    hx.fillStyle = sg; hx.fillRect(0, 0, w, h);
+  });
+  // crowd dots
+  hx.fillStyle = 'rgba(255,255,255,.16)';
+  for (let i = 0; i < 60; i++) hx.fillRect(Math.random() * w, Math.random() * h * 0.45, 5, 5);
+  // arena floor ellipse
+  hx.save();
+  hx.beginPath(); hx.ellipse(w/2, h*0.78, 300, 78, 0, 0, 7);
+  const fg = hx.createRadialGradient(w/2, h*0.78, 20, w/2, h*0.78, 300);
+  fg.addColorStop(0, '#6b4a26'); fg.addColorStop(1, '#3a2410');
+  hx.fillStyle = fg; hx.fill();
+  hx.lineWidth = 6; hx.strokeStyle = '#d8a83c'; hx.stroke();
+  hx.restore();
+  // big glossy die (left)
+  drawHeroDie(hx, 250, 200, 150, 5);
+  // 4 glossy pawns (right)
+  const cols = ['#e63946', '#2a9d48', '#f4b400', '#2f6fed'];
+  const dark = ['#a31621', '#1a6b32', '#b78700', '#1d44ad'];
+  const lite = ['#ff7a85', '#5fd07e', '#ffd94d', '#6b96ff'];
+  [[470, 235, 46], [560, 215, 54], [655, 240, 44]].forEach((p, i) => drawHeroPawn(hx, p[0], p[1], p[2], cols[i], dark[i], lite[i]));
+  drawHeroPawn(hx, 565, 300, 40, cols[3], dark[3], lite[3]);
+  // VS burst
+  hx.save(); hx.translate(400, 130); hx.rotate(-0.12);
+  hx.font = '900 64px Trebuchet MS'; hx.textAlign = 'center'; hx.textBaseline = 'middle';
+  hx.lineWidth = 8; hx.strokeStyle = '#7a4d12'; hx.strokeText('VS', 0, 0);
+  const vg = hx.createLinearGradient(0, -34, 0, 34);
+  vg.addColorStop(0, '#fff6c8'); vg.addColorStop(0.5, '#ffd75e'); vg.addColorStop(1, '#e8960c');
+  hx.fillStyle = vg; hx.fillText('VS', 0, 0); hx.restore();
+}
+function drawHeroDie(hx, x, y, s, val) {
+  hx.save(); hx.translate(x, y); hx.rotate(-0.1);
+  hx.shadowColor = 'rgba(0,0,0,.55)'; hx.shadowBlur = 22; hx.shadowOffsetY = 10;
+  const g = hx.createLinearGradient(-s/2, -s/2, s/2, s/2);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#f2f5fa'); g.addColorStop(1, '#c9d1e2');
+  hx.beginPath(); hx.roundRect(-s/2, -s/2, s, s, s*0.2); hx.fillStyle = g; hx.fill();
+  hx.shadowColor = 'transparent'; hx.shadowBlur = 0; hx.shadowOffsetY = 0;
+  hx.lineWidth = 4; hx.strokeStyle = '#8a93a8'; hx.stroke();
+  hx.beginPath(); hx.roundRect(-s/2+10, -s/2+10, s-20, s*0.3, s*0.1);
+  hx.fillStyle = 'rgba(255,255,255,.6)'; hx.fill();
+  const pr = s*0.09, off = s*0.27;
+  const P = { 5: [[-1,-1],[1,-1],[0,0],[-1,1],[1,1]] }[val];
+  P.forEach(p => {
+    const pg = hx.createRadialGradient(p[0]*off-4, p[1]*off-4, 2, p[0]*off, p[1]*off, pr);
+    pg.addColorStop(0, '#e63946'); pg.addColorStop(1, '#8f1020');
+    hx.beginPath(); hx.arc(p[0]*off, p[1]*off, pr, 0, 7); hx.fillStyle = pg; hx.fill();
+  });
+  hx.restore();
+}
+function drawHeroPawn(hx, x, y, r, C, D, L) {
+  hx.save();
+  hx.beginPath(); hx.ellipse(x, y + r*0.95, r*0.9, r*0.3, 0, 0, 7);
+  hx.fillStyle = 'rgba(0,0,0,.4)'; hx.fill();
+  const g = hx.createRadialGradient(x - r*0.35, y - r*0.4, r*0.15, x, y, r*1.15);
+  g.addColorStop(0, L); g.addColorStop(0.55, C); g.addColorStop(1, D);
+  hx.shadowColor = 'rgba(0,0,0,.4)'; hx.shadowBlur = 12;
+  hx.beginPath(); hx.arc(x, y, r, 0, 7); hx.fillStyle = g; hx.fill();
+  hx.shadowColor = 'transparent'; hx.shadowBlur = 0;
+  hx.lineWidth = r*0.12; hx.strokeStyle = D; hx.stroke();
+  hx.beginPath(); hx.ellipse(x - r*0.34, y - r*0.42, r*0.26, r*0.16, -0.6, 0, 7);
+  hx.fillStyle = 'rgba(255,255,255,.9)'; hx.fill();
+  hx.restore();
+}
+
+/* ============================================================
+   GAME FLOW
+   ============================================================ */
+function toast(msg, ms) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._h); toast._h = setTimeout(() => t.style.display = 'none', ms || 1800);
+}
+function curIsBot() { return G.st && G.st.players[G.st.turn].isBot; }
+
+function showMenu() {
+  G.screen = 'menu'; G.st = null;
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('winOv').classList.add('hidden');
+  drawHero();
+}
+function startGame() {
+  const s = G.setup;
+  let botFlags, humanColor = null;
+  if (s.mode === 'pass') botFlags = new Array(s.count).fill(false);
+  else {
+    botFlags = new Array(s.count).fill(true);
+    botFlags[0] = false; humanColor = s.color;
+  }
+  G.st = LD.newGame(s.count, botFlags, humanColor);
+  G.phase = 'roll'; G.diceVal = 6; G.legal = []; G.msg = '';
+  G.particles = []; G.pawnAnims = [];
+  G.screen = 'board';
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('winOv').classList.add('hidden');
+  sfx.turn();
+  maybeBotTurn();
+}
+
+// ---- dice ----
+function doRoll() {
+  if (G.phase !== 'roll' || G.screen !== 'board') return;
+  G.phase = 'anim'; G.diceAnim = 0.7; G.diceT = 0;
+  sfx.dice();
+  setTimeout(() => {
+    const { roll, forfeited } = LD.rollDice(G.st);
+    G.diceVal = roll; G.diceAnim = 0;
+    if (forfeited) {
+      toast('⚠ Lagatar 3 six! Turn zaya.');
+      return setTimeout(nextTurn, 1100);
+    }
+    G.legal = LD.legalMoves(G.st, G.st.turn, roll);
+    G.phase = 'move';
+    if (!G.legal.length) {
+      G.msg = roll === 6 ? '6 aaya lekin koi chaal nahi!' : 'Koi chaal nahi!';
+      setTimeout(() => { if (G.phase === 'move') autoNext(roll); }, 1100);
+    } else if (curIsBot()) {
+      setTimeout(botMove, 750);
+    }
+  }, 720);
+}
+function autoNext(roll) { // no legal moves
+  if (roll === 6) { G.phase = 'roll'; maybeBotTurn(); } // 6 par dobara roll ka haq
+  else nextTurn();
+}
+function nextTurn() {
+  G.st.turn = (G.st.turn + 1) % G.st.players.length;
+  G.phase = 'roll'; G.legal = []; G.msg = '';
+  sfx.turn();
+  maybeBotTurn();
+}
+function maybeBotTurn() {
+  if (G.screen === 'board' && G.phase === 'roll' && curIsBot())
+    setTimeout(() => { if (G.phase === 'roll' && curIsBot()) doRoll(); }, 900);
+}
+function botMove() {
+  if (G.phase !== 'move' || !curIsBot()) return;
+  const ch = LD.botChoose(G.st, G.st.turn, G.diceVal, Math.random);
+  if (ch < 0) return autoNext(G.diceVal);
+  movePawn(G.st.turn, ch);
+}
+
+// ---- pawn move with hop animation ----
+function movePawn(pi, pawnIdx) {
+  const pl = G.st.players[pi], p = pl.pawns[pawnIdx], roll = G.diceVal;
+  const colorIdx = pl.color;
+  // build pixel path
+  const fromPx = pawnXY(pi, pawnIdx);
+  const path = [];
+  const np = (p === -1) ? 0 : p + roll;
+  if (p === -1) {
+    const cp = pawnCellPos(colorIdx, 0), ctr = cellCenter(cp.c, cp.r);
+    path.push(ctr);
+  } else {
+    for (let s = 1; s <= roll; s++) {
+      const ip = p + s;
+      if (ip > 56) break;
+      const cp = pawnCellPos(colorIdx, ip);
+      const ctr = cp.home ? cellCenter(7, 7) : cellCenter(cp.c, cp.r);
+      path.push(ctr);
+    }
+  }
+  // apply logic now
+  const res = LD.applyMove(G.st, pi, pawnIdx, roll);
+  G.phase = 'anim';
+  G.pawnAnims.push({ pi, pawn: pawnIdx, ci: colorIdx, from: fromPx, path, seg: 0, t: 0, dur: 0.16, arc: 34, res, roll });
+  sfx.hop();
+  if (res.leftBase) setTimeout(() => sfx.out(), 150);
+}
+
+function finishPawnAnim(a) {
+  const res = a.res, pi = a.pi;
+  const endPx = a.path[a.path.length - 1];
+  if (res.captured.length) {
+    burst(endPx.x, endPx.y, ['#ff5a5a', '#ffffff', '#ffd75e'], 26, 300);
+    sfx.capture();
+    toast('⚔️ Capture!');
+  } else if (res.finished) {
+    burst(endPx.x, endPx.y, ['#ffd75e', '#ffffff'], 20, 220);
+    sfx.safe();
+  }
+  // win?
+  if (LD.hasWon(G.st, pi)) return gameOver(pi);
+  // extra turn on 6
+  if (a.roll === 6) { G.phase = 'roll'; G.legal = []; G.msg = ''; maybeBotTurn(); }
+  else nextTurn();
+}
+
+function gameOver(pi) {
+  G.phase = 'over'; G.st.winner = pi;
+  const pl = G.st.players[pi];
+  // interstitial frequency hook: har 3rd game par ad ka mauqa (native side)
+  try {
+    window.__dangalGamesCompleted = (window.__dangalGamesCompleted || 0) + 1;
+  } catch (e) {}
+  confetti(); sfx.win();
+  setTimeout(() => {
+    document.getElementById('winTitle').textContent = pl.name + ' Wins! 🏆';
+    document.getElementById('winSub').textContent = pl.isBot ? 'Bot ne dangal jeet liya!' : 'Dangal jeet liya! 🎉';
+    document.getElementById('winOv').classList.remove('hidden');
+  }, 900);
+}
+// Native AdMob interstitial isay call karke pooch sakta hai:
+window.__shouldShowInterstitial = function () {
+  const n = window.__dangalGamesCompleted || 0;
+  return n > 0 && n % 3 === 0;   // kam az kam 2 games ka waqfa
+};
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+function canvasPos(ev) {
+  const r = cv.getBoundingClientRect();
+  const t = ev.touches ? ev.touches[0] : ev;
+  return { x: (t.clientX - r.left) * (W / r.width), y: (t.clientY - r.top) * (H / r.height) };
+}
+function inRect(p, rc) { return p.x >= rc.x && p.x <= rc.x + (rc.w || rc.s) && p.y >= rc.y && p.y <= rc.y + (rc.h || rc.s); }
+
+cv.addEventListener('pointerdown', ev => {
+  if (G.screen !== 'board' || !G.st) return;
+  const p = canvasPos(ev);
+  // roll button or dice
+  const b = G.rollBtn, d = G.diceRect;
+  if (G.phase === 'roll' && !curIsBot() && (inRect(p, b) || inRect(p, d))) { sfx.click(); doRoll(); return; }
+  // pawn tap
+  if (G.phase === 'move' && !curIsBot()) {
+    const pi = G.st.turn, r = pawnRadius() * 1.5;
+    for (const i of G.legal) {
+      const pp = pawnXY(pi, i);
+      if ((p.x - pp.x) ** 2 + (p.y - pp.y) ** 2 <= r * r) { movePawn(pi, i); return; }
+    }
+  }
+});
+
+/* ============================================================
+   MENU WIRING
+   ============================================================ */
+function selOpt(rowId, btn) {
+  document.querySelectorAll('#' + rowId + ' .opt').forEach(o => o.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+document.getElementById('mPass').onclick = () => { G.setup.mode = 'pass'; selOpt('mPass', document.getElementById('mPass')); document.getElementById('mPass').classList.add('sel'); document.getElementById('mBots').classList.remove('sel'); sfx.click(); };
+document.getElementById('mBots').onclick = () => { G.setup.mode = 'bots'; document.getElementById('mBots').classList.add('sel'); document.getElementById('mPass').classList.remove('sel'); sfx.click(); };
+document.querySelectorAll('#countRow .opt').forEach(b => b.onclick = () => {
+  G.setup.count = +b.dataset.n; selOpt('countRow', b); sfx.click();
+});
+document.querySelectorAll('#colorRow .colorpick').forEach(b => b.onclick = () => {
+  G.setup.color = +b.dataset.c;
+  document.querySelectorAll('#colorRow .colorpick').forEach(o => o.classList.remove('sel'));
+  b.classList.add('sel'); sfx.click();
+});
+document.getElementById('startBtn').onclick = () => { sfx.click(); startGame(); };
+document.getElementById('howBtn').onclick = () => {
+  const h = document.getElementById('howto');
+  h.style.display = h.style.display === 'block' ? 'none' : 'block'; sfx.click();
+};
+document.getElementById('againBtn').onclick = () => { sfx.click(); startGame(); };
+document.getElementById('winMenuBtn').onclick = () => { sfx.click(); showMenu(); };
+document.getElementById('menuBtn').onclick = () => { sfx.click(); showMenu(); };
+document.getElementById('muteBtn').onclick = () => setMute(!G.muted);
+
+// back-button hooks (Android wrapper)
+window.__atMenu = function () { return G.screen === 'menu'; };
+window.__goMenu = function () { showMenu(); };
+
+/* ============================================================
+   UPDATE CHECKER
+   ============================================================ */
+async function checkUpdate() {
+  try {
+    const r = await fetch('ludo-dangal-version.json?t=' + Date.now());
+    const v = await r.json();
+    if (v.version && v.version !== APP_VERSION) {
+      try { if (localStorage.getItem('ld_update_dismissed') === v.version) return; } catch (e) {}
+      document.getElementById('updateCard').style.display = 'block';
+      document.getElementById('updateDlBtn').onclick = () => {
+        try { localStorage.setItem('ld_update_dismissed', v.version); } catch (e) {}
+        location.href = APK_URL;
+      };
+      document.getElementById('updateNoBtn').onclick = () => {
+        try { localStorage.setItem('ld_update_dismissed', v.version); } catch (e) {}
+        document.getElementById('updateCard').style.display = 'none';
+      };
+    }
+  } catch (e) {}
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (t - lastT) / 1000 || 0.016); lastT = t;
+  G.hlPulse += dt;
+  if (G.diceAnim > 0) { G.diceAnim -= dt; G.diceT += dt; }
+  updateParticles(dt);
+  // pawn animations
+  G.pawnAnims = G.pawnAnims.filter(a => {
+    a.t += dt;
+    if (a.t >= a.dur) {
+      a.seg++; a.t = 0;
+      if (a.seg >= a.path.length) { finishPawnAnim(a); return false; }
+      sfx.hop();
+    }
+    return true;
+  });
+  render();
+}
+
+function render() {
+  // bg
+  const bg = grad(0, 0, 0, H, [[0, '#232a5e'], [0.5, '#161b45'], [1, '#0b0e28']]);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // subtle arena dots
+  ctx.fillStyle = 'rgba(255,255,255,.05)';
+  for (let i = 0; i < 40; i++) {
+    const x = (i * 211) % W, y = (i * 337) % H;
+    ctx.fillRect(x, y, 4, 4);
+  }
+  if (G.screen === 'board' && G.st) {
+    drawTopBar(); drawTurnBanner(); drawBoard(); drawPawns(); drawParticles(); drawBottomPanel();
+  } else {
+    // menu backdrop: dimmed board preview
+    ctx.save(); ctx.globalAlpha = 0.25;
+    drawBoard();
+    ctx.restore();
+  }
+}
+
+// boot
+showMenu();
+checkUpdate();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
