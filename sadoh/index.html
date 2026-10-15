@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sadoh! 🏴‍☠️ Pirate Ludo</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#07182e;overflow:hidden;font-family:'Trebuchet MS','Segoe UI',sans-serif;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #game{display:block;background:#0b3d66;touch-action:manipulation}
+  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,12,24,.82);z-index:20;padding:16px}
+  .card{background:linear-gradient(160deg,#3a2410,#1d1208);border:3px solid #c9963c;border-radius:18px;padding:22px 20px;max-width:430px;width:100%;text-align:center;color:#ffe9b8;box-shadow:0 10px 40px rgba(0,0,0,.6);max-height:92vh;overflow-y:auto}
+  .card h1{font-size:40px;color:#ffd75e;text-shadow:2px 2px 0 #7a4d12;margin-bottom:2px}
+  .card h1 .ar{font-size:34px}
+  .card p.sub{color:#e8c98a;margin-bottom:14px;font-size:14px}
+  .optRow{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+  .opt{background:#5d3a1a;border:2px solid #c9963c;color:#ffe9b8;border-radius:12px;padding:10px 14px;font-size:15px;font-weight:bold;cursor:pointer;min-width:64px}
+  .opt.sel{background:#c9963c;color:#3a2410;box-shadow:0 0 12px #ffd75e}
+  .bigbtn{display:block;width:100%;margin:12px 0 4px;background:linear-gradient(180deg,#ffd75e,#e0a92e);border:none;border-radius:14px;padding:14px;font-size:20px;font-weight:bold;color:#4a2c08;cursor:pointer;box-shadow:0 4px 0 #7a4d12}
+  .bigbtn:active{transform:translateY(2px);box-shadow:none}
+  .ghostbtn{background:none;border:2px solid #c9963c;color:#ffe9b8;border-radius:12px;padding:9px 14px;font-size:14px;cursor:pointer;margin-top:8px}
+  .colorpick{width:52px;height:52px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+  .colorpick.sel{border-color:#fff;box-shadow:0 0 14px #fff}
+  #howto{display:none;text-align:left;font-size:13.5px;line-height:1.65;color:#ffe9b8;background:rgba(0,0,0,.25);border-radius:10px;padding:12px;margin-top:10px}
+  #winCard h1{font-size:46px}
+  #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(20,10,2,.92);color:#ffe9b8;border:2px solid #c9963c;border-radius:12px;padding:10px 18px;font-size:16px;font-weight:bold;z-index:30;display:none;max-width:88vw;text-align:center}
+  #topbtns{position:fixed;top:10px;right:10px;z-index:15;display:flex;gap:8px}
+  #topbtns button{width:44px;height:44px;border-radius:12px;border:2px solid #c9963c;background:rgba(30,18,6,.85);color:#ffd75e;font-size:20px;cursor:pointer}
+  #updateCard{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#12300f;border:2px solid #7CFC00;border-radius:12px;padding:10px 14px;color:#eaffd0;z-index:25;display:none;text-align:center;font-size:14px;max-width:92vw}
+  #updateCard button{background:#7CFC00;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;margin:6px 4px 0;cursor:pointer}
+  .lbl{font-size:13px;color:#e8c98a;margin-top:10px;letter-spacing:1px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" width="900" height="1500"></canvas></div>
+<div id="topbtns">
+  <button id="muteBtn" title="Sound">🔊</button>
+  <button id="menuBtn" title="Menu">☰</button>
+</div>
+<div id="updateCard">
+  🎉 <b>Sadoh ka naya version aaya hai!</b><br>
+  <button id="updateDlBtn">⬇ Download</button><button id="updateNoBtn">Baad me</button>
+</div>
+<div id="toast"></div>
+
+<div id="menu" class="overlay">
+  <div class="card">
+    <h1>🏴‍☠️ Sadoh! <span class="ar">صادوه</span></h1>
+    <p class="sub">Pirate Ludo — figure-8 samandari race!</p>
+    <div class="lbl">MODE</div>
+    <div class="optRow">
+      <button class="opt sel" id="mPass">👥 Pass &amp; Play</button>
+      <button class="opt" id="mBots">🤖 Vs Bots</button>
+    </div>
+    <div class="lbl" id="countLbl">PLAYERS</div>
+    <div class="optRow" id="countRow">
+      <button class="opt sel" data-n="2">2</button>
+      <button class="opt" data-n="3">3</button>
+      <button class="opt" data-n="4">4</button>
+    </div>
+    <div class="lbl" id="colorLbl">YOUR COLOR (vs bots)</div>
+    <div class="optRow" id="colorRow">
+      <button class="colorpick sel" data-c="0" style="background:#e63946"></button>
+      <button class="colorpick" data-c="1" style="background:#2a9d48"></button>
+      <button class="colorpick" data-c="2" style="background:#f4b400"></button>
+      <button class="colorpick" data-c="3" style="background:#2f6fed"></button>
+    </div>
+    <button class="bigbtn" id="startBtn">▶ Start Game</button>
+    <button class="ghostbtn" id="howBtn">❓ How to Play</button>
+    <div id="howto">
+      🎲 <b>6</b> aaye to pawn base se nikalo.<br>
+      👆 Chamakte pawn par tap karke chalao.<br>
+      ⚔️ Dushman ke pawn par utro to wo wapas base jayega — <b>★ safe</b> tiles par koi capture nahi.<br>
+      🏠 Ghar (home) me jaane ke liye <b>exact</b> number chahiye.<br>
+      🎲 6 par extra turn; lagatar 3 six = turn zaya.<br>
+      🏆 Pehle apne 4 pawn ghar pohnchao aur jeeto!
+    </div>
+  </div>
+</div>
+
+<div id="winOv" class="overlay hidden">
+  <div class="card" id="winCard">
+    <h1>🏆</h1>
+    <h1 id="winTitle" style="font-size:34px">Red Wins!</h1>
+    <p class="sub" id="winSub">All 4 pirates reached home!</p>
+    <button class="bigbtn" id="againBtn">🔄 Play Again</button>
+    <button class="ghostbtn" id="winMenuBtn">☰ Menu</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   SADOH! (صادوه) — pirate figure-8 Ludo. v1.0
+   Canvas + vanilla JS, offline, original art.
+   ============================================================ */
+const SADOH_APP_VERSION = '1.0';
+const SADOH_APK_URL = 'https://jilanapps.github.io/jilan-store/sadoh/sadoh.apk';
+
+/* ---------------- Config ---------------- */
+const W = 900, H = 1500;
+const COLORS = [
+  {name:'Red',    main:'#e63946', dark:'#a11f2b', light:'#ff8a93'},
+  {name:'Green',  main:'#2a9d48', dark:'#186b2e', light:'#7ce495'},
+  {name:'Yellow', main:'#f4b400', dark:'#b07e00', light:'#ffdd70'},
+  {name:'Blue',   main:'#2f6fed', dark:'#1a46ad', light:'#8fb2ff'},
+];
+// Start tiles (safe ★) per color index — top/bottom of each loop
+const START_TILE = [16, 34, 7, 25];   // Red, Green, Yellow, Blue
+const SAFE_TILES = new Set([16, 34, 7, 25, 3, 21]); // starts + FREE ZONE channel
+const TRACK_N = 34, HOME_N = 4, FINISH_STEPS = TRACK_N + HOME_N; // 38
+
+/* ---------------- Audio (WebAudio synth, no files) ---------------- */
+const Sfx = {
+  ctx:null, muted:false,
+  init(){ try{ this.muted = localStorage.getItem('sadoh_mute')==='1'; }catch(e){}
+    document.getElementById('muteBtn').textContent = this.muted?'🔇':'🔊'; },
+  ensure(){ if(!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+    if(this.ctx && this.ctx.state==='suspended') this.ctx.resume(); },
+  toggle(){ this.muted=!this.muted; try{localStorage.setItem('sadoh_mute',this.muted?'1':'0');}catch(e){}
+    document.getElementById('muteBtn').textContent=this.muted?'🔇':'🔊'; },
+  tone(f,d,type,vol,when){ if(this.muted||!this.ctx)return; type=type||'sine';vol=vol||0.18;when=when||0;
+    const t=this.ctx.currentTime+when, o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(g);g.connect(this.ctx.destination);
+    o.start(t);o.stop(t+d+0.02); },
+  noise(d,vol,when){ if(this.muted||!this.ctx)return; d=d||0.08;vol=vol||0.12;when=when||0;
+    const t=this.ctx.currentTime+when, len=Math.floor(this.ctx.sampleRate*d),
+      buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate), ch=buf.getChannelData(0);
+    for(let i=0;i<len;i++)ch[i]=(Math.random()*2-1)*(1-i/len);
+    const s=this.ctx.createBufferSource(),g=this.ctx.createGain();s.buffer=buf;
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    s.connect(g);g.connect(this.ctx.destination);s.start(t); },
+  dice(){ for(let i=0;i<6;i++)this.noise(0.05,0.10,i*0.09); },
+  hop(n){ for(let i=0;i<n;i++)this.tone(300+i*60,0.09,'triangle',0.14,i*0.11); },
+  six(){ this.tone(660,0.12,'triangle',0.16);this.tone(880,0.16,'triangle',0.16,0.1); },
+  capture(){ this.tone(220,0.25,'square',0.14);this.tone(110,0.3,'square',0.14,0.08);this.noise(0.2,0.1,0.02); },
+  out(){ this.tone(440,0.1,'triangle',0.15);this.tone(554,0.14,'triangle',0.15,0.09); },
+  turn(){ this.tone(520,0.06,'sine',0.08); },
+  win(){ const n=[523,659,784,1047,784,1047]; n.forEach((f,i)=>this.tone(f,0.22,'triangle',0.18,i*0.16)); },
+  deny(){ this.tone(180,0.15,'sawtooth',0.1); },
+};
+
+/* ---------------- Board geometry ---------------- */
+const C1={x:300,y:640}, C2={x:620,y:640}, RR=195;
+const TILE_POS=[]; // 1..34 -> {x,y}
+(function(){
+  const step=Math.PI*2/17;
+  for(let i=1;i<=17;i++){ const a=-0.678+(i-1)*step; TILE_POS[i]={x:C1.x+RR*Math.cos(a),y:C1.y+RR*Math.sin(a),a}; }
+  for(let i=18;i<=34;i++){ const b=-2.094-(i-18)*step; TILE_POS[i]={x:C2.x+RR*Math.cos(b),y:C2.y+RR*Math.sin(b),a:b}; }
+})();
+// connector dotted routes: 17->18 and 34->1 (sailing routes over the top)
+const LINK_A={x1:TILE_POS[17].x,y1:TILE_POS[17].y,cx:460,cy:330,x2:TILE_POS[18].x,y2:TILE_POS[18].y};
+const LINK_B={x1:TILE_POS[34].x,y1:TILE_POS[34].y,cx:460,cy:330,x2:TILE_POS[1].x,y2:TILE_POS[1].y};
+function qpoint(L,t){ const u=1-t; return {x:u*u*L.x1+2*u*t*L.cx+t*t*L.x2, y:u*u*L.y1+2*u*t*L.cy+t*t*L.y2}; }
+// Bases (octagons) per color
+const BASES=[{x:140,y:280},{x:760,y:280},{x:140,y:1000},{x:760,y:1000}];
+// Home stretch tiles: 4 per color, anchor -> toward center
+const HOME_TILES=[[],[],[],[]];
+(function(){
+  const anchors=[{x:352,y:478},{x:568,y:478},{x:352,y:802},{x:568,y:802}];
+  const ends=[[436,606],[484,606],[436,674],[484,674]];
+  for(let c=0;c<4;c++)for(let j=0;j<HOME_N;j++){
+    const t=(j+1)/(HOME_N+0.6);
+    HOME_TILES[c][j]={x:anchors[c].x+(ends[c][0]-anchors[c].x)*t, y:anchors[c].y+(ends[c][1]-anchors[c].y)*t};
+  }
+})();
+const CENTER={x:460,y:640};
+
+/* ---------------- Game state & rules (pure logic) ---------------- */
+function trackTileOf(player, pawn){ // steps 1..34 -> tile 1..34
+  return ((player.start-1 + pawn.steps-1)%TRACK_N)+1;
+}
+function newGameState(nPlayers, humanColors){
+  // humanColors: array of color indices that are human; others are bots. null => all human (pass&play)
+  const order=[0,1,2,3].slice(0,nPlayers);
+  const players=order.map(ci=>({
+    color:ci, start:START_TILE[ci],
+    isBot: humanColors ? humanColors.indexOf(ci)<0 : false,
+    pawns:[{steps:0},{steps:0},{steps:0},{steps:0}],
+    sixes:0, finished:false,
+  }));
+  return {players, turn:0, dice:1, phase:'roll', roll:null, moves:[], winner:-1, moveCount:0};
+}
+function pawnPos(pawn, player){ // where is this pawn? {kind:'base'|'track'|'home'|'done', tile?, hi?}
+  if(pawn.steps===0) return {kind:'base'};
+  if(pawn.steps<=TRACK_N) return {kind:'track', tile:trackTileOf(player,pawn)};
+  if(pawn.steps<FINISH_STEPS) return {kind:'home', hi:pawn.steps-TRACK_N-1};
+  return {kind:'done'};
+}
+// legal moves for current roll: list of pawn indices that can move
+function legalMoves(state, pi, roll){
+  const p=state.players[pi], out=[];
+  for(let i=0;i<4;i++){
+    const s=p.pawns[i].steps;
+    if(s===0){ if(roll===6) out.push(i); }
+    else if(s<FINISH_STEPS){ if(s+roll<=FINISH_STEPS) out.push(i); }
+  }
+  return out;
+}
+// apply a move; returns events {captured:[{pi,idx}], leftBase, finished, extraTurn}
+function applyMove(state, pi, pawnIdx, roll){
+  const p=state.players[pi], pawn=p.pawns[pawnIdx];
+  const ev={captured:[], leftBase:false, finishedPawn:false, extraTurn:roll===6};
+  if(pawn.steps===0){ pawn.steps=1; ev.leftBase=true; }
+  else pawn.steps+=roll;
+  state.moveCount++;
+  if(pawn.steps===FINISH_STEPS) ev.finishedPawn=true;
+  // capture on track, non-safe tile
+  if(pawn.steps<=TRACK_N){
+    const tile=trackTileOf(p,pawn);
+    if(!SAFE_TILES.has(tile)){
+      state.players.forEach((op,oi)=>{
+        if(oi===pi||op.finished)return;
+        op.pawns.forEach((opw,wi)=>{
+          if(opw.steps>0&&opw.steps<=TRACK_N&&trackTileOf(op,opw)===tile){
+            opw.steps=0; ev.captured.push({pi:oi,idx:wi});
+          }
+        });
+      });
+    }
+  }
+  // win check
+  if(p.pawns.every(w=>w.steps===FINISH_STEPS)){ p.finished=true; state.winner=pi; }
+  return ev;
+}
+/* Bot AI: capture > leave base on 6 > furthest pawn > first */
+function botChoose(state, pi, roll, moves){
+  const p=state.players[pi];
+  let best=null,bestScore=-1e9;
+  moves.forEach(mi=>{
+    const pawn=p.pawns[mi]; let score=0;
+    if(pawn.steps===0){ score=60; }
+    else{
+      const ns=pawn.steps+roll;
+      if(ns<=TRACK_N){
+        const tile=((p.start-1+ns-1)%TRACK_N)+1;
+        if(!SAFE_TILES.has(tile)){
+          state.players.forEach((op,oi)=>{ if(oi===pi||op.finished)return;
+            op.pawns.forEach(opw=>{ if(opw.steps>0&&opw.steps<=TRACK_N&&trackTileOf(op,opw)===tile) score+=100; });
+          });
+        }
+        score+=ns; // prefer furthest
+        if(ns===FINISH_STEPS)score+=50;
+      } else { score=40+ns; if(ns===FINISH_STEPS)score+=80; }
+    }
+    score+=Math.random()*4;
+    if(score>bestScore){bestScore=score;best=mi;}
+  });
+  return best;
+}
+
+/* ---------------- Flow control & animation ---------------- */
+const G={
+  screen:'menu', state:null, setup:{mode:'pass',count:2,humanColor:0},
+  anims:[], particles:[], diceAnim:null, msg:'', msgT:0,
+  pawnAnim:null, // {pi,idx,path:[{x,y}],t}
+  thinking:false,
+};
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function toast(t,ms){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block';
+  clearTimeout(toast._t); toast._t=setTimeout(()=>el.style.display='none',ms||1600); }
+function say(t){ G.msg=t; G.msgT=Date.now(); }
+
+function startGame(){
+  const s=G.setup; let nPlayers, humanColors;
+  if(s.mode==='pass'){ nPlayers=s.count; humanColors=null; }
+  else{ nPlayers=1+s.count; humanColors=[s.humanColor]; }
+  G.state=newGameState(nPlayers,humanColors);
+  G.screen='game'; G.particles=[];G.anims=[];G.pawnAnim=null;G.diceAnim=null;
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('winOv').classList.add('hidden');
+  const p=cur();
+  say(COLORS[p.color].name+' starts — tap the dice! 🎲');
+  Sfx.ensure();
+  if(p.isBot) botTurn();
+}
+function cur(){ return G.state.players[G.state.turn]; }
+function nextTurn(){
+  const st=G.state;
+  st.turn=(st.turn+1)%st.players.length;
+  st.phase='roll'; st.roll=null; st.moves=[];
+  const p=cur();
+  if(st.winner>=0) return;
+  Sfx.turn();
+  say(COLORS[p.color].name+(p.isBot?' (bot)':'')+' — tap the dice! 🎲');
+  if(p.isBot) botTurn();
+}
+async function doRoll(){
+  const st=G.state; if(!st||st.phase!=='roll'||st.winner>=0) return;
+  const p=cur(); if(p.isBot&&!G.thinking) return; // bots go via botTurn
+  if(!p.isBot && G.thinking) return;
+  Sfx.ensure(); Sfx.dice();
+  st.phase='anim';
+  const val=1+Math.floor(Math.random()*6);
+  G.diceAnim={t:0,dur:750,val};
+  await wait(800); G.diceAnim=null; st.dice=val; st.roll=val;
+  if(val===6){ p.sixes++; Sfx.six(); } else p.sixes=0;
+  if(p.sixes>=3){ // three sixes -> forfeit
+    say('Three 6s! Turn forfeited.'); p.sixes=0; await wait(1200); nextTurn(); return;
+  }
+  const moves=legalMoves(st,st.turn,val);
+  if(moves.length===0){
+    say('No possible move.'+(val===6?' Extra turn kept — roll again! 🎲':''));
+    Sfx.deny(); await wait(1100);
+    if(val===6){ st.phase='roll'; } else nextTurn();
+    return;
+  }
+  st.moves=moves; st.phase='move';
+  if(p.isBot){ await wait(500); const pick=botChoose(st,st.turn,val,moves); await doMove(pick); }
+  else say(COLORS[p.color].name+': rolled '+val+' — tap a glowing pawn! 👆');
+}
+async function doMove(pawnIdx){
+  const st=G.state; if(!st||st.phase!=='move') return;
+  const pi=st.turn, p=cur(), roll=st.roll;
+  if(st.moves.indexOf(pawnIdx)<0){ Sfx.deny(); return; }
+  st.phase='anim'; st.moves=[];
+  const pawn=p.pawns[pawnIdx];
+  const fromXY=pawnXY(pi,pawnIdx);
+  const ev=applyMove(st,pi,pawnIdx,roll);
+  // build animation path tile-by-tile
+  const path=[];
+  if(ev.leftBase){ path.push(pawnXY(pi,pawnIdx)); }
+  else{
+    let s=pawn.steps-roll;
+    for(let k=1;k<=roll;k++){ path.push(pawnXYsteps(pi,s+k,p)); }
+  }
+  Sfx.hop(Math.min(roll,6));
+  await animatePawn(pi,pawnIdx,fromXY,path);
+  if(ev.leftBase){ Sfx.out(); say(COLORS[p.color].name+' pawn sails out! ⛵'); await wait(500); }
+  if(ev.captured.length){ Sfx.capture(); say('⚔️ Captured! Back to base!'); await wait(900); }
+  if(ev.finishedPawn){ Sfx.six(); say('🏠 One pirate home!'); await wait(700); }
+  if(st.winner>=0){ onWin(pi); return; }
+  if(ev.extraTurn){ st.phase='roll'; say(COLORS[p.color].name+' rolled 6 — roll again! 🎲'); if(p.isBot) botTurn(); }
+  else nextTurn();
+}
+async function botTurn(){
+  const st=G.state; if(!st||st.winner>=0) return;
+  G.thinking=true; await wait(900+Math.random()*700);
+  if(!G.state||G.state.phase!=='roll'){G.thinking=false;return;}
+  G.thinking=false; await doRoll();
+}
+function onWin(pi){
+  const st=G.state, p=st.players[pi];
+  Sfx.win(); G.screen='win';
+  for(let i=0;i<120;i++)G.particles.push({x:450+Math.random()*0,y:300+Math.random()*200,
+    vx:(Math.random()-0.5)*8,vy:-2-Math.random()*6,c:COLORS[i%4].main,life:120+Math.random()*60,r:4+Math.random()*5});
+  document.getElementById('winTitle').textContent=COLORS[p.color].name+' Wins!';
+  document.getElementById('winSub').textContent=p.isBot?'The bot pirates reached home first!':'All 4 pirates reached home!';
+  document.getElementById('winOv').classList.remove('hidden');
+}
+
+/* ---------------- Pawn screen positions ---------------- */
+function stackOffset(tile, pi, idx, list){
+  // list: all pawns currently on this tile; offset in mini grid
+  const n=list.length; if(n<=1) return {x:0,y:0};
+  const k=list.indexOf(idx);
+  const r=16, cols=Math.ceil(Math.sqrt(n));
+  const cx=(k%cols)-(cols-1)/2, cy=Math.floor(k/cols)-((Math.ceil(n/cols)-1)/2);
+  return {x:cx*r*2.1, y:cy*r*2.1};
+}
+function pawnsOnTile(tile){
+  // returns [{pi,idx}] of pawns on track tile
+  const out=[]; const st=G.state; if(!st)return out;
+  st.players.forEach((p,pi)=>p.pawns.forEach((w,wi)=>{
+    if(w.steps>0&&w.steps<=TRACK_N&&trackTileOf(p,w)===tile)out.push({pi,idx:wi});
+  }));
+  return out;
+}
+function pawnXY(pi, idx){
+  const st=G.state, p=st.players[pi], w=p.pawns[idx];
+  const pos=pawnPos(w,p);
+  if(pos.kind==='base'){
+    const b=BASES[p.color], k=idx, ox=(k%2?1:-1)*34, oy=(k<2?-1:1)*34;
+    return {x:b.x+ox, y:b.y+oy};
+  }
+  if(pos.kind==='track'){
+    const t=TILE_POS[pos.tile];
+    const lst=pawnsOnTile(pos.tile).map(o=>o.idx+o.pi*10);
+    const o=stackOffset(pos.tile,pi,idx+pi*10,lst);
+    return {x:t.x+o.x, y:t.y+o.y};
+  }
+  if(pos.kind==='home'){ const h=HOME_TILES[p.color][pos.hi]; return {x:h.x,y:h.y}; }
+  // done -> treasure chest spot near home end
+  const e=HOME_TILES[p.color][HOME_N-1]; return {x:e.x+44,y:e.y};
+}
+function pawnXYsteps(pi, steps, player){
+  // position for a hypothetical steps value (for animation path)
+  const fake={steps}; const pos=pawnPos(fake,player);
+  if(pos.kind==='track'){ const t=TILE_POS[pos.tile]; return {x:t.x,y:t.y}; }
+  if(pos.kind==='home'){ const h=HOME_TILES[player.color][pos.hi]; return {x:h.x,y:h.y}; }
+  if(pos.kind==='done'){ const e=HOME_TILES[player.color][HOME_N-1]; return {x:e.x+44,y:e.y}; }
+  const b=BASES[player.color]; return {x:b.x,y:b.y};
+}
+function animatePawn(pi,idx,from,path){
+  return new Promise(res=>{
+    G.pawnAnim={pi,idx,from,path,t:0,seg:0,dur:Math.max(1,path.length)*130,res};
+  });
+}
+
+/* ---------------- Renderer ---------------- */
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+function fitCanvas(){
+  const ww=window.innerWidth, wh=window.innerHeight;
+  const s=Math.min(ww/W, wh/H);
+  canvas.style.width=(W*s)+'px'; canvas.style.height=(H*s)+'px';
+}
+window.addEventListener('resize',fitCanvas);
+function rr(x,y,w,h,r){ ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
+function circle(x,y,r){ ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2); }
+function star(x,y,r,rot){ ctx.beginPath();
+  for(let i=0;i<10;i++){ const a=(rot||0)+i*Math.PI/5-Math.PI/2, rad=i%2?r*0.45:r;
+    ctx[i?'lineTo':'moveTo'](x+rad*Math.cos(a),y+rad*Math.sin(a)); } ctx.closePath(); }
+
+function drawBG(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0e4a7d');g.addColorStop(0.55,'#0b3d66');g.addColorStop(1,'#062a4a');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // distant pirate ship silhouette
+  ctx.save();ctx.globalAlpha=0.5;ctx.fillStyle='#041a30';
+  ctx.fillRect(690,180,90,14);ctx.fillRect(715,140,8,44);ctx.fillRect(745,150,6,36);
+  ctx.beginPath();ctx.moveTo(723,140);ctx.lineTo(745,162);ctx.lineTo(723,162);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(751,150);ctx.lineTo(768,168);ctx.lineTo(751,168);ctx.closePath();ctx.fill();
+  ctx.restore();
+  // waves
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=3;
+  for(let r=0;r<6;r++){ ctx.beginPath();
+    for(let x=0;x<=W;x+=20){ const y=1180+r*46+Math.sin(x/90+r*2+Date.now()/1400)*10;
+      x?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); }
+  // top bar
+  ctx.fillStyle='rgba(20,10,2,0.55)';ctx.fillRect(0,0,W,140);
+  ctx.fillStyle='#ffd75e';ctx.font='bold 52px Trebuchet MS';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🏴‍☠️ Sadoh! صادوه',450,58);
+  ctx.fillStyle='#e8c98a';ctx.font='20px Trebuchet MS';
+  ctx.fillText('Pirate Ludo • figure-8 race',450,108);
+  // version tag
+  ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='18px Trebuchet MS';
+  ctx.fillText('v'+SADOH_APP_VERSION,W-14,H-12);ctx.textAlign='center';
+}
+function drawFreeZone(){
+  // compass medallion behind center tiles
+  const g=ctx.createRadialGradient(CENTER.x,CENTER.y,10,CENTER.x,CENTER.y,95);
+  g.addColorStop(0,'#8a6a2f');g.addColorStop(1,'#4a3312');
+  ctx.fillStyle=g;circle(CENTER.x,CENTER.y,95);ctx.fill();
+  ctx.lineWidth=6;ctx.strokeStyle='#ffd75e';circle(CENTER.x,CENTER.y,95);ctx.stroke();
+  ctx.lineWidth=2;ctx.strokeStyle='rgba(255,215,94,0.5)';circle(CENTER.x,CENTER.y,78);ctx.stroke();
+  ctx.fillStyle='#ffd75e';ctx.font='bold 24px Trebuchet MS';
+  ctx.fillText('FREE ZONE',CENTER.x,CENTER.y-52);
+  ctx.font='20px Trebuchet MS';ctx.fillText('منطقة حرة',CENTER.x,CENTER.y+56);
+  // compass star
+  ctx.fillStyle='rgba(255,215,94,0.85)';star(CENTER.x,CENTER.y,34,Date.now()/4000);ctx.fill();
+  ctx.fillStyle='#4a3312';circle(CENTER.x,CENTER.y,10);ctx.fill();
+}
+function drawConnectors(){
+  ctx.strokeStyle='rgba(255,235,180,0.55)';ctx.lineWidth=5;ctx.setLineDash([2,14]);ctx.lineCap='round';
+  [LINK_A,LINK_B].forEach(L=>{ ctx.beginPath();ctx.moveTo(L.x1,L.y1);
+    ctx.quadraticCurveTo(L.cx,L.cy,L.x2,L.y2);ctx.stroke(); });
+  ctx.setLineDash([]);
+  // tiny ship on route A
+  const t=(Date.now()/6000)%1, p=qpoint(LINK_A,t);
+  ctx.font='26px serif';ctx.fillText('⛵',p.x,p.y-14);
+}
+function drawTrack(){
+  const st=G.state;
+  for(let i=1;i<=TRACK_N;i++){
+    const t=TILE_POS[i], safe=SAFE_TILES.has(i);
+    const isStart=START_TILE.indexOf(i)>=0;
+    const ci=isStart?START_TILE.indexOf(i):-1;
+    // wooden barrel tile
+    const g=ctx.createRadialGradient(t.x-8,t.y-8,4,t.x,t.y,34);
+    g.addColorStop(0,'#c99a55');g.addColorStop(1,'#7a5326');
+    ctx.fillStyle=g;circle(t.x,t.y,32);ctx.fill();
+    ctx.lineWidth=4;ctx.strokeStyle='#4a2f12';circle(t.x,t.y,32);ctx.stroke();
+    ctx.strokeStyle='rgba(74,47,18,0.6)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(t.x-24,t.y-8);ctx.lineTo(t.x+24,t.y-8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(t.x-24,t.y+10);ctx.lineTo(t.x+24,t.y+10);ctx.stroke();
+    if(isStart){ ctx.lineWidth=6;ctx.strokeStyle=COLORS[ci].main;circle(t.x,t.y,32);ctx.stroke(); }
+    if(safe){ ctx.lineWidth=3;ctx.strokeStyle='#ffd75e';circle(t.x,t.y,26);ctx.stroke(); }
+    ctx.fillStyle=isStart?'#fff':'#3a2410';ctx.font='bold '+(isStart?22:20)+'px Trebuchet MS';
+    if(isStart){ star(t.x,t.y-1,13,0);ctx.fillStyle=COLORS[ci].light;star(t.x,t.y-1,13,0);ctx.fill(); }
+    else ctx.fillText(i,t.x,t.y+1);
+  }
+}
+function drawBases(){
+  const st=G.state;
+  for(let c=0;c<4;c++){
+    const b=BASES[c], active=st&&st.players.some(p=>p.color===c);
+    // octagon
+    ctx.save();ctx.translate(b.x,b.y);
+    ctx.beginPath();
+    for(let k=0;k<8;k++){ const a=k*Math.PI/4+Math.PI/8;
+      ctx[k?'lineTo':'moveTo'](100*Math.cos(a),100*Math.sin(a)); }
+    ctx.closePath();
+    const g=ctx.createLinearGradient(0,-100,0,100);
+    g.addColorStop(0,'#a06a35');g.addColorStop(1,'#6b421d');
+    ctx.fillStyle=g;ctx.fill();ctx.lineWidth=7;ctx.strokeStyle=COLORS[c].main;ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle=COLORS[c].main;ctx.font='bold 24px Trebuchet MS';
+    ctx.fillText(COLORS[c].name,b.x,b.y-118);
+    if(!st)continue;
+    const p=st.players.find(pp=>pp.color===c);
+    const onBoard=p.pawns.filter(w=>w.steps>0&&w.steps<FINISH_STEPS).length;
+    const inBase=p.pawns.filter(w=>w.steps===0).length;
+    const done=p.pawns.filter(w=>w.steps===FINISH_STEPS).length;
+    ctx.fillStyle='#ffe9b8';ctx.font='19px Trebuchet MS';
+    ctx.fillText('⛵'+onBoard+'  🏴'+inBase+(done?'  🏠'+done:''),b.x,b.y+124);
+    if(!active){ ctx.fillStyle='rgba(0,0,0,0.45)';ctx.save();ctx.translate(b.x,b.y);
+      ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4+Math.PI/8;ctx[k?'lineTo':'moveTo'](100*Math.cos(a),100*Math.sin(a));}
+      ctx.closePath();ctx.fill();ctx.restore(); }
+  }
+}
+function drawHome(){
+  for(let c=0;c<4;c++){
+    HOME_TILES[c].forEach((h,j)=>{
+      ctx.fillStyle=COLORS[c].dark;circle(h.x,h.y,24);ctx.fill();
+      ctx.lineWidth=4;ctx.strokeStyle=COLORS[c].light;circle(h.x,h.y,24);ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 20px Trebuchet MS';ctx.fillText(j+1,h.x,h.y+1);
+    });
+    const e=HOME_TILES[c][HOME_N-1];
+    ctx.font='30px serif';ctx.fillText('💰',e.x+52,e.y+2); // treasure at home end
+  }
+}
+
+function drawPawn(x,y,r,color,glow,mini){
+  if(glow){ ctx.save();ctx.shadowColor='#fff';ctx.shadowBlur=24;
+    ctx.fillStyle='rgba(255,255,255,0.9)';circle(x,y,r+7);ctx.fill();ctx.restore(); }
+  const g=ctx.createRadialGradient(x-r*0.3,y-r*0.3,r*0.2,x,y,r);
+  g.addColorStop(0,color.light);g.addColorStop(1,color.main);
+  ctx.fillStyle=g;circle(x,y,r);ctx.fill();
+  ctx.lineWidth=3;ctx.strokeStyle=color.dark;circle(x,y,r);ctx.stroke();
+  // bandana
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,r,Math.PI*1.08,Math.PI*1.92);ctx.closePath();ctx.fill();
+  ctx.fillStyle=color.dark;ctx.fillRect(x-r,y-r*0.95,r*2,5);
+  // face
+  ctx.fillStyle='#2b1a08';circle(x-r*0.28,y+r*0.15,r*0.13);ctx.fill();circle(x+r*0.28,y+r*0.15,r*0.13);ctx.fill();
+  if(!mini){ ctx.strokeStyle='#2b1a08';ctx.lineWidth=2.5;ctx.beginPath();
+    ctx.arc(x,y+r*0.1,r*0.4,0.35,Math.PI-0.35);ctx.stroke(); }
+}
+function drawPawns(){
+  const st=G.state; if(!st)return;
+  // dim non-highlight first, then highlighted on top
+  const order=[];
+  st.players.forEach((p,pi)=>p.pawns.forEach((w,wi)=>order.push({pi,wi,w})));
+  order.forEach(o=>{
+    if(G.pawnAnim&&G.pawnAnim.pi===o.pi&&G.pawnAnim.idx===o.wi)return; // animated separately
+    const hl=st.phase==='move'&&st.turn===o.pi&&st.moves.indexOf(o.wi)>=0&&!st.players[o.pi].isBot;
+    const pos=pawnXY(o.pi,o.wi);
+    const onTile=o.w.steps>0&&o.w.steps<=TRACK_N;
+    const r=onTile? (pawnsOnTile(trackTileOf(st.players[o.pi],o.w)).length>1?15:24) : 26;
+    drawPawn(pos.x,pos.y,r,COLORS[st.players[o.pi].color],hl,false);
+    if(hl){ const pl=1+0.12*Math.sin(Date.now()/180); ctx.save();ctx.globalAlpha=0.9;
+      ctx.strokeStyle='#fff';ctx.lineWidth=4;circle(pos.x,pos.y,(r+9)*pl);ctx.stroke();ctx.restore(); }
+  });
+  // animated pawn
+  if(G.pawnAnim){ const a=G.pawnAnim;
+    drawPawn(a.curX,a.curY,26,COLORS[st.players[a.pi].color],true,false); }
+}
+const DICE={x:450,y:1330,s:120};
+function drawPanel(){
+  const st=G.state;
+  ctx.fillStyle='rgba(20,10,2,0.55)';ctx.fillRect(0,1120,W,H-1120);
+  ctx.strokeStyle='#c9963c';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,1120);ctx.lineTo(W,1120);ctx.stroke();
+  if(!st)return;
+  const p=cur();
+  // turn banner
+  ctx.fillStyle=COLORS[p.color].main;rr(230,1140,440,56,16);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 30px Trebuchet MS';
+  ctx.fillText((p.isBot?'🤖 ':'👆 ')+COLORS[p.color].name+(p.isBot?' (thinking…)':' — your turn'),450,1169);
+  // message
+  ctx.fillStyle='#ffe9b8';ctx.font='22px Trebuchet MS';
+  const m=G.msg; if(m&&Date.now()-G.msgT<6000){
+    const words=m.split(' ');let line='',yy=1215;
+    words.forEach(wd=>{ if((line+' '+wd).length>38){ctx.fillText(line,450,yy);yy+=26;line=wd;} else line=line?line+' '+wd:wd; });
+    ctx.fillText(line,450,yy);
+  }
+  // dice
+  const d=G.diceAnim, face=d? (1+Math.floor(Math.random()*6)) : st.dice;
+  const dx=DICE.x,dy=DICE.y,s=DICE.s;
+  const canRoll=st.phase==='roll'&&!p.isBot&&st.winner<0;
+  if(d){ const jx=(Math.random()-0.5)*14, jy=(Math.random()-0.5)*14; drawDie(dx+jx,dy+jy,s,face,0); }
+  else drawDie(dx,dy,s,face,canRoll?1+0.04*Math.sin(Date.now()/200):0);
+  if(canRoll){ ctx.fillStyle='#ffd75e';ctx.font='bold 22px Trebuchet MS';ctx.fillText('TAP DICE 🎲',450,dy+s/2+34); }
+  // player chips
+  st.players.forEach((pp,i)=>{
+    const x=120+i*220, y=1440, done=pp.pawns.filter(w=>w.steps===FINISH_STEPS).length;
+    ctx.fillStyle=i===st.turn?'rgba(255,215,94,0.25)':'rgba(0,0,0,0.25)';
+    rr(x-100,y-26,200,52,12);ctx.fill();
+    drawPawn(x-72,y,17,COLORS[pp.color],false,true);
+    ctx.fillStyle='#ffe9b8';ctx.font='bold 20px Trebuchet MS';ctx.textAlign='left';
+    ctx.fillText((pp.isBot?'🤖 ':'')+COLORS[pp.color].name+' 🏠'+done,x-46,y+7);ctx.textAlign='center';
+  });
+}
+function drawDie(x,y,s,face,pulse){
+  ctx.save();ctx.translate(x,y);if(pulse)ctx.scale(pulse,pulse);
+  const g=ctx.createLinearGradient(-s/2,-s/2,s/2,s/2);
+  g.addColorStop(0,'#fffdf5');g.addColorStop(1,'#d9c9a8');
+  ctx.fillStyle=g;rr(-s/2,-s/2,s,s,22);ctx.fill();
+  ctx.lineWidth=5;ctx.strokeStyle='#7a5a28';rr(-s/2,-s/2,s,s,22);ctx.stroke();
+  const P={1:[[0,0]],2:[[-1,-1],[1,1]],3:[[-1,-1],[0,0],[1,1]],4:[[-1,-1],[1,-1],[-1,1],[1,1]],
+    5:[[-1,-1],[1,-1],[0,0],[-1,1],[1,1]],6:[[-1,-1],[1,-1],[-1,0],[1,0],[-1,1],[1,1]]}[face];
+  ctx.fillStyle='#3a2410';
+  P.forEach(pt=>{circle(pt[0]*s*0.26,pt[1]*s*0.26,s*0.075);ctx.fill();});
+  ctx.restore();
+}
+function drawParticles(){
+  G.particles=G.particles.filter(p=>p.life>0);
+  G.particles.forEach(p=>{ p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.life--;
+    ctx.globalAlpha=Math.min(1,p.life/60);ctx.fillStyle=p.c;circle(p.x,p.y,p.r);ctx.fill(); });
+  ctx.globalAlpha=1;
+}
+function updateAnims(){
+  const a=G.pawnAnim;
+  if(a){ a.t+=16;
+    const segDur=a.dur, total=a.path.length*segDur;
+    const el=Math.min(a.t,total), si=Math.min(a.path.length-1,Math.floor(el/segDur)), st2=(el-si*segDur)/segDur;
+    const from=si===0?a.from:a.path[si-1], to=a.path[si];
+    const hop=Math.sin(st2*Math.PI)*22;
+    a.curX=from.x+(to.x-from.x)*st2; a.curY=from.y+(to.y-from.y)*st2-hop;
+    if(el>=total){ G.pawnAnim=null; a.res(); }
+  }
+}
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  drawBG();
+  if(G.screen==='game'&&G.state){
+    drawFreeZone();drawConnectors();drawTrack();drawHome();drawBases();drawPawns();drawPanel();
+  } else {
+    // menu backdrop: board preview
+    drawFreeZone();drawConnectors();drawTrack();drawHome();
+  }
+  drawParticles();updateAnims();
+  requestAnimationFrame(loop);
+}
+
+/* ---------------- Input ---------------- */
+function canvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  const cx=(e.touches&&e.touches[0]?e.touches[0].clientX:e.clientX), cy=(e.touches&&e.touches[0]?e.touches[0].clientY:e.clientY);
+  return {x:(cx-r.left)*W/r.width, y:(cy-r.top)*H/r.height};
+}
+canvas.addEventListener('pointerdown',e=>{
+  e.preventDefault(); Sfx.ensure();
+  if(G.screen!=='game'||!G.state||G.state.winner>=0)return;
+  const st=G.state, p=cur(), pt=canvasPos(e);
+  if(st.phase==='roll'&&!p.isBot){
+    if(Math.abs(pt.x-DICE.x)<DICE.s&&Math.abs(pt.y-DICE.y)<DICE.s) doRoll();
+    return;
+  }
+  if(st.phase==='move'&&!p.isBot){
+    let best=-1,bd=1e9;
+    st.moves.forEach(mi=>{ const q=pawnXY(st.turn,mi);
+      const d=Math.hypot(q.x-pt.x,q.y-pt.y); if(d<bd){bd=d;best=mi;} });
+    if(best>=0&&bd<70) doMove(best);
+  }
+});
+/* ---------------- Setup wiring ---------------- */
+function wireSetup(){
+  const s=G.setup;
+  const mPass=document.getElementById('mPass'), mBots=document.getElementById('mBots');
+  const countRow=document.getElementById('countRow'), colorRow=document.getElementById('colorRow');
+  const countLbl=document.getElementById('countLbl'), colorLbl=document.getElementById('colorLbl');
+  function refresh(){
+    mPass.classList.toggle('sel',s.mode==='pass'); mBots.classList.toggle('sel',s.mode==='bots');
+    countLbl.textContent=s.mode==='pass'?'PLAYERS':'BOTS (you + bots)';
+    colorRow.style.display=s.mode==='bots'?'flex':'none';
+    colorLbl.style.display=s.mode==='bots'?'block':'none';
+    countRow.querySelectorAll('.opt').forEach(b=>b.classList.toggle('sel',+b.dataset.n===s.count));
+    colorRow.querySelectorAll('.colorpick').forEach(b=>b.classList.toggle('sel',+b.dataset.c===s.humanColor));
+  }
+  mPass.onclick=()=>{s.mode='pass';refresh();Sfx.ensure();};
+  mBots.onclick=()=>{s.mode='bots';refresh();Sfx.ensure();};
+  countRow.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{s.count=+b.dataset.n;refresh();});
+  colorRow.querySelectorAll('.colorpick').forEach(b=>b.onclick=()=>{s.humanColor=+b.dataset.c;refresh();});
+  document.getElementById('howBtn').onclick=()=>{ const h=document.getElementById('howto');
+    h.style.display=h.style.display==='block'?'none':'block'; };
+  document.getElementById('startBtn').onclick=()=>{ Sfx.ensure(); startGame(); };
+  document.getElementById('againBtn').onclick=()=>startGame();
+  document.getElementById('winMenuBtn').onclick=()=>showMenu();
+  document.getElementById('menuBtn').onclick=()=>showMenu();
+  document.getElementById('muteBtn').onclick=()=>{Sfx.ensure();Sfx.toggle();};
+  refresh();
+}
+function showMenu(){
+  G.screen='menu'; G.state=null;
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('winOv').classList.add('hidden');
+}
+// Android back-button hooks (used by the WebView wrapper)
+window.__atMenu=function(){ return G.screen==='menu'; };
+window.__goMenu=function(){ showMenu(); };
+/* ---------------- Update checker ---------------- */
+async function sadohCheckUpdate(){
+  try{
+    const r=await fetch('sadoh-version.json?t='+Date.now());
+    if(!r.ok)return; const v=await r.json();
+    if(v.version&&v.version!==SADOH_APP_VERSION){
+      try{ if(localStorage.getItem('sadoh_update_dismissed')===v.version)return; }catch(e){}
+      document.getElementById('updateCard').style.display='block';
+      document.getElementById('updateDlBtn').onclick=()=>{
+        try{localStorage.setItem('sadoh_update_dismissed',v.version);}catch(e){}
+        window.location.href=v.apkUrl||SADOH_APK_URL; };
+      document.getElementById('updateNoBtn').onclick=()=>{
+        try{localStorage.setItem('sadoh_update_dismissed',v.version);}catch(e){}
+        document.getElementById('updateCard').style.display='none'; };
+    }
+  }catch(e){}
+}
+/* ---------------- Boot ---------------- */
+fitCanvas(); Sfx.init(); wireSetup(); loop();
+setTimeout(sadohCheckUpdate,2500);
+</script>
+</body>
+</html>
