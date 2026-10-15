@@ -76,7 +76,8 @@ html,body{height:100%;overflow:hidden;background:#0b1f14;font-family:system-ui,-
       <b>How to play</b><br>
       📱 <b>Phone:</b> drag anywhere to steer • hold <b>BOOST</b> for speed (costs a little score)<br>
       💻 <b>Computer:</b> mouse to steer • arrow keys / WASD • hold <b>Space</b> to boost<br>
-      🍒 Eat glowing food to grow • 💥 Don't hit other worms or the red edge — you drop food when you crash!
+      🍒 Eat glowing food to grow • 🍔 Rare bonus foods (🍔🍕🍩🍎🍇) give <b>+5 points</b> — grab them fast!<br>
+      💥 Don't hit other worms or the red edge — you drop food when you crash!
     </div>
     <div class="lb"><b>🏆 TOP SCORES (this phone)</b><div id="menuLb"></div></div>
     <div class="foot">Made by <b>Jilan Apps Official</b> • v1.0</div>
@@ -139,7 +140,10 @@ soundBtn.onclick=function(){soundOn=!soundOn;store.set(SOUND_KEY,soundOn);paintS
 /* ---------- game state ---------- */
 var WORLD=2600, PELLETS_N=330, BOT_N=6;
 var state='menu', paused=false, lastTs=0, cam={x:0,y:0};
-var player=null, bots=[], pellets=[], particles=[];
+var player=null, bots=[], pellets=[], particles=[], popups=[];
+/* rare bonus foods: emoji + big points */
+var BONUS_FOODS=[{emoji:'🍔',name:'Burger'},{emoji:'🍕',name:'Pizza'},{emoji:'🍎',name:'Apple'},{emoji:'🍩',name:'Donut'},{emoji:'🍇',name:'Grapes'}];
+var BONUS_POINTS=5, BONUS_CHANCE=0.045;
 var score=0, boostHeld=false, joy={on:false,ox:0,oy:0,dx:0,dy:0};
 var mouse={x:-999,y:-999,active:false};
 var keys={};
@@ -152,12 +156,15 @@ function skinColor(skin,t,i){if(skin.id==='rainbow'){var h=(t*60+i*9)%360;return
 
 function makeWorm(x,y,angle,skin,isPlayer,name){
   var pts=[];for(var i=0;i<6;i++)pts.push({x:x-Math.cos(angle)*i*14,y:y-Math.sin(angle)*i*14});
-  return {pts:pts,angle:angle,skin:skin,isPlayer:!!isPlayer,name:name||'Bot',speed:isPlayer?200:170,turn:isPlayer?4.2:3.0,score:0,alive:true,boost:false,aiT:0,aiAng:angle,wanderT:rnd(1,3),target:null,deadT:0};
+  return {pts:pts,angle:angle,skin:skin,isPlayer:!!isPlayer,name:name||'Bot',speed:isPlayer?200:170,turn:isPlayer?6.2:3.0,score:0,alive:true,boost:false,aiT:0,aiAng:angle,wanderT:rnd(1,3),target:null,deadT:0};
 }
-function spawnPellets(n){for(var i=0;i<n;i++)pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:rnd(3.5,6.5),c:['#ffd54f','#ff8a65','#81d4fa','#a5d6a7','#f48fb1','#fff176'][Math.floor(Math.random()*6)],ph:rnd(0,6.28)});}
+function spawnPellets(n){for(var i=0;i<n;i++){
+  if(Math.random()<BONUS_CHANCE){var bf=BONUS_FOODS[Math.floor(Math.random()*BONUS_FOODS.length)];pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:9,bonus:true,emoji:bf.emoji,ph:rnd(0,6.28)});}
+  else pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:rnd(3.5,6.5),c:['#ffd54f','#ff8a65','#81d4fa','#a5d6a7','#f48fb1','#fff176'][Math.floor(Math.random()*6)],ph:rnd(0,6.28)});
+}}
 function botNames(){return ['Speedy','Noodle','Zigzag','Chotu','Turbo','Lambi','Rocket','Cobra'];}
 function reset(){
-  pellets=[];bots=[];particles=[];score=0;paused=false;boostHeld=false;
+  pellets=[];bots=[];particles=[];popups=[];score=0;paused=false;boostHeld=false;
   var names=botNames();for(var i=names.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=names[i];names[i]=names[j];names[j]=t;}
   player=makeWorm(WORLD/2,WORLD/2,rnd(0,6.28),SKINS[skinIdx],true,playerName);
   for(var b=0;b<BOT_N;b++){
@@ -234,7 +241,10 @@ function botThink(b,dt){
 
 /* ---------- movement / collisions ---------- */
 function moveWorm(w,dt,targetAngle){
-  var dA=angDiff(w.angle,targetAngle);w.angle+=Math.max(-w.turn*dt,Math.min(w.turn*dt,dA));
+  var dA=angDiff(w.angle,targetAngle);
+  var rate=w.turn;
+  if(w.isPlayer&&Math.abs(dA)>1.2)rate=w.turn*1.5; // snappy U-turns, still smooth for small corrections
+  w.angle+=Math.max(-rate*dt,Math.min(rate*dt,dA));
   var sp=w.speed*(w.boost?1.75:1);
   var head=w.pts[0];
   head.x+=Math.cos(w.angle)*sp*dt;head.y+=Math.sin(w.angle)*sp*dt;
@@ -255,9 +265,17 @@ function eatPellets(w,isP){
   var head=w.pts[0];
   for(var i=pellets.length-1;i>=0;i--){var p=pellets[i];if(dist2(head.x,head.y,p.x,p.y)<(17+p.r)*(17+p.r)){
     pellets.splice(i,1);
-    w.score+=1;if(isP){score=w.score;blip(520+Math.min(score,40)*8,0.05,'sine');}
+    var gain=p.bonus?BONUS_POINTS:1;
+    w.score+=gain;if(isP){score=w.score;}
     growTo(w,w.score);
-    for(var k=0;k<3;k++)particles.push({x:p.x,y:p.y,vx:rnd(-40,40),vy:rnd(-40,40),life:0.35,c:p.c});
+    if(p.bonus){
+      popups.push({x:p.x,y:p.y,text:'+'+BONUS_POINTS+' '+p.emoji,life:1.1});
+      for(var k=0;k<10;k++)particles.push({x:p.x,y:p.y,vx:rnd(-130,130),vy:rnd(-130,130),life:0.6,c:'#ffd54f'});
+      if(isP)blip(880,0.14,'triangle');
+    }else{
+      if(isP)blip(520+Math.min(score,40)*8,0.05,'sine');
+      for(var k=0;k<3;k++)particles.push({x:p.x,y:p.y,vx:rnd(-40,40),vy:rnd(-40,40),life:0.35,c:p.c});
+    }
     break;
   }}
 }
@@ -284,7 +302,7 @@ function endGame(){
 
 /* ---------- loop ---------- */
 function targetAngleForPlayer(){
-  if(joy.on&&(Math.abs(joy.dx)>0.12||Math.abs(joy.dy)>0.12))return Math.atan2(joy.dy,joy.dx);
+  if(joy.on&&(Math.abs(joy.dx)>0.06||Math.abs(joy.dy)>0.06))return Math.atan2(joy.dy,joy.dx);
   var a=null;
   if(keys['ArrowUp']||keys['KeyW'])a=-Math.PI/2;
   if(keys['ArrowDown']||keys['KeyS'])a=Math.PI/2;
@@ -307,6 +325,7 @@ function step(dt){
   // pellets upkeep + particles
   if(pellets.length<PELLETS_N)spawnPellets(1);
   for(var p=particles.length-1;p>=0;p--){var pt=particles[p];pt.life-=dt;pt.x+=pt.vx*dt;pt.y+=pt.vy*dt;if(pt.life<=0)particles.splice(p,1);}
+  for(var u=popups.length-1;u>=0;u--){var pu=popups[u];pu.life-=dt;pu.y-=36*dt;if(pu.life<=0)popups.splice(u,1);}
   // camera
   var hx=player.pts[0].x,hy=player.pts[0].y;
   cam.x+=(hx-cam.x)*Math.min(1,dt*5);cam.y+=(hy-cam.y)*Math.min(1,dt*5);
@@ -327,11 +346,21 @@ function draw(){
   // red border zone
   ctx.strokeStyle='rgba(255,60,60,0.75)';ctx.lineWidth=5;ctx.setLineDash([22,14]);
   ctx.strokeRect(25+ox,25+oy,WORLD-50,WORLD-50);ctx.setLineDash([]);
-  // pellets
+  // pellets (normal dots + rare bonus foods)
   var now=performance.now()/1000;
-  for(var i=0;i<pellets.length;i++){var p=pellets[i];var px=p.x+ox,py=p.y+oy;if(px<-20||px>W+20||py<-20||py>H+20)continue;var pul=1+Math.sin(now*3+p.ph)*0.18;ctx.beginPath();ctx.fillStyle=p.c;ctx.globalAlpha=0.28;ctx.arc(px,py,p.r*2.4*pul,0,6.29);ctx.fill();ctx.globalAlpha=1;ctx.arc(px,py,p.r*pul,0,6.29);ctx.fill();}
+  for(var i=0;i<pellets.length;i++){var p=pellets[i];var px=p.x+ox,py=p.y+oy;if(px<-20||px>W+20||py<-20||py>H+20)continue;var pul=1+Math.sin(now*3+p.ph)*0.18;
+    if(p.bonus){
+      ctx.beginPath();ctx.strokeStyle='rgba(255,213,79,0.9)';ctx.lineWidth=2.5;ctx.arc(px,py,15*pul,0,6.29);ctx.stroke();
+      ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,px,py+1);ctx.textBaseline='alphabetic';
+    }else{
+      ctx.beginPath();ctx.fillStyle=p.c;ctx.globalAlpha=0.28;ctx.arc(px,py,p.r*2.4*pul,0,6.29);ctx.fill();ctx.globalAlpha=1;ctx.arc(px,py,p.r*pul,0,6.29);ctx.fill();
+    }
+  }
   // particles
   for(var q=0;q<particles.length;q++){var pt=particles[q];ctx.globalAlpha=Math.max(0,pt.life/0.7);ctx.fillStyle=pt.c;ctx.beginPath();ctx.arc(pt.x+ox,pt.y+oy,4,0,6.29);ctx.fill();}
+  ctx.globalAlpha=1;
+  // bonus popups (+5 🍔)
+  for(var uu=0;uu<popups.length;uu++){var pup=popups[uu];ctx.globalAlpha=Math.max(0,Math.min(1,pup.life/0.5));ctx.fillStyle='#ffd54f';ctx.font='bold 17px system-ui';ctx.textAlign='center';ctx.fillText(pup.text,pup.x+ox,pup.y+oy);}
   ctx.globalAlpha=1;
   // worms (bots first, player on top)
   var all=bots.slice().filter(function(b){return b.alive;});if(player.alive)all.push(player);
