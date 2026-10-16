@@ -247,9 +247,11 @@ async function send(){
       body:JSON.stringify({system_instruction:{parts:[{text:sysPrompt}]},contents:hist})
     });
     rmTyping();
-    if(res.status===400){showErr(t("e400"));setTimeout(()=>$("setup").classList.remove("hidden"),1500);$("send").disabled=false;return;}
-    if(res.status===429){showErr(t("e429"));$("send").disabled=false;return;}
-    if(!res.ok){showErr(t("eunk"));$("send").disabled=false;return;}
+    let det="";
+    if(!res.ok){try{const ej=await res.json();if(ej&&ej.error&&ej.error.message)det=" ["+res.status+"] "+ej.error.message;}catch(_){det=" ["+res.status+"]";}}
+    if(res.status===400){showErr(t("e400")+det);setTimeout(()=>$("setup").classList.remove("hidden"),1500);$("send").disabled=false;return;}
+    if(res.status===429){showErr(t("e429")+det);$("send").disabled=false;return;}
+    if(!res.ok){showErr(t("eunk")+det);$("send").disabled=false;return;}
     const j=await res.json();
     const ans=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts?j.candidates[0].content.parts.map(p=>p.text||"").join(""):"";
     c.msgs.push({r:"a",t:ans||"…"});
