@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ur"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Jilan AI Chat — Apna Free AI Dost</title>
+<style>
+:root{--green:#14532d;--green2:#1d6b3c;--gold:#c9a227;--bg:#f4f8f4;--card:#fff;--mut:#6b7c6e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Nastaliq Urdu",sans-serif;background:var(--bg);color:#1d2b20;height:100dvh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:5}
+header .logo{font-size:26px}
+header h1{font-size:17px;font-weight:700}
+header .sub{font-size:11px;opacity:.85}
+header .sp{flex:1}
+.hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:7px 10px;font-size:15px;cursor:pointer}
+.hbtn:active{transform:scale(.95)}
+.hbtn.on{background:var(--gold);border-color:var(--gold);color:#3a2f05}
+#chat{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;padding:10px 13px;border-radius:16px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;position:relative;animation:pop .18s ease}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{align-self:flex-end;background:var(--green);color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--card);border:1px solid #dfe8df;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.msg.ai b{color:var(--green)}
+.msg .cp{position:absolute;top:4px;right:6px;font-size:11px;opacity:.45;cursor:pointer;border:none;background:none}
+.msg.user .cp{color:#fff}
+.typing{align-self:flex-start;background:var(--card);border:1px solid #dfe8df;border-radius:16px;padding:10px 16px;font-size:18px;letter-spacing:3px;color:var(--green)}
+.typing span{animation:bl 1s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,100%{opacity:.25}50%{opacity:1}}
+.err{background:#fff3f3;border:1px solid #f3c2c2;color:#a33}
+#composer{display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid #dfe8df;align-items:flex-end}
+#inp{flex:1;border:2px solid #dfe8df;border-radius:14px;padding:11px 13px;font-size:15px;font-family:inherit;resize:none;max-height:110px;outline:none}
+#inp:focus{border-color:var(--green)}
+#send{background:var(--green);color:#fff;border:none;border-radius:14px;padding:0 18px;font-size:17px;font-weight:700;cursor:pointer;min-height:46px}
+#send:disabled{opacity:.5}
+.screen{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:26px 18px}
+.hidden{display:none!important}
+.card{background:#fff;border-radius:18px;padding:22px 18px;max-width:460px;width:100%;box-shadow:0 4px 18px rgba(20,83,45,.1);margin-top:12px}
+.biglogo{font-size:56px}
+.card h2{color:var(--green);font-size:20px;margin:8px 0;text-align:center}
+.card p{font-size:14px;color:#3c4a3e;line-height:1.7;margin:8px 0}
+.steps{background:#f4f8f4;border-radius:12px;padding:12px 14px;margin:12px 0}
+.steps div{font-size:14px;margin:7px 0;color:#2c3a2e}
+.btn{display:block;width:100%;text-align:center;background:var(--green);color:#fff;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin:10px 0;text-decoration:none}
+.btn.gold{background:var(--gold);color:#3a2f05}
+.btn.outline{background:#fff;color:var(--green);border:2px solid var(--green)}
+.keybox{width:100%;border:2px solid #dfe8df;border-radius:12px;padding:12px;font-size:14px;font-family:monospace;margin:8px 0}
+.note{font-size:12px;color:var(--mut);text-align:center;line-height:1.6}
+footer.app-foot{text-align:center;font-size:11px;color:var(--mut);padding:8px}
+/* drawer */
+#drawer{position:fixed;top:0;left:0;bottom:0;width:270px;background:#fff;z-index:30;box-shadow:2px 0 14px rgba(0,0,0,.2);transform:translateX(-105%);transition:transform .25s;display:flex;flex-direction:column}
+#drawer.open{transform:none}
+#drawer .dh{background:var(--green);color:#fff;padding:14px;font-weight:700}
+#histList{flex:1;overflow-y:auto}
+.hitem{padding:11px 14px;border-bottom:1px solid #eee;font-size:14px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.hitem:active{background:#f0f5f0}
+.hitem .t{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hitem .x{color:#c33;font-size:13px}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:25;display:none}
+#scrim.open{display:block}
+.dfoot{padding:10px;border-top:1px solid #eee}
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;font-size:14px;border-bottom:1px solid #f0f0f0}
+.setrow button{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--green);background:#fff;color:var(--green);cursor:pointer}
+.langsw{display:flex;gap:6px}
+.langsw button{border:1px solid #ccc;background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+.langsw button.on{background:var(--green);color:#fff;border-color:var(--green)}
+#updateCard{margin:10px 12px 0}
+</style></head><body>
+
+<header>
+  <button class="hbtn" id="menuBtn" title="Menu">☰</button>
+  <div class="logo">🤖</div>
+  <div><h1 id="appTitle">Jilan AI Chat</h1><div class="sub" id="appSub">Apna free AI dost</div></div>
+  <div class="sp"></div>
+  <button class="hbtn" id="islamiBtn" title="Islami Mode">🕌</button>
+  <button class="hbtn" id="newBtn" title="New chat">✚</button>
+</header>
+
+<div id="updateCard" class="hidden"></div>
+<div id="chat"></div>
+
+<div id="composer">
+  <textarea id="inp" rows="1" placeholder="Yahan likhein…"></textarea>
+  <button id="send">➤</button>
+</div>
+<footer class="app-foot">Made by Jilan Apps Official</footer>
+
+<!-- SETUP SCREEN -->
+<div id="setup" class="screen hidden">
+  <div class="biglogo">🤖</div>
+  <div class="card">
+    <h2 id="sTitle">Khush Aamdeed!</h2>
+    <p id="sDesc">Ye aap ka <b>muft AI dost</b> hai — sawal poochein, jawab payein, Roman Urdu ya English me.</p>
+    <p id="sKey">AI chalane ke liye <b>Google ki muft API key</b> chahiye (bilkul free, 2 minute ka kaam). Key <b>sirf aap ke phone</b> me rehti hai.</p>
+    <div class="steps" id="sSteps">
+      <div>1️⃣ Neeche button dabayein — Google AI Studio khulega</div>
+      <div>2️⃣ <b>"Create API key"</b> dabayein</div>
+      <div>3️⃣ Key <b>copy</b> kar ke neeche paste karein</div>
+    </div>
+    <a class="btn gold" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" id="keyBtn">🔑 Free API Key Banayein</a>
+    <input class="keybox" id="keyInp" placeholder="Yahan API key paste karein…" autocomplete="off" spellcheck="false">
+    <button class="btn" id="saveKey">✅ Save &amp; Shuru Karein</button>
+    <div class="note" id="sNote">Key Google ke servers par mehfooz rehti hai.<br>Made by Jilan Apps Official</div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div id="scrim"></div>
+<aside id="drawer">
+  <div class="dh">💬 <span id="dTitle">Chats</span></div>
+  <div id="histList"></div>
+  <div class="dfoot">
+    <div class="setrow"><span id="lLang">Zubaan / Language</span>
+      <span class="langsw"><button id="langRU" class="on">Roman Urdu</button><button id="langEN">English</button></span></div>
+    <div class="setrow"><span id="lKey">API Key</span><button id="chgKey">🔑 <span id="lChg">Tabdeel</span></button></div>
+    <div class="setrow"><span id="lClear">Saari chats saaf karein</span><button id="clrAll">🗑</button></div>
+    <div class="note" style="margin-top:8px">Made by Jilan Apps Official<br>v1.0</div>
+  </div>
+</aside>
+
+<script>
+"use strict";
+const APP_VERSION="1.0";
+const LS_KEY="jac_key", LS_CHATS="jac_chats", LS_LANG="jac_lang";
+const $=id=>document.getElementById(id);
+const SYS="You are Jilan AI Chat, a friendly assistant for Pakistani users. Reply in Roman Urdu by default. If the user writes in English, reply in English. If the user writes in Urdu script, reply in Urdu script. Keep answers clear and concise.";
+const ISLAMI_ADD="Islami sawalon ke jawab Ahle Sunnat (Barelvi) maslak aur Hanafi fiqh ke mutabiq do. Deobandi, Ahl-e-Hadith ya Shia mauqif na do.";
+const LS_ISLAMI="jac_islami";
+let ISLAMI=localStorage.getItem(LS_ISLAMI)==="1";
+
+const T={
+ru:{ph:"Yahan likhein…",sub:"Apna free AI dost",chats:"Chats",lang:"Zubaan / Language",key:"API Key",chg:"Tabdeel",clear:"Saari chats saaf karein",
+newc:"Nayi guftagu shuru karein… 👋 Kuch bhi poochein!",nokey:"Pehle API key save karein.",send:"Bhej rahe hain…",
+e400:"⚠️ API key ghalat lagti hai. Dobara check karein.",e429:"⏳ Limit poori ho gayi — 1 minute baad dobara try karein.",enet:"📡 Internet nahi lag raha. Net on kar ke dobara try karein.",eunk:"⚠️ Kuch garbar hui. Dobara try karein.",
+setupT:"Khush Aamdeed!",setupD:"Ye aap ka <b>muft AI dost</b> hai — sawal poochein, jawab payein, Roman Urdu ya English me.",
+setupK:"AI chalane ke liye <b>Google ki muft API key</b> chahiye (bilkul free, 2 minute ka kaam). Key <b>sirf aap ke phone</b> me rehti hai.",
+st1:"1️⃣ Neeche button dabayein — Google AI Studio khulega",st2:"2️⃣ <b>\"Create API key\"</b> dabayein",st3:"3️⃣ Key <b>copy</b> kar ke neeche paste karein",
+kb:"🔑 Free API Key Banayein",kp:"Yahan API key paste karein…",sv:"✅ Save & Shuru Karein",
+kn:"Key Google ke servers par mehfooz rehti hai.<br>Made by Jilan Apps Official",
+needkey:"⚠️ Pehle API key dalein.",upd:"🎉 Naya version available hai!",updb:"Nai features ke liye app update karein",upbtn:"📥 Update Download Karein",
+del:"Chat delete karein?",clr:"Saari chats delete ho jayengi. Pakka?",copied:"✅ Copy ho gaya",
+islOn:"🕌 Islami Mode ON — Islami jawab Ahle Sunnat maslak ke mutabiq",islOff:"Islami Mode OFF"},
+en:{ph:"Type here…",sub:"Your free AI friend",chats:"Chats",lang:"Language",key:"API Key",chg:"Change",clear:"Clear all chats",
+newc:"Start a new conversation… 👋 Ask me anything!",nokey:"Please save your API key first.",send:"Sending…",
+e400:"⚠️ The API key looks invalid. Please check it again.",e429:"⏳ Quota finished — please try again in a minute.",enet:"📡 No internet. Turn it on and try again.",eunk:"⚠️ Something went wrong. Please try again.",
+setupT:"Welcome!",setupD:"This is your <b>free AI friend</b> — ask questions, get answers, in Roman Urdu or English.",
+setupK:"The AI needs a <b>free Google API key</b> (totally free, 2-minute job). The key stays <b>only on your phone</b>.",
+st1:"1️⃣ Tap the button below — Google AI Studio will open",st2:"2️⃣ Tap <b>\"Create API key\"</b>",st3:"3️⃣ <b>Copy</b> the key and paste it below",
+kb:"🔑 Get Free API Key",kp:"Paste API key here…",sv:"✅ Save & Start",
+kn:"The key stays safe on Google's servers.<br>Made by Jilan Apps Official",
+needkey:"⚠️ Please add your API key first.",upd:"🎉 New version available!",updb:"Update the app for new features",upbtn:"📥 Download Update",
+del:"Delete this chat?",clr:"All chats will be deleted. Sure?",copied:"✅ Copied",
+islOn:"🕌 Islami Mode ON — Islamic answers per Ahle Sunnat maslak",islOff:"Islami Mode OFF"}
+};
+let LANG=localStorage.getItem(LS_LANG)||"ru";
+function t(k){return T[LANG][k];}
+function applyLang(){
+  $("inp").placeholder=t("ph");$("appSub").textContent=t("sub");$("dTitle").textContent=t("chats");
+  $("lLang").textContent=t("lang");$("lKey").textContent=t("key");$("lChg").textContent=t("chg");$("lClear").textContent=t("clear");
+  $("sTitle").textContent=t("setupT");$("sDesc").innerHTML=t("setupD");$("sKey").innerHTML=t("setupK");
+  $("keyBtn").textContent=t("kb");$("keyInp").placeholder=t("kp");$("saveKey").textContent=t("sv");$("sNote").innerHTML=t("kn");
+  $("langRU").classList.toggle("on",LANG==="ru");$("langEN").classList.toggle("on",LANG==="en");
+  const s=$("sSteps").children;s[0].textContent="";s[0].innerHTML=t("st1");s[1].innerHTML=t("st2");s[2].innerHTML=t("st3");
+}
+$("langRU").onclick=()=>{LANG="ru";localStorage.setItem(LS_LANG,"ru");applyLang();};
+$("langEN").onclick=()=>{LANG="en";localStorage.setItem(LS_LANG,"en");applyLang();};
+
+/* ---------- chats storage ---------- */
+function getChats(){try{return JSON.parse(localStorage.getItem(LS_CHATS)||"[]");}catch(e){return[];}}
+function saveChats(c){localStorage.setItem(LS_CHATS,JSON.stringify(c.slice(0,50)));}
+let cur=null; // current chat id
+function newChat(){cur="c"+Date.now();const cs=getChats();cs.unshift({id:cur,title:"",msgs:[],ts:Date.now()});saveChats(cs);renderChat();renderHist();}
+function getCur(){const cs=getChats();let c=cs.find(x=>x.id===cur);if(!c){newChat();return getChats().find(x=>x.id===cur);}return c;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmt(s){let h=esc(s);h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");h=h.replace(/`([^`]+)`/g,"<code>$1</code>");return h;}
+
+/* ---------- render ---------- */
+function renderChat(){
+  const c=getCur(),box=$("chat");box.innerHTML="";
+  if(!c.msgs.length){const d=document.createElement("div");d.className="msg ai";d.innerHTML=esc(t("newc"));box.appendChild(d);}
+  c.msgs.forEach((m,i)=>{
+    const d=document.createElement("div");d.className="msg "+(m.r==="u"?"user":"ai");
+    d.innerHTML=fmt(m.t);
+    if(m.r==="a"){const b=document.createElement("button");b.className="cp";b.textContent="📋";b.title="Copy";
+      b.onclick=ev=>{ev.stopPropagation();(navigator.clipboard?navigator.clipboard.writeText(m.t):Promise.reject()).then(()=>toast(t("copied"))).catch(()=>{});};d.appendChild(b);}
+    box.appendChild(d);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function renderHist(){
+  const cs=getChats(),L=$("histList");L.innerHTML="";
+  cs.forEach(c=>{
+    const d=document.createElement("div");d.className="hitem";
+    const title=c.title||c.msgs.find(m=>m.r==="u")?.t||"—";
+    d.innerHTML='<span style="font-size:16px">💬</span><span class="t">'+esc(title.slice(0,40))+"</span>";
+    const x=document.createElement("span");x.className="x";x.textContent="✕";
+    x.onclick=ev=>{ev.stopPropagation();if(confirm(t("del"))){saveChats(getChats().filter(z=>z.id!==c.id));if(cur===c.id)cur=null;renderHist();renderChat();}};
+    d.onclick=()=>{cur=c.id;renderChat();closeDrawer();};
+    d.appendChild(x);L.appendChild(d);
+  });
+}
+let toastT=null;
+function toast(m){let e=$("toast");if(!e){e=document.createElement("div");e.id="toast";e.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#14532d;color:#fff;padding:10px 18px;border-radius:12px;z-index:99;font-size:14px";document.body.appendChild(e);}e.textContent=m;e.style.display="block";clearTimeout(toastT);toastT=setTimeout(()=>e.style.display="none",1800);}
+
+/* ---------- islami mode ---------- */
+function updIslamiBtn(){$("islamiBtn").classList.toggle("on",ISLAMI);$("islamiBtn").title="Islami Mode ("+(ISLAMI?"ON":"OFF")+")";}
+$("islamiBtn").onclick=()=>{ISLAMI=!ISLAMI;localStorage.setItem(LS_ISLAMI,ISLAMI?"1":"0");updIslamiBtn();toast(ISLAMI?t("islOn"):t("islOff"));};
+
+/* ---------- drawer ---------- */
+function openDrawer(){$("drawer").classList.add("open");$("scrim").classList.add("open");}
+function closeDrawer(){$("drawer").classList.remove("open");$("scrim").classList.remove("open");}
+$("menuBtn").onclick=openDrawer;$("scrim").onclick=closeDrawer;
+$("newBtn").onclick=()=>{newChat();};
+$("clrAll").onclick=()=>{if(confirm(t("clr"))){localStorage.removeItem(LS_CHATS);cur=null;renderHist();renderChat();}};
+$("chgKey").onclick=()=>{localStorage.removeItem(LS_KEY);$("setup").classList.remove("hidden");closeDrawer();};
+
+/* ---------- setup ---------- */
+$("saveKey").onclick=()=>{
+  const k=$("keyInp").value.trim();
+  if(k.length<10){toast(t("needkey"));return;}
+  localStorage.setItem(LS_KEY,k);
+  $("setup").classList.add("hidden");
+  renderChat();
+};
+
+/* ---------- send ---------- */
+function addTyping(){const d=document.createElement("div");d.className="typing";d.id="typing";d.innerHTML="<span>.</span><span>.</span><span>.</span>";$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;}
+function rmTyping(){const d=$("typing");if(d)d.remove();}
+async function send(){
+  const inp=$("inp"),txt=inp.value.trim();if(!txt)return;
+  const key=localStorage.getItem(LS_KEY);
+  if(!key){toast(t("nokey"));$("setup").classList.remove("hidden");return;}
+  const c=getCur();
+  if(!c.title)c.title=txt.slice(0,40);
+  c.msgs.push({r:"u",t:txt});
+  // keep last 12 msgs for context, save
+  const cs=getChats();const ix=cs.findIndex(x=>x.id===c.id);if(ix>=0){cs[ix]=c;saveChats(cs);}
+  inp.value="";$("send").disabled=true;renderChat();addTyping();
+  try{
+    const hist=c.msgs.slice(-12).map(m=>({role:m.r==="u"?"user":"model",parts:[{text:m.t}]}));
+    // last msg is the user msg we just added; hist already includes it
+    const sysPrompt=SYS+(ISLAMI?" "+ISLAMI_ADD:"");
+    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({system_instruction:{parts:[{text:sysPrompt}]},contents:hist})
+    });
+    rmTyping();
+    if(res.status===400){showErr(t("e400"));setTimeout(()=>$("setup").classList.remove("hidden"),1500);$("send").disabled=false;return;}
+    if(res.status===429){showErr(t("e429"));$("send").disabled=false;return;}
+    if(!res.ok){showErr(t("eunk"));$("send").disabled=false;return;}
+    const j=await res.json();
+    const ans=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts?j.candidates[0].content.parts.map(p=>p.text||"").join(""):"";
+    c.msgs.push({r:"a",t:ans||"…"});
+    const cs2=getChats();const ix2=cs2.findIndex(x=>x.id===c.id);if(ix2>=0){cs2[ix2]=c;saveChats(cs2);}
+    renderChat();renderHist();
+  }catch(e){rmTyping();showErr(t("enet"));}
+  $("send").disabled=false;
+}
+function showErr(m){const d=document.createElement("div");d.className="msg ai err";d.textContent=m;$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;}
+$("send").onclick=send;
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
+// auto-grow
+$("inp").addEventListener("input",()=>{$("inp").style.height="auto";$("inp").style.height=Math.min($("inp").scrollHeight,110)+"px";});
+
+/* ---------- updater (direct APK; Play build me hataya jata hai) ---------- */
+async function checkUpdate(){
+  try{
+    const r=await fetch("jilan-ai-chat-version.json?t="+Date.now());
+    if(!r.ok)return;
+    const v=await r.json();
+    if(v.version&&v.version!==APP_VERSION){
+      const c=$("updateCard");c.classList.remove("hidden");
+      c.innerHTML='<div class="card" style="margin:0"><div style="font-weight:700">🎉 '+esc(t("upd"))+'</div><div class="note">'+esc(t("updb"))+'</div><a href="https://jilanapps.github.io/jilan-store/jilan-ai-chat/jilan-ai-chat.apk" class="btn gold" style="display:inline-block;margin-top:8px;text-decoration:none">'+esc(t("upbtn"))+'</a></div>';
+    }
+  }catch(e){}
+}
+
+/* ---------- init ---------- */
+applyLang();
+updIslamiBtn();
+if(!localStorage.getItem(LS_KEY)){$("setup").classList.remove("hidden");}
+else{const cs=getChats();if(cs.length){cur=cs[0].id;}else{newChat();}renderChat();}
+renderHist();
+setTimeout(checkUpdate,3000);
+</script></body></html>
