@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shifa Clinic Manager — Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+body{background:#f0f7f4;color:#1a3c34;min-height:100vh}
+.demo{background:#b45309;color:#fff;text-align:center;font-size:13px;padding:7px;font-weight:700;letter-spacing:.5px}
+header{background:linear-gradient(135deg,#0d6e5f,#14a085);color:#fff;padding:16px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+header .logo{font-size:32px}
+header h1{font-size:19px}
+header p{font-size:12px;opacity:.85}
+#langBtn{margin-left:auto;background:rgba(255,255,255,.2);border:1px solid #fff;color:#fff;border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer}
+.tabs{display:flex;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);position:sticky;top:73px;z-index:5}
+.tabs button{flex:1;padding:13px;border:0;background:#fff;font-size:15px;font-weight:600;color:#5b7a72;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button.on{color:#0d6e5f;border-bottom-color:#0d6e5f}
+main{padding:14px;max-width:640px;margin:auto}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat .n{font-size:26px;font-weight:800;color:#0d6e5f}
+.stat .l{font-size:12px;color:#5b7a72}
+.card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px}
+.card h3{font-size:15px;margin-bottom:10px;color:#0d6e5f}
+.search{width:100%;padding:11px 13px;border:1.5px solid #cfe3dd;border-radius:10px;font-size:15px;margin-bottom:10px;outline:none}
+.search:focus{border-color:#0d6e5f}
+.prow{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #eef4f2}
+.prow:last-child{border:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#d7efe9;color:#0d6e5f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pinfo .nm{font-weight:700;font-size:15px}
+.pinfo .dt{font-size:12px;color:#5b7a72}
+.del{background:#fde8e8;color:#c0392b;border:0;border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer}
+.fab{position:fixed;bottom:22px;right:20px;width:60px;height:60px;border-radius:50%;background:#0d6e5f;color:#fff;font-size:30px;border:0;box-shadow:0 4px 14px rgba(13,110,95,.4);cursor:pointer;z-index:6}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.modal.hide{display:none}
+.sheet{background:#fff;width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:20px 16px 30px;max-height:88vh;overflow:auto}
+.sheet h2{font-size:18px;margin-bottom:14px;color:#0d6e5f}
+.sheet label{font-size:13px;color:#5b7a72;display:block;margin:10px 0 4px}
+.sheet input,.sheet select,.sheet textarea{width:100%;padding:11px;border:1.5px solid #cfe3dd;border-radius:10px;font-size:15px;outline:none}
+.sheet input:focus{border-color:#0d6e5f}
+.btnrow{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;padding:13px;border:0;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.btn.ok{background:#0d6e5f;color:#fff}
+.btn.no{background:#eef4f2;color:#5b7a72}
+.aprow{display:flex;gap:10px;align-items:center;padding:11px 4px;border-bottom:1px solid #eef4f2}
+.aprow:last-child{border:0}
+.atime{background:#e6f4f0;color:#0d6e5f;font-weight:800;border-radius:10px;padding:8px 10px;font-size:14px;min-width:64px;text-align:center}
+footer{text-align:center;font-size:12px;color:#8aa39c;padding:18px}
+.empty{text-align:center;color:#8aa39c;padding:24px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="demo">⚠️ DEMO by Jilan Apps — Muft peshkash</div>
+<header>
+<div class="logo">🏥</div>
+<div><h1 id="appT">Shifa Clinic Manager</h1><p id="appS">Mareez aur appointment ka asaan hisaab</p></div>
+<button id="langBtn">EN</button>
+</header>
+<div class="tabs">
+<button id="tDash" class="on">📊 <span data-t="dash">Dashboard</span></button>
+<button id="tPat">🧑‍⚕️ <span data-t="pats">Mareez</span></button>
+<button id="tApt">📅 <span data-t="apts">Appointments</span></button>
+</div>
+<main>
+<!-- DASHBOARD -->
+<section id="vDash">
+<div class="stats">
+<div class="stat"><div class="n" id="sPat">0</div><div class="l" data-t="tpat">Kul Mareez</div></div>
+<div class="stat"><div class="n" id="sApt">0</div><div class="l" data-t="tapt">Aaj ki Appointments</div></div>
+<div class="stat"><div class="n" id="sVis">0</div><div class="l" data-t="tvis">Kul Visits</div></div>
+<div class="stat"><div class="n" id="sNew">0</div><div class="l" data-t="tnew">Is Haftay Naye</div></div>
+</div>
+<div class="card"><h3 data-t="today">📅 Aaj ki Appointments</h3><div id="todayList"></div></div>
+</section>
+<!-- PATIENTS -->
+<section id="vPat" style="display:none">
+<div class="card">
+<input class="search" id="pSearch" data-ph="srch" placeholder="🔍 Mareez ka naam ya bemari likhein...">
+<div id="pList"></div>
+</div>
+</section>
+<!-- APPOINTMENTS -->
+<section id="vApt" style="display:none">
+<div class="card"><h3 data-t="allapt">📅 Tamam Appointments</h3><div id="aList"></div></div>
+</section>
+</main>
+<button class="fab" id="fab">+</button>
+
+<!-- ADD PATIENT -->
+<div class="modal hide" id="mPat"><div class="sheet">
+<h2 data-t="addp">➕ Naya Mareez</h2>
+<label data-t="nm">Naam</label><input id="fNm" placeholder="Muhammad Ahmed">
+<label data-t="age">Umar</label><input id="fAge" type="number" placeholder="35">
+<label data-t="ph">Phone</label><input id="fPh" placeholder="0300-1234567">
+<label data-t="dis">Bemari</label><input id="fDis" placeholder="Bukhar / Nazla">
+<label data-t="nt">Notes</label><textarea id="fNt" rows="2" placeholder="..."></textarea>
+<div class="btnrow"><button class="btn ok" id="savePat" data-t="save">Save karein</button><button class="btn no" data-t="cancel">Cancel</button></div>
+</div></div>
+
+<!-- ADD APPOINTMENT -->
+<div class="modal hide" id="mApt"><div class="sheet">
+<h2 data-t="adda">➕ Nayi Appointment</h2>
+<label data-t="patsel">Mareez</label><select id="fAPat"></select>
+<label data-t="dt">Tareekh</label><input id="fADt" type="date">
+<label data-t="tm">Waqt</label><input id="fATm" type="time">
+<div class="btnrow"><button class="btn ok" id="saveApt" data-t="save">Save karein</button><button class="btn no" data-t="cancel">Cancel</button></div>
+</div></div>
+
+<footer>Made by Jilan Apps Official • Demo version</footer>
+
+<script>
+const T={
+ru:{dash:"Dashboard",pats:"Mareez",apts:"Appointments",tpat:"Kul Mareez",tapt:"Aaj ki Appointments",tvis:"Kul Visits",tnew:"Is Haftay Naye",today:"📅 Aaj ki Appointments",allapt:"📅 Tamam Appointments",addp:"➕ Naya Mareez",adda:"➕ Nayi Appointment",nm:"Naam",age:"Umar",ph:"Phone",dis:"Bemari",nt:"Notes",save:"Save karein",cancel:"Cancel",srch:"🔍 Mareez ka naam ya bemari likhein...",patsel:"Mareez",dt:"Tareekh",tm:"Waqt",none:"Koi record nahi",del:"Delete",cf:"Kya waqai delete karna hai?",sv:"✅ Save ho gaya!",appt:"Pichli visit"},
+en:{dash:"Dashboard",pats:"Patients",apts:"Appointments",tpat:"Total Patients",tapt:"Today's Appointments",tvis:"Total Visits",tnew:"New This Week",today:"📅 Today's Appointments",allapt:"📅 All Appointments",addp:"➕ New Patient",adda:"➕ New Appointment",nm:"Name",age:"Age",ph:"Phone",dis:"Disease",nt:"Notes",save:"Save",cancel:"Cancel",srch:"🔍 Search patient or disease...",patsel:"Patient",dt:"Date",tm:"Time",none:"No records",del:"Delete",cf:"Really delete?",sv:"✅ Saved!",appt:"Last visit"}};
+let L=localStorage.getItem("cd_lang")||"ru";
+const $=id=>document.getElementById(id);
+function seed(){
+ if(localStorage.getItem("cd_p"))return;
+ const P=[
+ {n:"Muhammad Ahmed",a:35,p:"0300-1111111",d:"Bukhar",nt:"3 din se",v:4,dt:"2026-10-10"},
+ {n:"Fatima Bibi",a:52,p:"0300-2222222",d:"Sugar",nt:"Monthly checkup",v:12,dt:"2026-10-14"},
+ {n:"Ali Raza",a:28,p:"0300-3333333",d:"Nazla Zukam",nt:"-",v:2,dt:"2026-10-12"},
+ {n:"Ayesha Khan",a:41,p:"0300-4444444",d:"Blood Pressure",nt:"Dawai jari",v:8,dt:"2026-10-15"},
+ {n:"Usman Tariq",a:19,p:"0300-5555555",d:"Allergy",nt:"-",v:1,dt:"2026-10-09"}];
+ const A=[
+ {p:"Fatima Bibi",d:"2026-10-16",t:"10:00"},
+ {p:"Muhammad Ahmed",d:"2026-10-16",t:"11:30"},
+ {p:"Ayesha Khan",d:"2026-10-17",t:"09:00"}];
+ localStorage.setItem("cd_p",JSON.stringify(P));
+ localStorage.setItem("cd_a",JSON.stringify(A));
+}
+const GP=()=>JSON.parse(localStorage.getItem("cd_p")||"[]");
+const GA=()=>JSON.parse(localStorage.getItem("cd_a")||"[]");
+const SP=p=>localStorage.setItem("cd_p",JSON.stringify(p));
+const SA=a=>localStorage.setItem("cd_a",JSON.stringify(a));
+const todayStr=()=>new Date().toISOString().slice(0,10);
+function render(){
+ const t=T[L],P=GP(),A=GA(),td=todayStr();
+ $("sPat").textContent=P.length;
+ $("sApt").textContent=A.filter(a=>a.d===td).length;
+ $("sVis").textContent=P.reduce((s,p)=>s+(p.v||0),0);
+ $("sNew").textContent=P.filter(p=>p.dt>=td.slice(0,8)+"01").length;
+ document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=t[e.dataset.t]||e.textContent});
+ document.querySelectorAll("[data-ph]").forEach(e=>{e.placeholder=t[e.dataset.ph]||e.placeholder});
+ $("appT").textContent=L==="ru"?"Shifa Clinic Manager":"Shifa Clinic Manager";
+ $("appS").textContent=L==="ru"?"Mareez aur appointment ka asaan hisaab":"Easy patient & appointment records";
+ $("langBtn").textContent=L==="ru"?"EN":"اردو";
+ // today
+ const tl=$("todayList");const ta=A.filter(a=>a.d===td).sort((x,y)=>x.t.localeCompare(y.t));
+ tl.innerHTML=ta.length?ta.map(a=>'<div class="aprow"><div class="atime">'+a.t+'</div><div class="pinfo"><div class="nm">'+esc(a.p)+'</div></div></div>').join(""):'<div class="empty">'+t.none+'</div>';
+ // patients
+ const q=($("pSearch").value||"").toLowerCase();
+ const fp=P.filter(p=>(p.n+" "+p.d).toLowerCase().includes(q));
+ $("pList").innerHTML=fp.length?fp.map((p,i)=>'<div class="prow"><div class="avatar">'+esc(p.n[0])+'</div><div class="pinfo"><div class="nm">'+esc(p.n)+' • '+p.a+'</div><div class="dt">'+esc(p.d)+' | '+esc(p.p)+' | '+t.appt+': '+p.dt+'</div></div><button class="del" onclick="delP('+P.indexOf(p)+')">'+t.del+'</button></div>').join(""):'<div class="empty">'+t.none+'</div>';
+ // appointments
+ const sa=[...A].sort((x,y)=>(x.d+x.t).localeCompare(y.d+y.t));
+ $("aList").innerHTML=sa.length?sa.map(a=>'<div class="aprow"><div class="atime">'+a.t+'</div><div class="pinfo"><div class="nm">'+esc(a.p)+'</div><div class="dt">'+a.d+'</div></div><button class="del" onclick="delA(\''+a.d+"|"+a.t+"|"+esc(a.p)+'\')">'+t.del+'</button></div>').join(""):'<div class="empty">'+t.none+'</div>';
+ // patient select
+ $("fAPat").innerHTML=P.map(p=>'<option>'+esc(p.n)+'</option>').join("");
+}
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+window.delP=i=>{if(!confirm(T[L].cf))return;const P=GP();P.splice(i,1);SP(P);render()};
+window.delA=k=>{if(!confirm(T[L].cf))return;const[d,tm,p]=k.split("|");SA(GA().filter(a=>!(a.d===d&&a.t===tm&&a.p===p)));render()};
+function tab(v){["Dash","Pat","Apt"].forEach(x=>{$("v"+x).style.display=x===v?"block":"none";$("t"+x).classList.toggle("on",x===v)});$("fab").textContent=v==="Apt"?"📅":"+"}
+$("tDash").onclick=()=>tab("Dash");$("tPat").onclick=()=>tab("Pat");$("tApt").onclick=()=>tab("Apt");
+$("pSearch").oninput=render;
+$("fab").onclick=()=>{const v=$("vApt").style.display!=="none"?"Apt":"Pat";$(v==="Apt"?"mApt":"mPat").classList.remove("hide")};
+document.querySelectorAll(".btn.no").forEach(b=>b.onclick=e=>e.target.closest(".modal").classList.add("hide"));
+$("savePat").onclick=()=>{const n=$("fNm").value.trim();if(!n)return;const P=GP();P.push({n,a:$("fAge").value||"-",p:$("fPh").value||"-",d:$("fDis").value||"-",nt:$("fNt").value||"-",v:1,dt:todayStr()});SP(P);["fNm","fAge","fPh","fDis","fNt"].forEach(i=>$(i).value="");$("mPat").classList.add("hide");render();alert(T[L].sv)};
+$("saveApt").onclick=()=>{const d=$("fADt").value,tm=$("fATm").value;if(!d||!tm)return;const A=GA();A.push({p:$("fAPat").value,d,t:tm});SA(A);$("mApt").classList.add("hide");render();alert(T[L].sv)};
+$("langBtn").onclick=()=>{L=L==="ru"?"en":"ru";localStorage.setItem("cd_lang",L);render()};
+$("fADt").value=todayStr();
+seed();render();
+</script>
+</body>
+</html>
