@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jilan App Store — Apni Dukaan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+body{background:#0b0f1a;color:#e6ebf5;min-height:100vh}
+header{background:linear-gradient(135deg,#1e1b4b,#4c1d95 60%,#7c3aed);padding:20px 16px 16px;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 14px rgba(124,58,237,.5)}
+.brand h1{font-size:21px}
+.brand p{font-size:12px;color:#c4b5fd}
+.search{margin-top:14px;position:relative}
+.search input{width:100%;padding:12px 14px 12px 42px;border-radius:12px;border:1px solid #3b3a5e;background:#151a2e;color:#fff;font-size:15px;outline:none}
+.search input:focus{border-color:#7c3aed}
+.search .ic{position:absolute;left:14px;top:12px;font-size:17px;opacity:.6}
+.chips{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;position:sticky;top:0;background:#0b0f1a;z-index:9}
+.chip{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid #3b3a5e;background:#151a2e;color:#a5b4d4;font-size:14px;cursor:pointer}
+.chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;font-weight:700}
+main{padding:4px 14px 20px;max-width:680px;margin:auto}
+.card{display:flex;gap:13px;background:#141a2e;border:1px solid #232a45;border-radius:16px;padding:13px;margin-bottom:11px;align-items:center}
+.icon{width:58px;height:58px;border-radius:14px;flex-shrink:0;overflow:hidden;background:#232a45;display:flex;align-items:center;justify-content:center}
+.icon img{width:100%;height:100%;object-fit:cover}
+.icon .lt{font-size:26px;font-weight:800;color:#fff}
+.info{flex:1;min-width:0}
+.info .nm{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:7px}
+.info .ds{font-size:12.5px;color:#8b96b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info .mt{font-size:11.5px;color:#5d6a8f;margin-top:3px}
+.badge{font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.3px}
+.b-upd{background:#166534;color:#bbf7d0}
+.b-ok{background:#1e293b;color:#7dd3fc;border:1px solid #334155}
+.act{flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.btn{border:0;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.btn.get{background:#7c3aed;color:#fff}
+.btn.upd{background:#16a34a;color:#fff}
+.btn.open{background:#1e293b;color:#7dd3fc;border:1px solid #334155}
+.btn.web{background:transparent;color:#a78bfa;font-size:12.5px;padding:6px 4px}
+#updateCard{margin:0 0 12px}
+#updateCard .inner{background:linear-gradient(135deg,#14532d,#166534);border-radius:14px;padding:14px 16px}
+#updateCard .t{font-weight:800;font-size:15px}
+#updateCard .s{font-size:12.5px;color:#bbf7d0;margin:4px 0 8px}
+.hidden{display:none!important}
+.empty{text-align:center;color:#5d6a8f;padding:40px 20px;font-size:14px}
+footer{text-align:center;font-size:12px;color:#5d6a8f;padding:22px 16px 30px}
+.count{font-size:12px;color:#5d6a8f;padding:2px 2px 10px}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">
+<div class="logo">🏪</div>
+<div><h1>Jilan App Store</h1><p>Apni dukaan — sari apps ek jagah</p></div>
+</div>
+<div class="search"><span class="ic">🔍</span><input id="q" placeholder="App talash karein..."></div>
+</header>
+<div class="chips" id="chips">
+<button class="chip on" data-c="all">🌐 Sab</button>
+<button class="chip" data-c="islamic">🕌 Islamic</button>
+<button class="chip" data-c="games">🎮 Games</button>
+<button class="chip" data-c="apps">📱 Apps</button>
+<button class="chip" data-c="tools">🛠️ Tools</button>
+</div>
+<main>
+<div id="updateCard" class="hidden"><div class="inner">
+<div class="t">🎉 Naya version aya hai!</div>
+<div class="s">Jilan App Store ka naya version download karein.</div>
+<a class="btn upd" href="https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk">Download Update</a>
+</div></div>
+<div class="count" id="count"></div>
+<div id="list"></div>
+</main>
+<footer>Made by Jilan Apps Official<br><a href="privacy-policy.html" style="color:#7c3aed">Privacy Policy</a></footer>
+
+<script>
+const APP_VER="1.0";
+let APPS=[],CAT="all",Q="";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtSize=b=>b>=1048576?(b/1048576).toFixed(1)+" MB":Math.round(b/1024)+" KB";
+function installedVer(pkg){
+  if(!pkg)return null;
+  try{if(window.AppStore&&window.AppStore.getInstalledVersion){const v=window.AppStore.getInstalledVersion(pkg);return v||"";}}catch(e){}
+  return null;
+}
+function openApp(pkg){
+  try{if(window.AppStore&&window.AppStore.openApp){window.AppStore.openApp(pkg);return true;}}catch(e){}
+  return false;
+}
+function iconHTML(a){
+  if(a.icon)return '<div class="icon"><img src="'+esc(a.icon)+'" alt="" loading="lazy"></div>';
+  return '<div class="icon" style="background:'+esc(a.color||"#4c1d95")+'"><span class="lt">'+esc(a.name[0])+'</span></div>';
+}
+function cardHTML(a){
+  const iv=installedVer(a.package);
+  let badge="",btn="";
+  if(a.apk){
+    if(iv===null){btn='<a class="btn get" href="'+esc(a.apk)+'">GET</a>';}
+    else if(iv===""){btn='<a class="btn get" href="'+esc(a.apk)+'">GET</a>';}
+    else if(iv===a.versionName){badge='<span class="badge b-ok">✓ Installed</span>';btn='<button class="btn open" onclick="openApp(\''+esc(a.package)+'\')">Open</button>';}
+    else{badge='<span class="badge b-upd">⬆ Update</span>';btn='<a class="btn upd" href="'+esc(a.apk)+'">Update</a>';}
+  }else{
+    btn='<a class="btn open" href="'+esc(a.web)+'" target="_blank">Open</a>';
+  }
+  const web2=(a.apk&&a.web)?'<a class="btn web" href="'+esc(a.web)+'" target="_blank">🌐 web</a>':"";
+  return '<div class="card">'+iconHTML(a)+
+    '<div class="info"><div class="nm">'+esc(a.name)+' '+badge+'</div>'+
+    '<div class="ds">'+esc(a.desc)+'</div>'+
+    '<div class="mt">v'+esc(a.versionName)+(a.size?" • "+fmtSize(a.size):"")+'</div></div>'+
+    '<div class="act">'+btn+web2+'</div></div>';
+}
+function render(){
+  const list=$("list");
+  const f=APPS.filter(a=>(CAT==="all"||a.category===CAT)&&(a.name+" "+a.desc).toLowerCase().includes(Q));
+  $("count").textContent=f.length+" apps";
+  list.innerHTML=f.length?f.map(cardHTML).join(""):'<div class="empty">🔍 Koi app nahi mili</div>';
+}
+$("q").addEventListener("input",e=>{Q=e.target.value.toLowerCase();render();});
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+  c.classList.add("on");CAT=c.dataset.c;render();
+});
+async function selfUpdate(){
+  try{
+    const r=await fetch("appstore-version.json?t="+Date.now());
+    if(!r.ok)return;const v=await r.json();
+    if(v.version&&v.version!==APP_VER)$("updateCard").classList.remove("hidden");
+  }catch(e){}
+}
+(async()=>{
+  try{
+    const r=await fetch("apps.json?t="+Date.now());
+    APPS=(await r.json()).apps||[];
+  }catch(e){APPS=[];}
+  render();selfUpdate();
+})();
+</script>
+</body>
+</html>
