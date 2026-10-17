@@ -60,6 +60,21 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
 .micbig{width:110px;height:110px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#a78bfa,#6d28d9);font-size:44px;margin:18px auto;display:block;box-shadow:0 0 30px #8b5cf688}
 .micbig.lis{animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 20px #8b5cf688}50%{box-shadow:0 0 45px #f5c542aa}}
+/* JARVIS orb */
+.orb{width:150px;height:150px;border-radius:50%;margin:8px auto;position:relative;cursor:pointer;
+background:radial-gradient(circle at 35% 28%,#d9fbff 0%,#67e8f9 22%,#22d3ee 45%,#0e7490 72%,#083344 100%);
+box-shadow:0 0 28px #22d3ee99,0 0 90px #22d3ee44,inset 0 0 45px #22d3ee77,inset -12px -18px 45px #00000066;
+animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.orb::before,.orb::after{content:"";position:absolute;inset:-16px;border-radius:50%;border:2px solid #22d3ee66;pointer-events:none}
+.orb::before{animation:orbRing 3.2s ease-out infinite}
+.orb::after{animation:orbRing 3.2s ease-out 1.6s infinite}
+@keyframes orbIdle{0%,100%{transform:scale(1);box-shadow:0 0 28px #22d3ee99,0 0 90px #22d3ee44,inset 0 0 45px #22d3ee77,inset -12px -18px 45px #00000066}50%{transform:scale(1.06);box-shadow:0 0 46px #22d3eecc,0 0 120px #22d3ee66,inset 0 0 60px #22d3ee99,inset -12px -18px 45px #00000066}}
+@keyframes orbRing{0%{transform:scale(.82);opacity:.9}100%{transform:scale(1.28);opacity:0}}
+.orb.lis{animation:orbListen .8s ease-in-out infinite}
+.orb.lis::before,.orb.lis::after{animation-duration:.8s}
+@keyframes orbListen{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+.orb.spk{animation:orbSpeak 1.1s ease-in-out infinite}
+@keyframes orbSpeak{0%,100%{transform:scale(1)}25%{transform:scale(1.09)}50%{transform:scale(1.02)}75%{transform:scale(1.11)}}
 #voiceOut{background:#141126;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:70px;font-size:14px;line-height:1.7;margin-top:12px}
 .hidden{display:none!important}
 .nrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -72,6 +87,10 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
 <!-- HOME -->
 <div class="sec on" id="s-home">
   <div class="card"><div class="greet" id="greet">Assalam-o-Alaikum!</div><div class="note" id="dateLine"></div></div>
+  <div class="card" style="text-align:center;padding:24px 14px 18px">
+    <div class="orb" id="orb" role="button" aria-label="Voice"></div>
+    <div class="note" id="orbHint" data-t="orbTap" style="margin-top:12px">Bolne ke liye tap karein 🎙️</div>
+  </div>
   <div class="row" style="margin-bottom:12px">
     <div class="stat"><b id="stTasks">0</b><span data-t="stT">Baqi tasks</span></div>
     <div class="stat"><b id="stRems">0</b><span data-t="stR">Aaj reminders</span></div>
@@ -205,8 +224,16 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
 const $=id=>document.getElementById(id);
 const APPV="1.0";
 const hasBridge=()=>typeof window.Assistant!=="undefined"&&window.Assistant!==null;
-function nspeak(t){try{if(hasBridge()){Assistant.speak(t);return true;}}catch(e){}
+function nspeak(t){orbSpeak(t);try{if(hasBridge()){Assistant.speak(t);return true;}}catch(e){}
   try{if("speechSynthesis" in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t));return true;}}catch(e){}return false;}
+/* JARVIS orb states: idle | listen | speak */
+let orbSpkT=null;
+function orbState(s){const o=$("orb");if(!o)return;o.classList.remove("lis","spk");const h=$("orbHint");
+  if(s==="listen"){o.classList.add("lis");if(h)h.textContent=t("orbLis");}
+  else if(s==="speak"){o.classList.add("spk");if(h)h.textContent=t("orbSpk");}
+  else{if(h)h.textContent=t("orbTap");}}
+function orbSpeak(t){orbState("speak");try{clearTimeout(orbSpkT);}catch(e){}
+  orbSpkT=setTimeout(()=>{if(!listening)orbState("idle");},Math.min(9000,700+String(t||"").length*75));}
 function nnotify(t,b){try{if(hasBridge()){Assistant.notify(t,b);return true;}}catch(e){}
   try{if("Notification" in window&&Notification.permission==="granted"){new Notification(t,{body:b});return true;}}catch(e){}return false;}
 
@@ -219,6 +246,7 @@ goalH:"🎯 Goals",goalPh:"Goal ka naam...",vcH:"🎙️ Voice Commands",vcSub:'
 gdH:"📖 Commands Guide",gdNote:"Ye assistant <b>neeche wale commands</b> samajhta hai — har cheez nahi. Misalon jaisa bolein:",
 keyNote:"Apni FREE key yahan paste karein. Key sirf aap ke phone me rehti hai, sirf Google ko jati hai.",keyPh:"API key paste karein...",aiPh:"Kuch poochein...",keyChg:"Key badlein",
 noteH:"📝 Notes",notePh:"Note likhein...",setH:"⚙️ Settings",cityL:"🌤️ Weather city:",cityPh:"Multan",homeL:"🏠 Ghar ka pata (maps ke liye):",homePh:"Basti Malook, Multan",
+orbTap:"Bolne ke liye tap karein 🎙️",orbLis:"🎙️ Sun raha hun... bolein",orbSpk:"🔊 Bol raha hun...",
 nav:[["s-home","🏠","Home"],["s-tasks","✅","Tasks"],["s-rems","⏰","Reminders"],["s-namaz","🕌","Namaz"],["s-goals","🎯","Goals"],["s-voice","🎙️","Voice"],["s-guide","📖","Guide"],["s-ai","🤖","AI"],["s-notes","📝","Notes"],["s-settings","⚙️","Settings"]]},
 en:{appSub:"Your personal AI assistant",stT:"Pending tasks",stR:"Today's reminders",stG:"Goals",briefH:"📋 My Day",briefB:"Tell me my day 🎙️",quickH:"⚡ Quick",qT:"+ Task",qV:"🎙️ Voice",qA:"🤖 AI Chat",
 taskH:"✅ Tasks",taskPh:"Type a new task...",add:"Add",fAll:"All",fPen:"Pending",fDone:"Done",remH:"⏰ Reminders",remPh:"Remind me about?",remNote:"📌 Note: the app must be open for reminders to fire (v1). A native notification is also shown.",
@@ -227,6 +255,7 @@ goalH:"🎯 Goals",goalPh:"Goal name...",vcH:"🎙️ Voice Commands",vcSub:'Tap
 gdH:"📖 Commands Guide",gdNote:"This assistant understands the <b>commands below</b> — not everything. Speak like the examples:",
 keyNote:"Paste your FREE key here. The key stays only on your phone and goes only to Google.",keyPh:"Paste API key...",aiPh:"Ask anything...",keyChg:"Change key",
 noteH:"📝 Notes",notePh:"Write a note...",setH:"⚙️ Settings",cityL:"🌤️ Weather city:",cityPh:"Multan",homeL:"🏠 Home address (for maps):",homePh:"Basti Malook, Multan",
+orbTap:"Tap to speak 🎙️",orbLis:"🎙️ Listening... speak",orbSpk:"🔊 Speaking...",
 nav:[["s-home","🏠","Home"],["s-tasks","✅","Tasks"],["s-rems","⏰","Reminders"],["s-namaz","🕌","Prayer"],["s-goals","🎯","Goals"],["s-voice","🎙️","Voice"],["s-guide","📖","Guide"],["s-ai","🤖","AI"],["s-notes","📝","Notes"],["s-settings","⚙️","Settings"]]}};
 let LANG=localStorage.getItem("ja_lang")||"ru";
 const t=k=>T[LANG][k]||k;
@@ -375,24 +404,25 @@ let recog=null, listening=false;
 function startVoice(){
   if(hasBridge()){ // native speech
     try{$("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
-      $("micBig").classList.add("lis");Assistant.startVoice();return;}catch(e){}
+      $("micBig").classList.add("lis");orbState("listen");Assistant.startVoice();return;}catch(e){}
   }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){$("voiceOut").innerHTML='<div class="note">⚠️ '+(LANG==="ru"?"Is browser me voice support nahi. Android app me mic kaam karega.":"Voice not supported in this browser. It works in the Android app.")+'</div>';return;}
   if(listening){try{recog.stop();}catch(e){}return;}
   recog=new SR();recog.lang="ur-PK";recog.interimResults=false;recog.maxAlternatives=1;
   recog.onresult=e=>{const txt=e.results[0][0].transcript;onVoiceResult(txt);};
-  recog.onerror=e=>{listening=false;$("micBig").classList.remove("lis");$("micState").textContent=t("vcTap");
+  recog.onerror=e=>{listening=false;$("micBig").classList.remove("lis");orbState("idle");$("micState").textContent=t("vcTap");
     if(e.error==="not-allowed")toast(LANG==="ru"?"🔐 Mic permission dein":"🔐 Allow mic permission");};
-  recog.onend=()=>{listening=false;$("micBig").classList.remove("lis");if($("micState").textContent.indexOf("...")>0)$("micState").textContent=t("vcTap");};
-  listening=true;$("micBig").classList.add("lis");
+  recog.onend=()=>{listening=false;$("micBig").classList.remove("lis");orbState("idle");if($("micState").textContent.indexOf("...")>0)$("micState").textContent=t("vcTap");};
+  listening=true;$("micBig").classList.add("lis");orbState("listen");
   $("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
   try{recog.start();}catch(e){listening=false;}
 }
 $("micBig").onclick=startVoice;
+try{if($("orb"))$("orb").onclick=startVoice;}catch(e){}
 // called by native bridge
 function onVoiceResult(txt){
-  listening=false;try{$("micBig").classList.remove("lis");}catch(e){}
+  listening=false;try{$("micBig").classList.remove("lis");}catch(e){}orbState("idle");
   $("micState").textContent=t("vcTap");
   txt=(txt||"").trim();if(!txt)return;
   if(voiceMode==="aichat"){voiceMode="cmd";$("aiInp").value=txt;go("s-ai");aiSend(true);return;}
@@ -400,7 +430,7 @@ function onVoiceResult(txt){
   $("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(txt)+'"</div>';
   parseCommand(txt);
 }
-function onVoiceError(c){listening=false;try{$("micBig").classList.remove("lis");}catch(e){}
+function onVoiceError(c){listening=false;try{$("micBig").classList.remove("lis");}catch(e){}orbState("idle");
   $("micState").textContent=t("vcTap");
   $("voiceOut").innerHTML='<div class="note">⚠️ '+(LANG==="ru"?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again")+'</div>';}
 
@@ -469,6 +499,42 @@ function parseCommand(raw){
     out("💬 "+esc(c.name)+": "+esc(msg));
     nspeak((LANG==="ru"?"Ji, WhatsApp khol raha hun. Send aap khud dabayein.":"OK, opening WhatsApp. You tap send yourself."));
     try{if(hasBridge())Assistant.whatsappChat(c.phone,msg);}catch(e){}return;}
+  // 1. youtube search: "YouTube par X search karo"
+  m=s.match(/youtube\s+(?:par\s+)?(.+?)\s+search\s*karo/)||s.match(/search\s+(.+?)\s+(?:par|on)\s+youtube/);
+  if(m){const q=m[1].trim();const url="https://www.youtube.com/results?search_query="+encodeURIComponent(q);
+    const msg=(LANG==="ru"?"YouTube par search kar raha hun: ":"Searching YouTube for: ")+q;
+    out("▶️ "+esc(msg));nspeak(msg);
+    try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
+  // 2. sms: "X ko SMS karo <text>"
+  m=s.match(/(.+?)\s+ko\s+sms\s+(?:karo\s+)?(.+)/)||s.match(/^sms\s+(.+?)\s+(.+)/);
+  if(m){const nm=m[1].trim(),msg=m[2].trim();const c=findContact(nm);
+    if(!c){const em=LANG==="ru"?("Contact nahi mila: "+nm):("Contact not found: "+nm);out(esc(em));nspeak(em);return;}
+    out("✉️ "+esc(c.name)+": "+esc(msg));
+    nspeak((LANG==="ru"?"Ji, SMS khol raha hun. Send aap khud dabayein.":"OK, opening SMS. You tap send yourself."));
+    try{if(hasBridge())Assistant.sendSms(c.phone,msg);}catch(e){}return;}
+  // 3. email: "email karo"
+  if(/email\s*(karo|bhejo|bhej)|mail\s*karo/.test(s)){
+    const msg=LANG==="ru"?"Ji, email khol raha hun":"OK, opening email";
+    out("📧 "+esc(msg));nspeak(msg);
+    try{if(hasBridge())Assistant.openUrl("mailto:");}catch(e){}return;}
+  // 4. maps search: "X kahan hai" / "map par X dikhao"
+  m=s.match(/(.+?)\s+kahan\s+hai/)||s.match(/(?:map\s*(?:par|pe)\s+)?(.+?)\s+(?:dikhao|dikhayen|show\s*(?:me|on\s*map)?)/);
+  if(m){let q=m[1].trim().replace(/^(map|par|pe)\s+/,"").trim();if(!q)q=m[1].trim();
+    const msg=(LANG==="ru"?"Map par dikha raha hun: ":"Showing on map: ")+q;
+    out("🗺️ "+esc(msg));nspeak(msg);
+    try{if(hasBridge())Assistant.openUrl("geo:0,0?q="+encodeURIComponent(q));}catch(e){}return;}
+  // 5. play store search: "Play Store par X search karo"
+  m=s.match(/play\s*store\s+(?:par\s+|pe\s+)?(.+?)\s+search\s*karo/)||s.match(/search\s+(.+?)\s+(?:par|pe|on)\s+play\s*store/);
+  if(m){const q=m[1].trim();const url="market://search?q="+encodeURIComponent(q);
+    const msg=(LANG==="ru"?"Play Store par search kar raha hun: ":"Searching Play Store for: ")+q;
+    out("🏪 "+esc(msg));nspeak(msg);
+    try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
+  // 6. google search: "X Google karo"
+  m=s.match(/(.+?)\s+google\s*karo/)||s.match(/^google\s+(.+)/);
+  if(m){const q=m[1].trim();const url="https://www.google.com/search?q="+encodeURIComponent(q);
+    const msg=(LANG==="ru"?"Google par search kar raha hun: ":"Searching Google for: ")+q;
+    out("🔍 "+esc(msg));nspeak(msg);
+    try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
   // alarm
   if(/alarm\s*(lagao|set)/.test(s)){const tm=parseTime(s);
     if(!tm){const msg=LANG==="ru"?'Waqt samajh nahi aaya. Jaise bolein: "Subah 6 baje alarm lagao"':'Did not get the time. Say e.g. "Set alarm 6 am"';out(esc(msg));nspeak(msg);return;}
@@ -515,7 +581,13 @@ const GUIDE=[
 ["⏱️ Timer","<i>\"timer lagao 5 minute\"</i> / <i>\"timer band karo\"</i>","Waqt khatam par alarm + notification bajega."],
 ["🗺️ Rasta","<i>\"ghar ka rasta dikhao\"</i> / <i>\"navigate to Lahore\"</i>","Ghar ka pata Settings me set karein. Google Maps khul jayega."],
 ["🔊 Volume","<i>\"volume kam karo\"</i> / <i>\"volume zyada karo\"</i> / <i>\"silent karo\"</i>","Media volume control."],
-["🤖 AI se poochein","AI tab me sawal likhein","Apni FREE Gemini key se — key sirf aap ke phone me."]];
+["🤖 AI se poochein","AI tab me sawal likhein","Apni FREE Gemini key se — key sirf aap ke phone me."],
+["▶️ YouTube search","<i>\"YouTube par naat search karo\"</i> / <i>\"search funny videos on YouTube\"</i>","YouTube app me search results khul jayein ge."],
+["✉️ SMS","<i>\"Ammi ko SMS karo ghar aa raha hun\"</i>","SMS composer khul jayega, text likha hoga — <b>Send aap khud dabayein</b>, auto-send kabhi nahi."],
+["📧 Email","<i>\"email karo\"</i>","Email app ka compose khul jayega."],
+["🗺️ Map search","<i>\"hospital kahan hai\"</i> / <i>\"map par restaurant dikhao\"</i>","Google Maps me jagah search ho jayegi."],
+["🏪 Play Store search","<i>\"Play Store par WhatsApp search karo\"</i>","Play Store me app search khul jayegi."],
+["🔍 Google search","<i>\"naat Google karo\"</i> / <i>\"google weather\"</i>","Browser me Google search results khul jayein ge."]];
 function renderGuide(){const el=$("guideList");el.innerHTML="";GUIDE.forEach(g=>{const d=document.createElement("div");d.className="cmd";d.innerHTML="<b>"+esc(g[0])+"</b><div class='ex'>"+g[1]+"<br>"+esc(g[2])+"</div>";el.appendChild(d);});}
 
 /* ---------- AI chat (Gemini, user's own key) ---------- */
@@ -526,7 +598,7 @@ function updToggles(){const a=$("spkBtn"),b=$("autoBtn");if(!a)return;
   a.textContent=speakerOn?"🔊 Voice: ON":"🔇 Voice: OFF";
   b.textContent=autoListen?"🔁 Auto-listen: ON":"🔁 Auto-listen: OFF";}
 function stopSpeak(){try{if(hasBridge())Assistant.stopSpeak();}catch(e){}try{if("speechSynthesis" in window)speechSynthesis.cancel();}catch(e){}}
-function speakReply(txt){if(!speakerOn||!txt)return;
+function speakReply(txt){if(!speakerOn||!txt)return;orbSpeak(txt);
   if(hasBridge()){try{Assistant.speakChat(txt);return;}catch(e){}}
   try{if("speechSynthesis" in window){const u=new SpeechSynthesisUtterance(txt);u.lang="ur-PK";u.onend=()=>onTtsDone();speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
 function onTtsDone(){if(autoListen){voiceMode="aichat";setTimeout(()=>{try{startVoice();}catch(e){}},500);}}
