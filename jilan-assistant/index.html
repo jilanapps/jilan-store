@@ -137,6 +137,14 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
 <div class="sec" id="s-guide">
   <div class="card"><h3 data-t="gdH">📖 Commands Guide</h3>
   <div class="note" style="margin-bottom:10px" data-t="gdNote">Ye assistant <b>neeche wale commands</b> samajhta hai — har cheez nahi. Misalon jaisa bolein:</div>
+  <div class="card" style="background:#141126"><h3>📴 Offline Mode</h3>
+    <div class="note" style="line-height:1.9">
+    • <b>Voice commands</b> (app kholo, call, alarm, light, timer, hisab...) <b>internet ke baghair bhi</b> chalte hain — basharte ke aap ne <b>offline speech pack</b> download kiya ho:<br>
+    Google app → Settings → Voice → Offline speech recognition → <b>Urdu + English</b> download karein.<br>
+    • 🤖 <b>AI Chat HAMESHA internet mangta hai</b> (Gemini API) — offline nahi chalega.<br>
+    • 🎙️ Baat karne ka tareeqa: <b>app ke andar mic button</b> dabayein. "Jilan" wake-word ya lock-screen voice <b>is version me nahi</b> hai.
+    </div>
+  </div>
   <div id="guideList"></div></div>
 </div>
 <!-- AI CHAT -->
@@ -146,7 +154,9 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
     <div class="row"><input id="keyInp" data-ph="keyPh" placeholder="API key paste karein..."><button class="btn" id="keySave" data-t="save">Save</button></div>
   </div>
   <div class="card"><h3>🤖 AI Chat</h3><div id="chat"></div>
-    <div class="row"><input id="aiInp" data-ph="aiPh" placeholder="Kuch poochein..."><button class="btn" id="aiSend">➤</button></div>
+    <div class="row"><input id="aiInp" data-ph="aiPh" placeholder="Kuch poochein..."><button class="btn" id="aiMic" title="Voice">🎙️</button><button class="btn" id="aiSend">➤</button></div>
+    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="spkBtn">🔊 Voice: ON</button><button class="btn ghost sm" id="autoBtn">🔁 Auto-listen: OFF</button></div>
+    <div class="note" style="margin-top:8px">🔈 Note: jawab phone ki robotic awaz (TTS) me sunai dega — insani awaz jaisa nahi. Mic dabayein, bolein, jawab sunein!</div>
     <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="aiClear" data-t="clear">Clear chat</button><button class="btn ghost sm" id="keyChg" data-t="keyChg">Key badlein</button></div>
   </div>
 </div>
@@ -166,11 +176,30 @@ footer{text-align:center;font-size:11.5px;color:var(--dim);padding:18px 10px 6px
     <div class="row" style="margin-bottom:10px"><input id="homeInp" data-ph="homePh" placeholder="Basti Malook, Multan"></div>
     <button class="btn" id="setSave" style="width:100%" data-t="save">Save</button>
   </div>
+  <div class="card"><h3>📞 Call End Service</h3>
+    <div class="note" style="margin-bottom:8px">"Call band karo" voice command ke liye zaroori hai. Ye service <b>sirf aap ke kehne par</b> call ka End button dabati hai — kuch aur nahi karti, koi data nahi leti.</div>
+    <div class="note" id="a11yState" style="margin-bottom:8px"></div>
+    <button class="btn" id="a11yBtn" style="width:100%">Enable karein</button>
+  </div>
+  <div class="card"><h3>🔐 Permissions</h3>
+    <div class="note" style="margin-bottom:8px">Koi permission reh gayi ho to setup dobara chalayein:</div>
+    <button class="btn ghost" id="wzRedo" style="width:100%">Setup wizard dobara chalayein</button>
+  </div>
 </div>
 </main>
 <footer>© 2026 Jilan Apps Official. All rights reserved.<br><a href="privacy-policy.html" style="color:var(--dim)">Privacy Policy</a></footer>
 <nav id="nav"></nav>
 <div id="toast"></div>
+<div id="wizard" class="hidden" style="position:fixed;inset:0;z-index:100;background:#0f0d1af5;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="card" style="width:100%;max-width:380px;text-align:center">
+    <div class="note" id="wzProg">1/5</div>
+    <div style="font-size:48px;margin:10px" id="wzIcon">🎙️</div>
+    <h3 id="wzTitle"></h3>
+    <div class="note" id="wzDesc" style="margin:10px 0 16px;line-height:1.8"></div>
+    <button class="btn" id="wzAllow" style="width:100%;padding:14px;font-size:16px">Allow karein ✅</button><br>
+    <button class="btn ghost sm" id="wzSkip" style="margin-top:10px">Baad me ⏭️</button>
+  </div>
+</div>
 <script>
 /* ===== Jilan Assistant v1.0 ===== */
 const $=id=>document.getElementById(id);
@@ -366,6 +395,7 @@ function onVoiceResult(txt){
   listening=false;try{$("micBig").classList.remove("lis");}catch(e){}
   $("micState").textContent=t("vcTap");
   txt=(txt||"").trim();if(!txt)return;
+  if(voiceMode==="aichat"){voiceMode="cmd";$("aiInp").value=txt;go("s-ai");aiSend(true);return;}
   if(voiceMode==="task"){if(addTask(txt)){toast("✅ "+txt);nspeak(LANG==="ru"?"Task add ho gaya":"Task added");}voiceMode="cmd";return;}
   $("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(txt)+'"</div>';
   parseCommand(txt);
@@ -468,6 +498,7 @@ function parseCommand(raw){
 const GUIDE=[
 ["📱 App kholo","<i>\"WhatsApp kholo\"</i> / <i>\"YouTube kholo\"</i> / <i>\"open Chrome\"</i>","WhatsApp, YouTube, Chrome, Gmail, Maps, Play Store, Facebook, Instagram, TikTok, Camera, Gallery, Settings, Clock"],
 ["📞 Call karo","<i>\"Ammi ko call karo\"</i> / <i>\"call Ahmed\"</i>","Naam aap ke contacts se milaya jata hai. CALL ki permission lagegi."],
+["📴 Call band karo","<i>\"call band karo\"</i> / <i>\"disconnect\"</i>","Pehle Settings me <b>Call End Service ON</b> karein (Accessibility)."],
 ["💬 WhatsApp message","<i>\"Ammi ko WhatsApp karo ghar aa raha hun\"</i>","Chat khul jayegi, text likha hoga — <b>Send aap khud dabayein</b>, auto-send kabhi nahi."],
 ["⏰ Alarm","<i>\"Subah 6 baje alarm lagao\"</i> / <i>\"set alarm 7:30 pm\"</i>","Waqt: \"5 baje\", \"6:30\", \"subah 7\", \"sham 8 baje\""],
 ["🔔 Reminder","<i>\"Reminder lagao dawai leni hai 9 baje\"</i> / <i>\"yaad dilao meeting 3 baje\"</i>","Waqt na bolein to 1 ghante baad. App khuli ho to bajega."],
@@ -489,6 +520,19 @@ function renderGuide(){const el=$("guideList");el.innerHTML="";GUIDE.forEach(g=>
 
 /* ---------- AI chat (Gemini, user's own key) ---------- */
 const LS_KEY="ja_gkey",LS_CHAT="ja_chat";
+let speakerOn=localStorage.getItem("ja_spk")!=="0";
+let autoListen=localStorage.getItem("ja_auto")==="1";
+function updToggles(){const a=$("spkBtn"),b=$("autoBtn");if(!a)return;
+  a.textContent=speakerOn?"🔊 Voice: ON":"🔇 Voice: OFF";
+  b.textContent=autoListen?"🔁 Auto-listen: ON":"🔁 Auto-listen: OFF";}
+function stopSpeak(){try{if(hasBridge())Assistant.stopSpeak();}catch(e){}try{if("speechSynthesis" in window)speechSynthesis.cancel();}catch(e){}}
+function speakReply(txt){if(!speakerOn||!txt)return;
+  if(hasBridge()){try{Assistant.speakChat(txt);return;}catch(e){}}
+  try{if("speechSynthesis" in window){const u=new SpeechSynthesisUtterance(txt);u.lang="ur-PK";u.onend=()=>onTtsDone();speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
+function onTtsDone(){if(autoListen){voiceMode="aichat";setTimeout(()=>{try{startVoice();}catch(e){}},500);}}
+$("spkBtn").onclick=()=>{speakerOn=!speakerOn;localStorage.setItem("ja_spk",speakerOn?"1":"0");updToggles();if(!speakerOn)stopSpeak();};
+$("autoBtn").onclick=()=>{autoListen=!autoListen;localStorage.setItem("ja_auto",autoListen?"1":"0");updToggles();toast(autoListen?"🔁 Auto-listen ON":"🔁 Auto-listen OFF");};
+$("aiMic").onclick=()=>{stopSpeak();voiceMode="aichat";startVoice();go("s-ai");};
 const SYS="You are Jilan Assistant, a helpful personal assistant. The user speaks Roman Urdu or English. Reply in the same language/mix the user uses. Keep answers short and useful. You help with tasks, reminders, goals and general questions.";
 function getChat(){return J(LS_CHAT,[]);}
 function saveChat(c){S(LS_CHAT,c.slice(-30));}
@@ -496,7 +540,7 @@ function renderChat(){
   const c=$("chat");c.innerHTML="";getChat().forEach(m=>{const d=document.createElement("div");d.className="msg "+(m.r==="u"?"u":"a");d.textContent=m.t;c.appendChild(d);});
   c.scrollTop=c.scrollHeight;}
 function aiErr(m){const d=document.createElement("div");d.className="msg a err";d.textContent=m;$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;}
-async function aiSend(){
+async function aiSend(fromVoice){
   const inp=$("aiInp"),txt=inp.value.trim();if(!txt)return;
   const key=localStorage.getItem(LS_KEY);
   if(!key){toast(LANG==="ru"?"🔑 Pehle API key lagayein":"🔑 Add your API key first");$("aiSetup").classList.remove("hidden");return;}
@@ -515,10 +559,11 @@ async function aiSend(){
     const j=await res.json();
     const ans=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts?j.candidates[0].content.parts.map(p=>p.text||"").join(""):"";
     const ch2=getChat();ch2.push({r:"a",t:ans||"…"});saveChat(ch2);renderChat();
+    if(fromVoice)speakReply(ans||"");
   }catch(e){tp.remove();aiErr(LANG==="ru"?"🌐 Internet check karein":"🌐 Check your internet");}
 }
-$("aiSend").onclick=aiSend;
-$("aiInp").addEventListener("keydown",e=>{if(e.key==="Enter")aiSend();});
+$("aiSend").onclick=()=>aiSend(false);
+$("aiInp").addEventListener("keydown",e=>{if(e.key==="Enter")aiSend(false);});
 $("aiClear").onclick=()=>{if(confirm("✕")){localStorage.removeItem(LS_CHAT);renderChat();}};
 $("keySave").onclick=()=>{const k=$("keyInp").value.trim();if(k.length<10){toast("⚠️");return;}localStorage.setItem(LS_KEY,k);$("aiSetup").classList.add("hidden");toast("✅");};
 $("keyChg").onclick=()=>{localStorage.removeItem(LS_KEY);$("aiSetup").classList.remove("hidden");};
@@ -676,9 +721,24 @@ $("timerCancel").onclick=()=>timerCancel(false);
 // restore ticking UI on launch
 (function(){const t=J("ja_timer",null);if(t&&t.end>Date.now()){timerInt=setInterval(tickTimer,1000);$("timerCancel").classList.remove("hidden");tickTimer();}else localStorage.removeItem("ja_timer");})();
 
+/* ---------- accessibility / call end ---------- */
+function refreshA11y(){let on=false;try{if(hasBridge())on=Assistant.isCallEndReady();}catch(e){}
+  const st=$("a11yState");if(!st)return;
+  st.textContent=on?"✅ ON hai — 'call band karo' kaam karega":"❌ Abhi OFF hai — neeche button dabayein";
+  $("a11yBtn").textContent=on?"Settings kholein":"Enable karein";}
+$("a11yBtn").onclick=()=>{try{if(hasBridge())Assistant.openAccessibilitySettings();}catch(e){}setTimeout(refreshA11y,2000);};
+const _go2=go;go=function(s){_go2(s);if(s==="s-settings")setTimeout(refreshA11y,300);};
+
 /* ---------- extra voice commands ---------- */
 function parseExtra(s,raw){
   const out=m=>{$("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(raw)+'"</div><div style="margin-top:8px">'+m+'</div>';};
+  // call disconnect (pehle — warna "call" wala pattern pakar lega)
+  if(/call\s*band\s*karo|call\s*kaat\s*do|call\s*khatam\s*karo|disconnect|end\s*call/.test(s)){
+    let ok=false;try{if(hasBridge())ok=Assistant.endCall();}catch(e){}
+    if(ok){const msg=LANG==="ru"?"Call band kar di":"Call ended";out("📞 "+esc(msg));nspeak(msg);}
+    else{const msg=LANG==="ru"?"Pehle Settings me 'Call End Service' ON karein":"Turn on 'Call End Service' in Settings first";
+      out('📞 '+esc(msg)+'<br><button class="btn sm" style="margin-top:8px" onclick="go(\'s-settings\')">⚙️ Settings kholein</button>');nspeak(msg);}
+    return true;}
   // flashlight
   if(/light\s*jalao|flashlight\s*on|torch\s*on|light\s*on\s*karo/.test(s)){
     try{if(hasBridge())Assistant.setFlash(true);}catch(e){}
@@ -732,8 +792,34 @@ parseCommand=function(raw){
   _parseCommand(raw);
 };
 
+/* ---------- setup wizard (first launch) ---------- */
+const WZ=[
+ {icon:"🎙️",title:"Microphone",desc:"Voice commands ke liye mic chahiye. 'Allow karein' dabayein, phir system dialog me Allow karein.",kind:"mic"},
+ {icon:"👥",title:"Contacts",desc:"Naam se call ya WhatsApp karne ke liye contacts ki ijazat chahiye.",kind:"contacts"},
+ {icon:"📞",title:"Phone",desc:"'Ammi ko call karo' command ke liye call lagane ki ijazat chahiye.",kind:"phone"},
+ {icon:"🔔",title:"Notifications",desc:"Reminders, namaz aur timer ke alerts ke liye notification ki ijazat.",kind:"notif"},
+ {icon:"♿",title:"Accessibility",desc:"'Call band karo' command ke liye. Button dabayein — Settings khulegi, wahan 'Jilan Assistant' ON karein.",kind:"a11y",manual:true}
+];
+let wzIx=0;
+function showWizard(){wzIx=0;renderWz();$("wizard").classList.remove("hidden");}
+function renderWz(){const w=WZ[wzIx];
+  $("wzProg").textContent=(wzIx+1)+"/"+WZ.length;
+  $("wzIcon").textContent=w.icon;$("wzTitle").textContent=w.title;$("wzDesc").textContent=w.desc;
+  $("wzAllow").textContent=w.manual?"Settings kholein ⚙️":"Allow karein ✅";}
+function wzNext(){wzIx++;
+  if(wzIx>=WZ.length){localStorage.setItem("ja_setup_done","1");$("wizard").classList.add("hidden");toast(LANG==="ru"?"✅ Setup mukammal!":"✅ Setup complete!");refreshA11y();}
+  else renderWz();}
+$("wzAllow").onclick=()=>{const w=WZ[wzIx];
+  if(w.manual){try{if(hasBridge())Assistant.openAccessibilitySettings();}catch(e){}wzNext();return;}
+  if(hasBridge()){try{Assistant.requestPerm(w.kind);}catch(e){wzNext();}return;}
+  wzNext();};
+$("wzSkip").onclick=wzNext;
+function onPermResult(kind,granted){wzNext();}
+$("wzRedo").onclick=()=>{localStorage.removeItem("ja_setup_done");showWizard();};
+
 /* ---------- init ---------- */
-applyLang();renderGuide();renderAll();renderChat();loadSettings();
+applyLang();renderGuide();renderAll();renderChat();loadSettings();refreshA11y();updToggles();
+if(!localStorage.getItem("ja_setup_done"))setTimeout(showWizard,900);
 if(!localStorage.getItem(LS_KEY))$("aiSetup").classList.remove("hidden");
 rescheduleNamaz();
 setTimeout(checkUpdate,3000);
