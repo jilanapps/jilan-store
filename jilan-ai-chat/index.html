@@ -122,7 +122,9 @@ footer.app-foot{text-align:center;font-size:11px;color:var(--mut);padding:8px}
 
 <script>
 "use strict";
-const APP_VERSION="1.0";
+const APP_VERSION="1.1";
+// Gemini model: Google purana model retire kar de to SIRF ye line badlein
+const GEMINI_MODEL="gemini-3.8-flash";
 const LS_KEY="jac_key", LS_CHATS="jac_chats", LS_LANG="jac_lang";
 const $=id=>document.getElementById(id);
 const SYS="You are Jilan AI Chat, a friendly assistant for Pakistani users. Reply in Roman Urdu by default. If the user writes in English, reply in English. If the user writes in Urdu script, reply in Urdu script. Keep answers clear and concise.";
@@ -242,7 +244,7 @@ async function send(){
     const hist=c.msgs.slice(-12).map(m=>({role:m.r==="u"?"user":"model",parts:[{text:m.t}]}));
     // last msg is the user msg we just added; hist already includes it
     const sysPrompt=SYS+(ISLAMI?" "+ISLAMI_ADD:"");
-    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),{
+    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GEMINI_MODEL+":generateContent?key="+encodeURIComponent(key),{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({system_instruction:{parts:[{text:sysPrompt}]},contents:hist})
     });

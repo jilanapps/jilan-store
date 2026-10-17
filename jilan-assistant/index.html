@@ -220,9 +220,11 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
   </div>
 </div>
 <script>
-/* ===== Jilan Assistant v1.0 ===== */
+/* ===== Jilan Assistant v1.1 ===== */
 const $=id=>document.getElementById(id);
-const APPV="1.0";
+const APPV="1.1";
+// Gemini model: Google purana model retire kar de to SIRF ye line badlein
+const GEMINI_MODEL="gemini-3.8-flash";
 const hasBridge=()=>typeof window.Assistant!=="undefined"&&window.Assistant!==null;
 function nspeak(t){orbSpeak(t);try{if(hasBridge()){Assistant.speak(t);return true;}}catch(e){}
   try{if("speechSynthesis" in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t));return true;}}catch(e){}return false;}
@@ -575,6 +577,9 @@ const GUIDE=[
 ["🔦 Light","<i>\"light jalao\"</i> / <i>\"light band karo\"</i> / <i>\"flashlight on\"</i>","Torch on/off. Camera permission lagegi."],
 ["🧮 Calculator","<i>\"12x8 kitna hota hai\"</i> / <i>\"calculate 100+50\"</i>","Jama, tafreeq, zarb, taqseem, % — offline hisab."],
 ["📜 Hadith","<i>\"aaj ki hadith sunao\"</i> / <i>\"hadith\"</i>","Roz ek mustanad hadith (Bukhari/Muslim) hawale ke saath — parh kar sunayega."],
+["🕌 Aaj ki Ayat","<i>\"aaj ki ayat sunao\"</i> / <i>\"quran verse\"</i>","Roz ek nayi ayat — Arabic + Urdu tarjuma, hawale ke saath. Offline."],
+["🔋 Battery","<i>\"battery kitni hai?\"</i> / <i>\"battery\"</i>","Charge % + charging status bol kar batayega."],
+["💱 Currency","<i>\"100 dollar kitne rupees?\"</i> / <i>\"50 euro kitne pkr\"</i>","USD/EUR/GBP/AED/SAR ↔ PKR. Internet chahiye."],
 ["🌤️ Mausam","<i>\"mausam kaisa hai\"</i> / <i>\"weather\"</i>","Sheher Settings me set karein (default Multan). Internet chahiye."],
 ["📸 Photo","<i>\"photo lo\"</i> / <i>\"selfie lo\"</i>","Camera khul jayega, photo gallery me save hogi."],
 ["📝 Note","<i>\"note likho doodh lena hai\"</i>","Notes tab me save ho jayega."],
@@ -620,7 +625,7 @@ async function aiSend(fromVoice){
   const tp=document.createElement("div");tp.className="typing";tp.innerHTML="<span>.</span><span>.</span><span>.</span>";$("chat").appendChild(tp);$("chat").scrollTop=$("chat").scrollHeight;
   try{
     const hist=ch.slice(-12).map(m=>({role:m.r==="u"?"user":"model",parts:[{text:m.t}]}));
-    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),{
+    const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GEMINI_MODEL+":generateContent?key="+encodeURIComponent(key),{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({system_instruction:{parts:[{text:SYS}]},contents:hist})});
     tp.remove();let det="";
@@ -707,6 +712,30 @@ function tellHadith(){
   nspeak("Aaj ki hadith: "+h[0]);
 }
 
+/* ---------- daily quran (offline, mashhoor ayaat) ---------- */
+const QURAN=[
+ {a:"إِنَّ مَعَ الْعُسْرِ يُسْرًا",u:"Beshak mushkil ke saath aasani hai.",r:"Surah Ash-Sharh 94:6"},
+ {a:"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",u:"Khabardar! Allah ke zikr se hi dilon ko itminan milta hai.",r:"Surah Ar-Ra'd 13:28"},
+ {a:"يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",u:"Aey imaan walo! Sabr aur namaz se madad mango. Beshak Allah sabr karne walon ke saath hai.",r:"Surah Al-Baqarah 2:153"},
+ {a:"قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",u:"Kaho: Woh Allah hai, Aik. Allah beniyaz hai. Na us ne kisi ko jana, na woh jana gaya. Aur us ka koi humsar nahi.",r:"Surah Al-Ikhlas 112:1-4"},
+ {a:"رَّبِّ زِدْنِي عِلْمًا",u:"Aey mere Rab! Mere ilm mein izafa farma.",r:"Surah Ta-Ha 20:114"},
+ {a:"لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ",u:"Allah ki rehmat se na-umeed na ho.",r:"Surah Az-Zumar 39:53"},
+ {a:"فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",u:"Tum Mera zikr karo, Main tumhein yaad karunga; Mera shukr ada karo aur na-shukri na karo.",r:"Surah Al-Baqarah 2:152"},
+ {a:"وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ",u:"Aur jo Allah par bharosa kare, to Allah us ke liye kaafi hai.",r:"Surah At-Talaq 65:3"},
+ {a:"فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",u:"To beshak mushkil ke saath aasani hai.",r:"Surah Ash-Sharh 94:5"},
+ {a:"وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ إِن كُنتُم مُّؤْمِنِينَ",u:"Aur na himmat haaro, na gham karo — tum hi ghalib rahoge agar tum momin ho.",r:"Surah Aal-e-Imran 3:139"},
+ {a:"لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",u:"Allah kisi jaan ko us ki taqat se zyada takleef nahi deta.",r:"Surah Al-Baqarah 2:286"},
+ {a:"وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ",u:"Aur tumhare Rab ne farmaya: Mujh se dua mango, Main tumhari dua qubool karunga.",r:"Surah Ghafir 40:60"},
+ {a:"فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ",u:"To tum apne Rab ki kaun-kaun si nematon ko jhutlaoge?",r:"Surah Ar-Rahman 55:13"},
+ {a:"الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",u:"Sab taareefein Allah ke liye hain jo tamam jahanon ka Rab hai.",r:"Surah Al-Fatihah 1:2"}];
+function dailyQuran(){const now=new Date();const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);return QURAN[doy%QURAN.length];}
+function tellQuran(){
+  const v=dailyQuran();
+  const html='<div class="card" style="margin-top:8px"><b>🕌 Aaj ki Ayat</b><div dir="rtl" style="margin:8px 0;line-height:2.1;font-size:1.25em;text-align:right">'+esc(v.a)+'</div><div style="margin:6px 0;line-height:1.8">"'+esc(v.u)+'"</div><div class="note">📖 '+esc(v.r)+'</div></div>';
+  $("voiceOut").innerHTML='<div class="note">🗣️</div>'+html;
+  nspeak((LANG==="ru"?"Aaj ki ayat: ":"Today's verse: ")+v.u);
+}
+
 /* ---------- calculator (safe, no eval) ---------- */
 function calcSafe(raw){
   let e=" "+raw.toLowerCase()+" ";
@@ -759,6 +788,25 @@ async function tellWeather(){
   }catch(e){
     $("wxCard").innerHTML="<b>🌤️ "+esc(city)+'</b><div class="note">⚠️ '+(LANG==="ru"?"Internet nahi — mausam nahi maloom ho saka":"No internet — could not fetch weather")+"</div>";
     nspeak(LANG==="ru"?"Internet nahi hai":"No internet");
+  }
+}
+
+/* ---------- currency converter (er-api, no key) ---------- */
+const CURS={dollar:"USD",usd:"USD",euro:"EUR",eur:"EUR",pound:"GBP",gbp:"GBP",dirham:"AED",aed:"AED",riyal:"SAR",reyal:"SAR",sar:"SAR",rupee:"PKR",rupees:"PKR",pkr:"PKR"};
+async function doCurrency(amt,from,to){
+  $("voiceOut").innerHTML+='<div class="note">💱 '+(LANG==="ru"?"Rate dekh raha hun...":"Checking rate...")+"</div>";
+  try{
+    const r=await fetch("https://open.er-api.com/v6/latest/"+from);
+    const j=await r.json();
+    const rate=j&&j.rates&&j.rates[to];
+    if(!rate)throw 0;
+    const f=n=>n.toLocaleString("en-US",{maximumFractionDigits:2});
+    const msg=f(amt)+" "+from+" = "+f(amt*rate)+" "+to;
+    $("voiceOut").innerHTML+='<div class="note">💱 '+esc(msg)+"</div>";
+    nspeak(msg);
+  }catch(e){
+    const msg=LANG==="ru"?"🌐 Currency rate ke liye internet chahiye":"🌐 Internet needed for currency rates";
+    $("voiceOut").innerHTML+='<div class="note">'+esc(msg)+"</div>";nspeak(msg);
   }
 }
 
@@ -854,6 +902,26 @@ function parseExtra(s,raw){
     const msg=LANG==="ru"?"Volume zyada kar diya":"Volume up";out("🔊 "+esc(msg));nspeak(msg);return true;}
   if(/silent\s*karo|khamosh\s*karo|mute\s*karo|chup\s*karo/.test(s)){try{if(hasBridge())Assistant.volumeMute();}catch(e){}
     const msg=LANG==="ru"?"Silent kar diya":"Muted";out("🔇 "+esc(msg));nspeak(msg);return true;}
+  // quran: "aaj ki ayat sunao"
+  if(/aaj ki ayat|ayat sunao|quran.*(ayat|verse)|daily.*quran/.test(s)){tellQuran();return true;}
+  // battery: "battery kitni hai?"
+  if(/battery/.test(s)){
+    let pct=-1,chg=false;
+    try{if(hasBridge()){const j=JSON.parse(Assistant.getBattery()||"{}");pct=j.pct;chg=!!j.charging;}}catch(e){}
+    if(pct<0){const msg=LANG==="ru"?"Battery ka pata nahi chal saka (Android app me kaam karega)":"Could not read battery (works in the Android app)";out("🔋 "+esc(msg));nspeak(msg);return true;}
+    const txt=(LANG==="ru"?"Battery ":"Battery ")+pct+"%"+(chg?(LANG==="ru"?" — charging ho rahi hai":" — charging"):(LANG==="ru"?" — charging nahi ho rahi":" — not charging"));
+    out("🔋 "+esc(txt));nspeak(txt);return true;}
+  // currency: "100 dollar kitne rupees?"
+  let cm=s.match(/(\d+(?:\.\d+)?)\s*(dollar|usd|euro|eur|pound|gbp|dirham|aed|riyal|reyal|sar|rupees?|pkr)/);
+  if(cm){
+    const amt=parseFloat(cm[1]);const from=CURS[cm[2]];
+    let to="PKR";
+    const rest=s.slice(s.indexOf(cm[0])+cm[0].length);
+    const tm=rest.match(/(dollar|usd|euro|eur|pound|gbp|dirham|aed|riyal|reyal|sar|rupees?|pkr)/);
+    if(tm)to=CURS[tm[1]];
+    if(!(amt>0)||amt>1e12){const msg=LANG==="ru"?"Raqam samajh nahi aayi":"Could not understand the amount";out("💱 "+esc(msg));nspeak(msg);return true;}
+    if(from===to){const msg=LANG==="ru"?"Dono ek hi currency hain":"Same currency";out("💱 "+esc(msg));nspeak(msg);return true;}
+    doCurrency(amt,from,to);return true;}
   return false;
 }
 // hook into parseCommand fallback: try extras before giving up
