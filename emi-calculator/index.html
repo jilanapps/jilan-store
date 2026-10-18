@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMI Calculator — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:480px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:18px}
+.card{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:16px;margin-bottom:14px}
+label{font-size:12px;color:#8b95b8;display:block;margin:10px 0 4px}
+input{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:11px;font-size:16px}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
+.calc{background:#e8b93c;color:#0b1120}
+.preset{background:#1f2b4d;color:#e8b93c;border:1px solid #e8b93c66}
+.res{display:none;background:#101a33;border:1px solid #e8b93c88;border-radius:16px;padding:16px;margin-top:4px}
+.rrow{display:flex;justify-content:space-between;padding:10px 4px;border-bottom:1px solid #2a3558;font-size:15px}
+.rrow:last-child{border-bottom:none}
+.rrow .v{font-weight:800;color:#e8b93c}
+.rrow.big .v{font-size:20px}
+.err{display:none;color:#ff8b8b;font-size:13px;margin-top:8px;text-align:center}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧮 EMI Calculator</h1>
+  <div class="sub">Loan ki mahana qist nikalein</div>
+  <div class="card">
+    <label>Loan ki raqam (Rs)</label>
+    <input id="amt" type="number" inputmode="decimal" placeholder="Misal: 500000">
+    <label>Salana markup (%) — sood-free ho to 0 likhein</label>
+    <input id="rate" type="number" inputmode="decimal" placeholder="Misal: 5">
+    <label>Muddat (saal)</label>
+    <input id="yrs" type="number" inputmode="decimal" placeholder="Misal: 3">
+    <button class="btn calc" onclick="calc()">Qist nikalein</button>
+    <button class="btn preset" onclick="preset()">⭐ PM Youth Tier 1 (5 lakh, 0%, 3 saal)</button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="res" id="res">
+    <div class="rrow big"><span>Mahana qist</span><span class="v" id="rEmi"></span></div>
+    <div class="rrow"><span>Kul markup (sood)</span><span class="v" id="rInt"></span></div>
+    <div class="rrow"><span>Kul adaigi</span><span class="v" id="rTot"></span></div>
+    <div class="rrow"><span>Qiston ki tadad</span><span class="v" id="rN"></span></div>
+  </div>
+  <div class="note">© 2026 Jilan Apps Official. All rights reserved.<br>Ye andaza hai — asal sharaet bank se confirm karein.</div>
+</div>
+<script>
+function fmt(x){return "Rs "+Math.round(x).toLocaleString("en-IN")}
+function preset(){
+  document.getElementById("amt").value=500000;
+  document.getElementById("rate").value=0;
+  document.getElementById("yrs").value=3;
+  calc();
+}
+function calc(){
+  var err=document.getElementById("err"),res=document.getElementById("res");
+  err.style.display="none";res.style.display="none";
+  var P=parseFloat(document.getElementById("amt").value);
+  var annual=parseFloat(document.getElementById("rate").value);
+  var yrs=parseFloat(document.getElementById("yrs").value);
+  if(!(P>0)){err.textContent="Loan ki raqam 0 se zyada likhein";err.style.display="block";return}
+  if(isNaN(annual)||annual<0){err.textContent="Markup % durust likhein (0 ya zyada)";err.style.display="block";return}
+  if(!(yrs>0)){err.textContent="Muddat 0 se zyada likhein";err.style.display="block";return}
+  var n=Math.round(yrs*12), emi;
+  if(annual===0){emi=P/n}
+  else{
+    var r=annual/12/100;
+    var pw=Math.pow(1+r,n);
+    emi=P*r*pw/(pw-1);
+  }
+  var tot=emi*n, intr=tot-P;
+  document.getElementById("rEmi").textContent=fmt(emi);
+  document.getElementById("rInt").textContent=fmt(intr);
+  document.getElementById("rTot").textContent=fmt(tot);
+  document.getElementById("rN").textContent=n+" mahine";
+  res.style.display="block";
+}
+</script>
+</body>
+</html>

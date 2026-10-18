@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Calculator — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:480px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:18px}
+.card{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:16px;margin-bottom:14px}
+label{font-size:12px;color:#8b95b8;display:block;margin:10px 0 4px}
+input{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:11px;font-size:16px;color-scheme:dark}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;background:#e8b93c;color:#0b1120}
+.res{display:none;margin-top:4px}
+.age3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.age3 .b{background:#101a33;border:1px solid #e8b93c88;border-radius:14px;padding:14px 6px;text-align:center}
+.age3 .n{font-size:28px;font-weight:800;color:#e8b93c}
+.age3 .l{font-size:12px;color:#8b95b8;margin-top:4px}
+.rrow{display:flex;justify-content:space-between;background:#101a33;border:1px solid #2a3558;border-radius:10px;padding:11px 14px;margin:8px 0;font-size:14px}
+.rrow .v{font-weight:800;color:#e8b93c}
+.bday{background:linear-gradient(135deg,#1a2340,#2a1a3a);border:1px solid #e8b93c88;border-radius:14px;padding:16px;text-align:center;margin-top:12px}
+.bday .n{font-size:22px;font-weight:800;color:#e8b93c;margin-top:6px}
+.err{display:none;color:#ff8b8b;font-size:13px;margin-top:8px;text-align:center}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎂 Age Calculator</h1>
+  <div class="sub">Bilkul sahi umar — saal, mahine, din</div>
+  <div class="card">
+    <label>Paidaish ki tareekh</label>
+    <input id="dob" type="date">
+    <button class="btn" onclick="calc()">Umar nikalein</button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="res" id="res">
+    <div class="age3">
+      <div class="b"><div class="n" id="aY">0</div><div class="l">Saal</div></div>
+      <div class="b"><div class="n" id="aM">0</div><div class="l">Mahine</div></div>
+      <div class="b"><div class="n" id="aD">0</div><div class="l">Din</div></div>
+    </div>
+    <div class="rrow"><span>Kul mahine</span><span class="v" id="tM"></span></div>
+    <div class="rrow"><span>Kul hafte</span><span class="v" id="tW"></span></div>
+    <div class="rrow"><span>Kul din</span><span class="v" id="tD"></span></div>
+    <div class="bday">🎉 Agli salgirah<div class="n" id="bday"></div></div>
+  </div>
+  <div class="note">© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+<script>
+function calc(){
+  var err=document.getElementById("err"),res=document.getElementById("res");
+  err.style.display="none";res.style.display="none";
+  var v=document.getElementById("dob").value;
+  if(!v){err.textContent="Tareekh chunein";err.style.display="block";return}
+  var b=new Date(v+"T00:00:00"), now=new Date();
+  var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  if(b>today){err.textContent="Paidaish ki tareekh aaj se aage nahi ho sakti";err.style.display="block";return}
+  var y=today.getFullYear()-b.getFullYear();
+  var m=today.getMonth()-b.getMonth();
+  var d=today.getDate()-b.getDate();
+  if(d<0){m--;var pm=new Date(today.getFullYear(),today.getMonth(),0);d+=pm.getDate()}
+  if(m<0){y--;m+=12}
+  var days=Math.floor((today-b)/86400000);
+  document.getElementById("aY").textContent=y;
+  document.getElementById("aM").textContent=m;
+  document.getElementById("aD").textContent=d;
+  document.getElementById("tM").textContent=(y*12+m).toLocaleString("en-IN")+" mahine";
+  document.getElementById("tW").textContent=Math.floor(days/7).toLocaleString("en-IN")+" hafte";
+  document.getElementById("tD").textContent=days.toLocaleString("en-IN")+" din";
+  // next birthday
+  var nb=new Date(today.getFullYear(),b.getMonth(),b.getDate());
+  if(nb.getMonth()!==b.getMonth())nb=new Date(today.getFullYear(),1,28); // 29 Feb -> 28 Feb
+  if(nb<=today){
+    nb=new Date(today.getFullYear()+1,b.getMonth(),b.getDate());
+    if(nb.getMonth()!==b.getMonth())nb=new Date(today.getFullYear()+1,1,28);
+  }
+  var left=Math.round((nb-today)/86400000);
+  var ds=left+" din baqi";
+  if(left===0)ds="Aaj hi hai! 🎉";
+  document.getElementById("bday").textContent=nb.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})+" ("+ds+")";
+  res.style.display="block";
+}
+</script>
+</body>
+</html>

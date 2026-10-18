@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Rate — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:480px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:18px}
+.card{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:16px;margin-bottom:14px}
+label{font-size:12px;color:#8b95b8;display:block;margin:10px 0 4px}
+input,select{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:11px;font-size:16px}
+.btn{width:100%;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;background:#e8b93c;color:#0b1120}
+.rates{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.rate{background:#0b1120;border:1px solid #2a3558;border-radius:12px;padding:12px;text-align:center}
+.rate .l{font-size:11px;color:#8b95b8}
+.rate .n{font-size:16px;font-weight:800;color:#e8b93c;margin-top:4px}
+.big{background:#101a33;border:1px solid #e8b93c88;border-radius:16px;padding:18px;text-align:center;margin-top:4px}
+.big .l{font-size:13px;color:#8b95b8}
+.big .n{font-size:26px;font-weight:800;color:#e8b93c;margin-top:6px}
+.warn{font-size:12px;color:#e8b93c;background:#e8b93c14;border:1px solid #e8b93c44;border-radius:10px;padding:10px;margin-bottom:14px;line-height:1.6}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px}
+.row2{display:flex;gap:10px}
+.row2>div{flex:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🪙 Sona Rate</h1>
+  <div class="sub">Aaj ka bhao — wazan se qeemat</div>
+  <div class="warn">⚠️ Rate <b>khud darj karein</b> — ye live market rate nahi hai. Roz subah apne sunar se rate pooch kar yahan likhein.</div>
+  <div class="card">
+    <label>Aaj ka rate — Fi Tola (Rs)</label>
+    <input id="rate" type="number" inputmode="decimal" placeholder="Misal: 285000">
+    <button class="btn" onclick="saveRate()">💾 Rate save karo</button>
+    <div class="rates">
+      <div class="rate"><div class="l">Fi Gram</div><div class="n" id="rGram">—</div></div>
+      <div class="rate"><div class="l">10 Gram</div><div class="n" id="r10g">—</div></div>
+      <div class="rate"><div class="l">Fi Masha</div><div class="n" id="rMasha">—</div></div>
+      <div class="rate"><div class="l">Fi Ratti</div><div class="n" id="rRatti">—</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <label style="margin-top:0">Wazan se qeemat nikalein</label>
+    <div class="row2">
+      <div><input id="wt" type="number" inputmode="decimal" placeholder="Wazan"></div>
+      <div><select id="unit">
+        <option value="tola">Tola</option>
+        <option value="masha">Masha</option>
+        <option value="ratti">Ratti</option>
+        <option value="gram">Gram</option>
+      </select></div>
+    </div>
+    <button class="btn" onclick="calcPrice()">Qeemat nikalein</button>
+  </div>
+  <div class="big" id="out" style="display:none">
+    <div class="l" id="outL"></div>
+    <div class="n" id="outN"></div>
+  </div>
+  <div class="note">1 tola = 12 masha = 96 ratti = 11.6638 gram<br>© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+<script>
+var TOLA_G=11.6638, KEY="jilan_gold_rate";
+function fmt(x){return "Rs "+Math.round(x).toLocaleString("en-IN")}
+function getRate(){var r=parseFloat(document.getElementById("rate").value);return (r>0)?r:0}
+function refresh(){
+  var r=getRate();if(!r)return;
+  document.getElementById("rGram").textContent=fmt(r/TOLA_G);
+  document.getElementById("r10g").textContent=fmt(r/TOLA_G*10);
+  document.getElementById("rMasha").textContent=fmt(r/12);
+  document.getElementById("rRatti").textContent=fmt(r/96);
+}
+function saveRate(){
+  var r=getRate();
+  if(!r){alert("Pehle rate likhein");return}
+  try{localStorage.setItem(KEY,String(r))}catch(e){}
+  refresh();calcPrice();
+  alert("Rate save ho gaya ✅");
+}
+function calcPrice(){
+  var r=getRate();
+  if(!r){alert("Pehle upar rate darj karein");return}
+  var w=parseFloat(document.getElementById("wt").value);
+  if(!(w>0)){alert("Wazan durust likhein");return}
+  var u=document.getElementById("unit").value, tola=w;
+  if(u==="masha")tola=w/12;else if(u==="ratti")tola=w/96;else if(u==="gram")tola=w/TOLA_G;
+  var un={tola:"Tola",masha:"Masha",ratti:"Ratti",gram:"Gram"}[u];
+  document.getElementById("outL").textContent=w+" "+un+" sone ki qeemat";
+  document.getElementById("outN").textContent=fmt(tola*r);
+  document.getElementById("out").style.display="block";
+}
+(function(){
+  var r=null;try{r=localStorage.getItem(KEY)}catch(e){}
+  if(r){document.getElementById("rate").value=r;refresh()}
+  document.getElementById("rate").addEventListener("input",refresh);
+})();
+</script>
+</body>
+</html>

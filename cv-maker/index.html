@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Maker — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:560px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:18px}
+.card{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:16px;margin-bottom:14px}
+label{font-size:12px;color:#8b95b8;display:block;margin:10px 0 4px}
+input,textarea{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:10px;font-size:15px;font-family:inherit}
+textarea{resize:vertical;min-height:64px}
+.btnrow{display:flex;gap:10px;margin-top:12px}
+.btnrow button{flex:1;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.print{background:#e8b93c;color:#0b1120}
+.wa{background:#25D366;color:#fff}
+h2{color:#e8b93c;font-size:16px;margin:18px 0 8px;text-align:center}
+/* CV paper preview */
+.paper{background:#fff;color:#1a1a1a;border-radius:8px;padding:28px 24px;box-shadow:0 4px 24px #0008}
+.paper h3{font-size:24px;color:#0b1120;border-bottom:3px solid #e8b93c;padding-bottom:8px;margin-bottom:6px}
+.paper .cinfo{font-size:13px;color:#444;margin-bottom:14px;line-height:1.7}
+.paper h4{font-size:14px;color:#0b1120;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #ddd;margin:14px 0 8px;padding-bottom:4px}
+.paper p,.paper li{font-size:13.5px;line-height:1.65;color:#333}
+.paper ul{margin-left:18px}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px}
+@media print{
+  body{background:#fff;padding:0}
+  .wrap{max-width:100%}
+  .noprint{display:none!important}
+  .paper{box-shadow:none;border-radius:0}
+  .note{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="noprint">
+    <h1>📄 CV Maker</h1>
+    <div class="sub">Apni CV banayein — neeche live preview</div>
+    <div class="card">
+      <label>Poora naam</label><input id="fName" placeholder="Misal: Muhammad Asif Ameen" oninput="render()">
+      <label>Phone</label><input id="fPhone" placeholder="0300xxxxxxx" oninput="render()">
+      <label>Email</label><input id="fEmail" placeholder="email@example.com" oninput="render()">
+      <label>Address</label><input id="fAddr" placeholder="Sheher, Pakistan" oninput="render()">
+      <label>Objective (maq sad)</label><textarea id="fObj" placeholder="2-3 jumlon me apna maqsad likhein" oninput="render()"></textarea>
+      <label>Taleem (har line par aik)</label><textarea id="fEdu" placeholder="FA — BISE Multan&#10;DHMS — ..." oninput="render()"></textarea>
+      <label>Tajurba (har line par aik)</label><textarea id="fExp" placeholder="Computer Operator — Clinic (2011 se)&#10;Founder — Jilan Apps (2026 se)" oninput="render()"></textarea>
+      <label>Skills (har line par aik)</label><textarea id="fSkills" placeholder="Mobile App Development&#10;Website Development" oninput="render()"></textarea>
+      <div class="btnrow">
+        <button class="print" onclick="window.print()">🖨️ Print / PDF</button>
+        <button class="wa" onclick="shareWA()">📩 WhatsApp</button>
+      </div>
+    </div>
+    <h2 class="noprint">👇 Live Preview</h2>
+  </div>
+  <div class="paper" id="paper"></div>
+  <div class="note noprint">© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+<script>
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function lines(id){return document.getElementById(id).value.split("\n").map(function(s){return s.trim()}).filter(Boolean)}
+function v(id){return document.getElementById(id).value.trim()}
+function render(){
+  var name=v("fName")||"Aapka Naam";
+  var cinfo=[v("fPhone"),v("fEmail"),v("fAddr")].filter(Boolean).join(" &nbsp;|&nbsp; ");
+  var h="<h3>"+esc(name)+"</h3>";
+  h+='<div class="cinfo">'+cinfo+"</div>";
+  if(v("fObj"))h+="<h4>Objective</h4><p>"+esc(v("fObj"))+"</p>";
+  var edu=lines("fEdu");
+  if(edu.length)h+="<h4>Taleem</h4><ul>"+edu.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+"</ul>";
+  var exp=lines("fExp");
+  if(exp.length)h+="<h4>Tajurba</h4><ul>"+exp.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+"</ul>";
+  var sk=lines("fSkills");
+  if(sk.length)h+="<h4>Skills</h4><ul>"+sk.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+"</ul>";
+  document.getElementById("paper").innerHTML=h;
+}
+function shareWA(){
+  var t="*CV — "+(v("fName")||"")+"*%0A";
+  if(v("fPhone"))t+="📞 "+encodeURIComponent(v("fPhone"))+"%0A";
+  if(v("fEmail"))t+="✉️ "+encodeURIComponent(v("fEmail"))+"%0A";
+  if(v("fObj"))t+="%0A"+encodeURIComponent(v("fObj"))+"%0A";
+  var sk=lines("fSkills");
+  if(sk.length)t+="%0ASkills: "+encodeURIComponent(sk.join(", "));
+  window.open("https://wa.me/?text="+t,"_blank");
+}
+render();
+</script>
+</body>
+</html>

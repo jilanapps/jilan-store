@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Islami Naam — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:520px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:16px}
+.tabs{display:flex;gap:10px;margin-bottom:12px}
+.tabs button{flex:1;border:1px solid #e8b93c66;background:#1f2b4d;color:#e8b93c;border-radius:12px;padding:12px;font-size:16px;font-weight:700;cursor:pointer}
+.tabs button.on{background:#e8b93c;color:#0b1120}
+.search{width:100%;background:#101a33;border:1px solid #2a3558;color:#fff;border-radius:12px;padding:12px;font-size:16px;margin-bottom:12px}
+.count{text-align:center;font-size:12px;color:#8b95b8;margin-bottom:10px}
+.ncard{background:#101a33;border:1px solid #2a3558;border-radius:12px;padding:12px 14px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ncard .nm{font-size:17px;font-weight:700}
+.ncard .ur{font-size:15px;color:#e8b93c}
+.ncard .mn{font-size:12.5px;color:#8b95b8;margin-top:3px}
+.empty{text-align:center;color:#8b95b8;padding:24px;font-size:14px}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>👶 Islami Naam</h1>
+  <div class="sub">Bachon ke pyare naam — maani ke saath</div>
+  <div class="tabs">
+    <button id="tB" class="on" onclick="tab('B')">🤴 Larkay</button>
+    <button id="tG" onclick="tab('G')">👸 Larkiyan</button>
+  </div>
+  <input class="search" id="q" placeholder="🔍 Naam talash karein..." oninput="render()">
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+  <div class="note">Naam ka intekhab walidain ki zimmedari hai — maani tehqeeq kar lein.<br>© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+<script>
+var BOYS=[
+["Muhammad","محمد","Sab se zyada tareef kiya gaya"],
+["Ahmed","احمد","Bohat tareef karne wala"],
+["Ali","علی","Buland martaba, aala"],
+["Hassan","حسن","Khoobsurat, acha"],
+["Hussain","حسین","Khoobsurat (chhota Hassan)"],
+["Umar","عمر","Lambi umar, zindagi"],
+["Hamza","حمزہ","Sher jaisa bahadur"],
+["Talha","طلحہ","Khushnuma darakht"],
+["Zubair","زبیر","Mazboot, danishmand"],
+["Salman","سلمان","Mehfooz, sahi salamat"],
+["Bilal","بلال","Tarawat, nami"],
+["Imran","عمران","Abaad karne wala"],
+["Ibrahim","ابراہیم","Qaumon ka baap (Khalilullah)"],
+["Ismail","اسماعیل","Allah sunne wala"],
+["Musa","موسیٰ","Pani se nikala hua"],
+["Haroon","ہارون","Bahadur jangju"],
+["Dawood","داؤد","Mehboob"],
+["Sulaiman","سلیمان","Aman o salamati wala"],
+["Yahya","یحییٰ","Zinda rehne wala"],
+["Zakariya","زکریا","Allah yaad karne wala"],
+["Idris","ادریس","Ilm wala"],
+["Adam","آدم","Mitti se paida hua"],
+["Ayub","ایوب","Sabar karne wala"],
+["Yunus","یونس","Kabootar (narm dil)"],
+["Saleh","صالح","Nek, durust"],
+["Abdullah","عبداللہ","Allah ka banda"],
+["Abdul Rahman","عبدالرحمن","Rehman ka banda"],
+["Abdul Qadir","عبدالقادر","Qadir ka banda"],
+["Abdul Malik","عبدالمالک","Malik ka banda"],
+["Abdul Aziz","عبدالعزیز","Aziz ka banda"],
+["Abdul Basit","عبدالباسط","Basit ka banda"],
+["Abdul Hadi","عبدالہادی","Hadi ka banda"],
+["Abdul Kareem","عبدالکریم","Kareem ka banda"],
+["Abdul Rahim","عبدالرحیم","Rahim ka banda"],
+["Abdul Wahab","عبدالوہاب","Wahab ka banda"],
+["Abdul Razaq","عبدالرزاق","Razaq ka banda"],
+["Faisal","فیصل","Faisla karne wala"],
+["Khalid","خالد","Hamesha rehne wala"],
+["Tariq","طارق","Roshan sitara"],
+["Qasim","قاسم","Taqseem karne wala"],
+["Asim","عاصم","Hifazat karne wala"],
+["Aamir","عامر","Abaad karne wala"],
+["Danish","دانش","Ilm o danishmandi"],
+["Fahad","فہد","Cheetah (tez)"],
+["Saad","سعد","Khushqismat"],
+["Saeed","سعید","Khushnaseeb"],
+["Rashid","راشد","Hidayat yafta"],
+["Kamran","کامران","Kamyab"],
+["Naveed","نوید","Khushkhabri lane wala"],
+["Waseem","وسیم","Khoobsurat chehre wala"]
+];
+var GIRLS=[
+["Fatima","فاطمہ","Doodh chhurane wali (Pak)"],
+["Ayesha","عائشہ","Zinda rehne wali"],
+["Khadija","خدیجہ","Muqaddam, pehle aane wali"],
+["Maryam","مریم","Pak daman, ibadat guzar"],
+["Zainab","زینب","Khushbudar phool"],
+["Ruqayya","رقیہ","Buland martaba wali"],
+["Rani","رانی","Malika, shehzadi"],
+["Noor","نور","Roshni"],
+["Mahnoor","ماہ نور","Chand ki roshni"],
+["Hira","حرا","Qeemti pathar (heera)"],
+["Iqra","اقرا","Parho (ilm ka hukm)"],
+["Saba","صبا","Subah ki thandi hawa"],
+["Hina","حنا","Mehndi (khushbu)"],
+["Sana","ثناء","Tareef"],
+["Rabia","رابعہ","Chauthi (number wali)"],
+["Salma","سلمیٰ","Mehfooz, sahi salamat"],
+["Sadia","سعدیہ","Khushnaseeb"],
+["Hania","ہانیہ","Khush o khurram rehne wali"],
+["Mahira","ماہرہ","Mahir, hunarmand"],
+["Anaya","عنایہ","Allah ka tohfa"],
+["Zoya","زویا","Roshni, zindagi"],
+["Alina","علینہ","Buland, naram mizaj"],
+["Areeba","عریبہ","Aqalmand"],
+["Emaan","ایمان","Yaqeen, iman"],
+["Dua","دعا","Dua"],
+["Jannat","جنت","Jannat (bahaar)"],
+["Hoor","حور","Jannat ki hoor"],
+["Bushra","بشریٰ","Khushkhabri"],
+["Tayyaba","طیبہ","Pakiza"],
+["Tahira","طاہرہ","Pak saaf"],
+["Samina","ثمینہ","Qeemti"],
+["Farah","فرح","Khushi"],
+["Nasreen","نسرین","Jungli gulab"],
+["Gulnaz","گلناز","Phoolon par naaz karne wali"],
+["Fiza","فضا","Khuli fiza"],
+["Komal","کومل","Naram o nazuk"],
+["Areej","اریج","Khushbu"],
+["Warda","وردہ","Gulab ka phool"],
+["Sidra","سدرہ","Beri ka darakht"],
+["Asma","اسماء","Buland naam wali"],
+["Amina","آمنہ","Aman wali"],
+["Halima","حلیمہ","Naram mizaj wali"],
+["Sumayya","سمیہ","Buland martaba wali"],
+["Safiya","صفیہ","Chuni hui, pak"],
+["Nadia","نادیہ","Shabnam, tarawat"],
+["Shagufta","شگفتہ","Khili hui, khush"],
+["Amara","عمارہ","Abaad karne wali"],
+["Zara","زارہ","Roshan, chamakdar"],
+["Inaya","عنایہ","Madad, tawajjuh"]
+];
+var cur="B";
+function tab(t){
+  cur=t;
+  document.getElementById("tB").className=t==="B"?"on":"";
+  document.getElementById("tG").className=t==="G"?"on":"";
+  render();
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function render(){
+  var q=document.getElementById("q").value.trim().toLowerCase();
+  var arr=cur==="B"?BOYS:GIRLS;
+  var out=arr.filter(function(x){
+    return !q||x[0].toLowerCase().indexOf(q)>-1||x[1].indexOf(document.getElementById("q").value.trim())>-1||x[2].toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById("count").textContent=out.length+" naam";
+  var h=out.map(function(x){
+    return '<div class="ncard"><div><div class="nm">'+esc(x[0])+' <span class="ur">'+esc(x[1])+'</span></div><div class="mn">'+esc(x[2])+'</div></div></div>';
+  }).join("");
+  document.getElementById("list").innerHTML=h||'<div class="empty">Koi naam nahi mila</div>';
+}
+render();
+</script>
+</body>
+</html>
