@@ -152,5 +152,19 @@ footer{text-align:center;padding:28px 16px;color:#7a8a7a;font-size:.85rem}
 <a class="wafloat" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!">💬</a>
 
 <footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+<script>
+/* 3-day demo expiry */
+(function(){
+  const DAYS=3, K="sc_demo_first";
+  let f=localStorage.getItem(K);
+  if(!f){f=Date.now();localStorage.setItem(K,f);}
+  if((Date.now()-f)/86400000>DAYS){
+    document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b5c2f;color:#fff;text-align:center;padding:30px;font-family:sans-serif">'
+    +'<div><div style="font-size:3rem">⏰</div><h2>Demo Muddat Khatam!</h2>'
+    +'<p style="margin:14px 0">Ye demo sirf 3 din ke liye tha.<br>Poori website hasil karne ke liye rabta karein:</p>'
+    +'<a href="https://wa.me/923057867149?text=Assalam-o-Alaikum!%20Mujhe%20Super%20Computer%20wali%20website%20chahiye." style="display:inline-block;background:#25D366;color:#fff;padding:14px 34px;border-radius:50px;text-decoration:none;font-weight:700">💬 Jilan Apps se Rabta Karein</a></div></div>';
+  }
+})();
+</script>
 </body>
 </html>
