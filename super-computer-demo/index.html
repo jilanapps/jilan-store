@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +8,15 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--green:#0b5c2f;--green2:#128a46;--gold:#e8b93c;--dark:#0e2416;--light:#f4f7f4}
-body{font-family:'Segoe UI',Arial,sans-serif;background:var(--light);color:#1a2e1a;line-height:1.6;overflow-x:hidden}
+body{font-family:'Segoe UI','Noto Nastaliq Urdu',Arial,sans-serif;background:var(--light);color:#1a2e1a;line-height:1.6;overflow-x:hidden}
+[dir="rtl"] body{font-family:'Noto Nastaliq Urdu','Segoe UI',Arial,sans-serif;line-height:2}
 .demo-banner{background:var(--gold);color:#1a1a1a;text-align:center;padding:10px;font-weight:700;font-size:14px;letter-spacing:1px}
-/* NAV */
 nav{position:sticky;top:0;z-index:50;background:rgba(11,92,47,.96);backdrop-filter:blur(8px);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.2)}
 nav .brand{color:#fff;font-weight:800;font-size:1.2rem;text-decoration:none}
 nav .brand span{color:var(--gold)}
+nav .right{display:flex;gap:10px;align-items:center}
+.langbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 18px;border-radius:50px;font-weight:700;font-size:.85rem;cursor:pointer}
 nav .cta{background:#25D366;color:#fff;padding:9px 22px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem}
-/* HERO */
 .hero{background:radial-gradient(ellipse at 20% 10%,#128a46 0%,#0b5c2f 55%,#083d20 100%);color:#fff;padding:70px 20px 90px;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;width:400px;height:400px;background:rgba(232,185,60,.12);border-radius:50%;top:-120px;right:-120px;animation:float 7s ease-in-out infinite}
 .hero::after{content:'';position:absolute;width:280px;height:280px;background:rgba(37,211,102,.12);border-radius:50%;bottom:-100px;left:-80px;animation:float 9s ease-in-out infinite reverse}
@@ -28,22 +29,20 @@ nav .cta{background:#25D366;color:#fff;padding:9px 22px;border-radius:50px;text-
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .btn{display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:15px 38px;border-radius:50px;text-decoration:none;font-size:1.08rem;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:.25s;animation:fadeUp .7s .3s ease both}
 .btn:hover{transform:translateY(-3px) scale(1.03)}
-.btn.gold{background:var(--gold);color:#1a1a1a}
-/* TRUST BAR */
 .trust{background:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 34px;padding:18px 16px;box-shadow:0 2px 10px rgba(0,0,0,.08);font-weight:600;color:var(--green);font-size:.95rem}
-/* SECTIONS */
 .container{max-width:1040px;margin:0 auto;padding:56px 20px}
 h2.sec{text-align:center;color:var(--green);margin-bottom:6px;font-size:1.8rem}
 h2.sec span{color:#c9982a}
 p.sub{text-align:center;color:#5a7a5a;margin-bottom:34px;max-width:640px;margin-left:auto;margin-right:auto}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px}
-.card{background:#fff;border-radius:16px;padding:30px 26px;box-shadow:0 3px 16px rgba(0,0,0,.08);border-top:5px solid var(--green2);transition:.25s;position:relative;overflow:hidden}
+.card{background:#fff;border-radius:16px;padding:30px 26px;box-shadow:0 3px 16px rgba(0,0,0,.08);border-top:5px solid var(--green2);transition:.25s}
 .card:hover{transform:translateY(-6px);box-shadow:0 10px 28px rgba(11,92,47,.18)}
 .card .ico{font-size:2.6rem;margin-bottom:12px}
 .card h3{color:var(--green);margin-bottom:8px;font-size:1.18rem}
 .card p{color:#4a5a4a;font-size:.95rem;margin-bottom:14px}
 .card .tag{display:inline-block;background:#e8f5ec;color:var(--green);font-size:.78rem;font-weight:700;padding:5px 14px;border-radius:20px}
-/* WHY */
+.tagcloud{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:800px;margin:0 auto}
+.tagcloud .tag{background:#e8f5ec;color:var(--green);font-weight:700;padding:9px 20px;border-radius:25px;font-size:.9rem}
 .why{background:var(--dark);color:#e8f0e8;border-radius:20px;padding:48px 34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:26px}
 .why h2{grid-column:1/-1;text-align:center;color:#fff;margin-bottom:6px}
 .why h2 span{color:var(--gold)}
@@ -51,27 +50,26 @@ p.sub{text-align:center;color:#5a7a5a;margin-bottom:34px;max-width:640px;margin-
 .witem .ico{font-size:2.2rem;margin-bottom:8px}
 .witem h4{color:var(--gold);margin-bottom:6px}
 .witem p{font-size:.92rem;opacity:.85}
-/* STEPS */
 .steps{display:flex;flex-wrap:wrap;gap:18px;justify-content:center}
-.step{background:#fff;border-radius:14px;padding:28px 22px;flex:1 1 230px;max-width:310px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.08);position:relative}
+.step{background:#fff;border-radius:14px;padding:28px 22px;flex:1 1 230px;max-width:310px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.08)}
 .step .n{background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto 12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(18,138,70,.4)}
-/* FAQ */
 .faq{max-width:720px;margin:0 auto}
 .faq details{background:#fff;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden}
 .faq summary{padding:18px 22px;cursor:pointer;font-weight:700;color:var(--green);list-style:none}
 .faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:'+';float:right;font-size:1.3rem;color:var(--green2)}
+[dir="rtl"] .faq summary::after{float:left}
 .faq details[open] summary::after{content:'−'}
 .faq .a{padding:0 22px 18px;color:#4a5a4a;font-size:.95rem}
-/* CONTACT */
 .contact{background:radial-gradient(ellipse at 50% 0%,#128a46,#083d20);color:#fff;text-align:center;padding:60px 24px;border-radius:22px;position:relative;overflow:hidden}
 .contact h2{font-size:1.9rem;margin-bottom:10px}
 .contact h2 span{color:var(--gold)}
 .contact p{opacity:.92;margin-bottom:26px;max-width:520px;margin-left:auto;margin-right:auto}
-.cbtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-/* FLOATING WA */
 .wafloat{position:fixed;bottom:22px;right:22px;background:#25D366;color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:99;animation:pulse 2.4s infinite}
+[dir="rtl"] .wafloat{right:auto;left:22px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.certbox{max-width:520px;margin:0 auto;background:#fff;padding:14px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.certbox img{width:100%;border-radius:12px;display:block}
 footer{text-align:center;padding:28px 16px;color:#7a8a7a;font-size:.85rem}
 @media(max-width:600px){.hero h1{font-size:1.9rem}nav .brand{font-size:1rem}}
 </style>
@@ -81,104 +79,123 @@ footer{text-align:center;padding:28px 16px;color:#7a8a7a;font-size:.85rem}
 
 <nav>
   <a class="brand" href="#">🖥️ Super <span>Computer</span></a>
-  <a class="cta" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye.">WhatsApp</a>
+  <div class="right">
+    <button class="langbtn" id="langBtn" onclick="toggleLang()">اردو</button>
+    <a class="cta" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye.">WhatsApp</a>
+  </div>
 </nav>
 
 <div class="hero">
-  <div class="badge">✅ Aitemad wali service — Multan</div>
-  <h1>Online <span>Document</span> & Consultancy Services</h1>
-  <p><b>Muhammad Waseem</b> — Attestation, certificates, licenses aur online kaam — sab kuch ghar baithe, tez aur mehfooz!</p>
-  <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20apni%20service%20ke%20bare%20me%20maloomat%20chahiye.">💬 WhatsApp par Rabta Karein</a>
+  <div class="badge" data-i18n="badge">✅ Aitemad wali service — Multan</div>
+  <h1 data-i18n="heroH">Online <span>Document</span> & Consultancy Services</h1>
+  <p data-i18n="heroP"><b>Muhammad Waseem</b> — Attestation, certificates, licenses aur online kaam — sab kuch ghar baithe, tez aur mehfooz!</p>
+  <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20apni%20service%20ke%20bare%20me%20maloomat%20chahiye." data-i18n="heroBtn">💬 WhatsApp par Rabta Karein</a>
 </div>
 
 <div class="trust">
-  <span>📜 MOFA / IBCC / HEC</span><span>🛡️ Police Certificate</span><span>🏥 PHC License</span><span>📝 Online Apply</span><span>⚡ Tez Service</span>
+  <span data-i18n="t1">📜 MOFA / IBCC / HEC</span><span data-i18n="t2">🛡️ Police Certificate</span><span data-i18n="t3">🏥 PHC License</span><span data-i18n="t4">📝 Online Apply</span><span data-i18n="t5">⚡ Tez Service</span>
 </div>
 
 <div class="container">
-  <h2 class="sec">Hamari <span>Services</span></h2>
-  <p class="sub">Har kaam mukammal zimmedari ke sath — pehle maloomat, phir kaam</p>
+  <h2 class="sec" data-i18n="svcH">Hamari <span>Services</span></h2>
+  <p class="sub" data-i18n="svcS">Har kaam mukammal zimmedari ke sath — pehle maloomat, phir kaam</p>
   <div class="grid">
-    <div class="card"><div class="ico">📜</div><h3>Document Attestation</h3><p>MOFA, IBCC aur HEC se degree, transcript, diploma aur official papers ki mukammal attestation.</p><span class="tag">Sab se zyada mang</span></div>
-    <div class="card"><div class="ico">🛡️</div><h3>Police Character Certificate</h3><p>Police character certificate online hasil karein — baghair line, baghair pareshani.</p><span class="tag">Online sahulat</span></div>
-    <div class="card"><div class="ico">🏥</div><h3>PHC Registration & License</h3><p>Hospital ya clinic ki PHC registration, provisional aur regular license ki step-by-step guidance.</p><span class="tag">Healthcare</span></div>
-    <div class="card"><div class="ico">📝</div><h3>Online Applications</h3><p>Naukriyon ke forms, test ki tayyari, aur har qisam ki online darkhwastein.</p><span class="tag">Jobs & Forms</span></div>
-    <div class="card"><div class="ico">🎓</div><h3>Degree Verification</h3><p>HEC / IBCC se degree verification ka mukammal process — aik hi jagah.</p><span class="tag">Students</span></div>
-    <div class="card"><div class="ico">💒</div><h3>Dhee Rani Program</h3><p>Punjab Dhee Rani Program 2026 — muft shadi, 2 lakh naqd aur mukammal jahez. Registration me mukammal madad.</p><span class="tag">Hakumat Program</span></div>
-    <div class="card"><div class="ico">📱</div><h3>Mobile & Computer Services</h3><p>Mobile shop ki tamam services aur computer ka har kaam — aik hi chhat ke neeche.</p><span class="tag">Shop Services</span></div>
+    <div class="card"><div class="ico">📜</div><h3 data-i18n="s1h">Document Attestation</h3><p data-i18n="s1p">MOFA, IBCC aur HEC se degree, transcript, diploma aur official papers ki mukammal attestation.</p><span class="tag" data-i18n="s1t">Sab se zyada mang</span></div>
+    <div class="card"><div class="ico">🛡️</div><h3 data-i18n="s2h">Police Character Certificate</h3><p data-i18n="s2p">Police character certificate online hasil karein — baghair line, baghair pareshani.</p><span class="tag" data-i18n="s2t">Online sahulat</span></div>
+    <div class="card"><div class="ico">🏥</div><h3 data-i18n="s3h">PHC Registration & License</h3><p data-i18n="s3p">Hospital ya clinic ki PHC registration, provisional aur regular license ki step-by-step guidance.</p><span class="tag" data-i18n="s3t">Healthcare</span></div>
+    <div class="card"><div class="ico">📝</div><h3 data-i18n="s4h">Online Applications</h3><p data-i18n="s4p">Naukriyon ke forms, test ki tayyari, aur har qisam ki online darkhwastein.</p><span class="tag" data-i18n="s4t">Jobs & Forms</span></div>
+    <div class="card"><div class="ico">🎓</div><h3 data-i18n="s5h">Degree Verification</h3><p data-i18n="s5p">HEC / IBCC se degree verification ka mukammal process — aik hi jagah.</p><span class="tag" data-i18n="s5t">Students</span></div>
+    <div class="card"><div class="ico">💒</div><h3 data-i18n="s6h">Dhee Rani Program</h3><p data-i18n="s6p">Punjab Dhee Rani Program 2026 — muft shadi, 2 lakh naqd aur mukammal jahez. Registration me mukammal madad.</p><span class="tag" data-i18n="s6t">Hakumat Program</span></div>
+    <div class="card"><div class="ico">📱</div><h3 data-i18n="s7h">Mobile & Computer Services</h3><p data-i18n="s7p">Mobile shop ki tamam services aur computer ka har kaam — aik hi chhat ke neeche.</p><span class="tag" data-i18n="s7t">Shop Services</span></div>
   </div>
 
-  <h2 class="sec" style="margin-top:48px">Mazeed <span>Sahuliyat</span></h2>
-  <p class="sub">Dukan par dastiyab har sahulat</p>
-  <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:800px;margin:0 auto">
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">📄 FBR Filer Registration</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">👆 Biometric Verification</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">🆔 NADRA Sahulat</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">🖨️ Color / Black Print</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">📸 Photos & CV Printing</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">💒 Shadi Album</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">📑 Scanning & Photocopy</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">🏦 HBL Connect</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">💸 JazzCash / Easypaisa</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">📲 SIM & Tamam Load</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">📧 Email Services</span>
-    <span class="tag" style="font-size:.9rem;padding:9px 20px">🎓 Admission Apply</span>
+  <h2 class="sec" style="margin-top:48px" data-i18n="moreH">Mazeed <span>Sahuliyat</span></h2>
+  <p class="sub" data-i18n="moreS">Dukan par dastiyab har sahulat</p>
+  <div class="tagcloud">
+    <span class="tag" data-i18n="m1">📄 FBR Filer Registration</span>
+    <span class="tag" data-i18n="m2">👆 Biometric Verification</span>
+    <span class="tag" data-i18n="m3">🆔 NADRA Sahulat</span>
+    <span class="tag" data-i18n="m4">🖨️ Color / Black Print</span>
+    <span class="tag" data-i18n="m5">📸 Photos & CV Printing</span>
+    <span class="tag" data-i18n="m6">💒 Shadi Album</span>
+    <span class="tag" data-i18n="m7">📑 Scanning & Photocopy</span>
+    <span class="tag" data-i18n="m8">🏦 HBL Connect</span>
+    <span class="tag" data-i18n="m9">💸 JazzCash / Easypaisa</span>
+    <span class="tag" data-i18n="m10">📲 SIM & Tamam Load</span>
+    <span class="tag" data-i18n="m11">📧 Email Services</span>
+    <span class="tag" data-i18n="m12">🎓 Admission Apply</span>
   </div>
 </div>
 
 <div class="container" style="padding-top:0">
-  <h2 class="sec">Hamara <span>Certificate</span></h2>
-  <p class="sub">OEC & ICMPD recognized — Soft Skills Training (65 days)</p>
-  <div style="max-width:520px;margin:0 auto;background:#fff;padding:14px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.12)">
-    <img src="certificate.jpg" alt="Soft Skills Training Certificate — OEC & ICMPD" style="width:100%;border-radius:12px;display:block">
-  </div>
+  <h2 class="sec" data-i18n="certH">Hamara <span>Certificate</span></h2>
+  <p class="sub" data-i18n="certS">OEC & ICMPD recognized — Soft Skills Training (65 days)</p>
+  <div class="certbox"><img src="certificate.jpg" alt="Certificate"></div>
 </div>
 
 <div class="container">
   <div class="why">
-    <h2>Kyoun <span>Hum?</span></h2>
-    <div class="witem"><div class="ico">🎓</div><h4>Certified Professional</h4><p>Soft Skills Training — <b>OEC & ICMPD</b> recognized (65 days)</p></div>
-    <div class="witem"><div class="ico">⚡</div><h4>Tez Kaam</h4><p>Lambe intezar nahi — kaam waqt par</p></div>
-    <div class="witem"><div class="ico">🔒</div><h4>Mehfooz</h4><p>Aap ke documents ki mukammal hifazat</p></div>
-    <div class="witem"><div class="ico">💰</div><h4>Munasib Fees</h4><p>Pehle qeemat tay, baad me koi izafa nahi</p></div>
-    <div class="witem"><div class="ico">💬</div><h4>Asan Rabta</h4><p>WhatsApp par fori jawab</p></div>
+    <h2 data-i18n="whyH">Kyoun <span>Hum?</span></h2>
+    <div class="witem"><div class="ico">🎓</div><h4 data-i18n="w1h">Certified Professional</h4><p data-i18n="w1p">Soft Skills Training — OEC & ICMPD recognized (65 days)</p></div>
+    <div class="witem"><div class="ico">⚡</div><h4 data-i18n="w2h">Tez Kaam</h4><p data-i18n="w2p">Lambe intezar nahi — kaam waqt par</p></div>
+    <div class="witem"><div class="ico">🔒</div><h4 data-i18n="w3h">Mehfooz</h4><p data-i18n="w3p">Aap ke documents ki mukammal hifazat</p></div>
+    <div class="witem"><div class="ico">💰</div><h4 data-i18n="w4h">Munasib Fees</h4><p data-i18n="w4p">Pehle qeemat tay, baad me koi izafa nahi</p></div>
+    <div class="witem"><div class="ico">💬</div><h4 data-i18n="w5h">Asan Rabta</h4><p data-i18n="w5p">WhatsApp par fori jawab</p></div>
   </div>
 </div>
 
 <div class="container">
-  <h2 class="sec">Kaam <span>Kaise</span> Hoga?</h2>
-  <p class="sub">Sirf 3 aasan steps — ghar baithe!</p>
+  <h2 class="sec" data-i18n="stH">Kaam <span>Kaise</span> Hoga?</h2>
+  <p class="sub" data-i18n="stS">Sirf 3 aasan steps — ghar baithe!</p>
   <div class="steps">
-    <div class="step"><div class="n">1</div><b>WhatsApp Karein</b><p>Apni zaroorat batayein — muft mashwara</p></div>
-    <div class="step"><div class="n">2</div><b>Documents Bhejein</b><p>Photo ya scan WhatsApp par bhej dein</p></div>
-    <div class="step"><div class="n">3</div><b>Kaam Mukammal!</b><p>Tez, mehfooz aur zimmedari se</p></div>
+    <div class="step"><div class="n">1</div><b data-i18n="st1h">WhatsApp Karein</b><p data-i18n="st1p">Apni zaroorat batayein — muft mashwara</p></div>
+    <div class="step"><div class="n">2</div><b data-i18n="st2h">Documents Bhejein</b><p data-i18n="st2p">Photo ya scan WhatsApp par bhej dein</p></div>
+    <div class="step"><div class="n">3</div><b data-i18n="st3h">Kaam Mukammal!</b><p data-i18n="st3p">Tez, mehfooz aur zimmedari se</p></div>
   </div>
 </div>
 
 <div class="container">
-  <h2 class="sec">Aam <span>Sawalat</span></h2>
-  <p class="sub">Jo sab poochte hain</p>
+  <h2 class="sec" data-i18n="faqH">Aam <span>Sawalat</span></h2>
+  <p class="sub" data-i18n="faqS">Jo sab poochte hain</p>
   <div class="faq">
-    <details><summary>Fees kitni hogi?</summary><div class="a">Har kaam ki fees alag hai — WhatsApp par apna kaam batayein, pehle qeemat tay hogi. Baad me koi chupa kharcha nahi.</div></details>
-    <details><summary>Kitne din me kaam hoga?</summary><div class="a">Kaam ki noiyat par hai — aam tor par chand din. WhatsApp par poochein, sahi waqt bata diya jayega.</div></details>
-    <details><summary>Kya documents mehfooz rahein ge?</summary><div class="a">Ji bilkul! Aap ke documents sirf aap ke kaam ke liye istemal honge — kisi teesre ko nahi diye jayein ge.</div></details>
-    <details><summary>Door se kaam ho sakta hai?</summary><div class="a">Ji! Zyada tar kaam WhatsApp par documents bhej kar ho jata hai — kahin jane ki zaroorat nahi.</div></details>
+    <details><summary data-i18n="q1">Fees kitni hogi?</summary><div class="a" data-i18n="a1">Har kaam ki fees alag hai — WhatsApp par apna kaam batayein, pehle qeemat tay hogi. Baad me koi chupa kharcha nahi.</div></details>
+    <details><summary data-i18n="q2">Kitne din me kaam hoga?</summary><div class="a" data-i18n="a2">Kaam ki noiyat par hai — aam tor par chand din. WhatsApp par poochein, sahi waqt bata diya jayega.</div></details>
+    <details><summary data-i18n="q3">Kya documents mehfooz rahein ge?</summary><div class="a" data-i18n="a3">Ji bilkul! Aap ke documents sirf aap ke kaam ke liye istemal honge — kisi teesre ko nahi diye jayein ge.</div></details>
+    <details><summary data-i18n="q4">Door se kaam ho sakta hai?</summary><div class="a" data-i18n="a4">Ji! Zyada tar kaam WhatsApp par documents bhej kar ho jata hai — kahin jane ki zaroorat nahi.</div></details>
   </div>
 </div>
 
 <div class="container">
   <div class="contact">
-    <h2>Abhi <span>Rabta</span> Karein!</h2>
-    <p><b>Muhammad Waseem</b> — Super Computer<br>Muft mashware ke liye WhatsApp karein, jawab foran milega!</p>
-    <div class="cbtns">
-      <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye.">💬 WhatsApp: 0300-7885987</a>
-    </div>
+    <h2 data-i18n="ctH">Abhi <span>Rabta</span> Karein!</h2>
+    <p data-i18n="ctP"><b>Muhammad Waseem</b> — Super Computer<br>Muft mashware ke liye WhatsApp karein, jawab foran milega!</p>
+    <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye." data-i18n="ctB">💬 WhatsApp: 0300-7885987</a>
   </div>
 </div>
 
 <a class="wafloat" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!">💬</a>
 
 <footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<script>
+const I18N={
+en:{badge:"✅ Aitemad wali service — Multan",heroH:'Online <span>Document</span> & Consultancy Services',heroP:"<b>Muhammad Waseem</b> — Attestation, certificates, licenses aur online kaam — sab kuch ghar baithe, tez aur mehfooz!",heroBtn:"💬 WhatsApp par Rabta Karein",t1:"📜 MOFA / IBCC / HEC",t2:"🛡️ Police Certificate",t3:"🏥 PHC License",t4:"📝 Online Apply",t5:"⚡ Tez Service",svcH:"Hamari <span>Services</span>",svcS:"Har kaam mukammal zimmedari ke sath — pehle maloomat, phir kaam",s1h:"Document Attestation",s1p:"MOFA, IBCC aur HEC se degree, transcript, diploma aur official papers ki mukammal attestation.",s1t:"Sab se zyada mang",s2h:"Police Character Certificate",s2p:"Police character certificate online hasil karein — baghair line, baghair pareshani.",s2t:"Online sahulat",s3h:"PHC Registration & License",s3p:"Hospital ya clinic ki PHC registration, provisional aur regular license ki step-by-step guidance.",s3t:"Healthcare",s4h:"Online Applications",s4p:"Naukriyon ke forms, test ki tayyari, aur har qisam ki online darkhwastein.",s4t:"Jobs & Forms",s5h:"Degree Verification",s5p:"HEC / IBCC se degree verification ka mukammal process — aik hi jagah.",s5t:"Students",s6h:"Dhee Rani Program",s6p:"Punjab Dhee Rani Program 2026 — muft shadi, 2 lakh naqd aur mukammal jahez. Registration me mukammal madad.",s6t:"Hakumat Program",s7h:"Mobile & Computer Services",s7p:"Mobile shop ki tamam services aur computer ka har kaam — aik hi chhat ke neeche.",s7t:"Shop Services",moreH:"Mazeed <span>Sahuliyat</span>",moreS:"Dukan par dastiyab har sahulat",m1:"📄 FBR Filer Registration",m2:"👆 Biometric Verification",m3:"🆔 NADRA Sahulat",m4:"🖨️ Color / Black Print",m5:"📸 Photos & CV Printing",m6:"💒 Shadi Album",m7:"📑 Scanning & Photocopy",m8:"🏦 HBL Connect",m9:"💸 JazzCash / Easypaisa",m10:"📲 SIM & Tamam Load",m11:"📧 Email Services",m12:"🎓 Admission Apply",certH:"Hamara <span>Certificate</span>",certS:"OEC & ICMPD recognized — Soft Skills Training (65 days)",whyH:"Kyoun <span>Hum?</span>",w1h:"Certified Professional",w1p:"Soft Skills Training — OEC & ICMPD recognized (65 days)",w2h:"Tez Kaam",w2p:"Lambe intezar nahi — kaam waqt par",w3h:"Mehfooz",w3p:"Aap ke documents ki mukammal hifazat",w4h:"Munasib Fees",w4p:"Pehle qeemat tay, baad me koi izafa nahi",w5h:"Asan Rabta",w5p:"WhatsApp par fori jawab",stH:"Kaam <span>Kaise</span> Hoga?",stS:"Sirf 3 aasan steps — ghar baithe!",st1h:"WhatsApp Karein",st1p:"Apni zaroorat batayein — muft mashwara",st2h:"Documents Bhejein",st2p:"Photo ya scan WhatsApp par bhej dein",st3h:"Kaam Mukammal!",st3p:"Tez, mehfooz aur zimmedari se",faqH:"Aam <span>Sawalat</span>",faqS:"Jo sab poochte hain",q1:"Fees kitni hogi?",a1:"Har kaam ki fees alag hai — WhatsApp par apna kaam batayein, pehle qeemat tay hogi. Baad me koi chupa kharcha nahi.",q2:"Kitne din me kaam hoga?",a2:"Kaam ki noiyat par hai — aam tor par chand din. WhatsApp par poochein, sahi waqt bata diya jayega.",q3:"Kya documents mehfooz rahein ge?",a3:"Ji bilkul! Aap ke documents sirf aap ke kaam ke liye istemal honge — kisi teesre ko nahi diye jayein ge.",q4:"Door se kaam ho sakta hai?",a4:"Ji! Zyada tar kaam WhatsApp par documents bhej kar ho jata hai — kahin jane ki zaroorat nahi.",ctH:"Abhi <span>Rabta</span> Karein!",ctP:"<b>Muhammad Waseem</b> — Super Computer<br>Muft mashware ke liye WhatsApp karein, jawab foran milega!",ctB:"💬 WhatsApp: 0300-7885987"},
+ur:{badge:"✅ اعتماد والی سروس — ملتان",heroH:'آن لائن <span>دستاویزات</span> و کنسلٹنسی سروسز',heroP:"<b>محمد وسیم</b> — تصدیق، سرٹیفکیٹ، لائسنس اور آن لائن کام — سب کچھ گھر بیٹھے، تیز اور محفوظ!",heroBtn:"💬 واٹس ایپ پر رابطہ کریں",t1:"📜 موفا / آئی بی سی سی / ایچ ای سی",t2:"🛡️ پولیس سرٹیفکیٹ",t3:"🏥 پی ایچ سی لائسنس",t4:"📝 آن لائن اپلائی",t5:"⚡ تیز سروس",svcH:"ہماری <span>سروسز</span>",svcS:"ہر کام مکمل ذمہ داری کے ساتھ — پہلے معلومات، پھر کام",s1h:"دستاویزات کی تصدیق",s1p:"موفا، آئی بی سی سی اور ایچ ای سی سے ڈگری، ٹرانسکرپٹ، ڈپلومہ اور سرکاری کاغذات کی مکمل تصدیق۔",s1t:"سب سے زیادہ مانگ",s2h:"پولیس کریکٹر سرٹیفکیٹ",s2p:"پولیس کریکٹر سرٹیفکیٹ آن لائن حاصل کریں — بغیر لائن، بغیر پریشانی۔",s2t:"آن لائن سہولت",s3h:"پی ایچ سی رجسٹریشن و لائسنس",s3p:"ہسپتال یا کلینک کی پی ایچ سی رجسٹریشن، عارضی اور مستقل لائسنس کی مرحلہ وار رہنمائی۔",s3t:"ہیلتھ کیئر",s4h:"آن لائن درخواستیں",s4p:"نوکریوں کے فارم، ٹیسٹ کی تیاری، اور ہر قسم کی آن لائن درخواستیں۔",s4t:"نوکریاں و فارم",s5h:"ڈگری کی تصدیق",s5p:"ایچ ای سی / آئی بی سی سی سے ڈگری کی تصدیق کا مکمل عمل — ایک ہی جگہ۔",s5t:"طلبہ",s6h:"دھی رانی پروگرام",s6p:"پنجاب دھی رانی پروگرام 2026 — مفت شادی، 2 لاکھ نقد اور مکمل جہیز۔ رجسٹریشن میں مکمل مدد۔",s6t:"حکومتی پروگرام",s7h:"موبائل و کمپیوٹر سروسز",s7p:"موبائل شاپ کی تمام سروسز اور کمپیوٹر کا ہر کام — ایک ہی چھت کے نیچے۔",s7t:"شاپ سروسز",moreH:"مزید <span>سہولیات</span>",moreS:"دکان پر دستیاب ہر سہولت",m1:"📄 ایف بی آر فائلر رجسٹریشن",m2:"👆 بائیومیٹرک تصدیق",m3:"🆔 نادرا سہولت",m4:"🖨️ کلر / بلیک پرنٹ",m5:"📸 تصاویر و سی وی پرنٹنگ",m6:"💒 شادی البم",m7:"📑 اسکیننگ و فوٹو کاپی",m8:"🏦 ایچ بی ایل کنیکٹ",m9:"💸 جاز کیش / ایزی پیسہ",m10:"📲 سم و تمام لوڈ",m11:"📧 ای میل سروسز",m12:"🎓 داخلہ اپلائی",certH:"ہمارا <span>سرٹیفکیٹ</span>",certS:"او ای سی و آئی سی ایم پی ڈی سے منظور شدہ — سافٹ اسکلز ٹریننگ (65 دن)",whyH:"کیوں <span>ہم؟</span>",w1h:"تصدیق شدہ پروفیشنل",w1p:"سافٹ اسکلز ٹریننگ — او ای سی و آئی سی ایم پی ڈی سے منظور شدہ (65 دن)",w2h:"تیز کام",w2p:"لمبا انتظار نہیں — کام وقت پر",w3h:"محفوظ",w3p:"آپ کے دستاویزات کی مکمل حفاظت",w4h:"مناسب فیس",w4p:"پہلے قیمت طے، بعد میں کوئی اضافہ نہیں",w5h:"آسان رابطہ",w5p:"واٹس ایپ پر فوری جواب",stH:"کام <span>کیسے</span> ہوگا؟",stS:"صرف 3 آسان مراحل — گھر بیٹھے!",st1h:"واٹس ایپ کریں",st1p:"اپنی ضرورت بتائیں — مفت مشورہ",st2h:"دستاویزات بھیجیں",st2p:"تصویر یا اسکین واٹس ایپ پر بھیج دیں",st3h:"کام مکمل!",st3p:"تیز، محفوظ اور ذمہ داری سے",faqH:"عام <span>سوالات</span>",faqS:"جو سب پوچھتے ہیں",q1:"فیس کتنی ہوگی؟",a1:"ہر کام کی فیس الگ ہے — واٹس ایپ پر اپنا کام بتائیں، پہلے قیمت طے ہوگی۔ بعد میں کوئی چھپا خرچ نہیں۔",q2:"کتنے دن میں کام ہوگا؟",a2:"کام کی نوعیت پر ہے — عام طور پر چند دن۔ واٹس ایپ پر پوچھیں، صحیح وقت بتا دیا جائے گا۔",q3:"کیا دستاویزات محفوظ رہیں گے؟",a3:"جی بالکل! آپ کے دستاویزات صرف آپ کے کام کے لیے استعمال ہوں گے — کسی تیسرے کو نہیں دیے جائیں گے۔",q4:"دور سے کام ہو سکتا ہے؟",a4:"جی! زیادہ تر کام واٹس ایپ پر دستاویزات بھیج کر ہو جاتا ہے — کہیں جانے کی ضرورت نہیں۔",ctH:"ابھی <span>رابطہ</span> کریں!",ctP:"<b>محمد وسیم</b> — سپر کمپیوٹر<br>مفت مشورے کے لیے واٹس ایپ کریں، جواب فوراً ملے گا!",ctB:"💬 واٹس ایپ: 0300-7885987"}
+};
+let LANG=localStorage.getItem("sc_lang")||"en";
+function applyLang(){
+  const d=I18N[LANG];
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.getAttribute("data-i18n");
+    if(d[k])el.innerHTML=d[k];
+  });
+  document.getElementById("htmlRoot").lang=LANG==="ur"?"ur":"en";
+  document.getElementById("htmlRoot").dir=LANG==="ur"?"rtl":"ltr";
+  document.getElementById("langBtn").textContent=LANG==="ur"?"English":"اردو";
+}
+function toggleLang(){LANG=LANG==="ur"?"en":"ur";localStorage.setItem("sc_lang",LANG);applyLang();}
+applyLang();
+</script>
 <script>
 /* 3-day demo expiry */
 (function(){
