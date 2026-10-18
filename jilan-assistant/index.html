@@ -87,6 +87,7 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
 </head>
 <body>
 <header><div class="logo">🤖</div><div><h1 id="appName">Jilan Assistant</h1><div class="sub" id="appSub">Aap ka zaati AI assistant</div></div><button id="langBtn">EN</button></header>
+<div id="offBar" class="hidden" style="background:#7a4a00;color:#ffe9c4;text-align:center;font-size:13px;padding:7px 10px;font-weight:700">📴 Offline mode — AI chat, mausam aur currency band hain. Baqi sab chal raha hai!</div>
 <main>
 <!-- HOME -->
 <div class="sec on" id="s-home">
@@ -961,8 +962,17 @@ $("wzSkip").onclick=wzNext;
 function onPermResult(kind,granted){wzNext();}
 $("wzRedo").onclick=()=>{localStorage.removeItem("ja_setup_done");showWizard();};
 
+/* ---------- offline-first (service worker + net banner) ---------- */
+function updNet(){const off=!navigator.onLine;const b=$("offBar");if(b)b.classList.toggle("hidden",!off);}
+window.addEventListener("online",updNet);window.addEventListener("offline",updNet);
+if("serviceWorker" in navigator){
+  let swFresh=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!swFresh){swFresh=true;location.reload();}});
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
 /* ---------- init ---------- */
-applyLang();renderGuide();renderAll();renderChat();loadSettings();refreshA11y();updToggles();
+applyLang();renderGuide();renderAll();renderChat();loadSettings();refreshA11y();updToggles();updNet();
 if(!localStorage.getItem("ja_setup_done"))setTimeout(showWizard,900);
 if(!localStorage.getItem(LS_KEY))$("aiSetup").classList.remove("hidden");
 rescheduleNamaz();
