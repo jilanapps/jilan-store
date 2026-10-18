@@ -7,73 +7,150 @@
 <meta name="description" content="Super Computer by Muhammad Waseem — document attestation (MOFA, IBCC, HEC), police character certificate, PHC clinic registration & license, online applications.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f7f4;color:#1a2e1a;line-height:1.6}
-.demo-banner{background:#e8b93c;color:#1a1a1a;text-align:center;padding:10px;font-weight:700;font-size:14px;letter-spacing:1px}
-header{background:linear-gradient(135deg,#0b5c2f,#128a46);color:#fff;padding:56px 20px;text-align:center}
-header h1{font-size:2.2rem;margin-bottom:8px}
-header p{font-size:1.05rem;opacity:.95;max-width:600px;margin:0 auto 24px}
-.btn{display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:14px 34px;border-radius:50px;text-decoration:none;font-size:1.05rem;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-.btn:hover{transform:translateY(-2px)}
-.container{max-width:1000px;margin:0 auto;padding:40px 20px}
-h2.sec{text-align:center;color:#0b5c2f;margin-bottom:6px;font-size:1.7rem}
-p.sub{text-align:center;color:#5a7a5a;margin-bottom:32px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.card{background:#fff;border-radius:14px;padding:26px;box-shadow:0 2px 12px rgba(0,0,0,.08);border-top:4px solid #128a46}
-.card .ico{font-size:2.2rem;margin-bottom:10px}
-.card h3{color:#0b5c2f;margin-bottom:8px;font-size:1.15rem}
-.card p{color:#4a5a4a;font-size:.95rem}
-.steps{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:10px}
-.step{background:#fff;border-radius:12px;padding:20px;flex:1 1 220px;max-width:300px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-.step .n{background:#128a46;color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 10px;font-size:1.1rem}
-.contact{background:linear-gradient(135deg,#0b5c2f,#128a46);color:#fff;text-align:center;padding:48px 20px;border-radius:18px;margin-top:10px}
-.contact h2{margin-bottom:10px}
-.contact p{opacity:.9;margin-bottom:20px}
-footer{text-align:center;padding:24px;color:#7a8a7a;font-size:.85rem}
-footer .cr{margin-top:6px;color:#9aaa9a}
+:root{--green:#0b5c2f;--green2:#128a46;--gold:#e8b93c;--dark:#0e2416;--light:#f4f7f4}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--light);color:#1a2e1a;line-height:1.6;overflow-x:hidden}
+.demo-banner{background:var(--gold);color:#1a1a1a;text-align:center;padding:10px;font-weight:700;font-size:14px;letter-spacing:1px}
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(11,92,47,.96);backdrop-filter:blur(8px);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+nav .brand{color:#fff;font-weight:800;font-size:1.2rem;text-decoration:none}
+nav .brand span{color:var(--gold)}
+nav .cta{background:#25D366;color:#fff;padding:9px 22px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem}
+/* HERO */
+.hero{background:radial-gradient(ellipse at 20% 10%,#128a46 0%,#0b5c2f 55%,#083d20 100%);color:#fff;padding:70px 20px 90px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:400px;height:400px;background:rgba(232,185,60,.12);border-radius:50%;top:-120px;right:-120px;animation:float 7s ease-in-out infinite}
+.hero::after{content:'';position:absolute;width:280px;height:280px;background:rgba(37,211,102,.12);border-radius:50%;bottom:-100px;left:-80px;animation:float 9s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
+.hero>*{position:relative;z-index:1}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);padding:7px 20px;border-radius:50px;font-size:.85rem;margin-bottom:18px;animation:fadeUp .7s ease}
+.hero h1{font-size:2.6rem;margin-bottom:10px;animation:fadeUp .7s .1s ease both}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:1.08rem;opacity:.95;max-width:620px;margin:0 auto 28px;animation:fadeUp .7s .2s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.btn{display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:15px 38px;border-radius:50px;text-decoration:none;font-size:1.08rem;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:.25s;animation:fadeUp .7s .3s ease both}
+.btn:hover{transform:translateY(-3px) scale(1.03)}
+.btn.gold{background:var(--gold);color:#1a1a1a}
+/* TRUST BAR */
+.trust{background:#fff;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 34px;padding:18px 16px;box-shadow:0 2px 10px rgba(0,0,0,.08);font-weight:600;color:var(--green);font-size:.95rem}
+/* SECTIONS */
+.container{max-width:1040px;margin:0 auto;padding:56px 20px}
+h2.sec{text-align:center;color:var(--green);margin-bottom:6px;font-size:1.8rem}
+h2.sec span{color:#c9982a}
+p.sub{text-align:center;color:#5a7a5a;margin-bottom:34px;max-width:640px;margin-left:auto;margin-right:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px}
+.card{background:#fff;border-radius:16px;padding:30px 26px;box-shadow:0 3px 16px rgba(0,0,0,.08);border-top:5px solid var(--green2);transition:.25s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-6px);box-shadow:0 10px 28px rgba(11,92,47,.18)}
+.card .ico{font-size:2.6rem;margin-bottom:12px}
+.card h3{color:var(--green);margin-bottom:8px;font-size:1.18rem}
+.card p{color:#4a5a4a;font-size:.95rem;margin-bottom:14px}
+.card .tag{display:inline-block;background:#e8f5ec;color:var(--green);font-size:.78rem;font-weight:700;padding:5px 14px;border-radius:20px}
+/* WHY */
+.why{background:var(--dark);color:#e8f0e8;border-radius:20px;padding:48px 34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:26px}
+.why h2{grid-column:1/-1;text-align:center;color:#fff;margin-bottom:6px}
+.why h2 span{color:var(--gold)}
+.witem{text-align:center}
+.witem .ico{font-size:2.2rem;margin-bottom:8px}
+.witem h4{color:var(--gold);margin-bottom:6px}
+.witem p{font-size:.92rem;opacity:.85}
+/* STEPS */
+.steps{display:flex;flex-wrap:wrap;gap:18px;justify-content:center}
+.step{background:#fff;border-radius:14px;padding:28px 22px;flex:1 1 230px;max-width:310px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.08);position:relative}
+.step .n{background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto 12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(18,138,70,.4)}
+/* FAQ */
+.faq{max-width:720px;margin:0 auto}
+.faq details{background:#fff;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden}
+.faq summary{padding:18px 22px;cursor:pointer;font-weight:700;color:var(--green);list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';float:right;font-size:1.3rem;color:var(--green2)}
+.faq details[open] summary::after{content:'−'}
+.faq .a{padding:0 22px 18px;color:#4a5a4a;font-size:.95rem}
+/* CONTACT */
+.contact{background:radial-gradient(ellipse at 50% 0%,#128a46,#083d20);color:#fff;text-align:center;padding:60px 24px;border-radius:22px;position:relative;overflow:hidden}
+.contact h2{font-size:1.9rem;margin-bottom:10px}
+.contact h2 span{color:var(--gold)}
+.contact p{opacity:.92;margin-bottom:26px;max-width:520px;margin-left:auto;margin-right:auto}
+.cbtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+/* FLOATING WA */
+.wafloat{position:fixed;bottom:22px;right:22px;background:#25D366;color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:99;animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+footer{text-align:center;padding:28px 16px;color:#7a8a7a;font-size:.85rem}
+@media(max-width:600px){.hero h1{font-size:1.9rem}nav .brand{font-size:1rem}}
 </style>
 </head>
 <body>
 <div class="demo-banner">★ DEMO by Jilan Apps ★</div>
 
-<header>
-  <h1>🖥️ Super Computer</h1>
-  <p>Online Document & Consultancy Services — <b>Muhammad Waseem</b><br>Attestation, certificates, licenses — sab kaam ghar baithe!</p>
+<nav>
+  <a class="brand" href="#">🖥️ Super <span>Computer</span></a>
+  <a class="cta" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye.">WhatsApp</a>
+</nav>
+
+<div class="hero">
+  <div class="badge">✅ Aitemad wali service — Multan</div>
+  <h1>Online <span>Document</span> & Consultancy Services</h1>
+  <p><b>Muhammad Waseem</b> — Attestation, certificates, licenses aur online kaam — sab kuch ghar baithe, tez aur mehfooz!</p>
   <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20apni%20service%20ke%20bare%20me%20maloomat%20chahiye.">💬 WhatsApp par Rabta Karein</a>
-</header>
+</div>
+
+<div class="trust">
+  <span>📜 MOFA / IBCC / HEC</span><span>🛡️ Police Certificate</span><span>🏥 PHC License</span><span>📝 Online Apply</span><span>⚡ Tez Service</span>
+</div>
 
 <div class="container">
-  <h2 class="sec">Hamari Services</h2>
-  <p class="sub">Har kaam tez, mehfooz aur munasib qeemat par</p>
+  <h2 class="sec">Hamari <span>Services</span></h2>
+  <p class="sub">Har kaam mukammal zimmedari ke sath — pehle maloomat, phir kaam</p>
   <div class="grid">
-    <div class="card"><div class="ico">📜</div><h3>Document Attestation</h3><p>MOFA, IBCC aur HEC se degree, transcript, diploma aur official papers ki attestation.</p></div>
-    <div class="card"><div class="ico">🛡️</div><h3>Police Character Certificate</h3><p>Police character certificate online hasil karein — aasan aur tez tareeqa.</p></div>
-    <div class="card"><div class="ico">🏥</div><h3>PHC Registration & License</h3><p>Hospital ya clinic ki PHC registration, provisional aur regular license ki mukammal guidance.</p></div>
-    <div class="card"><div class="ico">📝</div><h3>Online Applications</h3><p>Naukriyon ke forms, online apply, aur har qisam ki online darkhwastein.</p></div>
-    <div class="card"><div class="ico">📱</div><h3>Mobile & Computer Services</h3><p>Mobile shop ki tamam services — aik hi chhat ke neeche.</p></div>
-    <div class="card"><div class="ico">📢</div><h3>Jobs & Updates</h3><p>Nayi bhartiyon aur sarkari elanat ki barwaqt maloomat.</p></div>
+    <div class="card"><div class="ico">📜</div><h3>Document Attestation</h3><p>MOFA, IBCC aur HEC se degree, transcript, diploma aur official papers ki mukammal attestation.</p><span class="tag">Sab se zyada mang</span></div>
+    <div class="card"><div class="ico">🛡️</div><h3>Police Character Certificate</h3><p>Police character certificate online hasil karein — baghair line, baghair pareshani.</p><span class="tag">Online sahulat</span></div>
+    <div class="card"><div class="ico">🏥</div><h3>PHC Registration & License</h3><p>Hospital ya clinic ki PHC registration, provisional aur regular license ki step-by-step guidance.</p><span class="tag">Healthcare</span></div>
+    <div class="card"><div class="ico">📝</div><h3>Online Applications</h3><p>Naukriyon ke forms, test ki tayyari, aur har qisam ki online darkhwastein.</p><span class="tag">Jobs & Forms</span></div>
+    <div class="card"><div class="ico">🎓</div><h3>Degree Verification</h3><p>HEC / IBCC se degree verification ka mukammal process — aik hi jagah.</p><span class="tag">Students</span></div>
+    <div class="card"><div class="ico">📱</div><h3>Mobile & Computer Services</h3><p>Mobile shop ki tamam services aur computer ka har kaam — aik hi chhat ke neeche.</p><span class="tag">Shop Services</span></div>
   </div>
 </div>
 
 <div class="container">
-  <h2 class="sec">Kaam Kaise Hoga?</h2>
-  <p class="sub">Sirf 3 aasan steps</p>
+  <div class="why">
+    <h2>Kyoun <span>Hum?</span></h2>
+    <div class="witem"><div class="ico">⚡</div><h4>Tez Kaam</h4><p>Lambe intezar nahi — kaam waqt par</p></div>
+    <div class="witem"><div class="ico">🔒</div><h4>Mehfooz</h4><p>Aap ke documents ki mukammal hifazat</p></div>
+    <div class="witem"><div class="ico">💰</div><h4>Munasib Fees</h4><p>Pehle qeemat tay, baad me koi izafa nahi</p></div>
+    <div class="witem"><div class="ico">💬</div><h4>Asan Rabta</h4><p>WhatsApp par fori jawab</p></div>
+  </div>
+</div>
+
+<div class="container">
+  <h2 class="sec">Kaam <span>Kaise</span> Hoga?</h2>
+  <p class="sub">Sirf 3 aasan steps — ghar baithe!</p>
   <div class="steps">
-    <div class="step"><div class="n">1</div><b>WhatsApp Karein</b><p>Apni zaroorat batayein</p></div>
-    <div class="step"><div class="n">2</div><b>Documents Bhejein</b><p>Photo ya scan WhatsApp par</p></div>
-    <div class="step"><div class="n">3</div><b>Kaam Ho Gaya!</b><p>Tez aur mehfooz service</p></div>
+    <div class="step"><div class="n">1</div><b>WhatsApp Karein</b><p>Apni zaroorat batayein — muft mashwara</p></div>
+    <div class="step"><div class="n">2</div><b>Documents Bhejein</b><p>Photo ya scan WhatsApp par bhej dein</p></div>
+    <div class="step"><div class="n">3</div><b>Kaam Mukammal!</b><p>Tez, mehfooz aur zimmedari se</p></div>
+  </div>
+</div>
+
+<div class="container">
+  <h2 class="sec">Aam <span>Sawalat</span></h2>
+  <p class="sub">Jo sab poochte hain</p>
+  <div class="faq">
+    <details><summary>Fees kitni hogi?</summary><div class="a">Har kaam ki fees alag hai — WhatsApp par apna kaam batayein, pehle qeemat tay hogi. Baad me koi chupa kharcha nahi.</div></details>
+    <details><summary>Kitne din me kaam hoga?</summary><div class="a">Kaam ki noiyat par hai — aam tor par chand din. WhatsApp par poochein, sahi waqt bata diya jayega.</div></details>
+    <details><summary>Kya documents mehfooz rahein ge?</summary><div class="a">Ji bilkul! Aap ke documents sirf aap ke kaam ke liye istemal honge — kisi teesre ko nahi diye jayein ge.</div></details>
+    <details><summary>Door se kaam ho sakta hai?</summary><div class="a">Ji! Zyada tar kaam WhatsApp par documents bhej kar ho jata hai — kahin jane ki zaroorat nahi.</div></details>
   </div>
 </div>
 
 <div class="container">
   <div class="contact">
-    <h2>Abhi Rabta Karein!</h2>
-    <p>Muhammad Waseem — Super Computer<br>WhatsApp: 0300-7885987</p>
-    <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20apni%20service%20ke%20bare%20me%20maloomat%20chahiye.">💬 WhatsApp: 0300-7885987</a>
+    <h2>Abhi <span>Rabta</span> Karein!</h2>
+    <p><b>Muhammad Waseem</b> — Super Computer<br>Muft mashware ke liye WhatsApp karein, jawab foran milega!</p>
+    <div class="cbtns">
+      <a class="btn" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!%20Mujhe%20maloomat%20chahiye.">💬 WhatsApp: 0300-7885987</a>
+    </div>
   </div>
 </div>
 
-<footer>
-  <div>© 2026 Jilan Apps Official. All rights reserved.</div>
-</footer>
+<a class="wafloat" href="https://wa.me/923007885987?text=Assalam-o-Alaikum!">💬</a>
+
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
 </body>
 </html>
