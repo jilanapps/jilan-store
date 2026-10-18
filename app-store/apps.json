@@ -321,11 +321,24 @@
       "versionCode": 2,
       "versionName": "1.1",
       "web": "https://jilanapps.github.io/jilan-store/jilan-assistant/"
+    },
+    {
+      "id": "waweb",
+      "name": "WA Web",
+      "package": "com.jilanapps.waweb",
+      "versionCode": 1,
+      "versionName": "1.0",
+      "apk": "https://jilanapps.github.io/jilan-store/wa-web/wa-web.apk",
+      "category": "tools",
+      "color": "#25D366",
+      "desc": "WhatsApp Web ka wrapper — doosre phone ka WhatsApp is app me QR scan karke chalayein",
+      "icon": "icons/waweb.png",
+      "size": 16854
     }
   ],
   "store": {
     "name": "Jilan App Store",
-    "updated": "2026-10-16",
+    "updated": "2026-10-18",
     "version": "1.0"
   }
 }
