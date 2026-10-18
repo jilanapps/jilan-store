@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jilanapps.github.io/jilan-store/business/sitemap.xml
