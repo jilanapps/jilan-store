@@ -407,39 +407,82 @@ function renderAll(){renderTasks();renderRems();renderGoals();renderNamaz();rend
 
 /* ---------- voice ---------- */
 let voiceMode="cmd"; // "cmd" | "task"
-let recog=null, listening=false;
+let recog=null, listening=false, listenTimer=null;
+function resetVoiceUI(){
+  listening=false;clearTimeout(listenTimer);listenTimer=null;
+  try{$("micBig").classList.remove("lis");}catch(e){}
+  orbState("idle");
+  $("micState").textContent=t("vcTap");
+}
+function voiceFail(msg){
+  resetVoiceUI();
+  $("voiceOut").innerHTML='<div class="note">⚠️ '+esc(msg)+'<br><span style="opacity:.7">💡 Tip: type karke bhi kaam chala sakte hain.</span></div>';
+  toast("⚠️ "+msg,true);
+}
+function armListenTimeout(ms){
+  clearTimeout(listenTimer);
+  listenTimer=setTimeout(()=>{
+    try{if(recog)recog.stop();}catch(e){}
+    voiceFail(LANG==="ru"?"Kuch sunai nahi diya — dobara bolein ya type karein":"Didn't hear anything — try again or type instead");
+  },ms);
+}
 function startVoice(){
   if(hasBridge()){ // native speech
-    try{$("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
-      $("micBig").classList.add("lis");orbState("listen");Assistant.startVoice();return;}catch(e){}
+    try{
+      $("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
+      $("micBig").classList.add("lis");orbState("listen");listening=true;
+      Assistant.startVoice();
+      armListenTimeout(15000); // native callback na aaye to khud reset
+      return;
+    }catch(e){resetVoiceUI();}
   }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){$("voiceOut").innerHTML='<div class="note">⚠️ '+(LANG==="ru"?"Is browser me voice support nahi. Android app me mic kaam karega.":"Voice not supported in this browser. It works in the Android app.")+'</div>';return;}
-  if(listening){try{recog.stop();}catch(e){}return;}
-  recog=new SR();recog.lang="ur-PK";recog.interimResults=false;recog.maxAlternatives=1;
-  recog.onresult=e=>{const txt=e.results[0][0].transcript;onVoiceResult(txt);};
-  recog.onerror=e=>{listening=false;$("micBig").classList.remove("lis");orbState("idle");$("micState").textContent=t("vcTap");
-    if(e.error==="not-allowed")toast(LANG==="ru"?"🔐 Mic permission dein":"🔐 Allow mic permission");};
-  recog.onend=()=>{listening=false;$("micBig").classList.remove("lis");orbState("idle");if($("micState").textContent.indexOf("...")>0)$("micState").textContent=t("vcTap");};
+  if(listening){try{recog.stop();}catch(e){}resetVoiceUI();return;}
+  recog=new SR();recog.lang="ur-PK";recog.interimResults=true;recog.maxAlternatives=1;
+  recog.onresult=e=>{
+    let interim="",final="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const tr=e.results[i][0].transcript;
+      if(e.results[i].isFinal)final+=tr;else interim+=tr;
+    }
+    if(interim)$("micState").textContent="🗣️ "+interim; // live proof: sun raha hai!
+    if(final){clearTimeout(listenTimer);onVoiceResult(final);}
+  };
+  recog.onerror=e=>{
+    const R=LANG==="ru";
+    if(e.error==="not-allowed"||e.error==="service-not-allowed")
+      voiceFail(R?"🔐 Mic permission dein — Settings me Allow karein":"🔐 Allow mic permission in Settings");
+    else if(e.error==="no-speech")
+      voiceFail(R?"Awaz nahi aayi — thora zor se bolein":"No speech heard — speak a little louder");
+    else if(e.error==="audio-capture")
+      voiceFail(R?"Mic nahi mila — koi aur app mic use kar rahi hai?":"No microphone found — is another app using the mic?");
+    else if(e.error==="network"||e.error==="language-not-supported")
+      voiceFail(R?"Internet chahiye voice ke liye — net check karein":"Voice needs internet — check connection");
+    else voiceFail(R?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again");
+  };
+  recog.onend=()=>{ if(listening){ // bina result ke band hua
+      voiceFail(LANG==="ru"?"Ruk gaya — dobara try karein":"Stopped — try again"); } };
   listening=true;$("micBig").classList.add("lis");orbState("listen");
   $("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
-  try{recog.start();}catch(e){listening=false;}
+  $("voiceOut").innerHTML='<div class="note">🎙️ '+(LANG==="ru"?"Bolein...":"Speak now...")+'</div>';
+  armListenTimeout(12000);
+  try{recog.start();}catch(e){voiceFail(LANG==="ru"?"Mic start nahi hua":"Mic failed to start");}
 }
 $("micBig").onclick=startVoice;
 try{if($("orb"))$("orb").onclick=startVoice;}catch(e){}
 // called by native bridge
 function onVoiceResult(txt){
-  listening=false;try{$("micBig").classList.remove("lis");}catch(e){}orbState("idle");
-  $("micState").textContent=t("vcTap");
+  resetVoiceUI();
   txt=(txt||"").trim();if(!txt)return;
   if(voiceMode==="aichat"){voiceMode="cmd";$("aiInp").value=txt;go("s-ai");aiSend(true);return;}
   if(voiceMode==="task"){if(addTask(txt)){toast("✅ "+txt);nspeak(LANG==="ru"?"Task add ho gaya":"Task added");}voiceMode="cmd";return;}
   $("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(txt)+'"</div>';
   parseCommand(txt);
 }
-function onVoiceError(c){listening=false;try{$("micBig").classList.remove("lis");}catch(e){}orbState("idle");
-  $("micState").textContent=t("vcTap");
-  $("voiceOut").innerHTML='<div class="note">⚠️ '+(LANG==="ru"?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again")+'</div>';}
+function onVoiceError(c){
+  voiceFail(LANG==="ru"?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again");
+}
 
 /* ---------- app open map ---------- */
 const APPS={whatsapp:"com.whatsapp",youtube:"com.google.android.youtube",chrome:"com.android.chrome",gmail:"com.google.android.gm",maps:"com.google.android.apps.maps",playstore:"com.android.vending",facebook:"com.facebook.katana",instagram:"com.instagram.android",tiktok:"com.zhiliaoapp.musically",snapchat:"com.snapchat.android"};
