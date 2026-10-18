@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Apps — Digital Visiting Card</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+.card{width:100%;max-width:420px;background:linear-gradient(135deg,#101a33 0%,#0b1120 60%,#1a1408 100%);border:1px solid #e8b93c55;border-radius:20px;padding:28px 24px;box-shadow:0 0 40px #e8b93c22;text-align:center;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,#e8b93c33,transparent 70%);border-radius:50%}
+.logo{width:84px;height:84px;border-radius:50%;border:3px solid #e8b93c;box-shadow:0 0 24px #e8b93caa;object-fit:cover;margin-bottom:12px}
+h1{font-size:22px;color:#e8b93c;margin-bottom:4px}
+.role{font-size:13px;color:#aab4d4;margin-bottom:16px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#e8b93c88,transparent);margin:14px 0}
+.row{display:flex;align-items:center;gap:10px;justify-content:flex-start;text-align:left;background:#ffffff08;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px}
+.row .ic{font-size:18px;flex-shrink:0}
+.row a{color:#fff;text-decoration:none;word-break:break-all}
+.row small{display:block;color:#8b95b8;font-size:11px}
+.links{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.links a{font-size:12px;color:#e8b93c;border:1px solid #e8b93c66;border-radius:20px;padding:6px 14px;text-decoration:none}
+.btns{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;margin-top:18px}
+button{border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.wa{background:#25D366;color:#fff}
+.save{background:#e8b93c;color:#0b1120}
+.call{background:#1f2b4d;color:#fff;border:1px solid #e8b93c55}
+.note{margin-top:14px;font-size:12px;color:#8b95b8;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<div class="card">
+  <img class="logo" src="https://jilanapps.github.io/jilan-store/business/logo.png" alt="Jilan Apps">
+  <h1>Dr Mohammad Asif Ameen</h1>
+  <div class="role">Mobile App &amp; Website Developer<br>Founder — Jilan Apps Official</div>
+  <div class="divider"></div>
+  <div class="row"><span class="ic">📞</span><div><a href="tel:+923057867149">+92 305 7867149</a><small>Call / WhatsApp</small></div></div>
+  <div class="row"><span class="ic">✉️</span><div><a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a><small>Email</small></div></div>
+  <div class="row"><span class="ic">🌐</span><div><a href="https://jilanapps.github.io/jilan-store/business/">jilanapps.github.io/jilan-store/business</a><small>Website</small></div></div>
+  <div class="row"><span class="ic">📍</span><div>Multan, Pakistan<small>Location</small></div></div>
+  <div class="links">
+    <a href="https://www.fiverr.com/jilanapps">Fiverr</a>
+    <a href="https://www.upwork.com/freelancers/~01d03f4f8fad40ef10">Upwork</a>
+  </div>
+</div>
+<div class="btns">
+  <button class="wa" onclick="shareWA()">📩 WhatsApp par bhejo</button>
+  <button class="save" onclick="saveContact()">💾 Contact save karo</button>
+  <button class="call" onclick="location.href='tel:+923057867149'">📞 Call karo</button>
+</div>
+<p class="note">© 2026 Jilan Apps Official. All rights reserved.</p>
+<script>
+function shareWA(){
+  var t="*Jilan Apps Official*%0A";
+  t+="Dr Mohammad Asif Ameen%0A";
+  t+="Mobile App & Website Developer%0A%0A";
+  t+="📞 +92 305 7867149%0A";
+  t+="✉️ jilanappsofficial@gmail.com%0A";
+  t+="🌐 https://jilanapps.github.io/jilan-store/business/%0A%0A";
+  t+="Fiverr: https://www.fiverr.com/jilanapps";
+  window.open("https://wa.me/?text="+t,"_blank");
+}
+function saveContact(){
+  var v="BEGIN:VCARD\nVERSION:3.0\nFN:Dr Mohammad Asif Ameen\nORG:Jilan Apps Official\nTITLE:Mobile App & Website Developer\nTEL;TYPE=CELL:+923057867149\nEMAIL:jilanappsofficial@gmail.com\nURL:https://jilanapps.github.io/jilan-store/business/\nADR:;;Multan;;;Pakistan;\nEND:VCARD";
+  var b=new Blob([v],{type:"text/vcard"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="jilan-apps.vcf";a.click();
+}
+</script>
+</body>
+</html>

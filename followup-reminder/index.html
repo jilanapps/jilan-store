@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow-up Reminder — Jilan Apps</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:480px;margin:0 auto}
+h1{color:#e8b93c;font-size:22px;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:18px}
+.form{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:16px;margin-bottom:18px}
+.form input,.form textarea{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:11px;margin:6px 0;font-size:15px}
+.form label{font-size:12px;color:#8b95b8}
+.form button{width:100%;background:#e8b93c;color:#0b1120;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:700;margin-top:8px;cursor:pointer}
+.lead{background:#101a33;border:1px solid #2a3558;border-radius:14px;padding:14px;margin:10px 0}
+.lead.overdue{border-color:#ff5b5b;box-shadow:0 0 12px #ff5b5b33}
+.lead.today{border-color:#e8b93c;box-shadow:0 0 12px #e8b93c33}
+.lead .nm{font-size:17px;font-weight:700}
+.lead .nt{font-size:13px;color:#aab4d4;margin:6px 0}
+.lead .dt{font-size:12px;color:#8b95b8}
+.lead.overdue .dt{color:#ff8b8b;font-weight:700}
+.lead.today .dt{color:#e8b93c;font-weight:700}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:700;cursor:pointer}
+.wa{background:#25D366;color:#fff}
+.done{background:#1f2b4d;color:#8b95b8;border:1px solid #2a3558}
+.del{background:transparent;color:#ff8b8b;border:1px solid #ff5b5b55;flex:0 0 44px}
+.empty{text-align:center;color:#8b95b8;padding:30px 10px;font-size:14px}
+.count{text-align:center;font-size:13px;color:#8b95b8;margin-bottom:10px}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📅 Follow-up Reminder</h1>
+  <div class="sub">Client leads — kis ko kab dobara poochna hai</div>
+  <div class="count" id="count"></div>
+  <div class="form">
+    <label>Naam</label>
+    <input id="fName" placeholder="Misal: Waseem (Super Computer)">
+    <label>Phone (WhatsApp)</label>
+    <input id="fPhone" inputmode="tel" placeholder="0300xxxxxxx">
+    <label>Note</label>
+    <input id="fNote" placeholder="Misal: website demo bheja">
+    <label>Kab follow-up karna hai</label>
+    <input id="fDate" type="date">
+    <button onclick="addLead()">➕ Lead add karo</button>
+  </div>
+  <div id="list"></div>
+  <div class="note">© 2026 Jilan Apps Official. All rights reserved.<br>Data sirf is phone me save hota hai.</div>
+</div>
+<script>
+var KEY="jilan_followup_leads";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+function save(l){localStorage.setItem(KEY,JSON.stringify(l))}
+function dstr(d){return d.toISOString().slice(0,10)}
+function addLead(){
+  var n=document.getElementById("fName").value.trim();
+  var p=document.getElementById("fPhone").value.trim();
+  var nt=document.getElementById("fNote").value.trim();
+  var dt=document.getElementById("fDate").value;
+  if(!n){alert("Naam likhein");return}
+  if(!dt){alert("Follow-up ki date chunein");return}
+  var l=load();l.push({n:n,p:p,nt:nt,dt:dt});save(l);
+  document.getElementById("fName").value="";document.getElementById("fPhone").value="";
+  document.getElementById("fNote").value="";document.getElementById("fDate").value="";
+  render();
+}
+function waNum(p){
+  p=(p||"").replace(/[^0-9]/g,"");
+  if(p.length===10&&p.charAt(0)==="0")p="92"+p.substring(1);
+  else if(p.length===11&&p.substring(0,2)==="03")p="92"+p.substring(1);
+  return p;
+}
+function askWA(i){
+  var l=load()[i];var p=waNum(l.p);
+  var t="Assalam o Alaikum "+l.n+" bhai! Demo dekha aap ne? Koi sawal ho to batayein — Jilan Apps";
+  var url=p?("https://wa.me/"+p+"?text="+encodeURIComponent(t)):("https://wa.me/?text="+encodeURIComponent(t));
+  window.open(url,"_blank");
+}
+function doneLead(i){var l=load();l.splice(i,1);save(l);render()}
+function render(){
+  var l=load();var t=dstr(new Date());
+  l.sort(function(a,b){return a.dt<b.dt?-1:1});
+  var box=document.getElementById("list");
+  var od=l.filter(function(x){return x.dt<t}).length;
+  document.getElementById("count").textContent=l.length?("Kul "+l.length+" leads"+(od?(" — ⚠️ "+od+" overdue!"):"")):"";
+  if(!l.length){box.innerHTML='<div class="empty">Abhi koi lead nahi.<br>Upar se pehli lead add karein 👆</div>';return}
+  var h="";
+  l.forEach(function(x,i){
+    var cls=x.dt<t?"overdue":(x.dt===t?"today":"");
+    var lbl=x.dt<t?"⚠️ OVERDUE — aaj hi rabta karein!":(x.dt===t?"📍 AAJ follow-up hai":"📅 "+x.dt);
+    h+='<div class="lead '+cls+'"><div class="nm">'+esc(x.n)+'</div>'
+      +(x.nt?'<div class="nt">'+esc(x.nt)+'</div>':"")
+      +'<div class="dt">'+lbl+(x.p?" • "+esc(x.p):"")+'</div>'
+      +'<div class="actions"><button class="wa" onclick="askWA('+i+')">💬 WhatsApp</button>'
+      +'<button class="done" onclick="doneLead('+i+')">✅ Ho gaya</button>'
+      +'<button class="del" onclick="doneLead('+i+')">✖</button></div></div>';
+  });
+  box.innerHTML=h;
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+render();
+</script>
+</body>
+</html>
