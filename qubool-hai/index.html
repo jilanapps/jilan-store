@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qubool Hai — Rishta App</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#fff;min-height:100vh;padding:16px 12px 90px}
+.wrap{max-width:480px;margin:0 auto}
+h1{color:#e8b93c;font-size:24px;text-align:center;margin:6px 0 2px}
+.sub{text-align:center;color:#8b95b8;font-size:13px;margin-bottom:14px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;position:sticky;top:0;background:#0b1120;padding:8px 0;z-index:5}
+.tab{flex:1;text-align:center;padding:11px 4px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:#101a33;color:#8b95b8;border:1px solid #2a3558}
+.tab.on{background:#e8b93c;color:#0b1120;border-color:#e8b93c}
+.card{background:#101a33;border:1px solid #e8b93c44;border-radius:16px;padding:14px;margin-bottom:12px}
+.frow{display:flex;gap:8px;margin-bottom:10px}
+.frow>*{flex:1}
+label{font-size:12px;color:#8b95b8;display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;background:#0b1120;border:1px solid #2a3558;color:#fff;border-radius:10px;padding:11px;font-size:15px;color-scheme:dark;font-family:inherit}
+textarea{resize:vertical;min-height:70px}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;background:#e8b93c;color:#0b1120}
+.btn.ghost{background:#101a33;color:#e8b93c;border:1px solid #e8b93c88}
+.prof{display:flex;gap:12px;align-items:center;cursor:pointer}
+.avatar{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#0b1120;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:16px;font-weight:700}
+.pmeta{font-size:13px;color:#8b95b8;margin-top:3px}
+.badge{display:inline-block;background:#e8b93c;color:#0b1120;font-size:10px;font-weight:800;border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.badge.me{background:#4ade80}
+.heart{font-size:24px;cursor:pointer;flex-shrink:0;user-select:none;filter:grayscale(1);opacity:.5}
+.heart.on{filter:none;opacity:1}
+.detail{line-height:1.7;font-size:14px}
+.detail b{color:#e8b93c}
+.empty{text-align:center;color:#8b95b8;padding:30px 10px;font-size:14px}
+.privacy{background:#0f1a12;border:1px solid #4ade8066;border-radius:12px;padding:12px;font-size:12px;color:#9fd8ae;text-align:center;margin-bottom:12px}
+.note{text-align:center;font-size:11px;color:#5b6488;margin-top:24px}
+.hidden{display:none!important}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.demoline{text-align:center;font-size:11px;color:#8b95b8;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💛 Qubool Hai</h1>
+  <div class="sub">Rishta — izzat ke sath</div>
+
+  <div class="tabs">
+    <div class="tab on" id="tHome" onclick="showTab('home')">🏠 Profiles</div>
+    <div class="tab" id="tShort" onclick="showTab('short')">❤️ Shortlist <span id="shortCount"></span></div>
+    <div class="tab" id="tMine" onclick="showTab('mine')">👤 Mera Profile</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="paneHome">
+    <div class="card">
+      <div class="frow">
+        <input id="q" placeholder="Naam ya sheher likhein..." oninput="render()">
+      </div>
+      <div class="frow">
+        <select id="fGender" onchange="render()">
+          <option value="">Sab</option><option value="M">Larka</option><option value="F">Larki</option>
+        </select>
+        <select id="fCity" onchange="render()"><option value="">Sara Pakistan</option></select>
+      </div>
+      <div class="frow">
+        <select id="fEdu" onchange="render()"><option value="">Har Taleem</option></select>
+        <select id="fAge" onchange="render()">
+          <option value="">Har Umar</option>
+          <option value="18-25">18–25</option>
+          <option value="26-30">26–30</option>
+          <option value="31-35">31–35</option>
+          <option value="36-99">36+</option>
+        </select>
+      </div>
+    </div>
+    <div class="demoline">Neeche wale profiles <b>DEMO</b> hain — asli log nahi</div>
+    <div id="list"></div>
+  </div>
+
+  <!-- SHORTLIST -->
+  <div id="paneShort" class="hidden">
+    <div id="shortList"></div>
+  </div>
+
+  <!-- MERA PROFILE -->
+  <div id="paneMine" class="hidden">
+    <div class="privacy">🔒 Apki maloomat <b>sirf apke phone me</b> rehti hai — kahin upload nahi hoti.</div>
+    <div id="myCard"></div>
+    <div class="card" id="myForm">
+      <label>Naam</label><input id="mName" placeholder="Apka naam">
+      <div class="row2">
+        <div><label>Sinf</label><select id="mGender"><option value="M">Larka</option><option value="F">Larki</option></select></div>
+        <div><label>Umar</label><input id="mAge" type="number" min="18" max="70" placeholder="25"></div>
+      </div>
+      <div class="row2">
+        <div><label>Sheher</label><input id="mCity" placeholder="Multan"></div>
+        <div><label>Taleem</label><select id="mEdu"></select></div>
+      </div>
+      <label>Pesha</label><input id="mJob" placeholder="Teacher">
+      <label>Apne bare me</label><textarea id="mAbout" placeholder="Mukhtasar taaruf likhein..."></textarea>
+      <button class="btn" onclick="saveMine()">Profile Save Karein</button>
+    </div>
+  </div>
+
+  <div class="note">© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="modal" class="hidden" style="position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeModal()">
+  <div class="card" style="width:100%;max-width:480px;margin:0;border-radius:20px 20px 0 0;max-height:85vh;overflow:auto" id="modalBody"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
