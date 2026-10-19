@@ -586,6 +586,20 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/call-recorder/"
+  },
+  {
+   "id": "applock",
+   "name": "Jilan App Lock",
+   "desc": "Lock any app with a 4-digit PIN",
+   "icon": "icons/applock.png",
+   "apk": "https://jilanapps.github.io/jilan-store/app-lock/applock.apk",
+   "web": "https://jilanapps.github.io/jilan-store/app-lock/",
+   "package": "com.jilanapps.applock",
+   "versionCode": 1,
+   "versionName": "1.0",
+   "size": 135729,
+   "category": "utility",
+   "color": "#e8b93c"
   }
  ],
  "store": {
