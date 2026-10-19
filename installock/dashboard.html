@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Installock Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+body{background:#0b1120;color:#e8ecf5;min-height:100vh;padding:16px}
+.wrap{max-width:860px;margin:0 auto}
+h1{color:#e8b93c;text-align:center;font-size:24px;margin:8px 0 2px}
+.sub{text-align:center;color:#9aa7c7;font-size:13px;margin-bottom:14px}
+.card{background:#151b30;border:1px solid #2a3350;border-radius:14px;padding:16px;margin-bottom:12px}
+.banner{background:#3a2b08;border:1px solid #e8b93c;border-radius:12px;padding:12px;font-size:13px;color:#f5d98b;margin-bottom:12px;line-height:1.6}
+label{display:block;color:#9aa7c7;font-size:13px;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid #2a3350;background:#0b1120;color:#fff;font-size:15px}
+textarea{min-height:110px;font-family:monospace;font-size:12px}
+button{display:block;width:100%;padding:13px;margin-top:10px;border:none;border-radius:12px;background:#e8b93c;color:#0b1120;font-size:16px;font-weight:700;cursor:pointer}
+button.ghost{background:#1c2440;color:#e8b93c;border:1px solid #2a3350}
+button.danger{background:#7B1F1F;color:#fff}
+.row{display:flex;gap:8px}.row>*{flex:1}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{padding:8px 6px;border-bottom:1px solid #2a3350;text-align:left;vertical-align:top}
+th{color:#e8b93c;font-size:12px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.ok{background:#0f3d1f;color:#4ade80}.bad{background:#3d0f0f;color:#f87171}.warn{background:#3a2b08;color:#e8b93c}
+.stats{display:flex;gap:8px;margin-bottom:12px}.stat{flex:1;background:#151b30;border:1px solid #2a3350;border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px;color:#e8b93c}.stat span{font-size:11px;color:#9aa7c7}
+.hidden{display:none!important}
+.small{font-size:12px;color:#9aa7c7;line-height:1.6}
+h3{color:#e8b93c;font-size:16px;margin-bottom:6px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.topbar button{width:auto;padding:8px 14px;font-size:13px;margin-top:0}
+footer{text-align:center;color:#5b6b8c;font-size:12px;margin:24px 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔐 Installock Dashboard</h1>
+<div class="sub">v1 — Local record (koi server nahi)</div>
+
+<div class="banner">⚠️ <b>Ehem:</b> ye dashboard <b>sirf record</b> rakhta hai — phone ko <b>control nahi karta</b>.
+Door se lock/unlock ke liye <b>server chahiye (v2 me ayega)</b>. v1 me lock/unlock <b>har phone par PIN se</b> hota hai.
+Data <b>sirf is browser me</b> rehta hai.</div>
+
+<!-- SETUP -->
+<div id="view-setup" class="card hidden">
+<h3>Pehli martaba setup</h3>
+<label>Master PIN set karein (Dr Asif ka — full control)</label>
+<input type="password" id="s-master" inputmode="numeric" placeholder="4-8 hindse">
+<label>Apni dukaan ka naam</label>
+<input type="text" id="s-shop" placeholder="e.g. Waseem Mobile Shop">
+<label>Dukaan PIN set karein</label>
+<input type="password" id="s-pin" inputmode="numeric" placeholder="4-8 hindse">
+<button onclick="doSetup()">Setup Mukammal</button>
+<p class="small" style="margin-top:8px">PINs is browser me hash ho kar rehte hain. Master PIN har phone ke app wale Master PIN jaisa hi rakhein.</p>
+</div>
+
+<!-- LOGIN -->
+<div id="view-login" class="card hidden">
+<h3>Login</h3>
+<label>PIN likhein (Master ya Dukaan)</label>
+<input type="password" id="l-pin" inputmode="numeric" placeholder="PIN">
+<button onclick="doLogin()">Login</button>
+<p id="login-err" class="small" style="color:#f87171"></p>
+</div>
+
+<!-- DASH -->
+<div id="view-dash" class="hidden">
+<div class="topbar">
+<div><b id="who" style="color:#e8b93c"></b> <span class="small" id="role"></span></div>
+<button class="ghost" onclick="logout()">Logout</button>
+</div>
+<div class="stats">
+<div class="stat"><b id="st-total">0</b><span>Kul phones</span></div>
+<div class="stat"><b id="st-limited">0</b><span>Limited 🔒</span></div>
+<div class="stat"><b id="st-overdue">0</b><span>Overdue</span></div>
+</div>
+<div class="card" id="master-shops-card">
+<h3>Dukaanein (Master)</h3>
+<div class="row">
+<input type="text" id="ns-name" placeholder="Dukaan ka naam">
+<input type="password" id="ns-pin" inputmode="numeric" placeholder="Dukaan PIN">
+</div>
+<button class="ghost" onclick="addShop()">Dukaan Add Karein</button>
+<div id="shops-list" class="small" style="margin-top:8px"></div>
+</div>
+<div class="card">
+<h3>Naya phone record</h3>
+<div class="row">
+<div><label>Gahak ka naam</label><input type="text" id="r-cust" placeholder="e.g. Ahmed"></div>
+<div><label>Phone model</label><input type="text" id="r-model" placeholder="e.g. Tecno Spark 20"></div>
+</div>
+<div class="row">
+<div><label>IMEI</label><input type="text" id="r-imei" inputmode="numeric" placeholder="15 hindse"></div>
+<div><label>Due date</label><input type="date" id="r-due"></div>
+</div>
+<div class="row">
+<div><label>Dukaan</label><select id="r-shop"></select></div>
+<div><label>Status</label><select id="r-status">
+<option value="Normal">Normal ✅</option>
+<option value="Limited">Limited 🔒</option>
+<option value="Wasool">Qist Wasool ✅</option>
+</select></div>
+</div>
+<button onclick="addRecord()">Record Add Karein</button>
+</div>
+<div class="card">
+<h3>App se record import</h3>
+<p class="small">Phone par Installock app me <b>"Record Share Karein"</b> dabayein, text copy karke yahan paste karein:</p>
+<textarea id="imp-text" placeholder="Installock Record&#10;Dukaan: ..."></textarea>
+<button class="ghost" onclick="importRecord()">Import Karein</button>
+</div>
+<div class="card">
+<h3>Phones <span id="filter-wrap" class="small"></span></h3>
+<div style="overflow-x:auto"><table>
+<tr><th>Gahak</th><th>IMEI</th><th>Due date</th><th>Status</th><th></th></tr>
+<tbody id="rows"></tbody>
+</table></div>
+<div class="row" style="margin-top:10px">
+<button class="ghost" onclick="exportJson()">Backup Download (JSON)</button>
+<button class="ghost danger" onclick="wipeAll()">Sab Delete</button>
+</div>
+</div>
+</div>
+
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+</div>
+
+<script>
+var DB_KEY='ild_records', CFG_KEY='ild_cfg';
+var session=null; // {role:'master'|'shop', shop: name}
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+async function hpin(pin){
+  var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('installock-dash::'+pin));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function loadCfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY))||null;}catch(e){return null;}}
+function saveCfg(c){localStorage.setItem(CFG_KEY,JSON.stringify(c));}
+function loadRecs(){try{return JSON.parse(localStorage.getItem(DB_KEY))||[];}catch(e){return [];}}
+function saveRecs(r){localStorage.setItem(DB_KEY,JSON.stringify(r));}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function show(id){['view-setup','view-login','view-dash'].forEach(v=>$(v).classList.add('hidden'));$(id).classList.remove('hidden');}
+
+async function doSetup(){
+  var mp=$('s-master').value.trim(), sn=$('s-shop').value.trim(), sp=$('s-pin').value.trim();
+  if(mp.length<4||sp.length<4||!sn){alert('Master PIN, dukaan naam aur dukaan PIN zaroori hain (4+ hindse)');return;}
+  saveCfg({master:await hpin(mp), shops:[{name:sn,pin:await hpin(sp)}]});
+  boot();
+}
+async function doLogin(){
+  var cfg=loadCfg(), p=$('l-pin').value.trim(), hp=await hpin(p);
+  $('login-err').textContent='';
+  if(hp===cfg.master){session={role:'master',shop:null};}
+  else{
+    var s=cfg.shops.find(x=>x.pin===hp);
+    if(s) session={role:'shop',shop:s.name}; else {$('login-err').textContent='Ghalat PIN';return;}
+  }
+  $('l-pin').value='';
+  renderDash();
+}
+function logout(){session=null;show('view-login');}
+function boot(){
+  var cfg=loadCfg();
+  if(!cfg){show('view-setup');} else {show('view-login');}
+}
+async function addShop(){
+  var cfg=loadCfg(), n=$('ns-name').value.trim(), p=$('ns-pin').value.trim();
+  if(!n||p.length<4){alert('Naam aur 4+ hindse PIN likhein');return;}
+  if(cfg.shops.some(x=>x.name===n)){alert('Ye dukaan pehle se hai');return;}
+  cfg.shops.push({name:n,pin:await hpin(p)});
+  saveCfg(cfg);$('ns-name').value='';$('ns-pin').value='';
+  renderDash();
+}
+function visibleRecs(){
+  var r=loadRecs();
+  if(session.role==='master')return r;
+  return r.filter(x=>x.shop===session.shop);
+}
+function statusBadge(s){
+  if(s==='Limited')return '<span class="badge bad">Limited 🔒</span>';
+  if(s==='Wasool')return '<span class="badge ok">Qist Wasool ✅</span>';
+  return '<span class="badge ok">Normal</span>';
+}
+function renderDash(){
+  show('view-dash');
+  var cfg=loadCfg();
+  $('who').textContent = session.role==='master' ? '⭐ Master (Dr Asif)' : esc(session.shop);
+  $('role').textContent = session.role==='master' ? '— sab dukaanein' : '— dukaan view';
+  $('master-shops-card').style.display = session.role==='master' ? 'block' : 'none';
+  // shop dropdowns
+  var shops = session.role==='master' ? cfg.shops.map(x=>x.name) : [session.shop];
+  $('r-shop').innerHTML = shops.map(n=>'<option>'+esc(n)+'</option>').join('');
+  $('shops-list').innerHTML = cfg.shops.map(x=>'• '+esc(x.name)).join('<br>');
+  // stats + rows
+  var recs=visibleRecs(), lim=0, od=0, t=todayISO();
+  recs.forEach(r=>{ if(r.status==='Limited')lim++; if(r.due&&r.due<t&&r.status!=='Wasool')od++; });
+  $('st-total').textContent=recs.length; $('st-limited').textContent=lim; $('st-overdue').textContent=od;
+  var tb=$('rows'); tb.innerHTML='';
+  if(!recs.length) tb.innerHTML='<tr><td colspan="5" class="small">Koi record nahi — upar se add karein.</td></tr>';
+  recs.forEach(r=>{
+    var tr=document.createElement('tr');
+    var over=r.due&&r.due<t&&r.status!=='Wasool';
+    tr.innerHTML='<td>'+esc(r.customer)+(r.model?'<br><span class="small">'+esc(r.model)+'</span>':'')
+      +'<br><span class="small">'+esc(r.shop)+'</span></td>'
+      +'<td style="font-family:monospace">'+esc(r.imei)+'</td>'
+      +'<td>'+esc(r.due||'—')+(over?'<br><span class="badge warn">overdue</span>':'')+'</td>'
+      +'<td>'+statusBadge(r.status)+'</td>'
+      +'<td><button class="ghost" style="padding:6px 10px;font-size:12px" onclick="delRec(\''+r.id+'\')">Delete</button></td>';
+    tb.appendChild(tr);
+  });
+}
+function addRecord(){
+  var recs=loadRecs();
+  var r={id:'r'+Date.now(), customer:$('r-cust').value.trim()||'—',
+    model:$('r-model').value.trim(), imei:$('r-imei').value.trim(),
+    due:$('r-due').value, shop:$('r-shop').value, status:$('r-status').value};
+  if(!r.imei){alert('IMEI zaroori hai');return;}
+  recs.push(r); saveRecs(recs);
+  $('r-cust').value='';$('r-model').value='';$('r-imei').value='';$('r-due').value='';
+  renderDash();
+}
+function delRec(id){
+  if(!confirm('Ye record delete karein?'))return;
+  saveRecs(loadRecs().filter(r=>r.id!==id));
+  renderDash();
+}
+function importRecord(){
+  var t=$('imp-text').value, get=function(k){var m=t.match(new RegExp('^'+k+':\\s*(.+)$','m'));return m?m[1].trim():'';};
+  var imei=get('IMEI'); if(!imei){alert('IMEI nahi mila — sahi text paste karein');return;}
+  var cfg=loadCfg(), shop=get('Dukaan');
+  if(session.role==='shop') shop=session.shop;
+  if(!shop||!cfg.shops.some(x=>x.name===shop)) shop=cfg.shops[0].name;
+  var recs=loadRecs();
+  var ex=recs.find(r=>r.imei===imei);
+  var due=get('Due ISO'), mode=get('Mode');
+  var status=mode.indexOf('LIMITED')>=0?'Limited':'Normal';
+  if(ex){ex.due=due||ex.due;ex.status=status;ex.shop=shop;}
+  else recs.push({id:'r'+Date.now(),customer:'—',model:'',imei:imei,due:due,shop:shop,status:status});
+  saveRecs(recs);$('imp-text').value='';
+  renderDash();alert('Import ho gaya ✅');
+}
+function exportJson(){
+  var blob=new Blob([JSON.stringify(loadRecs(),null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='installock-backup.json';a.click();
+}
+function wipeAll(){
+  if(!confirm('SARA data delete ho jayega. Pakka?'))return;
+  localStorage.removeItem(DB_KEY);renderDash();
+}
+boot();
+</script>
+</body>
+</html>

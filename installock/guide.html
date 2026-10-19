@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Installock — Setup Guide (Dukaandaar Guide)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+body{background:#0b1120;color:#e8ecf5;line-height:1.7;padding:0}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px}
+h1{color:#e8b93c;font-size:26px;text-align:center;margin:10px 0 4px}
+.sub{text-align:center;color:#9aa7c7;font-size:14px;margin-bottom:18px}
+h2{color:#e8b93c;font-size:20px;margin:26px 0 10px;border-bottom:1px solid #2a3350;padding-bottom:6px}
+h3{color:#fff;font-size:16px;margin:16px 0 8px}
+.card{background:#151b30;border:1px solid #2a3350;border-radius:14px;padding:16px;margin:12px 0}
+.banner{background:#3a2b08;border:1px solid #e8b93c;border-radius:12px;padding:12px;font-size:14px;color:#f5d98b;margin:12px 0;line-height:1.7}
+.red{background:#3d0f0f;border:1px solid #f87171;border-radius:12px;padding:12px;font-size:14px;color:#fca5a5;margin:12px 0;line-height:1.7}
+.green{background:#0f3d1f;border:1px solid #4ade80;border-radius:12px;padding:12px;font-size:14px;color:#86efac;margin:12px 0;line-height:1.7}
+ol,ul{margin:8px 0 8px 22px}
+li{margin:6px 0}
+pre{background:#0b1120;border:1px solid #2a3350;border-radius:10px;padding:12px;font-size:11px;overflow-x:auto;color:#c7d2fe;white-space:pre-wrap;word-break:break-all}
+code{background:#1c2440;padding:2px 6px;border-radius:6px;font-size:13px;color:#f5d98b}
+.qr{text-align:center;margin:14px 0}
+.qr img{max-width:300px;width:100%;border:6px solid #fff;border-radius:12px;background:#fff}
+.btn{display:inline-block;background:#e8b93c;color:#0b1120;font-weight:700;padding:12px 26px;border-radius:12px;text-decoration:none;margin:8px 6px 8px 0}
+.btn.ghost{background:#1c2440;color:#e8b93c;border:1px solid #2a3350}
+footer{text-align:center;color:#5b6b8c;font-size:12px;margin:30px 0 10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px;border-bottom:1px solid #2a3350;text-align:left}
+th{color:#e8b93c}
+.small{font-size:13px;color:#9aa7c7}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔐 Installock — Dukaandaar Guide</h1>
+<div class="sub">Qiston par beche gaye mobile ka lock system (v1.0) — Roman Urdu guide</div>
+
+<div class="banner">📌 <b>Ye kya hai:</b> Installock wo mobile dukaandaaron ke liye hai jo phone <b>qiston (installments)</b> par bechte hain.
+Har phone par ye app <b>Device Owner</b> ban kar rehti hai: qist ki due date guzar jaye to phone <b>khud-b-khud limited</b> ho jata hai —
+<b>sirf bank/payment apps</b> (JazzCash, Easypaisa waghera) chalti hain, baqi sab band. Dukaandaar ka PIN lagte hi full access wapas.</div>
+
+<h2>1️⃣ Do darjay ka PIN system (Two-Tier Admin)</h2>
+<div class="card">
+<table>
+<tr><th>Role</th><th>Kaun</th><th>Kya kar sakta hai</th></tr>
+<tr><td><b>⭐ Master Admin</b></td><td>Dr Asif</td><td>Har phone unlock kar sakta hai, due date badal sakta hai, <b>dukaan ka PIN change</b> kar sakta hai — sab kuch.</td></tr>
+<tr><td><b>🏪 Dukaandaar</b></td><td>Har mobile shop ka malik</td><td><b>Sirf apni dukaan ke phones</b>: unlock, next due date, bank apps — apne phone par.</td></tr>
+</table>
+<p style="margin-top:10px">Setup ke waqt <b>Master PIN (Dr Asif ka)</b> aur <b>Dukaan PIN</b> dono dale jate hain. Dono me se koi bhi PIN lock khol deta hai.
+Master PIN Dr Asif har dukaan ko <b>privately</b> batate hain — ye guide me nahi likha.</p>
+</div>
+
+<h2>2️⃣ Zaroori shart (pehle samajh lein)</h2>
+<div class="red">⚠️ <b>Seedhi baat:</b>
+<ul>
+<li>Har phone par <b>factory reset + QR scan</b> zaroori hai — <b>sirf APK install karne se ye system kaam NAHI karega</b> (ye Android ki security hai, hamari marzi nahi).</li>
+<li>QR scan ke waqt phone ko <b>WiFi/internet</b> chahiye (sirf ek dafa, APK download ke liye).</li>
+<li><b>Uske baad SIM ho ya na ho, internet ho ya na ho</b> — lock/due-date check <b>poori tarah phone ke andar</b> chalta hai. Koi SMS, koi server, koi network dependency nahi.</li>
+<li>Factory reset karne se management <b>khatam</b> ho jata hai (dobara QR provisioning zaroori). Settings wala reset option band hai, lekin <b>recovery-mode (power+volume) reset nahi roka ja sakta</b> — ye Android ki had hai.</li>
+<li><b>Phone par asal test abhi UNCONFIRMED hai</b> — pehle ek test phone par azmayein, phir customer ko dein.</li>
+</ul></div>
+
+<h2>3️⃣ QR Code — provisioning ke liye scan karein</h2>
+<div class="card">
+<p>Phone ko <b>factory reset</b> karein. Setup wizard me <b>Welcome screen par 6 dafa tap</b> karein → WiFi connect karein → <b>"Scan QR code"</b> aayega → neeche wala QR scan karein:</p>
+<div class="qr"><img src="qr.png" alt="Installock provisioning QR"></div>
+<p class="small">Ye ek hi QR <b>sab phones</b> ke liye hai. QR me APK ka download link aur security checksums hain — phone khud APK download karke Installock ko Device Owner bana dega.</p>
+<h3>QR ka JSON (technical record)</h3>
+<pre>{
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.jilanapps.installock/.InstallockAdmin",
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "AxEceV3omV4-7Q-qtq3H_Rn7Dn5EI5LOpeg0e5E2FqI",
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://jilanapps.github.io/jilan-store/installock/installock.apk",
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM": "IoymI2wC8HqlKRofGkOlw6356GcH8WybCaxAsDhesUs",
+    "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+    "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {}
+}</pre>
+</div>
+
+<h2>4️⃣ App me setup (har phone par, ek dafa)</h2>
+<div class="card">
+<p>Provisioning ke baad <b>Installock</b> kholein — setup wizard khulega:</p>
+<ol>
+<li><b>Dukaan ka naam</b> aur <b>rabta number</b> likhein.</li>
+<li><b>Dukaan PIN</b> set karein (dobara likh kar confirm).</li>
+<li><b>Master PIN</b> likhein — ye <b>Dr Asif se lein</b> (har phone par ek jaisa).</li>
+<li><b>Qist ki due date</b> chunein — date picker ya <b>"30 din baad"</b> button.</li>
+<li><b>Bank apps</b> chunein — jo apps limited mode me chalengi (JazzCash, Easypaisa, bank apps).</li>
+</ol>
+<p class="small">📱 <b>IMEI</b> app khud parh kar save kar leti hai — lock screen, dukaandaar panel aur record me nazar aayega.</p>
+</div>
+
+<h2>5️⃣ Roz ka kaam — ye sab khud hota hai</h2>
+<div class="card">
+<ul>
+<li>🔔 Phone par <b>hamesha</b> notification rehta hai: <b>"Ye mobile qisto par hai"</b> + lock screen par dukaan ka banner.</li>
+<li>⏰ Due date guzarte hi phone <b>khud limited</b> ho jata hai (check har ~6 ghante, reboot aur app khulne par bhi).</li>
+<li>🔒 Limited mode me <b>calls NAHI, SMS NAHI, general network band</b> — <b>sirf bank/payment apps</b> + lock screen. Gahak sirf <b>qist ada</b> kar sakta hai.</li>
+<li>🔓 Qist milte hi dukaandaar apna <b>PIN</b> lagaye → full access wapas + <b>agli due date</b> set kare.</li>
+<li>📤 <b>"Record Share Karein"</b> se phone ka record (IMEI, due date, status) WhatsApp par bhejein ya dashboard me import karein.</li>
+<li>🛡️ <b>Sakht Mode</b> (panel me): ON karne se <b>Settings app chhup</b> jati hai — gahak factory reset ka option ya app data clear nahi kar sakta. Zaroorat par panel se wapas ON/OFF.</li>
+</ul>
+</div>
+
+<h2>6️⃣ Dashboard (record system)</h2>
+<div class="card">
+<p>💻 <a href="dashboard.html" style="color:#e8b93c"><b>Installock Dashboard kholein</b></a> — laptop ya mobile browser me chalta hai.</p>
+<ul>
+<li><b>Master (Dr Asif)</b> apne Master PIN se login → sab dukaanein, sab phones, IMEI list, due dates, overdue highlight.</li>
+<li><b>Dukaandaar</b> apne dukaan PIN se login → <b>sirf apni dukaan ke phones</b>.</li>
+<li>App ke <b>"Record Share Karein"</b> wala text paste karke <b>import</b> karein, ya manually add karein. JSON backup download bhi hai.</li>
+</ul>
+<div class="banner">⚠️ Dashboard <b>v1 me sirf record</b> hai — phone ko control nahi karta. <b>Door se (internet par) lock/unlock ke liye server chahiye jo v2 me ayega.</b> v1 me lock/unlock har phone par PIN se hota hai.</div>
+</div>
+
+<h2>7️⃣ Ehem hadayat (honest limits)</h2>
+<div class="red">
+<ul>
+<li>Plain APK install <b>Device Owner nahi ban sakta</b> — factory reset + QR lazmi hai. Testing ke liye fresh phone par <code>adb shell dpm set-device-owner com.jilanapps.installock/.InstallockAdmin</code> use ho sakta hai.</li>
+<li>Factory reset = management khatam (dobara provisioning). Recovery-mode reset <b>nahi roka ja sakta</b>.</li>
+<li>Due-date check system clock par hai — gahak agar phone ki <b>tareekh peeche</b> kar de to check late ho sakta hai (v2 me server-time check ayega).</li>
+<li>PIN bhool jayein to <b>sirf factory reset + dobara provisioning</b> rasta hai (ya Master PIN yaad ho to us se khol lein).</li>
+<li>Device Owner active rehte app <b>uninstall nahi</b> ho sakti.</li>
+<li>Emergency call button <b>best-effort</b> hai (phone ke dialer par munhasir).</li>
+<li><b>Phone par asal test UNCONFIRMED</b> — customer ko dene se pehle ek phone par poora flow azma lein.</li>
+</ul>
+</div>
+
+<h2>8️⃣ Download</h2>
+<div class="card" style="text-align:center">
+<a class="btn" href="installock.apk">⬇️ Installock APK Download</a>
+<a class="btn ghost" href="dashboard.html">📊 Dashboard Kholein</a>
+<p class="small" style="margin-top:8px">Package: com.jilanapps.installock • v1.0 • Signed & verified</p>
+</div>
+
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+</div>
+</body>
+</html>
