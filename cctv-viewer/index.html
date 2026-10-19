@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan CCTV Viewer - Watch Your Hikvision DVR on Your Phone</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b1120;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+header{text-align:center;padding:48px 20px 24px}
+.logo{width:96px;height:96px;margin:0 auto 16px;display:block}
+h1{color:#e8b93c;font-size:32px;margin-bottom:8px}
+.tag{color:#9aa3b2;font-size:17px}
+main{flex:1;max-width:640px;margin:0 auto;padding:12px 20px 40px;width:100%}
+.card{background:#16213a;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{color:#e8b93c;font-size:19px;margin-bottom:12px}
+.card ul{list-style:none}
+.card li{padding:7px 0;border-bottom:1px solid #0b1120;font-size:15px;color:#d7dce5}
+.card li:last-child{border:none}
+.card li b{color:#e8b93c}
+.btn{display:block;text-align:center;background:#e8b93c;color:#0b1120;font-weight:bold;font-size:18px;padding:15px;border-radius:10px;text-decoration:none;margin:8px 0}
+.note{font-size:13px;color:#9aa3b2;text-align:center;margin-top:12px}
+.steps{counter-reset:step}
+.steps li{counter-increment:step;padding-left:0}
+.steps li::before{content:counter(step) ". ";color:#e8b93c;font-weight:bold}
+code{color:#e8b93c;font-size:13px}
+footer{text-align:center;padding:20px;color:#6b7280;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<img class="logo" src="../app-store/icons/cctvviewer.png" alt="Jilan CCTV Viewer icon">
+<h1>Jilan CCTV Viewer</h1>
+<p class="tag">Watch your Hikvision DVR cameras live on your phone.</p>
+</header>
+<main>
+<div class="card">
+<h2>Download</h2>
+<a class="btn" href="cctvviewer.apk">Download APK (v1.0)</a>
+<p class="note">Android 7.0+ &middot; Free &middot; No account needed</p>
+</div>
+<div class="card">
+<h2>Features</h2>
+<ul>
+<li><b>Live RTSP streaming</b> - watch your Hikvision DVR cameras in real time</li>
+<li><b>Multi-camera grid</b> - 4, 9 or 16 cameras on one screen</li>
+<li><b>Tap for fullscreen</b> - tap any camera for a full-screen view</li>
+<li><b>Easy DVR setup</b> - just enter IP, port, username and password once</li>
+<li><b>Main / Sub stream</b> - use sub-stream for smooth multi-camera viewing</li>
+<li><b>100% private</b> - connects directly to your DVR, no cloud, no account</li>
+</ul>
+</div>
+<div class="card">
+<h2>Setup Guide</h2>
+<ul class="steps">
+<li>Install the app and open it</li>
+<li>Enter your DVR <b>IP address</b> (e.g. 192.168.1.64), port (<b>554</b>), <b>username</b> (usually admin) and <b>password</b></li>
+<li>Tap <b>Save &amp; Connect</b> - your cameras appear</li>
+<li>Tap the grid button (<b>4</b>) to switch between 4, 9 and 16 camera views</li>
+<li>Tap any camera for fullscreen. Long-press also opens fullscreen</li>
+</ul>
+</div>
+<div class="card">
+<h2>Finding Your DVR Details</h2>
+<ul>
+<li><b>IP address:</b> check the sticker on your DVR, or use the Hikvision SADP tool on a computer on the same network</li>
+<li><b>Port:</b> RTSP port is <b>554</b> by default</li>
+<li><b>Stream URL format:</b> <code>rtsp://user:pass@IP:554/Streaming/Channels/101</code></li>
+<li>Your phone must be on the <b>same WiFi network</b> as the DVR (or use port forwarding for remote access)</li>
+</ul>
+</div>
+</main>
+<footer>&copy; 2026 Jilan Apps Official. All rights reserved.</footer>
+</body>
+</html>

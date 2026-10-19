@@ -502,6 +502,20 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/msg-saver/"
+  },
+  {
+   "id": "cctvviewer",
+   "name": "Jilan CCTV Viewer",
+   "package": "com.jilanapps.cctvviewer",
+   "desc": "Watch your Hikvision DVR cameras live (RTSP)",
+   "category": "utility",
+   "icon": "icons/cctvviewer.png",
+   "apk": "https://jilanapps.github.io/jilan-store/cctv-viewer/cctvviewer.apk",
+   "web": "https://jilanapps.github.io/jilan-store/cctv-viewer/",
+   "versionCode": 1,
+   "versionName": "1.0",
+   "size": 37638,
+   "color": "#0b1120"
   }
  ],
  "store": {
