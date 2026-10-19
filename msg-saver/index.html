@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Msg Saver - Recover Deleted Messages</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b1120;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+header{text-align:center;padding:48px 20px 24px}
+.logo{width:96px;height:96px;margin:0 auto 16px;display:block}
+h1{color:#e8b93c;font-size:32px;margin-bottom:8px}
+.tag{color:#9aa3b2;font-size:17px}
+main{flex:1;max-width:640px;margin:0 auto;padding:12px 20px 40px;width:100%}
+.card{background:#16213a;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{color:#e8b93c;font-size:19px;margin-bottom:12px}
+.card ul{list-style:none}
+.card li{padding:7px 0;border-bottom:1px solid #0b1120;font-size:15px;color:#d7dce5}
+.card li:last-child{border:none}
+.card li b{color:#e8b93c}
+.btn{display:block;text-align:center;background:#e8b93c;color:#0b1120;font-weight:bold;font-size:18px;padding:15px;border-radius:10px;text-decoration:none;margin:8px 0}
+.btn.ghost{background:transparent;color:#e8b93c;border:2px solid #e8b93c}
+.steps{counter-reset:step}
+.steps li{counter-increment:step;padding-left:0}
+.steps li::before{content:counter(step) ". ";color:#e8b93c;font-weight:bold}
+.note{font-size:13px;color:#9aa3b2;text-align:center;margin-top:12px}
+footer{text-align:center;padding:20px;color:#6b7280;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<img class="logo" src="../app-store/icons/msgsaver.png" alt="Jilan Msg Saver icon">
+<h1>Jilan Msg Saver</h1>
+<p class="tag">Never lose a deleted message again.</p>
+</header>
+<main>
+<div class="card">
+<h2>Download</h2>
+<a class="btn" href="msgsaver.apk">Download APK (v1.0)</a>
+<a class="btn ghost" href="msgsaver.aab">Download AAB (Play Store)</a>
+<p class="note">Android 7.0+ &middot; Free &middot; No account needed</p>
+</div>
+<div class="card">
+<h2>Features</h2>
+<ul>
+<li><b>Deleted message recovery</b> - see messages even after the sender deletes them</li>
+<li><b>Deleted detection</b> - deleted messages are highlighted in red</li>
+<li><b>Sender filter</b> - browse messages by contact</li>
+<li><b>WhatsApp filter</b> - one-tap WhatsApp-only view</li>
+<li><b>100% private</b> - everything stays on your phone, no cloud, no account</li>
+</ul>
+</div>
+<div class="card">
+<h2>Setup Guide</h2>
+<ul class="steps">
+<li>Install the app and open it</li>
+<li>Tap <b>Enable Access</b></li>
+<li>Find <b>Jilan Msg Saver</b> in the list and turn it <b>ON</b>, then confirm</li>
+</ul>
+<p class="note">The app reads incoming notifications to save messages. It cannot read old messages from before installation.</p>
+</div>
+</main>
+<footer>&copy; 2026 Jilan Apps Official. All rights reserved.</footer>
+</body>
+</html>
