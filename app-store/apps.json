@@ -488,20 +488,6 @@
       "size": 98778,
       "category": "utility",
       "color": "#e8b93c"
-    },
-    {
-      "id": "installock",
-      "name": "Installock",
-      "package": "com.jilanapps.installock",
-      "category": "utility",
-      "desc": "Qiston par beche gaye mobile ka lock system — dukaandaaron ke liye (due date par auto-limit, bank apps only)",
-      "icon": "icons/installock.png",
-      "apk": "https://jilanapps.github.io/jilan-store/installock/installock.apk",
-      "web": "https://jilanapps.github.io/jilan-store/installock/guide.html",
-      "versionCode": 1,
-      "versionName": "1.0",
-      "size": 107040,
-      "color": "#e8b93c"
     }
   ],
   "store": {
