@@ -558,6 +558,34 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/music-player/"
+  },
+  {
+   "id": "screenrecorder",
+   "name": "Jilan Screen Recorder",
+   "package": "com.jilanapps.screenrecorder",
+   "desc": "Record your phone screen with audio — free, no watermark",
+   "category": "utility",
+   "icon": "icons/screenrecorder.png",
+   "apk": "https://jilanapps.github.io/jilan-store/screen-recorder/screenrecorder.apk",
+   "web": "https://jilanapps.github.io/jilan-store/screen-recorder/",
+   "versionCode": 1,
+   "versionName": "1.0",
+   "size": 25264,
+   "color": "#0b1120"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/call-recorder/callrecorder.apk",
+   "category": "utility",
+   "color": "#0b1120",
+   "desc": "Auto call recorder - record incoming & outgoing calls",
+   "icon": "icons/callrecorder.png",
+   "id": "callrecorder",
+   "name": "Jilan Call Recorder",
+   "package": "com.jilanapps.callrecorder",
+   "size": 131835,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/call-recorder/"
   }
  ],
  "store": {
