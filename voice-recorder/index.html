@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Voice Recorder - Record Audio Easily</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b1120;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+header{text-align:center;padding:48px 20px 24px}
+.logo{width:96px;height:96px;margin:0 auto 16px;display:block}
+h1{color:#e8b93c;font-size:32px;margin-bottom:8px}
+.tag{color:#9aa3b2;font-size:17px}
+main{flex:1;max-width:640px;margin:0 auto;padding:12px 20px 40px;width:100%}
+.card{background:#16213a;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{color:#e8b93c;font-size:19px;margin-bottom:12px}
+.card ul{list-style:none}
+.card li{padding:7px 0;border-bottom:1px solid #0b1120;font-size:15px;color:#d7dce5}
+.card li:last-child{border:none}
+.card li b{color:#e8b93c}
+.btn{display:block;text-align:center;background:#e8b93c;color:#0b1120;font-weight:bold;font-size:18px;padding:15px;border-radius:10px;text-decoration:none;margin:8px 0}
+.steps{counter-reset:step}
+.steps li{counter-increment:step;padding-left:0}
+.steps li::before{content:counter(step) ". ";color:#e8b93c;font-weight:bold}
+.note{font-size:13px;color:#9aa3b2;text-align:center;margin-top:12px}
+footer{text-align:center;padding:20px;color:#6b7280;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<img class="logo" src="../app-store/icons/voicerecorder.png" alt="Jilan Voice Recorder icon">
+<h1>Jilan Voice Recorder</h1>
+<p class="tag">Record voice memos in high quality.</p>
+</header>
+<main>
+<div class="card">
+<h2>Download</h2>
+<a class="btn" href="voicerecorder.apk">Download APK (v1.0)</a>
+<p class="note">Android 7.0+ &middot; Free &middot; No account needed</p>
+</div>
+<div class="card">
+<h2>Features</h2>
+<ul>
+<li><b>One-tap recording</b> - record from your microphone in AAC quality</li>
+<li><b>Live timer</b> - see recording duration while you record</li>
+<li><b>Playback</b> - play any recording right inside the app</li>
+<li><b>Delete</b> - remove recordings you no longer need</li>
+<li><b>Share</b> - send recordings via WhatsApp, email, or any app</li>
+<li><b>100% private</b> - everything stays on your phone, no cloud, no account</li>
+</ul>
+</div>
+<div class="card">
+<h2>How to Use</h2>
+<ul class="steps">
+<li>Install the app and grant <b>microphone</b> permission</li>
+<li>Tap <b>Record</b> to start, tap <b>Stop</b> to save</li>
+<li>Tap a recording to select it, then <b>Play</b>, <b>Delete</b>, or <b>Share</b></li>
+</ul>
+</div>
+</main>
+<footer>&copy; 2026 Jilan Apps Official. All rights reserved.</footer>
+</body>
+</html>
