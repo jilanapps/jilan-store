@@ -544,6 +544,20 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/voice-recorder/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/music-player/music-player.apk",
+   "category": "utility",
+   "color": "#0b1120",
+   "desc": "Play music from your phone with playlists",
+   "icon": "icons/musicplayer.png",
+   "id": "musicplayer",
+   "name": "Jilan Music Player",
+   "package": "com.jilanapps.musicplayer",
+   "size": 49629,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/music-player/"
   }
  ],
  "store": {
