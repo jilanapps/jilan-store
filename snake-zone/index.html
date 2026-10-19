@@ -76,7 +76,7 @@ html,body{height:100%;overflow:hidden;background:#0b1f14;font-family:system-ui,-
       <b>How to play</b><br>
       📱 <b>Phone:</b> drag anywhere to steer • hold <b>BOOST</b> for speed (costs a little score)<br>
       💻 <b>Computer:</b> mouse to steer • arrow keys / WASD • hold <b>Space</b> to boost<br>
-      🍒 Eat glowing food to grow • 🍔 Rare bonus foods (🍔🍕🍩🍎🍇) give <b>+5 points</b> — grab them fast!<br>
+      🍕 Eat foods to grow — fruits 🍎🍇🍉 give <b>+1</b>, 🍔🍕🥪🍩 give <b>+2/+3</b> — grab them fast!<br>
       💥 Don't hit other worms or the red edge — you drop food when you crash!
     </div>
     <div class="lb"><b>🏆 TOP SCORES (this phone)</b><div id="menuLb"></div></div>
@@ -141,9 +141,12 @@ soundBtn.onclick=function(){soundOn=!soundOn;store.set(SOUND_KEY,soundOn);paintS
 var WORLD=2600, PELLETS_N=330, BOT_N=6;
 var state='menu', paused=false, lastTs=0, cam={x:0,y:0};
 var player=null, bots=[], pellets=[], particles=[], popups=[];
-/* rare bonus foods: emoji + big points */
-var BONUS_FOODS=[{emoji:'🍔',name:'Burger'},{emoji:'🍕',name:'Pizza'},{emoji:'🍎',name:'Apple'},{emoji:'🍩',name:'Donut'},{emoji:'🍇',name:'Grapes'}];
-var BONUS_POINTS=5, BONUS_CHANCE=0.045;
+/* foods the snake eats to grow — bigger foods give more points */
+var FOODS=[
+ {emoji:'🍕',pts:3},{emoji:'🍔',pts:3},{emoji:'🥪',pts:2},{emoji:'🍩',pts:2},
+ {emoji:'🍎',pts:1},{emoji:'🥭',pts:1},{emoji:'🍇',pts:1},{emoji:'🍒',pts:1},
+ {emoji:'🍉',pts:1},{emoji:'🍌',pts:1}
+];
 var score=0, boostHeld=false, joy={on:false,ox:0,oy:0,dx:0,dy:0};
 var mouse={x:-999,y:-999,active:false};
 var keys={};
@@ -159,8 +162,9 @@ function makeWorm(x,y,angle,skin,isPlayer,name){
   return {pts:pts,angle:angle,skin:skin,isPlayer:!!isPlayer,name:name||'Bot',speed:isPlayer?200:170,turn:isPlayer?6.2:3.0,score:0,alive:true,boost:false,aiT:0,aiAng:angle,wanderT:rnd(1,3),target:null,deadT:0};
 }
 function spawnPellets(n){for(var i=0;i<n;i++){
-  if(Math.random()<BONUS_CHANCE){var bf=BONUS_FOODS[Math.floor(Math.random()*BONUS_FOODS.length)];pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:9,bonus:true,emoji:bf.emoji,ph:rnd(0,6.28)});}
-  else pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:rnd(3.5,6.5),c:['#ffd54f','#ff8a65','#81d4fa','#a5d6a7','#f48fb1','#fff176'][Math.floor(Math.random()*6)],ph:rnd(0,6.28)});
+  var f=FOODS[Math.floor(Math.random()*FOODS.length)];
+  var big=f.pts>1;
+  pellets.push({x:rnd(60,WORLD-60),y:rnd(60,WORLD-60),r:big?10:7,emoji:f.emoji,pts:f.pts,big:big,ph:rnd(0,6.28)});
 }}
 function botNames(){return ['Speedy','Noodle','Zigzag','Chotu','Turbo','Lambi','Rocket','Cobra'];}
 function reset(){
@@ -179,7 +183,7 @@ function reset(){
   updateHUD();
 }
 function growTo(w,sc){var want=6+Math.floor(sc/5);while(w.pts.length<want){var l=w.pts[w.pts.length-1];w.pts.push({x:l.x,y:l.y});}while(w.pts.length>want)w.pts.pop();}
-function dropFood(w){for(var i=0;i<w.pts.length;i+=2){pellets.push({x:w.pts[i].x+rnd(-8,8),y:w.pts[i].y+rnd(-8,8),r:rnd(4,6.5),c:w.skin.c1,ph:rnd(0,6.28)});}}
+function dropFood(w){var fruits=['🍎','🍇','🍒','🍉','🍌','🥭'];for(var i=0;i<w.pts.length;i+=2){var f=fruits[Math.floor(Math.random()*fruits.length)];pellets.push({x:w.pts[i].x+rnd(-8,8),y:w.pts[i].y+rnd(-8,8),r:7,emoji:f,pts:1,ph:rnd(0,6.28)});}}
 function updateHUD(){scoreEl.textContent=score;lenEl.textContent=player?player.pts.length:6;renderLeaders();}
 function renderLeaders(){
   var rows=[{name:playerName,score:score,me:true}].concat(bots.filter(function(b){return b.alive;}).map(function(b){return {name:b.name,score:b.score,me:false};}));
@@ -265,16 +269,16 @@ function eatPellets(w,isP){
   var head=w.pts[0];
   for(var i=pellets.length-1;i>=0;i--){var p=pellets[i];if(dist2(head.x,head.y,p.x,p.y)<(17+p.r)*(17+p.r)){
     pellets.splice(i,1);
-    var gain=p.bonus?BONUS_POINTS:1;
+    var gain=p.pts||1;
     w.score+=gain;if(isP){score=w.score;}
     growTo(w,w.score);
-    if(p.bonus){
-      popups.push({x:p.x,y:p.y,text:'+'+BONUS_POINTS+' '+p.emoji,life:1.1});
+    if(p.big){
+      popups.push({x:p.x,y:p.y,text:'+'+gain+' '+p.emoji,life:1.1});
       for(var k=0;k<10;k++)particles.push({x:p.x,y:p.y,vx:rnd(-130,130),vy:rnd(-130,130),life:0.6,c:'#ffd54f'});
       if(isP)blip(880,0.14,'triangle');
     }else{
       if(isP)blip(520+Math.min(score,40)*8,0.05,'sine');
-      for(var k=0;k<3;k++)particles.push({x:p.x,y:p.y,vx:rnd(-40,40),vy:rnd(-40,40),life:0.35,c:p.c});
+      for(var k=0;k<3;k++)particles.push({x:p.x,y:p.y,vx:rnd(-40,40),vy:rnd(-40,40),life:0.35,c:'#a5d6a7'});
     }
     break;
   }}
@@ -346,14 +350,14 @@ function draw(){
   // red border zone
   ctx.strokeStyle='rgba(255,60,60,0.75)';ctx.lineWidth=5;ctx.setLineDash([22,14]);
   ctx.strokeRect(25+ox,25+oy,WORLD-50,WORLD-50);ctx.setLineDash([]);
-  // pellets (normal dots + rare bonus foods)
+  // pellets (foods the snake eats to grow)
   var now=performance.now()/1000;
   for(var i=0;i<pellets.length;i++){var p=pellets[i];var px=p.x+ox,py=p.y+oy;if(px<-20||px>W+20||py<-20||py>H+20)continue;var pul=1+Math.sin(now*3+p.ph)*0.18;
-    if(p.bonus){
-      ctx.beginPath();ctx.strokeStyle='rgba(255,213,79,0.9)';ctx.lineWidth=2.5;ctx.arc(px,py,15*pul,0,6.29);ctx.stroke();
-      ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,px,py+1);ctx.textBaseline='alphabetic';
+    if(p.big){
+      ctx.beginPath();ctx.strokeStyle='rgba(255,213,79,0.9)';ctx.lineWidth=2.5;ctx.arc(px,py,16*pul,0,6.29);ctx.stroke();
+      ctx.font='22px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,px,py+1);ctx.textBaseline='alphabetic';
     }else{
-      ctx.beginPath();ctx.fillStyle=p.c;ctx.globalAlpha=0.28;ctx.arc(px,py,p.r*2.4*pul,0,6.29);ctx.fill();ctx.globalAlpha=1;ctx.arc(px,py,p.r*pul,0,6.29);ctx.fill();
+      ctx.font='17px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,px,py+1);ctx.textBaseline='alphabetic';
     }
   }
   // particles
