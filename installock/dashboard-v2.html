@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installock v2 — Cloud Dashboard</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b1120;color:#e8eaf2;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+header{background:#151b30;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e8b93c;position:sticky;top:0;z-index:10}
+header h1{color:#e8b93c;font-size:18px}
+header .user{font-size:13px;color:#9aa7c7}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:#151b30;border-radius:12px;padding:18px;margin-bottom:16px;border:1px solid #232c4a}
+.card h2{color:#e8b93c;font-size:16px;margin-bottom:12px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5e;background:#0b1120;color:#fff;margin-bottom:10px;font-size:15px}
+button{background:#e8b93c;color:#0b1120;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:#232c4a;color:#e8b93c}
+button.danger{background:#7b1f1f;color:#fff}
+button.small{padding:6px 10px;font-size:12px}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#151b30;border-radius:10px;padding:14px;text-align:center;border:1px solid #232c4a}
+.stat .n{font-size:26px;font-weight:800;color:#e8b93c}
+.stat .l{font-size:12px;color:#9aa7c7}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #232c4a}
+th{color:#e8b93c;font-size:12px;text-transform:uppercase}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.c-active{background:#1f6b3a;color:#fff}.c-grace{background:#8a6d1c;color:#fff}
+.c-limited{background:#7b1f1f;color:#fff}.c-offline{background:#4a2c7b;color:#fff}
+.c-released{background:#3a4a5e;color:#fff}
+.alert{background:#2a1a1a;border-left:4px solid #e85c5c;padding:10px;border-radius:6px;margin-bottom:8px;font-size:13px}
+.alert.seen{opacity:.55}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{flex:1;min-width:100px}
+footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
+@media(max-width:600px){table{font-size:11px}th,td{padding:6px 4px}}
+</style>
+</head>
+<body>
+<header>
+<h1>🔒 Installock v2 Dashboard</h1>
+<span class="user" id="userLabel"></span>
+</header>
+<div class="wrap">
+
+<!-- LOGIN -->
+<div class="card" id="loginCard">
+<h2>Login</h2>
+<input id="cfgKey" placeholder="Firebase API Key (first time only)">
+<input id="cfgPid" placeholder="Firebase Project ID (first time only)">
+<input id="loginEmail" type="email" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+<button onclick="doLogin()">Login</button>
+<p style="font-size:12px;color:#9aa7c7;margin-top:8px">API Key + Project ID ek martaba dalein — browser me save rahega.</p>
+</div>
+
+<!-- MAIN -->
+<div id="mainUI" class="hidden">
+<div class="tabs">
+<button onclick="showTab('phones')">📱 Phones</button>
+<button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
+<button onclick="showTab('shops')">🏪 Shops</button>
+<button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
+<button class="ghost" onclick="doLogout()">Logout</button>
+</div>
+
+<div class="stats" id="statsRow"></div>
+
+<div class="card" id="tab-phones">
+<h2>Phones</h2>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>IMEI</th><th>Shop</th><th>Status</th><th>Due Date</th><th>Last Seen</th><th>Actions</th></tr></thead>
+<tbody id="phoneRows"><tr><td colspan="6">Loading...</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<div class="card hidden" id="tab-alerts">
+<h2>Alerts</h2>
+<div id="alertList">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-shops">
+<h2>Shops</h2>
+<div id="shopList">Loading...</div>
+</div>
+</div>
+
+</div>
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<script>
+let db, auth, myUid, myRole='retailer', allPhones=[], allAlerts=[], shopNames={};
+
+function cfg(){ return {
+  apiKey: localStorage.getItem('il2_key')||'',
+  projectId: localStorage.getItem('il2_pid')||''
+};}
+
+function initFirebase(){
+  const c = cfg();
+  if(!c.apiKey || !c.projectId) return false;
+  if(!firebase.apps.length) firebase.initializeApp(c);
+  auth = firebase.auth(); db = firebase.firestore();
+  return true;
+}
+
+async function doLogin(){
+  const k = document.getElementById('cfgKey').value.trim();
+  const p = document.getElementById('cfgPid').value.trim();
+  if(k) localStorage.setItem('il2_key', k);
+  if(p) localStorage.setItem('il2_pid', p);
+  if(!initFirebase()){ alert('API Key + Project ID zaroori hai'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  try{
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    myUid = cred.user.uid;
+    // check admin
+    const mdoc = await db.collection('masters').doc(myUid).get();
+    if(mdoc.exists){ myRole='admin'; }
+    else{
+      const udoc = await db.collection('users').doc(myUid).get();
+      if(udoc.exists) myRole = udoc.data().role || 'retailer';
+    }
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('mainUI').classList.remove('hidden');
+    document.getElementById('userLabel').textContent = email + ' (' + myRole + ')';
+    startListeners();
+  }catch(e){ alert('Login failed: ' + e.message); }
+}
+
+function doLogout(){ auth.signOut().then(()=>location.reload()); }
+
+function showTab(t){
+  ['phones','alerts','shops'].forEach(x=>
+    document.getElementById('tab-'+x).classList.toggle('hidden', x!==t));
+}
+
+function canSee(shop){
+  if(myRole==='admin') return true;
+  if(myRole==='distributor') return shop.distributorUid===myUid;
+  return shop.retailerUid===myUid;
+}
+
+async function startListeners(){
+  // shops
+  const shopsSnap = await db.collection('shops').get();
+  const myShops = [];
+  shopsSnap.forEach(d=>{
+    const s = d.data(); s._id = d.id; shopNames[d.id] = s.name||d.id;
+    if(canSee(s)) myShops.push(s);
+  });
+  renderShops(myShops);
+  // phones (per shop subcollection)
+  allPhones = [];
+  for(const s of myShops){
+    const ps = await db.collection('shops').doc(s._id).collection('phones').get();
+    ps.forEach(d=>{ const p=d.data(); p._id=d.id; p._shop=s._id; p._shopName=s.name; allPhones.push(p); });
+  }
+  renderPhones();
+  // alerts
+  const as = await db.collection('alerts').orderBy('at','desc').limit(50).get();
+  allAlerts = [];
+  as.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
+  renderAlerts();
+  // realtime phone updates
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('phones')
+      .onSnapshot(snap=>{
+        snap.docChanges().forEach(ch=>{
+          const p = ch.doc.data(); p._id=ch.doc.id; p._shop=s._id; p._shopName=s.name;
+          const ix = allPhones.findIndex(x=>x._id===p._id && x._shop===s._id);
+          if(ch.type==='removed'){ if(ix>=0) allPhones.splice(ix,1); }
+          else if(ix>=0) allPhones[ix]=p; else allPhones.push(p);
+        });
+        renderPhones();
+      });
+  }
+  db.collection('alerts').orderBy('at','desc').limit(50).onSnapshot(snap=>{
+    allAlerts = [];
+    snap.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
+    renderAlerts();
+  });
+}
+
+function chip(status){
+  const m = {active:'c-active',grace:'c-grace',limited:'c-limited',
+    offline_locked:'c-offline',released:'c-released'};
+  return '<span class="chip '+(m[status]||'c-released')+'">'+(status||'?')+'</span>';
+}
+function fmtDate(ms){
+  if(!ms) return '—';
+  return new Date(Number(ms)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtSeen(ts){
+  if(!ts) return '—';
+  try{
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const mins = Math.round((Date.now()-d.getTime())/60000);
+    if(mins<1) return 'just now';
+    if(mins<60) return mins+'m ago';
+    const h = Math.round(mins/60);
+    if(h<48) return h+'h ago';
+    return Math.round(h/24)+'d ago';
+  }catch(e){ return '—'; }
+}
+
+function renderPhones(){
+  const counts = {active:0,grace:0,limited:0,offline_locked:0};
+  let html = '';
+  allPhones.forEach(p=>{
+    const st = p.status||'active';
+    if(counts[st]!==undefined) counts[st]++;
+    const dueMs = p.dueDate ? Number(p.dueDate) : 0;
+    const overdue = dueMs && Date.now()>dueMs && st!=='released';
+    html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
+      + '<td>'+(p.imei||'—').substring(0,15)+'</td>'
+      + '<td>'+(p._shopName||'—')+'</td>'
+      + '<td>'+chip(st)+'</td>'
+      + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')+'</td>'
+      + '<td>'+fmtSeen(p.lastSeen)+'</td>'
+      + '<td>'
+      + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')">Lock</button>'
+      + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')">Unlock</button>'
+      + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')">Due Date</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
+      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
+      + '</td></tr>';
+  });
+  document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="6">No phones yet</td></tr>';
+  document.getElementById('statsRow').innerHTML =
+    stat(allPhones.length,'Total Phones')+stat(counts.active,'Active')
+    +stat(counts.grace,'Grace')+stat(counts.limited,'Limited')
+    +stat(counts.offline_locked,'Offline Lock');
+}
+function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+function renderAlerts(){
+  const unseen = allAlerts.filter(a=>!a.seen).length;
+  document.getElementById('alertCount').textContent = unseen?('('+unseen+')'):'';
+  let html='';
+  allAlerts.forEach(a=>{
+    html += '<div class="alert'+(a.seen?' seen':'')+'">'
+      + '<b>'+(a.type||'ALERT')+'</b> — IMEI '+(a.imei||'—')
+      + ' <span style="color:#9aa7c7">'+fmtSeen(a.at)+'</span>'
+      + (a.seen?'':' <button class="small ghost" onclick="markSeen(\''+a._id+'\')">Mark seen</button>')
+      + '</div>';
+  });
+  document.getElementById('alertList').innerHTML = html || 'No alerts';
+}
+
+function renderShops(shops){
+  let html='';
+  shops.forEach(s=>{
+    const n = allPhones.filter(p=>p._shop===s._id).length;
+    html += '<div class="card" style="margin-bottom:10px"><b>'+(s.name||s._id)+'</b>'
+      + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span></div>';
+  });
+  document.getElementById('shopList').innerHTML = html || 'No shops';
+}
+
+async function sendCmd(shopId, imei, type){
+  if(!confirm(type+' command bhejna hai? (phone online hone par 15 min me apply hoga)')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: type, targetImei: imei, status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    alert(type+' command bhej diya ✅');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function setDue(shopId, imei){
+  const d = prompt('Nayi due date (YYYY-MM-DD):');
+  if(!d) return;
+  const ms = new Date(d+'T23:59:59').getTime();
+  if(isNaN(ms)){ alert('Ghalat date'); return; }
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'SET_DUE_DATE', targetImei: imei, status: 'pending',
+      newDueDate: ms,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    alert('Due date command bhej diya ✅');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function markSeen(id){
+  try{ await db.collection('alerts').doc(id).update({seen:true}); }
+  catch(e){}
+}
+
+function exportCSV(){
+  let csv = 'IMEI,Shop,Status,Due Date,Last Seen\n';
+  allPhones.forEach(p=>{
+    csv += '"'+(p.imei||'')+'","'+(p._shopName||'')+'","'+(p.status||'')
+      +'","'+fmtDate(p.dueDate)+'","'+fmtSeen(p.lastSeen)+'"\n';
+  });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'installock-phones.csv';
+  a.click();
+}
+
+// auto-init if config saved
+(function(){
+  const k = document.getElementById('cfgKey'), p = document.getElementById('cfgPid');
+  if(localStorage.getItem('il2_key')) k.value = localStorage.getItem('il2_key');
+  if(localStorage.getItem('il2_pid')) p.value = localStorage.getItem('il2_pid');
+  initFirebase();
+  if(auth) auth.onAuthStateChanged(u=>{
+    if(u){
+      myUid = u.uid;
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('mainUI').classList.remove('hidden');
+      document.getElementById('userLabel').textContent = u.email;
+      // role check
+      db.collection('masters').doc(myUid).get().then(mdoc=>{
+        myRole = mdoc.exists ? 'admin' : 'retailer';
+        if(myRole!=='admin') db.collection('users').doc(myUid).get().then(ud=>{
+          if(ud.exists) myRole = ud.data().role||'retailer';
+          document.getElementById('userLabel').textContent = u.email+' ('+myRole+')';
+          startListeners();
+        });
+        else { document.getElementById('userLabel').textContent = u.email+' (admin)'; startListeners(); }
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>
