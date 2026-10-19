@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Jilan Online Shopping Store</title>
+<meta name="description" content="Jilan Online Shopping Store — kapre, cosmetics, electronics, ghar ka saman. Cash on Delivery, puray Pakistan me.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#0b1120;--navy2:#111a30;--gold:#e8b93c;--gold-d:#c99a2b;--txt:#f1f5f9;--muted:#94a3b8;--green:#22c55e}
+body{background:var(--navy);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+header{position:sticky;top:0;z-index:50;background:rgba(11,17,32,.97);backdrop-filter:blur(6px);border-bottom:2px solid var(--gold);padding:12px 14px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.brand .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold-d));display:flex;align-items:center;justify-content:center;font-weight:900;color:#0b1120;font-size:20px}
+.brand h1{font-size:19px;color:var(--gold);line-height:1.2}
+.brand small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2a3458;background:var(--navy2);color:var(--txt);font-size:15px;outline:none}
+.search:focus{border-color:var(--gold)}
+.cod-strip{background:linear-gradient(90deg,#0e2a1a,#123c24);color:#bbf7d0;text-align:center;padding:9px 10px;font-size:13.5px;font-weight:600}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:1px solid #2a3458;background:var(--navy2);color:var(--txt);font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.active{background:var(--gold);color:#0b1120;border-color:var(--gold);font-weight:700}
+main{padding:4px 14px 30px;max-width:1100px;margin:0 auto}
+.count{color:var(--muted);font-size:13px;margin:6px 2px 12px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+.card{background:var(--navy2);border:1px solid #1e2a4a;border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .15s}
+.card:active{transform:scale(.98)}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;background:#16203a}
+.card-body{padding:10px;display:flex;flex-direction:column;gap:6px;flex:1}
+.cat{align-self:flex-start;font-size:10.5px;background:#1e2a4a;color:var(--gold);padding:3px 9px;border-radius:999px}
+.card h3{font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+.price{color:var(--gold);font-weight:800;font-size:16px}
+.btn-order{margin-top:auto;background:var(--green);color:#06240f;border:none;border-radius:10px;padding:10px;font-size:13.5px;font-weight:800;cursor:pointer}
+.btn-order:active{transform:scale(.97)}
+.loadmore-wrap{text-align:center;margin:24px 0 8px}
+#loadMore{background:var(--gold);color:#0b1120;border:none;border-radius:12px;padding:13px 38px;font-size:15px;font-weight:800;cursor:pointer}
+#loadMore:disabled{opacity:.4}
+.empty{text-align:center;color:var(--muted);padding:50px 10px;font-size:15px}
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-backdrop.open{display:flex}
+@media(min-width:700px){.modal-backdrop{align-items:center;padding:20px}}
+.modal-box{background:var(--navy2);border:1px solid var(--gold);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;position:relative}
+@media(min-width:700px){.modal-box{border-radius:18px}}
+.modal-box img{width:100%;aspect-ratio:1;object-fit:cover;background:#16203a;border-radius:18px 18px 0 0}
+@media(min-width:700px){.modal-box img{border-radius:18px 18px 0 0}}
+.modal-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:17px;cursor:pointer}
+.modal-body{padding:16px}
+.modal-body h2{font-size:17px;line-height:1.45;margin:8px 0}
+.price.big{font-size:22px;margin:4px 0 14px}
+.mbtns{display:grid;gap:10px}
+.mbtn{border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.mbtn.copy{background:#1e2a4a;color:var(--gold)}
+.mbtn.dl{background:#334155;color:#fff}
+.mbtn.wa{background:var(--green);color:#06240f}
+.cod-note{text-align:center;color:#bbf7d0;font-size:13px;margin-top:12px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gold);color:#0b1120;font-weight:700;padding:12px 22px;border-radius:999px;font-size:14px;z-index:200;transition:transform .25s;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+footer{text-align:center;color:var(--muted);font-size:12.5px;padding:26px 14px 40px;border-top:1px solid #1e2a4a}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">J</div>
+    <h1>Jilan Online Shopping Store<small>Sasta aur mayari — Cash on Delivery</small></h1>
+  </div>
+  <input class="search" id="search" type="search" placeholder="Product talash karein... (misal: watch, shoes)" autocomplete="off">
+</header>
+
+<div class="cod-strip">🚚 Cash on Delivery — puray Pakistan me! Pehle product dekhein, phir paise dein.</div>
+
+<div class="chips" id="chips"></div>
+
+<main>
+  <p class="count" id="count"></p>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">Kuch nahi mila — doosra lafz likh kar dekhein.</div>
+  <div class="loadmore-wrap"><button id="loadMore">Aur Dekhein ⬇</button></div>
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">✕</button>
+    <img id="mImg" alt="">
+    <div class="modal-body">
+      <span class="cat" id="mCat"></span>
+      <h2 id="mName"></h2>
+      <div class="price big" id="mPrice"></div>
+      <div class="mbtns">
+        <button class="mbtn copy" id="mCopy">📋 Naam + Price Copy Karein</button>
+        <button class="mbtn dl" id="mDl">📥 Tasveer Download Karein</button>
+        <a class="mbtn wa" id="mOrder" target="_blank" rel="noopener">📲 WhatsApp par Order Karein</a>
+      </div>
+      <p class="cod-note">🚚 Cash on Delivery dastiyab hai</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<script src="products.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
