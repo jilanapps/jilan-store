@@ -463,15 +463,15 @@
     },
     {
       "id": "quboolhai",
-      "name": "Qubool Hai",
+      "name": "Qubool Hay",
       "desc": "Rishta app — profiles, shortlist, apna profile",
       "icon": "icons/quboolhai.png",
       "web": "https://jilanapps.github.io/jilan-store/qubool-hai/",
       "apk": "https://jilanapps.github.io/jilan-store/qubool-hai/qubool-hai.apk",
       "package": "com.jilanapps.quboolhai",
-      "versionCode": 1,
-      "versionName": "1.0",
-      "size": 16980,
+      "versionCode": 2,
+      "versionName": "1.1",
+      "size": 119380,
       "category": "social",
       "color": "#e8b93c"
     }
