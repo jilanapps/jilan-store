@@ -641,6 +641,19 @@
    "size": 37334,
    "versionCode": 2,
    "versionName": "1.1"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/bisp-check/bisp-check.apk",
+   "category": "tools",
+   "color": "#0b1a36",
+   "desc": "Check your Benazir (BISP) 8171 eligibility and payment status by CNIC on the official portal",
+   "icon": "icons/bispcheck.png",
+   "id": "bispcheck",
+   "name": "Jilan BISP Check",
+   "package": "com.jilanapps.bispcheck",
+   "size": 25046,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
