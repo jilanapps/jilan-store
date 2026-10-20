@@ -628,6 +628,19 @@
       "versionCode": 1,
       "versionName": "1.0",
       "web": "https://jilanapps.github.io/jilan-store/doc-scanner/"
+    },
+    {
+      "apk": "https://jilanapps.github.io/jilan-store/loan-apply/loan-apply.apk",
+      "category": "tools",
+      "color": "#0b1a36",
+      "desc": "Apply for the PM Youth Loan on the official portal and track your application \u2014 Tier 1 up to Rs 500,000 at 0% markup",
+      "icon": "icons/loanapply.png",
+      "id": "loanapply",
+      "name": "Jilan Loan Apply",
+      "package": "com.jilanapps.loanapply",
+      "size": 33238,
+      "versionCode": 1,
+      "versionName": "1.0"
     }
   ],
   "store": {
