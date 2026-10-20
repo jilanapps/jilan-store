@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Installock v2 — Cloud Dashboard</title>
+<title>Installock — Cloud Dashboard (v3.2)</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -43,7 +43,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 </head>
 <body>
 <header>
-<h1>🔒 Installock v2 Dashboard</h1>
+<h1>🔒 Installock Dashboard</h1>
 <span class="user" id="userLabel"></span>
 </header>
 <div class="wrap">
@@ -224,11 +224,15 @@ function renderPhones(){
       + '<td>'+(p.imei||'—').substring(0,15)+'</td>'
       + '<td>'+(p._shopName||'—')+'</td>'
       + '<td>'+chip(st)+'</td>'
-      + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')+'</td>'
+      + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
+      + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
+      + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
+      + '</td>'
       + '<td>'+fmtSeen(p.lastSeen)+'</td>'
       + '<td>'
       + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')">Lock</button>'
       + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')">Unlock</button>'
+      + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')">Paid ✓</button>'
       + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')">Due Date</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
@@ -276,6 +280,25 @@ async function sendCmd(shopId, imei, type){
       createdBy: myUid
     });
     alert(type+' command bhej diya ✅');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function paymentReceived(shopId, imei, monthly, left){
+  const amtStr = prompt('Payment received — amount (PKR):', monthly>0 ? String(monthly) : '');
+  if(amtStr===null) return;
+  const amt = parseInt(amtStr, 10);
+  if(isNaN(amt) || amt<0){ alert('Ghalat amount'); return; }
+  const last = (left===1);
+  if(!confirm('Payment mark karein? Due date 1 month aage ho jayegi, installments left kam ho jayega.'
+      + (last ? '\n\n⚠️ Ye AKHRI qist hai — phone RELEASE ho jayega (sab limits khatam).' : ''))) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'PAYMENT_RECEIVED', targetImei: imei, status: 'pending',
+      amount: amt,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    alert('Payment command bhej diya ✅ (phone online hone par 15 min me apply hoga)');
   }catch(e){ alert('Error: '+e.message); }
 }
 
