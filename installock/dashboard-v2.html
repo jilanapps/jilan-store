@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Installock — Cloud Dashboard (v3.2)</title>
+<title>Installock — Cloud Dashboard (v3.3)</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -65,6 +65,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <button onclick="showTab('phones')">📱 Phones</button>
 <button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
 <button onclick="showTab('shops')">🏪 Shops</button>
+<button class="ghost" onclick="updateAll()">⬆️ Update All</button>
 <button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
 <button class="ghost" onclick="doLogout()">Logout</button>
 </div>
@@ -97,6 +98,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 
 <script>
 let db, auth, myUid, myRole='retailer', allPhones=[], allAlerts=[], shopNames={};
+let pendingCmds={}, pendingByShop={};
 
 function cfg(){ return {
   apiKey: localStorage.getItem('il2_key')||'',
@@ -188,6 +190,40 @@ async function startListeners(){
     snap.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
     renderAlerts();
   });
+  // v3.3: pending-command state — buttons show "pending until phone is
+  // online"; commands queue server-side and land on the phone's next poll.
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('commands')
+      .where('status','==','pending')
+      .onSnapshot(snap=>{
+        const set = {};
+        snap.forEach(d=>{
+          const c = d.data();
+          if(c.targetImei && c.type) set[c.targetImei+'|'+c.type]=true;
+        });
+        pendingByShop[s._id]=set;
+        rebuildPending();
+        renderPhones();
+      });
+  }
+}
+
+function rebuildPending(){
+  pendingCmds = {};
+  Object.keys(pendingByShop).forEach(sid=>{
+    Object.keys(pendingByShop[sid]).forEach(k=>{ pendingCmds[k]=true; });
+  });
+}
+function isPending(imei, type){ return !!pendingCmds[(imei||'')+'|'+type]; }
+function dis(imei, type){ return isPending(imei,type) ? ' disabled style="opacity:.45"' : ''; }
+function pendTag(imei){
+  const tags = [];
+  Object.keys(pendingCmds).forEach(k=>{
+    const parts = k.split('|');
+    if(parts[0]===(imei||'')) tags.push(parts[1]);
+  });
+  return tags.length ? '<br><span style="color:#e8b93c">⏳ Pending: '+tags.join(', ')
+    +' — phone online hone par apply hoga</span>' : '';
 }
 
 function chip(status){
@@ -227,15 +263,25 @@ function renderPhones(){
       + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
       + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
       + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
+      + ((p.paidSoFar!==undefined&&p.paidSoFar!==null&&Number(p.paidSoFar)>0)?'<br><span style="color:#9aa7c7">Paid: Rs '+Number(p.paidSoFar).toLocaleString('en-US')+'</span>':'')
+      + (p.phoneType?'<br><span style="color:#9aa7c7">Type: '+(p.phoneType==='used'?'Used':'New')+'</span>':'')
+      + (p.appVersion?'<br><span style="color:#9aa7c7">App: v'+p.appVersion+'</span>':'')
+      + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+String(p.healthCertSummary).substring(0,150)+'</span>':'')
+      + pendTag(p.imei||'')
       + '</td>'
       + '<td>'+fmtSeen(p.lastSeen)+'</td>'
       + '<td>'
-      + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')">Lock</button>'
-      + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')">Unlock</button>'
-      + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')">Paid ✓</button>'
-      + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')">Due Date</button>'
+      + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
+      + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')"'+dis(p.imei,'UNLOCK')+'>Unlock</button>'
+      + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')"'+dis(p.imei,'PAYMENT_RECEIVED')+'>Paid ✓</button>'
+      + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_DUE_DATE')+'>Due Date</button>'
+      + '<button class="small ghost" onclick="setPlan(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_PLAN')+'>Plan</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
+      + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
       + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
       + '</td></tr>';
   });
@@ -271,16 +317,67 @@ function renderShops(shops){
   document.getElementById('shopList').innerHTML = html || 'No shops';
 }
 
-async function sendCmd(shopId, imei, type){
-  if(!confirm(type+' command bhejna hai? (phone online hone par 15 min me apply hoga)')) return;
+async function sendCmd(shopId, imei, type, payload, confirmMsg){
+  if(!confirm(confirmMsg || (type+' command bhejna hai? (phone online hone par 15 min me apply hoga)'))) return;
   try{
-    await db.collection('shops').doc(shopId).collection('commands').add({
+    const doc = {
       type: type, targetImei: imei, status: 'pending',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: myUid
-    });
-    alert(type+' command bhej diya ✅');
+    };
+    if(payload) Object.assign(doc, payload);
+    await db.collection('shops').doc(shopId).collection('commands').add(doc);
+    pendingCmds[imei+'|'+type]=true; renderPhones();
+    alert(type+' command bhej diya ✅ — pending hai, phone online hone par apply hoga');
   }catch(e){ alert('Error: '+e.message); }
+}
+
+async function releasePhone(shopId, imei){
+  if(!confirm('⚠️ RELEASE: is phone ki saari Installock limits KHATAM ho jayengi.\nSirf tab karein jab qist mukammal wasool ho chuki ho.\n\nPakka release karna hai?')) return;
+  if(!confirm('Dobara confirm karein — RELEASE ke baad phone aam phone ban jayega.')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'RELEASE', targetImei: imei, status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    pendingCmds[imei+'|RELEASE']=true; renderPhones();
+    alert('RELEASE command bhej diya ✅ — phone online hone par apply hoga');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function setPlan(shopId, imei){
+  const m = prompt('Plan — total months (1-60):');
+  if(m===null) return;
+  const months = parseInt(m, 10);
+  if(isNaN(months) || months<1 || months>60){ alert('Ghalat months'); return; }
+  const l = prompt('Installments left (khaali chhorein = '+months+'):', '');
+  if(l===null) return;
+  const left = parseInt(l, 10);
+  const payload = { months: months };
+  if(!isNaN(left) && left>0) payload.installmentsLeft = Math.min(left, months);
+  sendCmd(shopId, imei, 'SET_PLAN', payload,
+    'Plan set karein? '+months+' months'
+    +(payload.installmentsLeft ? ', '+payload.installmentsLeft+' qist baqi' : '')
+    +' (phone online hone par apply hoga)');
+}
+
+async function updateAll(){
+  if(!confirm('Sab active phones ko UPDATE_NOW command bhejna hai? Jo phone online hoga, wo khud nayi version par update ho jayega.')) return;
+  let n = 0;
+  for(const p of allPhones){
+    if(!p.imei || p.status==='released') continue;
+    try{
+      await db.collection('shops').doc(p._shop).collection('commands').add({
+        type: 'UPDATE_NOW', targetImei: p.imei, status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: myUid
+      });
+      pendingCmds[p.imei+'|UPDATE_NOW']=true; n++;
+    }catch(e){}
+  }
+  renderPhones();
+  alert(n+' phones ko update command bhej diya ✅');
 }
 
 async function paymentReceived(shopId, imei, monthly, left){
