@@ -33,6 +33,7 @@ th{color:#e8b93c;font-size:12px;text-transform:uppercase}
 .c-active{background:#1f6b3a;color:#fff}.c-grace{background:#8a6d1c;color:#fff}
 .c-limited{background:#7b1f1f;color:#fff}.c-offline{background:#4a2c7b;color:#fff}
 .c-released{background:#3a4a5e;color:#fff}
+.c-dead{background:#7a1d1d;color:#fff}
 .alert{background:#2a1a1a;border-left:4px solid #e85c5c;padding:10px;border-radius:6px;margin-bottom:8px;font-size:13px}
 .alert.seen{opacity:.55}
 .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
@@ -42,6 +43,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 /* ===== v4.0 PRO: tags, hisaab, agreement/receipt print ===== */
 .c-overdue{background:#c62828;color:#fff}
 .tag-off{color:#ffb74d;font-weight:700;font-size:11px}
+.tag-dead{color:#ff6b6b;font-weight:700;font-size:11px}
 #docOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow:auto;padding:18px}
 #docOverlay.open{display:block}
 .docbox{max-width:780px;margin:0 auto}
@@ -391,7 +393,10 @@ function renderPhones(){
     html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
       + '<td>'+(p.imei||'—').substring(0,15)+'</td>'
       + '<td>'+(p._shopName||'—')+'</td>'
-      + '<td>'+chip(st)+(overdue?' <span class="chip c-overdue">OVERDUE</span>':'')+'</td>'
+      + '<td>'+chip(st)+(overdue?' <span class="chip c-overdue">OVERDUE</span>':'')
+      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+          return ls>0 && (Date.now()-ls) > 86400000; })())
+          ? ' <span class="chip c-dead">\uD83D\uDD34 RABTA KHATAM?</span>' : '')+'</td>'
       + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
       + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
       + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
@@ -405,6 +410,10 @@ function renderPhones(){
       + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
           return ls>0 && (Date.now()-ls) > 3*86400000; })())
           ? '<br><span class="tag-off">⚠️ OFFLINE 3+ DAYS</span>' : '')
+      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+          const age = ls>0 ? (Date.now()-ls) : 0;
+          return age > 86400000 && age <= 3*86400000; })())
+          ? '<br><span class="tag-dead">\uD83D\uDD34 24h+ khamoshi — band/reset ho sakta hai</span>' : '')
       + '</td>'
       + '<td>'
       + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
@@ -423,6 +432,7 @@ function renderPhones(){
       + (((Number(p.lastPaymentAmount)||0)>0 || (Number(p.lastPaymentAt)||0)>0 || (Number(p.lastPaymentDate)||0)>0)
           ? '' : ' disabled style="opacity:.45"')
       + '>🧾 Receipt</button>'
+      + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">\uD83D\uDDD1 Delete</button>'
       + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
       + '</td></tr>';
   });
@@ -522,6 +532,18 @@ async function sendCmd(shopId, imei, type, payload, confirmMsg){
     pendingCmds[imei+'|'+type]=true; renderPhones();
     alert(type+' command bhej diya ✅ — pending hai, phone online hone par apply hoga');
   }catch(e){ alert('Error: '+e.message); }
+}
+
+/* v2.1: remove a phone record from the dashboard (ghost/sold/test
+   phones). Deletes ONLY the Firestore record — the phone itself is
+   not touched. Double confirm because there is no undo. */
+async function deleteRecord(shopId, docId){
+  if(!confirm('Is phone ka record dashboard se HAMESHA ke liye delete kar dein?\n\nYe sirf dashboard ka record hai — phone par koi asar nahi hoga.')) return;
+  if(!confirm('Pakka delete karein? Ye wapas nahi ayega!')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('phones').doc(docId).delete();
+    alert('Record delete ho gaya \u2705');
+  }catch(e){ alert('Delete nahi ho saka: '+e.message); }
 }
 
 async function releasePhone(shopId, imei){
