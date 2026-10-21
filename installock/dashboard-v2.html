@@ -258,7 +258,13 @@ function canSee(shop){
 
 async function startListeners(){
   // shops
-  const shopsSnap = await db.collection('shops').get();
+  // v4.4 (audit I1): query ONLY the shops this login owns. Firestore
+  // rules are not filters — an unfiltered get() is denied entirely for
+  // a retailer under per-shop rules, which used to break their login.
+  let shopsSnap;
+  if(myRole==='admin') shopsSnap = await db.collection('shops').get();
+  else if(myRole==='distributor') shopsSnap = await db.collection('shops').where('distributorUid','==',myUid).get();
+  else shopsSnap = await db.collection('shops').where('retailerUid','==',myUid).get();
   const myShops = [];
   shopsSnap.forEach(d=>{
     const s = d.data(); s._id = d.id; shopNames[d.id] = s.name||d.id;
@@ -274,11 +280,14 @@ async function startListeners(){
     ps.forEach(d=>{ const p=d.data(); p._id=d.id; p._shop=s._id; p._shopName=s.name; allPhones.push(p); });
   }
   renderPhones();
-  // alerts
-  const as = await db.collection('alerts').orderBy('at','desc').limit(50).get();
-  allAlerts = [];
-  as.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
-  renderAlerts();
+  // alerts (master-only under the v4.4 rules — a denied read must not
+  // break the rest of the dashboard for a retailer login)
+  try{
+    const as = await db.collection('alerts').orderBy('at','desc').limit(50).get();
+    allAlerts = [];
+    as.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
+    renderAlerts();
+  }catch(e){ allAlerts = []; }
   // realtime phone updates
   for(const s of myShops){
     db.collection('shops').doc(s._id).collection('phones')
@@ -307,6 +316,7 @@ async function startListeners(){
         snap.forEach(d=>{
           const c = d.data();
           if(c.targetImei && c.type) set[c.targetImei+'|'+c.type]=true;
+          if(c.targetPhoneId && c.type) set[c.targetPhoneId+'|'+c.type]=true;
         });
         pendingByShop[s._id]=set;
         rebuildPending();
@@ -350,11 +360,11 @@ function rebuildPending(){
 }
 function isPending(imei, type){ return !!pendingCmds[(imei||'')+'|'+type]; }
 function dis(imei, type){ return isPending(imei,type) ? ' disabled style="opacity:.45"' : ''; }
-function pendTag(imei){
+function pendTag(p){
   const tags = [];
   Object.keys(pendingCmds).forEach(k=>{
     const parts = k.split('|');
-    if(parts[0]===(imei||'')) tags.push(parts[1]);
+    if(parts[0]===(p._id||'') || parts[0]===(p.imei||'')) tags.push(parts[1]);
   });
   return tags.length ? '<br><span style="color:#e8b93c">⏳ Pending: '+tags.join(', ')
     +' — phone online hone par apply hoga</span>' : '';
@@ -391,8 +401,8 @@ function renderPhones(){
     const dueMs = p.dueDate ? Number(p.dueDate) : 0;
     const overdue = dueMs && Date.now()>dueMs && st!=='released';
     html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
-      + '<td>'+(p.imei||'—').substring(0,15)+'</td>'
-      + '<td>'+(p._shopName||'—')+'</td>'
+      + '<td>'+esc((p.imei||'—').substring(0,15))+'</td>'
+      + '<td>'+esc(p._shopName||'—')+'</td>'
       + '<td>'+chip(st)+(overdue?' <span class="chip c-overdue">OVERDUE</span>':'')
       + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
           return ls>0 && (Date.now()-ls) > 86400000; })())
@@ -403,8 +413,8 @@ function renderPhones(){
       + ((p.paidSoFar!==undefined&&p.paidSoFar!==null&&Number(p.paidSoFar)>0)?'<br><span style="color:#9aa7c7">Paid: Rs '+Number(p.paidSoFar).toLocaleString('en-US')+'</span>':'')
       + (p.phoneType?'<br><span style="color:#9aa7c7">Type: '+(p.phoneType==='used'?'Used':'New')+'</span>':'')
       + (p.appVersion?'<br><span style="color:#9aa7c7">App: v'+p.appVersion+'</span>':'')
-      + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+String(p.healthCertSummary).substring(0,150)+'</span>':'')
-      + pendTag(p.imei||'')
+      + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</span>':'')
+      + pendTag(p)
       + '</td>'
       + '<td>'+fmtSeen(p.lastSeen)
       + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
@@ -513,10 +523,15 @@ function renderShops(shops){
   let html='';
   shops.forEach(s=>{
     const n = allPhones.filter(p=>p._shop===s._id).length;
-    html += '<div class="card" style="margin-bottom:10px"><b>'+(s.name||s._id)+'</b>'
+    html += '<div class="card" style="margin-bottom:10px"><b>'+esc(s.name||s._id)+'</b>'
       + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span></div>';
   });
   document.getElementById('shopList').innerHTML = html || 'No shops';
+}
+
+function phoneIdFor(shopId, imei){
+  const p = allPhones.find(x=>x._shop===shopId && (x.imei||'')===(imei||''));
+  return p ? p._id : '';
 }
 
 async function sendCmd(shopId, imei, type, payload, confirmMsg){
@@ -527,6 +542,8 @@ async function sendCmd(shopId, imei, type, payload, confirmMsg){
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: myUid
     };
+    const pid = phoneIdFor(shopId, imei);
+    if(pid) doc.targetPhoneId = pid;
     if(payload) Object.assign(doc, payload);
     await db.collection('shops').doc(shopId).collection('commands').add(doc);
     pendingCmds[imei+'|'+type]=true; renderPhones();
@@ -538,7 +555,7 @@ async function sendCmd(shopId, imei, type, payload, confirmMsg){
    phones). Deletes ONLY the Firestore record — the phone itself is
    not touched. Double confirm because there is no undo. */
 async function deleteRecord(shopId, docId){
-  if(!confirm('Is phone ka record dashboard se HAMESHA ke liye delete kar dein?\n\nYe sirf dashboard ka record hai — phone par koi asar nahi hoga.')) return;
+  if(!confirm('Is phone ka record dashboard se HAMESHA ke liye delete kar dein?\n\nYe sirf dashboard ka record hai — phone par koi asar nahi hoga.\n\nNOTE: Ye sirf band/reset ho chuke phones ke liye hai — ZINDA phone ka record agli sync par khud wapas ajayega.')) return;
   if(!confirm('Pakka delete karein? Ye wapas nahi ayega!')) return;
   try{
     await db.collection('shops').doc(shopId).collection('phones').doc(docId).delete();
@@ -551,7 +568,7 @@ async function releasePhone(shopId, imei){
   if(!confirm('Dobara confirm karein — RELEASE ke baad phone aam phone ban jayega.')) return;
   try{
     await db.collection('shops').doc(shopId).collection('commands').add({
-      type: 'RELEASE', targetImei: imei, status: 'pending',
+      type: 'RELEASE', targetImei: imei, targetPhoneId: phoneIdFor(shopId, imei), status: 'pending',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: myUid
     });
@@ -583,7 +600,7 @@ async function updateAll(){
     if(!p.imei || p.status==='released') continue;
     try{
       await db.collection('shops').doc(p._shop).collection('commands').add({
-        type: 'UPDATE_NOW', targetImei: p.imei, status: 'pending',
+        type: 'UPDATE_NOW', targetImei: p.imei, targetPhoneId: p._id, status: 'pending',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: myUid
       });
@@ -598,13 +615,13 @@ async function paymentReceived(shopId, phoneId, imei, monthly, left){
   const amtStr = prompt('Payment received — amount (PKR):', monthly>0 ? String(monthly) : '');
   if(amtStr===null) return;
   const amt = parseInt(amtStr, 10);
-  if(isNaN(amt) || amt<0){ alert('Ghalat amount'); return; }
+  if(isNaN(amt) || amt<=0){ alert('Ghalat amount — amount 0 nahi ho sakta (phone 0 ko POORI qist samajhta hai)'); return; }
   const last = (left===1);
   if(!confirm('Payment mark karein? Due date 1 month aage ho jayegi, installments left kam ho jayega.'
-      + (last ? '\n\n⚠️ Ye AKHRI qist hai — phone RELEASE ho jayega (sab limits khatam).' : ''))) return;
+      + (last ? '\n\n⚠️ Ye AKHRI qist hai — agar kul baqi raqam bhi khatam ho jaye to phone RELEASE ho jayega (sab limits khatam).' : ''))) return;
   try{
     await db.collection('shops').doc(shopId).collection('commands').add({
-      type: 'PAYMENT_RECEIVED', targetImei: imei, status: 'pending',
+      type: 'PAYMENT_RECEIVED', targetImei: imei, targetPhoneId: phoneId||'', status: 'pending',
       amount: amt,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: myUid
@@ -630,7 +647,7 @@ async function setDue(shopId, imei){
   if(isNaN(ms)){ alert('Ghalat date'); return; }
   try{
     await db.collection('shops').doc(shopId).collection('commands').add({
-      type: 'SET_DUE_DATE', targetImei: imei, status: 'pending',
+      type: 'SET_DUE_DATE', targetImei: imei, targetPhoneId: phoneIdFor(shopId, imei), status: 'pending',
       newDueDate: ms,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdBy: myUid
