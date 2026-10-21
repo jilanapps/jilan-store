@@ -142,7 +142,7 @@
   },
   {
    "apk": "",
-   "category": "apps",
+   "category": "web",
    "color": "#a16207",
    "desc": "Reseller dashboard aur referral system",
    "icon": "icons/reseller.png",
@@ -156,7 +156,7 @@
   },
   {
    "apk": "",
-   "category": "apps",
+   "category": "web",
    "color": "#9a3412",
    "desc": "Restaurant demo",
    "icon": "icons/kingcafe.png",
