@@ -10,7 +10,7 @@
 body{background:#0b0f1a;color:#e6ebf5;min-height:100vh}
 header{background:linear-gradient(135deg,#1e1b4b,#4c1d95 60%,#7c3aed);padding:20px 16px 16px;position:sticky;top:0;z-index:10}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 14px rgba(124,58,237,.5)}
+.logo{width:52px;height:52px;border-radius:14px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.45)}
 .brand h1{font-size:21px}
 .brand p{font-size:12px;color:#c4b5fd}
 .search{margin-top:14px;position:relative}
@@ -55,7 +55,7 @@ footer{text-align:center;font-size:12px;color:#5d6a8f;padding:22px 16px 30px}
 <body>
 <header>
 <div class="brand">
-<div class="logo">🏪</div>
+<img class="logo" src="icon-512.png" alt="Jilan Apps Official">
 <div><h1>Jilan App Store</h1><p>Apni dukaan — sari apps ek jagah</p></div>
 </div>
 <div class="search"><span class="ic">🔍</span><input id="q" placeholder="App talash karein..."></div>
