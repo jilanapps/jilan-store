@@ -836,6 +836,19 @@
    "size": 25046,
    "versionCode": 1,
    "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/vehicle-info/vehicle-info.apk",
+   "category": "tools",
+   "color": "#0b1a36",
+   "desc": "Check any vehicle or bike by number plate — owner, engine, chassis, model & tax status on the official Excise portals of all provinces",
+   "icon": "icons/vehicleinfo.png",
+   "id": "vehicleinfo",
+   "name": "Jilan Vehicle Info",
+   "package": "com.jilanapps.vehicleinfo",
+   "size": 25046,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
