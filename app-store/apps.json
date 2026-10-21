@@ -849,6 +849,19 @@
    "size": 385494,
    "versionCode": 3,
    "versionName": "1.2"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/fuel-relief/fuel-relief.apk",
+   "category": "tools",
+   "color": "#07351b",
+   "desc": "PM Fuel Relief Scheme helper — register by SMS to 9771 (REG), get your petrol token (TOK), eligibility guide and the official portal inside the app",
+   "icon": "icons/fuelrelief.png",
+   "id": "fuelrelief",
+   "name": "Jilan Fuel Relief",
+   "package": "com.jilanapps.fuelrelief",
+   "size": 25046,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
