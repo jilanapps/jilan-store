@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installock QR Generator — Jilan Apps Official</title>
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;background:#0d1526;color:#e8ecf5;margin:0;padding:16px}
+  .wrap{max-width:640px;margin:0 auto}
+  h1{color:#e8b93c;font-size:22px;margin:4px 0}
+  .sub{color:#9aa7c7;font-size:13px;margin-bottom:14px}
+  .card{background:#16213a;border:1px solid #26365e;border-radius:10px;padding:14px;margin-bottom:12px}
+  label{display:block;font-size:13px;color:#c8d2ea;margin:10px 0 4px}
+  input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #33477a;background:#0d1526;color:#fff;font-size:15px}
+  button{background:#e8b93c;color:#141414;border:0;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px}
+  button.ghost{background:#26365e;color:#e8ecf5}
+  #qrbox{background:#fff;border-radius:10px;padding:12px;display:inline-block;margin-top:10px}
+  .note{font-size:12.5px;color:#9aa7c7;line-height:1.55}
+  .warn{color:#ffb74d;font-size:13px}
+  textarea{width:100%;box-sizing:border-box;height:90px;background:#0d1526;color:#9aa7c7;border:1px solid #33477a;border-radius:8px;font-size:11px;padding:8px}
+  .chk{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .chk input{width:auto}
+  @media print{ body{background:#fff;color:#000} .card{border:1px solid #999;background:#fff} button,.noprint{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📷 Installock QR Generator</h1>
+  <div class="sub">Har dukaan ka apna provisioning QR — bina PC/laptop ke, sirf is page se. Jilan Apps Official</div>
+
+  <div class="card noprint">
+    <label>Dukaan ka naam (shop name)</label>
+    <input id="f_shop" placeholder="e.g. Zahid Mobile Zone">
+    <label>Rabta number (shop contact)</label>
+    <input id="f_contact" placeholder="03xx-xxxxxxx" inputmode="tel">
+    <label>Shop PIN (kam az kam 4 hindse)</label>
+    <input id="f_pin" placeholder="Shop PIN" inputmode="numeric" maxlength="8">
+    <label>Master PIN (kam az kam 4 hindse)</label>
+    <input id="f_mpin" placeholder="Master PIN" inputmode="numeric" maxlength="8">
+    <label>Pehli due date (qist ki pehli tareekh)</label>
+    <input id="f_due" type="date">
+    <div class="chk">
+      <input type="checkbox" id="f_plain">
+      <span style="font-size:13px">Bina dukaan-data ke QR banayein (sirf Installock lagega, setup baad me app me hoga)</span>
+    </div>
+    <button onclick="generate()">QR Banayein</button>
+    <div id="msg" class="warn" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="result" style="display:none;text-align:center">
+    <div id="r_title" style="font-weight:700;color:#e8b93c"></div>
+    <div id="qrbox"></div>
+    <div class="note" style="text-align:left;margin-top:10px">
+      <b>Scan karne ka tareeqa:</b> Naya ya reset kiya hua phone lein → pehli (Welcome) screen par
+      <b>aik hi jagah 6 dafa tap</b> karein → QR scanner khul jayega → ye QR scan karein →
+      Wi-Fi se jodein → Installock khud download + set ho jayegi.
+    </div>
+    <button class="ghost" onclick="window.print()">🖨 Print Karein</button>
+  </div>
+
+  <div class="card noprint">
+    <div class="note">
+      <b>🔒 Privacy:</b> Ye page koi data kahin <b>nahi</b> bhejti — sab kuch aap ke browser ke andar hota hai.
+      PIN kabhi QR me nahi jata; sirf us ka <b>hash</b> jata hai.<br><br>
+      <b>📌 Note:</b> QR me signature-checksum hai jo Installock ki har nayi version par bhi chalta hai —
+      QR baar baar badalne ki zaroorat nahi. Agar dukaan ka data bhara jaye to provisioning ke baad phone
+      <b>khud hi set-up</b> hota hai (v4.4): phir app me sirf <b>FRP (shop Gmail)</b> aur <b>Cloud connect</b> baqi rehta hai.<br><br>
+      Agar QR upar nazar na aye (internet slow ho), to neeche wala text copy karke kisi bhi
+      "QR code generator" website par paste kar dein — wahi QR ban jayega:
+    </div>
+    <textarea id="payload" readonly placeholder="QR banane par payload yahan ajayega"></textarea>
+  </div>
+
+  <div class="note" style="text-align:center">© 2026 Jilan Apps Official. All rights reserved.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const COMPONENT = "com.jilanapps.installock/com.jilanapps.installock.InstallockAdmin";
+const APK_URL   = "https://jilanapps.github.io/jilan-store/installock/installock-v3.apk";
+const SIG_SUM   = "AxEceV3omV4-7Q-qtq3H_Rn7Dn5EI5LOpeg0e5E2FqI"; // cert-based: har version par valid
+
+async function sha256hex(text){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function generate(){
+  const msg = document.getElementById('msg'); msg.textContent = "";
+  const plain = document.getElementById('f_plain').checked;
+  const payload = {
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": COMPONENT,
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": SIG_SUM,
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": APK_URL,
+    "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": true,
+    "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+    "android.app.extra.PROVISIONING_USE_MOBILE_DATA": false,
+    "android.app.extra.PROVISIONING_LOCALE": "en_US",
+    "android.app.extra.PROVISIONING_TIME_ZONE": "Asia/Karachi"
+  };
+  let shopName = "";
+  if(!plain){
+    shopName = document.getElementById('f_shop').value.trim();
+    const contact = document.getElementById('f_contact').value.trim();
+    const pin = document.getElementById('f_pin').value.trim();
+    const mpin = document.getElementById('f_mpin').value.trim();
+    const dueVal = document.getElementById('f_due').value;
+    if(pin.length < 4 || mpin.length < 4){
+      msg.textContent = "⚠️ Shop PIN aur Master PIN kam az kam 4 hindson ke hon — warna QR nahi banega.";
+      return;
+    }
+    if(!dueVal){
+      msg.textContent = "⚠️ Due date lazmi chunein — is ke baghair phone khud set-up nahi hoga (setup app me karna parega).";
+      return;
+    }
+    const due = new Date(dueVal + "T23:59:59").getTime();
+    payload["android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"] = {
+      "shop_name": shopName,
+      "shop_contact": contact,
+      "pin_hash": await sha256hex("installock::" + pin),
+      "master_pin_hash": await sha256hex("installock::" + mpin),
+      "due_date": due
+    };
+  }
+  const text = JSON.stringify(payload);
+  document.getElementById('payload').value = text;
+  document.getElementById('result').style.display = "block";
+  document.getElementById('r_title').textContent =
+    (plain ? "Installock — aam QR (bina dukaan-data ke)" : "Installock QR — " + (shopName || "Dukaan"));
+  const box = document.getElementById('qrbox');
+  box.innerHTML = "";
+  if(window.QRCode){
+    new QRCode(box, { text: text, width: 512, height: 512,
+      correctLevel: QRCode.CorrectLevel.M });
+  } else {
+    box.innerHTML = "<div style='color:#000;font-size:13px'>QR library load nahi hui — neeche wala text kisi QR maker par paste karein.</div>";
+  }
+  document.getElementById('result').scrollIntoView({behavior:"smooth"});
+}
+</script>
+</body>
+</html>
