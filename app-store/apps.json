@@ -1095,6 +1095,19 @@
    "size": 287190,
    "versionCode": 2,
    "versionName": "1.1"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/imei-check/imei-check.apk",
+   "category": "tools",
+   "color": "#0b1a36",
+   "desc": "Check any phone by IMEI — validity check, brand from TAC, official PTA approval check (SMS 8484 / DIRBS) and Installock installment record check",
+   "icon": "icons/imeicheck.png",
+   "id": "imeicheck",
+   "name": "Jilan IMEI Check",
+   "package": "com.jilanapps.imeicheck",
+   "size": 791058,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
