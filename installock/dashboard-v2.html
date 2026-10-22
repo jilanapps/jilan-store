@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0b1120;color:#e8eaf2;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
@@ -100,9 +101,21 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <button onclick="showTab('phones')">📱 Phones</button>
 <button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
 <button onclick="showTab('shops')">🏪 Shops</button>
+<button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">🔳 Shop QR</button>
 <button class="ghost" onclick="updateAll()">⬆️ Update All</button>
 <button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
 <button class="ghost" onclick="doLogout()">Logout</button>
+</div>
+
+<div class="card hidden" id="shopQrPanel">
+<h2>Shop QR — Cloud ID</h2>
+<input id="shopQrEmail" type="email" placeholder="Shop email" autocomplete="off">
+<input id="shopQrPass" type="password" placeholder="Shop password" autocomplete="new-password">
+<button onclick="makeShopQr()">QR banao</button>
+<button class="ghost" onclick="toggleShopQr(false)">Band karein</button>
+<p style="color:#ffb74d;font-size:13px;margin-top:8px">Is QR me password hai — isay khufiya rakhein, aam share na karein.</p>
+<div id="shopQrBox" style="display:none;background:#fff;border-radius:10px;padding:12px;width:max-content;max-width:100%;margin-top:10px"></div>
+<p id="shopQrMsg" style="color:#9aa7c7;font-size:13px;margin-top:8px"></p>
 </div>
 
 <div class="stats" id="statsRow"></div>
@@ -256,7 +269,60 @@ function canSee(shop){
   return shop.retailerUid===myUid;
 }
 
+function updateShopQrVisibility(){
+  const btn = document.getElementById('shopQrBtn');
+  if(btn) btn.classList.toggle('hidden', myRole!=='admin');
+  if(myRole!=='admin'){
+    const panel = document.getElementById('shopQrPanel');
+    if(panel) panel.classList.add('hidden');
+  }
+}
+
+function toggleShopQr(force){
+  if(myRole!=='admin') return;
+  const panel = document.getElementById('shopQrPanel');
+  if(!panel) return;
+  const show = (typeof force==='boolean') ? force : panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !show);
+  if(show){
+    const email = document.getElementById('shopQrEmail');
+    if(email) email.focus();
+  }
+}
+
+function makeShopQr(){
+  const emailEl = document.getElementById('shopQrEmail');
+  const passEl = document.getElementById('shopQrPass');
+  const box = document.getElementById('shopQrBox');
+  const msg = document.getElementById('shopQrMsg');
+  const email = emailEl.value.trim();
+  const password = passEl.value;
+  if(!email || email.indexOf('@')<1 || email.indexOf('.')<0){
+    alert('Durust shop email likhein');
+    return;
+  }
+  if(!password){ alert('Shop password likhein'); return; }
+  if(!window.QRCode){
+    alert('QR library load nahi hui — internet check karke page refresh karein');
+    return;
+  }
+  const text = JSON.stringify({ email: email, password: password });
+  box.innerHTML = '';
+  box.style.display = 'block';
+  try{
+    new QRCode(box, { text: text, width: 256, height: 256,
+      correctLevel: QRCode.CorrectLevel.M });
+  }catch(e){
+    box.style.display = 'none';
+    alert('QR nahi ban saka: '+e.message);
+    return;
+  }
+  passEl.value = '';
+  msg.textContent = 'QR tayyar hai — phone ke Cloud setup me scan karein, phir Connect dabayein.';
+}
+
 async function startListeners(){
+  updateShopQrVisibility();
   // shops
   // v4.4 (audit I1): query ONLY the shops this login owns. Firestore
   // rules are not filters — an unfiltered get() is denied entirely for
@@ -428,6 +494,7 @@ function renderPhones(){
       + '<td>'
       + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
       + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')"'+dis(p.imei,'UNLOCK')+'>Unlock</button>'
+      + '<button class="small ghost" onclick="setMasterPin(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_MASTER_HASH')+'>Master PIN</button>'
       + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+p._id+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')"'+dis(p.imei,'PAYMENT_RECEIVED')+'>Paid ✓</button>'
       + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_DUE_DATE')+'>Due Date</button>'
       + '<button class="small ghost" onclick="setPlan(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_PLAN')+'>Plan</button>'
@@ -548,6 +615,46 @@ async function sendCmd(shopId, imei, type, payload, confirmMsg){
     await db.collection('shops').doc(shopId).collection('commands').add(doc);
     pendingCmds[imei+'|'+type]=true; renderPhones();
     alert(type+' command bhej diya ✅ — pending hai, phone online hone par apply hoga');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+function bytesToHex(bytes){
+  return Array.from(bytes, b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* v4.9: byte-identical to Android PinUtil.hashNew. Only this resulting
+   hash is sent to Firestore — the plaintext PIN never leaves the prompts. */
+async function pinHashV2(pin){
+  if(!window.crypto || !crypto.subtle || !crypto.getRandomValues){
+    throw new Error('Is browser me secure PIN hash nahi ban saka');
+  }
+  const salt = new Uint8Array(8);
+  crypto.getRandomValues(salt);
+  const first = new TextEncoder().encode('installock::' + pin);
+  let input = new Uint8Array(salt.length + first.length);
+  input.set(salt);
+  input.set(first, salt.length);
+  let hash = new Uint8Array(await crypto.subtle.digest('SHA-256', input));
+  for(let round=2; round<=10000; round++){
+    input = new Uint8Array(salt.length + hash.length);
+    input.set(salt);
+    input.set(hash, salt.length);
+    hash = new Uint8Array(await crypto.subtle.digest('SHA-256', input));
+  }
+  return 'v2:' + bytesToHex(salt) + ':' + bytesToHex(hash);
+}
+
+async function setMasterPin(shopId, imei){
+  const pin = prompt('Naya Master PIN (4-8 digits):');
+  if(pin===null) return;
+  if(!/^\d{4,8}$/.test(pin)){ alert('Master PIN sirf 4-8 digits ka hona chahiye'); return; }
+  const again = prompt('Naya Master PIN dobara likhein:');
+  if(again===null) return;
+  if(pin!==again){ alert('Dono Master PIN match nahi ho rahe'); return; }
+  try{
+    const masterHash = await pinHashV2(pin);
+    await sendCmd(shopId, imei, 'SET_MASTER_HASH', { masterHash: masterHash },
+      'Master PIN reset command bhejna hai? (phone online hone par 15 min me apply hoga)');
   }catch(e){ alert('Error: '+e.message); }
 }
 
