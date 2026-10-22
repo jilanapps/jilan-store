@@ -1,1 +1,7 @@
-{"apkUrl":"https://jilanapps.github.io/jilan-store/jilan-assistant/jilan-assistant.apk","notes":"Jilan Assistant v1.4: Hands-Free Mode — orb chhuye baghair sirf 'Jilan' kahein, assistant jaag jayega; jawab ke baad 20 second tak baghair wake word ke mazeed commands; 'so jao' kehne se band. Mode ON ho aur app chal rahi ho tab hi sunta hai (notification dikhega).","versionCode":5,"versionName":"1.4"}
+{
+ "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-assistant/jilan-assistant.apk",
+ "notes": "v1.5: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
+ "versionCode": 6,
+ "versionName": "1.5",
+ "size": 402984
+}
