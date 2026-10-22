@@ -155,20 +155,6 @@
    "web": "https://jilanapps.github.io/jilan-store/reseller/"
   },
   {
-   "apk": "",
-   "category": "web",
-   "color": "#9a3412",
-   "desc": "Restaurant demo",
-   "icon": "icons/kingcafe.png",
-   "id": "kingcafe",
-   "name": "King Cafe",
-   "package": "",
-   "size": 0,
-   "versionCode": 1,
-   "versionName": "1.0",
-   "web": "https://jilanapps.github.io/jilan-store/king-cafe/"
-  },
-  {
    "apk": "https://jilanapps.github.io/jilan-store/jilan-camera.apk",
    "category": "tools",
    "color": "#be123c",
