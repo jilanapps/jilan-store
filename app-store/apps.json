@@ -702,9 +702,9 @@
    "id": "echallan",
    "name": "Jilan E-Challan",
    "package": "com.jilanapps.echallan",
-   "size": 29142,
-   "versionCode": 3,
-   "versionName": "1.2"
+   "size": 37334,
+   "versionCode": 4,
+   "versionName": "1.3"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/cnic-tracking/cnic-tracking.apk",
