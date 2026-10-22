@@ -871,9 +871,9 @@
    "id": "nadraservices",
    "name": "Jilan NADRA Services",
    "package": "com.jilanapps.nadraservices",
-   "size": 37334,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 41430,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/post-tracking/post-tracking.apk",
@@ -884,9 +884,9 @@
    "id": "posttracking",
    "name": "Jilan Post Tracking",
    "package": "com.jilanapps.posttracking",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/punjab-jobs/punjab-jobs.apk",
@@ -897,9 +897,9 @@
    "id": "punjabjobs",
    "name": "Jilan Punjab Jobs",
    "package": "com.jilanapps.punjabjobs",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/e-khidmat/e-khidmat.apk",
@@ -910,9 +910,9 @@
    "id": "ekhidmat",
    "name": "Jilan E-Khidmat",
    "package": "com.jilanapps.ekhidmat",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/mandi-rates/mandi-rates.apk",
@@ -923,9 +923,9 @@
    "id": "mandirates",
    "name": "Jilan Mandi Rates",
    "package": "com.jilanapps.mandirates",
-   "size": 29142,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/police-services/police-services.apk",
@@ -936,9 +936,9 @@
    "id": "policeservices",
    "name": "Jilan Police Services",
    "package": "com.jilanapps.policeservices",
-   "size": 29142,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/rescue-1122/rescue-1122.apk",
@@ -949,9 +949,9 @@
    "id": "rescue1122",
    "name": "Jilan Rescue 1122",
    "package": "com.jilanapps.rescue1122",
-   "size": 29142,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 37334,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/sehat-card/sehat-card.apk",
@@ -962,9 +962,9 @@
    "id": "sehatcard",
    "name": "Jilan Sehat Card",
    "package": "com.jilanapps.sehatcard",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/zakat-calculator/zakat-calculator.apk",
@@ -975,9 +975,9 @@
    "id": "zakatcalc",
    "name": "Jilan Zakat Calculator",
    "package": "com.jilanapps.zakatcalc",
-   "size": 57814,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 61910,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/tasbeeh/tasbeeh.apk",
@@ -988,9 +988,9 @@
    "id": "tasbeeh",
    "name": "Jilan Tasbeeh",
    "package": "com.jilanapps.tasbeeh",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/qibla-compass/qibla-compass.apk",
@@ -1001,9 +1001,9 @@
    "id": "qiblacompass",
    "name": "Jilan Qibla Compass",
    "package": "com.jilanapps.qiblacompass",
-   "size": 29142,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 37334,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/unit-converter/unit-converter.apk",
@@ -1014,9 +1014,9 @@
    "id": "unitconverter",
    "name": "Jilan Unit Converter",
    "package": "com.jilanapps.unitconverter",
-   "size": 20950,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/bmi-calculator/bmi-calculator.apk",
