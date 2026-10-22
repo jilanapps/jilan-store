@@ -84,6 +84,14 @@ main{max-width:1120px;margin:auto;padding:0 16px}
 .btn-big{width:100%;max-width:460px;height:42px;font-size:15px;background:var(--green);color:#fff}
 .btn-big.outline{background:#fff;color:var(--green);border:1px solid #dadce0}
 .btn-big:active{background:var(--green-dark);color:#fff}
+.pkgwrap{display:inline-flex;align-items:center;gap:8px;vertical-align:middle}
+.pkgwrap.big{display:flex;width:100%;max-width:460px}
+.pkgwrap.big .btn-big{flex:1;width:auto}
+.btn-busy{opacity:.72;pointer-events:none}
+.btn-cancel{border-radius:999px;width:30px;height:30px;min-width:30px;padding:0;background:#f1f3f4;color:#5f6368;font-size:13px;border:1px solid #dadce0}
+.btn-cancel:active{background:#e8eaed}
+#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#202124;color:#fff;font-size:13.5px;padding:10px 18px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;max-width:88vw;text-align:center}
+#toast.show{opacity:1}
 
 /* ---------- horizontal rows ---------- */
 .hrow{display:flex;gap:18px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:none}
@@ -171,7 +179,7 @@ footer a{color:var(--green);font-weight:600}
   <div id="updateCard" class="hidden"><div class="inner">
     <div class="t">🎉 New version available!</div>
     <div class="s">Download the latest Jilan App Store update.</div>
-    <a class="btn btn-install" href="https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk">Update</a>
+    <span id="selfUpdSlot"></span>
   </div></div>
   <div id="heroWrap"></div>
   <div id="catRows"></div>
@@ -206,8 +214,12 @@ footer a{color:var(--green);font-weight:600}
   </button>
 </nav>
 
+<div id="toast"></div>
+
 <script>
-const APP_VER="1.1";
+const APP_VER="1.2";
+const SELF_PKG="com.jilanapps.appstore";
+const SELF_URL="https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk";
 let APPS=[],CAT="all",Q="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -216,20 +228,95 @@ const CAT_ORDER=["islamic","tools","utility","games","apps","business","educatio
 const CAT_LABEL={islamic:"Islamic",tools:"Tools & Services",utility:"Utilities",games:"Games",apps:"Apps",business:"Business",education:"Education",shopping:"Shopping",social:"Social",web:"Web Apps"};
 const catLabel=c=>CAT_LABEL[c]||(c?c[0].toUpperCase()+c.slice(1):"Apps");
 
-/* ---- native store-app bridge (same behaviour as before) ---- */
+/* ---- native store-app bridge ---- */
+const HAS_INSTALLER=!!(window.AppStore&&window.AppStore.installApp);
 function installedVer(pkg){
   if(!pkg)return null;
   try{if(window.AppStore&&window.AppStore.getInstalledVersion){const v=window.AppStore.getInstalledVersion(pkg);return v||"";}}catch(e){}
   return null;
 }
+function installedCode(pkg){
+  if(!pkg)return -2;
+  try{if(window.AppStore&&window.AppStore.getInstalledVersionCode){const c=window.AppStore.getInstalledVersionCode(pkg);return (typeof c==="number")?c:-2;}}catch(e){}
+  return -2; /* -1 = not installed (new bridge), -2 = unknown (old bridge/browser) */
+}
 function openApp(pkg){
   try{if(window.AppStore&&window.AppStore.openApp){window.AppStore.openApp(pkg);return true;}}catch(e){}
   return false;
 }
+let toastTimer=null;
+function toast(msg){
+  const t=$("toast");if(!t)return;
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ---- in-app download state (Play-Store-style flow) ---- */
+const DL={}; /* pkg -> {state, pct} : downloading | waiting | installing | ready */
+function startInstall(id){
+  const a=APPS.find(x=>x.id===id);
+  if(!a||!a.package||!a.apk)return;
+  DL[a.package]={state:"downloading",pct:0};
+  paintApp(id);
+  try{window.AppStore.installApp(a.package,a.apk,a.size||0);}
+  catch(e){delete DL[a.package];paintApp(id);toast("Download start nahi ho saka");}
+}
+function cancelInstall(pkg){
+  try{window.AppStore.cancelInstall(pkg);}catch(e){}
+  delete DL[pkg];
+  const a=APPS.find(x=>x.package===pkg);if(a)paintApp(a.id);
+}
+function promptInstall(pkg){
+  try{window.AppStore.promptInstall(pkg);}catch(e){}
+}
+function selfInstall(){
+  paintSelfBtn("downloading",0);
+  try{window.AppStore.installApp(SELF_PKG,SELF_URL,0);}
+  catch(e){paintSelfBtn();}
+}
+function paintSelfBtn(state,pct){
+  const slot=$("selfUpdSlot");if(!slot)return;
+  if(!HAS_INSTALLER){slot.innerHTML='<a class="btn btn-install" href="'+SELF_URL+'">Update</a>';return;}
+  if(state==="downloading"){slot.innerHTML='<button class="btn btn-install btn-busy" disabled>Downloading…'+((pct!=null&&pct>=0)?" "+pct+"%":"")+'</button>';return;}
+  if(state==="installing"){slot.innerHTML='<button class="btn btn-install btn-busy" disabled>Installing…</button>';return;}
+  if(state==="waiting"){slot.innerHTML='<button class="btn btn-install btn-busy" disabled>Allow permission…</button>';return;}
+  if(state==="ready"){slot.innerHTML='<button class="btn btn-install" onclick="promptInstall(\''+SELF_PKG+'\')">Install update</button>';return;}
+  slot.innerHTML='<button class="btn btn-install" onclick="selfInstall()">Update</button>';
+}
+/* called by the native wrapper whenever a download/install state changes */
+window.__onStoreDl=function(pkg,state,pct){
+  if(pkg===SELF_PKG){paintSelfBtn(state,pct);return;}
+  const a=APPS.find(x=>x.package===pkg);if(!a)return;
+  if(state==="failed"){delete DL[pkg];}
+  else DL[pkg]={state:state,pct:pct};
+  paintApp(a.id);
+};
+/* called by the native wrapper on resume: re-sync states + installed versions */
+window.__storeRefresh=function(){
+  if(!HAS_INSTALLER)return;
+  try{
+    APPS.forEach(a=>{
+      if(!a.apk||!a.package)return;
+      let s="";try{s=window.AppStore.getInstallState(a.package)||"";}catch(e){}
+      if(s==="idle"){if(DL[a.package]&&DL[a.package].state!=="downloading")delete DL[a.package];}
+      else if(s.indexOf("downloading:")===0){DL[a.package]={state:"downloading",pct:parseInt(s.split(":")[1]||"0",10)};}
+      else if(s==="ready"||s==="waiting"||s==="installing"){DL[a.package]={state:s,pct:0};}
+    });
+  }catch(e){}
+  paintAll();
+};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)window.__storeRefresh();});
+window.addEventListener("focus",()=>window.__storeRefresh());
 
 /* ---- what the primary button should do for an app ---- */
 function actionFor(a){
   if(a.apk){
+    const c=installedCode(a.package);
+    if(c===-1)return{kind:"install",url:a.apk};
+    if(c>=0){
+      if(a.versionCode&&c<a.versionCode)return{kind:"update",url:a.apk};
+      return{kind:"open"};
+    }
     const iv=installedVer(a.package);
     if(iv){
       if(iv===a.versionName)return{kind:"open"};
@@ -247,20 +334,47 @@ function badgeFor(a){
   return "";
 }
 function btnHTML(a,style){
+  return '<span class="pkgwrap'+(style==="big"?" big":"")+'" data-pkgbtn="'+esc(a.id)+'" data-style="'+esc(style||"")+'">'+btnInnerHTML(a,style)+'</span>';
+}
+function btnInnerHTML(a,style){
   const act=actionFor(a);
-  if(style==="hero"){
-    if(act.kind==="open")return '<button class="btn btn-hero" style="color:#01734f" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
-    if(act.kind==="webopen")return '<a class="btn btn-hero" style="color:#01734f" href="'+esc(act.url)+'" target="_blank" onclick="event.stopPropagation()">Open</a>';
-    return '<a class="btn btn-hero" style="color:#01734f" href="'+esc(act.url)+'" onclick="event.stopPropagation()">'+(act.kind==="update"?"Update":"Install")+'</a>';
+  const clsBase=style==="hero"?"btn btn-hero":(style==="big"?"btn btn-big":"btn btn-install");
+  const heroStyle=style==="hero"?' style="color:#01734f"':"";
+  if(act.kind==="open"){
+    if(style==="big")return '<button class="btn btn-big outline" onclick="openApp(\''+esc(a.package)+'\')">Open</button>';
+    if(style==="hero")return '<button class="btn btn-hero" style="color:#01734f" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
+    return '<button class="btn btn-outline" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
   }
-  if(style==="big"){
-    if(act.kind==="open")return '<button class="btn btn-big outline" onclick="openApp(\''+esc(a.package)+'\')">Open</button>';
-    if(act.kind==="webopen")return '<a class="btn btn-big" href="'+esc(act.url)+'" target="_blank">Open</a>';
-    return '<a class="btn btn-big" href="'+esc(act.url)+'">'+(act.kind==="update"?"Update":"Install")+'</a>';
+  if(act.kind==="webopen"){
+    if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'" target="_blank">Open</a>';
+    if(style==="hero")return '<a class="btn btn-hero" style="color:#01734f" href="'+esc(act.url)+'" target="_blank" onclick="event.stopPropagation()">Open</a>';
+    return '<a class="btn btn-outline" href="'+esc(act.url)+'" target="_blank" onclick="event.stopPropagation()">Open</a>';
   }
-  if(act.kind==="open")return '<button class="btn btn-outline" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
-  if(act.kind==="webopen")return '<a class="btn btn-outline" href="'+esc(act.url)+'" target="_blank" onclick="event.stopPropagation()">Open</a>';
-  return '<a class="btn btn-install" href="'+esc(act.url)+'" onclick="event.stopPropagation()">'+(act.kind==="update"?"Update":"Install")+'</a>';
+  const label=act.kind==="update"?"Update":"Install";
+  const dl=a.package?DL[a.package]:null;
+  if(dl&&HAS_INSTALLER){
+    if(dl.state==="downloading"){
+      const pctTxt=(dl.pct!=null&&dl.pct>=0)?" "+dl.pct+"%":"";
+      return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Downloading…'+pctTxt+'</button>'
+        +'<button class="btn-cancel" data-cancel="'+esc(a.package)+'" aria-label="Cancel download">✕</button>';
+    }
+    if(dl.state==="waiting")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Allow permission…</button>';
+    if(dl.state==="installing")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Installing…</button>';
+    if(dl.state==="ready")return '<button class="'+clsBase+'" data-prompt="'+esc(a.package)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+' now</button>';
+  }
+  if(HAS_INSTALLER&&a.package){
+    return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</button>';
+  }
+  /* plain browser / old wrapper: direct APK download link (previous behaviour) */
+  if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'">'+label+'</a>';
+  return '<a class="'+clsBase+'" href="'+esc(act.url)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</a>';
+}
+function paintApp(id){
+  const a=APPS.find(x=>x.id===id);if(!a)return;
+  document.querySelectorAll("[data-pkgbtn]").forEach(w=>{if(w.dataset.pkgbtn===id)w.innerHTML=btnInnerHTML(a,w.dataset.style||undefined);});
+}
+function paintAll(){
+  document.querySelectorAll("[data-pkgbtn]").forEach(w=>{const a=APPS.find(x=>x.id===w.dataset.pkgbtn);if(a)w.innerHTML=btnInnerHTML(a,w.dataset.style||undefined);});
 }
 function iconInner(a,letterSize){
   const letter='<span class="lt" style="font-size:'+letterSize+'px">'+esc((a.name||"J")[0])+'</span>';
@@ -392,6 +506,12 @@ function route(){
 
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
+  const ci=e.target.closest("[data-install]");
+  if(ci){e.stopPropagation();startInstall(ci.dataset.install);return;}
+  const cc=e.target.closest("[data-cancel]");
+  if(cc){e.stopPropagation();cancelInstall(cc.dataset.cancel);return;}
+  const cp=e.target.closest("[data-prompt]");
+  if(cp){e.stopPropagation();promptInstall(cp.dataset.prompt);return;}
   const t=e.target.closest("[data-app]");
   if(!t)return;
   if(e.target.closest(".btn"))return;
@@ -415,7 +535,8 @@ async function selfUpdate(){
   try{
     const r=await fetch("appstore-version.json?t="+Date.now());
     if(!r.ok)return;const v=await r.json();
-    if(v.version&&v.version!==APP_VER)$("updateCard").classList.remove("hidden");
+    const rv=v.versionName||v.version;
+    if(rv&&rv!==APP_VER){$("updateCard").classList.remove("hidden");paintSelfBtn();}
   }catch(e){}
 }
 (async()=>{

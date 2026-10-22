@@ -1,4 +1,1 @@
-{
-  "version": "1.0",
-  "apk": "jilan-app-store.apk"
-}
+{"apk":"jilan-app-store.apk","apkUrl":"https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk","notes":"Jilan App Store v1.2: Play-Store-style installs — tap Install, the app downloads itself and the install screen opens automatically. Store self-update is now one-tap too.","size":4425869,"version":"1.2","versionCode":3,"versionName":"1.2"}
