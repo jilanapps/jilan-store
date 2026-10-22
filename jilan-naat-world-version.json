@@ -1,1 +1,7 @@
-{"versionCode": 3, "versionName": "2.1", "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-naat-world.apk", "notes": "Jilan Naat World v2.1: in-app Update button added."}
+{
+ "versionCode": 4,
+ "versionName": "2.2",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-naat-world.apk",
+ "notes": "v2.2: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
+ "size": 107033
+}

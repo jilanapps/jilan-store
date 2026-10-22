@@ -23,9 +23,9 @@
    "id": "naatworld",
    "name": "Jilan Naat World",
    "package": "com.jilanapps.naatworld",
-   "size": 102937,
-   "versionCode": 3,
-   "versionName": "2.1",
+   "size": 107033,
+   "versionCode": 4,
+   "versionName": "2.2",
    "web": "https://jilanapps.github.io/jilan-store/naat-world/"
   },
   {
@@ -37,9 +37,9 @@
    "id": "snakezone",
    "name": "Jilan Snake Zone",
    "package": "com.jilanapps.snakezone",
-   "size": 29209,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 33305,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/snake-zone/"
   },
   {
@@ -65,9 +65,9 @@
    "id": "sadoh",
    "name": "Sadoh",
    "package": "com.jilanapps.sadoh",
-   "size": 33305,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 37401,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/sadoh/"
   },
   {
@@ -79,9 +79,9 @@
    "id": "jilangames",
    "name": "Jilan Games",
    "package": "com.jilanapps.games",
-   "size": 82577,
-   "versionCode": 9,
-   "versionName": "1.4",
+   "size": 86553,
+   "versionCode": 10,
+   "versionName": "1.5",
    "web": "https://jilanapps.github.io/jilan-store/games/"
   },
   {
@@ -93,9 +93,9 @@
    "id": "jilanaichat",
    "name": "Jilan AI Chat",
    "package": "com.jilanapps.jilanaichat",
-   "size": 218653,
-   "versionCode": 3,
-   "versionName": "1.2",
+   "size": 226845,
+   "versionCode": 4,
+   "versionName": "1.3",
    "web": "https://jilanapps.github.io/jilan-store/jilan-ai-chat/"
   },
   {
@@ -121,9 +121,9 @@
    "id": "virtualtradepro",
    "name": "Virtual Trade Pro",
    "package": "com.jilanapps.virtualtradepro",
-   "size": 66193,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 74385,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/virtual-trade-pro/"
   },
   {
@@ -135,9 +135,9 @@
    "id": "wamanager",
    "name": "Jilan Business Manager",
    "package": "com.jilanapps.wamanager",
-   "size": 62097,
-   "versionCode": 3,
-   "versionName": "1.1",
+   "size": 70169,
+   "versionCode": 4,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/wa-manager/"
   },
   {
@@ -163,9 +163,9 @@
    "id": "jilancamera",
    "name": "Jilan Camera",
    "package": "com.jilanapps.filtercamera",
-   "size": 57881,
-   "versionCode": 3,
-   "versionName": "1.1",
+   "size": 61977,
+   "versionCode": 4,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -177,9 +177,9 @@
    "id": "jilangallery",
    "name": "Jilan Gallery",
    "package": "com.jilanapps.gallerylock",
-   "size": 70169,
-   "versionCode": 14,
-   "versionName": "1.5",
+   "size": 74265,
+   "versionCode": 15,
+   "versionName": "1.6",
    "web": ""
   },
   {
@@ -191,9 +191,9 @@
    "id": "voicerec",
    "name": "Jilan Voice Recorder",
    "package": "com.jilanapps.voicerec",
-   "size": 98774,
-   "versionCode": 12,
-   "versionName": "1.1",
+   "size": 106966,
+   "versionCode": 13,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -205,9 +205,9 @@
    "id": "translator",
    "name": "Jilan Translator",
    "package": "com.jilanapps.translator",
-   "size": 90649,
-   "versionCode": 3,
-   "versionName": "1.1",
+   "size": 94745,
+   "versionCode": 4,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -219,9 +219,9 @@
    "id": "khata",
    "name": "Jilan Khata",
    "package": "com.jilanapps.khata",
-   "size": 49689,
-   "versionCode": 4,
-   "versionName": "1.2",
+   "size": 57881,
+   "versionCode": 5,
+   "versionName": "1.3",
    "web": ""
   },
   {
@@ -233,9 +233,9 @@
    "id": "expense",
    "name": "Jilan Expense Tracker",
    "package": "com.jilanapps.expense",
-   "size": 53785,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 57881,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -247,9 +247,9 @@
    "id": "calcvault",
    "name": "Calc Vault",
    "package": "com.jilanapps.calcvault",
-   "size": 107241,
-   "versionCode": 3,
-   "versionName": "1.2",
+   "size": 115433,
+   "versionCode": 4,
+   "versionName": "1.3",
    "web": ""
   },
   {
@@ -261,9 +261,9 @@
    "id": "qrkit",
    "name": "QR Business Kit",
    "package": "com.jilanapps.qrkit",
-   "size": 176665,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 184857,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/qr-kit/"
   },
   {

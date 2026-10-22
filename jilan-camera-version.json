@@ -1,1 +1,7 @@
-{"versionCode": 3, "versionName": "1.1", "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-camera.apk", "notes": "Jilan Camera v1.1: in-app Update button added, new icon (phase1)."}
+{
+ "versionCode": 4,
+ "versionName": "1.2",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-camera.apk",
+ "notes": "v1.2: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
+ "size": 61977
+}
