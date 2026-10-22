@@ -111,7 +111,7 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
     <button class="btn ghost sm" data-go="s-ai" data-t="qA">🤖 AI Chat</button>
   </div></div>
   <div id="updateCard" class="hidden"></div>
-  <div class="card" style="text-align:center"><div class="note" style="margin-bottom:8px">Jilan Assistant v1.2</div><button class="btn ghost" style="width:100%" onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}else{alert('Update check is available in the app.');}">🔄 Check for Update</button></div>
+  <div class="card" style="text-align:center"><div class="note" style="margin-bottom:8px">Jilan Assistant v1.3</div><button class="btn ghost" style="width:100%" onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}else{alert('Update check is available in the app.');}">🔄 Check for Update</button></div>
 </div>
 <!-- TASKS -->
 <div class="sec" id="s-tasks">
@@ -154,6 +154,7 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
     <div class="note" data-t="vcSub">Mic dabayein aur bolein — jaise "WhatsApp kholo"</div>
     <button class="micbig" id="micBig">🎙️</button>
     <div class="note" id="micState" data-t="vcTap">Mic dabayein...</div>
+    <div class="row" style="justify-content:center;align-items:center;gap:8px;margin-top:10px"><span class="note">🗣️ <span data-t="vcLang">Awaz ki zuban:</span></span><button class="btn ghost sm" id="vlangUr">اردو</button><button class="btn ghost sm" id="vlangEn">English</button></div>
     <div id="voiceOut"></div>
   </div>
   <div class="card"><div class="note" data-t="vcPerm">🔐 Pehli baar mic ki permission mange ga — "Allow" dabayein. Aap ki awaz phone se bahar nahi jati.</div></div>
@@ -226,9 +227,9 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
   </div>
 </div>
 <script>
-/* ===== Jilan Assistant v1.2 ===== */
+/* ===== Jilan Assistant v1.3 ===== */
 const $=id=>document.getElementById(id);
-const APPV="1.2";
+const APPV="1.3";
 // Gemini model: Google purana model retire kar de to SIRF ye line badlein
 const GEMINI_MODEL="gemini-3.8-flash";
 const hasBridge=()=>typeof window.Assistant!=="undefined"&&window.Assistant!==null;
@@ -250,7 +251,7 @@ const T={
 ru:{appSub:"Aap ka zaati AI assistant",stT:"Baqi tasks",stR:"Aaj reminders",stG:"Goals",briefH:"📋 Mera Din",briefB:"Mera din batao 🎙️",quickH:"⚡ Quick",qT:"+ Task",qV:"🎙️ Voice",qA:"🤖 AI Chat",
 taskH:"✅ Tasks",taskPh:"Naya task likhein...",add:"Add",fAll:"Sab",fPen:"Baqi",fDone:"Mukammal",remH:"⏰ Reminders",remPh:"Kis cheez ka reminder?",remNote:"📌 Note: reminder bajne ke liye app khuli honi chahiye (v1). Native notification bhi lagegi.",
 nmzH:"🕌 Namaz Reminders",nmzNote:"Apne sheher ke auqaat khud set karein (is version me auto-calculation nahi). Waqt par notification + tone bajegi. Phone restart ho to app ek baar khol lein.",save:"Save",clear:"Clear",
-goalH:"🎯 Goals",goalPh:"Goal ka naam...",vcH:"🎙️ Voice Commands",vcSub:'Mic dabayein aur bolein — jaise "WhatsApp kholo"',vcTap:"Mic dabayein...",vcPerm:'🔐 Pehli baar mic ki permission mange ga — "Allow" dabayein. Aap ki awaz phone se bahar nahi jati.',
+goalH:"🎯 Goals",goalPh:"Goal ka naam...",vcH:"🎙️ Voice Commands",vcSub:'Mic dabayein aur bolein — jaise "WhatsApp kholo"',vcTap:"Mic dabayein...",vcLang:"Awaz ki zuban:",vcPerm:'🔐 Pehli baar mic ki permission mange ga — "Allow" dabayein. Aap ki awaz phone se bahar nahi jati.',
 gdH:"📖 Commands Guide",gdNote:"Ye assistant <b>neeche wale commands</b> samajhta hai — har cheez nahi. Misalon jaisa bolein:",
 keyNote:"Apni FREE key yahan paste karein. Key sirf aap ke phone me rehti hai, sirf Google ko jati hai.",keyPh:"API key paste karein...",aiPh:"Kuch poochein...",keyChg:"Key badlein",
 noteH:"📝 Notes",notePh:"Note likhein...",setH:"⚙️ Settings",cityL:"🌤️ Weather city:",cityPh:"Multan",homeL:"🏠 Ghar ka pata (maps ke liye):",homePh:"Basti Malook, Multan",
@@ -259,7 +260,7 @@ nav:[["s-home","🏠","Home"],["s-tasks","✅","Tasks"],["s-rems","⏰","Reminde
 en:{appSub:"Your personal AI assistant",stT:"Pending tasks",stR:"Today's reminders",stG:"Goals",briefH:"📋 My Day",briefB:"Tell me my day 🎙️",quickH:"⚡ Quick",qT:"+ Task",qV:"🎙️ Voice",qA:"🤖 AI Chat",
 taskH:"✅ Tasks",taskPh:"Type a new task...",add:"Add",fAll:"All",fPen:"Pending",fDone:"Done",remH:"⏰ Reminders",remPh:"Remind me about?",remNote:"📌 Note: the app must be open for reminders to fire (v1). A native notification is also shown.",
 nmzH:"🕌 Prayer Reminders",nmzNote:"Set your city's times manually (no auto-calculation in this version). Notification + tone at each time. After a phone restart, open the app once.",save:"Save",clear:"Clear",
-goalH:"🎯 Goals",goalPh:"Goal name...",vcH:"🎙️ Voice Commands",vcSub:'Tap mic and speak — e.g. "open WhatsApp"',vcTap:"Tap the mic...",vcPerm:'🔐 It will ask mic permission the first time — tap "Allow". Your voice never leaves your phone.',
+goalH:"🎯 Goals",goalPh:"Goal name...",vcH:"🎙️ Voice Commands",vcSub:'Tap mic and speak — e.g. "open WhatsApp"',vcTap:"Tap the mic...",vcLang:"Voice language:",vcPerm:'🔐 It will ask mic permission the first time — tap "Allow". Your voice never leaves your phone.',
 gdH:"📖 Commands Guide",gdNote:"This assistant understands the <b>commands below</b> — not everything. Speak like the examples:",
 keyNote:"Paste your FREE key here. The key stays only on your phone and goes only to Google.",keyPh:"Paste API key...",aiPh:"Ask anything...",keyChg:"Change key",
 noteH:"📝 Notes",notePh:"Write a note...",setH:"⚙️ Settings",cityL:"🌤️ Weather city:",cityPh:"Multan",homeL:"🏠 Home address (for maps):",homePh:"Basti Malook, Multan",
@@ -409,6 +410,30 @@ function renderAll(){renderTasks();renderRems();renderGoals();renderNamaz();rend
 /* ---------- voice ---------- */
 let voiceMode="cmd"; // "cmd" | "task"
 let recog=null, listening=false, listenTimer=null;
+/* v1.3: command matching ke liye text normalize karein —
+   Urdu digits -> Latin, Arabic harakat/diacritics khatam, mukhtalif Urdu shaklein aik jaisi */
+function normCmdStr(x){
+  x=String(x||"");
+  x=x.replace(/[٠-٩۰-۹]/g,ch=>{const c=ch.charCodeAt(0);return String(c>=0x6F0?c-0x6F0:c-0x660);});
+  x=x.replace(/[ً-ٰٟـ]/g,"");
+  x=x.replace(/[أإآ]/g,"ا").replace(/ى/g,"ی").replace(/ئ/g,"ی").replace(/ؤ/g,"و").replace(/ة/g,"ہ").replace(/ك/g,"ک").replace(/ي/g,"ی");
+  return x;
+}
+/* v1.3: voice language selector (Voice screen) — "ur-PK" | "en-US", localStorage me mehfooz */
+let vLang=localStorage.getItem("ja_vlang")||"ur-PK";
+function updVLangBtns(){const u=$("vlangUr"),e=$("vlangEn");if(!u||!e)return;
+  u.className="btn sm"+(vLang==="ur-PK"?"":" ghost");
+  e.className="btn sm"+(vLang==="en-US"?"":" ghost");}
+function setVLang(l){vLang=l;localStorage.setItem("ja_vlang",l);updVLangBtns();
+  toast(l==="ur-PK"?"🗣️ Awaz ki zuban: اردو":"🗣️ Voice language: English");}
+$("vlangUr").onclick=()=>setVLang("ur-PK");
+$("vlangEn").onclick=()=>setVLang("en-US");
+updVLangBtns();
+/* native bridge: naye APK me 1-arg startVoice(lang) hai; purane par no-arg par gir jayein */
+function startNativeVoice(){
+  try{Assistant.startVoice(vLang);return;}catch(e){}
+  try{Assistant.startVoice();}catch(e){}
+}
 function resetVoiceUI(){
   listening=false;clearTimeout(listenTimer);listenTimer=null;
   try{$("micBig").classList.remove("lis");}catch(e){}
@@ -432,7 +457,7 @@ function startVoice(){
     try{
       $("micState").textContent=LANG==="ru"?"🎙️ Sun raha hun... bolein":"🎙️ Listening... speak";
       $("micBig").classList.add("lis");orbState("listen");listening=true;
-      Assistant.startVoice();
+      startNativeVoice();
       armListenTimeout(15000); // native callback na aaye to khud reset
       return;
     }catch(e){resetVoiceUI();}
@@ -440,7 +465,7 @@ function startVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){$("voiceOut").innerHTML='<div class="note">⚠️ '+(LANG==="ru"?"Is browser me voice support nahi. Android app me mic kaam karega.":"Voice not supported in this browser. It works in the Android app.")+'</div>';return;}
   if(listening){try{recog.stop();}catch(e){}resetVoiceUI();return;}
-  recog=new SR();recog.lang="ur-PK";recog.interimResults=true;recog.maxAlternatives=1;
+  recog=new SR();recog.lang=vLang;recog.interimResults=true;recog.maxAlternatives=1;
   recog.onresult=e=>{
     let interim="",final="";
     for(let i=e.resultIndex;i<e.results.length;i++){
@@ -473,15 +498,69 @@ function startVoice(){
 $("micBig").onclick=startVoice;
 try{if($("orb"))$("orb").onclick=startVoice;}catch(e){}
 // called by native bridge
-function onVoiceResult(txt){
+/* v1.3 pipeline: jo suna wo HAMESHA screen par dikhe ("🎧 Heard:") —
+   pehle sirf "kuch nahi hua" lagta tha, ab user khud dekh sakta hai masla kahan hai. */
+let altsAt=0,altsBest="",singleAt=0,singleBest="";
+function heardHTML(txt){return '<div class="note">🎧 '+(LANG==="ru"?"Suna: ":"Heard: ")+'"'+esc(txt)+'"</div>';}
+function prependHeard(txt){try{$("voiceOut").insertAdjacentHTML("afterbegin",heardHTML(txt));}catch(e){}}
+function voiceRouteMode(txt){ // aichat / task modes — hamesha pehli (best) transcript
+  if(voiceMode==="aichat"){voiceMode="cmd";$("aiInp").value=txt;go("s-ai");aiSend(true);return true;}
+  if(voiceMode==="task"){if(addTask(txt)){toast("✅ "+txt);nspeak(LANG==="ru"?"Task add ho gaya":"Task added");}voiceMode="cmd";return true;}
+  return false;
+}
+function noMatchFallback(txt){
+  const R=LANG==="ru";
+  const ex=R?'"WhatsApp kholo" • "Ammi ko call karo" • "light jalao" • "subah 6 baje alarm lagao"'
+            :'"open WhatsApp" • "call Ahmed" • "turn on flashlight" • "set alarm 6 am"';
+  const hasKey=!!localStorage.getItem(LS_KEY);
+  let h=heardHTML(txt);
+  h+='<div class="note" style="margin-top:8px">❓ '+(R?"Ye command nahi mili. Aise bolein: ":"Command not recognized. Try saying: ")+ex+'</div>';
+  if(hasKey)h+='<div class="note" style="margin-top:8px">🤖 '+(R?"Command nahi mili — AI se pooch raha hun...":"No command matched — asking the AI instead...")+'</div>';
+  $("voiceOut").innerHTML=h;
+  nspeak(R?"Command nahi mili":"Command not recognized");
+  if(hasKey)setTimeout(()=>{try{$("aiInp").value=txt;go("s-ai");aiSend(true);}catch(e){}},1200);
+}
+function runVoiceAlts(alts){
+  alts=(alts||[]).map(a=>(a||"").trim()).filter(Boolean);
+  if(!alts.length)return;
+  if(Date.now()-singleAt<2500&&singleBest===alts[0])return; // onVoiceResult pehle hi isay chala chuka
+  altsAt=Date.now();altsBest=alts[0];
   resetVoiceUI();
+  if(voiceRouteMode(alts[0])){prependHeard(alts[0]);return;}
+  window.__jaProbe=true;
+  let used=null;
+  for(const a of alts){if(parseCommand(a)){used=a;break;}}
+  window.__jaProbe=false;
+  if(used){prependHeard(used);return;}
+  noMatchFallback(alts[0]);
+}
+// called by native bridge (v1.3 APK): tamam alternatives JSON array ki surat me
+function onVoiceAlts(json){
+  let alts=[];try{alts=JSON.parse(json||"[]");}catch(e){}
+  if(Array.isArray(alts)&&alts.length)runVoiceAlts(alts);
+}
+function onVoiceResult(txt){
   txt=(txt||"").trim();if(!txt)return;
-  if(voiceMode==="aichat"){voiceMode="cmd";$("aiInp").value=txt;go("s-ai");aiSend(true);return;}
-  if(voiceMode==="task"){if(addTask(txt)){toast("✅ "+txt);nspeak(LANG==="ru"?"Task add ho gaya":"Task added");}voiceMode="cmd";return;}
-  $("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(txt)+'"</div>';
-  parseCommand(txt);
+  if(Date.now()-altsAt<2500&&altsBest===txt)return; // isi utterance ke alternatives chal chuke hain
+  singleAt=Date.now();singleBest=txt;
+  resetVoiceUI();
+  if(voiceRouteMode(txt)){prependHeard(txt);return;}
+  window.__jaProbe=true;
+  const ok=parseCommand(txt);
+  window.__jaProbe=false;
+  if(ok){prependHeard(txt);return;}
+  noMatchFallback(txt);
 }
 function onVoiceError(c){
+  resetVoiceUI();
+  if(c==="unavailable"){
+    const R=LANG==="ru";
+    $("voiceOut").innerHTML='<div class="note">🎙️ '+(R?"Is phone me voice (speech) service mojood nahi — Google Speech Services install/enable karein, phir voice commands chalenge.":"The voice (speech) service is missing on this phone — install/enable Google Speech Services, then voice commands will work.")
+      +'<br><a class="btn sm" style="display:inline-block;margin-top:8px;text-decoration:none" href="https://play.google.com/store/apps/details?id=com.google.android.tts">▶ Google Speech Services — Play Store</a></div>';
+    toast("⚠️ "+(R?"Voice service nahi mila":"Voice service missing"),true);
+    nspeak(R?"Voice service nahi mila":"Voice service missing");
+    return;
+  }
   voiceFail(LANG==="ru"?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again");
 }
 
@@ -494,17 +573,33 @@ function openAppByKey(k){
   if(sys[k]){try{if(hasBridge()){Assistant.openSystem(sys[k]);nspeak(LANG==="ru"?"Ji, khol raha hun":"OK, opening");return true;}}catch(e){}}
   return false;
 }
+/* v1.3: Urdu-script app names -> canonical keys */
+const APPNAME={"واٹس ایپ":"whatsapp","واٹساپ":"whatsapp","واٹس اپ":"whatsapp","یوٹیوب":"youtube","کروم":"chrome","جی میل":"gmail","جیمیل":"gmail","میپس":"maps","میپ":"maps","پلے اسٹور":"playstore","پلے سٹور":"playstore","فیس بک":"facebook","فیسبک":"facebook","انسٹاگرام":"instagram","انسٹا گرام":"instagram","ٹک ٹاک":"tiktok","ٹکٹاک":"tiktok","سنیپ چیٹ":"snapchat","کیمرہ":"camera","کیمرا":"camera","گیلری":"gallery","سیٹنگز":"settings","سیٹنگ":"settings","گھڑی":"clock"};
+const APPWORDS="whatsapp|youtube|chrome|gmail|maps|play\\s?store|facebook|instagram|tiktok|snapchat|camera|gallery|settings|clock|واٹس\\s?ایپ|واٹساپ|یوٹیوب|کروم|جی\\s?میل|جیمیل|میپس|پلے\\s?اسٹور|پلے\\s?سٹور|فیس\\s?بک|فیسبک|انسٹاگرام|ٹک\\s?ٹاک|سنیپ\\s?چیٹ|کیمرہ|کیمرا|گیلری|سیٹنگز|گھڑی";
+function appKeyOf(x){
+  x=(x||"").toLowerCase().trim();
+  if(APPNAME[x])return APPNAME[x];
+  const c=x.replace(/\s+/g,"");
+  for(const k in APPNAME){if(k.replace(/\s+/g,"")===c)return APPNAME[k];}
+  return c;
+}
 
 /* ---------- time parser (Roman Urdu + English) ---------- */
 function parseTime(s){
-  s=" "+s.toLowerCase()+" ";
+  s=" "+normCmdStr(s.toLowerCase())+" ";
+  // number words -> digits (Roman Urdu / Urdu script / English), token by token
+  const NUMW={ek:1,"do":2,teen:3,char:4,chaar:4,paanch:5,panch:5,chhe:6,saat:7,aath:8,nau:9,das:10,gyarah:11,barah:12,
+    one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,
+    "ایک":1,"دو":2,"تین":3,"چار":4,"پانچ":5,"چھ":6,"سات":7,"اٹھ":8,"نو":9,"دس":10,"گیارہ":11,"بارہ":12};
+  s=" "+s.trim().split(/\s+/).map(w=>NUMW[w]!=null?String(NUMW[w]):w).join(" ")+" ";
   let h=null,m=0;
   let mt=s.match(/(\d{1,2})[:.](\d{2})/);
   if(mt){h=+mt[1];m=+mt[2];}
-  else{mt=s.match(/(\d{1,2})\s*(baje|bajay|am|pm)/);if(mt)h=+mt[1];}
+  else{mt=s.match(/(\d{1,2})\s*(baje|bajay|am|pm|بجے)/);if(mt)h=+mt[1];
+    else{mt=s.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);if(mt){h=+mt[1];if(mt[2])m=+mt[2];if(mt[3]==="pm"&&h<12)h+=12;if(mt[3]==="am"&&h===12)h=0;}}}
   if(h==null)return null;
-  const pm=/pm|sham|shaam|raat|evening|night/.test(s);
-  const am=/am|subah|subha|morning/.test(s);
+  const pm=/pm|sham|shaam|raat|evening|night|شام|رات/.test(s);
+  const am=/am|subah|subha|morning|صبح/.test(s);
   if(pm&&h<12)h+=12;
   if(!pm&&!am){if(h<8)h+=12;} // "7 baje" din me -> shaam 7
   if(h===24)h=0;
@@ -525,46 +620,60 @@ function findContact(name){
 
 /* ---------- command parser (offline) ---------- */
 function parseCommand(raw){
-  const s=raw.toLowerCase().trim();
+  const s=normCmdStr(raw.toLowerCase().trim());
   const out=m=>{$("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(raw)+'"</div><div style="margin-top:8px">'+m+'</div>';};
   // my day / briefing
-  if(/mera din|my day|aaj ka din|din batao/.test(s)){const L=buildBrief();out(L.map(esc).join("<br>"));nspeak(L.join(" "));return;}
+  if(/mera din|my day|aaj ka din|din batao|میرا دن|آج کا دن/.test(s)){const L=buildBrief();out(L.map(esc).join("<br>"));nspeak(L.join(" "));return;}
   // time
-  if(/time kya hai|kitne baje|what.*time|time batao/.test(s)){
+  if(/time kya hai|kitne baje|what.*time|time batao|وقت کیا ہے|کتنے بجے|وقت بتاو|وقت بتا/.test(s)){
     const d=new Date();const msg=LANG==="ru"?("Is waqt "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+" baje hain"):("It is "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
     out(esc(msg));nspeak(msg);return;}
-  // open app
-  let m=s.match(/(whatsapp|youtube|chrome|gmail|maps|play\s?store|facebook|instagram|tiktok|camera|gallery|settings|clock)\s*(kholo|khol|open|khol do)/)||s.match(/open\s+(whatsapp|youtube|chrome|gmail|maps|play\s?store|facebook|instagram|tiktok|camera|gallery|settings|clock)/);
-  if(m){if(openAppByKey(m[1])){out("✅ "+esc(m[1]));}else{const msg=LANG==="ru"?"App nahi khul saki (Android app me kaam karega)":"Could not open (works in the Android app)";out(msg);nspeak(msg);}return;}
-  // call: "X ko call karo" / "call X"
-  m=s.match(/(.+?)\s+ko\s+call\s*karo/)||s.match(/^call\s+(.+)/)||s.match(/call\s*karo\s+(.+)/);
-  if(m){const nm=m[1].replace(/ko$/,"").trim();const c=findContact(nm);
+  // task query (pehle — warna maps wala "dikhao" pattern isay pakar lega):
+  // "kal ke task batao" / "mere task dikhao" / "show my tasks" / "میرے ٹاسک دکھاو"
+  if(/(?:task|tasks|ٹاسک)\s*(?:batao|dikhao|بتاو|دکھاو)|(?:mere|apne)\s+(?:task|ٹاسک)|my\s+tasks?|show\s+(?:me\s+)?(?:my\s+)?tasks?/.test(s)){
+    const arr=J("ja_tasks",[]);
+    go("s-tasks");
+    if(!arr.length){const msg=LANG==="ru"?"Koi task nahi hai":"No tasks yet";out("✅ "+esc(msg));nspeak(msg);return;}
+    const titles=arr.slice(0,5).map(x=>x.t||"").filter(Boolean);
+    const msg=(LANG==="ru"?"Aap ke "+arr.length+" task hain":"You have "+arr.length+" tasks")+": "+titles.join(", ");
+    out("✅ "+esc(msg));nspeak(msg);return;}
+  // open app — English / Roman Urdu / Urdu script, teeno shaklein
+  let m=s.match(new RegExp("("+APPWORDS+")\\s*(?:کھولو|کھول دو|کھولیں|کھول|kholo|khol do|khol|open|chalao|chala do|start)"))
+       ||s.match(new RegExp("(?:open|کھولو|کھول)\\s+("+APPWORDS+")"));
+  if(m){const key=appKeyOf(m[1]);if(openAppByKey(key)){out("✅ "+esc(m[1]));}else{const msg=LANG==="ru"?"App nahi khul saki (Android app me kaam karega)":"Could not open (works in the Android app)";out(msg);nspeak(msg);}return;}
+  // call: "X ko call karo" / "call X" / "X کو کال کرو" / number seedha dial
+  m=s.match(/(.+?)\s+ko\s+call\s*(?:karo|kar do|lagao|laga do)/)||s.match(/(.+?)\s+کو\s+کال\s*(?:کرو|لگاو|لگاؤ)/)||s.match(/(.+?)\s+ko\s+phone\s*(?:karo|kar do)/)||s.match(/^call\s+(.+)/)||s.match(/call\s*karo\s+(.+)/)||s.match(/کال\s*(?:کرو|لگاو|لگاؤ)\s+(.+)/);
+  if(m){const nm=m[1].replace(/ko$/,"").replace(/کو$/,"").trim();
+    const num=nm.replace(/[\s\-()]/g,"");
+    if(/^\+?\d{6,15}$/.test(num)){out("📞 "+esc(num));nspeak((LANG==="ru"?"Ji, call kar raha hun: ":"OK, calling: ")+num);
+      try{if(hasBridge())Assistant.makeCall(num);}catch(e){}return;}
+    const c=findContact(nm);
     if(!c){const msg=LANG==="ru"?("Contact nahi mila: "+nm):("Contact not found: "+nm);out(esc(msg));nspeak(msg);return;}
     const msg=(LANG==="ru"?"Ji, ":"OK, ")+c.name+(LANG==="ru"?" ko call kar raha hun":" calling");
     out("📞 "+esc(c.name));nspeak(msg);
     try{if(hasBridge())Assistant.makeCall(c.phone);}catch(e){}return;}
-  // whatsapp message: "X ko whatsapp karo <msg>"
-  m=s.match(/(.+?)\s+ko\s+whatsapp\s+(?:karo\s+)?(.+)/)||s.match(/whatsapp\s+(.+?)\s+(?:par\s+)?(.+)/);
+  // whatsapp message: "X ko whatsapp karo <msg>" / "X کو واٹس ایپ کرو <msg>"
+  m=s.match(/(.+?)\s+ko\s+whatsapp\s+(?:(?:karo|kar do|bhejo|bhej do)\s+)?(.+)/)||s.match(/(.+?)\s+کو\s+واٹس\s?ایپ\s+(?:کرو\s+)?(.+)/)||s.match(/whatsapp\s+(.+?)\s+(?:par\s+)?(.+)/);
   if(m){const nm=m[1].trim(),msg=m[2].trim();const c=findContact(nm);
     if(!c){const em=LANG==="ru"?("Contact nahi mila: "+nm):("Contact not found: "+nm);out(esc(em));nspeak(em);return;}
     out("💬 "+esc(c.name)+": "+esc(msg));
     nspeak((LANG==="ru"?"Ji, WhatsApp khol raha hun. Send aap khud dabayein.":"OK, opening WhatsApp. You tap send yourself."));
     try{if(hasBridge())Assistant.whatsappChat(c.phone,msg);}catch(e){}return;}
   // 1. youtube search: "YouTube par X search karo"
-  m=s.match(/youtube\s+(?:par\s+)?(.+?)\s+search\s*karo/)||s.match(/search\s+(.+?)\s+(?:par|on)\s+youtube/);
+  m=s.match(/youtube\s+(?:par\s+)?(.+?)\s+search\s*(?:karo|kar do)/)||s.match(/یوٹیوب\s+(?:پر\s+)?(.+?)\s+سرچ\s*کرو/)||s.match(/search\s+(.+?)\s+(?:par|on)\s+youtube/)||s.match(/search\s+(.+?)\s+on\s+youtube/);
   if(m){const q=m[1].trim();const url="https://www.youtube.com/results?search_query="+encodeURIComponent(q);
     const msg=(LANG==="ru"?"YouTube par search kar raha hun: ":"Searching YouTube for: ")+q;
     out("▶️ "+esc(msg));nspeak(msg);
     try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
   // 2. sms: "X ko SMS karo <text>"
-  m=s.match(/(.+?)\s+ko\s+sms\s+(?:karo\s+)?(.+)/)||s.match(/^sms\s+(.+?)\s+(.+)/);
+  m=s.match(/(.+?)\s+ko\s+sms\s+(?:(?:karo|kar do|bhejo|bhej do)\s+)?(.+)/)||s.match(/(.+?)\s+کو\s+(?:sms|ایس ایم ایس)\s+(?:کرو\s+)?(.+)/)||s.match(/^sms\s+(.+?)\s+(.+)/);
   if(m){const nm=m[1].trim(),msg=m[2].trim();const c=findContact(nm);
     if(!c){const em=LANG==="ru"?("Contact nahi mila: "+nm):("Contact not found: "+nm);out(esc(em));nspeak(em);return;}
     out("✉️ "+esc(c.name)+": "+esc(msg));
     nspeak((LANG==="ru"?"Ji, SMS khol raha hun. Send aap khud dabayein.":"OK, opening SMS. You tap send yourself."));
     try{if(hasBridge())Assistant.sendSms(c.phone,msg);}catch(e){}return;}
   // 3. email: "email karo"
-  if(/email\s*(karo|bhejo|bhej)|mail\s*karo/.test(s)){
+  if(/email\s*(karo|bhejo|bhej)|mail\s*karo|ای\s?میل\s*(کرو|بھیجو)/.test(s)){
     const msg=LANG==="ru"?"Ji, email khol raha hun":"OK, opening email";
     out("📧 "+esc(msg));nspeak(msg);
     try{if(hasBridge())Assistant.openUrl("mailto:");}catch(e){}return;}
@@ -575,25 +684,26 @@ function parseCommand(raw){
     out("🗺️ "+esc(msg));nspeak(msg);
     try{if(hasBridge())Assistant.openUrl("geo:0,0?q="+encodeURIComponent(q));}catch(e){}return;}
   // 5. play store search: "Play Store par X search karo"
-  m=s.match(/play\s*store\s+(?:par\s+|pe\s+)?(.+?)\s+search\s*karo/)||s.match(/search\s+(.+?)\s+(?:par|pe|on)\s+play\s*store/);
+  m=s.match(/play\s*store\s+(?:par\s+|pe\s+)?(.+?)\s+search\s*(?:karo|kar do)/)||s.match(/search\s+(.+?)\s+(?:par|pe|on)\s+play\s*store/);
   if(m){const q=m[1].trim();const url="market://search?q="+encodeURIComponent(q);
     const msg=(LANG==="ru"?"Play Store par search kar raha hun: ":"Searching Play Store for: ")+q;
     out("🏪 "+esc(msg));nspeak(msg);
     try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
   // 6. google search: "X Google karo"
-  m=s.match(/(.+?)\s+google\s*karo/)||s.match(/^google\s+(.+)/);
+  m=s.match(/(.+?)\s+(?:google|گوگل)\s*(?:karo|کرو)/)||s.match(/^google\s+(.+)/);
   if(m){const q=m[1].trim();const url="https://www.google.com/search?q="+encodeURIComponent(q);
     const msg=(LANG==="ru"?"Google par search kar raha hun: ":"Searching Google for: ")+q;
     out("🔍 "+esc(msg));nspeak(msg);
     try{if(hasBridge())Assistant.openUrl(url);}catch(e){}return;}
-  // alarm
-  if(/alarm\s*(lagao|set)/.test(s)){const tm=parseTime(s);
+  // alarm — "alarm lagao" / "set an alarm for 7 am" / "wake me at 6" / "الارم لگاو" / "مجھے جگاو"
+  if(/alarm\s*(lagao|laga do|lagana|set)|set\s+(?:an\s+)?alarm|الارم\s*(?:لگاو|لگا دو)|wake\s+me|مجھے\s+جگاو/.test(s)){const tm=parseTime(s);
+    if(tm&&/wake|جگاو/.test(s)&&!/pm|sham|shaam|raat|شام|رات|evening|night/.test(s)&&tm.h>=12)tm.h-=12; // "wake me at 6" = subah ke 6
     if(!tm){const msg=LANG==="ru"?'Waqt samajh nahi aaya. Jaise bolein: "Subah 6 baje alarm lagao"':'Did not get the time. Say e.g. "Set alarm 6 am"';out(esc(msg));nspeak(msg);return;}
     try{if(hasBridge())Assistant.setAlarm(tm.h,tm.m,"Jilan Assistant");}catch(e){}
     const msg=(LANG==="ru"?"Alarm lag gaya: ":"Alarm set: ")+tm.h+":"+String(tm.m).padStart(2,"0");
     out("⏰ "+esc(msg));nspeak(msg);return;}
   // reminder add: "reminder lagao <text> <time>" / "yaad dilao"
-  m=s.match(/(?:reminder\s*lagao|yaad\s*dilao)\s+(.+)/);
+  m=s.match(/(?:reminder\s*lagao|reminder\s*laga do|yaad\s*dilao|یاد\s*دلاو|یاد\s*دلاؤ)\s+(.+)/);
   if(m){const rest=m[1];const tm=parseTime(rest);
     let txt=rest,when=null;
     if(tm){const d=new Date();d.setHours(tm.h,tm.m,0,0);if(d.getTime()<Date.now())d.setDate(d.getDate()+1);when=d.getTime();
@@ -601,14 +711,20 @@ function parseCommand(raw){
     if(!when){const d=new Date(Date.now()+360e4);when=d.getTime();} // default 1 ghanta baad
     if(!txt)txt=LANG==="ru"?"Reminder":"Reminder";
     addRem(txt,when);const msg=(LANG==="ru"?"Reminder lag gaya: ":"Reminder set: ")+txt;out("⏰ "+esc(msg));nspeak(msg);return;}
-  // task add
-  m=s.match(/(?:task\s*add\s*karo|task\s*banao)\s+(.+)/);
+  // task add — "task add karo/lagao X" / "add a task for tomorrow X" / "kal ka task X" / "ٹاسک بناو X" / "کل کا ٹاسک X"
+  m=s.match(/(?:task\s*add\s*karo|task\s*banao|task\s*lagao|task\s*laga do)\s+(.+)/)
+    ||s.match(/add\s+(?:a\s+)?task\s+(?:for\s+tomorrow\s+)?(.+)/)
+    ||s.match(/kal\s+ka\s+task\s+(.+)/)
+    ||s.match(/(?:ٹاسک\s*(?:بناو|ایڈ کرو|لگاو)|کل\s+کا\s+ٹاسک)\s+(.+)/);
   if(m){addTask(m[1]);const msg=(LANG==="ru"?"Task add ho gaya: ":"Task added: ")+m[1];out("✅ "+esc(msg));nspeak(msg);return;}
   // namaz guide
-  if(/namaz/.test(s)){go("s-namaz");const msg=LANG==="ru"?"Namaz ke auqaat Namaz tab me set karein":"Set prayer times in the Prayer tab";out(esc(msg));nspeak(msg);return;}
-  // fallback
+  if(/namaz|نماز/.test(s)){go("s-namaz");const msg=LANG==="ru"?"Namaz ke auqaat Namaz tab me set karein":"Set prayer times in the Prayer tab";out(esc(msg));nspeak(msg);return;}
+  // fallback — probe mode (alternatives try ho rahe hain) me khamosh false dein;
+  // wrapper isay "no match" samajhta hai. Aakhri fallback onVoiceResult/noMatchFallback sambhalta hai.
+  if(window.__jaProbe)return false;
   const fb=LANG==="ru"?"Samajh nahi aaya. Guide tab me tamam commands dekhein.":"Did not understand. See all commands in the Guide tab.";
   out("❓ "+esc(fb));nspeak(fb);
+  return false;
 }
 
 /* ---------- commands guide ---------- */
@@ -902,59 +1018,59 @@ const _go2=go;go=function(s){_go2(s);if(s==="s-settings")setTimeout(refreshA11y,
 function parseExtra(s,raw){
   const out=m=>{$("voiceOut").innerHTML='<div class="note">🗣️ "'+esc(raw)+'"</div><div style="margin-top:8px">'+m+'</div>';};
   // call disconnect (pehle — warna "call" wala pattern pakar lega)
-  if(/call\s*band\s*karo|call\s*kaat\s*do|call\s*khatam\s*karo|disconnect|end\s*call/.test(s)){
+  if(/call\s*band\s*karo|call\s*kaat\s*do|call\s*khatam\s*karo|disconnect|end\s*call|کال\s*بند\s*کرو|کال\s*کاٹ\s*دو/.test(s)){
     let ok=false;try{if(hasBridge())ok=Assistant.endCall();}catch(e){}
     if(ok){const msg=LANG==="ru"?"Call band kar di":"Call ended";out("📞 "+esc(msg));nspeak(msg);}
     else{const msg=LANG==="ru"?"Pehle Settings me 'Call End Service' ON karein":"Turn on 'Call End Service' in Settings first";
       out('📞 '+esc(msg)+'<br><button class="btn sm" style="margin-top:8px" onclick="go(\'s-settings\')">⚙️ Settings kholein</button>');nspeak(msg);}
     return true;}
   // flashlight
-  if(/light\s*jalao|flashlight\s*on|torch\s*on|light\s*on\s*karo/.test(s)){
+  if(/light\s*jalao|light\s*jala\s*do|torch\s*jalao|batti\s*jalao|flashlight\s*on|torch\s*on|light\s*on\s*karo|turn\s*on\s*(the\s*)?(flashlight|torch)|flashlight\s*chalao|ٹارچ\s*جلاو|ٹارچ\s*جلا|لائٹ\s*جلاو|بتی\s*جلاو/.test(s)){
     try{if(hasBridge())Assistant.setFlash(true);}catch(e){}
     const msg=LANG==="ru"?"Light jala di":"Flashlight on";out("🔦 "+esc(msg));nspeak(msg);return true;}
-  if(/light\s*band|flashlight\s*off|torch\s*off/.test(s)){
+  if(/light\s*band|light\s*band\s*karo|torch\s*band|flashlight\s*off|torch\s*off|flashlight\s*band|turn\s*off\s*(the\s*)?(flashlight|torch)|ٹارچ\s*بند|لائٹ\s*بند/.test(s)){
     try{if(hasBridge())Assistant.setFlash(false);}catch(e){}
     const msg=LANG==="ru"?"Light band kar di":"Flashlight off";out("🔦 "+esc(msg));nspeak(msg);return true;}
   // calculator
-  if(/calculate|kitna hota hai|hisab|jama|zarb|taqseem|tafreeq/.test(s)||/^\d[\d\s+\-*/x×÷%.()]*$/.test(s.replace(/\s+/g," ").trim())){
+  if(/calculate|kitna hota hai|hisab|jama|zarb|taqseem|tafreeq|حساب|جمع|ضرب|تقسیم|تفریق/.test(s)||/^\d[\d\s+\-*/x×÷%.()]*$/.test(s.replace(/\s+/g," ").trim())){
     const r=calcSafe(s);
     if(r!==null){const msg=(LANG==="ru"?"Jawab: ":"Answer: ")+r;out("🧮 "+esc(msg));nspeak(msg);return true;}}
   // hadith
-  if(/hadith|hadees|hadees sunao|hadis/.test(s)){tellHadith();return true;}
+  if(/hadith|hadees|hadees sunao|hadis|حدیث/.test(s)){tellHadith();return true;}
   // weather
-  if(/mausam|weather/.test(s)){tellWeather();return true;}
+  if(/mausam|weather|موسم/.test(s)){tellWeather();return true;}
   // photo
-  if(/photo\s*lo|selfie\s*lo|tasveer\s*lo|take.*(photo|selfie)|capture/.test(s)){
+  if(/photo\s*lo|selfie\s*lo|tasveer\s*lo|فوٹو\s*لو|تصویر\s*لو|take.*(photo|selfie)|capture/.test(s)){
     try{if(hasBridge())Assistant.takePhoto();}catch(e){}
     const msg=LANG==="ru"?"Camera khol raha hun":"Opening camera";out("📸 "+esc(msg));nspeak(msg);return true;}
   // note
-  let m=s.match(/(?:note\s*likho|note\s*banao)\s+(.+)/);
+  let m=s.match(/(?:note\s*likho|note\s*banao|نوٹ\s*لکھو)\s+(.+)/);
   if(m){addNote(m[1]);const msg=(LANG==="ru"?"Note save ho gaya: ":"Note saved: ")+m[1];out("📝 "+esc(msg));nspeak(msg);return true;}
   // timer
-  m=s.match(/timer\s*(?:lagao|set)\s*(\d+)\s*(minute|min|second|sec|ghanta|hour)/);
-  if(m){let sec=+m[1];const u=m[2];if(/minute|min/.test(u))sec*=60;if(/ghanta|hour/.test(u))sec*=3600;
+  m=s.match(/timer\s*(?:lagao|set|لگاو)\s*(\d+)\s*(minute|min|second|sec|ghanta|hour|منٹ|سیکنڈ|گھنٹہ)/)||s.match(/(\d+)\s*(minute|min|second|sec|ghanta|hour|منٹ|سیکنڈ|گھنٹہ)\s*(?:ka\s*)?(?:timer|ٹائمر)/);
+  if(m){let sec=+m[1];const u=m[2];if(/minute|min|منٹ/.test(u))sec*=60;if(/ghanta|hour|گھنٹہ/.test(u))sec*=3600;
     if(sec>0&&sec<=86400){timerStart(sec,LANG==="ru"?"Timer":"Timer");return true;}}
-  if(/timer\s*band|timer\s*cancel/.test(s)){timerCancel(false);out("⏱️ "+esc(LANG==="ru"?"Timer band":"Timer cancelled"));return true;}
+  if(/timer\s*band|timer\s*cancel|ٹائمر\s*بند/.test(s)){timerCancel(false);out("⏱️ "+esc(LANG==="ru"?"Timer band":"Timer cancelled"));return true;}
   // maps
   if(/ghar ka rasta|navigate home|ghar ka rasta dikhao/.test(s)){
     const home=localStorage.getItem("ja_home")||"";
     if(!home){const msg=LANG==="ru"?"Pehle Settings me ghar ka pata likhein":"Set your home address in Settings first";out("🗺️ "+esc(msg));nspeak(msg);return true;}
     try{if(hasBridge())Assistant.navigateTo(home);}catch(e){}
     const msg=LANG==="ru"?"Ghar ka rasta dikha raha hun":"Showing route home";out("🗺️ "+esc(msg));nspeak(msg);return true;}
-  m=s.match(/navigate to\s+(.+)/)||s.match(/(.+)\s+ka rasta dikhao/);
+  m=s.match(/navigate to\s+(.+)/)||s.match(/(.+)\s+ka rasta dikhao/)||s.match(/(.+)\s+کا\s+راستہ\s+دکھاو/);
   if(m){try{if(hasBridge())Assistant.navigateTo(m[1].trim());}catch(e){}
     const msg=(LANG==="ru"?"Rasta dikha raha hun: ":"Navigating to: ")+m[1].trim();out("🗺️ "+esc(msg));nspeak(msg);return true;}
   // volume
-  if(/volume\s*(kam|kam karo|down)/.test(s)){try{if(hasBridge())Assistant.volumeDown();}catch(e){}
+  if(/volume\s*(kam|kam karo|down)|آواز\s*کم/.test(s)){try{if(hasBridge())Assistant.volumeDown();}catch(e){}
     const msg=LANG==="ru"?"Volume kam kar diya":"Volume down";out("🔉 "+esc(msg));nspeak(msg);return true;}
-  if(/volume\s*(zyada|tez|up|barhao)/.test(s)){try{if(hasBridge())Assistant.volumeUp();}catch(e){}
+  if(/volume\s*(zyada|tez|up|barhao)|آواز\s*(زیادہ|تیز)/.test(s)){try{if(hasBridge())Assistant.volumeUp();}catch(e){}
     const msg=LANG==="ru"?"Volume zyada kar diya":"Volume up";out("🔊 "+esc(msg));nspeak(msg);return true;}
-  if(/silent\s*karo|khamosh\s*karo|mute\s*karo|chup\s*karo/.test(s)){try{if(hasBridge())Assistant.volumeMute();}catch(e){}
+  if(/silent\s*karo|khamosh\s*karo|mute\s*karo|chup\s*karo|خاموش\s*کرو/.test(s)){try{if(hasBridge())Assistant.volumeMute();}catch(e){}
     const msg=LANG==="ru"?"Silent kar diya":"Muted";out("🔇 "+esc(msg));nspeak(msg);return true;}
   // quran: "aaj ki ayat sunao"
   if(/aaj ki ayat|ayat sunao|quran.*(ayat|verse)|daily.*quran/.test(s)){tellQuran();return true;}
   // battery: "battery kitni hai?"
-  if(/battery/.test(s)){
+  if(/battery|بیٹری/.test(s)){
     let pct=-1,chg=false;
     try{if(hasBridge()){const j=JSON.parse(Assistant.getBattery()||"{}");pct=j.pct;chg=!!j.charging;}}catch(e){}
     if(pct<0){const msg=LANG==="ru"?"Battery ka pata nahi chal saka (Android app me kaam karega)":"Could not read battery (works in the Android app)";out("🔋 "+esc(msg));nspeak(msg);return true;}
@@ -974,11 +1090,12 @@ function parseExtra(s,raw){
   return false;
 }
 // hook into parseCommand fallback: try extras before giving up
+// v1.3: return true = command match ho gayi, false = koi match nahi (alternatives pipeline isay istemal karti hai)
 const _parseCommand=parseCommand;
 parseCommand=function(raw){
-  const s=raw.toLowerCase().trim();
-  if(parseExtra(s,raw))return;
-  _parseCommand(raw);
+  const s=normCmdStr(raw.toLowerCase().trim());
+  if(parseExtra(s,raw))return true;
+  return _parseCommand(raw)!==false;
 };
 
 /* ---------- setup wizard (first launch) ---------- */
