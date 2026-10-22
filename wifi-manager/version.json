@@ -1,1 +1,6 @@
-{"versionCode": 1, "versionName": "1.0", "apkUrl": "https://jilanapps.github.io/jilan-store/wifi-manager/wifi-manager.apk", "notes": "Jilan WiFi Manager v1.0: first release — guest WiFi password generator with rotation reminders and local history, scan-to-join guest QR maker with image sharing, and a step-by-step router control guide (guest network, password change, blocking unknown devices)."}
+{
+ "versionCode": 2,
+ "versionName": "1.1",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/wifi-manager/wifi-manager.apk",
+ "notes": "Jilan WiFi Manager v1.1: NEW Connected Devices dashboard — scan your WiFi to see how many phones/devices are connected (names, vendors, router and this-phone badges), plus a 'This phone since restart' data card. NEW Internet Speed Test — real ping, download and upload speeds via Cloudflare. Plus everything from v1.0: guest password generator with rotation reminders and history, guest QR maker, and the router control guide."
+}

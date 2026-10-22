@@ -1113,14 +1113,14 @@
    "apk": "https://jilanapps.github.io/jilan-store/wifi-manager/wifi-manager.apk",
    "category": "tools",
    "color": "#0b1a36",
-   "desc": "Guest WiFi toolkit for the owner — strong guest password generator with rotation reminders and local history, scan-to-join guest QR maker with image sharing, and a step-by-step router guide (guest network, password change, blocking unknown devices)",
+   "desc": "Guest WiFi toolkit for the owner — connected-devices dashboard (scan your network to see what is on your WiFi), internet speed test (ping, download, upload), strong guest password generator with rotation reminders and local history, scan-to-join guest QR maker with image sharing, and a step-by-step router guide (guest network, password change, blocking unknown devices)",
    "icon": "icons/wifimanager.png",
    "id": "wifimanager",
    "name": "Jilan WiFi Manager",
    "package": "com.jilanapps.wifimanager",
-   "size": 291286,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 315862,
+   "versionCode": 2,
+   "versionName": "1.1"
   }
  ],
  "store": {
