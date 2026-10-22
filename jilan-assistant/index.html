@@ -157,6 +157,12 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
     <div class="row" style="justify-content:center;align-items:center;gap:8px;margin-top:10px"><span class="note">🗣️ <span data-t="vcLang">Awaz ki zuban:</span></span><button class="btn ghost sm" id="vlangUr">اردو</button><button class="btn ghost sm" id="vlangEn">English</button></div>
     <div id="voiceOut"></div>
   </div>
+  <div class="card"><h3>🎙️ Hands-Free Mode</h3>
+    <div class="note" style="margin-bottom:8px">Orb ko hath lagaye baghair — sirf <b>"Jilan"</b> kahein, assistant jaag jayega. Phir apni command bolein. Jawab ke baad <b>20 second</b> tak baghair "Jilan" kahe mazeed commands bhi de sakte hain. Band karne ke liye bolein: <b>"so jao"</b>.</div>
+    <button class="btn" id="hfToggle" style="width:100%">▶️ Hands-Free ON karein</button>
+    <div class="note" id="hfStatus" style="margin-top:8px">Band hai</div>
+    <div class="note" style="margin-top:8px">ℹ️ Sach ye hai: ye mode sirf tab sunta hai jab <b>ON ho aur app chal rahi ho</b> (upar notification dikhega). <b>App band kar dein to ye nahi sunega</b> — screen off / doosri app se "Hey Google" ki tarah nahi jagta. Battery kuch zyada lagegi, aur mic chalne par Android ka <b>mic indicator</b> (hara nuqta) dikhega.</div>
+  </div>
   <div class="card"><div class="note" data-t="vcPerm">🔐 Pehli baar mic ki permission mange ga — "Allow" dabayein. Aap ki awaz phone se bahar nahi jati.</div></div>
 </div>
 <!-- GUIDE -->
@@ -168,7 +174,7 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
     • <b>Voice commands</b> (app kholo, call, alarm, light, timer, hisab...) <b>internet ke baghair bhi</b> chalte hain — basharte ke aap ne <b>offline speech pack</b> download kiya ho:<br>
     Google app → Settings → Voice → Offline speech recognition → <b>Urdu + English</b> download karein.<br>
     • 🤖 <b>AI Chat HAMESHA internet mangta hai</b> (Gemini API) — offline nahi chalega.<br>
-    • 🎙️ Baat karne ka tareeqa: <b>app ke andar mic button</b> dabayein. "Jilan" wake-word ya lock-screen voice <b>is version me nahi</b> hai.
+    • 🎙️ Baat karne ka tareeqa: <b>app ke andar mic button</b> dabayein — ya Voice tab me <b>Hands-Free Mode</b> ON karein, phir sirf <b>"Jilan"</b> kehne se assistant jaag jayega. Ye sirf app chalti halat me kaam karta hai; <b>lock-screen ya screen-off par nahi</b> sunta.
     </div>
   </div>
   <div id="guideList"></div></div>
@@ -227,13 +233,13 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
   </div>
 </div>
 <script>
-/* ===== Jilan Assistant v1.3 ===== */
+/* ===== Jilan Assistant v1.4 ===== */
 const $=id=>document.getElementById(id);
-const APPV="1.3";
+const APPV="1.4";
 // Gemini model: Google purana model retire kar de to SIRF ye line badlein
 const GEMINI_MODEL="gemini-3.8-flash";
 const hasBridge=()=>typeof window.Assistant!=="undefined"&&window.Assistant!==null;
-function nspeak(t){orbSpeak(t);try{if(hasBridge()){Assistant.speak(t);return true;}}catch(e){}
+function nspeak(t){orbSpeak(t);hfMarkSpoke(t);try{if(hasBridge()){Assistant.speak(t);return true;}}catch(e){}
   try{if("speechSynthesis" in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t));return true;}}catch(e){}return false;}
 /* JARVIS orb states: idle | listen | speak */
 let orbSpkT=null;
@@ -425,7 +431,9 @@ function updVLangBtns(){const u=$("vlangUr"),e=$("vlangEn");if(!u||!e)return;
   u.className="btn sm"+(vLang==="ur-PK"?"":" ghost");
   e.className="btn sm"+(vLang==="en-US"?"":" ghost");}
 function setVLang(l){vLang=l;localStorage.setItem("ja_vlang",l);updVLangBtns();
-  toast(l==="ur-PK"?"🗣️ Awaz ki zuban: اردو":"🗣️ Voice language: English");}
+  toast(l==="ur-PK"?"🗣️ Awaz ki zuban: اردو":"🗣️ Voice language: English");
+  // v1.4: hands-free chal raha ho to nayi zuban ke saath service restart
+  try{if(hfOn&&hfSupported()){Assistant.handsFreeStop();setTimeout(()=>{try{Assistant.handsFreeStart(l);}catch(e){}},400);}}catch(e){}}
 $("vlangUr").onclick=()=>setVLang("ur-PK");
 $("vlangEn").onclick=()=>setVLang("en-US");
 updVLangBtns();
@@ -526,13 +534,14 @@ function runVoiceAlts(alts){
   if(Date.now()-singleAt<2500&&singleBest===alts[0])return; // onVoiceResult pehle hi isay chala chuka
   altsAt=Date.now();altsBest=alts[0];
   resetVoiceUI();
-  if(voiceRouteMode(alts[0])){prependHeard(alts[0]);return;}
+  if(voiceRouteMode(alts[0])){prependHeard(alts[0]);hfArmFinish();return;}
   window.__jaProbe=true;
   let used=null;
   for(const a of alts){if(parseCommand(a)){used=a;break;}}
   window.__jaProbe=false;
-  if(used){prependHeard(used);return;}
+  if(used){prependHeard(used);hfArmFinish();return;}
   noMatchFallback(alts[0]);
+  hfArmFinish();
 }
 // called by native bridge (v1.3 APK): tamam alternatives JSON array ki surat me
 function onVoiceAlts(json){
@@ -544,12 +553,13 @@ function onVoiceResult(txt){
   if(Date.now()-altsAt<2500&&altsBest===txt)return; // isi utterance ke alternatives chal chuke hain
   singleAt=Date.now();singleBest=txt;
   resetVoiceUI();
-  if(voiceRouteMode(txt)){prependHeard(txt);return;}
+  if(voiceRouteMode(txt)){prependHeard(txt);hfArmFinish();return;}
   window.__jaProbe=true;
   const ok=parseCommand(txt);
   window.__jaProbe=false;
-  if(ok){prependHeard(txt);return;}
+  if(ok){prependHeard(txt);hfArmFinish();return;}
   noMatchFallback(txt);
+  hfArmFinish();
 }
 function onVoiceError(c){
   resetVoiceUI();
@@ -562,6 +572,94 @@ function onVoiceError(c){
     return;
   }
   voiceFail(LANG==="ru"?"Awaz samajh nahi aayi, dobara bolein":"Could not understand, please try again");
+}
+
+/* ---------- v1.4: Hands-Free Mode (wake word "Jilan", orb chhuye baghair) ----------
+   Asal sunna native foreground service karti hai (HandsFreeService); ye hissa
+   sirf UI state, callbacks aur "jawab khatam -> dobara suno" ka signal sambhalta hai.
+   Sach jo UI par bhi likha hai: ye OS-level hotword NAHI — mode ON ho aur app chal
+   rahi ho tab hi sunta hai; app band ho to nahi sunega. */
+let hfOn=false,hfStateStr="off";
+let hfCmdPending=false,hfRouteAt=0,hfSpokeUntil=0,hfFinishTimer=null,hfLastTyping=0;
+function hfSupported(){return hasBridge()&&typeof Assistant.handsFreeStart==="function";}
+function hfMarkSpoke(txt){try{hfSpokeUntil=Math.max(hfSpokeUntil,Date.now()+Math.min(12000,900+String(txt||"").length*80));}catch(e){}}
+function hfTtsNudge(){if(Date.now()<hfSpokeUntil)hfSpokeUntil=Date.now();hfArmFinish();}
+// called by native bridge (sirf hands-free service chalne par, "ja1" utterance khatam par)
+function onNspeakDone(){hfTtsNudge();}
+// called by native bridge: command utterance pipeline se pehle — ye utterance hands-free se aayi hai
+function onHandsFreeBegin(){hfCmdPending=true;hfRouteAt=Date.now();hfSpokeUntil=0;hfLastTyping=0;clearTimeout(hfFinishTimer);}
+function hfArmFinish(){if(!hfCmdPending)return;clearTimeout(hfFinishTimer);hfFinishTimer=setTimeout(hfFinishCheck,350);}
+function hfFinishCheck(){
+  if(!hfCmdPending)return;
+  const now=Date.now();
+  let typing=null;try{typing=document.querySelector("#chat .typing");}catch(e){}
+  if(typing){hfLastTyping=now;hfFinishTimer=setTimeout(hfFinishCheck,450);return;}
+  if(hfLastTyping&&now-hfLastTyping<700){hfFinishTimer=setTimeout(hfFinishCheck,300);return;} // AI jawab abhi aaya — speakReply ka spoke-mark lagne dein
+  if(now<hfSpokeUntil){hfFinishTimer=setTimeout(hfFinishCheck,Math.min(500,Math.max(60,hfSpokeUntil-now+50)));return;}
+  if(now-hfRouteAt<800){hfFinishTimer=setTimeout(hfFinishCheck,250);return;}
+  hfCmdPending=false;
+  try{if(hfSupported()&&typeof Assistant.handsFreeResume==="function")Assistant.handsFreeResume();}catch(e){}
+}
+// called by native bridge: wake word sunai diya
+function onHandsFreeWake(){
+  try{$("micBig").classList.add("lis");}catch(e){}
+  orbState("listen");
+  try{$("micState").textContent=LANG==="ru"?"🎙️ Jaag gaya — boliye!":"🎙️ Awake — speak!";}catch(e){}
+  nspeak(LANG==="ru"?"Ji, boliye?":"Yes, go ahead?");
+}
+// called by native bridge: service ki halat badli (notification se stop bhi yahin aata hai)
+function onHandsFreeState(s){
+  hfStateStr=s||"off";hfOn=!!(s&&s!=="off");
+  try{localStorage.setItem("ja_handsfree",hfOn?"1":"0");}catch(e){}
+  if(!hfOn){hfCmdPending=false;clearTimeout(hfFinishTimer);try{$("micBig").classList.remove("lis");}catch(e){}orbState("idle");}
+  updHfUI();
+}
+function updHfUI(){
+  const b=$("hfToggle"),st=$("hfStatus");if(!b||!st)return;
+  const R=LANG==="ru";
+  if(!hasBridge()){b.style.display="none";st.textContent=R?"Hands-Free sirf Android app me chalta hai":"Hands-Free works in the Android app only";return;}
+  if(!hfSupported()){b.style.display="none";
+    st.innerHTML="⚠️ "+(R?"Is feature ke liye app update (v1.4) lagayein":"Update the app (v1.4) to use this feature")
+      +'<br><a class="btn sm gold" style="display:inline-block;margin-top:6px;text-decoration:none" href="https://jilanapps.github.io/jilan-store/jilan-assistant/jilan-assistant.apk">⬇ Update</a>';return;}
+  b.style.display="";b.textContent=hfOn?"⏹️ Hands-Free BAND karein":"▶️ Hands-Free ON karein";
+  b.className="btn"+(hfOn?" gold":"");
+  st.textContent=!hfOn?(R?"Band hai":"Off")
+    :hfStateStr==="command"?(R?"Jaag gaya — boliye!":"Awake — speak your command!")
+    :(R?"Sun raha hun… 'Jilan' kahein":"Listening… say 'Jilan'");
+}
+function initHandsFree(){
+  updHfUI();
+  if(!hfSupported())return;
+  try{const st=Assistant.handsFreeState();if(st&&st!=="off"){onHandsFreeState(st);return;}}catch(e){}
+  // pichli baar ON chhoda tha to dobara khud shuru kar dein (app foreground me hai)
+  try{if(localStorage.getItem("ja_handsfree")==="1")Assistant.handsFreeStart(vLang);}catch(e){}
+}
+$("hfToggle").onclick=()=>{
+  if(!hasBridge()){toast("📱 Android app me kholein");return;}
+  if(!hfSupported()){updHfUI();toast("⬇ Pehle app update (v1.4) lagayein");return;}
+  try{
+    if(hfOn)Assistant.handsFreeStop();
+    else{Assistant.handsFreeStart(vLang);$("hfStatus").textContent=LANG==="ru"?"Shuru ho raha hai…":"Starting…";}
+  }catch(e){toast("⚠️");}
+};
+/* hands-free band karne ki boli hui commands — sirf mode active ho tab.
+   Anchored patterns taake "light band karo" jaisi asli commands na kha jayein.
+   (normCmdStr ؤ ko و bana deta hai — is liye جاو wali shaklein bhi rakhi hain.) */
+function isHfExitCmd(s){
+  const x=(s||"").replace(/\s+/g," ").trim();
+  if(/stop listening/.test(x))return true;
+  if(/^(jilan\s+|جیلان\s+)?(so jao|so ja|سو جاؤ|سو جاو|سو جا)$/.test(x))return true;
+  if(/^(band karo|band kar do|بند کرو|سننا بند کرو|سننا بند کر دو)$/.test(x))return true;
+  if(/^(chup karo|chup kar|چپ کرو|چپ کر)$/.test(x))return true;
+  return false;
+}
+function hfExitNow(){
+  hfCmdPending=false;clearTimeout(hfFinishTimer);
+  nspeak(LANG==="ru"?"Theek hai, main so jata hun":"OK, going to sleep"); // pehle bolna, phir band — warna awaz kat jayegi
+  hfOn=false;hfStateStr="off";
+  try{localStorage.setItem("ja_handsfree","0");}catch(e){}
+  updHfUI();
+  setTimeout(()=>{try{if(hfSupported())Assistant.handsFreeStop();}catch(e){}},2000);
 }
 
 /* ---------- app open map ---------- */
@@ -768,10 +866,10 @@ function updToggles(){const a=$("spkBtn"),b=$("autoBtn");if(!a)return;
   a.textContent=speakerOn?"🔊 Voice: ON":"🔇 Voice: OFF";
   b.textContent=autoListen?"🔁 Auto-listen: ON":"🔁 Auto-listen: OFF";}
 function stopSpeak(){try{if(hasBridge())Assistant.stopSpeak();}catch(e){}try{if("speechSynthesis" in window)speechSynthesis.cancel();}catch(e){}}
-function speakReply(txt){if(!speakerOn||!txt)return;orbSpeak(txt);
+function speakReply(txt){if(!speakerOn||!txt)return;orbSpeak(txt);hfMarkSpoke(txt);
   if(hasBridge()){try{Assistant.speakChat(txt);return;}catch(e){}}
   try{if("speechSynthesis" in window){const u=new SpeechSynthesisUtterance(txt);u.lang="ur-PK";u.onend=()=>onTtsDone();speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
-function onTtsDone(){if(autoListen){voiceMode="aichat";setTimeout(()=>{try{startVoice();}catch(e){}},500);}}
+function onTtsDone(){try{hfTtsNudge();}catch(e){}if(autoListen){voiceMode="aichat";setTimeout(()=>{try{startVoice();}catch(e){}},500);}}
 $("spkBtn").onclick=()=>{speakerOn=!speakerOn;localStorage.setItem("ja_spk",speakerOn?"1":"0");updToggles();if(!speakerOn)stopSpeak();};
 $("autoBtn").onclick=()=>{autoListen=!autoListen;localStorage.setItem("ja_auto",autoListen?"1":"0");updToggles();toast(autoListen?"🔁 Auto-listen ON":"🔁 Auto-listen OFF");};
 $("aiMic").onclick=()=>{stopSpeak();voiceMode="aichat";startVoice();go("s-ai");};
@@ -1094,6 +1192,7 @@ function parseExtra(s,raw){
 const _parseCommand=parseCommand;
 parseCommand=function(raw){
   const s=normCmdStr(raw.toLowerCase().trim());
+  if(hfOn&&isHfExitCmd(s)){hfExitNow();return true;} // v1.4: "so jao / band karo" — sirf hands-free active ho tab
   if(parseExtra(s,raw))return true;
   return _parseCommand(raw)!==false;
 };
@@ -1133,7 +1232,7 @@ if("serviceWorker" in navigator){
 }
 
 /* ---------- init ---------- */
-applyLang();renderGuide();renderAll();renderChat();loadSettings();refreshA11y();updToggles();updNet();
+applyLang();renderGuide();renderAll();renderChat();loadSettings();refreshA11y();updToggles();updNet();initHandsFree();
 if(!localStorage.getItem("ja_setup_done"))setTimeout(showWizard,900);
 if(!localStorage.getItem(LS_KEY))$("aiSetup").classList.remove("hidden");
 rescheduleNamaz();
