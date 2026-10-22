@@ -289,9 +289,9 @@
    "id": "smartcam",
    "name": "Jilan Smart Camera",
    "package": "com.jilanapps.smartcam",
-   "size": 94815,
-   "versionCode": 7,
-   "versionName": "1.6",
+   "size": 103007,
+   "versionCode": 8,
+   "versionName": "1.7",
    "web": "https://jilanapps.github.io/jilan-store/smart-camera/"
   },
   {
@@ -312,14 +312,14 @@
    "id": "waweb",
    "name": "WA Web",
    "package": "com.jilanapps.waweb",
-   "versionCode": 3,
-   "versionName": "2.1",
+   "versionCode": 4,
+   "versionName": "2.2",
    "apk": "https://jilanapps.github.io/jilan-store/wa-web/wa-web.apk",
    "category": "tools",
    "color": "#25D366",
    "desc": "Run 4 WhatsApp accounts on one phone — each slot is a separate WhatsApp Web session (QR scan), login stays saved",
    "icon": "icons/waweb.png",
-   "size": 49622
+   "size": 57814
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/emi-calculator/emi-calculator.apk",
@@ -526,9 +526,9 @@
    "id": "voicerecorder",
    "name": "Jilan Voice Recorder",
    "package": "com.jilanapps.voicerecorder",
-   "size": 107038,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 111134,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/voice-recorder/"
   },
   {
@@ -554,9 +554,9 @@
    "icon": "icons/screenrecorder.png",
    "apk": "https://jilanapps.github.io/jilan-store/screen-recorder/screenrecorder.apk",
    "web": "https://jilanapps.github.io/jilan-store/screen-recorder/",
-   "versionCode": 2,
-   "versionName": "1.1",
-   "size": 25264,
+   "versionCode": 3,
+   "versionName": "1.2",
+   "size": 33456,
    "color": "#0b1120"
   },
   {
@@ -1092,9 +1092,9 @@
    "id": "qrscanner",
    "name": "Jilan QR Scanner",
    "package": "com.jilanapps.qrscanner",
-   "size": 287190,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 291286,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/imei-check/imei-check.apk",

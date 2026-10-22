@@ -1,1 +1,9 @@
-{"versionCode": 7, "versionName": "1.6", "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-smart-camera.apk", "notes": "Jilan Smart Camera v1.6: in-app Update button added, new icon."}
+{
+ "app": "smartcam",
+ "package": "com.jilanapps.smartcam",
+ "versionCode": 8,
+ "versionName": "1.7",
+ "apk": "https://jilanapps.github.io/jilan-store/jilan-smart-camera.apk",
+ "size": 103007,
+ "notes": "One-tap auto-update: this app now downloads new versions in the background and shows a tap-to-install banner when an update is ready."
+}

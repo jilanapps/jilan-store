@@ -1,6 +1,9 @@
 {
- "versionCode": 3,
- "versionName": "2.1",
- "apkUrl": "https://jilanapps.github.io/jilan-store/wa-web/wa-web.apk",
- "notes": "WA Web v2.1: in-app Update button added, new icon."
+ "app": "waweb",
+ "package": "com.jilanapps.waweb",
+ "versionCode": 4,
+ "versionName": "2.2",
+ "apk": "https://jilanapps.github.io/jilan-store/wa-web/wa-web.apk",
+ "size": 57814,
+ "notes": "One-tap auto-update: this app now downloads new versions in the background and shows a tap-to-install banner when an update is ready."
 }
