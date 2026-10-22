@@ -275,9 +275,9 @@
    "id": "engseekho",
    "name": "English Bolna Seekho",
    "package": "com.jilanapps.engseekho",
-   "size": 82457,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 90649,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/english-seekho/"
   },
   {
@@ -303,9 +303,9 @@
    "id": "jilanassistant",
    "name": "Jilan Assistant",
    "package": "com.jilanapps.jilanassistant",
-   "size": 382504,
-   "versionCode": 3,
-   "versionName": "1.2",
+   "size": 402984,
+   "versionCode": 6,
+   "versionName": "1.5",
    "web": "https://jilanapps.github.io/jilan-store/jilan-assistant/"
   },
   {
@@ -819,9 +819,9 @@
    "id": "allboards",
    "name": "Jilan All Boards Result",
    "package": "com.jilanapps.allboards",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/vehicle-info/vehicle-info.apk",
@@ -845,9 +845,9 @@
    "id": "fuelrelief",
    "name": "Jilan Fuel Relief",
    "package": "com.jilanapps.fuelrelief",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/flight-info/flight-info.apk",
@@ -858,9 +858,9 @@
    "id": "flightinfo",
    "name": "Jilan Flight Info",
    "package": "com.jilanapps.flightinfo",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/nadra-services/nadra-services.apk",
@@ -1027,9 +1027,9 @@
    "id": "bmicalc",
    "name": "Jilan BMI Calculator",
    "package": "com.jilanapps.bmicalc",
-   "size": 20950,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/currency-converter/currency-converter.apk",
@@ -1040,9 +1040,9 @@
    "id": "currencyconverter",
    "name": "Jilan Currency Converter",
    "package": "com.jilanapps.currencyconverter",
-   "size": 33238,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 37334,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/hijri-calendar/hijri-calendar.apk",
@@ -1066,9 +1066,9 @@
    "id": "hajjguide",
    "name": "Jilan Hajj Umrah Guide",
    "package": "com.jilanapps.hajjguide",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/first-aid/first-aid.apk",
@@ -1079,9 +1079,9 @@
    "id": "firstaid",
    "name": "Jilan First Aid",
    "package": "com.jilanapps.firstaid",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/qr-scanner/qr-scanner.apk",
@@ -1118,9 +1118,9 @@
    "id": "wifimanager",
    "name": "Jilan WiFi Manager",
    "package": "com.jilanapps.wifimanager",
-   "size": 315862,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 319958,
+   "versionCode": 3,
+   "versionName": "1.2"
   }
  ],
  "store": {
