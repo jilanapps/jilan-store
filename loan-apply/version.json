@@ -1,1 +1,7 @@
-{"versionCode": 6, "versionName": "1.5", "apkUrl": "https://jilanapps.github.io/jilan-store/loan-apply/loan-apply.apk", "notes": "Jilan Loan Apply v1.5: in-app Update button added."}
+{
+ "versionCode": 7,
+ "versionName": "1.6",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/loan-apply/loan-apply.apk",
+ "notes": "v1.6: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
+ "size": 45526
+}

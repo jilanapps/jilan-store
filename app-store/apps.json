@@ -595,9 +595,9 @@
    "apk": "https://jilanapps.github.io/jilan-store/urdu-dictionary/urdudictionary.apk",
    "web": "https://jilanapps.github.io/jilan-store/urdu-dictionary/",
    "package": "com.jilanapps.urdudictionary",
-   "versionCode": 2,
-   "versionName": "1.1",
-   "size": 107257,
+   "versionCode": 3,
+   "versionName": "1.2",
+   "size": 111353,
    "category": "education",
    "color": "#e8b93c"
   },
@@ -610,9 +610,9 @@
    "id": "docscanner",
    "name": "Jilan Doc Scanner",
    "package": "com.jilanapps.docscanner",
-   "size": 37706,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 45898,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/doc-scanner/"
   },
   {
@@ -624,9 +624,9 @@
    "id": "loanapply",
    "name": "Jilan Loan Apply",
    "package": "com.jilanapps.loanapply",
-   "size": 41430,
-   "versionCode": 6,
-   "versionName": "1.5"
+   "size": 45526,
+   "versionCode": 7,
+   "versionName": "1.6"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/bisp-check/bisp-check.apk",
@@ -637,9 +637,9 @@
    "id": "bispcheck",
    "name": "Jilan BISP Check",
    "package": "com.jilanapps.bispcheck",
-   "size": 29142,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/mepco-bill/mepco-bill.apk",
@@ -650,9 +650,9 @@
    "id": "mepcobill",
    "name": "Jilan MEPCO Bill",
    "package": "com.jilanapps.mepcobill",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/vehicle-check/vehicle-check.apk",
@@ -663,9 +663,9 @@
    "id": "vehiclecheck",
    "name": "Jilan Vehicle Check",
    "package": "com.jilanapps.vehiclecheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/fard-check/fard-check.apk",
@@ -676,9 +676,9 @@
    "id": "fardcheck",
    "name": "Jilan Fard Check",
    "package": "com.jilanapps.fardcheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/pta-check/pta-check.apk",
@@ -689,9 +689,9 @@
    "id": "ptacheck",
    "name": "Jilan PTA Check",
    "package": "com.jilanapps.ptacheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/e-challan/e-challan.apk",
@@ -702,9 +702,9 @@
    "id": "echallan",
    "name": "Jilan E-Challan",
    "package": "com.jilanapps.echallan",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/cnic-tracking/cnic-tracking.apk",
@@ -715,9 +715,9 @@
    "id": "cnictracking",
    "name": "Jilan CNIC Tracking",
    "package": "com.jilanapps.cnictracking",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/board-result/board-result.apk",
@@ -728,9 +728,9 @@
    "id": "boardresult",
    "name": "Jilan Board Result",
    "package": "com.jilanapps.boardresult",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/gas-bill/gas-bill.apk",
@@ -741,9 +741,9 @@
    "id": "gasbill",
    "name": "Jilan Gas Bill",
    "package": "com.jilanapps.gasbill",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/sim-check/sim-check.apk",
@@ -754,9 +754,9 @@
    "id": "simcheck",
    "name": "Jilan SIM Check",
    "package": "com.jilanapps.simcheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/passport-tracking/passport-tracking.apk",
@@ -767,9 +767,9 @@
    "id": "passporttracking",
    "name": "Jilan Passport Tracking",
    "package": "com.jilanapps.passporttracking",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/license-check/license-check.apk",
@@ -780,9 +780,9 @@
    "id": "licensecheck",
    "name": "Jilan License Check",
    "package": "com.jilanapps.licensecheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 33238,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/filer-check/filer-check.apk",
@@ -793,9 +793,9 @@
    "id": "filercheck",
    "name": "Jilan Filer Check",
    "package": "com.jilanapps.filercheck",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/train-ticket/train-ticket.apk",
@@ -806,9 +806,9 @@
    "id": "trainticket",
    "name": "Jilan Train Ticket",
    "package": "com.jilanapps.trainticket",
-   "size": 25046,
-   "versionCode": 2,
-   "versionName": "1.1"
+   "size": 29142,
+   "versionCode": 3,
+   "versionName": "1.2"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/all-boards/all-boards.apk",
