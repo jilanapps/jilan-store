@@ -23,9 +23,9 @@
    "id": "naatworld",
    "name": "Jilan Naat World",
    "package": "com.jilanapps.naatworld",
-   "size": 98865,
-   "versionCode": 2,
-   "versionName": "2.0",
+   "size": 102937,
+   "versionCode": 3,
+   "versionName": "2.1",
    "web": "https://jilanapps.github.io/jilan-store/naat-world/"
   },
   {
@@ -37,9 +37,9 @@
    "id": "snakezone",
    "name": "Jilan Snake Zone",
    "package": "com.jilanapps.snakezone",
-   "size": 25113,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 29209,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/snake-zone/"
   },
   {
@@ -51,9 +51,9 @@
    "id": "ludodangal",
    "name": "Ludo Dangal",
    "package": "com.jilanapps.ludodangal",
-   "size": 45802,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 78570,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/ludo-dangal/"
   },
   {
@@ -65,9 +65,9 @@
    "id": "sadoh",
    "name": "Sadoh",
    "package": "com.jilanapps.sadoh",
-   "size": 29209,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 33305,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/sadoh/"
   },
   {
@@ -79,9 +79,9 @@
    "id": "jilangames",
    "name": "Jilan Games",
    "package": "com.jilanapps.games",
-   "size": 33329,
-   "versionCode": 8,
-   "versionName": "1.3",
+   "size": 82577,
+   "versionCode": 9,
+   "versionName": "1.4",
    "web": "https://jilanapps.github.io/jilan-store/games/"
   },
   {
@@ -93,9 +93,9 @@
    "id": "jilanaichat",
    "name": "Jilan AI Chat",
    "package": "com.jilanapps.jilanaichat",
-   "size": 259613,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 218653,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/jilan-ai-chat/"
   },
   {
@@ -107,9 +107,9 @@
    "id": "jilanstore",
    "name": "Jilan Store",
    "package": "com.jilanapps.jstore",
-   "size": 324193,
-   "versionCode": 4,
-   "versionName": "1.3",
+   "size": 66138,
+   "versionCode": 5,
+   "versionName": "1.4",
    "web": "https://jilanapps.github.io/jilan-store/"
   },
   {
@@ -121,9 +121,9 @@
    "id": "virtualtradepro",
    "name": "Virtual Trade Pro",
    "package": "com.jilanapps.virtualtradepro",
-   "size": 21137,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 66193,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/virtual-trade-pro/"
   },
   {
@@ -135,9 +135,9 @@
    "id": "wamanager",
    "name": "Jilan Business Manager",
    "package": "com.jilanapps.wamanager",
-   "size": 29209,
-   "versionCode": 2,
-   "versionName": "1.0",
+   "size": 62097,
+   "versionCode": 3,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/wa-manager/"
   },
   {
@@ -177,9 +177,9 @@
    "id": "jilancamera",
    "name": "Jilan Camera",
    "package": "com.jilanapps.filtercamera",
-   "size": 70169,
-   "versionCode": 2,
-   "versionName": "1.0",
+   "size": 57881,
+   "versionCode": 3,
+   "versionName": "1.1",
    "web": ""
   },
   {
@@ -191,9 +191,9 @@
    "id": "jilangallery",
    "name": "Jilan Gallery",
    "package": "com.jilanapps.gallerylock",
-   "size": 74289,
-   "versionCode": 13,
-   "versionName": "1.4",
+   "size": 70169,
+   "versionCode": 14,
+   "versionName": "1.5",
    "web": ""
   },
   {
@@ -205,9 +205,9 @@
    "id": "voicerec",
    "name": "Jilan Voice Recorder",
    "package": "com.jilanapps.voicerec",
-   "size": 66006,
-   "versionCode": 11,
-   "versionName": "1.0",
+   "size": 98774,
+   "versionCode": 12,
+   "versionName": "1.1",
    "web": ""
   },
   {
@@ -219,9 +219,9 @@
    "id": "translator",
    "name": "Jilan Translator",
    "package": "com.jilanapps.translator",
-   "size": 41497,
-   "versionCode": 2,
-   "versionName": "1.0",
+   "size": 90649,
+   "versionCode": 3,
+   "versionName": "1.1",
    "web": ""
   },
   {
@@ -233,9 +233,9 @@
    "id": "khata",
    "name": "Jilan Khata",
    "package": "com.jilanapps.khata",
-   "size": 45593,
-   "versionCode": 2,
-   "versionName": "1.0",
+   "size": 49689,
+   "versionCode": 4,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -247,9 +247,9 @@
    "id": "expense",
    "name": "Jilan Expense Tracker",
    "package": "com.jilanapps.expense",
-   "size": 41497,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 53785,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": ""
   },
   {
@@ -261,9 +261,9 @@
    "id": "calcvault",
    "name": "Calc Vault",
    "package": "com.jilanapps.calcvault",
-   "size": 373481,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 107241,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": ""
   },
   {
@@ -275,9 +275,9 @@
    "id": "qrkit",
    "name": "QR Business Kit",
    "package": "com.jilanapps.qrkit",
-   "size": 143897,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 176665,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/qr-kit/"
   },
   {
@@ -289,9 +289,9 @@
    "id": "engseekho",
    "name": "English Bolna Seekho",
    "package": "com.jilanapps.engseekho",
-   "size": 45593,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 82457,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/english-seekho/"
   },
   {
@@ -303,9 +303,9 @@
    "id": "smartcam",
    "name": "Jilan Smart Camera",
    "package": "com.jilanapps.smartcam",
-   "size": 1311281,
-   "versionCode": 6,
-   "versionName": "1.5",
+   "size": 94815,
+   "versionCode": 7,
+   "versionName": "1.6",
    "web": "https://jilanapps.github.io/jilan-store/smart-camera/"
   },
   {
@@ -317,23 +317,23 @@
    "id": "jilanassistant",
    "name": "Jilan Assistant",
    "package": "com.jilanapps.jilanassistant",
-   "size": 173608,
-   "versionCode": 2,
-   "versionName": "1.1",
+   "size": 382504,
+   "versionCode": 3,
+   "versionName": "1.2",
    "web": "https://jilanapps.github.io/jilan-store/jilan-assistant/"
   },
   {
    "id": "waweb",
    "name": "WA Web",
    "package": "com.jilanapps.waweb",
-   "versionCode": 2,
-   "versionName": "2.0",
+   "versionCode": 3,
+   "versionName": "2.1",
    "apk": "https://jilanapps.github.io/jilan-store/wa-web/wa-web.apk",
    "category": "tools",
    "color": "#25D366",
    "desc": "Run 4 WhatsApp accounts on one phone — each slot is a separate WhatsApp Web session (QR scan), login stays saved",
    "icon": "icons/waweb.png",
-   "size": 20950
+   "size": 49622
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/emi-calculator/emi-calculator.apk",
@@ -344,9 +344,9 @@
    "id": "emi",
    "name": "EMI Calculator",
    "package": "com.jilanapps.emicalculator",
-   "size": 12825,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 57877,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/emi-calculator/"
   },
   {
@@ -358,9 +358,9 @@
    "id": "cv",
    "name": "CV Maker",
    "package": "com.jilanapps.cvmaker",
-   "size": 16921,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 49685,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/cv-maker/"
   },
   {
@@ -372,9 +372,9 @@
    "id": "gold",
    "name": "Gold Rate",
    "package": "com.jilanapps.goldrate",
-   "size": 16921,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 78357,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/gold-rate/"
   },
   {
@@ -386,9 +386,9 @@
    "id": "age",
    "name": "Age Calculator",
    "package": "com.jilanapps.agecalculator",
-   "size": 16921,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 53781,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/age-calculator/"
   },
   {
@@ -400,9 +400,9 @@
    "id": "naam",
    "name": "Islami Naam",
    "package": "com.jilanapps.islaminaam",
-   "size": 16921,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 66069,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/islami-naam/"
   },
   {
@@ -415,9 +415,9 @@
    "category": "business",
    "color": "#e8b93c",
    "desc": "Jilan Apps — services, portfolio, FAQ aur contact",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 2237641
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 2241733
   },
   {
    "id": "visitingcard",
@@ -429,9 +429,9 @@
    "category": "tools",
    "color": "#e8b93c",
    "desc": "Digital visiting card — WhatsApp share, vCard save, call",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 16921
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 21013
   },
   {
    "id": "followup",
@@ -443,9 +443,9 @@
    "category": "tools",
    "color": "#e8b93c",
    "desc": "Lead follow-up reminder — kabhi client na bhoolo",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 12825
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 16917
   },
   {
    "id": "shop",
@@ -457,9 +457,9 @@
    "category": "shopping",
    "color": "#e8b93c",
    "desc": "Online shopping — 1400+ products, cash on delivery",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 103060
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 103056
   },
   {
    "id": "quboolhai",
@@ -469,9 +469,9 @@
    "web": "https://jilanapps.github.io/jilan-store/qubool-hai/",
    "apk": "https://jilanapps.github.io/jilan-store/qubool-hai/qubool-hai.apk",
    "package": "com.jilanapps.quboolhai",
-   "versionCode": 2,
-   "versionName": "1.1",
-   "size": 119380,
+   "versionCode": 3,
+   "versionName": "1.2",
+   "size": 119376,
    "category": "social",
    "color": "#e8b93c"
   },
@@ -483,9 +483,9 @@
    "web": "https://jilanapps.github.io/jilan-store/attendance-scanner/",
    "apk": "https://jilanapps.github.io/jilan-store/attendance-scanner/attendance-scanner.apk",
    "package": "com.jilanapps.attendance",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 98778,
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 102870,
    "category": "utility",
    "color": "#e8b93c"
   },
@@ -499,8 +499,8 @@
    "name": "Jilan Msg Saver",
    "package": "com.jilanapps.msgsaver",
    "size": 33533,
-   "versionCode": 3,
-   "versionName": "1.2",
+   "versionCode": 4,
+   "versionName": "1.3",
    "web": "https://jilanapps.github.io/jilan-store/msg-saver/"
   },
   {
@@ -512,8 +512,8 @@
    "icon": "icons/cctvviewer.png",
    "apk": "https://jilanapps.github.io/jilan-store/cctv-viewer/cctvviewer.apk",
    "web": "https://jilanapps.github.io/jilan-store/cctv-viewer/",
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "size": 37638,
    "color": "#0b1120"
   },
@@ -526,9 +526,9 @@
    "icon": "icons/weatherapp.png",
    "apk": "https://jilanapps.github.io/jilan-store/weather-app/weather.apk",
    "web": "https://jilanapps.github.io/jilan-store/weather-app/",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 37484,
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 41580,
    "color": "#0b1120"
   },
   {
@@ -540,9 +540,9 @@
    "id": "voicerecorder",
    "name": "Jilan Voice Recorder",
    "package": "com.jilanapps.voicerecorder",
-   "size": 102942,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "size": 107038,
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/voice-recorder/"
   },
   {
@@ -555,8 +555,8 @@
    "name": "Jilan Music Player",
    "package": "com.jilanapps.musicplayer",
    "size": 49629,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/music-player/"
   },
   {
@@ -568,8 +568,8 @@
    "icon": "icons/screenrecorder.png",
    "apk": "https://jilanapps.github.io/jilan-store/screen-recorder/screenrecorder.apk",
    "web": "https://jilanapps.github.io/jilan-store/screen-recorder/",
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "size": 25264,
    "color": "#0b1120"
   },
@@ -583,8 +583,8 @@
    "name": "Jilan Call Recorder",
    "package": "com.jilanapps.callrecorder",
    "size": 131835,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/call-recorder/"
   },
   {
@@ -595,9 +595,9 @@
    "apk": "https://jilanapps.github.io/jilan-store/app-lock/applock.apk",
    "web": "https://jilanapps.github.io/jilan-store/app-lock/",
    "package": "com.jilanapps.applock",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 135729,
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 139825,
    "category": "utility",
    "color": "#e8b93c"
   },
@@ -609,9 +609,9 @@
    "apk": "https://jilanapps.github.io/jilan-store/urdu-dictionary/urdudictionary.apk",
    "web": "https://jilanapps.github.io/jilan-store/urdu-dictionary/",
    "package": "com.jilanapps.urdudictionary",
-   "versionCode": 1,
-   "versionName": "1.0",
-   "size": 103161,
+   "versionCode": 2,
+   "versionName": "1.1",
+   "size": 107257,
    "category": "education",
    "color": "#e8b93c"
   },
@@ -625,8 +625,8 @@
    "name": "Jilan Doc Scanner",
    "package": "com.jilanapps.docscanner",
    "size": 37706,
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/doc-scanner/"
   },
   {
@@ -638,9 +638,9 @@
    "id": "loanapply",
    "name": "Jilan Loan Apply",
    "package": "com.jilanapps.loanapply",
-   "size": 37334,
-   "versionCode": 5,
-   "versionName": "1.4"
+   "size": 41430,
+   "versionCode": 6,
+   "versionName": "1.5"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/bisp-check/bisp-check.apk",
@@ -651,9 +651,9 @@
    "id": "bispcheck",
    "name": "Jilan BISP Check",
    "package": "com.jilanapps.bispcheck",
-   "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 29142,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/mepco-bill/mepco-bill.apk",
@@ -664,9 +664,9 @@
    "id": "mepcobill",
    "name": "Jilan MEPCO Bill",
    "package": "com.jilanapps.mepcobill",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/vehicle-check/vehicle-check.apk",
@@ -677,9 +677,9 @@
    "id": "vehiclecheck",
    "name": "Jilan Vehicle Check",
    "package": "com.jilanapps.vehiclecheck",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/fard-check/fard-check.apk",
@@ -690,9 +690,9 @@
    "id": "fardcheck",
    "name": "Jilan Fard Check",
    "package": "com.jilanapps.fardcheck",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/pta-check/pta-check.apk",
@@ -703,9 +703,9 @@
    "id": "ptacheck",
    "name": "Jilan PTA Check",
    "package": "com.jilanapps.ptacheck",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/e-challan/e-challan.apk",
@@ -716,9 +716,9 @@
    "id": "echallan",
    "name": "Jilan E-Challan",
    "package": "com.jilanapps.echallan",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/cnic-tracking/cnic-tracking.apk",
@@ -729,9 +729,9 @@
    "id": "cnictracking",
    "name": "Jilan CNIC Tracking",
    "package": "com.jilanapps.cnictracking",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/board-result/board-result.apk",
@@ -742,9 +742,9 @@
    "id": "boardresult",
    "name": "Jilan Board Result",
    "package": "com.jilanapps.boardresult",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/gas-bill/gas-bill.apk",
@@ -755,9 +755,9 @@
    "id": "gasbill",
    "name": "Jilan Gas Bill",
    "package": "com.jilanapps.gasbill",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/sim-check/sim-check.apk",
@@ -768,9 +768,9 @@
    "id": "simcheck",
    "name": "Jilan SIM Check",
    "package": "com.jilanapps.simcheck",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/passport-tracking/passport-tracking.apk",
@@ -782,8 +782,8 @@
    "name": "Jilan Passport Tracking",
    "package": "com.jilanapps.passporttracking",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/license-check/license-check.apk",
@@ -795,8 +795,8 @@
    "name": "Jilan License Check",
    "package": "com.jilanapps.licensecheck",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/filer-check/filer-check.apk",
@@ -807,9 +807,9 @@
    "id": "filercheck",
    "name": "Jilan Filer Check",
    "package": "com.jilanapps.filercheck",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/train-ticket/train-ticket.apk",
@@ -820,9 +820,9 @@
    "id": "trainticket",
    "name": "Jilan Train Ticket",
    "package": "com.jilanapps.trainticket",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/all-boards/all-boards.apk",
@@ -834,8 +834,8 @@
    "name": "Jilan All Boards Result",
    "package": "com.jilanapps.allboards",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/vehicle-info/vehicle-info.apk",
@@ -846,9 +846,9 @@
    "id": "vehicleinfo",
    "name": "Jilan Vehicle Info",
    "package": "com.jilanapps.vehicleinfo",
-   "size": 385494,
-   "versionCode": 3,
-   "versionName": "1.2"
+   "size": 389590,
+   "versionCode": 4,
+   "versionName": "1.3"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/fuel-relief/fuel-relief.apk",
@@ -860,8 +860,8 @@
    "name": "Jilan Fuel Relief",
    "package": "com.jilanapps.fuelrelief",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/flight-info/flight-info.apk",
@@ -873,8 +873,8 @@
    "name": "Jilan Flight Info",
    "package": "com.jilanapps.flightinfo",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/nadra-services/nadra-services.apk",
@@ -885,9 +885,9 @@
    "id": "nadraservices",
    "name": "Jilan NADRA Services",
    "package": "com.jilanapps.nadraservices",
-   "size": 33238,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 37334,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/post-tracking/post-tracking.apk",
@@ -899,8 +899,8 @@
    "name": "Jilan Post Tracking",
    "package": "com.jilanapps.posttracking",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/punjab-jobs/punjab-jobs.apk",
@@ -912,8 +912,8 @@
    "name": "Jilan Punjab Jobs",
    "package": "com.jilanapps.punjabjobs",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/e-khidmat/e-khidmat.apk",
@@ -925,8 +925,8 @@
    "name": "Jilan E-Khidmat",
    "package": "com.jilanapps.ekhidmat",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/mandi-rates/mandi-rates.apk",
@@ -937,9 +937,9 @@
    "id": "mandirates",
    "name": "Jilan Mandi Rates",
    "package": "com.jilanapps.mandirates",
-   "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 29142,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/police-services/police-services.apk",
@@ -950,9 +950,9 @@
    "id": "policeservices",
    "name": "Jilan Police Services",
    "package": "com.jilanapps.policeservices",
-   "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 29142,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/rescue-1122/rescue-1122.apk",
@@ -964,8 +964,8 @@
    "name": "Jilan Rescue 1122",
    "package": "com.jilanapps.rescue1122",
    "size": 29142,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/sehat-card/sehat-card.apk",
@@ -977,8 +977,8 @@
    "name": "Jilan Sehat Card",
    "package": "com.jilanapps.sehatcard",
    "size": 25046,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/zakat-calculator/zakat-calculator.apk",
@@ -989,9 +989,9 @@
    "id": "zakatcalc",
    "name": "Jilan Zakat Calculator",
    "package": "com.jilanapps.zakatcalc",
-   "size": 53718,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 57814,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/tasbeeh/tasbeeh.apk",
@@ -1002,9 +1002,9 @@
    "id": "tasbeeh",
    "name": "Jilan Tasbeeh",
    "package": "com.jilanapps.tasbeeh",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/qibla-compass/qibla-compass.apk",
@@ -1016,8 +1016,8 @@
    "name": "Jilan Qibla Compass",
    "package": "com.jilanapps.qiblacompass",
    "size": 29142,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/unit-converter/unit-converter.apk",
@@ -1029,8 +1029,8 @@
    "name": "Jilan Unit Converter",
    "package": "com.jilanapps.unitconverter",
    "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/bmi-calculator/bmi-calculator.apk",
@@ -1042,8 +1042,8 @@
    "name": "Jilan BMI Calculator",
    "package": "com.jilanapps.bmicalc",
    "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/currency-converter/currency-converter.apk",
@@ -1054,9 +1054,9 @@
    "id": "currencyconverter",
    "name": "Jilan Currency Converter",
    "package": "com.jilanapps.currencyconverter",
-   "size": 29142,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 33238,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/hijri-calendar/hijri-calendar.apk",
@@ -1068,8 +1068,8 @@
    "name": "Jilan Hijri Calendar",
    "package": "com.jilanapps.hijricalendar",
    "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/hajj-umrah-guide/hajj-umrah-guide.apk",
@@ -1080,9 +1080,9 @@
    "id": "hajjguide",
    "name": "Jilan Hajj Umrah Guide",
    "package": "com.jilanapps.hajjguide",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/first-aid/first-aid.apk",
@@ -1093,9 +1093,9 @@
    "id": "firstaid",
    "name": "Jilan First Aid",
    "package": "com.jilanapps.firstaid",
-   "size": 20950,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 25046,
+   "versionCode": 2,
+   "versionName": "1.1"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/qr-scanner/qr-scanner.apk",
@@ -1106,9 +1106,9 @@
    "id": "qrscanner",
    "name": "Jilan QR Scanner",
    "package": "com.jilanapps.qrscanner",
-   "size": 283094,
-   "versionCode": 1,
-   "versionName": "1.0"
+   "size": 287190,
+   "versionCode": 2,
+   "versionName": "1.1"
   }
  ],
  "store": {

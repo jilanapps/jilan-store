@@ -111,6 +111,7 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
     <button class="btn ghost sm" data-go="s-ai" data-t="qA">🤖 AI Chat</button>
   </div></div>
   <div id="updateCard" class="hidden"></div>
+  <div class="card" style="text-align:center"><div class="note" style="margin-bottom:8px">Jilan Assistant v1.2</div><button class="btn ghost" style="width:100%" onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}else{alert('Update check is available in the app.');}">🔄 Check for Update</button></div>
 </div>
 <!-- TASKS -->
 <div class="sec" id="s-tasks">
@@ -225,9 +226,9 @@ animation:orbIdle 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transpar
   </div>
 </div>
 <script>
-/* ===== Jilan Assistant v1.1 ===== */
+/* ===== Jilan Assistant v1.2 ===== */
 const $=id=>document.getElementById(id);
-const APPV="1.1";
+const APPV="1.2";
 // Gemini model: Google purana model retire kar de to SIRF ye line badlein
 const GEMINI_MODEL="gemini-3.8-flash";
 const hasBridge=()=>typeof window.Assistant!=="undefined"&&window.Assistant!==null;

@@ -69,6 +69,7 @@
     </div>
     <button class="bigbtn" id="startBtn">▶ Start Game</button>
     <button class="ghostbtn" id="howBtn">❓ How to Play</button>
+    <button class="ghostbtn" id="updBtn" onclick="try{JilanUpdater.checkUpdate()}catch(e){alert('Update check is available inside the app')}">🔄 Check for Update</button>
     <div id="howto">
       🎲 <b>6</b> aaye to pawn base se nikalo.<br>
       👆 Chamakte pawn par tap karke chalao.<br>
@@ -93,10 +94,10 @@
 <script>
 'use strict';
 /* ============================================================
-   SADOH! (صادوه) — pirate figure-8 Ludo. v1.0
+   SADOH! (صادوه) — pirate figure-8 Ludo. v1.1
    Canvas + vanilla JS, offline, original art.
    ============================================================ */
-const SADOH_APP_VERSION = '1.0';
+const SADOH_APP_VERSION = '1.1';
 const SADOH_APK_URL = 'https://jilanapps.github.io/jilan-store/sadoh/sadoh.apk';
 
 /* ---------------- Config ---------------- */

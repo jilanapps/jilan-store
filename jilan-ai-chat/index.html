@@ -81,7 +81,7 @@ footer.app-foot{text-align:center;font-size:11px;color:var(--mut);padding:8px}
   <textarea id="inp" rows="1" placeholder="Yahan likhein…"></textarea>
   <button id="send">➤</button>
 </div>
-<footer class="app-foot"><span style="font-size:11px;opacity:.7">© 2026 Jilan Apps Official. All rights reserved.</span></footer>
+<footer class="app-foot"><span style="font-size:11px;opacity:.7">© 2026 Jilan Apps Official. All rights reserved.</span><br><button onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}" style="background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">🔄 Check for Update</button></footer>
 
 <!-- SETUP SCREEN -->
 <div id="setup" class="screen hidden">
@@ -116,13 +116,13 @@ footer.app-foot{text-align:center;font-size:11px;color:var(--mut);padding:8px}
       <span class="langsw"><button id="langRU" class="on">Roman Urdu</button><button id="langEN">English</button></span></div>
     <div class="setrow"><span id="lKey">API Key</span><button id="chgKey">🔑 <span id="lChg">Tabdeel</span></button></div>
     <div class="setrow"><span id="lClear">Saari chats saaf karein</span><button id="clrAll">🗑</button></div>
-    <div class="note" style="margin-top:8px">Made by Jilan Apps Official<br>v1.0</div>
+    <div class="note" style="margin-top:8px">Made by Jilan Apps Official<br>v1.2</div>
   </div>
 </aside>
 
 <script>
 "use strict";
-const APP_VERSION="1.1";
+const APP_VERSION="1.2";
 // Gemini model: Google purana model retire kar de to SIRF ye line badlein
 const GEMINI_MODEL="gemini-3.8-flash";
 const LS_KEY="jac_key", LS_CHATS="jac_chats", LS_LANG="jac_lang";

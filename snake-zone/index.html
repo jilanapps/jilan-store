@@ -72,6 +72,7 @@ html,body{height:100%;overflow:hidden;background:#0b1f14;font-family:system-ui,-
     <div style="font-size:13px;font-weight:700;opacity:.85;margin-bottom:2px">CHOOSE YOUR SKIN</div>
     <div class="skins" id="skins"></div>
     <button class="playBtn" id="playBtn">▶ PLAY</button>
+    <button class="playBtn" id="updBtn" style="background:linear-gradient(180deg,#455a64,#263238);box-shadow:0 5px 0 #102027;margin-top:10px" onclick="try{JilanUpdater.checkUpdate()}catch(e){alert('Update check is available inside the app')}">🔄 Check for Update</button>
     <div class="how">
       <b>How to play</b><br>
       📱 <b>Phone:</b> drag anywhere to steer • hold <b>BOOST</b> for speed (costs a little score)<br>
@@ -80,7 +81,7 @@ html,body{height:100%;overflow:hidden;background:#0b1f14;font-family:system-ui,-
       💥 Don't hit other worms or the red edge — you drop food when you crash!
     </div>
     <div class="lb"><b>🏆 TOP SCORES (this phone)</b><div id="menuLb"></div></div>
-    <div class="foot">Made by <b>Jilan Apps Official</b> • v1.0</div>
+    <div class="foot">Made by <b>Jilan Apps Official</b> • v1.1</div>
   </div>
 </div>
 
@@ -93,14 +94,14 @@ html,body{height:100%;overflow:hidden;background:#0b1f14;font-family:system-ui,-
     <div id="overLen">Length: 6</div>
     <button class="playBtn" id="againBtn">↻ PLAY AGAIN</button>
     <button class="playBtn" id="menuBtn" style="background:linear-gradient(180deg,#78909c,#455a64);box-shadow:0 5px 0 #263238;margin-top:10px">☰ MAIN MENU</button>
-    <div class="foot">Made by <b>Jilan Apps Official</b> • v1.0</div>
+    <div class="foot">Made by <b>Jilan Apps Official</b> • v1.1</div>
   </div>
 </div>
 
 <script>
 (function(){
 "use strict";
-var VERSION="v1.0";
+var VERSION="v1.1";
 var cv=document.getElementById('game'), ctx=cv.getContext('2d');
 var W=0,H=0,DPR=1;
 function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);}

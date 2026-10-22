@@ -201,6 +201,11 @@ select.status{padding:6px;font-size:13px;width:auto;margin:0}
     <button class="btn btn-gray" onclick="location.reload()" data-t="logout">Logout</button>
   </div>
   <div class="card">
+    <h3>🔄 Update</h3>
+    <p style="font-size:12px;color:var(--mut)">Jilan Business Manager v1.1</p>
+    <button class="btn btn-dark" onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}">🔄 Check for Update</button>
+  </div>
+  <div class="card">
     <h3>❓ <span data-t="help">Madad</span></h3>
     <div style="font-size:13px;line-height:1.8" data-t="helptext">help</div>
   </div>
