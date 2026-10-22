@@ -1,1 +1,9 @@
-{"versionCode": 1, "versionName": "1.0", "apkUrl": "https://jilanapps.github.io/jilan-store/imei-check/imei-check.apk", "notes": "Jilan IMEI Check v1.0: first release — IMEI validity (Luhn), brand from TAC, official PTA check via SMS 8484 / DIRBS portal, and Installock installment record check."}
+{
+ "app": "imeicheck",
+ "package": "com.jilanapps.imeicheck",
+ "versionCode": 2,
+ "versionName": "1.1",
+ "apk": "https://jilanapps.github.io/jilan-store/imei-check/imei-check.apk",
+ "size": 795154,
+ "notes": "One-tap auto-update: this app now downloads new versions in the background and shows a tap-to-install banner when an update is ready."
+}
