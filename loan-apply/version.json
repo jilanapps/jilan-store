@@ -1,7 +1,7 @@
 {
- "versionCode": 7,
- "versionName": "1.6",
+ "versionCode": 8,
+ "versionName": "1.7",
  "apkUrl": "https://jilanapps.github.io/jilan-store/loan-apply/loan-apply.apk",
- "notes": "v1.6: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
- "size": 45526
+ "notes": "v1.7: AdMob ads added — a small banner on the home screen only, plus an occasional full-screen ad when you return to the app after opening the portal (never more than once in 3 minutes, never over the portal). Plus one-tap auto-update.",
+ "size": 5243934
 }
