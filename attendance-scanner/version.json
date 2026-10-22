@@ -1,1 +1,7 @@
-{"versionCode": 2, "versionName": "1.1", "apkUrl": "https://jilanapps.github.io/jilan-store/attendance-scanner/attendance-scanner.apk", "notes": "Attendance Scanner v1.1: in-app Update button added."}
+{
+ "versionCode": 3,
+ "versionName": "1.2",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/attendance-scanner/attendance-scanner.apk",
+ "notes": "v1.2: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
+ "size": 106966
+}

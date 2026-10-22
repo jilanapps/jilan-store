@@ -1,1 +1,9 @@
-{"versionCode": 4, "versionName": "1.3", "apkUrl": "https://jilanapps.github.io/jilan-store/msg-saver/msgsaver.apk", "notes": "Jilan Msg Saver v1.3: in-app Update button added."}
+{
+ "app": "msgsaver",
+ "package": "com.jilanapps.msgsaver",
+ "versionCode": 5,
+ "versionName": "1.4",
+ "apk": "https://jilanapps.github.io/jilan-store/msg-saver/msgsaver.apk",
+ "size": 41725,
+ "notes": "One-tap auto-update: this app now downloads new versions in the background and shows a tap-to-install banner when an update is ready."
+}
