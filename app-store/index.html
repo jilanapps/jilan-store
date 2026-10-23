@@ -91,6 +91,10 @@ main{max-width:1120px;margin:auto;padding:0 16px}
 .btn-failed{background:#b3261e !important;}
 .btn-cancel{border-radius:999px;width:30px;height:30px;min-width:30px;padding:0;background:#f1f3f4;color:#5f6368;font-size:13px;border:1px solid #dadce0}
 .btn-cancel:active{background:#e8eaed}
+.btn-uninstall{background:#fff;color:#c5221f;border:1px solid #dadce0;font-size:13.5px;padding:7px 16px}
+.btn-uninstall:active{background:#fce8e6}
+.btn-big.btn-uninstall{flex:0 0 auto;width:auto;height:42px;padding:0 22px;background:#fff;color:#c5221f;border:1px solid #dadce0}
+.btn-hero.btn-uninstall-hero{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.65);font-size:13.5px;padding:7px 16px}
 #toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#202124;color:#fff;font-size:13.5px;padding:10px 18px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;max-width:88vw;text-align:center}
 #toast.show{opacity:1}
 
@@ -218,7 +222,7 @@ footer a{color:var(--green);font-weight:600}
 <div id="toast"></div>
 
 <script>
-const APP_VER="1.3";
+const APP_VER="1.4";
 const SELF_PKG="com.jilanapps.appstore";
 const SELF_URL="https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk";
 let APPS=[],CAT="all",Q="";
@@ -231,6 +235,7 @@ const catLabel=c=>CAT_LABEL[c]||(c?c[0].toUpperCase()+c.slice(1):"Apps");
 
 /* ---- native store-app bridge ---- */
 const HAS_INSTALLER=!!(window.AppStore&&window.AppStore.installApp);
+const HAS_UNINSTALL=!!(window.AppStore&&window.AppStore.uninstallApp);
 function installedVer(pkg){
   if(!pkg)return null;
   try{if(window.AppStore&&window.AppStore.getInstalledVersion){const v=window.AppStore.getInstalledVersion(pkg);return v||"";}}catch(e){}
@@ -244,6 +249,18 @@ function installedCode(pkg){
 function openApp(pkg){
   try{if(window.AppStore&&window.AppStore.openApp){window.AppStore.openApp(pkg);return true;}}catch(e){}
   return false;
+}
+function uninstallApp(pkg){
+  try{if(window.AppStore&&window.AppStore.uninstallApp){window.AppStore.uninstallApp(pkg);return true;}}catch(e){}
+  return false;
+}
+/* Play-Store-style secondary button: an installed app also offers Uninstall
+   next to Open / Update (only when the wrapper supports it). */
+function unBtnHTML(a,style){
+  if(!HAS_UNINSTALL||!a.package)return "";
+  if(style==="big")return '<button class="btn btn-big btn-uninstall" data-uninstall="'+esc(a.package)+'">Uninstall</button>';
+  if(style==="hero")return '<button class="btn btn-hero btn-uninstall-hero" data-uninstall="'+esc(a.package)+'">Uninstall</button>';
+  return '<button class="btn btn-uninstall" data-uninstall="'+esc(a.package)+'">Uninstall</button>';
 }
 let toastTimer=null;
 function toast(msg){
@@ -344,9 +361,9 @@ function btnInnerHTML(a,style){
   const clsBase=style==="hero"?"btn btn-hero":(style==="big"?"btn btn-big":"btn btn-install");
   const heroStyle=style==="hero"?' style="color:#01734f"':"";
   if(act.kind==="open"){
-    if(style==="big")return '<button class="btn btn-big outline" onclick="openApp(\''+esc(a.package)+'\')">Open</button>';
-    if(style==="hero")return '<button class="btn btn-hero" style="color:#01734f" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
-    return '<button class="btn btn-outline" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>';
+    if(style==="big")return '<button class="btn btn-big outline" onclick="openApp(\''+esc(a.package)+'\')">Open</button>'+unBtnHTML(a,style);
+    if(style==="hero")return '<button class="btn btn-hero" style="color:#01734f" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>'+unBtnHTML(a,style);
+    return '<button class="btn btn-outline" onclick="event.stopPropagation();openApp(\''+esc(a.package)+'\')">Open</button>'+unBtnHTML(a,style);
   }
   if(act.kind==="webopen"){
     if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'" target="_blank">Open</a>';
@@ -367,7 +384,7 @@ function btnInnerHTML(a,style){
     if(dl.state==="failed")return '<button class="'+clsBase+' btn-failed" data-install="'+esc(a.id)+'"'+heroStyle+'>Failed — tap to retry</button>';
   }
   if(HAS_INSTALLER&&a.package){
-    return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'"'+heroStyle+'>'+label+'</button>';
+    return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'"'+heroStyle+'>'+label+'</button>'+(act.kind==="update"?unBtnHTML(a,style):"");
   }
   /* plain browser / old wrapper: direct APK download link (previous behaviour).
      The download attribute helps browsers/WebViews that only start a file
@@ -519,6 +536,8 @@ document.addEventListener("click",e=>{
   if(cc){e.stopPropagation();cancelInstall(cc.dataset.cancel);return;}
   const cp=e.target.closest("[data-prompt]");
   if(cp){e.stopPropagation();promptInstall(cp.dataset.prompt);return;}
+  const cu=e.target.closest("[data-uninstall]");
+  if(cu){e.stopPropagation();uninstallApp(cu.dataset.uninstall);return;}
   const t=e.target.closest("[data-app]");
   if(!t)return;
   if(e.target.closest(".btn"))return;

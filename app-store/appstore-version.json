@@ -1,1 +1,9 @@
-{"apk": "jilan-app-store.apk", "apkUrl": "https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk", "notes": "Jilan App Store v1.3: download fix — kuch phones par Install dabane par kuch nahi hota tha (purani catalog size ki wajah se download reject ho jata tha); ab downloads hamesha mukammal hote hain, offline catalog bhi live list istemal karta hai, aur fail honay par button par \"Failed — tap to retry\" nazar aata hai.", "size": 4763624, "version": "1.3", "versionCode": 4, "versionName": "1.3"}
+{
+ "apk": "jilan-app-store.apk",
+ "apkUrl": "https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk",
+ "notes": "Jilan App Store v1.4: Play Store style buttons — jo app pehle se install ho us ke sath Open aur Uninstall ke buttons aate hain, aur purane version par Update ke sath bhi Uninstall milta hai, taake aap ko har app ki halat saaf nazar aye.",
+ "size": 4767720,
+ "version": "1.4",
+ "versionCode": 5,
+ "versionName": "1.4"
+}
