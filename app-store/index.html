@@ -88,6 +88,7 @@ main{max-width:1120px;margin:auto;padding:0 16px}
 .pkgwrap.big{display:flex;width:100%;max-width:460px}
 .pkgwrap.big .btn-big{flex:1;width:auto}
 .btn-busy{opacity:.72;pointer-events:none}
+.btn-failed{background:#b3261e !important;}
 .btn-cancel{border-radius:999px;width:30px;height:30px;min-width:30px;padding:0;background:#f1f3f4;color:#5f6368;font-size:13px;border:1px solid #dadce0}
 .btn-cancel:active{background:#e8eaed}
 #toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#202124;color:#fff;font-size:13.5px;padding:10px 18px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;max-width:88vw;text-align:center}
@@ -217,7 +218,7 @@ footer a{color:var(--green);font-weight:600}
 <div id="toast"></div>
 
 <script>
-const APP_VER="1.2";
+const APP_VER="1.3";
 const SELF_PKG="com.jilanapps.appstore";
 const SELF_URL="https://jilanapps.github.io/jilan-store/app-store/jilan-app-store.apk";
 let APPS=[],CAT="all",Q="";
@@ -281,13 +282,14 @@ function paintSelfBtn(state,pct){
   if(state==="installing"){slot.innerHTML='<button class="btn btn-install btn-busy" disabled>Installing…</button>';return;}
   if(state==="waiting"){slot.innerHTML='<button class="btn btn-install btn-busy" disabled>Allow permission…</button>';return;}
   if(state==="ready"){slot.innerHTML='<button class="btn btn-install" onclick="promptInstall(\''+SELF_PKG+'\')">Install update</button>';return;}
+  if(state==="failed"){slot.innerHTML='<button class="btn btn-install btn-failed" onclick="selfInstall()">Failed — tap to retry</button>';return;}
   slot.innerHTML='<button class="btn btn-install" onclick="selfInstall()">Update</button>';
 }
 /* called by the native wrapper whenever a download/install state changes */
 window.__onStoreDl=function(pkg,state,pct){
   if(pkg===SELF_PKG){paintSelfBtn(state,pct);return;}
   const a=APPS.find(x=>x.package===pkg);if(!a)return;
-  if(state==="failed"){delete DL[pkg];}
+  if(state==="failed"){DL[pkg]={state:"failed",pct:0};} /* pinned until next tap — never silently vanish */
   else DL[pkg]={state:state,pct:pct};
   paintApp(a.id);
 };
@@ -298,8 +300,9 @@ window.__storeRefresh=function(){
     APPS.forEach(a=>{
       if(!a.apk||!a.package)return;
       let s="";try{s=window.AppStore.getInstallState(a.package)||"";}catch(e){}
-      if(s==="idle"){if(DL[a.package]&&DL[a.package].state!=="downloading")delete DL[a.package];}
+      if(s==="idle"){if(DL[a.package]&&DL[a.package].state!=="downloading"&&DL[a.package].state!=="failed")delete DL[a.package];}
       else if(s.indexOf("downloading:")===0){DL[a.package]={state:"downloading",pct:parseInt(s.split(":")[1]||"0",10)};}
+      else if(s==="failed"){DL[a.package]={state:"failed",pct:0};}
       else if(s==="ready"||s==="waiting"||s==="installing"){DL[a.package]={state:s,pct:0};}
     });
   }catch(e){}
@@ -361,6 +364,7 @@ function btnInnerHTML(a,style){
     if(dl.state==="waiting")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Allow permission…</button>';
     if(dl.state==="installing")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Installing…</button>';
     if(dl.state==="ready")return '<button class="'+clsBase+'" data-prompt="'+esc(a.package)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+' now</button>';
+    if(dl.state==="failed")return '<button class="'+clsBase+' btn-failed" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>Failed — tap to retry</button>';
   }
   if(HAS_INSTALLER&&a.package){
     return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</button>';
