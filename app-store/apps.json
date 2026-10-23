@@ -1149,6 +1149,19 @@
    "versionCode": 4,
    "versionName": "1.3",
    "web": "https://jilanapps.github.io/jilan-store/english-challenge/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/fasal-claim/fasal-claim.apk",
+   "category": "tools",
+   "color": "#0b3d20",
+   "desc": "Crop damaged? Step-by-step guide to claim your compensation — documents checklist, why claims get rejected, and the right offices to visit",
+   "icon": "icons/fasalclaim.png",
+   "id": "fasalclaim",
+   "name": "Jilan Fasal Claim Guide",
+   "package": "com.jilanapps.fasalclaim",
+   "size": 45526,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
