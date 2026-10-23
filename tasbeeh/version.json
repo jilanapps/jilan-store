@@ -1,7 +1,7 @@
 {
- "versionCode": 3,
- "versionName": "1.2",
+ "versionCode": 4,
+ "versionName": "1.3",
  "apkUrl": "https://jilanapps.github.io/jilan-store/tasbeeh/tasbeeh.apk",
- "notes": "v1.2: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
- "size": 29142
+ "notes": "v1.3: ads added (banner at the bottom of the counter screen + occasional full-screen ad after a completed round) with the hardened, crash-fixed recipe; counts still saved on your phone only.",
+ "size": 5223454
 }
