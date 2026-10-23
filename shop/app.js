@@ -48,10 +48,20 @@
     return 'Rs ' + rest + last3;
   }
 
-  function waLink(p) {
-    var msg = 'Assalam-o-Alaikum! Mujhe ye product order karna hai:\n\n' +
-      p.name + '\nPrice: ' + fmtRs(p.price) + '\n\nProduct Link: ' + p.link;
-    return 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
+  function itemCode(p) {
+    var m = String(p.link || '').match(/(\d+)\/?$/);
+    return m ? m[1] : '';
+  }
+
+  /* Order message — bilkul purana format, bas Markaz link ki jagah Item Code
+     (link customer ko nazar a jata tha; code se product foran mil jata hai). */
+  function orderMsg(cust, p, qty) {
+    var code = itemCode(p);
+    return 'Assalam-o-Alaikum, Jilan Online Shopping Store se order karna hai.\n\n' +
+      'CUSTOMER DETAILS\nName: ' + cust.name + '\nPhone: ' + cust.phone + '\nCity: ' + cust.city + '\nAddress: ' + cust.addr + '\n\n' +
+      'ORDER ITEMS\n  1. ' + p.name + '\nPrice: ' + fmtRs(p.price) + '\nQuantity: ' + qty + '\n' +
+      (code ? 'Item Code: JLN-' + code + '\n' : '') +
+      '\nSubtotal: ' + fmtRs(p.price * qty) + '\nDelivery charges: Separate\nPayment: Cash on Delivery';
   }
 
   function toast(msg) {
@@ -116,7 +126,6 @@
     mCat.textContent = p.cat;
     mName.textContent = p.name;
     mPrice.textContent = fmtRs(p.price);
-    mOrder.href = waLink(p);
     backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -165,6 +174,63 @@
     });
   }
 
+  /* ---- order form ---- */
+  var formBackdrop = document.getElementById('formBackdrop');
+  var fSummary = document.getElementById('fSummary');
+  var qVal = document.getElementById('qVal');
+  var formProduct = null;
+  var formQty = 1;
+
+  function openOrderForm(p) {
+    if (!p) return;
+    formProduct = p;
+    formQty = 1;
+    qVal.textContent = '1';
+    var code = itemCode(p);
+    fSummary.innerHTML = '<b>' + esc(p.name) + '</b><br>' + fmtRs(p.price) +
+      (code ? ' • Item Code: JLN-' + code : '') + '<br><span style="color:var(--muted)">Cash on Delivery</span>';
+    formBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeForm() {
+    formBackdrop.classList.remove('open');
+    document.body.style.overflow = '';
+    formProduct = null;
+  }
+  document.getElementById('formClose').addEventListener('click', closeForm);
+  formBackdrop.addEventListener('click', function (e) { if (e.target === formBackdrop) closeForm(); });
+  document.getElementById('qMinus').addEventListener('click', function () {
+    formQty = Math.max(1, formQty - 1); qVal.textContent = String(formQty);
+  });
+  document.getElementById('qPlus').addEventListener('click', function () {
+    formQty = Math.min(50, formQty + 1); qVal.textContent = String(formQty);
+  });
+  mOrder.addEventListener('click', function () {
+    var p = currentProduct;
+    closeModal();
+    openOrderForm(p);
+  });
+  document.getElementById('fSubmit').addEventListener('click', function () {
+    if (!formProduct) return;
+    var name = document.getElementById('fName').value.trim();
+    var phone = document.getElementById('fPhone').value.replace(/[\s-]/g, '');
+    var city = document.getElementById('fCity').value.trim();
+    var addr = document.getElementById('fAddr').value.trim();
+    if (phone.indexOf('+92') === 0) phone = '0' + phone.slice(3);
+    if (phone.indexOf('92') === 0) phone = '0' + phone.slice(2);
+    var ok = true;
+    var ePhone = document.getElementById('ePhone');
+    var eAddr = document.getElementById('eAddr');
+    if (!/^03\d{9}$/.test(phone)) { ePhone.style.display = 'block'; ok = false; } else ePhone.style.display = 'none';
+    if (addr.length < 8) { eAddr.style.display = 'block'; ok = false; } else eAddr.style.display = 'none';
+    if (!name || !city) { toast('Naam aur sheher likhna zaroori hai'); ok = false; }
+    if (!ok) return;
+    var msg = orderMsg({ name: name, phone: phone, city: city, addr: addr }, formProduct, formQty);
+    window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+    closeForm();
+    toast('WhatsApp khul gaya hai — Send dabayein, order ho jayega ✅');
+  });
+
   // events
   chipsBox.addEventListener('click', function (e) {
     var b = e.target.closest('.chip');
@@ -190,8 +256,7 @@
     var ob = e.target.closest('[data-order]');
     if (ob) {
       e.stopPropagation();
-      var p = filtered[Number(ob.getAttribute('data-order'))];
-      window.open(waLink(p), '_blank');
+      openOrderForm(filtered[Number(ob.getAttribute('data-order'))]);
       return;
     }
     var vb = e.target.closest('[data-view]');
@@ -208,7 +273,7 @@
     downloadImage(currentProduct);
   });
 
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeModal(); closeForm(); } });
 
   // init
   buildChips();

@@ -59,6 +59,18 @@ main{padding:4px 14px 30px;max-width:1100px;margin:0 auto}
 .cod-note{text-align:center;color:#bbf7d0;font-size:13px;margin-top:12px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gold);color:#0b1120;font-weight:700;padding:12px 22px;border-radius:999px;font-size:14px;z-index:200;transition:transform .25s;opacity:0}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* order form */
+.f-field{margin-top:12px;text-align:left}
+.f-field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--txt)}
+.f-field label i{color:#f87171;font-style:normal}
+.f-field input,.f-field textarea{width:100%;background:var(--navy);border:1px solid #2a3458;border-radius:12px;color:var(--txt);padding:12px 13px;font-size:14.5px;outline:none;font-family:inherit}
+.f-field input:focus,.f-field textarea:focus{border-color:var(--gold)}
+.f-err{color:#f87171;font-size:12.5px;margin-top:5px;display:none}
+.qtyrow{display:flex;align-items:center;gap:12px;margin-top:12px}
+.qty{display:inline-flex;align-items:center;border:1px solid #2a3458;border-radius:999px;overflow:hidden}
+.qty button{width:34px;height:34px;background:#1e2a4a;color:var(--txt);border:0;font-size:17px;cursor:pointer}
+.qty b{min-width:32px;text-align:center;font-size:14.5px;color:var(--txt)}
+.ordbox{background:var(--navy);border:1px solid #2a3458;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.55;margin-top:10px;color:var(--txt)}
 footer{text-align:center;color:var(--muted);font-size:12.5px;padding:26px 14px 40px;border-top:1px solid #1e2a4a}
 </style>
 </head>
@@ -94,9 +106,28 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:26px 14px 4
       <div class="mbtns">
         <button class="mbtn copy" id="mCopy">📋 Naam + Price Copy Karein</button>
         <button class="mbtn dl" id="mDl">📥 Tasveer Download Karein</button>
-        <a class="mbtn wa" id="mOrder" target="_blank" rel="noopener">📲 WhatsApp par Order Karein</a>
+        <button class="mbtn wa" id="mOrder">📝 Order Karein</button>
       </div>
       <p class="cod-note">🚚 Cash on Delivery dastiyab hai</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="formBackdrop">
+  <div class="modal-box">
+    <button class="modal-close" id="formClose">✕</button>
+    <div class="modal-body">
+      <h2 style="margin-top:2px">📝 Order Form</h2>
+      <p style="color:var(--muted);font-size:13px">Apni maloomat likhein — order WhatsApp par confirm hoga.</p>
+      <div class="ordbox" id="fSummary"></div>
+      <div class="qtyrow"><span style="font-size:13px;color:var(--muted)">Quantity:</span>
+        <span class="qty"><button id="qMinus" type="button">−</button><b id="qVal">1</b><button id="qPlus" type="button">+</button></span></div>
+      <div class="f-field"><label>Apna Naam <i>*</i></label><input id="fName" type="text" placeholder="Misal: Muhammad Ali" autocomplete="name"></div>
+      <div class="f-field"><label>Mobile Number <i>*</i></label><input id="fPhone" type="tel" placeholder="03XX-XXXXXXX" autocomplete="tel"><div class="f-err" id="ePhone">Durust mobile number likhein (03 se shuru, 11 hindsay).</div></div>
+      <div class="f-field"><label>Sheher (City) <i>*</i></label><input id="fCity" type="text" placeholder="Misal: Multan" autocomplete="address-level2"></div>
+      <div class="f-field"><label>Mukammal Address <i>*</i></label><textarea id="fAddr" rows="3" placeholder="Ghar / mohalla / qareebi mashhoor jagah"></textarea><div class="f-err" id="eAddr">Address likhna zaroori hai taake delivery ho sakay.</div></div>
+      <div class="mbtns" style="margin-top:16px"><button class="mbtn wa" id="fSubmit">✅ WhatsApp par Order Bhejein</button></div>
+      <p class="cod-note">WhatsApp khule ga — wahan <b>Send</b> dabane se order mukammal hoga.</p>
     </div>
   </div>
 </div>
