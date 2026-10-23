@@ -442,9 +442,9 @@
    "id": "shop",
    "name": "Jilan Shopping Store",
    "package": "com.jilanapps.shop",
-   "size": 111248,
-   "versionCode": 3,
-   "versionName": "1.2",
+   "size": 115344,
+   "versionCode": 4,
+   "versionName": "1.3",
    "web": "https://jilanapps.github.io/jilan-store/shop/"
   },
   {
