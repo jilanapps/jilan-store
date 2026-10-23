@@ -363,11 +363,11 @@ function btnInnerHTML(a,style){
     }
     if(dl.state==="waiting")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Allow permission…</button>';
     if(dl.state==="installing")return '<button class="'+clsBase+' btn-busy" disabled'+heroStyle+'>Installing…</button>';
-    if(dl.state==="ready")return '<button class="'+clsBase+'" data-prompt="'+esc(a.package)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+' now</button>';
-    if(dl.state==="failed")return '<button class="'+clsBase+' btn-failed" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>Failed — tap to retry</button>';
+    if(dl.state==="ready")return '<button class="'+clsBase+'" data-prompt="'+esc(a.package)+'"'+heroStyle+'>'+label+' now</button>';
+    if(dl.state==="failed")return '<button class="'+clsBase+' btn-failed" data-install="'+esc(a.id)+'"'+heroStyle+'>Failed — tap to retry</button>';
   }
   if(HAS_INSTALLER&&a.package){
-    return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</button>';
+    return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'"'+heroStyle+'>'+label+'</button>';
   }
   /* plain browser / old wrapper: direct APK download link (previous behaviour).
      The download attribute helps browsers/WebViews that only start a file
