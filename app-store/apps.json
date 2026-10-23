@@ -1227,6 +1227,71 @@
    "size": 33238,
    "versionCode": 1,
    "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilannotes/jilannotes.apk",
+   "category": "utility",
+   "color": "#334155",
+   "desc": "Simple notes with an optional PIN lock - everything stays on your phone",
+   "icon": "icons/jilannotes.png",
+   "id": "jilannotes",
+   "name": "Jilan Notes",
+   "package": "com.jilanapps.jilannotes",
+   "size": 29142,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/bloodbank/bloodbank.apk",
+   "category": "tools",
+   "color": "#b91c1c",
+   "desc": "Blood group compatibility chart, donor eligibility checklist and blood request maker",
+   "icon": "icons/bloodbank.png",
+   "id": "bloodbank",
+   "name": "Blood Bank Guide",
+   "package": "com.jilanapps.bloodbank",
+   "size": 29142,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/stepcounter/stepcounter.apk",
+   "category": "utility",
+   "color": "#15803d",
+   "desc": "Count your daily steps, set a goal and see your last 7 days at a glance",
+   "icon": "icons/stepcounter.png",
+   "id": "stepcounter",
+   "name": "Step Counter",
+   "package": "com.jilanapps.stepcounter",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/waterreminder/waterreminder.apk",
+   "category": "utility",
+   "color": "#0284c7",
+   "desc": "Track your daily water glasses and get a gentle reminder at your chosen time",
+   "icon": "icons/waterreminder.png",
+   "id": "waterreminder",
+   "name": "Water Reminder",
+   "package": "com.jilanapps.waterreminder",
+   "size": 37334,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/idphotomaker/idphotomaker.apk",
+   "category": "tools",
+   "color": "#0369a1",
+   "desc": "Turn any photo into passport-size ID photos on a ready-to-print 4x6 sheet",
+   "icon": "icons/idphotomaker.png",
+   "id": "idphotomaker",
+   "name": "ID Photo Maker",
+   "package": "com.jilanapps.idphotomaker",
+   "size": 29142,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
