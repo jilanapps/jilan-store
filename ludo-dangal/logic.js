@@ -1,6 +1,8 @@
 'use strict';
 /* ============================================================
-   LUDO DANGAL — pure game logic (no DOM). v1.0
+   LUDO DANGAL — pure game logic (no DOM). v2.0
+   v1.0 core rules unchanged (harness-proven). v2.0 adds
+   LD.botChooseLevel: Easy / Medium / Hard bot difficulties.
    Works in browser (<script src>) and node (module.exports).
    Board: classic 15x15 Ludo. 52-tile main track, 4 bases,
    5-cell home columns, exact-roll finish.
@@ -162,6 +164,120 @@ LD.botChoose = function (st, pi, roll, rng) {
     if (p === -1 && roll === 6) score += 300; // leave base
     // tiny random tie-break
     score += rng() * 2;
+    if (score > bestScore) { bestScore = score; best = i; }
+  }
+  return best;
+};
+
+// ---- bot difficulties (v2.0) ----------------------------------
+// level: 'easy' | 'medium' | 'hard' (or 0 | 1 | 2). Fair play: the
+// dice are never rigged at any level — only the choice of move differs.
+LD.BOT_LEVELS = ['easy', 'medium', 'hard'];
+LD._normLevel = function (level) {
+  if (typeof level === 'number') return LD.BOT_LEVELS[Math.max(0, Math.min(2, level))];
+  const s = String(level || 'medium').toLowerCase();
+  return LD.BOT_LEVELS.includes(s) ? s : 'medium';
+};
+
+// Is the pawn of player pi standing at step `pos` (0..50, main track)
+// in danger? Danger = an enemy pawn sits 1..6 track squares behind it
+// on a non-safe square (that enemy could roll the exact number and capture).
+LD._inDanger = function (st, pi, pos) {
+  if (pos < 0 || pos > 50) return false;
+  const pl = st.players[pi];
+  const ti = LD.trackIndex(pl.color, pos);
+  if (LD.isSafeTrack(ti)) return false;
+  let danger = false;
+  st.players.forEach((op, oi) => {
+    if (oi === pi || danger) return;
+    op.pawns.forEach(opPos => {
+      if (opPos < 0 || opPos > 50) return;
+      const oti = LD.trackIndex(op.color, opPos);
+      const dist = (ti - oti + 52) % 52;
+      if (dist >= 1 && dist <= 6) danger = true;
+    });
+  });
+  return danger;
+};
+
+// Would an enemy be able to capture a pawn landing on track index ti?
+LD._landingInDanger = function (st, pi, ti) {
+  if (LD.isSafeTrack(ti)) return false;
+  let danger = false;
+  st.players.forEach((op, oi) => {
+    if (oi === pi || danger) return;
+    op.pawns.forEach(opPos => {
+      if (opPos < 0 || opPos > 50) return;
+      const oti = LD.trackIndex(op.color, opPos);
+      const dist = (ti - oti + 52) % 52;
+      if (dist >= 1 && dist <= 6) danger = true;
+    });
+  });
+  return danger;
+};
+
+LD.botChooseLevel = function (st, pi, roll, level, rng) {
+  rng = rng || Math.random;
+  const legal = LD.legalMoves(st, pi, roll);
+  if (!legal.length) return -1;
+  const lv = LD._normLevel(level);
+
+  // EASY: mostly random legal moves (still takes a capture when it
+  // happens to be the random pick — no strategy at all).
+  if (lv === 'easy') {
+    // small human-like touch: 1-in-4 times it notices a capture
+    const caps = legal.filter(i => {
+      const p = st.players[pi].pawns[i];
+      const np = (p === -1) ? 0 : p + roll;
+      if (np > 50) return false;
+      const ti = LD.trackIndex(st.players[pi].color, np);
+      if (LD.isSafeTrack(ti)) return false;
+      return st.players.some((op, oi) => oi !== pi && op.pawns.some(
+        q => q >= 0 && q <= 50 && LD.trackIndex(op.color, q) === ti));
+    });
+    if (caps.length && rng() < 0.25) return caps[Math.floor(rng() * caps.length)];
+    return legal[Math.floor(rng() * legal.length)];
+  }
+
+  // MEDIUM: the proven v1.0 chooser (capture > safe > progress).
+  if (lv === 'medium') return LD.botChoose(st, pi, roll, rng);
+
+  // HARD: medium-style attack PLUS defence — escape danger, never
+  // walk into danger without a payoff, protect the lead pawn,
+  // prioritise finishing and the home column.
+  const pl = st.players[pi];
+  let best = -1, bestScore = -Infinity;
+  for (const i of legal) {
+    const p = pl.pawns[i];
+    const np = (p === -1) ? 0 : p + roll;
+    let score = np; // progress baseline
+    if (np <= 50) {
+      const ti = LD.trackIndex(pl.color, np);
+      let victims = 0;
+      st.players.forEach((op, oi) => {
+        if (oi === pi) return;
+        op.pawns.forEach(opPos => {
+          if (opPos >= 0 && opPos <= 50 && LD.trackIndex(op.color, opPos) === ti) victims++;
+        });
+      });
+      if (!LD.isSafeTrack(ti) && victims > 0) score += 1200 + victims * 150; // capture!
+      if (LD.isSafeTrack(ti)) score += 220;                                  // safe landing
+      else if (LD._landingInDanger(st, pi, ti)) score -= 420;                // don't walk into a trap
+      // company: joining own pawn on the same square
+      if (pl.pawns.some((q, qi) => qi !== i && q === np)) score += 60;
+    } else if (np < LD.FINISH_POS) {
+      score += 620; // home column: nearly there
+    } else {
+      score += 950; // finished a pawn
+    }
+    if (p === -1 && roll === 6) score += 320;              // leave base on 6
+    if (p >= 0 && LD._inDanger(st, pi, p)) score += 380;  // escape a threatened pawn
+    if (p >= 0 && p <= 50) {
+      // the lead pawn is precious: nudge it home first
+      const lead = Math.max.apply(null, pl.pawns.filter(q => q >= 0 && q < LD.FINISH_POS));
+      if (p === lead) score += 40;
+    }
+    score += rng() * 2; // tiny tie-break
     if (score > bestScore) { bestScore = score; best = i; }
   }
   return best;

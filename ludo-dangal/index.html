@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ludo Dangal 💪 Classic Ludo</title>
+<title>Ludo Dangal — Classic Ludo</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;user-select:none;-webkit-user-select:none;background:#0d1030}
@@ -11,7 +11,7 @@
   #game{display:block;touch-action:manipulation;max-width:100vw;max-height:100vh}
   .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,7,20,.78);z-index:20;padding:14px;backdrop-filter:blur(3px)}
   .hidden{display:none!important}
-  /* ---------- menu card (premium) ---------- */
+  /* ---------- cards (premium) ---------- */
   .mcard{position:relative;width:100%;max-width:460px;border-radius:24px;padding:26px 22px 20px;text-align:center;color:#fff;
     background:linear-gradient(165deg,#3b2a63 0%,#241a45 45%,#171233 100%);
     border:2px solid rgba(255,215,94,.55);box-shadow:0 0 0 6px rgba(20,12,40,.55),0 24px 70px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.25);
@@ -31,16 +31,42 @@
   .opt.sel{background:linear-gradient(180deg,#ffe27a,#e8a90c);color:#4a2c08;border-color:#fff2b0;box-shadow:0 0 16px rgba(255,215,94,.65),0 4px 0 #7a4d12}
   .colorpick{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.25);cursor:pointer;box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 3px 4px 8px rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.4)}
   .colorpick.sel{border-color:#fff;box-shadow:0 0 18px #fff,inset -4px -6px 10px rgba(0,0,0,.35)}
+  .swatch{width:64px;height:46px;border-radius:12px;border:3px solid rgba(255,255,255,.25);cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.4);position:relative}
+  .swatch.sel{border-color:#fff;box-shadow:0 0 16px rgba(255,255,255,.8)}
+  .swatch span{position:absolute;left:0;right:0;bottom:-20px;font-size:10px;color:#e8ddff;letter-spacing:.4px}
   .playbtn{display:block;width:100%;margin:18px 0 6px;padding:17px;font-size:26px;font-weight:900;letter-spacing:3px;color:#3d2503;cursor:pointer;border:none;border-radius:20px;
     background:linear-gradient(180deg,#fff3b0 0%,#ffd75e 30%,#f0a500 65%,#d18a00 100%);
     box-shadow:0 6px 0 #7a4d12,0 12px 28px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.8);
     text-shadow:0 1px 0 rgba(255,255,255,.6);transition:transform .08s}
   .playbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #7a4d12,0 6px 14px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.8)}
-  .ghostbtn{background:rgba(255,255,255,.08);border:2px solid rgba(255,215,94,.4);color:#ffe9b8;border-radius:12px;padding:9px 16px;font-size:14px;cursor:pointer;margin-top:8px}
+  .ghostbtn{background:rgba(255,255,255,.08);border:2px solid rgba(255,215,94,.4);color:#ffe9b8;border-radius:12px;padding:9px 14px;font-size:14px;cursor:pointer;margin:8px 3px 0}
   #howto{display:none;text-align:left;font-size:13.5px;line-height:1.7;color:#efe6ff;background:rgba(0,0,0,.3);border-radius:12px;padding:12px 14px;margin-top:10px;border:1px solid rgba(255,215,94,.25)}
-  .vtag{margin-top:10px;font-size:11px;color:#8f83c9;letter-spacing:1px}
+  .vtag{margin-top:12px;font-size:11px;color:#a294d8;letter-spacing:1px}
+  .nameRow{display:flex;align-items:center;gap:8px;justify-content:center;margin:5px 0}
+  .dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.6);flex:none}
+  .nameIn{flex:1;max-width:250px;background:rgba(0,0,0,.35);border:2px solid rgba(255,215,94,.35);border-radius:10px;color:#fff;
+    padding:9px 12px;font-size:15px;font-family:inherit;outline:none}
+  .nameIn:focus{border-color:#ffd75e}
+  .setRow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,0,0,.28);border:1px solid rgba(255,215,94,.25);
+    border-radius:12px;padding:11px 14px;margin:8px 0;font-size:15px}
+  .tgl{width:58px;height:32px;border-radius:16px;border:2px solid rgba(255,255,255,.35);background:#3a335f;cursor:pointer;position:relative;flex:none}
+  .tgl::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#cfc8ea;transition:left .15s}
+  .tgl.on{background:#2a9d48;border-color:#7be495}
+  .tgl.on::after{left:29px;background:#fff}
+  table.stats{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+  table.stats th,table.stats td{padding:7px 6px;border-bottom:1px solid rgba(255,215,94,.18);text-align:left}
+  table.stats th{color:#ffd75e;font-size:12px;letter-spacing:1px}
+  table.stats td.n,table.stats th.n{text-align:right}
+  /* ---------- splash ---------- */
+  #splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(900px 700px at 50% 20%,#33397e 0%,#171a45 55%,#0a0c24 100%);transition:opacity .5s}
+  #splash .gtitle{font-size:64px}
+  #splashBar{width:210px;height:8px;border-radius:5px;background:rgba(255,255,255,.15);margin-top:26px;overflow:hidden}
+  #splashBar i{display:block;height:100%;width:40%;border-radius:5px;background:linear-gradient(90deg,#ffd75e,#fff3b0);animation:ld 1s infinite alternate}
+  @keyframes ld{from{transform:translateX(-60%)}to{transform:translateX(280%)}}
   /* ---------- win card ---------- */
-  #winCard h1{font-size:50px;margin-bottom:4px}
+  #winCard h1{font-size:56px;margin-bottom:4px;animation:pop 1s infinite alternate}
+  @keyframes pop{from{transform:scale(1)}to{transform:scale(1.12)}}
   #winTitle{font-size:36px;font-weight:900;margin:6px 0;
     background:linear-gradient(180deg,#fff6c8,#ffd75e 45%,#e8960c);-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 2px 0 #6b3d05)}
@@ -52,30 +78,36 @@
   #topbtns button{width:46px;height:46px;border-radius:14px;border:2px solid rgba(255,215,94,.55);background:rgba(20,14,45,.88);color:#ffd75e;font-size:21px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.4)}
   #updateCard{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#12300f;border:2px solid #7CFC00;border-radius:12px;padding:10px 14px;color:#eaffd0;z-index:25;display:none;text-align:center;font-size:14px;max-width:92vw}
   #updateCard button{background:#7CFC00;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;margin:6px 4px 0;cursor:pointer}
-  #rollHint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:14;display:none;pointer-events:none}
 </style>
 </head>
 <body>
+<div id="splash">
+  <div style="font-size:64px">🏆</div>
+  <div class="gtitle">LUDO<br>DANGAL</div>
+  <p class="gsub" style="margin-top:8px">Classic Ludo, Championship Style</p>
+  <div id="splashBar"><i></i></div>
+</div>
+
 <div id="wrap"><canvas id="game" width="900" height="1320"></canvas></div>
 <div id="topbtns">
-  <button id="muteBtn" title="Sound">🔊</button>
+  <button id="muteBtn" title="Sound on/off">🔊</button>
   <button id="menuBtn" title="Menu">☰</button>
 </div>
 <div id="updateCard">
-  🎉 <b>Ludo Dangal ka naya version aaya hai!</b><br>
-  <button id="updateDlBtn">⬇ Download</button><button id="updateNoBtn">Baad me</button>
+  🎉 <b>A new version of Ludo Dangal is available!</b><br>
+  <button id="updateDlBtn">⬇ Download</button><button id="updateNoBtn">Later</button>
 </div>
 <div id="toast"></div>
 
-<div id="menu" class="overlay">
-  <div class="mcard">
+<div id="menu" class="overlay hidden">
+  <div class="mcard" id="menuCard">
     <canvas id="heroCanvas" width="760" height="400"></canvas>
     <div class="gtitle">LUDO DANGAL</div>
-    <p class="gsub">💪 Classic Ludo — dangal style muqabla!</p>
+    <p class="gsub">🏆 Classic Ludo — championship style showdown!</p>
     <div class="lbl">MODE</div>
-    <div class="optRow">
+    <div class="optRow" id="modeRow">
       <button class="opt sel" id="mPass">👥 Pass &amp; Play</button>
-      <button class="opt" id="mBots">🤖 Vs Bots</button>
+      <button class="opt" id="mBots">🤖 Vs Computer</button>
     </div>
     <div class="lbl" id="countLbl">PLAYERS</div>
     <div class="optRow" id="countRow">
@@ -83,24 +115,64 @@
       <button class="opt" data-n="3">3</button>
       <button class="opt" data-n="4">4</button>
     </div>
-    <div class="lbl">YOUR COLOR (vs bots)</div>
-    <div class="optRow" id="colorRow">
-      <button class="colorpick sel" data-c="0" style="background:radial-gradient(circle at 35% 30%,#ff7a85,#e63946 60%,#a31621)"></button>
-      <button class="colorpick" data-c="1" style="background:radial-gradient(circle at 35% 30%,#5fd07e,#2a9d48 60%,#1a6b32)"></button>
-      <button class="colorpick" data-c="2" style="background:radial-gradient(circle at 35% 30%,#ffd94d,#f4b400 60%,#b78700)"></button>
-      <button class="colorpick" data-c="3" style="background:radial-gradient(circle at 35% 30%,#6b96ff,#2f6fed 60%,#1d44ad)"></button>
+    <div id="botsOnly">
+      <div class="lbl">BOT DIFFICULTY</div>
+      <div class="optRow" id="diffRow">
+        <button class="opt" data-d="easy">😊 Easy</button>
+        <button class="opt sel" data-d="medium">🎯 Medium</button>
+        <button class="opt" data-d="hard">🔥 Hard</button>
+      </div>
+      <div class="lbl">YOUR COLOR</div>
+      <div class="optRow" id="colorRow">
+        <button class="colorpick sel" data-c="0" style="background:radial-gradient(circle at 35% 30%,#ff7a85,#e63946 60%,#a31621)"></button>
+        <button class="colorpick" data-c="1" style="background:radial-gradient(circle at 35% 30%,#5fd07e,#2a9d48 60%,#1a6b32)"></button>
+        <button class="colorpick" data-c="2" style="background:radial-gradient(circle at 35% 30%,#ffd94d,#f4b400 60%,#b78700)"></button>
+        <button class="colorpick" data-c="3" style="background:radial-gradient(circle at 35% 30%,#6b96ff,#2f6fed 60%,#1d44ad)"></button>
+      </div>
+    </div>
+    <div class="lbl">PLAYER NAMES</div>
+    <div id="namesWrap"></div>
+    <div class="lbl">BOARD THEME</div>
+    <div class="optRow" id="themeRow" style="margin-bottom:16px">
+      <button class="swatch sel" data-t="classic" style="background:linear-gradient(150deg,#2b2f6b,#12173a)"><span>Classic</span></button>
+      <button class="swatch" data-t="royal" style="background:linear-gradient(150deg,#5b1f4d,#1c0826)"><span>Royal</span></button>
+      <button class="swatch" data-t="emerald" style="background:linear-gradient(150deg,#0f5a44,#06231f)"><span>Emerald</span></button>
     </div>
     <button class="playbtn" id="startBtn">▶ &nbsp;PLAY&nbsp; ◀</button>
-    <button class="ghostbtn" id="howBtn">❓ How to Play</button>
-    <div id="howto">
-      🎲 <b>6</b> aaye to pawn base se nikalo.<br>
-      👆 Chamakte pawn par tap karke chalao.<br>
-      ⚔️ Dushman ke pawn par utro to wo wapas base jayega — <b>★ safe</b> tiles par koi capture nahi.<br>
-      🏠 Ghar pohnchne ke liye <b>exact</b> number chahiye.<br>
-      🎲 6 par extra turn; lagatar 3 six = turn zaya.<br>
-      🏆 Pehle apne 4 pawn ghar pohnchao aur jeeto!
+    <div>
+      <button class="ghostbtn" id="howBtn">❓ How to Play</button>
+      <button class="ghostbtn" id="settingsBtn">⚙️ Settings</button>
+      <button class="ghostbtn" id="statsBtn">📊 Stats</button>
     </div>
-    <div class="vtag">LUDO DANGAL v1.1 • by Jilan Apps Official</div><div style="text-align:center;margin:12px 0"><button onclick="if(window.JilanUpdater){JilanUpdater.checkUpdate();}" style="background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer">🔄 Check for Update</button><div style="font-size:11px;opacity:.7;margin-top:4px">v1.1</div></div>
+    <div id="howto">
+      🎲 Roll a <b>6</b> to bring a pawn out of base.<br>
+      👆 Tap a glowing pawn to move it.<br>
+      ⚔️ Land on an enemy pawn to capture it — no captures on <b>★ safe</b> tiles.<br>
+      🏠 You need the <b>exact</b> roll to enter home.<br>
+      🎲 A 6 gives an extra turn; three 6s in a row lose the turn.<br>
+      🏆 First to bring all 4 pawns home wins the Dangal!
+    </div>
+    <div class="vtag">LUDO DANGAL v2.0 • by Jilan Apps Official</div>
+    <div style="text-align:center;margin:10px 0 2px"><button id="updBtn" style="background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer">🔄 Check for Update</button><div style="font-size:11px;opacity:.7;margin-top:4px">v2.0</div></div>
+  </div>
+</div>
+
+<div id="settingsOv" class="overlay hidden">
+  <div class="mcard">
+    <div class="gtitle" style="font-size:34px">SETTINGS</div>
+    <div class="setRow"><span>🔊 Sound effects</span><div class="tgl on" id="tglSfx"></div></div>
+    <div class="setRow"><span>🎵 Background music</span><div class="tgl" id="tglMusic"></div></div>
+    <p style="font-size:12.5px;color:#cbb8f5;margin-top:8px;line-height:1.6">Music is off by default. Turn it on for a soft background tune while you play. Your choices are remembered on this device.</p>
+    <button class="playbtn" id="settingsClose" style="font-size:19px">✔ DONE</button>
+  </div>
+</div>
+
+<div id="statsOv" class="overlay hidden">
+  <div class="mcard">
+    <div class="gtitle" style="font-size:34px">STATISTICS</div>
+    <div id="statsBody" style="text-align:left"></div>
+    <button class="ghostbtn" id="statsClear">🗑 Clear Stats</button>
+    <button class="playbtn" id="statsClose" style="font-size:19px">✔ DONE</button>
   </div>
 </div>
 
@@ -108,7 +180,8 @@
   <div class="mcard" id="winCard">
     <h1>🏆</h1>
     <div id="winTitle">Red Wins!</div>
-    <p class="gsub" id="winSub">Dangal jeet liya!</p>
+    <p class="gsub" id="winSub">Champion of the Dangal!</p>
+    <p class="gsub" id="winStat" style="font-size:13px"></p>
     <button class="playbtn" id="againBtn" style="font-size:21px">🔄 PLAY AGAIN</button>
     <button class="ghostbtn" id="winMenuBtn">☰ Menu</button>
   </div>
@@ -118,76 +191,145 @@
 <script>
 'use strict';
 /* ============================================================
-   LUDO DANGAL v1.0 — premium classic Ludo. Canvas + vanilla JS.
+   LUDO DANGAL v2.0 "Professional" — Canvas + vanilla JS.
+   Game rules: logic.js (LD). This file: UI, themes, sound,
+   bots with difficulty, names, stats, update hooks.
    ============================================================ */
-const APP_VERSION = '1.1';
+const APP_VERSION = '2.0';
 const APK_URL = 'https://jilanapps.github.io/jilan-store/ludo-dangal/ludo-dangal.apk';
 
 const cv = document.getElementById('game');
 const ctx = cv.getContext('2d');
 const W = 900, H = 1320;
+const BX = 30, BY = 250, BS = 840, CELL = BS / 15;
+const PANEL_Y = 1120;
 
-// layout
-const BX = 30, BY = 250, BS = 840, CELL = BS / 15;   // board
-const PANEL_Y = 1120;                                  // bottom panel top
+/* ---------------- settings (persisted) ---------------- */
+const DEF_SET = { theme: 'classic', sfx: true, music: false, difficulty: 'medium' };
+let SET = Object.assign({}, DEF_SET);
+try {
+  const s = JSON.parse(localStorage.getItem('ld2_settings') || 'null');
+  if (s) SET = Object.assign({}, DEF_SET, s);
+  // migrate v1 mute choice
+  if (localStorage.getItem('ld_muted') === '1' && !s) SET.sfx = false;
+} catch (e) {}
+function saveSet() { try { localStorage.setItem('ld2_settings', JSON.stringify(SET)); } catch (e) {} }
 
-// ------- state -------
+/* ---------------- themes ---------------- */
+const THEMES = {
+  classic: { bg: ['#232a5e', '#161b45', '#0b0e28'], felt: ['#1c2450', '#12173a'],
+    frame: ['#6b4423', '#4a2c14', '#2e1a0b'], trim: '#d8a83c',
+    panel: ['rgba(38,32,80,.93)', 'rgba(18,14,45,.95)'],
+    card: 'linear-gradient(165deg,#3b2a63 0%,#241a45 45%,#171233 100%)',
+    wrap: 'radial-gradient(1200px 800px at 50% -10%,#2b2f6b 0%,#14173d 55%,#0a0c24 100%)' },
+  royal: { bg: ['#40164a', '#2a0e33', '#150722'], felt: ['#38154d', '#200c31'],
+    frame: ['#6e2438', '#451222', '#26060f'], trim: '#e8b34b',
+    panel: ['rgba(74,22,66,.93)', 'rgba(32,8,38,.95)'],
+    card: 'linear-gradient(165deg,#57195c 0%,#33103e 45%,#1e0728 100%)',
+    wrap: 'radial-gradient(1200px 800px at 50% -10%,#57195c 0%,#2a0e33 55%,#150722 100%)' },
+  emerald: { bg: ['#0f4038', '#0a2c2c', '#04191d'], felt: ['#0e3a2c', '#07231e'],
+    frame: ['#2c5a43', '#1a3a2a', '#0a2117'], trim: '#c9a227',
+    panel: ['rgba(13,58,46,.93)', 'rgba(5,30,25,.95)'],
+    card: 'linear-gradient(165deg,#10503f 0%,#0a352c 45%,#05231d 100%)',
+    wrap: 'radial-gradient(1200px 800px at 50% -10%,#14604c 0%,#0a2c2c 55%,#04191d 100%)' },
+};
+function TH() { return THEMES[SET.theme] || THEMES.classic; }
+function applyTheme() {
+  const t = TH();
+  document.getElementById('wrap').style.background = t.wrap;
+  document.querySelectorAll('.mcard').forEach(c => c.style.background = t.card);
+  document.querySelectorAll('#themeRow .swatch').forEach(b => b.classList.toggle('sel', b.dataset.t === SET.theme));
+}
+
+/* ---------------- state ---------------- */
 const G = {
-  screen: 'menu',
-  st: null,
-  phase: 'roll',        // roll | move | anim | over
-  diceVal: 6, diceAnim: 0, diceT: 0,
-  legal: [], hlPulse: 0,
-  turnBanner: '',
-  particles: [],
-  pawnAnims: [],        // {pi, pawn, from:{x,y}, to:{x,y}, t, dur, arc, done}
-  captureFlash: 0,
+  screen: 'menu', st: null, phase: 'roll',
+  diceVal: 6, diceAnim: 0, diceT: 0, diceFace: 6,
+  legal: [], hlPulse: 0, particles: [], pawnAnims: [],
   setup: { mode: 'pass', count: 2, color: 0 },
-  muted: false,
-  msg: '', msgT: 0,
+  msg: '', shake: 0, humanNames: {},
   rollBtn: { x: 590, y: 1130, w: 270, h: 120 },
   diceRect: { x: 60, y: 1120, s: 150 },
-  shake: 0,
 };
-try { G.muted = localStorage.getItem('ld_muted') === '1'; } catch (e) {}
 
-// ------- audio (WebAudio, no files) -------
+/* ---------------- stats (persisted) ---------------- */
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('ld2_stats') || 'null') || { players: {}, levels: {}, totalGames: 0 }; }
+  catch (e) { return { players: {}, levels: {}, totalGames: 0 }; }
+}
+function saveStats(st) { try { localStorage.setItem('ld2_stats', JSON.stringify(st)); } catch (e) {} }
+function recordGame(winnerPi) {
+  const stats = loadStats();
+  stats.totalGames++;
+  G.st.players.forEach((pl, pi) => {
+    if (pl.isBot) return;
+    const key = pl.name || 'Player';
+    if (!stats.players[key]) stats.players[key] = { games: 0, wins: 0 };
+    stats.players[key].games++;
+    if (pi === winnerPi) stats.players[key].wins++;
+  });
+  if (G.setup.mode === 'bots') {
+    const lv = SET.difficulty;
+    if (!stats.levels[lv]) stats.levels[lv] = { games: 0, youWon: 0, botWon: 0 };
+    stats.levels[lv].games++;
+    if (G.st.players[winnerPi].isBot) stats.levels[lv].botWon++; else stats.levels[lv].youWon++;
+  }
+  saveStats(stats);
+  return stats;
+}
+
+/* ---------------- audio: synth SFX + gentle music ---------------- */
 let AC = null;
 function ac() {
   if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
   if (AC && AC.state === 'suspended') AC.resume();
   return AC;
 }
-function beep(freq, dur, type, vol, when) {
-  if (G.muted) return;
+function tone(freq, dur, type, vol, when, slideTo) {
   const a = ac(); if (!a) return;
   const t = a.currentTime + (when || 0);
   const o = a.createOscillator(), g = a.createGain();
-  o.type = type || 'sine'; o.frequency.value = freq;
-  g.gain.setValueAtTime(vol || 0.18, t);
+  o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(vol || 0.15, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + dur);
   o.connect(g); g.connect(a.destination);
   o.start(t); o.stop(t + dur + 0.02);
 }
 const sfx = {
-  click()  { beep(660, 0.07, 'triangle', 0.15); },
-  dice()   { for (let i = 0; i < 5; i++) beep(180 + Math.random() * 220, 0.05, 'square', 0.07, i * 0.07); },
-  hop()    { beep(440 + Math.random() * 120, 0.06, 'sine', 0.12); },
-  out()    { beep(523, 0.1, 'triangle', 0.16); beep(784, 0.12, 'triangle', 0.16, 0.09); },
-  capture(){ beep(140, 0.25, 'sawtooth', 0.2); beep(90, 0.3, 'sawtooth', 0.18, 0.08); },
-  safe()   { beep(880, 0.08, 'sine', 0.1); },
-  win()    { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => beep(f, 0.16, 'triangle', 0.18, i * 0.13)); },
-  turn()   { beep(520, 0.06, 'sine', 0.08); },
+  click()   { if (SET.sfx) tone(660, 0.07, 'triangle', 0.14); },
+  dice()    { if (SET.sfx) for (let i = 0; i < 6; i++) tone(160 + Math.random() * 260, 0.05, 'square', 0.06, i * 0.09); },
+  hop()     { if (SET.sfx) tone(420 + Math.random() * 140, 0.06, 'sine', 0.11); },
+  out()     { if (SET.sfx) { tone(523, 0.1, 'triangle', 0.15); tone(784, 0.13, 'triangle', 0.15, 0.09); } },
+  capture() { if (SET.sfx) { tone(150, 0.22, 'sawtooth', 0.18, 0, 60); tone(90, 0.3, 'sawtooth', 0.16, 0.07, 45); } },
+  six()     { if (SET.sfx) { tone(880, 0.09, 'triangle', 0.14); tone(1174, 0.12, 'triangle', 0.14, 0.08); } },
+  home()    { if (SET.sfx) [659, 784, 988].forEach((f, i) => tone(f, 0.13, 'triangle', 0.15, i * 0.08)); },
+  safe()    { if (SET.sfx) tone(880, 0.08, 'sine', 0.09); },
+  win()     { if (SET.sfx) [523, 659, 784, 1046, 784, 1046, 1318].forEach((f, i) => tone(f, 0.17, 'triangle', 0.17, i * 0.13)); },
+  turn()    { if (SET.sfx) tone(520, 0.06, 'sine', 0.07); },
 };
-function setMute(m) {
-  G.muted = m;
-  document.getElementById('muteBtn').textContent = m ? '🔇' : '🔊';
-  try { localStorage.setItem('ld_muted', m ? '1' : '0'); } catch (e) {}
-}
-setMute(G.muted);
+// soft background music: slow pentatonic loop, self-generated (no files)
+const Music = {
+  timer: null, step: 0,
+  scale: [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 440.0, 392.0],
+  start() {
+    if (this.timer || !SET.music) return;
+    if (!ac()) return;
+    this.timer = setInterval(() => {
+      if (!SET.music || document.hidden) return;
+      const n = this.scale[this.step % this.scale.length];
+      tone(n, 0.55, 'sine', 0.045);
+      if (this.step % 4 === 0) tone(n / 2, 1.0, 'triangle', 0.035);
+      this.step++;
+    }, 430);
+  },
+  stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } },
+  sync() { if (SET.music) this.start(); else this.stop(); }
+};
+function syncMuteBtn() { document.getElementById('muteBtn').textContent = SET.sfx ? '🔊' : '🔇'; }
 
 /* ============================================================
-   PREMIUM DRAWING — helpers
+   DRAWING — helpers, pawns, dice
    ============================================================ */
 function rr(x, y, w, h, r) {
   ctx.beginPath();
@@ -205,7 +347,6 @@ function grad(x0, y0, x1, y1, stops) {
 }
 function cellXY(c, r) { return { x: BX + c * CELL, y: BY + r * CELL }; }
 
-// glossy pawn with depth: shadow, radial body, rim, specular shine
 function drawPawn(x, y, r, ci, opts) {
   opts = opts || {};
   const C = LD.COLOR_HEX[LD.COLORS[ci]], D = LD.COLOR_DARK[LD.COLORS[ci]], L = LD.COLOR_LIGHT[LD.COLORS[ci]];
@@ -214,43 +355,40 @@ function drawPawn(x, y, r, ci, opts) {
     const p = 0.6 + 0.4 * Math.sin(G.hlPulse * 6);
     ctx.shadowColor = '#ffd75e'; ctx.shadowBlur = 22 * p + 8;
   } else { ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4; }
-  // shadow ellipse
   ctx.beginPath(); ctx.ellipse(x, y + r * 0.95, r * 0.85, r * 0.28, 0, 0, 7);
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-  // body
   const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r * 1.15);
   g.addColorStop(0, L); g.addColorStop(0.55, C); g.addColorStop(1, D);
   ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = g; ctx.fill();
-  // rim
   ctx.lineWidth = Math.max(2, r * 0.12); ctx.strokeStyle = D; ctx.stroke();
   ctx.lineWidth = Math.max(1, r * 0.05); ctx.strokeStyle = 'rgba(255,255,255,.65)';
   ctx.beginPath(); ctx.arc(x, y, r * 0.72, 0, 7); ctx.stroke();
-  // specular shine
   ctx.beginPath(); ctx.ellipse(x - r * 0.34, y - r * 0.42, r * 0.26, r * 0.16, -0.6, 0, 7);
   ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
-  if (opts.crown) { ctx.font = (r * 0.9) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('♛', x, y + r * 0.08); }
   ctx.restore();
 }
 
-// glossy die
 const PIPS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]],
   4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
   6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
 function drawDie(x, y, s, val, spinning) {
   ctx.save();
   ctx.translate(x + s / 2, y + s / 2);
-  if (spinning) ctx.rotate(Math.sin(G.diceT * 30) * 0.12);
+  if (spinning) {
+    // tumble: wobble rotation + pulsing scale while faces cycle
+    ctx.rotate(Math.sin(G.diceT * 26) * 0.28);
+    const sc = 1 + Math.sin(G.diceT * 30) * 0.05;
+    ctx.scale(sc, sc);
+  }
   ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
   const g = grad(-s/2, -s/2, s/2, s/2, [[0, '#ffffff'], [0.5, '#f4f6fb'], [1, '#cfd6e4']]);
   rr(-s/2, -s/2, s, s, s * 0.18); ctx.fillStyle = g; ctx.fill();
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
   ctx.lineWidth = 3; ctx.strokeStyle = '#8a93a8'; ctx.stroke();
-  // gloss stripe
   ctx.beginPath(); rr(-s/2 + 6, -s/2 + 6, s - 12, s * 0.32, s * 0.12);
   ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
-  // pips
-  const v = spinning ? (1 + Math.floor(Math.random() * 6)) : val;
+  const v = spinning ? G.diceFace : val;
   const pr = s * 0.085, off = s * 0.26;
   PIPS[v].forEach(p => {
     const px = p[0] * off, py = p[1] * off;
@@ -262,12 +400,11 @@ function drawDie(x, y, s, val, spinning) {
 }
 
 /* ============================================================
-   BOARD MAP — precompute 15x15 cell types
+   BOARD
    ============================================================ */
 const CELLMAP = [];
 (function buildMap() {
   for (let r = 0; r < 15; r++) { CELLMAP[r] = []; for (let c = 0; c < 15; c++) CELLMAP[r][c] = { t: 'empty' }; }
-  // bases
   const baseDefs = [
     { c0: 0, r0: 0, ci: 0 }, { c0: 9, r0: 0, ci: 1 },
     { c0: 9, r0: 9, ci: 2 }, { c0: 0, r0: 9, ci: 3 },
@@ -276,16 +413,13 @@ const CELLMAP = [];
     for (let r = b.r0; r < b.r0 + 6; r++) for (let c = b.c0; c < b.c0 + 6; c++)
       CELLMAP[r][c] = { t: 'base', ci: b.ci };
   });
-  // track
   LD.TRACK.forEach((cell, ti) => {
     const info = { t: 'track', ti };
     if (LD.ENTRY.includes(ti)) { info.ci = LD.ENTRY.indexOf(ti); info.arrow = true; }
     if (LD.SAFE.has(ti) && !info.arrow) info.star = true;
     CELLMAP[cell[1]][cell[0]] = info;
   });
-  // home columns
   LD.HOME_COL.forEach((col, ci) => col.forEach(cell => { CELLMAP[cell[1]][cell[0]] = { t: 'home', ci }; }));
-  // center 3x3
   for (let r = 6; r <= 8; r++) for (let c = 6; c <= 8; c++) CELLMAP[r][c] = { t: 'center' };
 })();
 
@@ -313,13 +447,11 @@ function drawTile(c, r) {
     }
     rr(x, y, w, w, w * 0.14); ctx.fillStyle = fill; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(20,25,45,.28)'; ctx.stroke();
-    // top gloss
     rr(x + 3, y + 3, w - 6, w * 0.3, w * 0.1);
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
     const cx = x + w / 2, cy = y + w / 2;
     if (info.star) drawStar(cx, cy, w * 0.3, '#e8a90c');
     if (info.arrow) {
-      // white arrow pointing along track direction
       const ti = info.ti;
       const nxt = LD.TRACK[(ti + 1) % 52];
       const dx = Math.sign(nxt[0] - c), dy = Math.sign(nxt[1] - r);
@@ -345,7 +477,6 @@ function drawBase(ci) {
   ctx.fill();
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.stroke();
-  // inner white arena circle panel
   const cx = p.x + s / 2, cy = p.y + s / 2, ir = s * 0.32;
   ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 8;
   ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 7);
@@ -353,7 +484,6 @@ function drawBase(ci) {
   ctx.fill();
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
   ctx.lineWidth = 3; ctx.strokeStyle = D; ctx.stroke();
-  // pawn spots
   LD.BASE_SPOTS[ci].forEach(sp => {
     const sx = BX + sp[0] * CELL, sy = BY + sp[1] * CELL, sr = CELL * 0.42;
     ctx.beginPath(); ctx.arc(sx, sy, sr, 0, 7);
@@ -368,7 +498,6 @@ function drawBase(ci) {
 
 function drawCenter() {
   const p = cellXY(6, 6), s = CELL * 3, cx = p.x + s / 2, cy = p.y + s / 2;
-  // triangles: red top, green right, yellow bottom, blue left
   const tris = [
     { ci: 0, pts: [[p.x, p.y], [p.x + s, p.y], [cx, cy]] },
     { ci: 1, pts: [[p.x + s, p.y], [p.x + s, p.y + s], [cx, cy]] },
@@ -385,7 +514,6 @@ function drawCenter() {
     ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.stroke();
   });
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-  // gold medallion
   const mg = ctx.createRadialGradient(cx - 8, cy - 10, 6, cx, cy, 34);
   mg.addColorStop(0, '#fff3b0'); mg.addColorStop(0.6, '#ffd75e'); mg.addColorStop(1, '#c07f00');
   ctx.beginPath(); ctx.arc(cx, cy, 32, 0, 7); ctx.fillStyle = mg; ctx.fill();
@@ -396,22 +524,20 @@ function drawCenter() {
 }
 
 function drawBoard() {
-  // arena frame: dark wood + gold trim
+  const T = TH();
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
   rr(BX - 16, BY - 16, BS + 32, BS + 32, 30);
-  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, '#6b4423'], [0.5, '#4a2c14'], [1, '#2e1a0b']]);
+  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, T.frame[0]], [0.5, T.frame[1]], [1, T.frame[2]]]);
   ctx.fill();
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-  ctx.lineWidth = 4; ctx.strokeStyle = '#d8a83c'; ctx.stroke();
+  ctx.lineWidth = 4; ctx.strokeStyle = T.trim; ctx.stroke();
   rr(BX - 8, BY - 8, BS + 16, BS + 16, 24);
   ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,215,94,.5)'; ctx.stroke();
-  // board felt background
   rr(BX, BY, BS, BS, 18);
-  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, '#1c2450'], [1, '#12173a']]);
+  ctx.fillStyle = grad(BX, BY, BX, BY + BS, [[0, T.felt[0]], [1, T.felt[1]]]);
   ctx.fill();
   ctx.restore();
-  // cells
   for (let r = 0; r < 15; r++) for (let c = 0; c < 15; c++) {
     const t = CELLMAP[r][c].t;
     if (t === 'track' || t === 'home') drawTile(c, r);
@@ -421,19 +547,17 @@ function drawBoard() {
 }
 
 /* ============================================================
-   PAWN POSITIONING + HUD + ANIMATIONS + PARTICLES + HERO ART
+   PAWNS + PARTICLES + HUD
    ============================================================ */
 function pawnCellPos(colorIdx, pos) {
-  if (pos === -1) return null;                    // base spot handled separately
+  if (pos === -1) return null;
   if (pos <= 50) { const t = LD.TRACK[(LD.ENTRY[colorIdx] + pos) % 52]; return { c: t[0], r: t[1] }; }
   if (pos <= 55) { const h = LD.HOME_COL[colorIdx][pos - 51]; return { c: h[0], r: h[1] }; }
-  return { c: 7, r: 7, home: true };               // finished -> center
+  return { c: 7, r: 7, home: true };
 }
-// pixel center of a cell
 function cellCenter(c, r) { return { x: BX + (c + 0.5) * CELL, y: BY + (r + 0.5) * CELL }; }
 
-// stacking offsets when several pawns share a cell
-function pawnXY(pi, pawnIdx, allPawns) {
+function pawnXY(pi, pawnIdx) {
   const pl = G.st.players[pi], colorIdx = pl.color, pos = pl.pawns[pawnIdx];
   if (pos === -1) {
     const sp = LD.BASE_SPOTS[colorIdx][pawnIdx];
@@ -442,13 +566,10 @@ function pawnXY(pi, pawnIdx, allPawns) {
   const cp = pawnCellPos(colorIdx, pos);
   const ctr = cellCenter(cp.c, cp.r);
   if (cp.home) {
-    // finished pawns arranged around medallion
-    const k = pl.pawns.filter(p => p === 56).indexOf(56);
     const idx = pl.pawns.slice(0, pawnIdx + 1).filter(p => p === 56).length - 1;
     const a = -Math.PI / 2 + idx * (Math.PI * 2 / 4);
     return { x: ctr.x + Math.cos(a) * 24, y: ctr.y + Math.sin(a) * 24 };
   }
-  // count occupants of same cell
   const key = cp.c + ',' + cp.r;
   const occ = [];
   G.st.players.forEach((p2, qi) => p2.pawns.forEach((pp, qj) => {
@@ -468,7 +589,6 @@ function drawPawns() {
   if (!G.st) return;
   const r = pawnRadius();
   const moving = new Set(G.pawnAnims.map(a => a.pi + ':' + a.pawn));
-  // non-glowing first, then glowing (legal moves) on top
   const order = [];
   G.st.players.forEach((pl, pi) => pl.pawns.forEach((_, i) => order.push([pi, i])));
   order.forEach(([pi, i]) => {
@@ -483,7 +603,6 @@ function drawPawns() {
     if (!isLegal) return;
     const p = pawnXY(pi, i); drawPawn(p.x, p.y, r * 1.12, G.st.players[pi].color, { glow: true });
   });
-  // in-flight pawn animations
   G.pawnAnims.forEach(a => {
     const from = a.seg === 0 ? a.from : a.path[a.seg - 1];
     const to = a.path[a.seg];
@@ -495,7 +614,6 @@ function drawPawns() {
   });
 }
 
-// ---- particles ----
 function burst(x, y, colors, n, spd) {
   for (let i = 0; i < (n || 24); i++) {
     const a = Math.random() * Math.PI * 2, s = (spd || 260) * (0.4 + Math.random() * 0.8);
@@ -503,17 +621,25 @@ function burst(x, y, colors, n, spd) {
       life: 0.9 + Math.random() * 0.5, t: 0, c: colors[i % colors.length], sz: 4 + Math.random() * 6 });
   }
 }
+function ringBurst(x, y, color) {
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    G.particles.push({ x, y, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190,
+      life: 0.6, t: 0, c: color, sz: 5, ring: true });
+  }
+}
 function confetti() {
   const cols = ['#ffd75e', '#e63946', '#2a9d48', '#2f6fed', '#ffffff', '#f4b400'];
-  for (let i = 0; i < 130; i++)
-    G.particles.push({ x: Math.random() * W, y: -20 - Math.random() * 300, vx: (Math.random() - 0.5) * 120,
-      vy: 140 + Math.random() * 160, life: 2.5 + Math.random() * 1.5, t: 0, c: cols[i % cols.length],
+  for (let i = 0; i < 170; i++)
+    G.particles.push({ x: Math.random() * W, y: -20 - Math.random() * 420, vx: (Math.random() - 0.5) * 120,
+      vy: 140 + Math.random() * 170, life: 3 + Math.random() * 1.5, t: 0, c: cols[i % cols.length],
       sz: 5 + Math.random() * 7, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8 });
 }
 function updateParticles(dt) {
   G.particles = G.particles.filter(p => {
     p.t += dt; if (p.t > p.life) return false;
-    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 500 * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (!p.ring) p.vy += 500 * dt;
     if (p.rot != null) p.rot += p.vr * dt;
     return true;
   });
@@ -527,9 +653,7 @@ function drawParticles() {
   });
 }
 
-// ---- HUD: top bar + turn banner + bottom panel ----
 function drawTopBar() {
-  // title
   ctx.save();
   ctx.font = '900 44px Trebuchet MS'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   const tg = ctx.createLinearGradient(0, 30, 0, 80);
@@ -553,14 +677,12 @@ function drawTurnBanner() {
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.stroke();
   rr(x + 8, y + 8, w - 16, h * 0.32, 12); ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
-  // pawn mini
   drawPawn(x + 62, y + h / 2, 30, pl.color, {});
   ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.font = '900 34px Trebuchet MS';
+  ctx.font = '900 32px Trebuchet MS';
   ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 4;
   let label = pl.name + (pl.isBot ? ' 🤖' : '');
-  ctx.fillText(label + ' ki baari', x + 110, y + h / 2 - 2);
-  // live score dots: finished pawns
+  ctx.fillText(label + "'s turn", x + 110, y + h / 2 - 2);
   const done = pl.pawns.filter(p => p === 56).length;
   for (let i = 0; i < 4; i++) {
     ctx.beginPath(); ctx.arc(x + w - 40 - i * 34, y + h / 2, 12, 0, 7);
@@ -571,20 +693,17 @@ function drawTurnBanner() {
 }
 
 function drawBottomPanel() {
-  const y = PANEL_Y;
+  const y = PANEL_Y, T = TH();
   ctx.save();
-  // panel bg
   rr(30, y, W - 60, H - y - 24, 24);
-  ctx.fillStyle = grad(30, y, 30, H, [[0, 'rgba(38,32,80,.92)'], [1, 'rgba(18,14,45,.94)']]);
+  ctx.fillStyle = grad(30, y, 30, H, [[0, T.panel[0]], [1, T.panel[1]]]);
   ctx.fill();
   ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,215,94,.4)'; ctx.stroke();
-  // dice
   const d = G.diceRect;
   const spinning = G.diceAnim > 0;
   drawDie(d.x, d.y + 8, d.s, G.diceVal, spinning);
   ctx.fillStyle = '#cfd6ea'; ctx.font = 'bold 22px Trebuchet MS'; ctx.textAlign = 'center';
   ctx.fillText('DICE', d.x + d.s / 2, d.y + d.s + 34);
-  // ROLL button (glossy)
   const b = G.rollBtn, canRoll = G.phase === 'roll' && !curIsBot();
   ctx.save();
   if (!canRoll) ctx.globalAlpha = 0.45;
@@ -600,37 +719,32 @@ function drawBottomPanel() {
   ctx.fillStyle = canRoll ? '#4a2c08' : '#e2e5ee'; ctx.font = '900 44px Trebuchet MS'; ctx.textBaseline = 'middle';
   ctx.fillText('🎲 ROLL', b.x + b.w / 2, b.y + b.h / 2 + 2);
   ctx.restore();
-  // message
-  ctx.fillStyle = '#ffe9b8'; ctx.font = 'bold 26px Trebuchet MS'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffe9b8'; ctx.font = 'bold 25px Trebuchet MS'; ctx.textAlign = 'center';
   const mm = G.msg || defaultMsg();
-  ctx.fillText(mm, W / 2 - 40, y + 210 > H - 40 ? H - 46 : y + 96);
+  ctx.fillText(mm, W / 2 - 30, H - 46);
   ctx.restore();
 }
 function defaultMsg() {
   if (!G.st) return '';
-  if (G.phase === 'roll') return curIsBot() ? 'Bot soch raha hai…' : 'Dice roll karo! 🎲';
-  if (G.phase === 'move') return 'Chamakte pawn par tap karo 👆';
+  if (G.phase === 'roll') return curIsBot() ? 'Bot is thinking…' : 'Roll the dice! 🎲';
+  if (G.phase === 'move') return 'Tap a glowing pawn 👆';
   return '';
 }
 
-/* ---------- HERO ART for menu (premium) ---------- */
+/* ---------- hero art for the home screen ---------- */
 function drawHero() {
   const hc = document.getElementById('heroCanvas'), hx = hc.getContext('2d');
   const w = 760, h = 400;
-  // arena night bg with spotlights
   const bg = hx.createRadialGradient(w/2, h*0.75, 40, w/2, h/2, 420);
   bg.addColorStop(0, '#4a3f8f'); bg.addColorStop(0.55, '#2a2560'); bg.addColorStop(1, '#14123a');
   hx.fillStyle = bg; hx.fillRect(0, 0, w, h);
-  // spotlights
   [[150, 60], [610, 60], [380, 40]].forEach(s => {
     const sg = hx.createRadialGradient(s[0], s[1], 4, s[0], s[1], 190);
     sg.addColorStop(0, 'rgba(255,240,180,.5)'); sg.addColorStop(1, 'rgba(255,240,180,0)');
     hx.fillStyle = sg; hx.fillRect(0, 0, w, h);
   });
-  // crowd dots
   hx.fillStyle = 'rgba(255,255,255,.16)';
-  for (let i = 0; i < 60; i++) hx.fillRect(Math.random() * w, Math.random() * h * 0.45, 5, 5);
-  // arena floor ellipse
+  for (let i = 0; i < 60; i++) hx.fillRect((i * 137) % w, (i * 89) % (h * 0.45), 5, 5);
   hx.save();
   hx.beginPath(); hx.ellipse(w/2, h*0.78, 300, 78, 0, 0, 7);
   const fg = hx.createRadialGradient(w/2, h*0.78, 20, w/2, h*0.78, 300);
@@ -638,15 +752,12 @@ function drawHero() {
   hx.fillStyle = fg; hx.fill();
   hx.lineWidth = 6; hx.strokeStyle = '#d8a83c'; hx.stroke();
   hx.restore();
-  // big glossy die (left)
   drawHeroDie(hx, 250, 200, 150, 5);
-  // 4 glossy pawns (right)
   const cols = ['#e63946', '#2a9d48', '#f4b400', '#2f6fed'];
   const dark = ['#a31621', '#1a6b32', '#b78700', '#1d44ad'];
   const lite = ['#ff7a85', '#5fd07e', '#ffd94d', '#6b96ff'];
   [[470, 235, 46], [560, 215, 54], [655, 240, 44]].forEach((p, i) => drawHeroPawn(hx, p[0], p[1], p[2], cols[i], dark[i], lite[i]));
   drawHeroPawn(hx, 565, 300, 40, cols[3], dark[3], lite[3]);
-  // VS burst
   hx.save(); hx.translate(400, 130); hx.rotate(-0.12);
   hx.font = '900 64px Trebuchet MS'; hx.textAlign = 'center'; hx.textBaseline = 'middle';
   hx.lineWidth = 8; hx.strokeStyle = '#7a4d12'; hx.strokeText('VS', 0, 0);
@@ -704,6 +815,16 @@ function showMenu() {
   document.getElementById('winOv').classList.add('hidden');
   drawHero();
 }
+
+function readNames() {
+  // returns array of names for the current setup (players in color order)
+  const names = [];
+  document.querySelectorAll('#namesWrap .nameIn').forEach(inp => {
+    names.push((inp.value || '').trim());
+  });
+  return names;
+}
+
 function startGame() {
   const s = G.setup;
   let botFlags, humanColor = null;
@@ -713,39 +834,52 @@ function startGame() {
     botFlags[0] = false; humanColor = s.color;
   }
   G.st = LD.newGame(s.count, botFlags, humanColor);
+  // apply editable names
+  const names = readNames();
+  G.st.players.forEach((pl, i) => {
+    if (pl.isBot) {
+      pl.name = 'Bot (' + SET.difficulty.charAt(0).toUpperCase() + SET.difficulty.slice(1) + ')';
+    } else if (s.mode === 'pass') {
+      if (names[i]) pl.name = names[i].slice(0, 14);
+    } else {
+      if (names[0]) pl.name = names[0].slice(0, 14);
+    }
+  });
+  try { localStorage.setItem('ld2_names', JSON.stringify(names)); } catch (e) {}
   G.phase = 'roll'; G.diceVal = 6; G.legal = []; G.msg = '';
   G.particles = []; G.pawnAnims = [];
   G.screen = 'board';
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('winOv').classList.add('hidden');
   sfx.turn();
+  Music.sync();
   maybeBotTurn();
 }
 
-// ---- dice ----
 function doRoll() {
   if (G.phase !== 'roll' || G.screen !== 'board') return;
-  G.phase = 'anim'; G.diceAnim = 0.7; G.diceT = 0;
+  G.phase = 'anim'; G.diceAnim = 0.85; G.diceT = 0;
   sfx.dice();
   setTimeout(() => {
     const { roll, forfeited } = LD.rollDice(G.st);
     G.diceVal = roll; G.diceAnim = 0;
     if (forfeited) {
-      toast('⚠ Lagatar 3 six! Turn zaya.');
+      toast('⚠ Three sixes in a row! Turn skipped.');
       return setTimeout(nextTurn, 1100);
     }
+    if (roll === 6) sfx.six();
     G.legal = LD.legalMoves(G.st, G.st.turn, roll);
     G.phase = 'move';
     if (!G.legal.length) {
-      G.msg = roll === 6 ? '6 aaya lekin koi chaal nahi!' : 'Koi chaal nahi!';
+      G.msg = 'No legal move!';
       setTimeout(() => { if (G.phase === 'move') autoNext(roll); }, 1100);
     } else if (curIsBot()) {
-      setTimeout(botMove, 750);
+      setTimeout(botMove, 800);
     }
-  }, 720);
+  }, 870);
 }
-function autoNext(roll) { // no legal moves
-  if (roll === 6) { G.phase = 'roll'; maybeBotTurn(); } // 6 par dobara roll ka haq
+function autoNext(roll) {
+  if (roll === 6) { G.phase = 'roll'; maybeBotTurn(); }
   else nextTurn();
 }
 function nextTurn() {
@@ -760,19 +894,16 @@ function maybeBotTurn() {
 }
 function botMove() {
   if (G.phase !== 'move' || !curIsBot()) return;
-  const ch = LD.botChoose(G.st, G.st.turn, G.diceVal, Math.random);
+  const ch = LD.botChooseLevel(G.st, G.st.turn, G.diceVal, SET.difficulty, Math.random);
   if (ch < 0) return autoNext(G.diceVal);
   movePawn(G.st.turn, ch);
 }
 
-// ---- pawn move with hop animation ----
 function movePawn(pi, pawnIdx) {
   const pl = G.st.players[pi], p = pl.pawns[pawnIdx], roll = G.diceVal;
   const colorIdx = pl.color;
-  // build pixel path
   const fromPx = pawnXY(pi, pawnIdx);
   const path = [];
-  const np = (p === -1) ? 0 : p + roll;
   if (p === -1) {
     const cp = pawnCellPos(colorIdx, 0), ctr = cellCenter(cp.c, cp.r);
     path.push(ctr);
@@ -785,10 +916,11 @@ function movePawn(pi, pawnIdx) {
       path.push(ctr);
     }
   }
-  // apply logic now
   const res = LD.applyMove(G.st, pi, pawnIdx, roll);
   G.phase = 'anim';
-  G.pawnAnims.push({ pi, pawn: pawnIdx, ci: colorIdx, from: fromPx, path, seg: 0, t: 0, dur: 0.16, arc: 34, res, roll });
+  // bigger hop when the move ends in a capture
+  const arc = res.captured.length ? 62 : 38;
+  G.pawnAnims.push({ pi, pawn: pawnIdx, ci: colorIdx, from: fromPx, path, seg: 0, t: 0, dur: 0.17, arc, res, roll });
   sfx.hop();
   if (res.leftBase) setTimeout(() => sfx.out(), 150);
 }
@@ -797,16 +929,18 @@ function finishPawnAnim(a) {
   const res = a.res, pi = a.pi;
   const endPx = a.path[a.path.length - 1];
   if (res.captured.length) {
-    burst(endPx.x, endPx.y, ['#ff5a5a', '#ffffff', '#ffd75e'], 26, 300);
+    burst(endPx.x, endPx.y, ['#ff5a5a', '#ffffff', '#ffd75e'], 30, 320);
+    ringBurst(endPx.x, endPx.y, '#ffd75e');
+    G.shake = 14;
     sfx.capture();
     toast('⚔️ Capture!');
   } else if (res.finished) {
-    burst(endPx.x, endPx.y, ['#ffd75e', '#ffffff'], 20, 220);
-    sfx.safe();
+    burst(endPx.x, endPx.y, ['#ffd75e', '#ffffff', '#7be495'], 26, 260);
+    ringBurst(endPx.x, endPx.y, '#7be495');
+    sfx.home();
+    toast('🏠 Pawn home!');
   }
-  // win?
   if (LD.hasWon(G.st, pi)) return gameOver(pi);
-  // extra turn on 6
   if (a.roll === 6) { G.phase = 'roll'; G.legal = []; G.msg = ''; maybeBotTurn(); }
   else nextTurn();
 }
@@ -814,21 +948,27 @@ function finishPawnAnim(a) {
 function gameOver(pi) {
   G.phase = 'over'; G.st.winner = pi;
   const pl = G.st.players[pi];
-  // interstitial frequency hook: har 3rd game par ad ka mauqa (native side)
-  try {
-    window.__dangalGamesCompleted = (window.__dangalGamesCompleted || 0) + 1;
-  } catch (e) {}
+  // Native interstitial hook: count completed games (native shows the
+  // ad only when __shouldShowInterstitial() agrees — see below).
+  try { window.__dangalGamesCompleted = (window.__dangalGamesCompleted || 0) + 1; } catch (e) {}
+  const stats = recordGame(pi);
   confetti(); sfx.win();
   setTimeout(() => {
     document.getElementById('winTitle').textContent = pl.name + ' Wins! 🏆';
-    document.getElementById('winSub').textContent = pl.isBot ? 'Bot ne dangal jeet liya!' : 'Dangal jeet liya! 🎉';
+    document.getElementById('winSub').textContent = pl.isBot ? 'The bot takes this Dangal!' : 'Champion of the Dangal! 🎉';
+    const mine = stats.players[pl.name];
+    document.getElementById('winStat').textContent = (!pl.isBot && mine)
+      ? pl.name + ': ' + mine.wins + ' win' + (mine.wins === 1 ? '' : 's') + ' in ' + mine.games + ' games • Total games: ' + stats.totalGames
+      : 'Total games played: ' + stats.totalGames;
     document.getElementById('winOv').classList.remove('hidden');
-  }, 900);
+  }, 1000);
 }
-// Native AdMob interstitial isay call karke pooch sakta hai:
+// Interstitial rule (user-ordered for v2.0): show on every 2ND completed
+// game — games 2, 4, 6, ... Game-over screen only: this counter advances
+// exclusively inside gameOver(), never at app start or mid-game.
 window.__shouldShowInterstitial = function () {
   const n = window.__dangalGamesCompleted || 0;
-  return n > 0 && n % 3 === 0;   // kam az kam 2 games ka waqfa
+  return n > 0 && n % 2 === 0;
 };
 
 /* ============================================================
@@ -844,10 +984,8 @@ function inRect(p, rc) { return p.x >= rc.x && p.x <= rc.x + (rc.w || rc.s) && p
 cv.addEventListener('pointerdown', ev => {
   if (G.screen !== 'board' || !G.st) return;
   const p = canvasPos(ev);
-  // roll button or dice
   const b = G.rollBtn, d = G.diceRect;
   if (G.phase === 'roll' && !curIsBot() && (inRect(p, b) || inRect(p, d))) { sfx.click(); doRoll(); return; }
-  // pawn tap
   if (G.phase === 'move' && !curIsBot()) {
     const pi = G.st.turn, r = pawnRadius() * 1.5;
     for (const i of G.legal) {
@@ -858,23 +996,54 @@ cv.addEventListener('pointerdown', ev => {
 });
 
 /* ============================================================
-   MENU WIRING
+   MENU / SETTINGS / STATS WIRING
    ============================================================ */
-function selOpt(rowId, btn) {
-  document.querySelectorAll('#' + rowId + ' .opt').forEach(o => o.classList.remove('sel'));
+function selRow(rowId, btn) {
+  document.querySelectorAll('#' + rowId + ' .opt, #' + rowId + ' .colorpick').forEach(o => o.classList.remove('sel'));
   btn.classList.add('sel');
 }
-document.getElementById('mPass').onclick = () => { G.setup.mode = 'pass'; selOpt('mPass', document.getElementById('mPass')); document.getElementById('mPass').classList.add('sel'); document.getElementById('mBots').classList.remove('sel'); sfx.click(); };
-document.getElementById('mBots').onclick = () => { G.setup.mode = 'bots'; document.getElementById('mBots').classList.add('sel'); document.getElementById('mPass').classList.remove('sel'); sfx.click(); };
+function buildNames() {
+  const wrap = document.getElementById('namesWrap');
+  wrap.innerHTML = '';
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem('ld2_names') || '[]'); } catch (e) {}
+  const mk = (idx, colorIdx, placeholder) => {
+    const row = document.createElement('div'); row.className = 'nameRow';
+    const dot = document.createElement('div'); dot.className = 'dot';
+    dot.style.background = LD.COLOR_HEX[LD.COLORS[colorIdx]];
+    const inp = document.createElement('input'); inp.className = 'nameIn';
+    inp.maxLength = 14; inp.placeholder = placeholder;
+    inp.value = saved[idx] || '';
+    inp.setAttribute('aria-label', placeholder);
+    row.appendChild(dot); row.appendChild(inp);
+    wrap.appendChild(row);
+  };
+  if (G.setup.mode === 'pass') {
+    for (let i = 0; i < G.setup.count; i++)
+      mk(i, i, 'Player ' + (i + 1) + ' (' + LD.COLORS[i] + ')');
+  } else {
+    mk(0, G.setup.color, 'Your name');
+  }
+}
+function syncBotsOnly() {
+  document.getElementById('botsOnly').style.display = G.setup.mode === 'bots' ? 'block' : 'none';
+  document.getElementById('countLbl').textContent = G.setup.mode === 'bots' ? 'PLAYERS (YOU + BOTS)' : 'PLAYERS';
+}
+document.getElementById('mPass').onclick = () => { G.setup.mode = 'pass'; selRow('modeRow', document.getElementById('mPass')); syncBotsOnly(); buildNames(); sfx.click(); };
+document.getElementById('mBots').onclick = () => { G.setup.mode = 'bots'; selRow('modeRow', document.getElementById('mBots')); syncBotsOnly(); buildNames(); sfx.click(); };
 document.querySelectorAll('#countRow .opt').forEach(b => b.onclick = () => {
-  G.setup.count = +b.dataset.n; selOpt('countRow', b); sfx.click();
+  G.setup.count = +b.dataset.n; selRow('countRow', b); buildNames(); sfx.click();
+});
+document.querySelectorAll('#diffRow .opt').forEach(b => b.onclick = () => {
+  SET.difficulty = b.dataset.d; selRow('diffRow', b); saveSet(); sfx.click();
 });
 document.querySelectorAll('#colorRow .colorpick').forEach(b => b.onclick = () => {
-  G.setup.color = +b.dataset.c;
-  document.querySelectorAll('#colorRow .colorpick').forEach(o => o.classList.remove('sel'));
-  b.classList.add('sel'); sfx.click();
+  G.setup.color = +b.dataset.c; selRow('colorRow', b); buildNames(); sfx.click();
 });
-document.getElementById('startBtn').onclick = () => { sfx.click(); startGame(); };
+document.querySelectorAll('#themeRow .swatch').forEach(b => b.onclick = () => {
+  SET.theme = b.dataset.t; saveSet(); applyTheme(); sfx.click();
+});
+document.getElementById('startBtn').onclick = () => { sfx.click(); Music.sync(); startGame(); };
 document.getElementById('howBtn').onclick = () => {
   const h = document.getElementById('howto');
   h.style.display = h.style.display === 'block' ? 'none' : 'block'; sfx.click();
@@ -882,16 +1051,63 @@ document.getElementById('howBtn').onclick = () => {
 document.getElementById('againBtn').onclick = () => { sfx.click(); startGame(); };
 document.getElementById('winMenuBtn').onclick = () => { sfx.click(); showMenu(); };
 document.getElementById('menuBtn').onclick = () => { sfx.click(); showMenu(); };
-document.getElementById('muteBtn').onclick = () => setMute(!G.muted);
+document.getElementById('muteBtn').onclick = () => { SET.sfx = !SET.sfx; saveSet(); syncMuteBtn(); if (SET.sfx) sfx.click(); };
+// settings overlay
+const tglSfx = document.getElementById('tglSfx'), tglMusic = document.getElementById('tglMusic');
+function syncToggles() {
+  tglSfx.classList.toggle('on', SET.sfx);
+  tglMusic.classList.toggle('on', SET.music);
+}
+tglSfx.onclick = () => { SET.sfx = !SET.sfx; saveSet(); syncToggles(); syncMuteBtn(); if (SET.sfx) sfx.click(); };
+tglMusic.onclick = () => { SET.music = !SET.music; saveSet(); syncToggles(); Music.sync(); sfx.click(); };
+document.getElementById('settingsBtn').onclick = () => { syncToggles(); document.getElementById('settingsOv').classList.remove('hidden'); sfx.click(); };
+document.getElementById('settingsClose').onclick = () => { document.getElementById('settingsOv').classList.add('hidden'); sfx.click(); };
+// stats overlay
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function renderStats() {
+  const st = loadStats();
+  let h = '<p style="font-size:14px;margin:4px 0 8px">Total games played: <b>' + st.totalGames + '</b></p>';
+  const pk = Object.keys(st.players || {});
+  if (pk.length) {
+    h += '<table class="stats"><tr><th>Player</th><th class="n">Games</th><th class="n">Wins</th></tr>';
+    pk.sort((a, b) => st.players[b].wins - st.players[a].wins).forEach(k => {
+      h += '<tr><td>' + esc(k) + '</td><td class="n">' + st.players[k].games + '</td><td class="n">' + st.players[k].wins + '</td></tr>';
+    });
+    h += '</table>';
+  }
+  const lk = Object.keys(st.levels || {});
+  if (lk.length) {
+    h += '<table class="stats"><tr><th>Bot level</th><th class="n">Games</th><th class="n">You won</th><th class="n">Bot won</th></tr>';
+    lk.forEach(k => {
+      const L = st.levels[k];
+      h += '<tr><td>' + k.charAt(0).toUpperCase() + k.slice(1) + '</td><td class="n">' + L.games + '</td><td class="n">' + L.youWon + '</td><td class="n">' + L.botWon + '</td></tr>';
+    });
+    h += '</table>';
+  }
+  if (!pk.length && !lk.length) h += '<p style="font-size:14px;color:#cbb8f5">No games recorded yet — play your first Dangal!</p>';
+  document.getElementById('statsBody').innerHTML = h;
+}
+document.getElementById('statsBtn').onclick = () => { renderStats(); document.getElementById('statsOv').classList.remove('hidden'); sfx.click(); };
+document.getElementById('statsClose').onclick = () => { document.getElementById('statsOv').classList.add('hidden'); sfx.click(); };
+document.getElementById('statsClear').onclick = () => {
+  saveStats({ players: {}, levels: {}, totalGames: 0 }); renderStats(); sfx.click();
+};
+// update button: native one-tap updater in the app; fetch check on the web
+document.getElementById('updBtn').onclick = () => {
+  sfx.click();
+  try { if (window.JilanUpdater && JilanUpdater.checkUpdate) { JilanUpdater.checkUpdate(); return; } } catch (e) {}
+  checkUpdateWeb();
+};
 
 // back-button hooks (Android wrapper)
 window.__atMenu = function () { return G.screen === 'menu'; };
 window.__goMenu = function () { showMenu(); };
 
 /* ============================================================
-   UPDATE CHECKER
+   WEB UPDATE CHECKER (browser fallback; in the app the native
+   one-tap updater handles background download + install banner)
    ============================================================ */
-async function checkUpdate() {
+async function checkUpdateWeb() {
   try {
     const r = await fetch('ludo-dangal-version.json?t=' + Date.now());
     const v = await r.json();
@@ -906,21 +1122,26 @@ async function checkUpdate() {
         try { localStorage.setItem('ld_update_dismissed', v.version); } catch (e) {}
         document.getElementById('updateCard').style.display = 'none';
       };
+    } else {
+      toast('✔ You are on the latest version (v' + APP_VERSION + ')');
     }
-  } catch (e) {}
+  } catch (e) { toast('Could not check for updates'); }
 }
 
 /* ============================================================
    MAIN LOOP
    ============================================================ */
-let lastT = 0;
+let lastT = 0, faceClock = 0;
 function loop(t) {
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, (t - lastT) / 1000 || 0.016); lastT = t;
   G.hlPulse += dt;
-  if (G.diceAnim > 0) { G.diceAnim -= dt; G.diceT += dt; }
+  if (G.diceAnim > 0) {
+    G.diceAnim -= dt; G.diceT += dt; faceClock += dt;
+    if (faceClock > 0.07) { faceClock = 0; G.diceFace = 1 + Math.floor(Math.random() * 6); }
+  }
+  if (G.shake > 0) G.shake = Math.max(0, G.shake - dt * 34);
   updateParticles(dt);
-  // pawn animations
   G.pawnAnims = G.pawnAnims.filter(a => {
     a.t += dt;
     if (a.t >= a.dur) {
@@ -934,29 +1155,44 @@ function loop(t) {
 }
 
 function render() {
-  // bg
-  const bg = grad(0, 0, 0, H, [[0, '#232a5e'], [0.5, '#161b45'], [1, '#0b0e28']]);
+  const T = TH();
+  const bg = grad(0, 0, 0, H, [[0, T.bg[0]], [0.5, T.bg[1]], [1, T.bg[2]]]);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-  // subtle arena dots
   ctx.fillStyle = 'rgba(255,255,255,.05)';
   for (let i = 0; i < 40; i++) {
     const x = (i * 211) % W, y = (i * 337) % H;
     ctx.fillRect(x, y, 4, 4);
   }
+  ctx.save();
+  if (G.shake > 0) ctx.translate((Math.random() - 0.5) * G.shake, (Math.random() - 0.5) * G.shake);
   if (G.screen === 'board' && G.st) {
     drawTopBar(); drawTurnBanner(); drawBoard(); drawPawns(); drawParticles(); drawBottomPanel();
   } else {
-    // menu backdrop: dimmed board preview
     ctx.save(); ctx.globalAlpha = 0.25;
     drawBoard();
     ctx.restore();
+    drawParticles();
   }
+  ctx.restore();
 }
 
-// boot
-showMenu();
-checkUpdate();
-requestAnimationFrame(loop);
+/* ---------------- boot ---------------- */
+(function boot() {
+  // restore difficulty selection UI
+  document.querySelectorAll('#diffRow .opt').forEach(b => b.classList.toggle('sel', b.dataset.d === SET.difficulty));
+  applyTheme();
+  syncMuteBtn();
+  syncBotsOnly();
+  buildNames();
+  showMenu();
+  requestAnimationFrame(loop);
+  // splash out
+  setTimeout(() => {
+    const sp = document.getElementById('splash');
+    sp.style.opacity = '0';
+    setTimeout(() => sp.style.display = 'none', 550);
+  }, 1100);
+})();
 </script>
 <div style="text-align:center;font-size:12px;opacity:.6;padding:12px;">© 2026 Jilan Apps Official. All rights reserved.</div>
 </body>

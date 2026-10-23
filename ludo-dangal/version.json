@@ -1,9 +1,9 @@
 {
  "app": "ludodangal",
  "package": "com.jilanapps.ludodangal",
- "versionCode": 3,
- "versionName": "1.2",
+ "versionCode": 4,
+ "versionName": "2.0",
  "apk": "https://jilanapps.github.io/jilan-store/ludo-dangal/ludo-dangal.apk",
- "size": 86762,
- "notes": "One-tap auto-update: this app now downloads new versions in the background and shows a tap-to-install banner when an update is ready."
+ "size": 3266573,
+ "notes": "Ludo Dangal v2.0 Professional: 3 board themes, animated dice, bot difficulty (Easy/Medium/Hard), sounds & music, player names and win stats. Interstitial ad now on every 2nd game."
 }
