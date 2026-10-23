@@ -1,7 +1,7 @@
 {
- "versionCode": 8,
- "versionName": "1.7",
+ "versionCode": 9,
+ "versionName": "1.8",
  "apkUrl": "https://jilanapps.github.io/jilan-store/loan-apply/loan-apply.apk",
- "notes": "v1.7: AdMob ads added — a small banner on the home screen only, plus an occasional full-screen ad when you return to the app after opening the portal (never more than once in 3 minutes, never over the portal). Plus one-tap auto-update.",
+ "notes": "v1.8: stability fix — on some phones the app could close immediately after opening; this update fixes that startup problem. Everything else, including the home-screen banner, is unchanged.",
  "size": 5243934
 }
