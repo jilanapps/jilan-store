@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!-- ================================================================
+     JILAN DAILY DEALS — seekhne wali website (Lesson: kisi site ke
+     dhanche ko dekh kar waisi hi site haath se banana)
+     Dhancha kisi bhi achi shopping site jaisa hai:
+     Top bar -> Header -> Hero -> Products -> Reviews -> New Arrivals
+     -> Articles -> Footer. Text aur products hamare apne hain.
+     ================================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jilan Daily Deals — Jewellery, Fashion & More</title>
+<style>
+  /* ===== STEP 1: poori page ki buniyadi setting ===== */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Georgia, 'Times New Roman', serif; background:#fdfcf9; color:#1c1a17; }
+  img { max-width:100%; display:block; }
+  a { text-decoration:none; color:inherit; }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 16px; }
+
+  /* ===== STEP 2: oper wali patti (top bar) aur header ===== */
+  .topbar { background:#1c1a17; color:#e9d8a6; text-align:center; font-size:13px; padding:8px 10px; letter-spacing:1px; }
+  header { background:#fff; border-bottom:1px solid #e7e0d0; }
+  .hrow { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+  .logo { font-size:27px; font-weight:bold; letter-spacing:2px; }
+  .logo span { color:#b8912f; }
+  nav a { margin-left:20px; font-size:15px; color:#44403c; }
+  nav a:hover { color:#b8912f; }
+
+  /* ===== STEP 3: hero — bari tasveer wala pehla hissa ===== */
+  .hero { display:flex; align-items:center; gap:28px; padding:44px 0; flex-wrap:wrap; }
+  .hero .txt { flex:1; min-width:260px; }
+  .hero h1 { font-size:42px; line-height:1.15; margin-bottom:14px; }
+  .hero p { font-size:17px; color:#57534e; margin-bottom:22px; }
+  .hero img { flex:1; min-width:260px; border-radius:18px; }
+  .btn { display:inline-block; background:#b8912f; color:#fff; padding:13px 30px; border-radius:999px; font-size:15px; letter-spacing:1px; }
+
+  /* ===== STEP 4: products wala hissa ===== */
+  .sec-title { text-align:center; font-size:30px; margin:38px 0 6px; }
+  .sec-sub { text-align:center; color:#78716c; margin-bottom:24px; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+  @media(min-width:760px){ .grid { grid-template-columns:repeat(4,1fr); } }
+  .card { background:#fff; border:1px solid #e7e0d0; border-radius:14px; overflow:hidden; }
+  .card img { aspect-ratio:1; object-fit:cover; width:100%; }
+  .card .b { padding:12px; }
+  .card h3 { font-size:14.5px; line-height:1.35; min-height:39px; }
+  .price { color:#b8912f; font-weight:bold; font-size:16.5px; margin-top:6px; }
+  .card .btn { width:100%; text-align:center; margin-top:10px; padding:10px; font-size:14px; }
+
+  /* ===== STEP 5: customers ke reviews ===== */
+  .reviews { background:#f5efe2; padding:36px 0; margin-top:44px; }
+  .rgrid { display:grid; grid-template-columns:1fr; gap:14px; }
+  @media(min-width:760px){ .rgrid { grid-template-columns:repeat(4,1fr); } }
+  .rcard { background:#fff; border-radius:14px; padding:18px; border:1px solid #e7e0d0; }
+  .stars { color:#b8912f; font-size:16px; letter-spacing:2px; }
+  .rcard p { font-size:14px; color:#44403c; margin:10px 0; line-height:1.55; }
+  .rcard b { font-size:13.5px; }
+
+  /* ===== STEP 6: articles (insights) ===== */
+  .agrid { display:grid; grid-template-columns:1fr; gap:14px; }
+  @media(min-width:760px){ .agrid { grid-template-columns:repeat(3,1fr); } }
+  .acard { background:#fff; border:1px solid #e7e0d0; border-radius:14px; overflow:hidden; }
+  .acard img { aspect-ratio:16/10; object-fit:cover; width:100%; }
+  .acard .b { padding:14px; }
+  .acard h3 { font-size:16.5px; margin-bottom:8px; }
+  .acard a { color:#b8912f; font-size:14px; font-weight:bold; }
+
+  /* ===== STEP 7: footer ===== */
+  footer { background:#1c1a17; color:#d6d3d1; margin-top:48px; padding:34px 0; text-align:center; font-size:14px; line-height:1.8; }
+  footer .fl { color:#e9d8a6; font-size:19px; letter-spacing:2px; }
+</style>
+</head>
+<body>
+
+<!-- STEP 2: top bar + header -->
+<div class="topbar">FREE CASH ON DELIVERY — ALL OVER PAKISTAN</div>
+<header>
+  <div class="wrap hrow">
+    <div class="logo">JILAN <span>DAILY DEALS</span></div>
+    <nav>
+      <a href="#collection">Shop</a>
+      <a href="#arrivals">New Arrivals</a>
+      <a href="#insights">Insights</a>
+      <a href="#footer">Contact</a>
+    </nav>
+  </div>
+</header>
+<!-- == STEP 2 KHATAM == -->
+
+<!-- STEP 3: hero -->
+<section class="wrap hero">
+  <div class="txt">
+    <h1>Explore The Finest Collection</h1>
+    <p>Handpicked jewellery and fashion pieces, chosen with care — quality you can feel, prices you will love.</p>
+    <a class="btn" href="#collection">SHOP NOW</a>
+  </div>
+  <img src="https://static.markaz.app/pakistan/products/2265-78-745245-product-1.webp" alt="Featured product">
+</section>
+<!-- == STEP 3 KHATAM == -->
+
+<!-- STEP 4: collection / products -->
+<section class="wrap" id="collection">
+  <h2 class="sec-title">Discover Our Collection</h2>
+  <p class="sec-sub">Bestsellers loved by our customers</p>
+  <div class="grid">
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/2929-78-MZ2929200012TERBCS-product-1.webp" alt=""><div class="b"><h3>1 Pc Charm Bracelet</h3><div class="price">Rs 1,169</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/2965-78-751533-product-1.webp" alt=""><div class="b"><h3>1 Pc Gajrey</h3><div class="price">Rs 1,170</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/604-78-748693-product-1.webp" alt=""><div class="b"><h3>2 Pcs Gold Plated Crystal Chain Bracelet</h3><div class="price">Rs 969</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/1119-78-MZ1119204128BYBR-769171001-product-1.webp" alt=""><div class="b"><h3>5 Pcs Funky Gold Plated Crystal Bracelet</h3><div class="price">Rs 999</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+  </div>
+</section>
+<!-- == STEP 4 KHATAM == -->
+
+<!-- STEP 5: reviews -->
+<section class="reviews">
+  <div class="wrap">
+    <h2 class="sec-title">What Our Customers Say</h2>
+    <p class="sec-sub">Sample reviews — apne asal customers ke reviews yahan lagte hain</p>
+    <div class="rgrid">
+      <div class="rcard"><div class="stars">★★★★★</div><p>The bracelet looked even better in person. Packing was neat and delivery was quick.</p><b>— Fatima S.</b></div>
+      <div class="rcard"><div class="stars">★★★★★</div><p>Good quality for the price. I ordered for my sister and she loved it.</p><b>— Areeba K.</b></div>
+      <div class="rcard"><div class="stars">★★★★★</div><p>Cash on delivery made it easy. The product matched the pictures.</p><b>— Mahnoor A.</b></div>
+      <div class="rcard"><div class="stars">★★★★★</div><p>Simple ordering on WhatsApp and a polite response. Recommended.</p><b>— Zainab R.</b></div>
+    </div>
+  </div>
+</section>
+<!-- == STEP 5 KHATAM == -->
+
+<!-- STEP 6: new arrivals -->
+<section class="wrap" id="arrivals">
+  <h2 class="sec-title">New Arrivals</h2>
+  <p class="sec-sub">Fresh pieces, just added</p>
+  <div class="grid">
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/2690-69-MZ2690200031KSFNHB-769189001-product-1.webp" alt=""><div class="b"><h3>Men's Fleece Printed Hoodie</h3><div class="price">Rs 1,899</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/2664-29-746991-product-1.webp" alt=""><div class="b"><h3>Men's Wool Plain Shawl (Black)</h3><div class="price">Rs 2,240</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/2744-172-745227-product-1.webp" alt=""><div class="b"><h3>Men's Cotton Printed T-Shirt</h3><div class="price">Rs 989</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+    <div class="card"><img src="https://static.markaz.app/pakistan/products/558-397-675888-product-1.webp" alt=""><div class="b"><h3>3 Color Foil Flakes Set — Jewelry Craft</h3><div class="price">Rs 899</div><a class="btn" href="https://wa.me/923007379385">Order Now</a></div></div>
+  </div>
+</section>
+<!-- == STEP 6 KHATAM == -->
+
+<!-- STEP 7: insights / articles -->
+<section class="wrap" id="insights">
+  <h2 class="sec-title">Insights & Guides</h2>
+  <p class="sec-sub">Helpful reads from our store</p>
+  <div class="agrid">
+    <div class="acard"><img src="https://static.markaz.app/pakistan/products/2965-78-751533-product-1.webp" alt=""><div class="b"><h3>How to Choose a Bracelet That Suits You</h3><a href="#">Read now →</a></div></div>
+    <div class="acard"><img src="https://static.markaz.app/pakistan/products/2265-78-745245-product-1.webp" alt=""><div class="b"><h3>Caring for Gold-Plated Jewellery</h3><a href="#">Read now →</a></div></div>
+    <div class="acard"><img src="https://static.markaz.app/pakistan/products/2690-69-MZ2690200031KSFNHB-769189001-product-1.webp" alt=""><div class="b"><h3>Winter Fashion Basics for Men</h3><a href="#">Read now →</a></div></div>
+  </div>
+</section>
+<!-- == STEP 7 KHATAM == -->
+
+<!-- STEP 8: footer -->
+<footer id="footer">
+  <div class="fl">JILAN DAILY DEALS</div>
+  <div>Cash on Delivery — All over Pakistan<br>Order on WhatsApp: 0300-7379385</div>
+  <div>© 2026 Jilan Apps Official. All rights reserved.</div>
+</footer>
+<!-- == STEP 8 KHATAM == -->
+
+</body>
+</html>
