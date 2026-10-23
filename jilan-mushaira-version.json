@@ -1,8 +1,8 @@
 {
- "versionCode": 6,
- "versionName": "3.3",
+ "versionCode": 7,
+ "versionName": "3.4",
  "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-mushaira.apk",
- "size": 2261891,
- "md5": "f1635aae33fe3722a9ba2aadbf92115a",
- "notes": "v3.3: now listed in the Jilan App Store, with one-tap auto-update \u2014 the app downloads updates in the background; tap the banner to install."
+ "size": 7456179,
+ "md5": "8d84a558386d4a71a79de586eaacc0c7",
+ "notes": "v3.4: ads added (banner on the home screen only + occasional full-screen ad when you return home) with the hardened, crash-fixed recipe; poetry and Urdu voice player unchanged."
 }
