@@ -1121,6 +1121,34 @@
    "size": 319958,
    "versionCode": 3,
    "versionName": "1.2"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilan-mushaira.apk",
+   "category": "education",
+   "color": "#7b1e26",
+   "desc": "Urdu poetry collection — classic ashaar of Ghalib, Iqbal, Mir and more, with an Urdu voice player that reads every sher aloud",
+   "icon": "icons/mushaira.png",
+   "id": "mushaira",
+   "name": "Jilan Mushaira",
+   "package": "com.jilanapps.mushaira",
+   "size": 2261891,
+   "versionCode": 6,
+   "versionName": "3.3",
+   "web": "https://jilanapps.github.io/jilan-store/mushaira/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilan-english-challenge.apk",
+   "category": "education",
+   "color": "#1d4ed8",
+   "desc": "Daily English speaking challenges with voice practice — build fluency one challenge at a time",
+   "icon": "icons/englishchallenge.png",
+   "id": "englishchallenge",
+   "name": "Jilan English Challenge",
+   "package": "com.jilanapps.englishchallenge",
+   "size": 62104,
+   "versionCode": 4,
+   "versionName": "1.3",
+   "web": "https://jilanapps.github.io/jilan-store/english-challenge/"
   }
  ],
  "store": {
