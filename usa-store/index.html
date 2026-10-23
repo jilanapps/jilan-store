@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan USA Store — Everyday Deals in USD</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6f9;color:#222}
+  .socialbar{background:#fff;border-bottom:1px solid #e5e9ef;display:flex;justify-content:flex-end;gap:6px;padding:5px 14px}
+  .socialbar a{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;color:#fff;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
+  .sfb{background:#3b5998}.sx{background:#000}.sig{background:#b03a5b}
+  header{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);position:sticky;top:0;z-index:60}
+  .hwrap{max-width:1200px;margin:auto;display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .burger{font-size:24px;cursor:pointer;background:none;border:none;color:#0b2a4a}
+  .logo{font-size:23px;font-weight:800;color:#0b5cad;text-decoration:none;white-space:nowrap}
+  .logo span{color:#f39c12}
+  .search{flex:1;min-width:150px;display:flex}
+  .search input{flex:1;padding:10px 14px;border:2px solid #0b5cad;border-right:none;border-radius:8px 0 0 8px;font-size:15px}
+  .search button{background:#0b5cad;color:#fff;border:none;padding:0 16px;border-radius:0 8px 8px 0;font-size:15px;cursor:pointer}
+  .cartbox{display:flex;align-items:center;gap:9px;cursor:pointer}
+  .carticon{position:relative;font-size:27px}
+  .cartcount{position:absolute;top:-7px;right:-9px;background:#0b5cad;color:#fff;border-radius:50%;width:19px;height:19px;font-size:11px;display:flex;align-items:center;justify-content:center}
+  .cartmeta{font-size:12px;color:#555;line-height:1.25}
+  .cartmeta b{display:block;font-size:15px;color:#0b5cad}
+  nav{background:#0b5cad}
+  .nwrap{max-width:1200px;margin:auto;display:flex;gap:4px;overflow-x:auto;padding:0 10px}
+  .nwrap a{color:#fff;text-decoration:none;padding:11px 13px;font-size:14px;white-space:nowrap;cursor:pointer}
+  .nwrap a:hover,.nwrap a.on{background:#084a8a}
+  /* side menu */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;display:none}
+  .overlay.show{display:block}
+  .sidemenu{position:fixed;top:0;left:-340px;width:330px;max-width:88vw;height:100%;background:#fff;z-index:95;transition:.3s;display:flex;flex-direction:column}
+  .sidemenu.open{left:0}
+  .sm-search{padding:14px}
+  .sm-search input{width:100%;padding:11px 14px;border:1px solid #ddd;border-radius:22px;font-size:15px;background:#f4f6f9}
+  .sm-tabs{display:flex;border-bottom:2px solid #eee}
+  .sm-tabs button{flex:1;background:none;border:none;padding:13px;font-size:14px;font-weight:700;color:#777;cursor:pointer;border-bottom:3px solid transparent}
+  .sm-tabs button.on{color:#0b5cad;border-bottom-color:#0b5cad}
+  .sm-list{flex:1;overflow-y:auto}
+  .sm-list a{display:block;padding:15px 18px;border-bottom:1px solid #f0f0f0;color:#222;text-decoration:none;font-size:15px;cursor:pointer}
+  .sm-list a:hover{color:#0b5cad}
+  .sm-social{display:flex;gap:8px;justify-content:center;padding:16px}
+  .sm-social a{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:4px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer}
+  .sm-close{position:absolute;top:10px;right:-46px;background:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:17px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+  /* hero slider */
+  .hero{max-width:1200px;margin:20px auto 6px;border-radius:14px;overflow:hidden;position:relative;color:#fff;min-height:230px;display:flex;align-items:center}
+  .slide{position:absolute;inset:0;padding:36px 30px;opacity:0;transition:opacity .7s;display:flex;flex-direction:column;justify-content:center;pointer-events:none}
+  .slide.act{opacity:1;pointer-events:auto}
+  .slide h1{font-size:32px;margin-bottom:8px;text-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .slide p{color:#e8f1fa;margin-bottom:14px;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+  .chips{display:flex;gap:9px;margin-bottom:16px}
+  .chips span{width:42px;height:42px;border:2px solid rgba(255,255,255,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;background:rgba(255,255,255,.12)}
+  .slide button{align-self:flex-start;background:#fff;color:#0b5cad;border:none;padding:11px 24px;font-size:15px;font-weight:700;border-radius:22px;cursor:pointer}
+  .dots{position:absolute;bottom:12px;left:0;right:0;display:flex;gap:7px;justify-content:center;z-index:3}
+  .dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer}
+  .dots span.on{background:#fff}
+  /* trust cards */
+  .trust{max-width:1200px;margin:16px auto;background:#0b5cad;border-radius:14px;padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .tcard{background:#fff;border-radius:10px;padding:16px;display:flex;gap:13px;align-items:center}
+  .ticon{width:52px;height:52px;flex:none;border:2px solid #bcd6f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:23px;background:#eef4fa}
+  .tcard b{color:#0b5cad;font-size:14px;letter-spacing:.3px}
+  .tcard p{font-size:13px;color:#666;margin-top:3px}
+  .sec{max-width:1200px;margin:26px auto;padding:0 16px}
+  .sec h2{font-size:23px;color:#0b2a4a}
+  .sec .sub{color:#777;font-size:14px;margin:4px 0 16px}
+  .cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .cat{border-radius:12px;height:130px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  .cat .e{font-size:38px}
+  .cat div{font-size:14px;font-weight:700;margin-top:7px;text-shadow:0 1px 3px rgba(0,0,0,.4);text-align:center;padding:0 6px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+  .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.07);display:flex;flex-direction:column}
+  .pimg{height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:#eef4fa}
+  .pbody{padding:12px;flex:1;display:flex;flex-direction:column}
+  .pcat{font-size:11px;color:#0b5cad;text-transform:uppercase;letter-spacing:.4px}
+  .pname{font-size:15px;font-weight:600;margin:5px 0;flex:1}
+  .stars{color:#f39c12;font-size:13px}
+  .price{margin:8px 0;font-size:18px;font-weight:800;color:#0b2a4a}
+  .price s{color:#999;font-weight:400;font-size:14px;margin-right:6px}
+  .off{background:#e74c3c;color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+  .add{background:#0b5cad;color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+  .add:hover{background:#084a8a}
+  footer{background:#0b2a4a;color:#cfe2f5;margin-top:16px}
+  .fwrap{max-width:1200px;margin:auto;padding:28px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+  footer h3{color:#fff;margin-bottom:10px;font-size:16px}
+  footer a{color:#cfe2f5;text-decoration:none;display:block;margin:6px 0;font-size:14px;cursor:pointer}
+  .copy{border-top:1px solid #1d4468;text-align:center;padding:14px;font-size:13px}
+  .crumbs{max-width:1200px;margin:16px auto 0;padding:0 16px;font-size:13px;color:#888}
+  .crumbs b{color:#333}
+  .drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100%;background:#fff;z-index:100;box-shadow:-4px 0 16px rgba(0,0,0,.2);transition:.3s;display:flex;flex-direction:column}
+  .drawer.open{right:0}
+  .dhead{padding:16px;background:#0b5cad;color:#fff;font-weight:700;display:flex;justify-content:space-between}
+  .ditems{flex:1;overflow-y:auto;padding:12px}
+  .ditem{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #eee;align-items:center}
+  .ditem .e{font-size:30px}
+  .qty button{width:24px;height:24px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer}
+  .dfoot{padding:16px;border-top:1px solid #eee}
+  .dfoot .row{display:flex;justify-content:space-between;margin:6px 0;font-size:15px}
+  .checkout{width:100%;background:#27ae60;color:#fff;border:none;padding:13px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+  .modal.open{display:flex}
+  .mbox{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:24px;max-height:90vh;overflow-y:auto}
+  .mbox h2{margin-bottom:12px;color:#0b2a4a;font-size:22px}
+  .mbox h3{margin:18px 0 6px;color:#0b2a4a}
+  .mbox label{font-size:13px;font-weight:600;display:block;margin:10px 0 4px}
+  .mbox label i{color:#e74c3c;font-style:normal}
+  .mbox input,.mbox textarea,.mbox select{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:14px}
+  .mbox .go{width:100%;background:#333;color:#fff;border:none;padding:13px;border-radius:4px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;letter-spacing:1px}
+  .mbox .green{background:#27ae60;border-radius:8px;letter-spacing:0}
+  .mbox .cancel{width:100%;background:#eee;border:none;padding:11px;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px}
+  .mbox .link{color:#0b5cad;font-size:13px;cursor:pointer}
+  .chk{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  .chk input{width:auto}
+  .msg{font-size:14px;margin-top:10px}
+  .empty{text-align:center;color:#888;padding:30px 0}
+  @media(max-width:640px){.cartmeta{display:none}.slide h1{font-size:24px}.hero{min-height:200px}}
+</style>
+</head>
+<body>
+<div class="socialbar">
+  <a class="sfb" title="Facebook">f</a><a class="sx" title="X">𝕏</a><a class="sig" title="Instagram">◎</a>
+</div>
+<header>
+  <div class="hwrap">
+    <button class="burger" onclick="toggleMenu(true)">☰</button>
+    <a class="logo" href="#" onclick="goHome()">Jilan<span>USA</span> Store</a>
+    <div class="search">
+      <input id="searchBox" type="text" placeholder="Search...">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <div class="cartbox" onclick="toggleCart(true)">
+      <div class="carticon">🛍️<span class="cartcount" id="cartCount">0</span></div>
+      <div class="cartmeta">Shopping Cart<b id="cartTotalHead">$0</b></div>
+    </div>
+  </div>
+  <nav><div class="nwrap" id="catNav"></div></nav>
+</header>
+
+<div class="overlay" id="overlay" onclick="toggleMenu(false);toggleCart(false)"></div>
+<aside class="sidemenu" id="sideMenu">
+  <button class="sm-close" onclick="toggleMenu(false)">✕</button>
+  <div class="sm-search"><input id="smSearch" type="text" placeholder="Search..." onkeydown="if(event.key==='Enter'){document.getElementById('searchBox').value=this.value;toggleMenu(false);doSearch()}"></div>
+  <div class="sm-tabs">
+    <button id="tabMenu" class="on" onclick="smTab('menu')">MAIN MENU</button>
+    <button id="tabCats" onclick="smTab('cats')">CATEGORIES</button>
+  </div>
+  <div class="sm-list" id="smListMenu">
+    <a onclick="goHome()">Home</a>
+    <a onclick="openPage('about')">About Us</a>
+    <a onclick="openPage('help')">Contact Us</a>
+    <a onclick="openPage('privacy')">Privacy Policy</a>
+    <a onclick="openPage('shipping')">Shipping Policy</a>
+    <a onclick="openPage('returns')">Refund And Returns Policy</a>
+  </div>
+  <div class="sm-list" id="smListCats" style="display:none"></div>
+  <div class="sm-social"><a class="sfb">f</a><a class="sx">𝕏</a><a class="sig">◎</a></div>
+</aside>
+
+<div class="hero" id="heroBox">
+  <div class="slide act" style="background:linear-gradient(120deg,#0b5cad,#0b2a4a)">
+    <h1>Sports &amp; Outdoors</h1><p>New Adventures — Outdoor Essentials</p>
+    <div class="chips"><span>🏋️</span><span>🏃</span><span>⛰️</span><span>🏕️</span></div>
+    <button onclick="filterCat('Sports & Outdoors')">Shop Now</button>
+  </div>
+  <div class="slide" style="background:linear-gradient(120deg,#7b2d8b,#3c1050)">
+    <h1>Beauty &amp; Personal Care</h1><p>Glow Every Day — Self Care Essentials</p>
+    <div class="chips"><span>💄</span><span>✨</span><span>💆</span><span>🧴</span></div>
+    <button onclick="filterCat('Beauty & Personal Care')">Shop Now</button>
+  </div>
+  <div class="slide" style="background:linear-gradient(120deg,#0e7a5f,#083f31)">
+    <h1>Electronics</h1><p>Smart Gadgets — Everyday Tech Deals</p>
+    <div class="chips"><span>🎧</span><span>🔌</span><span>📱</span><span>💡</span></div>
+    <button onclick="filterCat('Electronics')">Shop Now</button>
+  </div>
+  <div class="dots" id="heroDots"></div>
+</div>
+
+<div class="trust">
+  <div class="tcard"><div class="ticon">🚚</div><div><b>FREE SHIPPING &amp; RETURN</b><p>Free shipping on all orders over $99.</p></div></div>
+  <div class="tcard"><div class="ticon">💲</div><div><b>MONEY BACK GUARANTEE</b><p>100% money back guarantee.</p></div></div>
+  <div class="tcard"><div class="ticon">🎧</div><div><b>ONLINE SUPPORT 24/7</b><p>We're here to help you.</p></div></div>
+  <div class="tcard"><div class="ticon">🔒</div><div><b>SECURE PAYMENT</b><p>Safe and secure checkout.</p></div></div>
+</div>
+
+<div class="sec">
+  <h2>Popular Categories</h2>
+  <p class="sub">Products From These Categories Often Buy</p>
+  <div class="cats" id="catTiles"></div>
+</div>
+
+<div class="sec" id="shopSec">
+  <h2 id="gridTitle">Featured Products</h2>
+  <p class="sub" id="gridSub">Handpicked deals for you</p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  <div class="fwrap">
+    <div><h3>Jilan USA Store</h3><p style="font-size:14px">Everyday deals in USD, shipped across the United States. A Jilan Apps Official store.</p></div>
+    <div><h3>Quick Links</h3><a onclick="goHome()">Home</a><a onclick="filterCat('All')">Shop</a><a onclick="openPage('track')">Track Your Order</a><a onclick="openAccount()">My Account</a></div>
+    <div><h3>Information</h3><a onclick="openPage('about')">About Us</a><a onclick="openPage('help')">Contact Us</a><a onclick="openPage('privacy')">Privacy Policy</a><a onclick="openPage('shipping')">Shipping Policy</a><a onclick="openPage('returns')">Refund And Returns Policy</a></div>
+    <div><h3>Contact</h3><p style="font-size:14px">Email: jilanappsofficial@gmail.com</p></div>
+  </div>
+  <div class="copy">© 2026 Jilan Apps Official. All rights reserved.</div>
+</footer>
+
+<div class="drawer" id="cartDrawer">
+  <div class="dhead"><span>Shopping Cart</span><span style="cursor:pointer" onclick="toggleCart(false)">✕</span></div>
+  <div class="ditems" id="cartItems"></div>
+  <div class="dfoot">
+    <div class="row"><span>Subtotal</span><b id="ctSub">$0.00</b></div>
+    <div class="row"><span>Shipping</span><b id="ctShip">—</b></div>
+    <div class="row"><span>Total</span><b id="ctTotal">$0.00</b></div>
+    <button class="checkout" onclick="openCheckout()">Checkout →</button>
+  </div>
+</div>
+
+<div class="modal" id="pageModal"><div class="mbox" id="pageBox"></div></div>
+
+<div class="modal" id="accountModal">
+  <div class="mbox">
+    <div class="crumbs" style="margin:0 0 6px;padding:0">🏠 &nbsp;›&nbsp; SHOP &nbsp;›&nbsp; <b>MY ACCOUNT</b></div>
+    <div id="acctBody"></div>
+    <button class="cancel" onclick="closeModal('accountModal')">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="checkoutModal">
+  <div class="mbox">
+    <h2>Checkout</h2>
+    <div id="coSummary" style="font-size:14px;color:#444"></div>
+    <label>Full Name <i>*</i></label><input id="coName" placeholder="John Smith">
+    <label>Email <i>*</i></label><input id="coEmail" placeholder="you@email.com">
+    <label>Phone</label><input id="coPhone" placeholder="+1 ...">
+    <label>Street Address <i>*</i></label><input id="coAddr" placeholder="123 Main St, Apt 4">
+    <label>City <i>*</i></label><input id="coCity" placeholder="New York">
+    <label>State</label><input id="coState" placeholder="NY">
+    <label>ZIP Code</label><input id="coZip" placeholder="10001">
+    <label>Payment Method</label>
+    <select id="coPay"><option>Cash on Delivery</option><option>Card (coming soon)</option></select>
+    <button class="go green" onclick="placeOrder()">Place Order</button>
+    <button class="cancel" onclick="closeModal('checkoutModal')">Cancel</button>
+  </div>
+</div>
+
+<script>
+const PRODUCTS = [{"id": 1, "name": "Electric Spin Scrubber with 8 Brush Heads", "cat": "Tools & Home Improvement", "price": 39.99, "was": 59.99, "emoji": "\ud83e\uddfd"}, {"id": 2, "name": "LED Sunset Lamp Projector", "cat": "Electronics", "price": 24.95, "was": 39.95, "emoji": "\ud83c\udf05"}, {"id": 3, "name": "Portable Mini Humidifier USB", "cat": "Health & Household", "price": 18.99, "was": 29.99, "emoji": "\ud83d\udca7"}, {"id": 4, "name": "Vitamin C Brightening Face Serum", "cat": "Beauty & Personal Care", "price": 16.99, "was": 27.99, "emoji": "\u2728"}, {"id": 5, "name": "Electric Blackhead Remover Kit", "cat": "Beauty & Personal Care", "price": 21.5, "was": 34.99, "emoji": "\ud83d\udc86"}, {"id": 6, "name": "Hair Straightener Brush Ionic", "cat": "Beauty & Personal Care", "price": 29.99, "was": 49.99, "emoji": "\ud83d\udc87"}, {"id": 7, "name": "Electric Heating Pad for Back Pain", "cat": "Health & Household", "price": 27.99, "was": 44.99, "emoji": "\ud83c\udf21\ufe0f"}, {"id": 8, "name": "Water Flosser Cordless Dental Cleaner", "cat": "Health & Household", "price": 32.95, "was": 52.99, "emoji": "\ud83e\uddb7"}, {"id": 9, "name": "Posture Corrector Back Brace", "cat": "Health & Household", "price": 19.99, "was": 31.99, "emoji": "\ud83e\uddcd"}, {"id": 10, "name": "Wireless Bluetooth Earbuds Pro", "cat": "Electronics", "price": 25.99, "was": 45.99, "emoji": "\ud83c\udfa7"}, {"id": 11, "name": "3-in-1 Fast Charging Cable 6FT", "cat": "Electronics", "price": 12.99, "was": 21.99, "emoji": "\ud83d\udd0c"}, {"id": 12, "name": "LED Strip Lights 16.4ft with Remote", "cat": "Electronics", "price": 15.99, "was": 26.99, "emoji": "\ud83c\udf08"}, {"id": 13, "name": "Building Blocks Set 500 PCS", "cat": "Toys & Games", "price": 22.99, "was": 36.99, "emoji": "\ud83e\uddf1"}, {"id": 14, "name": "RC Stunt Car 360 Flip 4WD", "cat": "Toys & Games", "price": 34.95, "was": 54.99, "emoji": "\ud83d\ude97"}, {"id": 15, "name": "Plush Teddy Bear Giant 39 inch", "cat": "Toys & Games", "price": 28.5, "was": 44.99, "emoji": "\ud83e\uddf8"}, {"id": 16, "name": "Cordless Drill Driver Kit 21V", "cat": "Tools & Home Improvement", "price": 59.99, "was": 89.99, "emoji": "\ud83d\udd27"}, {"id": 17, "name": "Laser Distance Measure 196ft", "cat": "Tools & Home Improvement", "price": 33.99, "was": 54.99, "emoji": "\ud83d\udccf"}, {"id": 18, "name": "Heavy Duty Garden Hose 50ft Expandable", "cat": "Tools & Home Improvement", "price": 26.99, "was": 42.99, "emoji": "\ud83c\udf3f"}, {"id": 19, "name": "Car Vacuum Cleaner Portable 120W", "cat": "Automotive", "price": 29.95, "was": 47.99, "emoji": "\ud83d\ude99"}, {"id": 20, "name": "Car Phone Holder Air Vent Mount", "cat": "Automotive", "price": 13.99, "was": 22.99, "emoji": "\ud83d\udcf1"}, {"id": 21, "name": "LED Headlight Bulbs 6000K Pair", "cat": "Automotive", "price": 36.99, "was": 59.99, "emoji": "\ud83d\udca1"}, {"id": 22, "name": "Pet Hair Remover Roller Reusable", "cat": "Pet Supplies", "price": 14.95, "was": 24.99, "emoji": "\ud83d\udc3e"}, {"id": 23, "name": "Automatic Pet Feeder 4L with Timer", "cat": "Pet Supplies", "price": 42.99, "was": 69.99, "emoji": "\ud83d\udc36"}, {"id": 24, "name": "Cat Scratcher Lounge Cardboard", "cat": "Pet Supplies", "price": 17.99, "was": 27.99, "emoji": "\ud83d\udc31"}, {"id": 25, "name": "Insulated Water Bottle 32oz Steel", "cat": "Sports & Outdoors", "price": 19.95, "was": 29.99, "emoji": "\ud83e\udd64"}, {"id": 26, "name": "Resistance Bands Set of 5 with Handles", "cat": "Sports & Outdoors", "price": 16.99, "was": 26.99, "emoji": "\ud83c\udfcb\ufe0f"}, {"id": 27, "name": "LED Camping Lantern Rechargeable 2 Pack", "cat": "Sports & Outdoors", "price": 21.99, "was": 34.99, "emoji": "\ud83c\udfd5\ufe0f"}];
+const CATS = ["All","Beauty & Personal Care","Health & Household","Electronics","Toys & Games","Tools & Home Improvement","Automotive","Pet Supplies","Sports & Outdoors"];
+const CATEMOJI = {"Beauty & Personal Care":"💄","Health & Household":"🏠","Electronics":"🎧","Toys & Games":"🧸","Tools & Home Improvement":"🔧","Automotive":"🚗","Pet Supplies":"🐾","Sports & Outdoors":"🏕️"};
+const CATGRAD = {"Beauty & Personal Care":"linear-gradient(135deg,#c94f7c,#7b2d8b)","Health & Household":"linear-gradient(135deg,#2e9e6b,#0e5f43)","Electronics":"linear-gradient(135deg,#0b5cad,#0b2a4a)","Toys & Games":"linear-gradient(135deg,#e67e22,#b03a2e)","Tools & Home Improvement":"linear-gradient(135deg,#5d6d7e,#2e4053)","Automotive":"linear-gradient(135deg,#2874a6,#154360)","Pet Supplies":"linear-gradient(135deg,#b7950b,#7d6608)","Sports & Outdoors":"linear-gradient(135deg,#148f77,#0b5345)"};
+let cart = JSON.parse(localStorage.getItem('jus_cart')||'[]');
+let activeCat='All', query='', slideIdx=0;
+
+function money(n){return '$'+n.toFixed(2)}
+function esc(s){return s.replace(/'/g,"\\'")}
+function goHome(){filterCat('All');window.scrollTo({top:0,behavior:'smooth'})}
+function renderNav(){
+  document.getElementById('catNav').innerHTML = CATS.map(c=>`<a class="${c===activeCat?'on':''}" onclick="filterCat('${esc(c)}')">${c==='All'?'Shop All':c}</a>`).join('') + `<a onclick="openAccount()">My Account</a>`;
+  document.getElementById('catTiles').innerHTML = CATS.slice(1).map(c=>`<div class="cat" style="background:${CATGRAD[c]}" onclick="filterCat('${esc(c)}')"><div class="e">${CATEMOJI[c]}</div><div>${c}</div></div>`).join('');
+  document.getElementById('smListCats').innerHTML = CATS.slice(1).map(c=>`<a onclick="toggleMenu(false);filterCat('${esc(c)}')">${c}</a>`).join('') + `<a onclick="toggleMenu(false);openAccount()">Log In</a><a onclick="toggleMenu(false);openAccount(true)">Register</a>`;
+}
+function filterCat(c){activeCat=c;query='';document.getElementById('searchBox').value='';renderNav();renderGrid();document.getElementById('shopSec').scrollIntoView({behavior:'smooth'})}
+function doSearch(){query=document.getElementById('searchBox').value.toLowerCase();activeCat='All';renderNav();renderGrid();document.getElementById('shopSec').scrollIntoView({behavior:'smooth'})}
+function renderGrid(){
+  let list = PRODUCTS.filter(p=>(activeCat==='All'||p.cat===activeCat)&&p.name.toLowerCase().includes(query));
+  document.getElementById('gridTitle').textContent = query?('Results for "'+query+'"'):(activeCat==='All'?'Featured Products':activeCat);
+  document.getElementById('grid').innerHTML = list.length? list.map(p=>{
+    const off = Math.round((1-p.price/p.was)*100);
+    return `<div class="card"><div class="pimg">${p.emoji}</div><div class="pbody">
+      <div class="pcat">${p.cat}</div><div class="pname">${p.name}</div>
+      <div class="stars">☆☆☆☆☆ <small style="color:#999">(0 reviews)</small></div>
+      <div class="price"><s>${money(p.was)}</s>${money(p.price)}<span class="off">-${off}%</span></div>
+      <button class="add" onclick="addToCart(${p.id})">Add to Cart</button></div></div>`;
+  }).join('') : '<div class="empty">No products found.</div>';
+}
+/* cart */
+function saveCart(){localStorage.setItem('jus_cart',JSON.stringify(cart))}
+function addToCart(id){const it=cart.find(i=>i.id===id); if(it) it.qty++; else cart.push({id,qty:1}); saveCart(); renderCart(); toggleCart(true)}
+function chQty(id,d){const it=cart.find(i=>i.id===id); if(!it)return; it.qty+=d; if(it.qty<1) cart=cart.filter(i=>i.id!==id); saveCart(); renderCart()}
+function totals(){let sub=0; cart.forEach(i=>{const p=PRODUCTS.find(x=>x.id===i.id); sub+=p.price*i.qty}); const ship = sub===0?0:(sub>=99?0:6.99); return {sub,ship,total:sub+ship}}
+function renderCart(){
+  const box=document.getElementById('cartItems');
+  document.getElementById('cartCount').textContent = cart.reduce((a,i)=>a+i.qty,0);
+  const t=totals();
+  document.getElementById('cartTotalHead').textContent = money(t.total);
+  if(!cart.length){box.innerHTML='<div class="empty">Your cart is empty.</div>'}
+  else box.innerHTML = cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id); return `<div class="ditem"><div class="e">${p.emoji}</div><div style="flex:1"><b style="font-size:14px">${p.name}</b><br><small style="color:#666">${money(p.price)} × ${i.qty} = ${money(p.price*i.qty)}</small></div><div class="qty"><button onclick="chQty(${p.id},-1)">−</button> ${i.qty} <button onclick="chQty(${p.id},1)">+</button></div></div>`}).join('');
+  document.getElementById('ctSub').textContent=money(t.sub);
+  document.getElementById('ctShip').textContent = t.sub===0?'—':(t.ship===0?'FREE':money(t.ship));
+  document.getElementById('ctTotal').textContent=money(t.total);
+}
+function toggleCart(open){document.getElementById('cartDrawer').classList.toggle('open',open);document.getElementById('overlay').classList.toggle('show',open)}
+function toggleMenu(open){document.getElementById('sideMenu').classList.toggle('open',open);document.getElementById('overlay').classList.toggle('show',open)}
+function smTab(which){
+  document.getElementById('tabMenu').classList.toggle('on',which==='menu');
+  document.getElementById('tabCats').classList.toggle('on',which==='cats');
+  document.getElementById('smListMenu').style.display = which==='menu'?'block':'none';
+  document.getElementById('smListCats').style.display = which==='cats'?'block':'none';
+}
+/* checkout */
+function openCheckout(){
+  if(!cart.length){alert('Your cart is empty');return}
+  const t=totals();
+  document.getElementById('coSummary').innerHTML = cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id); return `${p.name} × ${i.qty} — ${money(p.price*i.qty)}`}).join('<br>')+`<br><b>Total: ${money(t.total)}</b> (shipping ${t.ship===0?'FREE':money(t.ship)})`;
+  toggleCart(false); document.getElementById('checkoutModal').classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function placeOrder(){
+  const name=document.getElementById('coName').value.trim(), addr=document.getElementById('coAddr').value.trim(), city=document.getElementById('coCity').value.trim();
+  if(!name||!addr||!city){alert('Please fill Name, Address and City');return}
+  const oid='JUS-'+Math.floor(100000+Math.random()*900000);
+  localStorage.setItem('jus_order_'+oid, JSON.stringify({name,total:totals().total,items:cart,status:'Processing'}));
+  cart=[]; saveCart(); renderCart(); closeModal('checkoutModal');
+  document.getElementById('pageBox').innerHTML = `<h2>✅ Order Placed!</h2><p>Thank you, ${name}. Your order ID is <b>${oid}</b>.</p><p style="margin-top:8px">Save this ID to track your order.</p><button class="cancel" onclick="closeModal('pageModal')">Continue Shopping</button>`;
+  document.getElementById('pageModal').classList.add('open');
+}
+/* pages */
+function openPage(which){
+  toggleMenu(false);
+  const box=document.getElementById('pageBox'); let h='';
+  if(which==='track'){ h=`<h2>📦 Track Your Order</h2><label>Order ID</label><input id="trkId" placeholder="JUS-123456"><button class="go green" style="border-radius:8px;letter-spacing:0" onclick="doTrack()">Track</button><div id="trkOut" style="margin-top:12px;font-size:14px"></div>` }
+  if(which==='help'){ h=`<h2>Contact Us</h2><p>Email us at <b>jilanappsofficial@gmail.com</b> — we reply within 24 hours.</p><p style="margin-top:8px">For order questions, please include your Order ID.</p>` }
+  if(which==='about'){ h=`<h2>About Us</h2><p>Jilan USA Store brings everyday deals in USD to customers across the United States — home, beauty, electronics, auto, pets and more, at honest prices. A Jilan Apps Official store.</p>` }
+  if(which==='privacy'){ h=`<h2>Privacy Policy</h2><p>We collect only the details needed to deliver your order (name, address, contact). We never sell your personal data.</p>` }
+  if(which==='shipping'){ h=`<h2>Shipping Policy</h2><p>Orders are processed within 1-2 business days. <b>Free shipping on all orders over $99.</b> Standard shipping $6.99 below that. Delivery in 3-7 business days across the USA.</p>` }
+  if(which==='returns'){ h=`<h2>Refund And Returns Policy</h2><p>100% money back guarantee. 30-day returns on unused items in original packaging. Contact us with your Order ID to start a return.</p>` }
+  box.innerHTML = h + `<button class="cancel" onclick="closeModal('pageModal')">Close</button>`;
+  document.getElementById('pageModal').classList.add('open');
+}
+function doTrack(){
+  const id=document.getElementById('trkId').value.trim(); const out=document.getElementById('trkOut');
+  const o=localStorage.getItem('jus_order_'+id);
+  out.innerHTML = o? `Order <b>${id}</b>: ${JSON.parse(o).status} — Total: ${money(JSON.parse(o).total)}` : 'Order not found on this device/browser.';
+}
+/* account (stored in this browser) */
+function currentUser(){try{return JSON.parse(localStorage.getItem('jus_session')||'null')}catch(e){return null}}
+function openAccount(register){
+  const u=currentUser(); const body=document.getElementById('acctBody');
+  if(u){
+    body.innerHTML = `<h2>My Account</h2><p class="msg">Welcome, <b>${u.first} ${u.last}</b> (${u.email})</p><button class="go" onclick="doLogout()">LOG OUT</button>`;
+  } else {
+    body.innerHTML = `
+    <h2>Login</h2>
+    <label>Username or email address <i>*</i></label><input id="liId" autocomplete="username">
+    <label>Password <i>*</i></label><input id="liPass" type="password" autocomplete="current-password">
+    <div class="chk"><input type="checkbox" id="liRem"><span>Remember me</span></div>
+    <button class="go" onclick="doLogin()">LOGIN</button>
+    <p style="margin-top:8px"><span class="link" onclick="alert('Password reset is enabled when the store goes live with its server.')">Forgot Password?</span></p>
+    <div id="liMsg" class="msg"></div>
+    <h3>Register</h3>
+    <label>First Name <i>*</i></label><input id="rgFirst">
+    <label>Last Name <i>*</i></label><input id="rgLast">
+    <label>Email address <i>*</i></label><input id="rgEmail" type="email">
+    <label>Password <i>*</i></label><input id="rgPass" type="password">
+    <button class="go" onclick="doRegister()">REGISTER</button>
+    <div id="rgMsg" class="msg"></div>`;
+    if(register){ setTimeout(()=>document.getElementById('rgFirst').focus(),100) }
+  }
+  document.getElementById('accountModal').classList.add('open');
+}
+function users(){try{return JSON.parse(localStorage.getItem('jus_users')||'[]')}catch(e){return[]}}
+function doRegister(){
+  const f=document.getElementById('rgFirst').value.trim(), l=document.getElementById('rgLast').value.trim(), e=document.getElementById('rgEmail').value.trim(), p=document.getElementById('rgPass').value;
+  const m=document.getElementById('rgMsg');
+  if(!f||!l||!e||!p){m.style.color='#e74c3c';m.textContent='Please fill all fields.';return}
+  const us=users(); if(us.find(x=>x.email===e)){m.style.color='#e74c3c';m.textContent='This email is already registered. Please log in.';return}
+  us.push({first:f,last:l,email:e,pass:p}); localStorage.setItem('jus_users',JSON.stringify(us));
+  localStorage.setItem('jus_session',JSON.stringify({first:f,last:l,email:e}));
+  m.style.color='#27ae60'; m.textContent='Registered successfully! You are now logged in.'; setTimeout(()=>openAccount(),700);
+}
+function doLogin(){
+  const id=document.getElementById('liId').value.trim(), p=document.getElementById('liPass').value, m=document.getElementById('liMsg');
+  const u=users().find(x=>(x.email===id||x.first===id)&&x.pass===p);
+  if(!u){m.style.color='#e74c3c';m.textContent='Invalid username or password.';return}
+  localStorage.setItem('jus_session',JSON.stringify({first:u.first,last:u.last,email:u.email}));
+  m.style.color='#27ae60'; m.textContent='Welcome back, '+u.first+'!'; setTimeout(()=>openAccount(),700);
+}
+function doLogout(){localStorage.removeItem('jus_session'); openAccount()}
+/* hero slider */
+const slides=document.querySelectorAll('.slide');
+const dotsBox=document.getElementById('heroDots');
+slides.forEach((s,i)=>{const d=document.createElement('span'); if(i===0)d.className='on'; d.onclick=()=>setSlide(i); dotsBox.appendChild(d)});
+function setSlide(i){slideIdx=i; slides.forEach((s,k)=>s.classList.toggle('act',k===i)); dotsBox.querySelectorAll('span').forEach((d,k)=>d.classList.toggle('on',k===i))}
+setInterval(()=>setSlide((slideIdx+1)%slides.length), 5000);
+
+renderNav(); renderGrid(); renderCart();
+</script>
+</body>
+</html>
