@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item Code Lookup — Jilan Apps</title>
+<style>
+  body{font-family:Arial,sans-serif;background:#0b1f3a;color:#fff;margin:0;padding:24px;text-align:center}
+  h1{font-size:22px;color:#f5c542}
+  p{color:#cfd8e3;font-size:15px}
+  input{width:90%;max-width:340px;padding:16px;font-size:22px;border-radius:10px;border:2px solid #f5c542;text-align:center;letter-spacing:1px}
+  button{display:block;margin:18px auto;width:90%;max-width:340px;padding:16px;font-size:20px;font-weight:bold;background:#f5c542;color:#0b1f3a;border:none;border-radius:10px;cursor:pointer}
+  .hint{font-size:13px;color:#8fa3bd;margin-top:28px}
+</style>
+</head>
+<body>
+  <h1>🔍 Item Code Lookup</h1>
+  <p>Order wala <b>Item Code</b> likhein (masalan JLN-769189) — product seedha khul jayega.</p>
+  <input id="code" type="text" inputmode="numeric" placeholder="JLN-______" autocomplete="off">
+  <button onclick="go()">Product Kholo →</button>
+  <p class="hint">Jilan Apps Official — private tool</p>
+<script>
+  function go(){
+    var v=document.getElementById('code').value.replace(/[^0-9]/g,'');
+    if(!v){alert('Pehle Item Code likhein');return;}
+    window.open('https://www.markaz.app/shop/product/p/'+v,'_blank');
+  }
+  document.getElementById('code').addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+</script>
+</body>
+</html>
