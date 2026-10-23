@@ -689,9 +689,9 @@
    "id": "ptacheck",
    "name": "Jilan PTA Check",
    "package": "com.jilanapps.ptacheck",
-   "size": 29142,
-   "versionCode": 3,
-   "versionName": "1.2"
+   "size": 5227550,
+   "versionCode": 4,
+   "versionName": "1.3"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/e-challan/e-challan.apk",
@@ -780,9 +780,9 @@
    "id": "licensecheck",
    "name": "Jilan License Check",
    "package": "com.jilanapps.licensecheck",
-   "size": 33238,
-   "versionCode": 3,
-   "versionName": "1.2"
+   "size": 5227550,
+   "versionCode": 4,
+   "versionName": "1.3"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/filer-check/filer-check.apk",
@@ -832,9 +832,9 @@
    "id": "vehicleinfo",
    "name": "Jilan Vehicle Info",
    "package": "com.jilanapps.vehicleinfo",
-   "size": 393686,
-   "versionCode": 5,
-   "versionName": "1.4"
+   "size": 5592094,
+   "versionCode": 6,
+   "versionName": "1.5"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/fuel-relief/fuel-relief.apk",
