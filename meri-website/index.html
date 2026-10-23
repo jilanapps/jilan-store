@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     MERI PEHLI WEBSITE — haath se likhi hui (manual coding)
+     Seekhne ke liye har hisse ke sath Roman Urdu me note likha hai.
+     Website 3 cheezon se banti hai:
+       1) HTML  = website ka dhancha (kya kya dikhega)
+       2) CSS   = rang, design, sajawat (cheezen kaisi dikhengi)
+       3) JavaScript = harkat (button dabane par kya ho) — ye hum baad me seekhenge
+     ============================================================ -->
+<html lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dr Asif — Jilan Apps Official</title>
+
+  <!-- ===== CSS yahan shuru hoti hai: ye page ki sajawat hai ===== -->
+  <style>
+    /* poori page ki setting: peeche ka rang aur likhai ka style */
+    body {
+      font-family: Arial, sans-serif;
+      background: #0e1420;
+      color: #ffffff;
+      margin: 0;
+      text-align: center;
+    }
+    /* oper wala hissa (header) */
+    header {
+      background: #14532d;
+      padding: 40px 16px;
+    }
+    /* bari likhai (naam) */
+    h1 { font-size: 34px; margin: 0 0 8px 0; }
+    /* chhoti halki likhai */
+    .halka { color: #cbd5e1; font-size: 16px; }
+    /* beech wala hissa */
+    main { padding: 24px 16px; max-width: 640px; margin: 0 auto; }
+    /* card: gol konon wala dabba */
+    .card {
+      background: #1a2436;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      text-align: left;
+    }
+    .card h2 { color: #4ade80; margin-top: 0; font-size: 20px; }
+    .card li { margin: 8px 0; }
+    /* WhatsApp wala hara button */
+    .btn {
+      display: inline-block;
+      background: #22c55e;
+      color: #06240f;
+      font-weight: bold;
+      font-size: 17px;
+      padding: 14px 30px;
+      border-radius: 999px;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+    /* neeche wala hissa (footer) */
+    footer { color: #94a3b8; font-size: 13px; padding: 22px 10px 30px; }
+  </style>
+  <!-- ===== CSS yahan khatam ===== -->
+</head>
+
+<body>
+  <!-- ===== HTML yahan shuru: ye asal cheezen hain jo nazar ayengi ===== -->
+
+  <header>
+    <h1>Dr Muhammad Asif Ameen Attari</h1>
+    <p class="halka">Founder — Jilan Apps Official • Basti Malook, Multan</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>👋 Mere Baare Me</h2>
+      <p>Main mobile apps aur websites banata hun — chhoti dukano, clinics aur karobaron ke liye asan aur sasti apps.</p>
+    </div>
+
+    <div class="card">
+      <h2>🛠️ Meri Services</h2>
+      <ul>
+        <li>Dukaan aur karobar ke liye mobile app</li>
+        <li>Business website</li>
+        <li>Online shopping store</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📲 Rabta Karein</h2>
+      <p>App ya website banwani hai to WhatsApp par message karein:</p>
+      <a class="btn" href="https://wa.me/923057867149">WhatsApp Par Message Karein</a>
+    </div>
+  </main>
+
+  <footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+  <!-- ===== HTML yahan khatam ===== -->
+</body>
+</html>
