@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raaziq Honda Center — Basti Malook | Honda Motorcycles, Parts & Service</title>
+<meta name="description" content="Raaziq Honda Center, Multan Road Basti Malook — new Honda motorcycles (CD 70, Pridor, CG 125, CB 150F), genuine spare parts and expert service under one roof.">
+<style>
+  :root{ --red:#cc0000; --red-dark:#9d0000; --ink:#16181d; --grey:#5b6068; --bg:#f6f6f7; --card:#ffffff; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  .demo-bar{ position:fixed; top:0; left:0; right:0; z-index:60; background:#111; color:#f5c542; text-align:center; font-weight:700; letter-spacing:2px; font-size:13px; padding:8px 6px; }
+  header{ margin-top:33px; background:var(--ink); color:#fff; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .logo{ font-size:20px; font-weight:800; letter-spacing:.5px; }
+  .logo span{ color:#ff2d2d; }
+  .logo small{ display:block; font-size:11px; font-weight:600; color:#c9ccd1; letter-spacing:1.6px; margin-top:2px; }
+  .tiktok-btn{ background:var(--red); color:#fff; text-decoration:none; font-weight:700; font-size:13px; padding:9px 14px; border-radius:20px; white-space:nowrap; }
+  .hero{ position:relative; }
+  .hero img{ width:100%; display:block; max-height:520px; object-fit:cover; }
+  .hero-text{ position:absolute; left:0; right:0; bottom:0; padding:44px 20px 22px; background:linear-gradient(transparent, rgba(0,0,0,.82)); color:#fff; }
+  .hero-text h1{ font-size:27px; line-height:1.2; font-weight:800; }
+  .hero-text h1 span{ color:#ff4747; }
+  .hero-text p{ margin-top:8px; font-size:15px; color:#e8e9eb; max-width:560px; }
+  .hero-cta{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+  .btn{ text-decoration:none; font-weight:700; font-size:14px; padding:11px 18px; border-radius:24px; }
+  .btn-red{ background:var(--red); color:#fff; }
+  .btn-ghost{ background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.55); }
+  .trust{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; background:#fff; padding:14px 12px; border-bottom:1px solid #e6e6e8; }
+  .trust div{ font-size:13px; font-weight:700; color:var(--ink); background:#f1f1f3; border-radius:16px; padding:7px 12px; }
+  .trust div b{ color:var(--red); }
+  section{ padding:30px 16px 6px; max-width:980px; margin:0 auto; }
+  h2{ font-size:22px; font-weight:800; }
+  h2 span{ color:var(--red); }
+  .sub{ color:var(--grey); font-size:14px; margin-top:5px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:16px; }
+  .bike{ background:var(--card); border-radius:14px; padding:16px 14px; box-shadow:0 1px 4px rgba(0,0,0,.07); border-top:4px solid var(--red); }
+  .bike .cc{ font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--red); }
+  .bike h3{ font-size:17px; margin:4px 0 5px; }
+  .bike p{ font-size:12.5px; color:var(--grey); line-height:1.45; min-height:36px; }
+  .bike .price{ margin-top:9px; font-size:15px; font-weight:800; }
+  .bike .price small{ display:block; font-size:10.5px; font-weight:600; color:#9a9ea6; }
+  .note{ font-size:12px; color:#9a9ea6; margin-top:12px; }
+  .svc-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-top:16px; }
+  .svc{ background:var(--card); border-radius:14px; padding:18px 16px; box-shadow:0 1px 4px rgba(0,0,0,.07); }
+  .svc .ic{ font-size:26px; }
+  .svc h3{ font-size:16px; margin:8px 0 5px; }
+  .svc p{ font-size:13px; color:var(--grey); line-height:1.5; }
+  .visit{ background:var(--ink); color:#fff; border-radius:16px; padding:24px 20px; margin-top:18px; }
+  .visit h2{ color:#fff; }
+  .visit p{ color:#d7d9dd; font-size:14.5px; line-height:1.6; margin-top:8px; }
+  .visit .btn{ display:inline-block; margin-top:14px; }
+  footer{ text-align:center; color:#8a8f98; font-size:12.5px; padding:26px 14px 30px; }
+  #demoLock{ display:none; position:fixed; inset:0; z-index:99; background:rgba(10,10,12,.94); color:#fff; text-align:center; padding:60px 24px; }
+  #demoLock h2{ font-size:23px; margin-bottom:10px; }
+  #demoLock p{ color:#cfd2d8; font-size:15px; line-height:1.6; }
+  #demoLock a{ display:inline-block; margin-top:18px; background:#25d366; color:#fff; text-decoration:none; font-weight:800; padding:13px 22px; border-radius:26px; }
+  @media (min-width:700px){ .hero-text h1{ font-size:38px; } .grid{ grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); } }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">DEMO by Jilan Apps</div>
+
+<header>
+  <div class="logo">RAAZIQ <span>HONDA</span> CENTER<small>MULTAN ROAD · BASTI MALOOK</small></div>
+  <a class="tiktok-btn" href="https://www.tiktok.com/@raaziqhondacenter" target="_blank" rel="noopener">▶ TikTok</a>
+</header>
+
+<div class="hero">
+  <img src="assets/hero-bike.jpg" alt="Honda motorcycle at Raaziq Honda Center showroom">
+  <div class="hero-text">
+    <h1>Basti Malook's Trusted Home for <span>Honda Motorcycles</span></h1>
+    <p>New Honda bikes, genuine spare parts and expert service — everything for your motorcycle, under one roof.</p>
+    <div class="hero-cta">
+      <a class="btn btn-red" href="#bikes">Explore Bikes</a>
+      <a class="btn btn-ghost" href="#visit">Visit the Showroom</a>
+    </div>
+  </div>
+</div>
+
+<div class="trust">
+  <div><b>✓</b> Genuine Parts</div>
+  <div><b>✓</b> Expert Mechanics</div>
+  <div><b>✓</b> Same-Day Service</div>
+  <div><b>✓</b> Fair Prices</div>
+</div>
+
+<section id="bikes">
+  <h2>Latest <span>Honda</span> Models</h2>
+  <p class="sub">Pakistan's most loved motorcycles — available at Raaziq Honda Center.</p>
+  <div class="grid">
+    <div class="bike"><div class="cc">72 CC</div><h3>Honda CD 70</h3><p>The nation's favourite — unmatched fuel economy and reliability for daily riding.</p><div class="price">Rs 157,900<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">72 CC</div><h3>Honda CD 70 Dream</h3><p>CD 70 dependability with a stylish, modern look and comfortable ride.</p><div class="price">Rs 168,900<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">100 CC</div><h3>Honda Pridor</h3><p>Smooth, comfortable and economical — the perfect step up for daily commuters.</p><div class="price">Rs 208,900<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">125 CC</div><h3>Honda CG 125</h3><p>The legendary power machine — rugged, strong and built for every road.</p><div class="price">Rs 238,500<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">125 CC</div><h3>Honda CG 125S</h3><p>CG power with self-start and premium features for effortless riding.</p><div class="price">Rs 292,900<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">125 CC</div><h3>Honda CB 125F</h3><p>Sporty styling, sharp handling and Honda's trusted 125cc performance.</p><div class="price">Rs 390,900<small>indicative price</small></div></div>
+    <div class="bike"><div class="cc">150 CC</div><h3>Honda CB 150F</h3><p>The flagship — bold looks, powerful engine and a truly premium ride.</p><div class="price">Rs 493,900<small>indicative price</small></div></div>
+  </div>
+  <p class="note">* Prices are indicative and may change without notice. Please confirm the latest price at the showroom.</p>
+</section>
+
+<section id="services">
+  <h2>Our <span>Services</span></h2>
+  <p class="sub">Sales, parts and service — complete care for your Honda.</p>
+  <div class="svc-grid">
+    <div class="svc"><div class="ic">🏍️</div><h3>New Motorcycle Sales</h3><p>All current Honda models in stock, with proper documentation and registration guidance.</p></div>
+    <div class="svc"><div class="ic">🧰</div><h3>Genuine Spare Parts</h3><p>Original Honda parts that keep your bike running like new — no compromises on quality.</p></div>
+    <div class="svc"><div class="ic">🔧</div><h3>Service &amp; Repair</h3><p>Experienced mechanics for complete engine work, repairs and routine maintenance.</p></div>
+    <div class="svc"><div class="ic">🛢️</div><h3>Oil Change &amp; Tuning</h3><p>Timely oil changes and expert tuning for better mileage and a longer engine life.</p></div>
+  </div>
+</section>
+
+<section id="visit">
+  <div class="visit">
+    <h2>Visit <span>Us</span></h2>
+    <p>📍 Raaziq Honda Center, Multan Road, Basti Malook, District Multan<br>
+    🕘 Open 7 days a week — 9:00 AM to 8:00 PM<br>
+    🎵 Follow us on TikTok for the latest bikes, offers and workshop videos.</p>
+    <a class="btn btn-red" href="https://www.tiktok.com/@raaziqhondacenter" target="_blank" rel="noopener">Watch on TikTok</a>
+  </div>
+</section>
+
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<div id="demoLock">
+  <h2>Demo Period Ended</h2>
+  <p>This was a free demo website made for Raaziq Honda Center.<br>To get this website live for your shop, contact Jilan Apps Official.</p>
+  <a href="https://wa.me/923057867149?text=I%20want%20a%20website%20for%20my%20shop" target="_blank" rel="noopener">WhatsApp Jilan Apps</a>
+</div>
+
+<script>
+  (function(){
+    try{
+      var k='raaziq_demo_first', now=Date.now(), first=localStorage.getItem(k);
+      if(!first){ localStorage.setItem(k, String(now)); first=String(now); }
+      if(now - parseInt(first,10) > 3*24*60*60*1000){ document.getElementById('demoLock').style.display='block'; }
+    }catch(e){}
+  })();
+</script>
+
+</body>
+</html>
