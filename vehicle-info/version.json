@@ -1,7 +1,7 @@
 {
- "versionCode": 6,
- "versionName": "1.5",
+ "versionCode": 7,
+ "versionName": "1.6",
  "apkUrl": "https://jilanapps.github.io/jilan-store/vehicle-info/vehicle-info.apk",
- "notes": "v1.5: AdMob ads added \u2014 a small banner on the home screen only, plus an occasional full-screen ad when you return home after using the portal (never more than once in 3 minutes, never over the portal). Plus one-tap auto-update.",
+ "notes": "v1.6: stability fix \u2014 on some phones the app could close immediately after opening; this update fixes that startup problem. Everything else, including the home-screen banner, is unchanged.",
  "size": 5592094
 }
