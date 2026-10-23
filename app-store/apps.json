@@ -1172,7 +1172,7 @@
    "id": "asmaulhusna",
    "name": "Asma-ul-Husna",
    "package": "com.jilanapps.asmaulhusna",
-   "size": 33238,
+   "size": 5231646,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1185,7 +1185,7 @@
    "id": "rozanaduaein",
    "name": "Rozana Duaein",
    "package": "com.jilanapps.rozanaduaein",
-   "size": 33238,
+   "size": 5227550,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1198,7 +1198,7 @@
    "id": "qazatracker",
    "name": "Qaza Namaz Tracker",
    "package": "com.jilanapps.qazatracker",
-   "size": 33238,
+   "size": 5231646,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1211,7 +1211,7 @@
    "id": "islamicquiz",
    "name": "Islamic Quiz",
    "package": "com.jilanapps.islamicquiz",
-   "size": 33238,
+   "size": 5227550,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1224,7 +1224,7 @@
    "id": "simpackages",
    "name": "SIM Packages",
    "package": "com.jilanapps.simpackages",
-   "size": 33238,
+   "size": 5227550,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1237,7 +1237,7 @@
    "id": "jilannotes",
    "name": "Jilan Notes",
    "package": "com.jilanapps.jilannotes",
-   "size": 29142,
+   "size": 5223454,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1250,7 +1250,7 @@
    "id": "bloodbank",
    "name": "Blood Bank Guide",
    "package": "com.jilanapps.bloodbank",
-   "size": 29142,
+   "size": 5223454,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1263,7 +1263,7 @@
    "id": "stepcounter",
    "name": "Step Counter",
    "package": "com.jilanapps.stepcounter",
-   "size": 33238,
+   "size": 5227550,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1276,7 +1276,7 @@
    "id": "waterreminder",
    "name": "Water Reminder",
    "package": "com.jilanapps.waterreminder",
-   "size": 37334,
+   "size": 5231646,
    "versionCode": 1,
    "versionName": "1.0"
   },
@@ -1289,7 +1289,72 @@
    "id": "idphotomaker",
    "name": "ID Photo Maker",
    "package": "com.jilanapps.idphotomaker",
-   "size": 29142,
+   "size": 5227550,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/gpacalc/gpacalc.apk",
+   "category": "education",
+   "color": "#4f46e5",
+   "desc": "Calculate semester GPA and overall CGPA on the standard 4.0 scale",
+   "icon": "icons/gpacalc.png",
+   "id": "gpacalc",
+   "name": "GPA Calculator",
+   "package": "com.jilanapps.gpacalc",
+   "size": 5231646,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/typingtest/typingtest.apk",
+   "category": "education",
+   "color": "#155e75",
+   "desc": "60-second typing test with live WPM, accuracy and your best score saved",
+   "icon": "icons/typingtest.png",
+   "id": "typingtest",
+   "name": "Typing Test",
+   "package": "com.jilanapps.typingtest",
+   "size": 5219358,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/trafficsigns/trafficsigns.apk",
+   "category": "education",
+   "color": "#a16207",
+   "desc": "Learn 30 Pakistan traffic signs with their meanings, plus a quiz mode",
+   "icon": "icons/trafficsigns.png",
+   "id": "trafficsigns",
+   "name": "Traffic Signs Test",
+   "package": "com.jilanapps.trafficsigns",
+   "size": 5231646,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/habittracker/habittracker.apk",
+   "category": "utility",
+   "color": "#be185d",
+   "desc": "Build good habits - daily ticks, streaks and progress, stored only on your phone",
+   "icon": "icons/habittracker.png",
+   "id": "habittracker",
+   "name": "Aadat Tracker",
+   "package": "com.jilanapps.habittracker",
+   "size": 5223454,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/passwordkhata/passwordkhata.apk",
+   "category": "utility",
+   "color": "#374151",
+   "desc": "Your private password notebook - PIN-locked, AES-encrypted, only on this phone",
+   "icon": "icons/passwordkhata.png",
+   "id": "passwordkhata",
+   "name": "Password Khata",
+   "package": "com.jilanapps.passwordkhata",
+   "size": 5231646,
    "versionCode": 1,
    "versionName": "1.0"
   }
