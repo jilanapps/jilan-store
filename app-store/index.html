@@ -365,9 +365,11 @@ function btnInnerHTML(a,style){
   if(HAS_INSTALLER&&a.package){
     return '<button class="'+clsBase+'" data-install="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</button>';
   }
-  /* plain browser / old wrapper: direct APK download link (previous behaviour) */
-  if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'">'+label+'</a>';
-  return '<a class="'+clsBase+'" href="'+esc(act.url)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</a>';
+  /* plain browser / old wrapper: direct APK download link (previous behaviour).
+     The download attribute helps browsers/WebViews that only start a file
+     download for links marked as downloads instead of page navigations. */
+  if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'" download>'+label+'</a>';
+  return '<a class="'+clsBase+'" href="'+esc(act.url)+'" download onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</a>';
 }
 function paintApp(id){
   const a=APPS.find(x=>x.id===id);if(!a)return;
@@ -482,6 +484,7 @@ function renderDetail(a){
     +'<div><div class="v">'+esc(fmtSize(a.size)||"—")+'</div><div class="k">Size</div></div>'
     +'<div><div class="v">'+esc(catLabel(a.category))+'</div><div class="k">Category</div></div></div>'
     +'<div class="d-install">'+btnHTML(a,"big")
+    +((!HAS_INSTALLER&&a.apk)?'<div style="margin-top:10px;font-size:13px;color:var(--sub);max-width:460px">If the download does not start, this page is open inside another app\'s browser — open the store in <b>Chrome</b> (or in the Jilan App Store app) and tap Install again.</div>':"")
     +(a.apk&&a.web?'<br><a class="d-web" href="'+esc(a.web)+'" target="_blank">🌐 Open web version</a>':"")
     +'</div>'
     +'<div class="d-sec"><h3>About this app</h3><p class="d-about">'+esc(a.desc)+'</p></div>'
