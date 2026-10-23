@@ -871,9 +871,9 @@
    "id": "nadraservices",
    "name": "Jilan NADRA Services",
    "package": "com.jilanapps.nadraservices",
-   "size": 41430,
-   "versionCode": 3,
-   "versionName": "1.2"
+   "size": 5235742,
+   "versionCode": 4,
+   "versionName": "1.3"
   },
   {
    "apk": "https://jilanapps.github.io/jilan-store/post-tracking/post-tracking.apk",
