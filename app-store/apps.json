@@ -1162,6 +1162,71 @@
    "size": 45526,
    "versionCode": 1,
    "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/asmaulhusna/asmaulhusna.apk",
+   "category": "islamic",
+   "color": "#0d6e5f",
+   "desc": "The 99 Names of Allah with Arabic, transliteration and English meanings",
+   "icon": "icons/asmaulhusna.png",
+   "id": "asmaulhusna",
+   "name": "Asma-ul-Husna",
+   "package": "com.jilanapps.asmaulhusna",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/rozanaduaein/rozanaduaein.apk",
+   "category": "islamic",
+   "color": "#0f766e",
+   "desc": "30 daily duas - Arabic text with Urdu translation; favourites saved on your phone",
+   "icon": "icons/rozanaduaein.png",
+   "id": "rozanaduaein",
+   "name": "Rozana Duaein",
+   "package": "com.jilanapps.rozanaduaein",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/qazatracker/qazatracker.apk",
+   "category": "islamic",
+   "color": "#166534",
+   "desc": "Count your missed (qaza) prayers and track completing them, prayer by prayer",
+   "icon": "icons/qazatracker.png",
+   "id": "qazatracker",
+   "name": "Qaza Namaz Tracker",
+   "package": "com.jilanapps.qazatracker",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/islamicquiz/islamicquiz.apk",
+   "category": "education",
+   "color": "#7c3aed",
+   "desc": "50 questions on Seerat and general Islamic knowledge - play, score and learn",
+   "icon": "icons/islamicquiz.png",
+   "id": "islamicquiz",
+   "name": "Islamic Quiz",
+   "package": "com.jilanapps.islamicquiz",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/simpackages/simpackages.apk",
+   "category": "tools",
+   "color": "#b45309",
+   "desc": "Popular Jazz, Zong, Telenor and Ufone packages with prices and subscribe codes",
+   "icon": "icons/simpackages.png",
+   "id": "simpackages",
+   "name": "SIM Packages",
+   "package": "com.jilanapps.simpackages",
+   "size": 33238,
+   "versionCode": 1,
+   "versionName": "1.0"
   }
  ],
  "store": {
