@@ -1,9 +1,9 @@
 {
  "app": "fuelrelief",
  "package": "com.jilanapps.fuelrelief",
- "versionCode": 4,
- "versionName": "1.3",
+ "versionCode": 5,
+ "versionName": "1.4",
  "apk": "https://jilanapps.github.io/jilan-store/fuel-relief/fuel-relief.apk",
  "size": 5227550,
- "notes": "v1.3: AdMob ads added — a small banner on the home screen only, plus an occasional full-screen ad when you return home after using the portal (never more than once in 3 minutes, never over the portal). Plus one-tap auto-update."
+ "notes": "v1.4: stability fix — on some phones the app could close immediately after opening; this update fixes that startup problem. Everything else, including the home-screen banner, is unchanged."
 }
