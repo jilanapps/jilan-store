@@ -183,20 +183,6 @@
    "web": ""
   },
   {
-   "apk": "https://jilanapps.github.io/jilan-store/jilan-voice.apk",
-   "category": "tools",
-   "color": "#c2410c",
-   "desc": "Awaz record karein",
-   "icon": "icons/voicerec.png",
-   "id": "voicerec",
-   "name": "Jilan Voice Recorder",
-   "package": "com.jilanapps.voicerec",
-   "size": 106966,
-   "versionCode": 13,
-   "versionName": "1.2",
-   "web": ""
-  },
-  {
    "apk": "https://jilanapps.github.io/jilan-store/jilan-translator.apk",
    "category": "tools",
    "color": "#0369a1",
