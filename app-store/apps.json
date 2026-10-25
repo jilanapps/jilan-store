@@ -2643,11 +2643,95 @@
    "size": 12825,
    "versionCode": 1,
    "versionName": "1.0"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/survival-strike/survival-strike.apk",
+   "category": "games",
+   "color": "#3f6212",
+   "desc": "3D battle royale shooter — 12 players, shrinking zone, offline",
+   "icon": "icons/survivalstrike.png",
+   "id": "survivalstrike",
+   "name": "Survival Strike",
+   "package": "com.jilanapps.survivalstrike",
+   "size": 672342,
+   "versionCode": 2,
+   "versionName": "2.0",
+   "web": "https://jilanapps.github.io/jilan-store/survival-strike/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/j-fire/j-fire.apk",
+   "category": "games",
+   "color": "#e11d48",
+   "desc": "Fast 3D battle royale — 10 players, quick zone, offline",
+   "icon": "icons/jfire.png",
+   "id": "jfire",
+   "name": "J Fire",
+   "package": "com.jilanapps.jfire",
+   "size": 606806,
+   "versionCode": 2,
+   "versionName": "2.0",
+   "web": "https://jilanapps.github.io/jilan-store/j-fire/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilanplay/jilanplay.apk",
+   "category": "games",
+   "color": "#9333ea",
+   "desc": "4 mini-games in one hub — run, race, collect coins, ball challenge",
+   "icon": "icons/jilanplay.png",
+   "id": "jilanplay",
+   "name": "JilanPlay",
+   "package": "com.jilanapps.jilanplay",
+   "size": 844495,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/jilanplay/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilanverse/jilanverse.apk",
+   "category": "games",
+   "color": "#0ea5e9",
+   "desc": "Fantasy 3D world — floating islands, quests, coins, offline",
+   "icon": "icons/jilanverse.png",
+   "id": "jilanverse",
+   "name": "JilanVerse",
+   "package": "com.jilanapps.jilanverse",
+   "size": 172630,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/jilanverse/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/blockora/blockora.apk",
+   "category": "games",
+   "color": "#f97316",
+   "desc": "3D block-building sandbox — build, save, explore, offline",
+   "icon": "icons/blockora.png",
+   "id": "blockora",
+   "name": "Blockora",
+   "package": "com.jilanapps.blockora",
+   "size": 180822,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/blockora/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/nexaworld/nexaworld.apk",
+   "category": "games",
+   "color": "#06b6d4",
+   "desc": "Futuristic 3D city — neon zones, crystals, missions, offline",
+   "icon": "icons/nexaworld.png",
+   "id": "nexaworld",
+   "name": "NexaWorld",
+   "package": "com.jilanapps.nexaworld",
+   "size": 176726,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/nexaworld/"
   }
  ],
  "store": {
   "name": "Jilan App Store",
-  "updated": "2026-10-19",
+  "updated": "2026-10-25",
   "version": "1.0"
  }
 }
