@@ -101,6 +101,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <button onclick="showTab('phones')">📱 Phones</button>
 <button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
 <button onclick="showTab('shops')">🏪 Shops</button>
+<button onclick="showTab('tid')">💳 TID Requests <span id="tidCount"></span></button>
 <button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">🔳 Shop QR</button>
 <button class="ghost" onclick="updateAll()">⬆️ Update All</button>
 <button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
@@ -145,6 +146,14 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <h2>Shops</h2>
 <div id="shopList">Loading...</div>
 </div>
+
+<div class="card hidden" id="tab-tid">
+<h2>💳 TID Payment Requests (Pending)</h2>
+<p style="color:#ffb74d;font-size:14px">TID khud saboot nahi — apni JazzCash/Easypaisa history me TID, raqam aur waqt match karke hi Verify karein.</p>
+<p style="color:#9aa7c7;font-size:13px">Customer ka TID submit sirf aik pending request banata hai — na auto-unlock hota hai, na due date / qist / baqi raqam badalti hai. Verify dabane par hi maujooda PAYMENT_RECEIVED flow chalta hai (payments doc + command, phone online hone par apply). Reject par koi payment record nahi banta aur phone unlock nahi hota. Koi bhi TID, payment ya dashboard action Google FRP nahi kholta.</p>
+<div id="tidList">Loading...</div>
+</div>
+
 </div>
 
 </div>
@@ -163,6 +172,7 @@ let db, auth, myUid, myRole='retailer', allPhones=[], allAlerts=[], shopNames={}
 let pendingCmds={}, pendingByShop={};
 // v4.0 PRO state
 let myShopsArr=[], allPayments=[], allEvents=[], docCtx=null;
+let allTidRequests=[];
 
 function esc(s){
   return String(s===undefined||s===null?'':s)
@@ -259,7 +269,7 @@ async function doLogin(){
 function doLogout(){ auth.signOut().then(()=>location.reload()); }
 
 function showTab(t){
-  ['phones','alerts','shops'].forEach(x=>
+  ['phones','alerts','shops','tid'].forEach(x=>
     document.getElementById('tab-'+x).classList.toggle('hidden', x!==t));
 }
 
@@ -401,6 +411,19 @@ async function startListeners(){
           allPayments.push(py);
         });
         renderHisaab();
+      });
+  }
+  // TID payment requests, owned shops only (2026-10-26 live).
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('paymentRequests')
+      .where('status','==','pending')
+      .onSnapshot(snap=>{
+        allTidRequests = allTidRequests.filter(x=>x._shop!==s._id);
+        snap.forEach(d=>{
+          const r = d.data(); r._id = d.id; r._shop = s._id;
+          r._shopName = s.name; allTidRequests.push(r);
+        });
+        renderTidRequests();
       });
   }
   // v4.0 PRO: tamper events -> Security Events section (newest 20 overall).
@@ -591,7 +614,9 @@ function renderShops(shops){
   shops.forEach(s=>{
     const n = allPhones.filter(p=>p._shop===s._id).length;
     html += '<div class="card" style="margin-bottom:10px"><b>'+esc(s.name||s._id)+'</b>'
-      + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span></div>';
+      + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span>'
+      + (s.shopDisplayName || s.shopJazzCashNumber ? '<br><span style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</span>' : '<br><span style="color:#9aa7c7;font-size:13px">No JazzCash number saved</span>')
+      + ' <button class="small" onclick="editShopPayment(\''+s._id+'\')">Payment details</button></div>';
   });
   document.getElementById('shopList').innerHTML = html || 'No shops';
 }
@@ -717,6 +742,97 @@ async function updateAll(){
   renderPhones();
   alert(n+' phones ko update command bhej diya ✅');
 }
+
+// Payment apps during lock (2026-10-26 live): per-shop payment details.
+// Display-only fields; never a PIN/password/OTP.
+f
+/* ===== TID payment requests (2026-10-26 live) =====
+   Submit (customer app) creates status='pending' ONLY.
+   Verify reuses the EXISTING payment flow (payments doc +
+   PAYMENT_RECEIVED command). Reject records nothing and unlocks
+   nothing. Both actions write an audit doc. No function here
+   patches a phone doc, so no finance field can change from TID
+   handling alone. FRP note: nothing here unlocks Google FRP. */
+function renderTidRequests(){
+  const el = document.getElementById('tidList');
+  const cnt = document.getElementById('tidCount');
+  if(!el) return;
+  const mine = new Set(myShopsArr.map(s=>s._id));
+  const rows = allTidRequests.filter(r=>mine.has(r._shop));
+  if(cnt) cnt.textContent = rows.length ? '('+rows.length+')' : '';
+  if(!rows.length){ el.innerHTML = '<p style="color:#9aa7c7">Koi pending TID request nahi hai.</p>'; return; }
+  // DRAFT 2026-10-26: show each owned shop's own pay-to line above the TID
+  // table, so the shopkeeper confirms the customer was told the right shop.
+  let payLines = '';
+  myShopsArr.forEach(s=>{
+    if(s.shopJazzCashNumber){ payLines += '<div style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</div>'; }
+  });
+  let html = payLines + '<div style="overflow-x:auto"><table><thead><tr><th>Shop / Phone</th><th>TID</th><th>Amount / Method</th><th>Time</th><th>Actions</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const phone = findPhone(r._shop, r.phoneDocId);
+    html += '<tr><td>'+esc(r._shopName||r._shop)+'<br><span style="color:#9aa7c7">'+esc(r.phoneDocId||'')+(phone&&phone.imei ? ' / '+esc(String(phone.imei).substring(0,15)) : '')+'</span></td>'
+      + '<td>'+esc(r.tid||'')+'</td>'
+      + '<td>'+rs(r.amount)+' / '+esc(r.method||'')+'</td>'
+      + '<td>'+fmtSeen(r.createdAt)+'</td>'
+      + '<td><button class="small" onclick="verifyTid(\''+r._shop+'\',\''+r._id+'\',\''+(r.phoneDocId||'')+'\',\''+(r.imei||'')+'\','+Number(r.amount||0)+',\''+esc(r.tid||'')+'\',\''+esc(r.method||'')+'\')">Verify ✓</button> '
+      + '<button class="small danger" onclick="rejectTid(\''+r._shop+'\',\''+r._id+'\')">Reject</button></td></tr>';
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+async function verifyTid(shopId, reqId, phoneId, imei, amount, tid, method){
+  if(!confirm('Verify karein?\\n\\nPehle apni JazzCash/Easypaisa history me TID, raqam aur waqt MATCH karein.\\nTID: '+tid+'\\nAmount: Rs '+amount+'\\nMethod: '+method+'\\n\\nMatch hone par hi Verify dabayein — Verify ke baad maujooda PAYMENT_RECEIVED flow chalega (due date 1 month aage, qist kam).')) return;
+  try{
+    const ref = db.collection('shops').doc(shopId).collection('paymentRequests').doc(reqId);
+    const snap = await ref.get();
+    if(!snap.exists || snap.data().status!=='pending'){ alert('Ye request ab pending nahi hai — list refresh karein.'); renderTidRequests(); return; }
+    await db.collection('shops').doc(shopId).collection('payments').add({
+      phoneId: phoneId||'', imei: imei, amount: amount, tid: tid, method: method,
+      date: firebase.firestore.FieldValue.serverTimestamp(),
+      source: 'tid-verified', createdBy: myUid
+    });
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'PAYMENT_RECEIVED', targetImei: imei, targetPhoneId: phoneId||'', status: 'pending',
+      amount: amount, tid: tid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    await ref.update({ status: 'verified', verifiedBy: myUid,
+      verifiedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    try{
+      await db.collection('shops').doc(shopId).collection('audit').add({
+        action: 'TID_VERIFIED', actorUid: myUid, phoneId: phoneId||'',
+        tid: tid, amount: amount,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e2){ /* payment + command already sent; audit is best-effort here */ }
+    alert('TID Verified ✅ — payment command bhej diya (phone online hone par apply hoga)');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function rejectTid(shopId, reqId){
+  const reason = prompt('Reject ki wajah likhein (zaroori):');
+  if(reason===null) return;
+  if(!reason.trim()){ alert('Reject ki wajah likhna zaroori hai'); return; }
+  try{
+    const ref = db.collection('shops').doc(shopId).collection('paymentRequests').doc(reqId);
+    const snap = await ref.get();
+    if(!snap.exists || snap.data().status!=='pending'){ alert('Ye request ab pending nahi hai — list refresh karein.'); renderTidRequests(); return; }
+    const d = snap.data();
+    await ref.update({ status: 'rejected', rejectReason: reason.trim(), rejectedBy: myUid,
+      rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    try{
+      await db.collection('shops').doc(shopId).collection('audit').add({
+        action: 'TID_REJECTED', actorUid: myUid, phoneId: d.phoneDocId||'',
+        tid: d.tid||'', amount: Number(d.amount||0), reason: reason.trim(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e2){}
+    alert('TID request Reject kar di gayi — koi payment record nahi bana, phone unlock nahi hua.');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
 
 async function paymentReceived(shopId, phoneId, imei, monthly, left){
   const amtStr = prompt('Payment received — amount (PKR):', monthly>0 ? String(monthly) : '');
