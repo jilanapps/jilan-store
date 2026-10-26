@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jilan Medical Store — Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef4f1;color:#14231d}
+.banner{background:#b45309;color:#fff;text-align:center;padding:9px 8px;font-weight:bold;font-size:14px;position:sticky;top:0;z-index:5}
+header{background:#0d6e5f;color:#fff;padding:16px}header h1{margin:0;font-size:24px}header p{margin:4px 0 0;opacity:.9}
+main{padding:12px;max-width:720px;margin:auto}.card{background:#fff;border-radius:12px;padding:14px;margin:10px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+input,textarea,select{width:100%;padding:10px;border:1px solid #cbd5d1;border-radius:8px;font-size:15px;margin:6px 0}
+button{background:#0d6e5f;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}button.ghost{background:#e6f2ef;color:#0d6e5f}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid #0d6e5f;border-radius:20px;padding:6px 12px;background:#fff;cursor:pointer}.chip.on{background:#0d6e5f;color:#fff}
+.item{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #eee;padding:10px 0}.item:first-child{border-top:0}
+.price{font-weight:bold;color:#0d6e5f;white-space:nowrap}.small{color:#666;font-size:13px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.qty button{width:34px;padding:6px}
+.hidden{display:none}.total{font-size:18px;font-weight:bold}
+.notice{background:#fff7e6;border:1px solid #f2c572;border-radius:10px;padding:10px;margin:10px 0;font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{flex:1}
+</style></head><body>
+<div class="banner">DEMO by Jilan Apps — Demo only, no real order or payment • Demo valid until 2 Nov 2026</div>
+<header><h1>💊 Jilan Medical Store</h1><p>Medicines, first aid &amp; baby care — Basti Malook • home delivery (demo)</p></header>
+<main>
+<nav><button onclick="show('home')">Home</button><button onclick="show('cart')">Cart (<span id="cartCount">0</span>)</button><button onclick="show('info')">Shop Info</button></nav>
+
+<section id="home">
+<div class="card"><h2 style="margin-top:0">Search medicines</h2>
+<input id="q" placeholder="Search e.g. Paracetamol, Cough Syrup…" oninput="render()">
+<div class="chips" id="cats"></div>
+<p class="small">Demo prices in PKR. Always consult a doctor or pharmacist before taking any medicine.</p></div>
+<div class="card"><h2 style="margin-top:0">Medicines</h2><div id="list"></div><p id="empty" class="small hidden">No medicine found. Try another name or category.</p></div>
+</section>
+
+<section id="detail" class="hidden"><div class="card"><button class="ghost" onclick="show('home')">← Back</button>
+<h2 id="dName"></h2><p class="price" id="dPrice"></p><p id="dDesc"></p><p class="small" id="dMeta"></p>
+<div class="row qty"><button onclick="chgDetail(-1)">−</button><span id="dQty">1</span><button onclick="chgDetail(1)">+</button>
+<button onclick="addDetail()">Add to Cart</button></div>
+<p class="small">Demo only: this does not place a real order.</p></div></section>
+
+<section id="cart" class="hidden"><div class="card"><h2 style="margin-top:0">Your Cart</h2><div id="cartList"></div>
+<p class="small" id="cartEmpty">Your cart is empty. Add a medicine from Home.</p>
+<div id="cartBox" class="hidden">
+<p>Subtotal: <b id="subtotal"></b></p>
+<p>Delivery: <b id="delFee"></b> <span class="small">(Free on orders Rs 2,000+)</span></p>
+<p class="total">Total: <span id="total"></span></p>
+<label>Delivery option</label>
+<select id="delOpt" onchange="renderCart()"><option value="delivery">Home Delivery</option><option value="pickup">Pickup from Store</option></select>
+<div id="addrBox"><label>Delivery address</label><textarea id="addr" rows="2" placeholder="House / street / area (demo)"></textarea></div>
+<label>Prescription note (optional)</label><textarea id="rx" rows="3" placeholder="e.g. Doctor name, prescription details, or 'No prescription — general item only' (demo)"></textarea>
+<div class="notice">WhatsApp order is a DEMO button. It uses a placeholder number (0300-0000000) and will not send a real order. The shop's real number will be added later.</div>
+<button onclick="waOrder()">Order on WhatsApp (Demo)</button>
+<button class="ghost" onclick="clearCart()">Clear Cart</button>
+</div></div></section>
+
+<section id="info" class="hidden"><div class="card"><h2 style="margin-top:0">Shop Information</h2>
+<p><b>Shop name:</b> Jilan Medical Store</p>
+<p><b>Location:</b> Basti Malook<br><b>Address:</b> [Full shop address in Basti Malook to be filled later]</p>
+<p><b>Phone:</b> [Shop phone to be filled later]</p>
+<p><b>Hours:</b> [Opening hours to be filled later]</p>
+<p><b>Delivery:</b> Home delivery &amp; pickup (demo)</p>
+<p class="small">This is a DEMO app by Jilan Apps for showing to a shop owner. No real orders, payments or patient data are processed.</p></div></section>
+</main>
+<script>
+var MEDS=[
+["Paracetamol 500mg Tablets","Tablets",180,"Fever & pain relief. 20 tablets strip. Demo price."],
+["Ibuprofen 400mg Tablets","Tablets",320,"Pain & inflammation relief. Demo price."],
+["Amoxicillin 250mg Capsules","Tablets",450,"Antibiotic — only on doctor prescription. Demo price."],
+["Cetirizine 10mg Tablets","Tablets",150,"Allergy relief. 10 tablets. Demo price."],
+["Omeprazole 20mg Capsules","Tablets",280,"Acidity & gastric relief. Demo price."],
+["Multivitamin Tablets","Vitamins",650,"Daily multivitamin. 30 tablets. Demo price."],
+["Vitamin C 1000mg Effervescent","Vitamins",520,"Immunity support. 20 tablets. Demo price."],
+["Calcium + Vitamin D Tablets","Vitamins",780,"Bone health. 30 tablets. Demo price."],
+["Cough Syrup 120ml","Syrups",260,"Cough relief syrup. Demo price."],
+["Paracetamol Syrup 120ml","Syrups",240,"Children fever syrup — follow dose guidance. Demo price."],
+["Antacid Syrup 170ml","Syrups",300,"Acidity relief syrup. Demo price."],
+["Iron Syrup 150ml","Syrups",380,"Iron supplement syrup. Demo price."],
+["Ceftriaxone Injection 1g","Injections",420,"Injection — to be given by a health professional only. Demo price."],
+["Diclofenac Injection 75mg","Injections",150,"Pain relief injection — professional use only. Demo price."],
+["Insulin Vial (Demo)","Injections",1200,"Demo listing only — real insulin needs a valid prescription and cold storage."],
+["First Aid Kit","First Aid",950,"Bandages, antiseptic, gauze & plasters. Demo price."],
+["Antiseptic Solution 100ml","First Aid",220,"Wound cleaning solution. Demo price."],
+["Digital Thermometer","First Aid",450,"Fever thermometer. Demo price."],
+["Baby Diapers (Pack of 20)","Baby Care",1100,"Newborn baby diapers, pack of 20. Demo price."],
+["Baby Milk Formula 400g","Baby Care",1850,"Infant formula — follow feeding guidance. Demo price."],
+["Baby Rash Cream 50g","Baby Care",420,"Diaper rash cream. Demo price."],
+["ORS Sachets (Pack of 10)","First Aid",180,"Oral rehydration salts. Demo price."],
+["Eye Drops (Lubricating)","Tablets",350,"Eye lubrication drops. Demo price."],
+["Hand Sanitizer 250ml","First Aid",300,"Hand sanitizer gel. Demo price."]
+];
+var CATS=["All","Tablets","Syrups","Injections","First Aid","Baby Care","Vitamins"];
+var cat="All", cart={}, detailIdx=0, detailQty=1;
+function money(n){return "Rs "+n.toLocaleString();}
+function show(id){["home","detail","cart","info"].forEach(function(s){document.getElementById(s).classList.toggle("hidden",s!==id)}); if(id==="cart")renderCart(); window.scrollTo(0,0);}
+function renderCats(){document.getElementById("cats").innerHTML=CATS.map(function(c){return '<span class="chip '+(c===cat?"on":"")+'" onclick="setCat(\''+c+'\')">'+c+'</span>'}).join("");}
+function setCat(c){cat=c;renderCats();render();}
+function render(){var q=(document.getElementById("q").value||"").toLowerCase();var list=MEDS.filter(function(m,i){return (cat==="All"||m[1]===cat)&&m[0].toLowerCase().indexOf(q)>=0;});
+document.getElementById("empty").classList.toggle("hidden",list.length>0);
+document.getElementById("list").innerHTML=list.map(function(m){var i=MEDS.indexOf(m);return '<div class="item"><div><b>'+m[0]+'</b><div class="small">'+m[1]+' • '+m[3]+'</div></div><div style="text-align:right"><div class="price">'+money(m[2])+'</div><button onclick="openDetail('+i+')">View</button> <button onclick="add('+i+',1)">Add</button></div></div>'}).join("");}
+function openDetail(i){detailIdx=i;detailQty=1;document.getElementById("dQty").textContent=1;document.getElementById("dName").textContent=MEDS[i][0];document.getElementById("dPrice").textContent=money(MEDS[i][2]);document.getElementById("dDesc").textContent=MEDS[i][3];document.getElementById("dMeta").textContent="Category: "+MEDS[i][1]+" • Demo price, demo stock";show("detail");}
+function chgDetail(d){detailQty=Math.max(1,detailQty+d);document.getElementById("dQty").textContent=detailQty;}
+function add(i,n){cart[i]=(cart[i]||0)+n;upd();}
+function addDetail(){add(detailIdx,detailQty);show("cart");}
+function upd(){var c=0;for(var k in cart)c+=cart[k];document.getElementById("cartCount").textContent=c;}
+function renderCart(){upd();var box=document.getElementById("cartBox");var empty=document.getElementById("cartEmpty");var keys=Object.keys(cart);empty.classList.toggle("hidden",keys.length>0);box.classList.toggle("hidden",keys.length===0);
+var sub=0;var html="";keys.forEach(function(k){var m=MEDS[k];sub+=m[2]*cart[k];html+='<div class="item"><div><b>'+m[0]+'</b><div class="small">'+money(m[2])+' each</div></div><div class="row qty"><button onclick="cartQty('+k+',-1)">−</button><span>'+cart[k]+'</span><button onclick="cartQty('+k+',1)">+</button><button class="ghost" onclick="cartQty('+k+',-999)">Remove</button></div></div>';});
+document.getElementById("cartList").innerHTML=html;
+var opt=document.getElementById("delOpt").value;var fee=(opt==="pickup"?0:(sub>=2000?0:150));
+document.getElementById("addrBox").classList.toggle("hidden",opt!=="delivery");
+document.getElementById("subtotal").textContent=money(sub);document.getElementById("delFee").textContent=fee===0?"Free":money(fee);document.getElementById("total").textContent=money(sub+fee);}
+function cartQty(k,d){if(d===-999)delete cart[k];else{cart[k]+=d;if(cart[k]<=0)delete cart[k];}renderCart();}
+function clearCart(){cart={};renderCart();}
+function waOrder(){var keys=Object.keys(cart);if(!keys.length){alert("Cart is empty.");return;}
+var lines=["Hello Jilan Medical Store, Basti Malook (DEMO ORDER)",""];var sub=0;keys.forEach(function(k){var m=MEDS[k];sub+=m[2]*cart[k];lines.push(m[0]+" x "+cart[k]+" = Rs "+(m[2]*cart[k]));});
+var opt=document.getElementById("delOpt").value;var fee=(opt==="pickup"?0:(sub>=2000?0:150));
+lines.push("");lines.push("Delivery: "+(opt==="pickup"?"Pickup from Store":"Home Delivery"));if(opt==="delivery")lines.push("Address: "+(document.getElementById("addr").value||"(not given — demo)"));
+lines.push("Prescription note: "+(document.getElementById("rx").value||"(none — demo)"));lines.push("Total: Rs "+(sub+fee));lines.push("");lines.push("NOTE: This is a DEMO order only.");
+alert("DEMO: No real order will be sent.\n\n"+lines.join("\n")+"\n\nPlaceholder WhatsApp: 0300-0000000 (demo only)");
+window.open("https://wa.me/923000000000?text="+encodeURIComponent(lines.join("\n"))," _blank".trim());}
+renderCats();render();
+</script>
+<!-- DEMO EXPIRY: change DEMO_EXPIRY_ISO below to extend/shorten the demo period. Current expiry: end of 2 Nov 2026 PKT (2026-11-02T18:59:59Z). On/after expiry, only the 'Demo Period Ended' screen is shown. -->
+<script>
+(function(){
+  var DEMO_EXPIRY_ISO = "2026-11-02T18:59:59Z"; // end of 2 Nov 2026 PKT (UTC+5)
+  if (new Date() > new Date(DEMO_EXPIRY_ISO)) {
+    document.body.innerHTML = '<div style="max-width:720px;margin:60px auto;padding:24px;text-align:center;font-family:Arial,sans-serif"><h1>Jilan Medical Store</h1><h2>Demo Period Ended</h2><p>This demo was valid until 2 Nov 2026 and has now expired.</p><p>Please contact Jilan Apps Official for a new demo.</p></div>';
+  }
+})();
+</script>
+</body></html>
