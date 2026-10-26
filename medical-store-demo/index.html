@@ -14,10 +14,11 @@ button{background:#0d6e5f;color:#fff;border:0;border-radius:8px;padding:10px 14p
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.qty button{width:34px;padding:6px}
 .hidden{display:none}.total{font-size:18px;font-weight:bold}
 .notice{background:#fff7e6;border:1px solid #f2c572;border-radius:10px;padding:10px;margin:10px 0;font-size:13px}
+.badge{display:inline-block;border-radius:12px;padding:2px 8px;font-size:12px;font-weight:bold;margin-top:4px}.badge.home{background:#dcfce7;color:#166534}.badge.pickup{background:#fee2e2;color:#991b1b}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{flex:1}
 </style></head><body>
 <div class="banner">DEMO by Jilan Apps — Demo only, no real order or payment • Demo valid until 2 Nov 2026</div>
-<header><h1>💊 Jilan Medical Store</h1><p>Medicines, first aid &amp; baby care — Basti Malook • home delivery (demo)</p></header>
+<header><h1>💊 Jilan Medical Store</h1><p>Medicines, first aid &amp; baby care — Basti Malook • home delivery &amp; pickup (demo)</p></header>
 <main>
 <nav><button onclick="show('home')">Home</button><button onclick="show('cart')">Cart (<span id="cartCount">0</span>)</button><button onclick="show('info')">Shop Info</button></nav>
 
@@ -30,7 +31,7 @@ nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{flex:1}
 </section>
 
 <section id="detail" class="hidden"><div class="card"><button class="ghost" onclick="show('home')">← Back</button>
-<h2 id="dName"></h2><div class="detail-pic" id="dPic"></div><p class="price" id="dPrice"></p><p id="dDesc"></p><p class="small" id="dMeta"></p>
+<h2 id="dName"></h2><div class="detail-pic" id="dPic"></div><p class="price" id="dPrice"></p><p id="dDesc"></p><p class="small" id="dMeta"></p><p id="dAvail"></p>
 <div class="row qty"><button onclick="chgDetail(-1)">−</button><span id="dQty">1</span><button onclick="chgDetail(1)">+</button>
 <button onclick="addDetail()">Add to Cart</button></div>
 <p class="small">Demo only: this does not place a real order.</p></div></section>
@@ -41,6 +42,7 @@ nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{flex:1}
 <p>Subtotal: <b id="subtotal"></b></p>
 <p>Delivery: <b id="delFee"></b> <span class="small">(Free on orders Rs 2,000+)</span></p>
 <p class="total">Total: <span id="total"></span></p>
+<p id="cartDelNote" class="notice hidden"></p>
 <label>Delivery option</label>
 <select id="delOpt" onchange="renderCart()"><option value="delivery">Home Delivery</option><option value="pickup">Pickup from Store</option></select>
 <div id="addrBox"><label>Delivery address</label><textarea id="addr" rows="2" placeholder="House / street / area (demo)"></textarea></div>
@@ -62,7 +64,7 @@ nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{flex:1}
 var MEDS=[
 ["Paracetamol 500mg Tablets","Tablets",180,"Fever & pain relief. 20 tablets strip. Demo price."],
 ["Ibuprofen 400mg Tablets","Tablets",320,"Pain & inflammation relief. Demo price."],
-["Amoxicillin 250mg Capsules","Tablets",450,"Antibiotic — only on doctor prescription. Demo price."],
+["Amoxicillin 250mg Capsules","Tablets",450,"Antibiotic — only on doctor prescription. Demo price.","pickup:Prescription only — pickup only"],
 ["Cetirizine 10mg Tablets","Tablets",150,"Allergy relief. 10 tablets. Demo price."],
 ["Omeprazole 20mg Capsules","Tablets",280,"Acidity & gastric relief. Demo price."],
 ["Multivitamin Tablets","Vitamins",650,"Daily multivitamin. 30 tablets. Demo price."],
@@ -72,9 +74,9 @@ var MEDS=[
 ["Paracetamol Syrup 120ml","Syrups",240,"Children fever syrup — follow dose guidance. Demo price."],
 ["Antacid Syrup 170ml","Syrups",300,"Acidity relief syrup. Demo price."],
 ["Iron Syrup 150ml","Syrups",380,"Iron supplement syrup. Demo price."],
-["Ceftriaxone Injection 1g","Injections",420,"Injection — to be given by a health professional only. Demo price."],
-["Diclofenac Injection 75mg","Injections",150,"Pain relief injection — professional use only. Demo price."],
-["Insulin Vial (Demo)","Injections",1200,"Demo listing only — real insulin needs a valid prescription and cold storage."],
+["Ceftriaxone Injection 1g","Injections",420,"Injection — to be given by a health professional only. Demo price.","pickup:Injection — pickup only"],
+["Diclofenac Injection 75mg","Injections",150,"Pain relief injection — professional use only. Demo price.","pickup:Injection — pickup only"],
+["Insulin Vial (Demo)","Injections",1200,"Demo listing only — real insulin needs a valid prescription and cold storage.","pickup:Prescription / cold storage — pickup only"],
 ["First Aid Kit","First Aid",950,"Bandages, antiseptic, gauze & plasters. Demo price."],
 ["Antiseptic Solution 100ml","First Aid",220,"Wound cleaning solution. Demo price."],
 ["Digital Thermometer","First Aid",450,"Fever thermometer. Demo price."],
@@ -92,7 +94,7 @@ var MEDS=[
 ["Muscle Rub Ointment 40g","Creams and Ointments",300,"Warming muscle rub ointment. Demo price."],
 ["Acne Gel 20g","Creams and Ointments",650,"Acne treatment gel. Demo price."],
 ["Skin Rash Cream 50g","Creams and Ointments",400,"Cream for skin rashes and irritation. Demo price."],
-["Eye Drops (Antibiotic) 10ml","Drops and Sprays",450,"Antibiotic eye drops — only on doctor prescription. Demo price."],
+["Eye Drops (Antibiotic) 10ml","Drops and Sprays",450,"Antibiotic eye drops — only on doctor prescription. Demo price.","pickup:Prescription only — pickup only"],
 ["Nasal Spray 20ml","Drops and Sprays",520,"Nasal spray for blocked nose. Demo price."],
 ["Ear Drops 10ml","Drops and Sprays",380,"Ear drops for ear discomfort. Demo price."],
 ["Throat Spray 30ml","Drops and Sprays",460,"Soothing throat spray. Demo price."],
@@ -112,22 +114,27 @@ function svgFor(m){var n=m[0].toLowerCase();
  if(m[1]==="Vitamins")return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="16" width="20" height="32" rx="6" fill="#f97316"/><rect x="24" y="10" width="16" height="8" rx="3" fill="#9a3412"/><circle cx="28" cy="30" r="4" fill="#fff"/><circle cx="37" cy="38" r="4" fill="#fff"/></svg>';
  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="20" width="40" height="24" rx="6" fill="#0d6e5f"/><circle cx="24" cy="32" r="6" fill="#fff"/><circle cx="32" cy="32" r="6" fill="#fff"/><circle cx="40" cy="32" r="6" fill="#fff"/></svg>';
 }
+function avail(m){if(m[4]&&m[4].indexOf("pickup:")===0)return{kind:"pickup",label:"Pickup Only",reason:m[4].slice(7)};return{kind:"home",label:"Home Delivery available",reason:""};}
+function badgeHtml(m){var a=avail(m);return '<span class="badge '+a.kind+'">'+a.label+(a.reason?" — "+a.reason:"")+'</span>';}
 function money(n){return "Rs "+n.toLocaleString();}
 function show(id){["home","detail","cart","info"].forEach(function(s){document.getElementById(s).classList.toggle("hidden",s!==id)}); if(id==="cart")renderCart(); window.scrollTo(0,0);}
 function renderCats(){document.getElementById("cats").innerHTML=CATS.map(function(c){return '<span class="chip '+(c===cat?"on":"")+'" onclick="setCat(\''+c+'\')">'+c+'</span>'}).join("");}
 function setCat(c){cat=c;renderCats();render();}
 function render(){var q=(document.getElementById("q").value||"").toLowerCase();var list=MEDS.filter(function(m,i){return (cat==="All"||m[1]===cat)&&m[0].toLowerCase().indexOf(q)>=0;});
 document.getElementById("empty").classList.toggle("hidden",list.length>0);
-document.getElementById("list").innerHTML=list.map(function(m){var i=MEDS.indexOf(m);return '<div class="item"><div class="thumb">'+svgFor(m)+'</div><div><b>'+m[0]+'</b><div class="small">'+m[1]+' • '+m[3]+'</div></div><div style="text-align:right"><div class="price">'+money(m[2])+'</div><button onclick="openDetail('+i+')">View</button> <button onclick="add('+i+',1)">Add</button></div></div>'}).join("");}
-function openDetail(i){detailIdx=i;detailQty=1;document.getElementById("dQty").textContent=1;document.getElementById("dName").textContent=MEDS[i][0];document.getElementById("dPrice").textContent=money(MEDS[i][2]);document.getElementById("dPic").innerHTML=svgFor(MEDS[i]);document.getElementById("dDesc").textContent=MEDS[i][3];document.getElementById("dMeta").textContent="Category: "+MEDS[i][1]+" • Demo price, demo stock";show("detail");}
+document.getElementById("list").innerHTML=list.map(function(m){var i=MEDS.indexOf(m);return '<div class="item"><div class="thumb">'+svgFor(m)+'</div><div><b>'+m[0]+'</b><div class="small">'+m[1]+' • '+m[3]+'</div>'+badgeHtml(m)+'</div><div style="text-align:right"><div class="price">'+money(m[2])+'</div><button onclick="openDetail('+i+')">View</button> <button onclick="add('+i+',1)">Add</button></div></div>'}).join("");}
+function openDetail(i){detailIdx=i;detailQty=1;document.getElementById("dQty").textContent=1;document.getElementById("dName").textContent=MEDS[i][0];document.getElementById("dPrice").textContent=money(MEDS[i][2]);document.getElementById("dPic").innerHTML=svgFor(MEDS[i]);document.getElementById("dDesc").textContent=MEDS[i][3];document.getElementById("dMeta").textContent="Category: "+MEDS[i][1]+" • Demo price, demo stock";document.getElementById("dAvail").innerHTML=badgeHtml(MEDS[i]);show("detail");}
 function chgDetail(d){detailQty=Math.max(1,detailQty+d);document.getElementById("dQty").textContent=detailQty;}
 function add(i,n){cart[i]=(cart[i]||0)+n;upd();}
 function addDetail(){add(detailIdx,detailQty);show("cart");}
 function upd(){var c=0;for(var k in cart)c+=cart[k];document.getElementById("cartCount").textContent=c;}
 function renderCart(){upd();var box=document.getElementById("cartBox");var empty=document.getElementById("cartEmpty");var keys=Object.keys(cart);empty.classList.toggle("hidden",keys.length>0);box.classList.toggle("hidden",keys.length===0);
-var sub=0;var html="";keys.forEach(function(k){var m=MEDS[k];sub+=m[2]*cart[k];html+='<div class="item"><div><b>'+m[0]+'</b><div class="small">'+money(m[2])+' each</div></div><div class="row qty"><button onclick="cartQty('+k+',-1)">−</button><span>'+cart[k]+'</span><button onclick="cartQty('+k+',1)">+</button><button class="ghost" onclick="cartQty('+k+',-999)">Remove</button></div></div>';});
+var sub=0;var html="";keys.forEach(function(k){var m=MEDS[k];sub+=m[2]*cart[k];html+='<div class="item"><div><b>'+m[0]+'</b><div class="small">'+money(m[2])+' each</div>'+badgeHtml(m)+'</div><div class="row qty"><button onclick="cartQty('+k+',-1)">−</button><span>'+cart[k]+'</span><button onclick="cartQty('+k+',1)">+</button><button class="ghost" onclick="cartQty('+k+',-999)">Remove</button></div></div>';});
 document.getElementById("cartList").innerHTML=html;
-var opt=document.getElementById("delOpt").value;var fee=(opt==="pickup"?0:(sub>=2000?0:150));
+var hasPickup=keys.some(function(k){return avail(MEDS[k]).kind==="pickup";});
+var sel=document.getElementById("delOpt");sel.options[0].disabled=hasPickup;if(hasPickup)sel.value="pickup";
+var note=document.getElementById("cartDelNote");note.classList.toggle("hidden",!hasPickup);if(hasPickup)note.textContent="Some items in your cart are pickup only, so home delivery is not available for this order. Please pick up this order from the store.";
+var opt=sel.value;var fee=(opt==="pickup"?0:(sub>=2000?0:150));
 document.getElementById("addrBox").classList.toggle("hidden",opt!=="delivery");
 document.getElementById("subtotal").textContent=money(sub);document.getElementById("delFee").textContent=fee===0?"Free":money(fee);document.getElementById("total").textContent=money(sub+fee);}
 function cartQty(k,d){if(d===-999)delete cart[k];else{cart[k]+=d;if(cart[k]<=0)delete cart[k];}renderCart();}
