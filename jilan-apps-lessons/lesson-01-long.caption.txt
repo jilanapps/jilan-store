@@ -1,0 +1,17 @@
+🎓 Lesson 1: HTML Tags — Tag ka Qaidah (Tafseel se)
+
+In this lesson: HTML tags ka qaidah tafseel se — opening tag, closing tag, slash ka usool, aur h1, p, h2, a tags ki misalein — aik mukammal mini project, aam ghaltiyan, practice aur homework ke saath.
+
+Urdu narration, easy words, real code examples. 📱💻
+
+👉 Follow Jilan Apps Tech for a new coding lesson every day!
+
+💬 Agar kuch samajh nahi aaya ya koi sawal hai to comments me pooch lein, zaroor jawab milega!
+
+📚 Humein join karein, rozana naya coding lesson seekhne ke liye:
+Facebook: https://www.facebook.com/profile.php?id=100403692606403
+Instagram: https://www.instagram.com/jilanappsofficial
+Threads: https://www.threads.net/@jilanappsofficial
+YouTube: https://www.youtube.com/@jilanappsofficial
+
+#Coding #HTML #WebDevelopment #LearnCoding #JilanAppsTech
