@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ur"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jilan Key — Master Dashboard (Test)</title>
+<style>body{background:#0f172a;color:#e2e8f0;font-family:system-ui;padding:20px}button{background:#facc15;color:#0f172a;border:0;padding:10px 16px;border-radius:8px;font-weight:700;margin:4px}input{padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;width:100%;box-sizing:border-box}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #334155;padding:8px;text-align:left}.revoked{color:#f87171}.active{color:#4ade80}</style></head>
+<body>
+<h1>🔑 Jilan Key — Master Dashboard</h1>
+<p>Aik key = aik mobile. Key pehli activation par IMEI se bandh jati hai, doosre mobile par nahi chalegi. Backup Master ke paas hi rehta hai.</p>
+<label>Dukaan ka naam <input id="shop" placeholder="e.g. Jilan Mobile"></label><br><br>
+<label>Dukaan ka number <input id="contact" placeholder="e.g. 0300xxxxxxx"></label><br><br>
+<button onclick="gen()">Nayi Key Banao</button>
+<button onclick="exp()">Backup Download (JSON)</button>
+<table><thead><tr><th>Key</th><th>Dukaan</th><th>Status</th><th>Bound IMEI</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table>
+<p style="color:#fbbf24">Fake TID se auto-unlock kabhi nahi: Verify shopkeeper ki history match ke baad hi hoga.</p>
+<script>
+function chars(){return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'}
+function makeKey(){let p=[];for(let i=0;i<3;i++){let s='';for(let j=0;j<4;j++)s+=chars()[Math.floor(Math.random()*chars().length)];p.push(s)}return 'JLN-'+p.join('-')}
+let keys=JSON.parse(localStorage.getItem('jilan_keys')||'[]');
+function save(){localStorage.setItem('jilan_keys',JSON.stringify(keys));render()}
+function gen(){let s=document.getElementById('shop').value.trim(),c=document.getElementById('contact').value.trim();if(!s){alert('Dukaan ka naam likhein');return}keys.push({key:makeKey(),shop:s,contact:c,status:'unused',boundImei:'',createdAt:new Date().toLocaleString()});save()}
+function revoke(i){keys[i].status='revoked';save()}
+function render(){document.getElementById('rows').innerHTML=keys.map((k,i)=>'<tr><td>'+k.key+'</td><td>'+k.shop+'<br>'+k.contact+'</td><td class="'+k.status+'">'+k.status+'</td><td>'+(k.boundImei||'—')+'</td><td><button onclick="revoke('+i+')">Revoke</button></td></tr>').join('')||'<tr><td colspan="5">Koi key nahi hai.</td></tr>'}
+function exp(){let a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(keys,null,2));a.download='jilan-key-backup.json';a.click()}
+render();
+</script></body></html>
