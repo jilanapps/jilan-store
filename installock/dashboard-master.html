@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installock Master Dashboard (Dr Asif)</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b1120;color:#e8eaf2;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+header{background:#151b30;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e8b93c;position:sticky;top:0;z-index:10}
+header h1{color:#e8b93c;font-size:18px}
+header .user{font-size:13px;color:#9aa7c7}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:#151b30;border-radius:12px;padding:18px;margin-bottom:16px;border:1px solid #232c4a}
+.card h2{color:#e8b93c;font-size:16px;margin-bottom:12px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5e;background:#0b1120;color:#fff;margin-bottom:10px;font-size:15px}
+button{background:#e8b93c;color:#0b1120;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:#232c4a;color:#e8b93c}
+button.danger{background:#7b1f1f;color:#fff}
+button.small{padding:6px 10px;font-size:12px}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#151b30;border-radius:10px;padding:14px;text-align:center;border:1px solid #232c4a}
+.stat .n{font-size:26px;font-weight:800;color:#e8b93c}
+.stat .l{font-size:12px;color:#9aa7c7}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #232c4a}
+th{color:#e8b93c;font-size:12px;text-transform:uppercase}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.c-active{background:#1f6b3a;color:#fff}.c-grace{background:#8a6d1c;color:#fff}
+.c-limited{background:#7b1f1f;color:#fff}.c-offline{background:#4a2c7b;color:#fff}
+.c-released{background:#3a4a5e;color:#fff}
+.c-dead{background:#7a1d1d;color:#fff}
+.alert{background:#2a1a1a;border-left:4px solid #e85c5c;padding:10px;border-radius:6px;margin-bottom:8px;font-size:13px}
+.alert.seen{opacity:.55}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{flex:1;min-width:100px}
+footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
+@media(max-width:600px){table{font-size:11px}th,td{padding:6px 4px}}
+/* ===== v4.0 PRO: tags, hisaab, agreement/receipt print ===== */
+.c-overdue{background:#c62828;color:#fff}
+.tag-off{color:#ffb74d;font-weight:700;font-size:11px}
+.tag-dead{color:#ff6b6b;font-weight:700;font-size:11px}
+#docOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow:auto;padding:18px}
+#docOverlay.open{display:block}
+.docbox{max-width:780px;margin:0 auto}
+.doctoolbar{background:#151b30;border:1px solid #232c4a;border-radius:10px;padding:12px;margin-bottom:12px}
+.doctoolbar input{margin-bottom:6px}
+.doctoolbar .hint{font-size:12px;color:#9aa7c7}
+#printArea{background:#fff;color:#111;border-radius:6px;padding:30px 34px;font-size:14px;line-height:1.45}
+#printArea h1{font-size:21px;text-align:center;margin-bottom:2px;color:#111}
+#printArea h3{font-size:15px;margin:14px 0 6px;color:#111}
+#printArea .shopname{text-align:center;font-size:16px;font-weight:700}
+#printArea .shopsub{text-align:center;font-size:12px;color:#444;margin-bottom:8px}
+#printArea .urdu{text-align:center;font-size:16px;font-weight:700;margin:10px 0;padding:8px;border:1px solid #999;border-radius:6px}
+#printArea .copytag{text-align:right;font-size:11px;font-weight:700;letter-spacing:1px;color:#555;text-transform:uppercase}
+#printArea table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
+#printArea table.kv td{padding:5px 8px;border-bottom:1px solid #ddd;color:#111}
+#printArea table.kv td.k{width:42%;color:#444}
+#printArea ol.terms{margin-left:18px;font-size:13px}
+#printArea ol.terms li{margin-bottom:5px}
+#printArea .signs{display:flex;justify-content:space-between;margin-top:34px;font-size:13px}
+#printArea .signs div{width:44%;border-top:1px solid #333;padding-top:5px;text-align:center}
+#printArea .docfoot{text-align:center;font-size:11px;color:#555;margin-top:22px}
+#printArea hr.cut{border:none;border-top:2px dashed #888;margin:26px 0}
+#printArea .rcpt-head{display:flex;justify-content:space-between;font-size:13px;color:#333}
+#printArea .big-amt{font-size:19px;font-weight:800}
+@media print{
+  body>*{display:none!important}
+  body>#docOverlay{display:block!important;position:static;background:#fff;padding:0;overflow:visible}
+  .doctoolbar{display:none!important}
+  #printArea{border-radius:0;padding:6mm}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>🔒 Installock Master Dashboard (Dr Asif)</h1>
+<span class="user" id="userLabel"></span>
+</header>
+<div class="wrap">
+
+<!-- LOGIN -->
+<div class="card" id="loginCard">
+<h2>Login</h2>
+<input id="cfgKey" placeholder="Firebase API Key (first time only)">
+<input id="cfgPid" placeholder="Firebase Project ID (first time only)">
+<input id="loginEmail" type="email" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+<button onclick="doLogin()">Login</button>
+<p style="font-size:12px;color:#9aa7c7;margin-top:8px">API Key + Project ID ek martaba dalein — browser me save rahega.</p>
+</div>
+
+<!-- MASTER ONLY GATE: retailers see this message, never shop data -->
+<div class="card hidden" id="masterOnlyMsg">
+<h2>Master Dashboard — sirf Master ke liye</h2>
+<p style="color:#9aa7c7;font-size:14px">Ye Installock Master Dashboard (Dr Asif) hai. Aap ka login Master (admin) nahi hai, is liye is page par koi shop data nahi dikhaya ja raha hai.</p>
+<p style="margin-top:10px"><a href="dashboard-shop.html" style="color:#e8b93c;font-weight:700">Installock Shop Dashboard par jayein →</a></p>
+<button class="ghost" onclick="doLogout()">Logout</button>
+</div>
+
+<!-- MAIN -->
+<div id="mainUI" class="hidden">
+<div class="tabs">
+<button onclick="showTab('phones')">📱 Phones</button>
+<button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
+<button onclick="showTab('shops')">🏪 Shops</button>
+<button onclick="showTab('tid')">💳 TID Requests <span id="tidCount"></span></button>
+<button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">🔳 Shop QR</button>
+<button class="ghost" onclick="updateAll()">⬆️ Update All</button>
+<button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
+<button class="ghost" onclick="doLogout()">Logout</button>
+</div>
+
+<div class="card hidden" id="shopQrPanel">
+<h2>Shop QR — Cloud ID</h2>
+<input id="shopQrEmail" type="email" placeholder="Shop email" autocomplete="off">
+<input id="shopQrPass" type="password" placeholder="Shop password" autocomplete="new-password">
+<button onclick="makeShopQr()">QR banao</button>
+<button class="ghost" onclick="toggleShopQr(false)">Band karein</button>
+<p style="color:#ffb74d;font-size:13px;margin-top:8px">Is QR me password hai — isay khufiya rakhein, aam share na karein.</p>
+<div id="shopQrBox" style="display:none;background:#fff;border-radius:10px;padding:12px;width:max-content;max-width:100%;margin-top:10px"></div>
+<p id="shopQrMsg" style="color:#9aa7c7;font-size:13px;margin-top:8px"></p>
+</div>
+
+<div class="stats" id="statsRow"></div>
+
+<!-- v4.0 PRO: hisaab strip -->
+<div class="stats" id="hisaabRow"></div>
+
+<div class="card" id="tab-phones">
+<h2>Phones</h2>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>IMEI</th><th>Shop</th><th>Status</th><th>Due Date</th><th>Last Seen</th><th>Actions</th></tr></thead>
+<tbody id="phoneRows"><tr><td colspan="6">Loading...</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<div class="card hidden" id="tab-alerts">
+<h2>Alerts</h2>
+<div id="alertList">Loading...</div>
+<!-- v4.0 PRO: tamper / security events from the phones -->
+<h2 style="margin-top:20px">🔐 Security Events</h2>
+<div id="eventList">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-shops">
+<h2>Shops</h2>
+<div id="shopList">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-tid">
+<h2>💳 TID Payment Requests (Pending)</h2>
+<p style="color:#ffb74d;font-size:14px">TID khud saboot nahi — apni JazzCash/Easypaisa history me TID, raqam aur waqt match karke hi Verify karein.</p>
+<p style="color:#9aa7c7;font-size:13px">Customer ka TID submit sirf aik pending request banata hai — na auto-unlock hota hai, na due date / qist / baqi raqam badalti hai. Verify dabane par hi maujooda PAYMENT_RECEIVED flow chalta hai (payments doc + command, phone online hone par apply). Reject par koi payment record nahi banta aur phone unlock nahi hota. Koi bhi TID, payment ya dashboard action Google FRP nahi kholta.</p>
+<div id="tidList">Loading...</div>
+</div>
+
+</div>
+
+</div>
+<footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<!-- v4.0 PRO: agreement / receipt print overlay (only #printArea prints) -->
+<div id="docOverlay">
+<div class="docbox">
+<div class="doctoolbar" id="docToolbar"></div>
+<div id="printArea"></div>
+</div>
+</div>
+
+<script>
+let db, auth, myUid, myRole='retailer', allPhones=[], allAlerts=[], shopNames={};
+let pendingCmds={}, pendingByShop={};
+// v4.0 PRO state
+let myShopsArr=[], allPayments=[], allEvents=[], docCtx=null;
+let allTidRequests=[];
+
+function esc(s){
+  return String(s===undefined||s===null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+function rs(n){ return 'Rs '+Number(n||0).toLocaleString('en-US'); }
+/** Firestore Timestamp / millis / ISO string -> epoch ms (0 if unknown). */
+function tsMs(v){
+  if(!v) return 0;
+  if(typeof v==='number') return v;
+  if(v.toDate) { try{ return v.toDate().getTime(); }catch(e){ return 0; } }
+  if(v.seconds) return v.seconds*1000;
+  const t = Date.parse(v);
+  return isNaN(t) ? 0 : t;
+}
+/**
+ * v4.0 finance view of a phone doc (null when finance was never used).
+ * Total payable (spec) = (Price + fee%) - Advance; remaining = that
+ * minus what has been paid (paymentsTotal from v4.0 app, else paidSoFar).
+ */
+function finOf(p){
+  const price = Number(p.price)||0;
+  if(!(price>0)) return null;
+  const pct = Number(p.markupPercent)||0;
+  const adv = Number(p.advance)||0;
+  const withFee = Math.round(price*(1+pct/100));
+  const financed = Math.max(0, withFee-adv);
+  const paid = (p.paymentsTotal!==undefined && p.paymentsTotal!==null)
+    ? Number(p.paymentsTotal)||0 : (Number(p.paidSoFar)||0);
+  return { price:price, pct:pct, adv:adv, withFee:withFee, financed:financed,
+    paid:paid, remaining:Math.max(0, financed-paid),
+    monthly:Number(p.monthlyInstallment)||0,
+    months:Number(p.planMonths)||0,
+    left:(p.installmentsLeft!==undefined&&p.installmentsLeft!==null)
+      ? Number(p.installmentsLeft) : null };
+}
+function findPhone(shopId, phoneId){
+  return allPhones.find(x=>x._shop===shopId && x._id===phoneId);
+}
+function shopOf(shopId){ return myShopsArr.find(s=>s._id===shopId) || {}; }
+function shopPhoneOf(p){
+  return p.shopContact || (shopOf(p._shop).contact) || '';
+}
+function custPhoneOf(p){
+  return p.customerPhone || p.customerContact || p.customerMobile || '';
+}
+function waLink(p, text){
+  let num = String(custPhoneOf(p)||'').replace(/\D/g,'');
+  if(num.length===11 && num.charAt(0)==='0') num = '92'+num.substring(1);
+  else if(num.length===10) num = '92'+num;
+  else if(num.indexOf('92')!==0) num = '';
+  return 'https://wa.me/'+num+'?text='+encodeURIComponent(text);
+}
+
+function cfg(){ return {
+  apiKey: localStorage.getItem('il2_key')||'',
+  projectId: localStorage.getItem('il2_pid')||''
+};}
+
+function initFirebase(){
+  const c = cfg();
+  if(!c.apiKey || !c.projectId) return false;
+  if(!firebase.apps.length) firebase.initializeApp(c);
+  auth = firebase.auth(); db = firebase.firestore();
+  return true;
+}
+
+async function doLogin(){
+  const k = document.getElementById('cfgKey').value.trim();
+  const p = document.getElementById('cfgPid').value.trim();
+  if(k) localStorage.setItem('il2_key', k);
+  if(p) localStorage.setItem('il2_pid', p);
+  if(!initFirebase()){ alert('API Key + Project ID zaroori hai'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  try{
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    myUid = cred.user.uid;
+    // check admin
+    const mdoc = await db.collection('masters').doc(myUid).get();
+    if(mdoc.exists){ myRole='admin'; }
+    else{
+      const udoc = await db.collection('users').doc(myUid).get();
+      if(udoc.exists) myRole = udoc.data().role || 'retailer';
+    }
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('userLabel').textContent = email + ' (' + myRole + ')';
+    if(myRole!=='admin'){
+      document.getElementById('masterOnlyMsg').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('mainUI').classList.remove('hidden');
+    startListeners();
+  }catch(e){ alert('Login failed: ' + e.message); }
+}
+
+function doLogout(){ auth.signOut().then(()=>location.reload()); }
+
+function showTab(t){
+  ['phones','alerts','shops','tid'].forEach(x=>
+    document.getElementById('tab-'+x).classList.toggle('hidden', x!==t));
+}
+
+function canSee(shop){
+  if(myRole==='admin') return true;
+  if(myRole==='distributor') return shop.distributorUid===myUid;
+  return shop.retailerUid===myUid;
+}
+
+function updateShopQrVisibility(){
+  const btn = document.getElementById('shopQrBtn');
+  if(btn) btn.classList.toggle('hidden', myRole!=='admin');
+  if(myRole!=='admin'){
+    const panel = document.getElementById('shopQrPanel');
+    if(panel) panel.classList.add('hidden');
+  }
+}
+
+function toggleShopQr(force){
+  if(myRole!=='admin') return;
+  const panel = document.getElementById('shopQrPanel');
+  if(!panel) return;
+  const show = (typeof force==='boolean') ? force : panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !show);
+  if(show){
+    const email = document.getElementById('shopQrEmail');
+    if(email) email.focus();
+  }
+}
+
+function makeShopQr(){
+  const emailEl = document.getElementById('shopQrEmail');
+  const passEl = document.getElementById('shopQrPass');
+  const box = document.getElementById('shopQrBox');
+  const msg = document.getElementById('shopQrMsg');
+  const email = emailEl.value.trim();
+  const password = passEl.value;
+  if(!email || email.indexOf('@')<1 || email.indexOf('.')<0){
+    alert('Durust shop email likhein');
+    return;
+  }
+  if(!password){ alert('Shop password likhein'); return; }
+  if(!window.QRCode){
+    alert('QR library load nahi hui — internet check karke page refresh karein');
+    return;
+  }
+  const text = JSON.stringify({ email: email, password: password });
+  box.innerHTML = '';
+  box.style.display = 'block';
+  try{
+    new QRCode(box, { text: text, width: 256, height: 256,
+      correctLevel: QRCode.CorrectLevel.M });
+  }catch(e){
+    box.style.display = 'none';
+    alert('QR nahi ban saka: '+e.message);
+    return;
+  }
+  passEl.value = '';
+  msg.textContent = 'QR tayyar hai — phone ke Cloud setup me scan karein, phir Connect dabayein.';
+}
+
+async function startListeners(){
+  updateShopQrVisibility();
+  // shops
+  // v4.4 (audit I1): query ONLY the shops this login owns. Firestore
+  // rules are not filters — an unfiltered get() is denied entirely for
+  // a retailer under per-shop rules, which used to break their login.
+  let shopsSnap;
+  if(myRole==='admin') shopsSnap = await db.collection('shops').get();
+  else if(myRole==='distributor') shopsSnap = await db.collection('shops').where('distributorUid','==',myUid).get();
+  else shopsSnap = await db.collection('shops').where('retailerUid','==',myUid).get();
+  const myShops = [];
+  shopsSnap.forEach(d=>{
+    const s = d.data(); s._id = d.id; shopNames[d.id] = s.name||d.id;
+    if(canSee(s)) myShops.push(s);
+  });
+  renderShops(myShops);
+  myShopsArr = myShops;
+  renderHisaab();
+  // phones (per shop subcollection)
+  allPhones = [];
+  for(const s of myShops){
+    const ps = await db.collection('shops').doc(s._id).collection('phones').get();
+    ps.forEach(d=>{ const p=d.data(); p._id=d.id; p._shop=s._id; p._shopName=s.name; allPhones.push(p); });
+  }
+  renderPhones();
+  // alerts (master-only under the v4.4 rules — a denied read must not
+  // break the rest of the dashboard for a retailer login)
+  try{
+    const as = await db.collection('alerts').orderBy('at','desc').limit(50).get();
+    allAlerts = [];
+    as.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
+    renderAlerts();
+  }catch(e){ allAlerts = []; }
+  // realtime phone updates
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('phones')
+      .onSnapshot(snap=>{
+        snap.docChanges().forEach(ch=>{
+          const p = ch.doc.data(); p._id=ch.doc.id; p._shop=s._id; p._shopName=s.name;
+          const ix = allPhones.findIndex(x=>x._id===p._id && x._shop===s._id);
+          if(ch.type==='removed'){ if(ix>=0) allPhones.splice(ix,1); }
+          else if(ix>=0) allPhones[ix]=p; else allPhones.push(p);
+        });
+        renderPhones();
+      });
+  }
+  db.collection('alerts').orderBy('at','desc').limit(50).onSnapshot(snap=>{
+    allAlerts = [];
+    snap.forEach(d=>{ const a=d.data(); a._id=d.id; allAlerts.push(a); });
+    renderAlerts();
+  });
+  // v3.3: pending-command state — buttons show "pending until phone is
+  // online"; commands queue server-side and land on the phone's next poll.
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('commands')
+      .where('status','==','pending')
+      .onSnapshot(snap=>{
+        const set = {};
+        snap.forEach(d=>{
+          const c = d.data();
+          if(c.targetImei && c.type) set[c.targetImei+'|'+c.type]=true;
+          if(c.targetPhoneId && c.type) set[c.targetPhoneId+'|'+c.type]=true;
+        });
+        pendingByShop[s._id]=set;
+        rebuildPending();
+        renderPhones();
+      });
+  }
+  // v4.0 PRO: payments subcollection -> hisaab "Collected This Month".
+  // Docs are appended by the app (on-device payments) and by this
+  // dashboard (Paid button) — one doc per recorded payment, never both.
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('payments')
+      .onSnapshot(snap=>{
+        allPayments = allPayments.filter(x=>x._shop!==s._id);
+        snap.forEach(d=>{
+          const py = d.data(); py._id = d.id; py._shop = s._id;
+          allPayments.push(py);
+        });
+        renderHisaab();
+      });
+  }
+  // TID payment requests, owned shops only (2026-10-26 live).
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('paymentRequests')
+      .where('status','==','pending')
+      .onSnapshot(snap=>{
+        allTidRequests = allTidRequests.filter(x=>x._shop!==s._id);
+        snap.forEach(d=>{
+          const r = d.data(); r._id = d.id; r._shop = s._id;
+          r._shopName = s.name; allTidRequests.push(r);
+        });
+        renderTidRequests();
+      });
+  }
+  // v4.0 PRO: tamper events -> Security Events section (newest 20 overall).
+  for(const s of myShops){
+    db.collection('shops').doc(s._id).collection('events')
+      .orderBy('at','desc').limit(20)
+      .onSnapshot(snap=>{
+        allEvents = allEvents.filter(x=>x._shop!==s._id);
+        snap.forEach(d=>{
+          const ev = d.data(); ev._id = d.id; ev._shop = s._id;
+          ev._shopName = s.name; allEvents.push(ev);
+        });
+        renderEvents();
+      });
+  }
+}
+
+function rebuildPending(){
+  pendingCmds = {};
+  Object.keys(pendingByShop).forEach(sid=>{
+    Object.keys(pendingByShop[sid]).forEach(k=>{ pendingCmds[k]=true; });
+  });
+}
+function isPending(imei, type){ return !!pendingCmds[(imei||'')+'|'+type]; }
+function dis(imei, type){ return isPending(imei,type) ? ' disabled style="opacity:.45"' : ''; }
+function pendTag(p){
+  const tags = [];
+  Object.keys(pendingCmds).forEach(k=>{
+    const parts = k.split('|');
+    if(parts[0]===(p._id||'') || parts[0]===(p.imei||'')) tags.push(parts[1]);
+  });
+  return tags.length ? '<br><span style="color:#e8b93c">⏳ Pending: '+tags.join(', ')
+    +' — phone online hone par apply hoga</span>' : '';
+}
+
+function chip(status){
+  const m = {active:'c-active',grace:'c-grace',limited:'c-limited',
+    offline_locked:'c-offline',released:'c-released'};
+  return '<span class="chip '+(m[status]||'c-released')+'">'+(status||'?')+'</span>';
+}
+function fmtDate(ms){
+  if(!ms) return '—';
+  return new Date(Number(ms)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtSeen(ts){
+  if(!ts) return '—';
+  try{
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const mins = Math.round((Date.now()-d.getTime())/60000);
+    if(mins<1) return 'just now';
+    if(mins<60) return mins+'m ago';
+    const h = Math.round(mins/60);
+    if(h<48) return h+'h ago';
+    return Math.round(h/24)+'d ago';
+  }catch(e){ return '—'; }
+}
+
+function renderPhones(){
+  const counts = {active:0,grace:0,limited:0,offline_locked:0};
+  let html = '';
+  allPhones.forEach(p=>{
+    const st = p.status||'active';
+    if(counts[st]!==undefined) counts[st]++;
+    const dueMs = p.dueDate ? Number(p.dueDate) : 0;
+    const overdue = dueMs && Date.now()>dueMs && st!=='released';
+    html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
+      + '<td>'+esc((p.imei||'—').substring(0,15))+'</td>'
+      + '<td>'+esc(p._shopName||'—')+'</td>'
+      + '<td>'+chip(st)+(overdue?' <span class="chip c-overdue">OVERDUE</span>':'')
+      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+          return ls>0 && (Date.now()-ls) > 86400000; })())
+          ? ' <span class="chip c-dead">\uD83D\uDD34 RABTA KHATAM?</span>' : '')+'</td>'
+      + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
+      + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
+      + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
+      + ((p.paidSoFar!==undefined&&p.paidSoFar!==null&&Number(p.paidSoFar)>0)?'<br><span style="color:#9aa7c7">Paid: Rs '+Number(p.paidSoFar).toLocaleString('en-US')+'</span>':'')
+      + (p.phoneType?'<br><span style="color:#9aa7c7">Type: '+(p.phoneType==='used'?'Used':'New')+'</span>':'')
+      + (p.appVersion?'<br><span style="color:#9aa7c7">App: v'+p.appVersion+'</span>':'')
+      + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</span>':'')
+      + pendTag(p)
+      + '</td>'
+      + '<td>'+fmtSeen(p.lastSeen)
+      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+          return ls>0 && (Date.now()-ls) > 3*86400000; })())
+          ? '<br><span class="tag-off">⚠️ OFFLINE 3+ DAYS</span>' : '')
+      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+          const age = ls>0 ? (Date.now()-ls) : 0;
+          return age > 86400000 && age <= 3*86400000; })())
+          ? '<br><span class="tag-dead">\uD83D\uDD34 24h+ khamoshi — band/reset ho sakta hai</span>' : '')
+      + '</td>'
+      + '<td>'
+      + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
+      + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')"'+dis(p.imei,'UNLOCK')+'>Unlock</button>'
+      + '<button class="small ghost" onclick="setMasterPin(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_MASTER_HASH')+'>Master PIN</button>'
+      + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+p._id+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')"'+dis(p.imei,'PAYMENT_RECEIVED')+'>Paid ✓</button>'
+      + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_DUE_DATE')+'>Due Date</button>'
+      + '<button class="small ghost" onclick="setPlan(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_PLAN')+'>Plan</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
+      + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
+      + '<button class="small ghost" onclick="openAgreement(\''+p._shop+'\',\''+p._id+'\')">📄 Agreement</button>'
+      + '<button class="small ghost" onclick="openReceipt(\''+p._shop+'\',\''+p._id+'\')"'
+      + (((Number(p.lastPaymentAmount)||0)>0 || (Number(p.lastPaymentAt)||0)>0 || (Number(p.lastPaymentDate)||0)>0)
+          ? '' : ' disabled style="opacity:.45"')
+      + '>🧾 Receipt</button>'
+      + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">\uD83D\uDDD1 Delete</button>'
+      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
+      + '</td></tr>';
+  });
+  document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="6">No phones yet</td></tr>';
+  document.getElementById('statsRow').innerHTML =
+    stat(allPhones.length,'Total Phones')+stat(counts.active,'Active')
+    +stat(counts.grace,'Grace')+stat(counts.limited,'Limited')
+    +stat(counts.offline_locked,'Offline Lock');
+  renderHisaab();
+}
+function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+/* ===== v4.0 PRO: hisaab strip =====
+   Total Outstanding: sum of remaining balances (spec formula) over
+   non-released phones that carry finance data.
+   Collected This Month: summed ONLY from the payments subcollection
+   (one doc per recorded payment — appended by the app for on-device
+   payments and by this dashboard for Paid-button payments). */
+function renderHisaab(){
+  const el = document.getElementById('hisaabRow');
+  if(!el) return;
+  let outstanding = 0, overdue = 0;
+  allPhones.forEach(p=>{
+    if(p.status==='released') return;
+    const f = finOf(p);
+    if(f) outstanding += f.remaining;
+    const dueMs = p.dueDate ? Number(p.dueDate) : 0;
+    if(dueMs && Date.now() > dueMs) overdue++;
+  });
+  const now = new Date();
+  const mStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const mEnd = new Date(now.getFullYear(), now.getMonth()+1, 1).getTime();
+  let collected = 0;
+  allPayments.forEach(py=>{
+    const t = tsMs(py.date);
+    if(t >= mStart && t < mEnd) collected += Number(py.amount)||0;
+  });
+  el.innerHTML =
+    stat(rs(outstanding),'Total Outstanding')
+    + stat(rs(collected),'Collected This Month')
+    + stat(overdue,'Overdue Phones');
+}
+
+function renderAlerts(){
+  const unseen = allAlerts.filter(a=>!a.seen).length;
+  document.getElementById('alertCount').textContent = unseen?('('+unseen+')'):'';
+  let html='';
+  allAlerts.forEach(a=>{
+    html += '<div class="alert'+(a.seen?' seen':'')+'">'
+      + '<b>'+(a.type||'ALERT')+'</b> — IMEI '+(a.imei||'—')
+      + ' <span style="color:#9aa7c7">'+fmtSeen(a.at)+'</span>'
+      + (a.seen?'':' <button class="small ghost" onclick="markSeen(\''+a._id+'\')">Mark seen</button>')
+      + '</div>';
+  });
+  document.getElementById('alertList').innerHTML = html || 'No alerts';
+}
+
+/* ===== v4.0 PRO: security events (shops/{shopId}/events) ===== */
+function renderEvents(){
+  const el = document.getElementById('eventList');
+  if(!el) return;
+  const list = allEvents.slice()
+    .sort((a,b)=>tsMs(b.at)-tsMs(a.at)).slice(0,20);
+  if(!list.length){ el.innerHTML = 'No security events yet'; return; }
+  let html='';
+  list.forEach(ev=>{
+    html += '<div class="alert">'
+      + '<b>'+esc(ev.type||'EVENT')+'</b> — '+(ev._shopName||'')
+      + ' • IMEI '+esc(ev.imei||'—')
+      + (ev.extra ? ' • '+esc(ev.extra) : '')
+      + ' <span style="color:#9aa7c7">'+fmtSeen(ev.at)+'</span>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderShops(shops){
+  let html='';
+  shops.forEach(s=>{
+    const n = allPhones.filter(p=>p._shop===s._id).length;
+    html += '<div class="card" style="margin-bottom:10px"><b>'+esc(s.name||s._id)+'</b>'
+      + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span>'
+      + (s.shopDisplayName || s.shopJazzCashNumber ? '<br><span style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</span>' : '<br><span style="color:#9aa7c7;font-size:13px">No JazzCash number saved</span>')
+      + ' <button class="small" onclick="editShopPayment(\''+s._id+'\')">Payment details</button></div>';
+  });
+  document.getElementById('shopList').innerHTML = html || 'No shops';
+}
+
+function phoneIdFor(shopId, imei){
+  const p = allPhones.find(x=>x._shop===shopId && (x.imei||'')===(imei||''));
+  return p ? p._id : '';
+}
+
+async function sendCmd(shopId, imei, type, payload, confirmMsg){
+  if(!confirm(confirmMsg || (type+' command bhejna hai? (phone online hone par 15 min me apply hoga)'))) return;
+  try{
+    const doc = {
+      type: type, targetImei: imei, status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    };
+    const pid = phoneIdFor(shopId, imei);
+    if(pid) doc.targetPhoneId = pid;
+    if(payload) Object.assign(doc, payload);
+    await db.collection('shops').doc(shopId).collection('commands').add(doc);
+    pendingCmds[imei+'|'+type]=true; renderPhones();
+    alert(type+' command bhej diya ✅ — pending hai, phone online hone par apply hoga');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+function bytesToHex(bytes){
+  return Array.from(bytes, b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* v4.9: byte-identical to Android PinUtil.hashNew. Only this resulting
+   hash is sent to Firestore — the plaintext PIN never leaves the prompts. */
+async function pinHashV2(pin){
+  if(!window.crypto || !crypto.subtle || !crypto.getRandomValues){
+    throw new Error('Is browser me secure PIN hash nahi ban saka');
+  }
+  const salt = new Uint8Array(8);
+  crypto.getRandomValues(salt);
+  const first = new TextEncoder().encode('installock::' + pin);
+  let input = new Uint8Array(salt.length + first.length);
+  input.set(salt);
+  input.set(first, salt.length);
+  let hash = new Uint8Array(await crypto.subtle.digest('SHA-256', input));
+  for(let round=2; round<=10000; round++){
+    input = new Uint8Array(salt.length + hash.length);
+    input.set(salt);
+    input.set(hash, salt.length);
+    hash = new Uint8Array(await crypto.subtle.digest('SHA-256', input));
+  }
+  return 'v2:' + bytesToHex(salt) + ':' + bytesToHex(hash);
+}
+
+async function setMasterPin(shopId, imei){
+  const pin = prompt('Naya Master PIN (4-8 digits):');
+  if(pin===null) return;
+  if(!/^\d{4,8}$/.test(pin)){ alert('Master PIN sirf 4-8 digits ka hona chahiye'); return; }
+  const again = prompt('Naya Master PIN dobara likhein:');
+  if(again===null) return;
+  if(pin!==again){ alert('Dono Master PIN match nahi ho rahe'); return; }
+  try{
+    const masterHash = await pinHashV2(pin);
+    await sendCmd(shopId, imei, 'SET_MASTER_HASH', { masterHash: masterHash },
+      'Master PIN reset command bhejna hai? (phone online hone par 15 min me apply hoga)');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+/* v2.1: remove a phone record from the dashboard (ghost/sold/test
+   phones). Deletes ONLY the Firestore record — the phone itself is
+   not touched. Double confirm because there is no undo. */
+async function deleteRecord(shopId, docId){
+  if(!confirm('Is phone ka record dashboard se HAMESHA ke liye delete kar dein?\n\nYe sirf dashboard ka record hai — phone par koi asar nahi hoga.\n\nNOTE: Ye sirf band/reset ho chuke phones ke liye hai — ZINDA phone ka record agli sync par khud wapas ajayega.')) return;
+  if(!confirm('Pakka delete karein? Ye wapas nahi ayega!')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('phones').doc(docId).delete();
+    alert('Record delete ho gaya \u2705');
+  }catch(e){ alert('Delete nahi ho saka: '+e.message); }
+}
+
+async function releasePhone(shopId, imei){
+  if(!confirm('⚠️ RELEASE: is phone ki saari Installock limits KHATAM ho jayengi.\nSirf tab karein jab qist mukammal wasool ho chuki ho.\n\nPakka release karna hai?')) return;
+  if(!confirm('Dobara confirm karein — RELEASE ke baad phone aam phone ban jayega.')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'RELEASE', targetImei: imei, targetPhoneId: phoneIdFor(shopId, imei), status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    pendingCmds[imei+'|RELEASE']=true; renderPhones();
+    alert('RELEASE command bhej diya ✅ — phone online hone par apply hoga');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function setPlan(shopId, imei){
+  const m = prompt('Plan — total months (1-60):');
+  if(m===null) return;
+  const months = parseInt(m, 10);
+  if(isNaN(months) || months<1 || months>60){ alert('Ghalat months'); return; }
+  const l = prompt('Installments left (khaali chhorein = '+months+'):', '');
+  if(l===null) return;
+  const left = parseInt(l, 10);
+  const payload = { months: months };
+  if(!isNaN(left) && left>0) payload.installmentsLeft = Math.min(left, months);
+  sendCmd(shopId, imei, 'SET_PLAN', payload,
+    'Plan set karein? '+months+' months'
+    +(payload.installmentsLeft ? ', '+payload.installmentsLeft+' qist baqi' : '')
+    +' (phone online hone par apply hoga)');
+}
+
+async function updateAll(){
+  if(!confirm('Sab active phones ko UPDATE_NOW command bhejna hai? Jo phone online hoga, wo khud nayi version par update ho jayega.')) return;
+  let n = 0;
+  for(const p of allPhones){
+    if(!p.imei || p.status==='released') continue;
+    try{
+      await db.collection('shops').doc(p._shop).collection('commands').add({
+        type: 'UPDATE_NOW', targetImei: p.imei, targetPhoneId: p._id, status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: myUid
+      });
+      pendingCmds[p.imei+'|UPDATE_NOW']=true; n++;
+    }catch(e){}
+  }
+  renderPhones();
+  alert(n+' phones ko update command bhej diya ✅');
+}
+
+// Payment apps during lock (2026-10-26 live): per-shop payment details.
+// Display-only fields; never a PIN/password/OTP.
+f
+/* ===== TID payment requests (2026-10-26 live) =====
+   Submit (customer app) creates status='pending' ONLY.
+   Verify reuses the EXISTING payment flow (payments doc +
+   PAYMENT_RECEIVED command). Reject records nothing and unlocks
+   nothing. Both actions write an audit doc. No function here
+   patches a phone doc, so no finance field can change from TID
+   handling alone. FRP note: nothing here unlocks Google FRP. */
+function renderTidRequests(){
+  const el = document.getElementById('tidList');
+  const cnt = document.getElementById('tidCount');
+  if(!el) return;
+  const mine = new Set(myShopsArr.map(s=>s._id));
+  const rows = allTidRequests.filter(r=>mine.has(r._shop));
+  if(cnt) cnt.textContent = rows.length ? '('+rows.length+')' : '';
+  if(!rows.length){ el.innerHTML = '<p style="color:#9aa7c7">Koi pending TID request nahi hai.</p>'; return; }
+  // DRAFT 2026-10-26: show each owned shop's own pay-to line above the TID
+  // table, so the shopkeeper confirms the customer was told the right shop.
+  let payLines = '';
+  myShopsArr.forEach(s=>{
+    if(s.shopJazzCashNumber){ payLines += '<div style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</div>'; }
+  });
+  let html = payLines + '<div style="overflow-x:auto"><table><thead><tr><th>Shop / Phone</th><th>TID</th><th>Amount / Method</th><th>Time</th><th>Actions</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const phone = findPhone(r._shop, r.phoneDocId);
+    html += '<tr><td>'+esc(r._shopName||r._shop)+'<br><span style="color:#9aa7c7">'+esc(r.phoneDocId||'')+(phone&&phone.imei ? ' / '+esc(String(phone.imei).substring(0,15)) : '')+'</span></td>'
+      + '<td>'+esc(r.tid||'')+'</td>'
+      + '<td>'+rs(r.amount)+' / '+esc(r.method||'')+'</td>'
+      + '<td>'+fmtSeen(r.createdAt)+'</td>'
+      + '<td><button class="small" onclick="verifyTid(\''+r._shop+'\',\''+r._id+'\',\''+(r.phoneDocId||'')+'\',\''+(r.imei||'')+'\','+Number(r.amount||0)+',\''+esc(r.tid||'')+'\',\''+esc(r.method||'')+'\')">Verify ✓</button> '
+      + '<button class="small danger" onclick="rejectTid(\''+r._shop+'\',\''+r._id+'\')">Reject</button></td></tr>';
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+async function verifyTid(shopId, reqId, phoneId, imei, amount, tid, method){
+  if(!confirm('Verify karein?\\n\\nPehle apni JazzCash/Easypaisa history me TID, raqam aur waqt MATCH karein.\\nTID: '+tid+'\\nAmount: Rs '+amount+'\\nMethod: '+method+'\\n\\nMatch hone par hi Verify dabayein — Verify ke baad maujooda PAYMENT_RECEIVED flow chalega (due date 1 month aage, qist kam).')) return;
+  try{
+    const ref = db.collection('shops').doc(shopId).collection('paymentRequests').doc(reqId);
+    const snap = await ref.get();
+    if(!snap.exists || snap.data().status!=='pending'){ alert('Ye request ab pending nahi hai — list refresh karein.'); renderTidRequests(); return; }
+    await db.collection('shops').doc(shopId).collection('payments').add({
+      phoneId: phoneId||'', imei: imei, amount: amount, tid: tid, method: method,
+      date: firebase.firestore.FieldValue.serverTimestamp(),
+      source: 'tid-verified', createdBy: myUid
+    });
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'PAYMENT_RECEIVED', targetImei: imei, targetPhoneId: phoneId||'', status: 'pending',
+      amount: amount, tid: tid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    await ref.update({ status: 'verified', verifiedBy: myUid,
+      verifiedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    try{
+      await db.collection('shops').doc(shopId).collection('audit').add({
+        action: 'TID_VERIFIED', actorUid: myUid, phoneId: phoneId||'',
+        tid: tid, amount: amount,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e2){ /* payment + command already sent; audit is best-effort here */ }
+    alert('TID Verified ✅ — payment command bhej diya (phone online hone par apply hoga)');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function rejectTid(shopId, reqId){
+  const reason = prompt('Reject ki wajah likhein (zaroori):');
+  if(reason===null) return;
+  if(!reason.trim()){ alert('Reject ki wajah likhna zaroori hai'); return; }
+  try{
+    const ref = db.collection('shops').doc(shopId).collection('paymentRequests').doc(reqId);
+    const snap = await ref.get();
+    if(!snap.exists || snap.data().status!=='pending'){ alert('Ye request ab pending nahi hai — list refresh karein.'); renderTidRequests(); return; }
+    const d = snap.data();
+    await ref.update({ status: 'rejected', rejectReason: reason.trim(), rejectedBy: myUid,
+      rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    try{
+      await db.collection('shops').doc(shopId).collection('audit').add({
+        action: 'TID_REJECTED', actorUid: myUid, phoneId: d.phoneDocId||'',
+        tid: d.tid||'', amount: Number(d.amount||0), reason: reason.trim(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e2){}
+    alert('TID request Reject kar di gayi — koi payment record nahi bana, phone unlock nahi hua.');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+
+async function paymentReceived(shopId, phoneId, imei, monthly, left){
+  const amtStr = prompt('Payment received — amount (PKR):', monthly>0 ? String(monthly) : '');
+  if(amtStr===null) return;
+  const amt = parseInt(amtStr, 10);
+  if(isNaN(amt) || amt<=0){ alert('Ghalat amount — amount 0 nahi ho sakta (phone 0 ko POORI qist samajhta hai)'); return; }
+  const last = (left===1);
+  if(!confirm('Payment mark karein? Due date 1 month aage ho jayegi, installments left kam ho jayega.'
+      + (last ? '\n\n⚠️ Ye AKHRI qist hai — agar kul baqi raqam bhi khatam ho jaye to phone RELEASE ho jayega (sab limits khatam).' : ''))) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'PAYMENT_RECEIVED', targetImei: imei, targetPhoneId: phoneId||'', status: 'pending',
+      amount: amt,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    // v4.0 PRO: hisaab entry — exactly ONE payments doc per recorded
+    // payment. Dashboard payments are written here; on-device payments are
+    // appended by the app itself (source 'app'), so nothing double-counts.
+    try{
+      await db.collection('shops').doc(shopId).collection('payments').add({
+        phoneId: phoneId||'', imei: imei, amount: amt,
+        date: firebase.firestore.FieldValue.serverTimestamp(),
+        source: 'dashboard', createdBy: myUid
+      });
+    }catch(e2){ /* command is already sent; hisaab write is best-effort */ }
+    alert('Payment command bhej diya ✅ (phone online hone par 15 min me apply hoga)');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function setDue(shopId, imei){
+  const d = prompt('Nayi due date (YYYY-MM-DD):');
+  if(!d) return;
+  const ms = new Date(d+'T23:59:59').getTime();
+  if(isNaN(ms)){ alert('Ghalat date'); return; }
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'SET_DUE_DATE', targetImei: imei, targetPhoneId: phoneIdFor(shopId, imei), status: 'pending',
+      newDueDate: ms,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    alert('Due date command bhej diya ✅');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function markSeen(id){
+  try{ await db.collection('alerts').doc(id).update({seen:true}); }
+  catch(e){}
+}
+
+/* ===== v4.0 PRO: Customer Agreement + Payment Receipt ===== */
+const URDU_LINE = 'یہ موبائل قسطوں پر ہے — تاریخ گزرنے پر موبائل کے فیچرز محدود کر دیے جائیں گے';
+const AGREEMENT_TERMS = [
+  'The customer has bought the mobile phone listed above on monthly installments from the shop named above. The plan, amounts and due dates written in this agreement are final.',
+  'Every installment must be paid on or before its due date.',
+  'If the due date passes without payment, the phone\u2019s features will be limited (calls, SMS and apps may stop; only payment apps and emergency calls will work) until the payment is received and the shop unlocks the phone.',
+  'The customer will not factory-reset the phone, and will not try to remove, bypass or damage the installment system. If the phone is reset, it may become unusable until the shop releases it (FRP protection).',
+  'The customer will inform the shop immediately if the phone is lost, stolen or damaged.',
+  'When all installments are fully paid, the shop will completely release the phone (all limits removed) and this agreement will end.',
+  'If payments stop, the shop may take legal action and/or report the phone\u2019s IMEI to the authorities.'
+];
+
+function kvRows(rows){
+  let h = '<table class="kv">';
+  rows.forEach(r=>{ h += '<tr><td class="k">'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>'; });
+  return h + '</table>';
+}
+function docFoot(){
+  return '<div class="docfoot">Powered by Installock — © 2026 Jilan Apps Official. All rights reserved.</div>';
+}
+function agreementCopy(p, copyLabel){
+  const f = finOf(p);
+  const shopName = p._shopName || shopOf(p._shop).name || '—';
+  const rows = [
+    ['Date', fmtDate(Date.now())],
+    ['Customer Name', p.customerName || '—'],
+    ['Customer CNIC', p.customerCnic || '—'],
+    ['Mobile Phone', p.model || '—'],
+    ['IMEI', p.imei || '—'],
+    ['Mobile Price', f ? rs(f.price) : '—'],
+    ['Installment Fee', f ? (f.pct + '%  (' + rs(f.withFee - f.price) + ')') : '—'],
+    ['Price + Fee', f ? rs(f.withFee) : '—'],
+    ['Advance Paid', f ? rs(f.adv) : '—'],
+    ['Total Payable (on installments)', f ? rs(f.financed) : '—'],
+    ['Monthly Installment', f && f.monthly ? rs(f.monthly) : '—'],
+    ['Plan', f && f.months ? (f.months + ' months') : '—'],
+    ['Installments Left', f && f.left !== null ? String(f.left) : '—'],
+    ['Next Due Date', p.dueDate ? fmtDate(Number(p.dueDate)) : '—'],
+    ['Shop Phone', shopPhoneOf(p) || '—']
+  ];
+  return '<div class="copytag">'+esc(copyLabel)+'</div>'
+    + '<div class="shopname">'+esc(shopName)+'</div>'
+    + '<div class="shopsub">Mobile Installment Agreement</div>'
+    + '<div class="urdu">'+URDU_LINE+'</div>'
+    + kvRows(rows)
+    + '<h3>Terms &amp; Conditions</h3><ol class="terms">'
+    + AGREEMENT_TERMS.map(t=>'<li>'+esc(t)+'</li>').join('')
+    + '</ol>'
+    + '<div class="signs"><div>Customer Signature</div><div>Shop Signature &amp; Stamp</div></div>'
+    + docFoot();
+}
+function receiptNo(p){
+  const code = String(p._shop||'').replace(/^shop_/,'').substring(0,6).toUpperCase() || 'SHOP';
+  return code + '-' + (Number(p.paymentsCount)||0);
+}
+function receiptHtml(p){
+  const f = finOf(p);
+  const shopName = p._shopName || shopOf(p._shop).name || '—';
+  const amt = Number(p.lastPaymentAmount)||0;
+  const pdate = Number(p.lastPaymentDate)||Number(p.lastPaymentAt)||0;
+  const rows = [
+    ['Receipt No', receiptNo(p)],
+    ['Date', pdate ? fmtDate(pdate) : '—'],
+    ['Customer Name', p.customerName || '—'],
+    ['Mobile Phone', (p.model || '—') + (p.imei ? '  (IMEI ' + p.imei + ')' : '')],
+    ['Installment Received', rs(amt)],
+    ['Paid So Far', f ? rs(f.paid) : '—'],
+    ['Remaining Balance', f ? rs(f.remaining) : '—'],
+    ['Next Due Date', p.dueDate ? fmtDate(Number(p.dueDate)) : '—'],
+    ['Shop Phone', shopPhoneOf(p) || '—']
+  ];
+  return '<div class="copytag">Payment Receipt</div>'
+    + '<div class="shopname">'+esc(shopName)+'</div>'
+    + '<div class="shopsub">Installment Payment Receipt</div>'
+    + '<div class="rcpt-head"><span>No: '+esc(receiptNo(p))+'</span>'
+    + '<span>'+(pdate ? fmtDate(pdate) : '')+'</span></div>'
+    + kvRows(rows)
+    + '<p style="text-align:center;margin-top:12px">Installment received: '
+    + '<span class="big-amt">'+rs(amt)+'</span></p>'
+    + '<div class="signs"><div>Received By (Shop)</div><div>Customer Signature</div></div>'
+    + docFoot();
+}
+function agreementWaText(p){
+  const f = finOf(p);
+  return 'Installment Agreement — ' + (p._shopName || '')
+    + '\nCustomer: ' + (p.customerName || '—')
+    + '\nMobile: ' + (p.model || '—') + ' (IMEI ' + (p.imei || '—') + ')'
+    + (f ? '\nPrice: ' + rs(f.price) + ' • Advance: ' + rs(f.adv)
+        + ' • Monthly: ' + rs(f.monthly) + ' x ' + f.months : '')
+    + '\nNext due date: ' + (p.dueDate ? fmtDate(Number(p.dueDate)) : '—')
+    + '\nThe signed paper copy is the final record.';
+}
+function receiptWaText(p){
+  const f = finOf(p);
+  return 'Payment Receipt — ' + (p._shopName || '')
+    + '\nReceipt No: ' + receiptNo(p)
+    + '\nCustomer: ' + (p.customerName || '—')
+    + '\nInstallment received: ' + rs(Number(p.lastPaymentAmount)||0)
+    + (f ? '\nPaid so far: ' + rs(f.paid) + '\nRemaining balance: ' + rs(f.remaining) : '')
+    + '\nNext due date: ' + (p.dueDate ? fmtDate(Number(p.dueDate)) : '—')
+    + '\nThank you!';
+}
+
+function openAgreement(shopId, phoneId){
+  docCtx = { shopId: shopId, phoneId: phoneId, kind: 'agreement' };
+  showDoc();
+}
+function openReceipt(shopId, phoneId){
+  docCtx = { shopId: shopId, phoneId: phoneId, kind: 'receipt' };
+  showDoc();
+}
+function showDoc(){
+  if(!docCtx) return;
+  const p = findPhone(docCtx.shopId, docCtx.phoneId);
+  if(!p){ alert('Phone record nahi mila'); return; }
+  if(docCtx.kind === 'agreement'){
+    document.getElementById('printArea').innerHTML =
+      agreementCopy(p, 'Customer Copy') + '<hr class="cut">'
+      + agreementCopy(p, 'Shop Copy');
+    docCtx.wa = agreementWaText(p);
+  } else {
+    document.getElementById('printArea').innerHTML = receiptHtml(p);
+    docCtx.wa = receiptWaText(p);
+  }
+  renderDocToolbar(p);
+  document.getElementById('docOverlay').classList.add('open');
+}
+function docFieldInput(field, placeholder, label){
+  return '<div style="margin-top:8px"><input id="df_'+field+'" placeholder="'
+    + esc(placeholder) + '"><button class="small" onclick="saveDocField(\''
+    + field + '\')">'+esc(label)+'</button></div>';
+}
+function renderDocToolbar(p){
+  let h = '<button onclick="window.print()">🖨️ PRINT</button>'
+    + '<button onclick="window.print()">💾 SAVE PDF</button>'
+    + '<button class="ghost" onclick="shareDocWA()">🟢 WhatsApp</button>'
+    + '<button class="ghost" onclick="closeDoc()">✖ Close</button>'
+    + '<div class="hint">SAVE PDF: print window me printer ki jagah '
+    + '<b>Save as PDF</b> chunein — file voucher / receipt ki tarah save ho jayegi.</div>';
+  if(docCtx.kind === 'agreement'){
+    if(!p.customerName)
+      h += docFieldInput('customerName', 'Customer Name',
+        'Customer name save karein');
+    if(!p.customerCnic)
+      h += docFieldInput('customerCnic', 'Customer CNIC (e.g. 35202-1234567-1)',
+        'CNIC save karein');
+    if(!shopPhoneOf(p))
+      h += docFieldInput('shopContact', 'Shop Phone Number',
+        'Shop number save karein');
+    if(h.indexOf('df_') >= 0)
+      h += '<div class="hint">Upar wali details save karne se agreement '
+        + 'mukammal ho jayega — saved values is phone / dukaan ke record me reh jayengi.</div>';
+  }
+  document.getElementById('docToolbar').innerHTML = h;
+}
+async function saveDocField(field){
+  const inp = document.getElementById('df_' + field);
+  const v = inp ? inp.value.trim() : '';
+  if(!v){ alert('Pehle value likhein'); return; }
+  const p = findPhone(docCtx.shopId, docCtx.phoneId);
+  try{
+    if(field === 'shopContact'){
+      await db.collection('shops').doc(docCtx.shopId).update({ contact: v });
+      shopOf(docCtx.shopId).contact = v;
+    } else {
+      const upd = {}; upd[field] = v;
+      await db.collection('shops').doc(docCtx.shopId)
+        .collection('phones').doc(docCtx.phoneId).update(upd);
+      if(p) p[field] = v;
+    }
+    showDoc();
+  }catch(e){ alert('Save error: ' + e.message); }
+}
+function shareDocWA(){
+  const p = findPhone(docCtx.shopId, docCtx.phoneId);
+  if(!p) return;
+  window.open(waLink(p, docCtx.wa || ''), '_blank');
+}
+function closeDoc(){
+  document.getElementById('docOverlay').classList.remove('open');
+}
+
+function exportCSV(){
+  let csv = 'IMEI,Shop,Status,Due Date,Last Seen\n';
+  allPhones.forEach(p=>{
+    csv += '"'+(p.imei||'')+'","'+(p._shopName||'')+'","'+(p.status||'')
+      +'","'+fmtDate(p.dueDate)+'","'+fmtSeen(p.lastSeen)+'"\n';
+  });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'installock-phones.csv';
+  a.click();
+}
+
+// auto-init if config saved
+(function(){
+  const k = document.getElementById('cfgKey'), p = document.getElementById('cfgPid');
+  if(localStorage.getItem('il2_key')) k.value = localStorage.getItem('il2_key');
+  if(localStorage.getItem('il2_pid')) p.value = localStorage.getItem('il2_pid');
+  initFirebase();
+  if(auth) auth.onAuthStateChanged(u=>{
+    if(u){
+      myUid = u.uid;
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('mainUI').classList.remove('hidden');
+      document.getElementById('userLabel').textContent = u.email;
+      // MASTER GATE: only admin may see shop data on this page
+      db.collection('masters').doc(myUid).get().then(mdoc=>{
+        myRole = mdoc.exists ? 'admin' : 'retailer';
+        if(myRole!=='admin'){
+          document.getElementById('userLabel').textContent = u.email+' (retailer — not master)';
+          document.getElementById('masterOnlyMsg').classList.remove('hidden');
+          return;
+        }
+        document.getElementById('userLabel').textContent = u.email+' (admin)';
+        startListeners();
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>
