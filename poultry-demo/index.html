@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poultry Farm Manager — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f2f5f0;color:#222;padding-bottom:40px}
+header{background:#1b6b3a;color:#fff;padding:18px 16px;text-align:center}
+header h1{font-size:22px}
+header p{font-size:13px;opacity:.9;margin-top:4px}
+nav{display:flex;gap:6px;overflow-x:auto;background:#fff;padding:8px;border-bottom:2px solid #1b6b3a;position:sticky;top:0;z-index:10}
+nav button{border:1px solid #1b6b3a;background:#fff;color:#1b6b3a;padding:8px 14px;border-radius:20px;cursor:pointer;white-space:nowrap;font-size:14px}
+nav button.active{background:#1b6b3a;color:#fff}
+section{display:none;padding:14px;max-width:900px;margin:0 auto}
+section.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);text-align:center}
+.card b{font-size:22px;display:block;color:#1b6b3a}
+.card span{font-size:12px;color:#666}
+.card.credit b{color:#0a7a42}
+h2{font-size:18px;margin:12px 0 8px;color:#1b6b3a}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:14px}
+th,td{padding:9px 8px;text-align:left;border-bottom:1px solid #eee}
+th{background:#e8f3ec;color:#1b6b3a}
+.wrap{overflow-x:auto}
+form{background:#fff;padding:14px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:14px}
+form label{font-size:13px;color:#555;display:block;margin:8px 0 3px}
+form input,form select{width:100%;padding:9px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+form button{background:#1b6b3a;color:#fff;border:0;padding:11px;border-radius:6px;width:100%;font-size:16px;margin-top:12px;cursor:pointer}
+.note{background:#fff8e1;border:1px solid #f0d98c;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.greenbox{background:#e6f7ec;border:1px solid #9ed6ae;padding:12px;border-radius:10px;margin-bottom:12px}
+.greenbox b{color:#0a7a42}
+footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
+.reset{background:none;border:0;color:#999;text-decoration:underline;font-size:12px;cursor:pointer}
+@media(min-width:700px){.cards{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<h1>🐔 Poultry Farm Manager</h1>
+<p>Green Valley Poultry Farm — Flocks, Eggs, Feed, Sales &amp; Green Meter Units</p>
+</header>
+<nav>
+<button class="active" onclick="tab('dash',this)">Dashboard</button>
+<button onclick="tab('flocks',this)">Flocks</button>
+<button onclick="tab('daily',this)">Daily Records</button>
+<button onclick="tab('money',this)">Sales &amp; Expenses</button>
+<button onclick="tab('meter',this)">⚡ Green Meter</button>
+</nav>
+
+<section id="dash" class="active">
+<div class="cards">
+<div class="card"><b id="dBirds">–</b><span>Total Birds</span></div>
+<div class="card"><b id="dEggs">–</b><span>Today's Eggs</span></div>
+<div class="card"><b id="dMort">–</b><span>Today's Mortality</span></div>
+<div class="card"><b id="dNet">–</b><span>Green Meter Net Units</span></div>
+</div>
+<div class="note">👋 Welcome! This is a <b>demo</b> with sample data. Add your own records — everything saves in this browser only.</div>
+<h2>Flocks Summary</h2>
+<div class="wrap"><table><thead><tr><th>Batch</th><th>Type</th><th>Breed</th><th>Birds</th><th>Shed</th></tr></thead><tbody id="dashFlocks"></tbody></table></div>
+<h2>Latest Green Meter Reading</h2>
+<div class="greenbox" id="dashMeter"></div>
+</section>
+
+<section id="flocks">
+<h2>Add New Flock / Batch</h2>
+<form onsubmit="addFlock(event)">
+<label>Batch ID</label><input id="fId" required placeholder="e.g. L-02">
+<label>Type</label><select id="fType"><option>Layer</option><option>Broiler</option><option>Breeder</option></select>
+<label>Breed</label><input id="fBreed" required placeholder="e.g. Hy-Line Brown">
+<label>Number of Birds</label><input id="fBirds" type="number" min="1" required>
+<label>Shed</label><input id="fShed" required placeholder="e.g. Shed 3">
+<label>Start Date</label><input id="fStart" type="date" required>
+<button type="submit">Add Flock</button>
+</form>
+<h2>All Flocks</h2>
+<div class="wrap"><table><thead><tr><th>Batch</th><th>Type</th><th>Breed</th><th>Birds</th><th>Shed</th><th>Start</th></tr></thead><tbody id="flockRows"></tbody></table></div>
+</section>
+
+<section id="daily">
+<h2>Add Daily Record</h2>
+<form onsubmit="addDaily(event)">
+<label>Date</label><input id="dDate" type="date" required>
+<label>Batch</label><select id="dFlock"></select>
+<label>Eggs Collected</label><input id="dEggsIn" type="number" min="0" value="0">
+<label>Mortality (birds died)</label><input id="dMortIn" type="number" min="0" value="0">
+<label>Feed Used (kg)</label><input id="dFeedIn" type="number" min="0" value="0">
+<button type="submit">Save Daily Record</button>
+</form>
+<h2>Daily Records</h2>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Batch</th><th>Eggs</th><th>Mortality</th><th>Feed (kg)</th></tr></thead><tbody id="dailyRows"></tbody></table></div>
+</section>
+
+<section id="money">
+<h2>Sales &amp; Expenses</h2>
+<div class="cards">
+<div class="card"><b id="mSales">–</b><span>Total Sales (Rs)</span></div>
+<div class="card"><b id="mExp">–</b><span>Total Expenses (Rs)</span></div>
+</div>
+<form onsubmit="addMoney(event)">
+<label>Type</label><select id="mType"><option value="sale">Sale</option><option value="expense">Expense</option></select>
+<label>Detail</label><input id="mDetail" required placeholder="e.g. Eggs sale — 140 trays">
+<label>Amount (Rs)</label><input id="mAmt" type="number" min="1" required>
+<button type="submit">Add Entry</button>
+</form>
+<div class="wrap"><table><thead><tr><th>Type</th><th>Detail</th><th>Amount (Rs)</th></tr></thead><tbody id="moneyRows"></tbody></table></div>
+</section>
+
+<section id="meter">
+<h2>⚡ Green Meter — Unit Adding System</h2>
+<div class="note">Solar net-metering meter: <b>Import</b> = units taken from the grid, <b>Export</b> = solar units sent to the grid. Net = Export − Import. Positive net = credit units in your favour.</div>
+<div class="cards">
+<div class="card"><b id="gImp">–</b><span>Total Import Units</span></div>
+<div class="card"><b id="gExp">–</b><span>Total Export Units</span></div>
+<div class="card credit"><b id="gNet">–</b><span>Net Balance (Units)</span></div>
+<div class="card"><b id="gCount">–</b><span>Readings Added</span></div>
+</div>
+<form onsubmit="addMeter(event)">
+<label>Reading Date</label><input id="gDate" type="date" required>
+<label>Import Units (kWh from grid)</label><input id="gImpIn" type="number" min="0" required>
+<label>Export Units (kWh to grid)</label><input id="gExpIn" type="number" min="0" required>
+<label>Note (optional)</label><input id="gNote" placeholder="e.g. October closing">
+<button type="submit">Add Units</button>
+</form>
+<h2>Meter Reading History</h2>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Import</th><th>Export</th><th>Net</th><th>Note</th></tr></thead><tbody id="meterRows"></tbody></table></div>
+</section>
+
+<footer>Demo version — sample data for presentation. <button class="reset" onclick="resetDemo()">Reset demo data</button></footer>
+
+<script>
+const KEY='poultryDemoV1';
+const SAMPLE={
+flocks:[
+{id:'L-01',type:'Layer',breed:'Hy-Line Brown',birds:5000,shed:'Shed 1',start:'2026-08-15'},
+{id:'B-01',type:'Broiler',breed:'Ross 308',birds:3000,shed:'Shed 2',start:'2026-10-01'}],
+daily:[
+{date:'2026-10-27',flock:'L-01',eggs:4280,mortality:6,feed:310},
+{date:'2026-10-28',flock:'L-01',eggs:4315,mortality:4,feed:312},
+{date:'2026-10-29',flock:'L-01',eggs:4290,mortality:5,feed:311}],
+money:[
+{type:'sale',detail:'Eggs sale — 140 trays',amt:44800},
+{type:'sale',detail:'Broiler sale — 200 birds',amt:84000},
+{type:'expense',detail:'Layer feed — 50 bags',amt:210000},
+{type:'expense',detail:'Medicine & vaccines',amt:15000}],
+meter:[
+{date:'2026-09-30',imp:2450,exp:3180,note:'September closing'},
+{date:'2026-10-15',imp:1180,exp:1650,note:'Mid October'},
+{date:'2026-10-29',imp:980,exp:1420,note:'Today'}]
+};
+let D;
+try{D=JSON.parse(localStorage.getItem(KEY))||SAMPLE}catch(e){D=SAMPLE}
+function save(){localStorage.setItem(KEY,JSON.stringify(D))}
+function num(n){return n.toLocaleString('en-PK')}
+function tab(id,btn){
+document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+}
+function render(){
+let birds=D.flocks.reduce((a,f)=>a+f.birds,0);
+let today=D.daily.filter(r=>r.date==='2026-10-29');
+let tEggs=today.reduce((a,r)=>a+r.eggs,0), tMort=today.reduce((a,r)=>a+r.mortality,0);
+let imp=D.meter.reduce((a,r)=>a+r.imp,0), exp=D.meter.reduce((a,r)=>a+r.exp,0), net=exp-imp;
+document.getElementById('dBirds').textContent=num(birds);
+document.getElementById('dEggs').textContent=num(tEggs);
+document.getElementById('dMort').textContent=num(tMort);
+document.getElementById('dNet').textContent=(net>=0?'+':'')+num(net);
+document.getElementById('dashFlocks').innerHTML=D.flocks.map(f=>`<tr><td>${f.id}</td><td>${f.type}</td><td>${f.breed}</td><td>${num(f.birds)}</td><td>${f.shed}</td></tr>`).join('');
+let last=D.meter[D.meter.length-1];
+document.getElementById('dashMeter').innerHTML=last?`Last reading <b>${last.date}</b>: Import ${num(last.imp)} units, Export ${num(last.exp)} units, Net <b>${(last.exp-last.imp>=0?'+':'')+num(last.exp-last.imp)}</b> units. Total net balance: <b>${(net>=0?'+':'')+num(net)} units ${net>=0?'(credit)':'(payable)'}</b>.`:'No readings yet.';
+document.getElementById('flockRows').innerHTML=D.flocks.map(f=>`<tr><td>${f.id}</td><td>${f.type}</td><td>${f.breed}</td><td>${num(f.birds)}</td><td>${f.shed}</td><td>${f.start}</td></tr>`).join('');
+document.getElementById('dFlock').innerHTML=D.flocks.map(f=>`<option>${f.id}</option>`).join('');
+document.getElementById('dailyRows').innerHTML=[...D.daily].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.flock}</td><td>${num(r.eggs)}</td><td>${r.mortality}</td><td>${r.feed}</td></tr>`).join('');
+let sales=D.money.filter(m=>m.type==='sale').reduce((a,m)=>a+m.amt,0);
+let exps=D.money.filter(m=>m.type==='expense').reduce((a,m)=>a+m.amt,0);
+document.getElementById('mSales').textContent=num(sales);
+document.getElementById('mExp').textContent=num(exps);
+document.getElementById('moneyRows').innerHTML=D.money.map(m=>`<tr><td>${m.type==='sale'?'🟢 Sale':'🔴 Expense'}</td><td>${m.detail}</td><td>${num(m.amt)}</td></tr>`).join('');
+document.getElementById('gImp').textContent=num(imp);
+document.getElementById('gExp').textContent=num(exp);
+document.getElementById('gNet').textContent=(net>=0?'+':'')+num(net);
+document.getElementById('gCount').textContent=D.meter.length;
+document.getElementById('meterRows').innerHTML=[...D.meter].reverse().map(r=>`<tr><td>${r.date}</td><td>${num(r.imp)}</td><td>${num(r.exp)}</td><td>${(r.exp-r.imp>=0?'+':'')+num(r.exp-r.imp)}</td><td>${r.note||''}</td></tr>`).join('');
+}
+function addFlock(e){e.preventDefault();
+D.flocks.push({id:document.getElementById('fId').value.trim(),type:document.getElementById('fType').value,breed:document.getElementById('fBreed').value.trim(),birds:+document.getElementById('fBirds').value,shed:document.getElementById('fShed').value.trim(),start:document.getElementById('fStart').value});
+save();render();e.target.reset();alert('Flock added!');}
+function addDaily(e){e.preventDefault();
+D.daily.push({date:document.getElementById('dDate').value,flock:document.getElementById('dFlock').value,eggs:+document.getElementById('dEggsIn').value,mortality:+document.getElementById('dMortIn').value,feed:+document.getElementById('dFeedIn').value});
+save();render();e.target.reset();alert('Daily record saved!');}
+function addMoney(e){e.preventDefault();
+D.money.push({type:document.getElementById('mType').value,detail:document.getElementById('mDetail').value.trim(),amt:+document.getElementById('mAmt').value});
+save();render();e.target.reset();alert('Entry added!');}
+function addMeter(e){e.preventDefault();
+D.meter.push({date:document.getElementById('gDate').value,imp:+document.getElementById('gImpIn').value,exp:+document.getElementById('gExpIn').value,note:document.getElementById('gNote').value.trim()});
+save();render();e.target.reset();alert('Units added! Net balance updated.');}
+function resetDemo(){if(confirm('Reset all demo data to samples?')){localStorage.removeItem(KEY);D=SAMPLE;render();}}
+document.getElementById('dDate').value='2026-10-29';
+document.getElementById('gDate').value='2026-10-29';
+render();
+</script>
+</body>
+</html>
