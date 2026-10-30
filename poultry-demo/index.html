@@ -13,6 +13,7 @@ header p{font-size:13px;opacity:.9;margin-top:4px}
 nav{display:flex;gap:6px;overflow-x:auto;background:#fff;padding:8px;border-bottom:2px solid #1b6b3a;position:sticky;top:0;z-index:10}
 nav button{border:1px solid #1b6b3a;background:#fff;color:#1b6b3a;padding:8px 14px;border-radius:20px;cursor:pointer;white-space:nowrap;font-size:14px}
 nav button.active{background:#1b6b3a;color:#fff}
+.badge{background:#d32f2f;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px}
 section{display:none;padding:14px;max-width:900px;margin:0 auto}
 section.active{display:block}
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
@@ -20,6 +21,7 @@ section.active{display:block}
 .card b{font-size:22px;display:block;color:#1b6b3a}
 .card span{font-size:12px;color:#666}
 .card.credit b{color:#0a7a42}
+.card.warn b{color:#d32f2f}
 h2{font-size:18px;margin:12px 0 8px;color:#1b6b3a}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:14px}
 th,td{padding:9px 8px;text-align:left;border-bottom:1px solid #eee}
@@ -32,6 +34,9 @@ form button{background:#1b6b3a;color:#fff;border:0;padding:11px;border-radius:6p
 .note{background:#fff8e1;border:1px solid #f0d98c;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px}
 .greenbox{background:#e6f7ec;border:1px solid #9ed6ae;padding:12px;border-radius:10px;margin-bottom:12px}
 .greenbox b{color:#0a7a42}
+.alert-red{background:#fdecea;border:1px solid #f5b5b0;padding:10px;border-radius:8px;font-size:14px;margin-bottom:8px}
+.alert-amber{background:#fff8e1;border:1px solid #f0d98c;padding:10px;border-radius:8px;font-size:14px;margin-bottom:8px}
+.alert-green{background:#e6f7ec;border:1px solid #9ed6ae;padding:10px;border-radius:8px;font-size:14px;margin-bottom:8px}
 footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
 .reset{background:none;border:0;color:#999;text-decoration:underline;font-size:12px;cursor:pointer}
 @media(min-width:700px){.cards{grid-template-columns:repeat(4,1fr)}}
@@ -40,14 +45,18 @@ footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
 <body>
 <header>
 <h1>🐔 Poultry Farm Manager</h1>
-<p>Green Valley Poultry Farm — Flocks, Eggs, Feed, Sales &amp; Green Meter Units</p>
+<p>Green Valley Poultry Farm — Flocks, Eggs, Feed, Medicine, Banks, Stock &amp; Green Meter Units</p>
 </header>
 <nav>
 <button class="active" onclick="tab('dash',this)">Dashboard</button>
 <button onclick="tab('flocks',this)">Flocks</button>
 <button onclick="tab('daily',this)">Daily Records</button>
 <button onclick="tab('money',this)">Sales &amp; Expenses</button>
+<button onclick="tab('meds',this)">💊 Medicine</button>
+<button onclick="tab('stock',this)">📦 Stock In / Out</button>
+<button onclick="tab('banks',this)">🏦 Banks</button>
 <button onclick="tab('meter',this)">⚡ Green Meter</button>
+<button onclick="tab('notifs',this)">🔔 Notifications <span class="badge" id="notifBadge" style="display:none"></span></button>
 </nav>
 
 <section id="dash" class="active">
@@ -56,12 +65,17 @@ footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
 <div class="card"><b id="dEggs">–</b><span>Today's Eggs</span></div>
 <div class="card"><b id="dMort">–</b><span>Today's Mortality</span></div>
 <div class="card"><b id="dNet">–</b><span>Green Meter Net Units</span></div>
+<div class="card"><b id="dFeedBal">–</b><span>Feed Stock Balance (kg)</span></div>
+<div class="card"><b id="dBankBal">–</b><span>Total Bank Balance (Rs)</span></div>
+<div class="card warn"><b id="dAlerts">–</b><span>Active Alerts</span></div>
 </div>
 <div class="note">👋 Welcome! This is a <b>demo</b> with sample data. Add your own records — everything saves in this browser only.</div>
 <h2>Flocks Summary</h2>
 <div class="wrap"><table><thead><tr><th>Batch</th><th>Type</th><th>Breed</th><th>Birds</th><th>Shed</th></tr></thead><tbody id="dashFlocks"></tbody></table></div>
 <h2>Latest Green Meter Reading</h2>
 <div class="greenbox" id="dashMeter"></div>
+<h2>Latest Alerts</h2>
+<div id="dashAlerts"></div>
 </section>
 
 <section id="flocks">
@@ -108,6 +122,68 @@ footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
 <div class="wrap"><table><thead><tr><th>Type</th><th>Detail</th><th>Amount (Rs)</th></tr></thead><tbody id="moneyRows"></tbody></table></div>
 </section>
 
+<section id="meds">
+<h2>💊 Medicine Stock</h2>
+<div id="medAlerts"></div>
+<form onsubmit="addMedStock(event)">
+<label>Medicine Name</label><input id="msName" required placeholder="e.g. ND Vaccine">
+<label>Quantity</label><input id="msQty" type="number" min="1" required>
+<label>Unit</label><select id="msUnit"><option>vials</option><option>kg</option><option>packs</option><option>bottles</option></select>
+<label>Expiry Date</label><input id="msExp" type="date" required>
+<button type="submit">Add Medicine Stock</button>
+</form>
+<div class="wrap"><table><thead><tr><th>Medicine</th><th>Qty</th><th>Unit</th><th>Expiry</th><th>Status</th></tr></thead><tbody id="medStockRows"></tbody></table></div>
+<h2>Medicine Usage per Flock</h2>
+<form onsubmit="addMedUse(event)">
+<label>Date</label><input id="muDate" type="date" required>
+<label>Batch</label><select id="muFlock"></select>
+<label>Medicine</label><select id="muMed"></select>
+<label>Quantity Used</label><input id="muQty" type="number" min="1" required>
+<label>Cost (Rs)</label><input id="muCost" type="number" min="0" value="0">
+<button type="submit">Record Usage</button>
+</form>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Batch</th><th>Medicine</th><th>Qty</th><th>Cost (Rs)</th></tr></thead><tbody id="medUseRows"></tbody></table></div>
+</section>
+
+<section id="stock">
+<h2>📦 Stock In / Out — Auto Calculation</h2>
+<div class="note">Every record updates the totals automatically: <b>Balance = Total In − Total Out</b>. Balances below are always live.</div>
+<div class="wrap"><table><thead><tr><th>Item</th><th>Total In</th><th>Total Out</th><th>Balance</th></tr></thead><tbody id="stockTotals"></tbody></table></div>
+<form onsubmit="addStock(event)">
+<label>Date</label><input id="sDate" type="date" required>
+<label>Item</label><select id="sItem"><option>Feed</option><option>Birds</option><option>Eggs</option><option>Other</option></select>
+<label>Direction</label><select id="sDir"><option value="in">In-going (received)</option><option value="out">Out-going (used / sold)</option></select>
+<label>Quantity</label><input id="sQty" type="number" min="1" required>
+<label>Unit</label><select id="sUnit"><option>kg</option><option>pcs</option><option>trays</option><option>bags</option></select>
+<label>Note (optional)</label><input id="sNote" placeholder="e.g. Feed delivery from supplier">
+<button type="submit">Add Stock Record</button>
+</form>
+<h2>Stock Movement History</h2>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Item</th><th>Direction</th><th>Qty</th><th>Unit</th><th>Note</th></tr></thead><tbody id="stockRows"></tbody></table></div>
+</section>
+
+<section id="banks">
+<h2>🏦 Bank Accounts</h2>
+<div class="wrap"><table><thead><tr><th>Account</th><th>Bank</th><th>Opening (Rs)</th><th>Balance (Rs)</th></tr></thead><tbody id="bankAcctRows"></tbody></table></div>
+<form onsubmit="addBankAcct(event)">
+<label>Account Name</label><input id="baName" required placeholder="e.g. Farm Current Account">
+<label>Bank</label><input id="baBank" required placeholder="e.g. Meezan Bank">
+<label>Opening Balance (Rs)</label><input id="baOpen" type="number" min="0" value="0">
+<button type="submit">Add Bank Account</button>
+</form>
+<h2>Bank Transactions</h2>
+<div class="note">Deposits and withdrawals update the account balance automatically. Sales receipts and supplier payments can be linked here.</div>
+<form onsubmit="addBankTx(event)">
+<label>Date</label><input id="btDate" type="date" required>
+<label>Account</label><select id="btAcct"></select>
+<label>Type</label><select id="btType"><option value="deposit">Deposit</option><option value="withdraw">Withdraw</option></select>
+<label>Amount (Rs)</label><input id="btAmt" type="number" min="1" required>
+<label>Note (optional)</label><input id="btNote" placeholder="e.g. Eggs sale receipt — 140 trays">
+<button type="submit">Add Transaction</button>
+</form>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Amount (Rs)</th><th>Note</th></tr></thead><tbody id="bankTxRows"></tbody></table></div>
+</section>
+
 <section id="meter">
 <h2>⚡ Green Meter — Unit Adding System</h2>
 <div class="note">Solar net-metering meter: <b>Import</b> = units taken from the grid, <b>Export</b> = solar units sent to the grid. Net = Export − Import. Positive net = credit units in your favour.</div>
@@ -128,10 +204,19 @@ footer{text-align:center;font-size:12px;color:#888;margin-top:20px}
 <div class="wrap"><table><thead><tr><th>Date</th><th>Import</th><th>Export</th><th>Net</th><th>Note</th></tr></thead><tbody id="meterRows"></tbody></table></div>
 </section>
 
+<section id="notifs">
+<h2>🔔 Auto Notifications</h2>
+<div class="note">Alerts below are generated automatically from your data — low stock, expiring medicine and account problems appear here on their own.</div>
+<div id="notifList"></div>
+<h2>📩 Auto Messages Log</h2>
+<div class="note">Demo only — these messages are <b>not actually sent</b>. In a real system they would go out automatically by SMS / WhatsApp when an alert triggers.</div>
+<div class="wrap"><table><thead><tr><th>Date</th><th>Channel</th><th>To</th><th>Message</th><th>Status</th></tr></thead><tbody id="msgRows"></tbody></table></div>
+</section>
+
 <footer>Demo version — sample data for presentation. <button class="reset" onclick="resetDemo()">Reset demo data</button></footer>
 
 <script>
-const KEY='poultryDemoV1';
+const KEY='poultryDemoV2';
 const SAMPLE={
 flocks:[
 {id:'L-01',type:'Layer',breed:'Hy-Line Brown',birds:5000,shed:'Shed 1',start:'2026-08-15'},
@@ -145,6 +230,28 @@ money:[
 {type:'sale',detail:'Broiler sale — 200 birds',amt:84000},
 {type:'expense',detail:'Layer feed — 50 bags',amt:210000},
 {type:'expense',detail:'Medicine & vaccines',amt:15000}],
+medStock:[
+{name:'Newcastle (ND) Vaccine',qty:40,unit:'vials',exp:'2026-11-20'},
+{name:'Amoxicillin 20%',qty:25,unit:'kg',exp:'2027-03-10'},
+{name:'Vitamin E + Selenium',qty:12,unit:'packs',exp:'2026-10-15'},
+{name:'Gumboro Vaccine',qty:60,unit:'vials',exp:'2027-01-25'}],
+medUse:[
+{date:'2026-10-27',flock:'L-01',med:'Newcastle (ND) Vaccine',qty:10,cost:2500},
+{date:'2026-10-28',flock:'B-01',med:'Amoxicillin 20%',qty:5,cost:8000}],
+stock:[
+{date:'2026-10-25',item:'Feed',dir:'in',qty:1200,unit:'kg',note:'Feed delivery from supplier'},
+{date:'2026-10-28',item:'Feed',dir:'out',qty:950,unit:'kg',note:'Feed consumed (3 days)'},
+{date:'2026-10-25',item:'Eggs',dir:'in',qty:12000,unit:'pcs',note:'Eggs collected'},
+{date:'2026-10-28',item:'Eggs',dir:'out',qty:8500,unit:'pcs',note:'Eggs sold to buyer'},
+{date:'2026-10-01',item:'Birds',dir:'in',qty:8000,unit:'pcs',note:'New batches arrived'},
+{date:'2026-10-28',item:'Birds',dir:'out',qty:200,unit:'pcs',note:'Broiler sale'}],
+bankAccts:[
+{name:'Farm Current Account',bank:'Meezan Bank',open:350000},
+{name:'JazzCash Business',bank:'JazzCash',open:25000}],
+bankTx:[
+{date:'2026-10-27',acct:'Farm Current Account',type:'deposit',amt:44800,note:'Eggs sale receipt — 140 trays'},
+{date:'2026-10-28',acct:'Farm Current Account',type:'withdraw',amt:210000,note:'Feed supplier payment'},
+{date:'2026-10-29',acct:'JazzCash Business',type:'deposit',amt:84000,note:'Broiler sale receipt — 200 birds'}],
 meter:[
 {date:'2026-09-30',imp:2450,exp:3180,note:'September closing'},
 {date:'2026-10-15',imp:1180,exp:1650,note:'Mid October'},
@@ -160,31 +267,91 @@ document.getElementById(id).classList.add('active');
 document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
 }
+function daysTo(d){return Math.round((new Date(d)-new Date().setHours(0,0,0,0))/86400000)}
+function medStatus(m){
+let dd=daysTo(m.exp);
+if(dd<0)return {t:'⛔ Expired',c:'alert-red'};
+if(dd<=30)return {t:'⚠️ Expiring in '+dd+' days',c:'alert-amber'};
+return {t:'✅ OK',c:'alert-green'};
+}
+function stockBal(item){
+let inn=D.stock.filter(s=>s.item===item&&s.dir==='in').reduce((a,s)=>a+s.qty,0);
+let out=D.stock.filter(s=>s.item===item&&s.dir==='out').reduce((a,s)=>a+s.qty,0);
+return {inn:inn,out:out,bal:inn-out};
+}
+function bankBal(acct){
+let a=D.bankAccts.find(x=>x.name===acct);
+if(!a)return 0;
+let tx=D.bankTx.filter(t=>t.acct===acct);
+return a.open+tx.filter(t=>t.type==='deposit').reduce((s,t)=>s+t.amt,0)-tx.filter(t=>t.type==='withdraw').reduce((s,t)=>s+t.amt,0);
+}
+function computeAlerts(){
+let alerts=[];
+let fb=stockBal('Feed');
+if(fb.bal<500)alerts.push({sev:'red',text:'🔴 Low feed stock: only '+num(fb.bal)+' kg remaining. Order feed soon.'});
+D.medStock.forEach(m=>{
+let dd=daysTo(m.exp);
+if(dd<0)alerts.push({sev:'red',text:'⛔ Medicine expired: '+m.name+' (expired '+m.exp+'). Do not use.'});
+else if(dd<=30)alerts.push({sev:'amber',text:'⚠️ Medicine expiring soon: '+m.name+' expires in '+dd+' days ('+m.exp+').'});
+});
+D.bankAccts.forEach(a=>{
+let b=bankBal(a.name);
+if(b<0)alerts.push({sev:'red',text:'🔴 Bank account overdrawn: '+a.name+' balance Rs '+num(b)+'.'});
+});
+return alerts;
+}
 function render(){
 let birds=D.flocks.reduce((a,f)=>a+f.birds,0);
 let today=D.daily.filter(r=>r.date==='2026-10-29');
 let tEggs=today.reduce((a,r)=>a+r.eggs,0), tMort=today.reduce((a,r)=>a+r.mortality,0);
 let imp=D.meter.reduce((a,r)=>a+r.imp,0), exp=D.meter.reduce((a,r)=>a+r.exp,0), net=exp-imp;
+let fb=stockBal('Feed');
+let totBank=D.bankAccts.reduce((a,x)=>a+bankBal(x.name),0);
+let alerts=computeAlerts();
 document.getElementById('dBirds').textContent=num(birds);
 document.getElementById('dEggs').textContent=num(tEggs);
 document.getElementById('dMort').textContent=num(tMort);
 document.getElementById('dNet').textContent=(net>=0?'+':'')+num(net);
+document.getElementById('dFeedBal').textContent=num(fb.bal);
+document.getElementById('dBankBal').textContent=num(totBank);
+document.getElementById('dAlerts').textContent=alerts.length;
+let badge=document.getElementById('notifBadge');
+badge.textContent=alerts.length; badge.style.display=alerts.length?'inline':'none';
+let alertHtml=alerts.length?alerts.map(a=>`<div class="${a.sev==='red'?'alert-red':'alert-amber'}">${a.text}</div>`).join(''):'<div class="alert-green">✅ No active alerts.</div>';
+document.getElementById('dashAlerts').innerHTML=alertHtml;
 document.getElementById('dashFlocks').innerHTML=D.flocks.map(f=>`<tr><td>${f.id}</td><td>${f.type}</td><td>${f.breed}</td><td>${num(f.birds)}</td><td>${f.shed}</td></tr>`).join('');
 let last=D.meter[D.meter.length-1];
 document.getElementById('dashMeter').innerHTML=last?`Last reading <b>${last.date}</b>: Import ${num(last.imp)} units, Export ${num(last.exp)} units, Net <b>${(last.exp-last.imp>=0?'+':'')+num(last.exp-last.imp)}</b> units. Total net balance: <b>${(net>=0?'+':'')+num(net)} units ${net>=0?'(credit)':'(payable)'}</b>.`:'No readings yet.';
 document.getElementById('flockRows').innerHTML=D.flocks.map(f=>`<tr><td>${f.id}</td><td>${f.type}</td><td>${f.breed}</td><td>${num(f.birds)}</td><td>${f.shed}</td><td>${f.start}</td></tr>`).join('');
 document.getElementById('dFlock').innerHTML=D.flocks.map(f=>`<option>${f.id}</option>`).join('');
+document.getElementById('muFlock').innerHTML=D.flocks.map(f=>`<option>${f.id}</option>`).join('');
 document.getElementById('dailyRows').innerHTML=[...D.daily].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.flock}</td><td>${num(r.eggs)}</td><td>${r.mortality}</td><td>${r.feed}</td></tr>`).join('');
 let sales=D.money.filter(m=>m.type==='sale').reduce((a,m)=>a+m.amt,0);
 let exps=D.money.filter(m=>m.type==='expense').reduce((a,m)=>a+m.amt,0);
 document.getElementById('mSales').textContent=num(sales);
 document.getElementById('mExp').textContent=num(exps);
 document.getElementById('moneyRows').innerHTML=D.money.map(m=>`<tr><td>${m.type==='sale'?'🟢 Sale':'🔴 Expense'}</td><td>${m.detail}</td><td>${num(m.amt)}</td></tr>`).join('');
+document.getElementById('medAlerts').innerHTML=D.medStock.filter(m=>medStatus(m).c!=='alert-green').map(m=>{let s=medStatus(m);return `<div class="${s.c}">${s.t} — ${m.name} (${m.qty} ${m.unit}, expiry ${m.exp})</div>`}).join('')||'<div class="alert-green">✅ All medicines in date.</div>';
+document.getElementById('medStockRows').innerHTML=D.medStock.map(m=>{let s=medStatus(m);return `<tr><td>${m.name}</td><td>${m.qty}</td><td>${m.unit}</td><td>${m.exp}</td><td>${s.t}</td></tr>`}).join('');
+document.getElementById('muMed').innerHTML=D.medStock.map(m=>`<option>${m.name}</option>`).join('');
+document.getElementById('medUseRows').innerHTML=[...D.medUse].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.flock}</td><td>${r.med}</td><td>${r.qty}</td><td>${num(r.cost)}</td></tr>`).join('');
+let items=['Feed','Birds','Eggs','Other'];
+document.getElementById('stockTotals').innerHTML=items.map(it=>{let b=stockBal(it);return `<tr><td>${it}</td><td>${num(b.inn)}</td><td>${num(b.out)}</td><td><b>${num(b.bal)}</b></td></tr>`}).join('');
+document.getElementById('stockRows').innerHTML=[...D.stock].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.item}</td><td>${r.dir==='in'?'🟢 In-going':'🔴 Out-going'}</td><td>${num(r.qty)}</td><td>${r.unit}</td><td>${r.note||''}</td></tr>`).join('');
+document.getElementById('bankAcctRows').innerHTML=D.bankAccts.map(a=>`<tr><td>${a.name}</td><td>${a.bank}</td><td>${num(a.open)}</td><td><b>${num(bankBal(a.name))}</b></td></tr>`).join('');
+document.getElementById('btAcct').innerHTML=D.bankAccts.map(a=>`<option>${a.name}</option>`).join('');
+document.getElementById('bankTxRows').innerHTML=[...D.bankTx].reverse().map(t=>`<tr><td>${t.date}</td><td>${t.acct}</td><td>${t.type==='deposit'?'🟢 Deposit':'🔴 Withdraw'}</td><td>${num(t.amt)}</td><td>${t.note||''}</td></tr>`).join('');
 document.getElementById('gImp').textContent=num(imp);
 document.getElementById('gExp').textContent=num(exp);
 document.getElementById('gNet').textContent=(net>=0?'+':'')+num(net);
 document.getElementById('gCount').textContent=D.meter.length;
 document.getElementById('meterRows').innerHTML=[...D.meter].reverse().map(r=>`<tr><td>${r.date}</td><td>${num(r.imp)}</td><td>${num(r.exp)}</td><td>${(r.exp-r.imp>=0?'+':'')+num(r.exp-r.imp)}</td><td>${r.note||''}</td></tr>`).join('');
+document.getElementById('notifList').innerHTML=alertHtml;
+let msgs=[];
+alerts.forEach(a=>{msgs.push({date:'2026-10-29',ch:'SMS',to:'Farm Manager',txt:a.text.replace(/^[🔴⚠️⛔]\s*/,''),st:'Demo only — not sent'});});
+msgs.push({date:'2026-10-28',ch:'WhatsApp',to:'Eggs Buyer',txt:'Eggs ready for pickup — 140 trays available today.',st:'Demo only — not sent'});
+msgs.push({date:'2026-10-27',ch:'SMS',to:'Feed Supplier',txt:'Feed stock low — please arrange delivery of 50 bags.',st:'Demo only — not sent'});
+document.getElementById('msgRows').innerHTML=msgs.map(m=>`<tr><td>${m.date}</td><td>${m.ch}</td><td>${m.to}</td><td>${m.txt}</td><td>${m.st}</td></tr>`).join('');
 }
 function addFlock(e){e.preventDefault();
 D.flocks.push({id:document.getElementById('fId').value.trim(),type:document.getElementById('fType').value,breed:document.getElementById('fBreed').value.trim(),birds:+document.getElementById('fBirds').value,shed:document.getElementById('fShed').value.trim(),start:document.getElementById('fStart').value});
@@ -195,12 +362,30 @@ save();render();e.target.reset();alert('Daily record saved!');}
 function addMoney(e){e.preventDefault();
 D.money.push({type:document.getElementById('mType').value,detail:document.getElementById('mDetail').value.trim(),amt:+document.getElementById('mAmt').value});
 save();render();e.target.reset();alert('Entry added!');}
+function addMedStock(e){e.preventDefault();
+D.medStock.push({name:document.getElementById('msName').value.trim(),qty:+document.getElementById('msQty').value,unit:document.getElementById('msUnit').value,exp:document.getElementById('msExp').value});
+save();render();e.target.reset();alert('Medicine stock added!');}
+function addMedUse(e){e.preventDefault();
+D.medUse.push({date:document.getElementById('muDate').value,flock:document.getElementById('muFlock').value,med:document.getElementById('muMed').value,qty:+document.getElementById('muQty').value,cost:+document.getElementById('muCost').value});
+save();render();e.target.reset();alert('Medicine usage recorded!');}
+function addStock(e){e.preventDefault();
+D.stock.push({date:document.getElementById('sDate').value,item:document.getElementById('sItem').value,dir:document.getElementById('sDir').value,qty:+document.getElementById('sQty').value,unit:document.getElementById('sUnit').value,note:document.getElementById('sNote').value.trim()});
+save();render();e.target.reset();alert('Stock record added! Balances updated automatically.');}
+function addBankAcct(e){e.preventDefault();
+D.bankAccts.push({name:document.getElementById('baName').value.trim(),bank:document.getElementById('baBank').value.trim(),open:+document.getElementById('baOpen').value});
+save();render();e.target.reset();alert('Bank account added!');}
+function addBankTx(e){e.preventDefault();
+D.bankTx.push({date:document.getElementById('btDate').value,acct:document.getElementById('btAcct').value,type:document.getElementById('btType').value,amt:+document.getElementById('btAmt').value,note:document.getElementById('btNote').value.trim()});
+save();render();e.target.reset();alert('Transaction added! Balance updated automatically.');}
 function addMeter(e){e.preventDefault();
 D.meter.push({date:document.getElementById('gDate').value,imp:+document.getElementById('gImpIn').value,exp:+document.getElementById('gExpIn').value,note:document.getElementById('gNote').value.trim()});
 save();render();e.target.reset();alert('Units added! Net balance updated.');}
 function resetDemo(){if(confirm('Reset all demo data to samples?')){localStorage.removeItem(KEY);D=SAMPLE;render();}}
 document.getElementById('dDate').value='2026-10-29';
 document.getElementById('gDate').value='2026-10-29';
+document.getElementById('muDate').value='2026-10-29';
+document.getElementById('sDate').value='2026-10-29';
+document.getElementById('btDate').value='2026-10-29';
 render();
 </script>
 </body>
