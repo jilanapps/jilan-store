@@ -170,6 +170,24 @@ Recovery-mode reset <b>koi app nahi rok sakti</b> (FRP shop ke Gmail se bachta h
 GPS ke liye location ON hona chahiye.</div>
 </div>
 
+<h2>1️⃣1️⃣ 📩 SMS Commands — jab phone par net na ho</h2>
+<div class="card">
+<p>Jab customer ke phone par <b>SIM + signal ho lekin net/data na ho</b>, to dashboard ka remote lock wahan nahi pahunchega. Us waqt dukaan daar <b>apne mobile se SMS</b> bhej kar phone lock/unlock kar sakta hai. <b>Dashboard me SMS bhejne ka button nahi hai</b> — SMS apne mobile ke Messages app se bhejna hai.</p>
+<h3>Do shartein (dono lazmi)</h3>
+<ol>
+<li><b>SMS Command Code laga ho:</b> setup ke waqt "SMS Commands (Optional)" me code set karein — <b>kam az kam 6 characters</b>. Code khali ho to ye rasta <b>band</b> rehta hai. Code baad me PIN panel se "SMS Command Code Set / Change Karein" se badla ja sakta hai.</li>
+<li><b>Number wahi ho:</b> SMS usi number se aaye jo setup me <b>dukaan ka rabta number</b> save hai — kisi aur number se aaya SMS phone <b>ignore</b> kar deta hai. Code kisi ko na batayein — yehi asal chabi hai.</li>
+</ol>
+<h3>SMS ka format</h3>
+<p>Customer ke number par ye SMS bhejein (code ki jagah apna SMS Command Code likhein):</p>
+<ul>
+<li><code>ILOCK &lt;code&gt; LOCK</code> — phone <b>lock</b> ho jayega</li>
+<li><code>ILOCK &lt;code&gt; UNLOCK</code> — phone <b>unlock</b> ho jayega (agar qist baqi na ho)</li>
+<li><code>ILOCK &lt;code&gt; STATUS</code> — phone wapas SMS par <b>due date, baqi qistein aur baki raqam</b> bhej deta hai (jawab ka SMS kharcha customer ke phone ke balance se hota hai)</li>
+</ul>
+<p class="small">Ye rasta sirf lock/unlock/status ke liye hai — due date change, release aur baqi kaam dashboard se hi hote hain.</p>
+</div>
+
 <footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
 </div>
 </body>
