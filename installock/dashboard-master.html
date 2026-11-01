@@ -129,6 +129,9 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 
 <div class="stats" id="statsRow"></div>
 
+<!-- v1.8-improvement: silent-phone alert banner (24h+) — top par, taake per-row tag miss na ho -->
+<div id="silentAlert"></div>
+
 <!-- v4.0 PRO: hisaab strip -->
 <div class="stats" id="hisaabRow"></div>
 
@@ -552,6 +555,24 @@ function renderPhones(){
       + '</td></tr>';
   });
   document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="6">No phones yet</td></tr>';
+  // Silent-phone banner: 24h+ khamosh, released nahi. Ye 'possible
+  // removal' hai, confirmed removal nahi — band phone / net off bhi
+  // khamosh lagta hai. Sirf naam + shop + aakhri seen, number nahi.
+  try {
+    const silent = allPhones.filter(p => {
+      if ((p.status||'active') === 'released') return false;
+      const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+      return ls > 0 && (Date.now()-ls) > 86400000;
+    });
+    const el = document.getElementById('silentAlert');
+    if (el) {
+      el.innerHTML = silent.length === 0 ? '' :
+        '<div style="background:#2a1515;border:1px solid #e53935;border-radius:10px;padding:12px;margin-bottom:16px">'
+        + '<b style="color:#ff8a80">\u26a0\ufe0f ' + silent.length + ' phone 24 ghante se zyada khamosh hai — band, net off ya reset ho sakta hai (confirmed removal nahi):</b><br>'
+        + silent.map(p => esc((p.customerName||p._shopName||'—')) + ' — ' + esc(p._shopName||'—') + ' — aakhri seen: ' + fmtSeen(p.lastSeen)).join('<br>')
+        + '</div>';
+    }
+  } catch(e) {}
   document.getElementById('statsRow').innerHTML =
     stat(allPhones.length,'Total Phones')+stat(counts.active,'Active')
     +stat(counts.grace,'Grace')+stat(counts.limited,'Limited')
