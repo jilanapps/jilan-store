@@ -1,0 +1,149 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(db)/documents/masters/$(request.auth.uid));
+    }
+    function shopData(shopId) {
+      return get(/databases/$(db)/documents/shops/$(shopId)).data;
+    }
+    function isShopSide(shopId) {
+      let s = shopData(shopId);
+      return request.auth != null
+        && (s.retailerUid == request.auth.uid
+            || s.distributorUid == request.auth.uid);
+    }
+    function ownsShop(shopId) {
+      return isAdmin() || isShopSide(shopId);
+    }
+    match /masters/{uid} {
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+    match /users/{uid} {
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+    }
+    match /shops/{shopId} {
+      allow read: if request.auth != null && (
+        resource.data.retailerUid == request.auth.uid ||
+        resource.data.distributorUid == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && (
+        request.resource.data.retailerUid == request.auth.uid || isAdmin());
+      allow update: if request.auth != null && (
+        resource.data.retailerUid == request.auth.uid ||
+        resource.data.distributorUid == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+      match /phones/{phoneId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /commands/{cmdId} {
+        allow read: if ownsShop(shopId);
+        allow create: if ownsShop(shopId)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.type in [
+            'LOCK','UNLOCK','RELEASE','PAYMENT_RECEIVED','SET_DUE_DATE',
+            'SET_PLAN','LOCATE','REMIND','UPDATE_NOW','FRP_ON','FRP_OFF','SET_MASTER_HASH'];
+        allow update, delete: if ownsShop(shopId);
+      }
+      match /payments/{payId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /events/{evId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /paymentRequests/{requestId} {
+        allow read: if ownsShop(shopId);
+        allow create: if ownsShop(shopId)
+          && request.resource.data.shopId == shopId
+          && request.resource.data.tid is string
+          && request.resource.data.tid.size() > 0
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.method in ['JazzCash', 'Easypaisa']
+          && request.resource.data.status == 'pending'
+          && request.resource.data.source == 'customer-tid'
+          && request.resource.data.phoneDocId is string
+          && request.resource.data.phoneDocId.size() > 0
+          && !('dueDate' in request.resource.data)
+          && !('installmentsLeft' in request.resource.data)
+          && !('remainingAmount' in request.resource.data)
+          && !('paidSoFar' in request.resource.data)
+          && !('paymentsTotal' in request.resource.data)
+          && !('planMonths' in request.resource.data)
+          && !('monthlyInstallment' in request.resource.data)
+          && !('price' in request.resource.data)
+          && !('advance' in request.resource.data)
+          && !('markupPercent' in request.resource.data);
+        allow update: if ownsShop(shopId)
+          && request.resource.data.tid == resource.data.tid
+          && request.resource.data.amount == resource.data.amount
+          && request.resource.data.method == resource.data.method
+          && request.resource.data.phoneDocId == resource.data.phoneDocId
+          && resource.data.status == 'pending'
+          && request.resource.data.status in ['verified', 'rejected']
+          && ((request.resource.data.status == 'verified'
+               && request.resource.data.verifiedBy == request.auth.uid)
+              || (request.resource.data.status == 'rejected'
+                  && request.resource.data.rejectedBy == request.auth.uid
+                  && request.resource.data.rejectReason is string
+                  && request.resource.data.rejectReason.size() > 0));
+        allow delete: if false;
+      }
+      match /audit/{auditId} {
+        allow read: if ownsShop(shopId);
+        allow create: if (isAdmin()
+              && request.resource.data.createdBy == request.auth.uid)
+            || (ownsShop(shopId)
+              && request.resource.data.action in ['TID_VERIFIED', 'TID_REJECTED']
+              && request.resource.data.actorUid == request.auth.uid);
+        allow update, delete: if false;
+      }
+    }
+    match /alerts/{alertId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // v50 FINAL - SERVER KEYS (NOT published - the USER publishes this in
+    // the Firebase Console, exactly like v49 was published).
+    // Firestore part above = live v49 (SET_MASTER_HASH) VERBATIM, unchanged
+    // (verified by diff against firestore-rules-v48-CORRECTED.txt: the only
+    // non-key difference is the SET_MASTER_HASH command type).
+    // Two corrections vs the v50 DRAFT:
+    //  (1) STRUCTURAL: the draft's jilanKeys match sat OUTSIDE the
+    //      /databases/{db}/documents block, which would NOT compile.
+    //      It is moved INSIDE here.
+    //  (2) SECURITY (the draft's real hole): the draft allowed ANY
+    //      authenticated user to GET any key by code AND to bind any
+    //      unused key (unused -> used, boundImei set once) with NO
+    //      shop-ownership check - so any shop account that learned an
+    //      unused key code could STEAL it by binding first. Verified
+    //      2026-11-01: NO shop, phone, dashboard or Device Owner client
+    //      reads or writes jilanKeys today (grep across all app + site
+    //      trees: only the Master admin app does). So jilanKeys is now
+    //      ADMIN-ONLY for get/list/create/update/delete. This breaks
+    //      nothing in production, and old Master builds (vc8, v1.5) keep
+    //      working because they also authenticate as the admin.
+    // Key doc id = the key code itself (JLN-XXXX-XXXX-XXXX).
+    // Stored status vocabulary (the app's stored layer): unused / used /
+    // revoked. Display states (Available/Assigned/Activated/Expired/
+    // Revoked) are derived in the Master app UI, never stored.
+    // Bind-once invariant: the Master app (v1.6) checks the server FIRST
+    // before any bind; a key already bound to another IMEI is REJECTED,
+    // never overwritten; a revoked key is never re-bound by the app.
+    // FUTURE WORK (do NOT re-open any-auth access): shop-side activation
+    // (a phone binding a key itself) needs a future rules revision with a
+    // shopId field on the key record + an ownership check, because the
+    // record today carries only a shop NAME, which rules cannot verify
+    // against the requester. Until then, binding happens only via Master.
+    match /jilanKeys/{keyId} {
+      allow get, list, create, update, delete: if isAdmin();
+    }
+
+  }
+}
