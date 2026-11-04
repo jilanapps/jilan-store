@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parts Catalog — Jilan Bike Parts (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Jilan <span>Bike Parts</span></h1>
+  <p>Bike Spare Parts Shop — Cash Sale (Naqd) • CD70 / CG125 Parts</p>
+  <span class="badge">DEMO WEBSITE</span>
+</header>
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="parts.html">Parts Catalog</a>
+  <a href="billing.html">Billing 🛒 (<span id="cartCount">0</span>)</a>
+  <a href="stock.html">Stock</a>
+  <a href="reports.html">Reports</a>
+</nav>
+<div class="wrap">
+  <div class="demo-note"><b>Demo only:</b> all parts and prices below are sample data. Cash sale only — no installments.</div>
+  <div id="notice" class="notice"></div>
+  <div class="panel">
+    <h2>Parts Catalog</h2>
+    <div class="search"><input id="partsSearch" placeholder="Search part or model..." oninput="renderParts()"></div>
+    <div class="catbar">
+      <button class="active" onclick="setCat('All',this)">All</button>
+      <button onclick="setCat('Engine',this)">Engine</button>
+      <button onclick="setCat('Brake',this)">Brake</button>
+      <button onclick="setCat('Suspension',this)">Suspension</button>
+      <button onclick="setCat('Electrical',this)">Electrical</button>
+      <button onclick="setCat('Tyre',this)">Tyre</button>
+      <button onclick="setCat('Drive',this)">Drive</button>
+      <button onclick="setCat('Filters',this)">Filters</button>
+      <button onclick="setCat('Body',this)">Body</button>
+    </div>
+    <div id="partsGrid" class="items"></div>
+  </div>
+  <div class="panel" style="text-align:center">
+    <h3>Contact</h3>
+    <p>For the full version, contact us on WhatsApp:</p>
+    <p style="margin-top:12px"><a class="btn green" href="https://wa.me/923007379385?text=Jilan%20Bike%20Parts%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+  </div>
+</div>
+<footer>Jilan Bike Parts — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; Cash sale only, no installments</footer>
+<script src="app.js"></script>
+</body>
+</html>
