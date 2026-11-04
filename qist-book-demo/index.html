@@ -63,7 +63,7 @@
   <span class="badge">DEMO WEBSITE</span>
 </header>
 
-<div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments.</div>
+<div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
 
 <nav>
   <button class="active" onclick="showTab('dash',this)">Dashboard</button>
@@ -122,11 +122,37 @@
     </div>
     <p style="font-size:13px;color:#888;margin-top:8px">Reminder buttons in this demo only mark the reminder as noted. No real SMS or WhatsApp message is sent from this demo.</p>
   </section>
+
+  <div class="panel" style="text-align:center">
+    <h3>Contact</h3>
+    <p>For the full version, contact us on WhatsApp:</p>
+    <p style="margin-top:12px"><a class="btn green" style="text-decoration:none;display:inline-block" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+  </div>
 </main>
 
 <footer>Jilan Qist Book — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; No device lock, no real payments</footer>
 
 <script>
+// Demo expiry: 3 days from first open on a visitor's device.
+// Owner link (?owner=1) never expires on that device.
+(function(){
+  try{
+    const q = new URLSearchParams(location.search);
+    if(q.get("owner")==="1"){ localStorage.setItem("jqb_owner","1"); }
+    if(localStorage.getItem("jqb_owner")==="1"){ return; }
+    const THREE = 3*24*60*60*1000;
+    let start = localStorage.getItem("jqb_start");
+    if(!start){ start = Date.now(); localStorage.setItem("jqb_start", String(start)); }
+    const left = THREE - (Date.now() - Number(start));
+    if(left <= 0){
+      document.body.innerHTML = '<div style="text-align:center;padding:80px 20px;font-family:Arial"><h2>Demo Expired</h2><p>This 3-day demo has expired. Please contact the owner for the full version.</p><p><a href="https://wa.me/923007379385">WhatsApp: 0300-7379385</a></p></div>';
+      return;
+    }
+    const days = Math.ceil(left/86400000);
+    const el = document.getElementById("validNote");
+    if(el) el.textContent = "This demo works for " + days + " more day(s) on this device.";
+  }catch(e){}
+})();
 const customers = [
   {name:"Ahmed Raza", item:'LED TV 43"', total:85000, adv:15000, monthly:7000, months:10, paid:5, firstDue:"2026-06-05", status:"Due Soon"},
   {name:"Bilal Khan", item:"Haier Fridge", total:95000, adv:20000, monthly:7500, months:10, paid:6, firstDue:"2026-05-02", status:"Overdue"},
