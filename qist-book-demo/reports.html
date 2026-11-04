@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — Jilan Qist Book (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Jilan Qist Book</h1>
+  <p>Electronics Installment Manager — for shops selling on monthly installments</p>
+  <span class="badge">DEMO WEBSITE</span>
+</header>
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="customers.html">Customers</a>
+  <a href="reminders.html">Reminders</a>
+  <a href="reports.html">Reports</a>
+</nav>
+<div class="wrap">
+  <div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
+  <div id="notice" class="notice"></div>
+
+  <div id="repTotals" class="cards"></div>
+
+  <div class="panel">
+    <h2>Monthly Collection (Sample)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Month</th><th>Collected</th></tr></thead>
+        <tbody>
+          <tr><td>June 2026</td><td>Rs 98,000</td></tr>
+          <tr><td>July 2026</td><td>Rs 112,000</td></tr>
+          <tr><td>August 2026</td><td>Rs 125,000</td></tr>
+          <tr><td>September 2026</td><td>Rs 131,000</td></tr>
+          <tr><td>October 2026</td><td>Rs 138,000</td></tr>
+          <tr><td>November 2026</td><td>Rs 142,500</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Customer Balances</h2>
+    <div class="table-wrap">
+      <table id="repTable">
+        <thead><tr><th>Customer</th><th>Item</th><th>Total</th><th>Collected</th><th>Remaining</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" style="text-align:center">
+    <h3>Contact</h3>
+    <p>For the full version, contact us on WhatsApp:</p>
+    <p style="margin-top:12px"><a class="btn green" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+  </div>
+</div>
+<footer>Jilan Qist Book — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; No device lock, no real payments</footer>
+<script src="app.js"></script>
+</body>
+</html>

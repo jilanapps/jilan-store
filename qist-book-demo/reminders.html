@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reminders — Jilan Qist Book (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Jilan Qist Book</h1>
+  <p>Electronics Installment Manager — for shops selling on monthly installments</p>
+  <span class="badge">DEMO WEBSITE</span>
+</header>
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="customers.html">Customers</a>
+  <a href="reminders.html">Reminders</a>
+  <a href="reports.html">Reports</a>
+</nav>
+<div class="wrap">
+  <div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
+  <div id="notice" class="notice"></div>
+
+  <div class="panel">
+    <h2>Due &amp; Overdue Reminders</h2>
+    <div class="table-wrap">
+      <table id="remTable">
+        <thead><tr><th>Customer</th><th>Item</th><th>Amount</th><th>Was Due</th><th>Delay</th><th>Action</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p style="font-size:13px;color:#888;margin-top:10px">Reminder buttons in this demo only mark the reminder as noted. No real SMS or WhatsApp message is sent from this demo.</p>
+  </div>
+
+  <div class="panel" style="text-align:center">
+    <h3>Contact</h3>
+    <p>For the full version, contact us on WhatsApp:</p>
+    <p style="margin-top:12px"><a class="btn green" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+  </div>
+</div>
+<footer>Jilan Qist Book — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; No device lock, no real payments</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers — Jilan Qist Book (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Jilan Qist Book</h1>
+  <p>Electronics Installment Manager — for shops selling on monthly installments</p>
+  <span class="badge">DEMO WEBSITE</span>
+</header>
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="customers.html">Customers</a>
+  <a href="reminders.html">Reminders</a>
+  <a href="reports.html">Reports</a>
+</nav>
+<div class="wrap">
+  <div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
+  <div id="notice" class="notice"></div>
+
+  <div class="panel">
+    <h2>Qist Book — Customers</h2>
+    <div class="search"><input id="searchInput" placeholder="Search by name or item..." oninput="renderCustomers(this.value)"></div>
+    <div class="table-wrap">
+      <table id="custTable">
+        <thead><tr><th>Customer</th><th>Item</th><th>Total</th><th>Advance</th><th>Monthly Qist</th><th>Paid</th><th>Remaining</th><th>Next Due</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p style="font-size:13px;color:#888;margin-top:8px">Tap a row to see the full qist schedule, payment history and record a payment.</p>
+  </div>
+
+  <div id="detail" class="panel" style="display:none"></div>
+
+  <div class="panel">
+    <form onsubmit="addCustomer(event)">
+      <h3>Add Customer (Demo — saved in this browser only)</h3>
+      <div><label>Customer Name</label><input id="fName" required placeholder="e.g. Ali Raza"></div>
+      <div><label>Item</label><input id="fItem" required placeholder="e.g. LED TV 32 inch"></div>
+      <div><label>Total Price (Rs)</label><input id="fTotal" type="number" min="1" required></div>
+      <div><label>Advance (Rs)</label><input id="fAdv" type="number" min="0" value="0" required></div>
+      <div><label>Months</label><input id="fMonths" type="number" min="1" max="24" value="10" required></div>
+      <div style="align-self:end"><button class="btn" type="submit">Add Customer</button></div>
+    </form>
+  </div>
+
+  <div class="panel" style="text-align:center">
+    <h3>Contact</h3>
+    <p>For the full version, contact us on WhatsApp:</p>
+    <p style="margin-top:12px"><a class="btn green" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+  </div>
+</div>
+<footer>Jilan Qist Book — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; No device lock, no real payments</footer>
+<script src="app.js"></script>
+</body>
+</html>

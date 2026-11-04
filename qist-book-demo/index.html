@@ -4,57 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jilan Qist Book — Electronics Installment Manager (Demo)</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,Helvetica,sans-serif;background:#f2f5f4;color:#222}
-  header{background:linear-gradient(135deg,#004d40,#00695c);color:#fff;padding:28px 20px;text-align:center}
-  header h1{font-size:26px;margin-bottom:6px}
-  header p{opacity:.9;font-size:14px}
-  .badge{display:inline-block;background:#ffb300;color:#3a2800;font-weight:bold;font-size:12px;padding:4px 12px;border-radius:20px;margin-top:10px}
-  .demo-note{background:#fff8e1;border:1px solid #ffe082;color:#6d4c00;padding:12px 16px;margin:16px auto;max-width:1000px;border-radius:10px;font-size:14px}
-  nav{max-width:1000px;margin:0 auto;display:flex;gap:8px;padding:0 16px;flex-wrap:wrap}
-  nav button{border:1px solid #00695c;background:#fff;color:#00695c;padding:10px 18px;border-radius:20px;cursor:pointer;font-size:15px}
-  nav button.active{background:#00695c;color:#fff}
-  main{max-width:1000px;margin:16px auto;padding:0 16px 40px}
-  .tab{display:none}
-  .tab.active{display:block}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
-  .card{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .card h3{font-size:14px;color:#666;margin-bottom:6px}
-  .card .num{font-size:26px;font-weight:bold;color:#004d40}
-  .card .sub{font-size:13px;color:#888;margin-top:4px}
-  .card.red .num{color:#c62828}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  th,td{padding:12px 10px;text-align:left;font-size:14px;border-bottom:1px solid #eee}
-  th{background:#00695c;color:#fff}
-  tr{cursor:pointer}
-  tr:hover td{background:#f1f8f7}
-  .table-wrap{overflow-x:auto}
-  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold}
-  .ok{background:#e8f5e9;color:#2e7d32}
-  .warn{background:#fff8e1;color:#ef6c00}
-  .bad{background:#ffebee;color:#c62828}
-  .done{background:#e3f2fd;color:#1565c0}
-  .panel{background:#fff;border-radius:14px;padding:18px;margin-top:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .panel h3{margin-bottom:10px;color:#004d40}
-  .panel p{font-size:14px;margin:4px 0}
-  .sched{width:100%;border-collapse:collapse;margin-top:10px}
-  .sched th{background:#eceff1;color:#333}
-  .sched td{border-bottom:1px solid #eee}
-  form{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}
-  form h3{grid-column:1/-1;color:#004d40}
-  label{font-size:13px;color:#555;display:block;margin-bottom:4px}
-  input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:15px}
-  .btn{background:#00695c;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-size:15px;cursor:pointer}
-  .btn.green{background:#25d366}
-  .btn:disabled{opacity:.6}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px}
-  .step{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center}
-  .step .n{font-size:26px;font-weight:bold;color:#ffb300}
-  .step h4{margin:8px 0 4px;color:#004d40}
-  .step p{font-size:13px;color:#666}
-  footer{text-align:center;color:#888;font-size:13px;padding:20px}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header>
@@ -62,175 +12,50 @@
   <p>Electronics Installment Manager — for shops selling on monthly installments</p>
   <span class="badge">DEMO WEBSITE</span>
 </header>
-
-<div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
-
 <nav>
-  <button class="active" onclick="showTab('dash',this)">Dashboard</button>
-  <button onclick="showTab('cust',this)">Qist Book (Customers)</button>
-  <button onclick="showTab('rem',this)">Reminders</button>
+  <a href="index.html">Dashboard</a>
+  <a href="customers.html">Customers</a>
+  <a href="reminders.html">Reminders</a>
+  <a href="reports.html">Reports</a>
 </nav>
+<div class="wrap">
+  <div class="demo-note"><b>Demo only:</b> all names, items and amounts below are sample data. This demo does not lock any device, does not send real messages and does not collect real payments. <span id="validNote"></span></div>
+  <div id="notice" class="notice"></div>
+  <div id="dashCards" class="cards"></div>
 
-<main>
-  <!-- DASHBOARD -->
-  <section id="dash" class="tab active">
-    <div class="cards">
-      <div class="card"><h3>Total Customers</h3><div class="num">24</div><div class="sub">Sample record</div></div>
-      <div class="card"><h3>Active Installments</h3><div class="num">18</div><div class="sub">Running qist plans</div></div>
-      <div class="card"><h3>Collected This Month</h3><div class="num">Rs 142,500</div><div class="sub">November 2026 (sample)</div></div>
-      <div class="card red"><h3>Overdue Amount</h3><div class="num">Rs 15,000</div><div class="sub">2 customers overdue</div></div>
+  <div class="panel">
+    <h2>Monthly Collection (Sample)</h2>
+    <div class="chart">
+      <div class="bar"><div class="fill" style="height:69%"></div><span>Jun<br>98,000</span></div>
+      <div class="bar"><div class="fill" style="height:79%"></div><span>Jul<br>112,000</span></div>
+      <div class="bar"><div class="fill" style="height:88%"></div><span>Aug<br>125,000</span></div>
+      <div class="bar"><div class="fill" style="height:92%"></div><span>Sep<br>131,000</span></div>
+      <div class="bar"><div class="fill" style="height:97%"></div><span>Oct<br>138,000</span></div>
+      <div class="bar"><div class="fill" style="height:100%;background:#ffb300"></div><span>Nov<br>142,500</span></div>
     </div>
-    <div class="panel">
-      <h3>How it works</h3>
-      <div class="steps">
-        <div class="step"><div class="n">1</div><h4>Add Customer</h4><p>Customer, item, total price, advance and monthly qist plan.</p></div>
-        <div class="step"><div class="n">2</div><h4>Record Payments</h4><p>Cash, JazzCash or Easypaisa — with receipt and balance update.</p></div>
-        <div class="step"><div class="n">3</div><h4>Reminders</h4><p>Due-date reminders and an overdue list for follow-up.</p></div>
-        <div class="step"><div class="n">4</div><h4>Dashboard</h4><p>Recovery, overdue and remaining balance at one glance.</p></div>
-      </div>
-    </div>
-  </section>
+  </div>
 
-  <!-- CUSTOMERS -->
-  <section id="cust" class="tab">
-    <div class="table-wrap">
-      <table id="custTable">
-        <thead><tr><th>Customer</th><th>Item</th><th>Total</th><th>Advance</th><th>Monthly Qist</th><th>Paid</th><th>Remaining</th><th>Next Due</th><th>Status</th></tr></thead>
-        <tbody></tbody>
-      </table>
+  <div class="panel">
+    <h2>Items on Installment (Sample)</h2>
+    <div class="items">
+      <div class="item"><div class="ic">📺</div><h4>LED TV 43 inch</h4><p>Advance 15,000</p><div class="price">Rs 85,000</div><p>7,000 x 10 months</p></div>
+      <div class="item"><div class="ic">🧊</div><h4>Haier Fridge</h4><p>Advance 20,000</p><div class="price">Rs 95,000</div><p>7,500 x 10 months</p></div>
+      <div class="item"><div class="ic">👕</div><h4>Washing Machine</h4><p>Advance 10,000</p><div class="price">Rs 55,000</div><p>4,500 x 10 months</p></div>
+      <div class="item"><div class="ic">❄️</div><h4>Air Cooler</h4><p>Advance 7,000</p><div class="price">Rs 32,000</div><p>2,500 x 10 months</p></div>
+      <div class="item"><div class="ic">🔊</div><h4>Sound System</h4><p>Advance 8,000</p><div class="price">Rs 68,000</div><p>7,500 x 8 months</p></div>
     </div>
-    <p style="font-size:13px;color:#888;margin-top:8px">Showing 6 of 24 sample records. Tap a row to see the full qist schedule.</p>
-    <div id="detail" class="panel" style="display:none"></div>
-    <form onsubmit="addCustomer(event)">
-      <h3>Add Customer (Demo — saved only in this browser tab)</h3>
-      <div><label>Customer Name</label><input id="fName" required placeholder="e.g. Ali Raza"></div>
-      <div><label>Item</label><input id="fItem" required placeholder="e.g. LED TV 32 inch"></div>
-      <div><label>Total Price (Rs)</label><input id="fTotal" type="number" min="1" required></div>
-      <div><label>Advance (Rs)</label><input id="fAdv" type="number" min="0" value="0" required></div>
-      <div><label>Months</label><input id="fMonths" type="number" min="1" max="24" value="10" required></div>
-      <div style="align-self:end"><button class="btn" type="submit">Add Customer</button></div>
-    </form>
-  </section>
+  </div>
 
-  <!-- REMINDERS -->
-  <section id="rem" class="tab">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Customer</th><th>Item</th><th>Amount</th><th>Was Due</th><th>Delay</th><th>Action</th></tr></thead>
-        <tbody id="remBody"></tbody>
-      </table>
-    </div>
-    <p style="font-size:13px;color:#888;margin-top:8px">Reminder buttons in this demo only mark the reminder as noted. No real SMS or WhatsApp message is sent from this demo.</p>
-  </section>
+  <div class="panel"><h2>Overdue Follow-ups</h2><div id="overdueList"></div></div>
+  <div class="panel"><h2>Recent Payments</h2><div id="recentList"></div></div>
 
   <div class="panel" style="text-align:center">
     <h3>Contact</h3>
     <p>For the full version, contact us on WhatsApp:</p>
-    <p style="margin-top:12px"><a class="btn green" style="text-decoration:none;display:inline-block" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
+    <p style="margin-top:12px"><a class="btn green" href="https://wa.me/923007379385?text=Jilan%20Qist%20Book%20demo%20dekha%20hai">WhatsApp: 0300-7379385</a></p>
   </div>
-</main>
-
+</div>
 <footer>Jilan Qist Book — Demo Website &nbsp;|&nbsp; Sample data only &nbsp;|&nbsp; No device lock, no real payments</footer>
-
-<script>
-// Demo expiry: 3 days from first open on a visitor's device.
-// Owner link (?owner=1) never expires on that device.
-(function(){
-  try{
-    const q = new URLSearchParams(location.search);
-    if(q.get("owner")==="1"){ localStorage.setItem("jqb_owner","1"); }
-    if(localStorage.getItem("jqb_owner")==="1"){ return; }
-    const THREE = 3*24*60*60*1000;
-    let start = localStorage.getItem("jqb_start");
-    if(!start){ start = Date.now(); localStorage.setItem("jqb_start", String(start)); }
-    const left = THREE - (Date.now() - Number(start));
-    if(left <= 0){
-      document.body.innerHTML = '<div style="text-align:center;padding:80px 20px;font-family:Arial"><h2>Demo Expired</h2><p>This 3-day demo has expired. Please contact the owner for the full version.</p><p><a href="https://wa.me/923007379385">WhatsApp: 0300-7379385</a></p></div>';
-      return;
-    }
-    const days = Math.ceil(left/86400000);
-    const el = document.getElementById("validNote");
-    if(el) el.textContent = "This demo works for " + days + " more day(s) on this device.";
-  }catch(e){}
-})();
-const customers = [
-  {name:"Ahmed Raza", item:'LED TV 43"', total:85000, adv:15000, monthly:7000, months:10, paid:5, firstDue:"2026-06-05", status:"Due Soon"},
-  {name:"Bilal Khan", item:"Haier Fridge", total:95000, adv:20000, monthly:7500, months:10, paid:6, firstDue:"2026-05-02", status:"Overdue"},
-  {name:"Usman Ghani", item:"Washing Machine", total:55000, adv:10000, monthly:4500, months:10, paid:8, firstDue:"2026-03-12", status:"On Track"},
-  {name:"Fatima Bibi", item:"Air Cooler", total:32000, adv:7000, monthly:2500, months:10, paid:3, firstDue:"2026-08-08", status:"On Track"},
-  {name:"Hassan Ali", item:"Ceiling Fans (2)", total:18000, adv:5000, monthly:1300, months:10, paid:10, firstDue:"2026-01-15", status:"Completed"},
-  {name:"Tariq Mehmood", item:"Sound System", total:68000, adv:8000, monthly:7500, months:10, paid:2, firstDue:"2026-08-30", status:"Overdue"},
-];
-const fmt = n => "Rs " + n.toLocaleString("en-PK");
-function rem(c){ return c.total - c.adv - c.paid * c.monthly; }
-function pill(s){
-  if(s==="Overdue") return '<span class="pill bad">Overdue</span>';
-  if(s==="Due Soon") return '<span class="pill warn">Due Soon</span>';
-  if(s==="Completed") return '<span class="pill done">Completed</span>';
-  return '<span class="pill ok">On Track</span>';
-}
-function dueDate(c){
-  const d = new Date(c.firstDue);
-  d.setMonth(d.getMonth() + c.paid);
-  return d;
-}
-function dstr(d){ return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
-function render(){
-  const tb = document.querySelector("#custTable tbody");
-  tb.innerHTML = "";
-  customers.forEach((c,i)=>{
-    const tr = document.createElement("tr");
-    tr.onclick = ()=>showDetail(i);
-    tr.innerHTML = `<td>${c.name}</td><td>${c.item}</td><td>${fmt(c.total)}</td><td>${fmt(c.adv)}</td><td>${fmt(c.monthly)}</td><td>${c.paid}/${c.months}</td><td>${fmt(rem(c))}</td><td>${c.status==="Completed" ? "—" : dstr(dueDate(c))}</td><td>${pill(c.status)}</td>`;
-    tb.appendChild(tr);
-  });
-}
-function showDetail(i){
-  const c = customers[i];
-  let rows = "";
-  for(let m=1;m<=c.months;m++){
-    const d = new Date(c.firstDue); d.setMonth(d.getMonth()+m-1);
-    let st = "Upcoming";
-    if(m<=c.paid) st = "Paid";
-    else if(c.status==="Overdue" && m===c.paid+1) st = "Overdue";
-    else if(c.status==="Due Soon" && m===c.paid+1) st = "Due Soon";
-    const cls = st==="Paid" ? "ok" : st==="Overdue" ? "bad" : st==="Due Soon" ? "warn" : "done";
-    rows += `<tr><td>Qist ${m}</td><td>${dstr(d)}</td><td>${fmt(c.monthly)}</td><td><span class="pill ${cls}">${st}</span></td></tr>`;
-  }
-  document.getElementById("detail").style.display = "block";
-  document.getElementById("detail").innerHTML =
-    `<h3>${c.name} — ${c.item}</h3>
-     <p>Total: <b>${fmt(c.total)}</b> &nbsp;|&nbsp; Advance: <b>${fmt(c.adv)}</b> &nbsp;|&nbsp; Monthly: <b>${fmt(c.monthly)}</b> &nbsp;|&nbsp; Paid: <b>${c.paid}/${c.months}</b> &nbsp;|&nbsp; Remaining: <b>${fmt(rem(c))}</b></p>
-     <table class="sched"><thead><tr><th>Qist</th><th>Due Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-function addCustomer(e){
-  e.preventDefault();
-  const total = +document.getElementById("fTotal").value;
-  const adv = +document.getElementById("fAdv").value;
-  const months = +document.getElementById("fMonths").value;
-  const d = new Date(); d.setMonth(d.getMonth()+1);
-  customers.unshift({name:document.getElementById("fName").value, item:document.getElementById("fItem").value,
-    total, adv, monthly:Math.round((total-adv)/months), months, paid:0,
-    firstDue:d.toISOString().slice(0,10), status:"On Track"});
-  e.target.reset(); document.getElementById("fAdv").value = 0; document.getElementById("fMonths").value = 10;
-  render();
-}
-function renderRem(){
-  const rows = [
-    {name:"Bilal Khan", item:"Haier Fridge", amt:7500, due:"02 Nov 2026", delay:"2 days overdue"},
-    {name:"Tariq Mehmood", item:"Sound System", amt:7500, due:"30 Oct 2026", delay:"5 days overdue"},
-  ];
-  document.getElementById("remBody").innerHTML = rows.map(r=>
-    `<tr><td>${r.name}</td><td>${r.item}</td><td>${fmt(r.amt)}</td><td>${r.due}</td><td>${r.delay}</td>
-     <td><button class="btn green" onclick="this.textContent='Noted (demo only)';this.disabled=true">Send Reminder</button></td></tr>`).join("");
-}
-function showTab(id,btn){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-}
-render(); renderRem();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
