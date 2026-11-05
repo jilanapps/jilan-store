@@ -260,6 +260,9 @@ async function doLogin(){
   if(!initFirebase()){ alert('API Key + Project ID zaroori hai'); return; }
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
+  // v1.10: Master ki gmail aik hi hoti hai — login par save karo taake
+  // agli dafa email khud bhara hua mile (password kabhi save nahi hota).
+  if(email) localStorage.setItem('il2_email', email);
   try{
     const cred = await auth.signInWithEmailAndPassword(email, pass);
     myUid = cred.user.uid;
@@ -1119,6 +1122,8 @@ function exportCSV(){
   const k = document.getElementById('cfgKey'), p = document.getElementById('cfgPid');
   if(localStorage.getItem('il2_key')) k.value = localStorage.getItem('il2_key');
   if(localStorage.getItem('il2_pid')) p.value = localStorage.getItem('il2_pid');
+  const em = document.getElementById('loginEmail');
+  if(em && localStorage.getItem('il2_email')) em.value = localStorage.getItem('il2_email');
   initFirebase();
   if(auth) auth.onAuthStateChanged(u=>{
     if(u){
