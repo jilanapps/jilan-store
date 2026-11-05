@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobileZone | Mobile Phones &amp; Accessories</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #0b1f3a;
+    --navy2: #12294d;
+    --gold: #d4a017;
+    --gold2: #f0b429;
+    --green: #25d366;
+    --ink: #1a2433;
+    --muted: #5b6b80;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --line: #e6eaf1;
+  }
+  body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+  a { text-decoration: none; color: inherit; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,.25); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { font-size: 24px; font-weight: 800; letter-spacing: .5px; }
+  .logo span { color: var(--gold2); }
+  .nav-links { display: flex; gap: 26px; font-size: 15px; font-weight: 600; }
+  .nav-links a:hover { color: var(--gold2); }
+  .nav-cta { background: var(--gold); color: #111; padding: 9px 18px; border-radius: 30px; font-weight: 700; font-size: 14px; }
+  .nav-cta:hover { background: var(--gold2); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 55%, #1d4e89 100%); color: #fff; padding: 70px 0 80px; }
+  .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center; }
+  @media (max-width: 820px) { .hero-grid { grid-template-columns: 1fr; } }
+  .badge { display: inline-block; background: rgba(212,160,23,.18); border: 1px solid var(--gold); color: var(--gold2); padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 700; letter-spacing: .5px; }
+  .hero h1 { font-size: 44px; line-height: 1.15; margin: 18px 0 14px; font-weight: 800; }
+  .hero h1 span { color: var(--gold2); }
+  @media (max-width: 520px) { .hero h1 { font-size: 32px; } }
+  .hero p { color: #c8d4e6; font-size: 17px; max-width: 520px; }
+  .hero-btns { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 10px; font-weight: 700; font-size: 15px; }
+  .btn-gold { background: var(--gold); color: #111; }
+  .btn-gold:hover { background: var(--gold2); }
+  .btn-ghost { border: 2px solid #fff; color: #fff; }
+  .btn-ghost:hover { background: rgba(255,255,255,.12); }
+  .hero-stats { display: flex; gap: 34px; margin-top: 34px; flex-wrap: wrap; }
+  .hero-stats b { font-size: 24px; display: block; color: var(--gold2); }
+  .hero-stats span { font-size: 13px; color: #c8d4e6; }
+
+  /* CSS phone mockup */
+  .phone-stage { display: flex; justify-content: center; gap: 18px; }
+  .phone { width: 180px; height: 360px; background: #0a0a0f; border-radius: 34px; padding: 10px; box-shadow: 0 24px 50px rgba(0,0,0,.5); border: 3px solid #2a3550; transform: rotate(-4deg); }
+  .phone.two { transform: rotate(5deg) translateY(18px); width: 150px; height: 310px; }
+  .screen { width: 100%; height: 100%; border-radius: 26px; background: linear-gradient(160deg, #1d4e89, #0b1f3a 60%, #d4a017); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 16px; }
+  .screen .notch { width: 64px; height: 8px; background: #0a0a0f; border-radius: 6px; margin-bottom: 22px; }
+  .screen h3 { font-size: 20px; line-height: 1.3; }
+  .screen p { font-size: 12px; color: #dbe7f5; margin-top: 8px; }
+  .screen .price { margin-top: 16px; background: var(--gold); color: #111; font-weight: 800; padding: 7px 14px; border-radius: 20px; font-size: 13px; }
+  @media (max-width: 820px) { .phone-stage { margin-top: 10px; } .phone.two { display: none; } }
+
+  /* Trust strip */
+  .trust { background: #fff; border-bottom: 1px solid var(--line); }
+  .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 22px 0; text-align: center; }
+  @media (max-width: 720px) { .trust-grid { grid-template-columns: repeat(2, 1fr); } }
+  .trust b { display: block; font-size: 15px; }
+  .trust span { font-size: 13px; color: var(--muted); }
+
+  /* Sections */
+  section { padding: 60px 0; }
+  .sec-head { text-align: center; margin-bottom: 36px; }
+  .sec-head h2 { font-size: 30px; font-weight: 800; }
+  .sec-head p { color: var(--muted); margin-top: 6px; }
+  .sec-head .rule { width: 60px; height: 4px; background: var(--gold); margin: 14px auto 0; border-radius: 4px; }
+
+  /* Products */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(11,31,58,.12); }
+  .card-img { height: 170px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #12294d, #1d4e89); position: relative; }
+  .card-img .mini { width: 74px; height: 140px; background: #0a0a0f; border-radius: 14px; border: 2px solid #33415e; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; text-align: center; padding: 8px; }
+  .tag { position: absolute; top: 12px; left: 12px; background: var(--gold); color: #111; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+  .card-body { padding: 18px; }
+  .card-body h3 { font-size: 18px; }
+  .card-body .spec { font-size: 13px; color: var(--muted); margin: 6px 0 12px; }
+  .price-row { display: flex; align-items: center; justify-content: space-between; }
+  .price-row b { font-size: 19px; color: var(--navy); }
+  .price-row s { color: var(--muted); font-size: 13px; margin-left: 6px; }
+  .wa-btn { background: var(--green); color: #fff; font-weight: 700; font-size: 13px; padding: 9px 14px; border-radius: 8px; }
+  .wa-btn:hover { background: #1eb856; }
+
+  /* Services */
+  .services { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .svc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  @media (max-width: 900px) { .svc-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .svc-grid { grid-template-columns: 1fr; } }
+  .svc { text-align: center; padding: 26px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
+  .svc .ico { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: var(--navy); color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+  .svc h3 { font-size: 17px; margin-bottom: 6px; }
+  .svc p { font-size: 14px; color: var(--muted); }
+
+  /* Reviews */
+  .rev { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .rev .stars { color: var(--gold); letter-spacing: 2px; font-size: 16px; }
+  .rev p { font-size: 15px; margin: 10px 0; color: #33415e; }
+  .rev b { font-size: 14px; }
+  .rev span { font-size: 13px; color: var(--muted); display: block; }
+
+  /* CTA band */
+  .cta-band { background: linear-gradient(135deg, var(--navy), #1d4e89); color: #fff; text-align: center; padding: 54px 20px; border-radius: 18px; }
+  .cta-band h2 { font-size: 28px; }
+  .cta-band p { color: #c8d4e6; margin: 10px 0 24px; }
+
+  /* Footer */
+  footer { background: var(--navy); color: #c8d4e6; padding: 44px 0 22px; font-size: 14px; }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; }
+  @media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr; } }
+  footer h4 { color: #fff; margin-bottom: 12px; font-size: 16px; }
+  footer a:hover { color: var(--gold2); }
+  .foot-bottom { border-top: 1px solid #22385c; margin-top: 30px; padding-top: 18px; text-align: center; font-size: 13px; color: #8fa3bd; }
+
+  /* Floating WhatsApp */
+  .float-wa { position: fixed; right: 18px; bottom: 18px; background: var(--green); color: #fff; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; box-shadow: 0 8px 20px rgba(0,0,0,.3); z-index: 60; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">Mobile<span>Zone</span></div>
+    <nav class="nav-links">
+      <a href="#phones">Phones</a>
+      <a href="#services">Services</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="nav-cta" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20MobileZone%20se%20mobile%20ke%20bare%20me%20maloomat%20chahiye.">WhatsApp Us</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge">100% GENUINE &nbsp;•&nbsp; PTA APPROVED</span>
+      <h1>New Mobile Phones at the <span>Best Prices</span> in Town</h1>
+      <p>Latest Samsung, Infinix, Tecno, Vivo, Redmi and Oppo mobiles — with official warranty, easy installments and same-day delivery.</p>
+      <div class="hero-btns">
+        <a class="btn btn-gold" href="#phones">Shop Phones</a>
+        <a class="btn btn-ghost" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20MobileZone%20se%20mobile%20ke%20bare%20me%20maloomat%20chahiye.">Chat on WhatsApp</a>
+      </div>
+      <div class="hero-stats">
+        <div><b>500+</b><span>Happy Customers</span></div>
+        <div><b>4.9 ★</b><span>Google Rating</span></div>
+        <div><b>1 Year</b><span>Official Warranty</span></div>
+      </div>
+    </div>
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <h3>Galaxy A16</h3>
+          <p>6.7&quot; Display • 128GB • 5000mAh</p>
+          <div class="price">Rs 54,999</div>
+        </div>
+      </div>
+      <div class="phone two">
+        <div class="screen">
+          <div class="notch"></div>
+          <h3>Note 40</h3>
+          <p>8GB RAM • 256GB</p>
+          <div class="price">Rs 52,999</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="trust">
+  <div class="wrap trust-grid">
+    <div><b>✔ Genuine Products</b><span>Sealed box, official warranty</span></div>
+    <div><b>✔ Easy Installments</b><span>Qiston par mobile lein</span></div>
+    <div><b>✔ Fast Delivery</b><span>Same-day in city</span></div>
+    <div><b>✔ Best Price</b><span>Price match guarantee</span></div>
+  </div>
+</div>
+
+<section id="phones">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Featured Phones</h2>
+      <p>Hand-picked latest models — order on WhatsApp in one tap.</p>
+      <div class="rule"></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-img"><span class="tag">Best Seller</span><div class="mini">Galaxy<br>A16</div></div>
+        <div class="card-body">
+          <h3>Samsung Galaxy A16</h3>
+          <div class="spec">6.7&quot; Super AMOLED • 8GB / 128GB • 5000mAh • PTA Approved</div>
+          <div class="price-row"><div><b>Rs 54,999</b><s>Rs 59,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Samsung%20Galaxy%20A16%20(Rs%2054%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><span class="tag">New</span><div class="mini">Infinix<br>Note 40</div></div>
+        <div class="card-body">
+          <h3>Infinix Note 40</h3>
+          <div class="spec">6.78&quot; AMOLED • 8GB / 256GB • 5000mAh • 45W Fast Charging</div>
+          <div class="price-row"><div><b>Rs 52,999</b><s>Rs 56,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Infinix%20Note%2040%20(Rs%2052%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><div class="mini">Tecno<br>Camon 30</div></div>
+        <div class="card-body">
+          <h3>Tecno Camon 30</h3>
+          <div class="spec">6.78&quot; Display • 8GB / 256GB • 50MP Camera • 5000mAh</div>
+          <div class="price-row"><div><b>Rs 49,999</b><s>Rs 53,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Tecno%20Camon%2030%20(Rs%2049%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><div class="mini">Vivo<br>Y28</div></div>
+        <div class="card-body">
+          <h3>Vivo Y28</h3>
+          <div class="spec">6.68&quot; Display • 8GB / 128GB • 6000mAh • 44W Charging</div>
+          <div class="price-row"><div><b>Rs 46,999</b><s>Rs 49,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Vivo%20Y28%20(Rs%2046%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><span class="tag">Hot Deal</span><div class="mini">Redmi<br>Note 13</div></div>
+        <div class="card-body">
+          <h3>Redmi Note 13</h3>
+          <div class="spec">6.67&quot; AMOLED • 8GB / 256GB • 108MP Camera • 5000mAh</div>
+          <div class="price-row"><div><b>Rs 58,999</b><s>Rs 64,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Redmi%20Note%2013%20(Rs%2058%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><div class="mini">Oppo<br>A3x</div></div>
+        <div class="card-body">
+          <h3>Oppo A3x</h3>
+          <div class="spec">6.67&quot; Display • 4GB / 128GB • 5100mAh • Military-Grade Body</div>
+          <div class="price-row"><div><b>Rs 39,999</b><s>Rs 42,999</s></div><a class="wa-btn" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20Oppo%20A3x%20(Rs%2039%2C999)%20order%20karna%20hai.">Order →</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Our Services</h2>
+      <p>Mobile se mutalliq har kaam — aik hi chhat ke neeche.</p>
+      <div class="rule"></div>
+    </div>
+    <div class="svc-grid">
+      <div class="svc"><div class="ico">✦</div><h3>Mobile Repair</h3><p>Screen, battery aur software — expert repair, 30-day service warranty.</p></div>
+      <div class="svc"><div class="ico">✦</div><h3>Accessories</h3><p>Original covers, protectors, chargers aur handsfree — wholesale rates par.</p></div>
+      <div class="svc"><div class="ico">✦</div><h3>Exchange Offer</h3><p>Apna purana mobile dein, naya mobile behtreen price par lein.</p></div>
+      <div class="svc"><div class="ico">✦</div><h3>Easy Installments</h3><p>Qiston par mobile — asaan sharaait, fori approval.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>What Our Customers Say</h2>
+      <p>500+ khush customers ki raye.</p>
+      <div class="rule"></div>
+    </div>
+    <div class="grid">
+      <div class="rev"><div class="stars">★★★★★</div><p>"Sealed box mobile mila, price bhi bazaar se kam thi. Staff bohat cooperative hai."</p><b>Ahmed Raza</b><span>Multan</span></div>
+      <div class="rev"><div class="stars">★★★★★</div><p>"Qiston par mobile liya, koi chhupi hui fee nahi. Har mahine yaad-dihani bhi aati hai."</p><b>Bilal Hussain</b><span>Basti Malook</span></div>
+      <div class="rev"><div class="stars">★★★★★</div><p>"Screen change karwai, aik ghante me kaam ho gaya aur rate bhi munasib tha."</p><b>Usman Ghani</b><span>Multan</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>Apna Naya Mobile Aaj Hi Lein</h2>
+      <p>WhatsApp par message karein — price, stock aur installment plan fori maloom karein.</p>
+      <a class="btn btn-gold" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20MobileZone%20se%20mobile%20lena%20hai.">WhatsApp par Order Karein</a>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>MobileZone</h4>
+        <p>Mobile phones, accessories aur repair — genuine products, munasib qeematein, aur behtreen service.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>Main Bazaar, Multan<br>Phone / WhatsApp: 0300-7379385<br>Timings: 10:00 AM – 10:00 PM (Mon – Sun)</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <p><a href="#phones">Phones</a><br><a href="#services">Services</a><br><a href="#reviews">Reviews</a></p>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 MobileZone. All rights reserved.</div>
+  </div>
+</footer>
+
+<a class="float-wa" href="https://wa.me/923007379385?text=Assalam-o-Alaikum%2C%20MobileZone%20se%20mobile%20ke%20bare%20me%20maloomat%20chahiye." aria-label="WhatsApp">✆</a>
+
+</body>
+</html>
