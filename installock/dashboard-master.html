@@ -39,6 +39,34 @@ th{color:#e8b93c;font-size:12px;text-transform:uppercase}
 .alert.seen{opacity:.55}
 .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .tabs button{flex:1;min-width:100px}
+/* ===== KW-style multi-color tiles (2026-11-06) — har tile ka alag rang =====
+   Pastel palette (KW jaisi): pink, yellow, mint, sky, lavender, peach,
+   rose, teal, lime, indigo, cyan, fuchsia. Dark navy shell waisa hi hai;
+   tiles par dark text taake readable rahe. Logout aakhri button hai —
+   wo subdued dark rehta hai taake action tiles se alag nazar aaye. */
+.tabs button{color:#1f2430;border:1px solid rgba(0,0,0,.08)}
+.tabs button:nth-child(1){background:#f9a8d4}
+.tabs button:nth-child(2){background:#fde68a}
+.tabs button:nth-child(3){background:#a7f3d0}
+.tabs button:nth-child(4){background:#bae6fd}
+.tabs button:nth-child(5){background:#ddd6fe}
+.tabs button:nth-child(6){background:#fed7aa}
+.tabs button:nth-child(7){background:#fda4af}
+.tabs button:nth-child(8){background:#99f6e4}
+.tabs button:nth-child(9){background:#d9f99d}
+.tabs button:nth-child(10){background:#c7d2fe}
+.tabs button:nth-child(11){background:#a5f3fc}
+.tabs button:nth-child(12){background:#f5d0fe}
+.tabs button:last-child{background:#232c4a;color:#e8b93c;border:1px solid #3a4a6b}
+.stats .stat{border:1px solid rgba(0,0,0,.08)}
+.stats .stat:nth-child(1){background:#f9a8d4}
+.stats .stat:nth-child(2){background:#fde68a}
+.stats .stat:nth-child(3){background:#a7f3d0}
+.stats .stat:nth-child(4){background:#bae6fd}
+.stats .stat:nth-child(5){background:#ddd6fe}
+.stats .stat:nth-child(6){background:#fed7aa}
+.stats .stat .n{color:#1f2430}
+.stats .stat .l{color:#4b5563}
 footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 @media(max-width:600px){table{font-size:11px}th,td{padding:6px 4px}}
 /* ===== v4.0 PRO: tags, hisaab, agreement/receipt print ===== */
