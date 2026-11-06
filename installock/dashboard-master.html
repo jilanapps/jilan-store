@@ -110,6 +110,12 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
 <button onclick="showTab('shops')">🏪 Shops</button>
 <button onclick="showTab('tid')">💳 TID Requests <span id="tidCount"></span></button>
+<button onclick="showTab('staff')">👥 Staff</button>
+<button onclick="showTab('dealers')">🏬 Dealers</button>
+<button onclick="showTab('credit')">🔍 Credit Check</button>
+<button onclick="showTab('referrals')">🎁 Referrals</button>
+<button onclick="showTab('store')">🛒 Store</button>
+<button onclick="showTab('help')">🎥 Video Help</button>
 <button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">🔳 Shop QR</button>
 <button class="ghost" onclick="updateAll()">⬆️ Update All</button>
 <button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
@@ -128,12 +134,29 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 </div>
 
 <div class="stats" id="statsRow"></div>
+<!-- FEATURE (2026-11-06): QR + Link card — evergreen provisioning QR-A + customer app link -->
+<div class="card" id="qrLinkCard">
+<h2>📱 QR + Link — Phone Enroll karein</h2>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+<div style="background:#fff;border-radius:10px;padding:10px;width:max-content">
+<img src="qr-a.png" alt="Installock provisioning QR (QR-A)" style="width:180px;height:180px;display:block">
+</div>
+<div style="flex:1;min-width:220px">
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:8px">Naye phone par Installock lagane ke liye QR scan karein, ya link tap karke customer app download karein.</p>
+<p style="margin-bottom:8px"><a href="https://jilanapps.github.io/jilan-store/installock/installock-v3.apk" style="color:#e8b93c;font-weight:700;word-break:break-all">https://jilanapps.github.io/jilan-store/installock/installock-v3.apk</a></p>
+<button onclick="copyAppLink()">📋 Copy Link</button>
+<span id="copyMsg" style="color:#7bd88f;font-size:13px;margin-left:8px"></span>
+</div>
+</div>
+</div>
+
 
 <!-- v1.8-improvement: silent-phone alert banner (24h+) — top par, taake per-row tag miss na ho -->
 <div id="silentAlert"></div>
 
 <!-- v4.0 PRO: hisaab strip -->
 <div class="stats" id="hisaabRow"></div>
+<div class="stats" id="dashTiles"></div>
 
 <div class="card" id="tab-phones">
 <h2>Phones</h2>
@@ -164,6 +187,72 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <p style="color:#9aa7c7;font-size:13px">Customer ka TID submit sirf aik pending request banata hai — na auto-unlock hota hai, na due date / qist / baqi raqam badalti hai. Verify dabane par hi maujooda PAYMENT_RECEIVED flow chalta hai (payments doc + command, phone online hone par apply). Reject par koi payment record nahi banta aur phone unlock nahi hota. Koi bhi TID, payment ya dashboard action Google FRP nahi kholta.</p>
 <div id="tidList">Loading...</div>
 </div>
+<div class="card hidden" id="tab-staff">
+<h2>👥 Staff Management</h2>
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Staff ka login (Firebase Auth user) aap khud Firebase Console me banayein — yahan sirf staff ka naam, role aur rights record hote hain.</p>
+<input id="staffName" placeholder="Staff name">
+<input id="staffContact" placeholder="Contact (phone)">
+<select id="staffRole"><option value="staff">Staff</option><option value="manager">Manager</option></select>
+<label style="display:block;font-size:14px;margin:6px 0"><input type="checkbox" id="staffCanLock" checked style="width:auto"> Lock / Unlock kar sakta hai</label>
+<label style="display:block;font-size:14px;margin:6px 0"><input type="checkbox" id="staffCanKeys" style="width:auto"> Keys dekh sakta hai</label>
+<label style="display:block;font-size:14px;margin:6px 0"><input type="checkbox" id="staffCanRelease" style="width:auto"> Release kar sakta hai</label>
+<button onclick="addStaff()">+ Add Staff</button>
+<div id="staffList" style="margin-top:12px">Loading...</div>
+<h2 style="margin-top:20px">📋 Activity Log</h2>
+<div id="activityList">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-dealers">
+<h2>🏬 Distributor Keys — Dealer Pools</h2>
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Dealer ko keys ka pool assign karein. Single-key flow (Jilan Key) waisa hi chalta rahega — ye pool us se alag record hai. Master app ka key-generator sync baad me hoga.</p>
+<input id="dealerName" placeholder="Dealer name">
+<input id="dealerContact" placeholder="Dealer contact (phone)">
+<textarea id="dealerKeys" placeholder="Key codes — aik line par aik key (JLN-XXXX-XXXX-XXXX)" rows="4" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5e;background:#0b1120;color:#fff;margin-bottom:10px;font-size:15px"></textarea>
+<button onclick="addDealer()">+ Create Dealer &amp; Assign Pool</button>
+<div id="dealerList" style="margin-top:12px">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-credit">
+<h2>🔍 Credit Check — Internal History</h2>
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">CNIC ya phone number se customer ka Installock record check karein. Ye sirf Installock ki apni history hai (KW jaisi bahari credit check nahi).</p>
+<input id="creditQuery" placeholder="CNIC (e.g. 36302-1234567-1) ya phone (03XX-XXXXXXX)">
+<button onclick="runCreditCheck()">Check</button>
+<div id="creditResult" style="margin-top:12px"></div>
+</div>
+
+<div class="card hidden" id="tab-referrals">
+<h2>🎁 Refer a Friend — Gift Keys</h2>
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Apna referral code share karein: nayi dukaan Installock join kare aur keys recharge kare to aap ko bonus keys milengi.</p>
+<p style="margin-bottom:8px">Referral code: <b id="refCode">—</b> <button class="small ghost" onclick="copyRefCode()">📋 Copy</button></p>
+<p style="color:#ffb74d;font-size:13px;margin-bottom:10px">Bonus keys per successful referral: TBD — Dr Asif decide karein ge (abhi tay nahi).</p>
+<input id="refShopName" placeholder="Referred shop name">
+<input id="refShopContact" placeholder="Referred shop contact">
+<button onclick="addReferral()">+ Record Referral</button>
+<div id="refList" style="margin-top:12px">Loading...</div>
+</div>
+
+<div class="card hidden" id="tab-store">
+<h2>🛒 Store — Premium Add-ons</h2>
+<div style="border:1px solid #e8b93c;border-radius:8px;padding:14px;margin-bottom:10px">
+<b>Wireless Premium Fast</b> — <span style="color:#e8b93c;font-weight:700">PKR 1,500 one-time</span><br>
+<span style="color:#9aa7c7;font-size:13px">One tap. A live ring. Every Android phone.</span><br>
+<span class="chip c-grace" style="margin-top:6px;display:inline-block">Coming soon — details on request</span>
+<p style="color:#9aa7c7;font-size:12px;margin-top:8px">Note: ye add-on KW ki video me dikhaya gaya tha; uska kaam karne ka tareeqa video me nahi bataya gaya, is liye details on request hain.</p>
+</div>
+<p style="color:#9aa7c7;font-size:13px">More add-ons coming soon.</p>
+</div>
+
+<div class="card hidden" id="tab-help">
+<h2>🎥 Video Help</h2>
+<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">How-to videos jald aa rahi hain:</p>
+<ul style="margin-left:18px;line-height:2;font-size:14px">
+<li>1. Setup — naye phone par Installock enroll kaise karein <span style="color:#ffb74d">(coming soon)</span></li>
+<li>2. Lock / Unlock — phone lock aur unlock kaise karein <span style="color:#ffb74d">(coming soon)</span></li>
+<li>3. Keys — Jilan Key activate kaise karein <span style="color:#ffb74d">(coming soon)</span></li>
+<li>4. Dues &amp; Payments — qist aur payment kaise record karein <span style="color:#ffb74d">(coming soon)</span></li>
+</ul>
+</div>
+
 
 </div>
 
@@ -287,7 +376,7 @@ async function doLogin(){
 function doLogout(){ auth.signOut().then(()=>location.reload()); }
 
 function showTab(t){
-  ['phones','alerts','shops','tid'].forEach(x=>
+  ['phones','alerts','shops','tid','staff','dealers','credit','referrals','store','help'].forEach(x=>
     document.getElementById('tab-'+x).classList.toggle('hidden', x!==t));
 }
 
@@ -367,6 +456,7 @@ async function startListeners(){
   renderShops(myShops);
   myShopsArr = myShops;
   renderHisaab();
+  startFeatureListeners();
   // phones (per shop subcollection)
   allPhones = [];
   for(const s of myShops){
@@ -442,6 +532,7 @@ async function startListeners(){
           r._shopName = s.name; allTidRequests.push(r);
         });
         renderTidRequests();
+        renderTiles();
       });
   }
   // v4.0 PRO: tamper events -> Security Events section (newest 20 overall).
@@ -499,6 +590,204 @@ function fmtSeen(ts){
   }catch(e){ return '—'; }
 }
 
+
+/* ===== FEATURE (2026-11-06): QR + Link — copy customer app link ===== */
+function copyAppLink(){
+  const link='https://jilanapps.github.io/jilan-store/installock/installock-v3.apk';
+  const done=function(){ const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓'; };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done).catch(function(){ fallbackCopy(link); }); }
+  else fallbackCopy(link);
+}
+function fallbackCopy(t){
+  const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓'; }catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* ===== FEATURE (2026-11-06): dashboard tiles — Reminders / Payments / Reports ===== */
+function renderTiles(){
+  const el=document.getElementById('dashTiles'); if(!el) return;
+  let toRemind=0;
+  allPhones.forEach(function(p){ const dueMs=p.dueDate?Number(p.dueDate):0; if(dueMs && Date.now()>dueMs && (p.status||'active')!=='released') toRemind++; });
+  const pendingTid=(typeof allTidRequests!=='undefined')?allTidRequests.length:0;
+  const now=new Date(); const dStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(); const dEnd=dStart+86400000;
+  let today=0; allPayments.forEach(function(py){ const t=tsMs(py.date); if(t>=dStart && t<dEnd) today+=Number(py.amount)||0; });
+  el.innerHTML=
+    '<div class="stat"><div class="n">'+(toRemind>0?toRemind:'✓')+'</div><div class="l">'+(toRemind>0?(toRemind===1?'phone to remind today':'phones to remind today'):'No one to remind today')+'</div></div>'
+    + '<div class="stat"><div class="n">'+(pendingTid>0?pendingTid:'✓')+'</div><div class="l">'+(pendingTid>0?(pendingTid===1?'payment pending verification':'payments pending verification'):'All verified ✓')+'</div></div>'
+    + '<div class="stat"><div class="n">PKR '+today.toLocaleString('en-US')+'</div><div class="l">collected today</div></div>';
+}
+
+/* ===== FEATURE (2026-11-06): Credit Check — INTERNAL Installock history only =====
+   KW ka exact check undocumented hai; ye sirf Installock ke apne record
+   (shops/{id}/phones) ki history hai — koi bahari credit bureau nahi. */
+function normDigits(s){ return String(s||'').replace(/\D/g,''); }
+function runCreditCheck(){
+  const q=document.getElementById('creditQuery').value.trim();
+  const el=document.getElementById('creditResult');
+  if(!q){ el.innerHTML='CNIC ya phone number likhein.'; return; }
+  const qd=normDigits(q);
+  const variants={}; variants[qd]=1;
+  if(qd.indexOf('92')===0) variants['0'+qd.slice(2)]=1;
+  if(qd.indexOf('0')===0) variants['92'+qd.slice(1)]=1;
+  const hits=allPhones.filter(function(p){
+    const cnic=normDigits(p.customerCnic||p.cnic||'');
+    const num=normDigits(p.customerNumber||'');
+    if(cnic && qd.length>=5 && cnic===qd) return true;
+    if(num && variants[num]) return true;
+    return false;
+  });
+  if(!hits.length){ el.innerHTML='<b>Koi record nahi mila.</b><br><span style="color:#9aa7c7">Ye CNIC/number Installock ki history me nahi hai. (Sirf Installock ka apna record check hota hai — bahari credit bureau nahi.)</span>'; return; }
+  let overdue=0, released=0, paid=0;
+  hits.forEach(function(p){
+    const dueMs=p.dueDate?Number(p.dueDate):0;
+    if((p.status||'')==='released') released++;
+    else if(dueMs && Date.now()>dueMs) overdue++;
+    paid+=Number(p.paidSoFar)||0;
+  });
+  let html='<b>'+hits.length+' record mila:</b><br>'
+    + 'Overdue/defaults: <b>'+overdue+'</b> • Released: <b>'+released+'</b> • Total paid (recorded): <b>Rs '+paid.toLocaleString('en-US')+'</b><br><br>';
+  hits.forEach(function(p){
+    html+='<div style="border-bottom:1px solid #232c4a;padding:8px 0;font-size:13px">'
+      + '<b>'+esc(p.customerName||'—')+'</b> • '+esc(p._shopName||'')+' • IMEI '+esc((p.imei||'—').substring(0,15))
+      + '<br>Status: '+esc(p.status||'active')+' • Due: '+fmtDate(p.dueDate?Number(p.dueDate):0)
+      + ' • Qist baqi: '+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):'—')
+      + ' • Paid: Rs '+Number(p.paidSoFar||0).toLocaleString('en-US')
+      + ' • Remaining: Rs '+Number(p.remainingAmount||0).toLocaleString('en-US')+'</div>';
+  });
+  html+='<p style="color:#9aa7c7;font-size:12px;margin-top:8px">Internal history check — sirf Installock ka apna record. Ye kisi bahari credit bureau ki report nahi hai.</p>';
+  el.innerHTML=html;
+}
+
+/* ===== FEATURE (2026-11-06): Refer a Friend — gift keys =====
+   Bonus keys ki tadad user ne tay nahi ki — UI me TBD dikhaya gaya hai,
+   koi number invent nahi kiya. Status 'active' tab hota hai jab referred
+   shop keys recharge kare (abhi manual — Master Console se update). */
+function refCodeVal(){ return 'JLN-'+String(myUid||'').replace(/[^A-Za-z0-9]/g,'').substring(0,6).toUpperCase(); }
+function copyRefCode(){
+  const c=refCodeVal();
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(c).then(function(){ alert('Referral code copy ho gaya: '+c); }); }
+  else prompt('Referral code copy karein:', c);
+}
+async function addReferral(){
+  const name=document.getElementById('refShopName').value.trim();
+  const contact=document.getElementById('refShopContact').value.trim();
+  if(!name){ alert('Referred shop ka naam likhein'); return; }
+  try{
+    await db.collection('referrals').add({code:refCodeVal(), referrerUid:myUid, referrerName:(myShopsArr[0]&&myShopsArr[0].name)||'', referredName:name, referredContact:contact, status:'pending', bonusGranted:false, createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById('refShopName').value=''; document.getElementById('refShopContact').value='';
+    alert('Referral record ho gaya ✓ — referred shop ke keys recharge karne par bonus milega (bonus keys ki tadad abhi Dr Asif tay karein ge).');
+  }catch(e){ alert('Referral record nahi ho saka: '+e.message); }
+}
+function renderReferralList(snap){
+  const list=[]; snap.forEach(function(d){ const r=d.data(); r._id=d.id; list.push(r); });
+  list.sort(function(a,b){ return tsMs(b.createdAt)-tsMs(a.createdAt); });
+  const el=document.getElementById('refList'); if(!el) return;
+  el.innerHTML=list.length?list.map(function(r){
+    return '<div style="border-bottom:1px solid #232c4a;padding:8px 0;font-size:13px"><b>'+esc(r.referredName||'—')+'</b> • '+esc(r.referredContact||'')+' • Status: <b>'+esc(r.status||'pending')+'</b>'+(r.bonusGranted?' • 🎁 Bonus granted':' • Bonus: pending')+'</div>';
+  }).join(''):'No referrals yet — apna code share karein.';
+}
+
+/* ===== FEATURE (2026-11-06): Staff Management (master only) =====
+   NOTE: Firebase Auth user creation dashboard se NAHI hoti — user khud
+   Firebase Console me banata hai. Dashboard sirf staff metadata/roles
+   Firestore (staff/{uid}) me record karta hai. */
+async function addStaff(){
+  const name=document.getElementById('staffName').value.trim();
+  const contact=document.getElementById('staffContact').value.trim();
+  if(!name){ alert('Staff name likhein'); return; }
+  try{
+    await db.collection('staff').add({name:name, contact:contact, role:document.getElementById('staffRole').value,
+      rights:{canLock:document.getElementById('staffCanLock').checked, canViewKeys:document.getElementById('staffCanKeys').checked, canRelease:document.getElementById('staffCanRelease').checked},
+      createdBy:myUid, createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById('staffName').value=''; document.getElementById('staffContact').value='';
+    alert('Staff add ho gaya ✓ (Auth user Firebase Console me khud banayein)');
+  }catch(e){ alert('Staff add nahi ho saka: '+e.message); }
+}
+async function deleteStaff(id){
+  if(!confirm('Ye staff record delete kar dein?')) return;
+  try{ await db.collection('staff').doc(id).delete(); }
+  catch(e){ alert('Delete nahi ho saka: '+e.message); }
+}
+
+/* ===== FEATURE (2026-11-06): Distributor Keys — dealer pools (master only) =====
+   Single-key flow (Jilan Key) untouched — pool sirf dealer doc me record
+   hota hai. Master app key-generator sync follow-up hai (aaj raat nahi). */
+const DEALER_KEY_RE=/^JLN-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+async function addDealer(){
+  const name=document.getElementById('dealerName').value.trim();
+  const contact=document.getElementById('dealerContact').value.trim();
+  const raw=document.getElementById('dealerKeys').value.split('\n').map(function(s){return s.trim().toUpperCase();}).filter(Boolean);
+  if(!name){ alert('Dealer name likhein'); return; }
+  if(!raw.length){ alert('Kam se kam aik key code likhein'); return; }
+  const bad=raw.filter(function(k){ return !DEALER_KEY_RE.test(k); });
+  if(bad.length){ alert('Ghalat key format: '+bad.slice(0,3).join(', ')+' — format JLN-XXXX-XXXX-XXXX'); return; }
+  const pool=raw.map(function(code){ return {code:code, used:false, usedAt:null, usedByShop:null}; });
+  try{
+    await db.collection('dealers').add({name:name, contact:contact, keyPool:pool, createdBy:myUid, createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById('dealerName').value=''; document.getElementById('dealerContact').value=''; document.getElementById('dealerKeys').value='';
+    alert('Dealer + key pool save ho gaya ✓');
+  }catch(e){ alert('Dealer save nahi ho saka: '+e.message); }
+}
+async function markDealerKeyUsed(dealerId){
+  const code=(prompt('Kaunsi key used mark karein? (JLN-XXXX-XXXX-XXXX)')||'').trim().toUpperCase();
+  if(!code) return;
+  try{
+    const doc=await db.collection('dealers').doc(dealerId).get();
+    if(!doc.exists){ alert('Dealer nahi mila'); return; }
+    const pool=(doc.data().keyPool||[]).slice();
+    const ix=pool.findIndex(function(k){ return k.code===code; });
+    if(ix<0){ alert('Ye key is dealer ke pool me nahi hai'); return; }
+    if(pool[ix].used){ alert('Ye key pehle se used hai'); return; }
+    pool[ix].used=true; pool[ix].usedAt=firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection('dealers').doc(dealerId).update({keyPool:pool});
+  }catch(e){ alert('Update nahi ho saka: '+e.message); }
+}
+
+function startFeatureListeners(){
+  const rc=document.getElementById('refCode'); if(rc) rc.textContent=refCodeVal();
+  try{
+    db.collection('staff').orderBy('createdAt','desc').limit(50).onSnapshot(function(snap){
+      const el=document.getElementById('staffList'); if(!el) return;
+      let html='';
+      snap.forEach(function(d){ const s=d.data();
+        html+='<div style="border-bottom:1px solid #232c4a;padding:8px 0;font-size:13px"><b>'+esc(s.name||'—')+'</b> • '+esc(s.contact||'')+' • Role: '+esc(s.role||'staff')
+          + '<br>Rights: '+((s.rights&&s.rights.canLock)?'Lock/Unlock ✓ ':'')+((s.rights&&s.rights.canViewKeys)?'Keys ✓ ':'')+((s.rights&&s.rights.canRelease)?'Release ✓ ':'')
+          + ' <button class="small danger" onclick="deleteStaff(\''+d.id+'\')">Delete</button></div>';
+      });
+      el.innerHTML=html||'No staff yet.';
+    }, function(err){ const el=document.getElementById('staffList'); if(el) el.textContent='Staff load nahi ho sake ('+err.code+') — sirf admin dekh sakta hai; rules publish hone par dikhein ge.'; });
+  }catch(e){}
+  try{
+    db.collection('activity').orderBy('timestamp','desc').limit(50).onSnapshot(function(snap){
+      const el=document.getElementById('activityList'); if(!el) return;
+      let html='';
+      snap.forEach(function(d){ const a=d.data();
+        html+='<div style="border-bottom:1px solid #232c4a;padding:6px 0;font-size:13px"><b>'+esc(a.action||'—')+'</b> • staff: '+esc(a.staffId||'—')+' • target: '+esc(a.target||'—')+' • '+fmtSeen(a.timestamp)+'</div>';
+      });
+      el.innerHTML=html||'No activity yet.';
+    }, function(err){ const el=document.getElementById('activityList'); if(el) el.textContent='Activity log load nahi ho saka ('+err.code+').'; });
+  }catch(e){}
+  try{
+    db.collection('dealers').orderBy('createdAt','desc').limit(50).onSnapshot(function(snap){
+      const el=document.getElementById('dealerList'); if(!el) return;
+      let html='';
+      snap.forEach(function(d){ const v=d.data(); const pool=v.keyPool||[];
+        const used=pool.filter(function(k){ return k.used; }).length;
+        html+='<div style="border:1px solid #232c4a;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px"><b>'+esc(v.name||'—')+'</b> • '+esc(v.contact||'')
+          + '<br>Keys: total <b>'+pool.length+'</b> • Used <b>'+used+'</b> • Remaining <b>'+(pool.length-used)+'</b>'
+          + '<br><span style="color:#9aa7c7">'+pool.map(function(k){ return esc(k.code)+(k.used?' (used)':''); }).join(', ')+'</span>'
+          + '<br><button class="small ghost" onclick="markDealerKeyUsed(\''+d.id+'\')">Mark a key used</button></div>';
+      });
+      el.innerHTML=html||'No dealers yet.';
+    }, function(err){ const el=document.getElementById('dealerList'); if(el) el.textContent='Dealers load nahi ho sake ('+err.code+') — sirf admin; rules publish hone par dikhein ge.'; });
+  }catch(e){}
+  try{
+    db.collection('referrals').where('referrerUid','==',myUid).onSnapshot(function(snap){ renderReferralList(snap); },
+      function(err){ const el=document.getElementById('refList'); if(el) el.textContent='Referrals load nahi ho sake ('+err.code+').'; });
+  }catch(e){}
+}
+
 function renderPhones(){
   const counts = {active:0,grace:0,limited:0,offline_locked:0};
   let html = '';
@@ -507,6 +796,10 @@ function renderPhones(){
     if(counts[st]!==undefined) counts[st]++;
     const dueMs = p.dueDate ? Number(p.dueDate) : 0;
     const overdue = dueMs && Date.now()>dueMs && st!=='released';
+    const custNum=(p.customerNumber||'').replace(/\D/g,'');
+    const waNum=custNum?(custNum.indexOf('92')===0?custNum:(custNum.indexOf('0')===0?'92'+custNum.slice(1):custNum)):'';
+    const remMsg='Assalam-o-Alaikum'+(p.customerName?', '+p.customerName:'')+', your Installock installment was due on '+fmtDate(dueMs)+(p.remainingAmount?'. Remaining amount: Rs '+Number(p.remainingAmount).toLocaleString('en-US'):'')+'. Please pay at your shop to keep your phone active. - Installock';
+    const remEnc=encodeURIComponent(remMsg);
     html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
       + '<td>'+esc((p.imei||'—').substring(0,15))+'</td>'
       + '<td>'+esc(p._shopName||'—')+'</td>'
@@ -544,6 +837,7 @@ function renderPhones(){
       + '<button class="small ghost" onclick="setPlan(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_PLAN')+'>Plan</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
+      + ((overdue&&waNum)?' <button class="small" onclick="window.open(\'https://wa.me/'+waNum+'?text='+remEnc+'\',\'_blank\')">📲 WhatsApp</button> <a href="sms:+'+waNum+'?body='+remEnc+'" style="color:#e8b93c;font-size:12px">SMS</a>':'')
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
@@ -613,6 +907,7 @@ function renderHisaab(){
     stat(rs(outstanding),'Total Outstanding')
     + stat(rs(collected),'Collected This Month')
     + stat(overdue,'Overdue Phones');
+  renderTiles();
 }
 
 function renderAlerts(){
