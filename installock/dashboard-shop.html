@@ -269,6 +269,18 @@ function esc(s){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
 }
+/** v4.39-test: CNIC 13 digits -> 35202-1234567-8. */
+function fmtCnic(v){
+  const d=String(v||'').replace(/\D/g,'');
+  return d.length===13 ? d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12) : String(v||'');
+}
+/** v4.39-test: small clickable thumbnail img for a phone-doc photo field.
+    Only our own data:image/jpeg;base64 thumbnails are rendered. */
+function thumbImg(p, field, title){
+  const u=p[field]||'';
+  if(typeof u!=='string' || u.indexOf('data:image/jpeg;base64,')!==0) return '';
+  return '<img src="'+u+'" title="'+title+'" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #2a3350;cursor:pointer;vertical-align:top;margin:2px 6px 2px 0" onclick="window.open(this.src,\'_blank\')">';
+}
 function rs(n){ return 'Rs '+Number(n||0).toLocaleString('en-US'); }
 /** Firestore Timestamp / millis / ISO string -> epoch ms (0 if unknown). */
 function tsMs(v){
@@ -666,6 +678,8 @@ function renderPhones(){
       + (p.appVersion?'<br><span style="color:#9aa7c7">App: v'+p.appVersion+'</span>':'')
       + (p.model?'<br><span style="color:#9aa7c7">Mobile: '+esc(p.model)+'</span>':'')
       + ((p.customerName||p.customerNumber)?'<br><span style="color:#9aa7c7">Customer: '+esc((p.customerName||'')+(p.customerName&&p.customerNumber?' ('+p.customerNumber+')':(p.customerNumber||'')))+'</span>':'')
+      + (p.cnicNumber?'<br><span style="color:#9aa7c7">CNIC: '+esc(fmtCnic(p.cnicNumber))+(p.cnicSource?' ('+esc(p.cnicSource==='ocr'?'OCR':'manual')+')':'')+'</span>':'')
+      + ((p.photoCustomerThumb||p.photoCnicThumb)?'<br>'+thumbImg(p,'photoCustomerThumb','Customer photo')+thumbImg(p,'photoCnicThumb','ID card photo'):'')
       + (p.guarantorNumber?'<br><span style="color:#9aa7c7">Guarantor: '+esc(p.guarantorNumber)+'</span>':'')
       + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</span>':'')
       + pendTag(p)
