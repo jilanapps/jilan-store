@@ -274,6 +274,11 @@ function fmtCnic(v){
   const d=String(v||'').replace(/\D/g,'');
   return d.length===13 ? d.slice(0,5)+'-'+d.slice(5,12)+'-'+d.slice(12) : String(v||'');
 }
+/** JazzCash number 11 digits -> 0300-1234567 (fix 2026-11-07: was called but never defined). */
+function fmtShopJazz(v){
+  const d=String(v||'').replace(/\D/g,'');
+  return d.length===11 ? d.slice(0,4)+'-'+d.slice(4) : String(v||'');
+}
 /** v4.39-test: small clickable thumbnail img for a phone-doc photo field.
     Only our own data:image/jpeg;base64 thumbnails are rendered. */
 function thumbImg(p, field, title){
