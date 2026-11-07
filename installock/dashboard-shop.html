@@ -34,6 +34,17 @@ th{color:#e8b93c;font-size:12px;text-transform:uppercase}
 .c-limited{background:#7b1f1f;color:#fff}.c-offline{background:#4a2c7b;color:#fff}
 .c-released{background:#3a4a5e;color:#fff}
 .c-dead{background:#7a1d1d;color:#fff}
+/* ===== Device Health view (2026-11-07) ===== */
+.hdot{font-size:15px}
+.h-ok{color:#4caf50}.h-warn{color:#ffb74d}.h-bad{color:#ff6b6b}
+.hchip{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
+.hchip.ok{background:#1f6b3a}.hchip.warn{background:#8a6d1c}.hchip.bad{background:#c62828}
+#healthOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow:auto;padding:18px}
+#healthOverlay.open{display:block}
+.healthbox{max-width:640px;margin:0 auto;background:#151b30;border:1px solid #232c4a;border-radius:12px;padding:18px}
+.healthbox table.kv{width:100%;border-collapse:collapse;font-size:14px}
+.healthbox table.kv td{padding:8px;border-bottom:1px solid #232c4a}
+.healthbox table.kv td.k{width:45%;color:#9aa7c7}
 .alert{background:#2a1a1a;border-left:4px solid #e85c5c;padding:10px;border-radius:6px;margin-bottom:8px;font-size:13px}
 .alert.seen{opacity:.55}
 .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
@@ -177,8 +188,8 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <h2>Phones</h2>
 <div style="overflow-x:auto">
 <table>
-<thead><tr><th>IMEI</th><th>Shop</th><th>Status</th><th>Due Date</th><th>Last Seen</th><th>Actions</th></tr></thead>
-<tbody id="phoneRows"><tr><td colspan="6">Loading...</td></tr></tbody>
+<thead><tr><th>IMEI</th><th>Shop</th><th>Status</th><th>Health</th><th>Due Date</th><th>Last Seen</th><th>Actions</th></tr></thead>
+<tbody id="phoneRows"><tr><td colspan="7">Loading...</td></tr></tbody>
 </table>
 </div>
 </div>
@@ -247,6 +258,18 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 </div>
 
 </div>
+
+<!-- Device Health detail panel (2026-11-07) -->
+<div id="healthOverlay">
+<div class="healthbox">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+<h2 style="color:#e8b93c;font-size:16px">📱 Device Health</h2>
+<button class="ghost small" onclick="closeHealth()">✕ Band karein</button>
+</div>
+<div id="healthBody">Loading...</div>
+</div>
+</div>
+
 <footer>© 2026 Jilan Apps Official. All rights reserved.</footer>
 
 <!-- v4.0 PRO: agreement / receipt print overlay (only #printArea prints) -->
@@ -549,6 +572,92 @@ function fmtSeen(ts){
     return Math.round(h/24)+'d ago';
   }catch(e){ return '—'; }
 }
+/* ===== Device Health view (2026-11-07, user order) =====
+   Per-phone status from the phone doc only:
+   - health map (v4.43 app): health.batteryLevel (number, %),
+     health.charging (boolean), health.lastBoot (epoch ms).
+     Missing until a v4.43 phone reports -> shown as '—'. NEVER
+     defaulted to 0/100 and never invented.
+   - tamper map: tamper.simChanged, tamper.devOptions,
+     tamper.adbEnabled (true/false; absent -> '—', unknown).
+     Aliases developerOptions / usbDebugging are also accepted.
+   - lastSeen/lastSync -> silent days; lastLocation (lat/lng) ->
+     last known location; status + dueDate -> lock state.
+   Overall status, precedence KHATRA > KHAMOSH > THEEK:
+   KHATRA = SIM changed OR Dev Options on OR ADB on.
+   KHAMOSH = silent > 3 days (and not KHATRA).
+   THEEK = otherwise. No other thresholds. */
+function healthOf(p){
+  const t = (p && p.tamper) || {};
+  const h = (p && p.health) || {};
+  const tri = function(v){ return v===true ? true : (v===false ? false : null); };
+  const simChanged = tri(t.simChanged);
+  const devOn = tri(t.devOptions!==undefined ? t.devOptions : t.developerOptions);
+  const adbOn = tri(t.adbEnabled!==undefined ? t.adbEnabled : t.usbDebugging);
+  const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
+  const silentDays = ls>0 ? Math.floor((Date.now()-ls)/86400000) : null;
+  let status = 'THEEK';
+  if(simChanged===true||devOn===true||adbOn===true) status='KHATRA';
+  else if(silentDays!==null && silentDays>3) status='KHAMOSH';
+  const batt = (typeof h.batteryLevel==='number' && isFinite(h.batteryLevel)) ? h.batteryLevel : null;
+  const charging = (typeof h.charging==='boolean') ? h.charging : null;
+  const bootMs = tsMs(h.lastBoot);
+  return {status:status, simChanged:simChanged, devOn:devOn, adbOn:adbOn,
+    silentDays:silentDays, lastSeenMs:ls, battery:batt, charging:charging,
+    lastBootMs: bootMs>0 ? bootMs : null};
+}
+function fmtDateTime(ms){
+  if(!ms) return '—';
+  return new Date(Number(ms)).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function healthCell(p){
+  const h = healthOf(p);
+  const cls = h.status==='KHATRA' ? 'bad' : (h.status==='KHAMOSH' ? 'warn' : 'ok');
+  return '<span class="hdot h-'+cls+'">●</span> <b>'+h.status+'</b><br>'
+    + '<button class="small ghost" onclick="openHealth(\''+p._shop+'\',\''+p._id+'\')">Health</button>';
+}
+function healthYesNo(v){
+  if(v===true) return '<span style="color:#ff6b6b;font-weight:700">Yes \u26a0\ufe0f</span>';
+  if(v===false) return 'No';
+  return '—';
+}
+function openHealth(shopId, phoneId){
+  const p = findPhone(shopId, phoneId);
+  if(!p) return;
+  const h = healthOf(p);
+  const cls = h.status==='KHATRA' ? 'bad' : (h.status==='KHAMOSH' ? 'warn' : 'ok');
+  const loc = p.lastLocation || {};
+  const hasLoc = (loc.lat!==undefined && loc.lat!==null && loc.lng!==undefined && loc.lng!==null);
+  const locMs = tsMs(loc.at)||tsMs(loc.time)||tsMs(loc.timestamp)||tsMs(p.lastLocationAt)||tsMs(p.locationUpdatedAt);
+  const dueMs = p.dueDate ? Number(p.dueDate) : 0;
+  const battTxt = h.battery===null ? '—' : (Math.round(h.battery)+'%'
+    + (h.charging===true ? ' — Charging' : (h.charging===false ? ' — Not charging' : '')));
+  const rows = [
+    ['Overall status', '<span class="hchip '+cls+'">'+h.status+'</span>'],
+    ['Battery', esc(battTxt)],
+    ['Last boot', h.lastBootMs ? fmtDateTime(h.lastBootMs) : '—'],
+    ['Last seen', fmtSeen(p.lastSeen)+(h.silentDays!==null ? ' ('+h.silentDays+' day'+(h.silentDays===1?'':'s')+' silent)' : '')],
+    ['Last known location', hasLoc
+      ? esc(Number(loc.lat).toFixed(5)+', '+Number(loc.lng).toFixed(5))
+        + ' <a href="https://maps.google.com/?q='+loc.lat+','+loc.lng+'" target="_blank" style="color:#e8b93c">\uD83D\uDCCD Map</a>'
+        + '<br><span style="color:#9aa7c7">'+(locMs ? fmtDateTime(locMs) : 'time —')+'</span>'
+      : '—'],
+    ['SIM changed', healthYesNo(h.simChanged)],
+    ['Developer options on', healthYesNo(h.devOn)],
+    ['USB debugging (ADB) on', healthYesNo(h.adbOn)],
+    ['Lock status', esc(p.status||'active')],
+    ['Due date', fmtDate(dueMs)]
+  ];
+  let html = '<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">'
+    + esc((p.customerName||'')+' \u2022 '+(p.model||'')) + ' \u2022 IMEI ' + esc((p.imei||'—').substring(0,15)) + '</p>'
+    + '<table class="kv"><tbody>'
+    + rows.map(function(r){ return '<tr><td class="k">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; }).join('')
+    + '</tbody></table>'
+    + '<p style="color:#9aa7c7;font-size:12px;margin-top:10px">Battery / last boot sirf v4.43+ phones bhejte hain — "\u2014" matlab phone ne abhi report nahi kiya. KHATRA = SIM changed ya Developer Options / ADB on. KHAMOSH = 3 din se zyada khamosh.</p>';
+  document.getElementById('healthBody').innerHTML = html;
+  document.getElementById('healthOverlay').classList.add('open');
+}
+function closeHealth(){ document.getElementById('healthOverlay').classList.remove('open'); }
 
 
 /* ===== FEATURE (2026-11-06): QR + Link — copy customer app link ===== */
@@ -675,6 +784,7 @@ function renderPhones(){
       + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
           return ls>0 && (Date.now()-ls) > 86400000; })())
           ? ' <span class="chip c-dead">\uD83D\uDD34 RABTA KHATAM?</span>' : '')+'</td>'
+      + '<td>'+healthCell(p)+'</td>'
       + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
       + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
       + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
@@ -720,7 +830,7 @@ function renderPhones(){
       + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
       + '</td></tr>';
   });
-  document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="6">No phones yet</td></tr>';
+  document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="7">No phones yet</td></tr>';
   // Silent-phone banner: 24h+ khamosh, released nahi. Ye 'possible
   // removal' hai, confirmed removal nahi — band phone / net off bhi
   // khamosh lagta hai. Sirf naam + shop + aakhri seen, number nahi.
