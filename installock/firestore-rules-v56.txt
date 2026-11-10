@@ -1,0 +1,300 @@
+// ================= v56 DIRECT SHOP KEY LIST (2026-11-10, DRAFT — NOT PUBLISHED) ====
+// = v55 verbatim + TWO changes (Shop "My Keys" 403 fix — sign-in as the
+// shop SUCCEEDED and retailerUid matched, yet the list still returned
+// PERMISSION_DENIED, so the get()-based check is bypassed for list/get):
+//  1. jilanKeys `allow get` + `allow list` now use a DIRECT check:
+//     resource.data.shopId == 'shop_' + request.auth.uid — no get() on
+//     the shops doc. Admin is still covered by the isAdmin() line above.
+//  2. isShopSide() now guards the distributorUid read with an `in` check,
+//     so a shop doc without a distributorUid field cannot break the
+//     bind/reserve update rules either.
+// Publish THIS file (not v55) so the Shop "My Keys" list works. The USER
+// publishes rules himself in Firebase Console — this file is a draft only
+// and is NOT live until he pastes + Publishes it.
+// ================= v55 KEY RESERVATION (2026-11-09, PUBLISHED by user 14:23 PKT) ====
+// = v54 verbatim + ONE addition: a shop may RESERVE one of its own unused
+// keys for the next customer setup (see the `allow update` reservation rule
+// in match /jilanKeys below). The Shop app sets reserved=true + reservedAt
+// (millis) when the shopkeeper taps "Customer phone par bhejein"; the
+// customer app auto-fills the most recently reserved unused key after Cloud
+// Connect. The H0 bind rule is untouched. Publish THIS file (not v54) so
+// the Shop "My Keys" list, the reservation, and the customer auto-fill all
+// work. The USER publishes rules himself in Firebase Console — this file is
+// a draft only and is NOT live until he pastes + Publishes it.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(db)/documents/masters/$(request.auth.uid));
+    }
+    function shopData(shopId) {
+      return get(/databases/$(db)/documents/shops/$(shopId)).data;
+    }
+    function isShopSide(shopId) {
+      let s = shopData(shopId);
+      return request.auth != null
+        && (s.retailerUid == request.auth.uid
+            || (('distributorUid' in s) && s.distributorUid == request.auth.uid));
+    }
+    function ownsShop(shopId) {
+      return isAdmin() || isShopSide(shopId);
+    }
+    match /masters/{uid} {
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+    match /users/{uid} {
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null
+        && (request.auth.uid == uid || isAdmin());
+    }
+    match /shops/{shopId} {
+      allow read: if request.auth != null && (
+        resource.data.retailerUid == request.auth.uid ||
+        resource.data.distributorUid == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && (
+        request.resource.data.retailerUid == request.auth.uid || isAdmin());
+      allow update: if isAdmin() || (
+        (resource.data.retailerUid == request.auth.uid
+          || resource.data.distributorUid == request.auth.uid)
+        && request.resource.data.diff(resource.data)
+             .affectedKeys().hasOnly(['name', 'contact', 'graceDays'])
+        && request.resource.data.retailerUid == resource.data.retailerUid
+        && ( (!('distributorUid' in resource.data)
+              && !('distributorUid' in request.resource.data))
+             || request.resource.data.distributorUid == resource.data.distributorUid )
+      );
+      allow delete: if isAdmin();
+      match /phones/{phoneId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /commands/{cmdId} {
+        allow read: if ownsShop(shopId);
+        allow create: if ownsShop(shopId)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.type in [
+            'LOCK','UNLOCK','RELEASE','PAYMENT_RECEIVED','SET_DUE_DATE',
+            'SET_PLAN','LOCATE','REMIND','UPDATE_NOW','FRP_ON','FRP_OFF','SET_MASTER_HASH'];
+        allow update, delete: if ownsShop(shopId);
+      }
+      match /payments/{payId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /events/{evId} {
+        allow read, write: if ownsShop(shopId);
+      }
+      match /paymentRequests/{requestId} {
+        allow read: if ownsShop(shopId);
+        allow create: if ownsShop(shopId)
+          && request.resource.data.shopId == shopId
+          && request.resource.data.tid is string
+          && request.resource.data.tid.size() > 0
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.method in ['JazzCash', 'Easypaisa']
+          && request.resource.data.status == 'pending'
+          && request.resource.data.source == 'customer-tid'
+          && request.resource.data.phoneDocId is string
+          && request.resource.data.phoneDocId.size() > 0
+          && !('dueDate' in request.resource.data)
+          && !('installmentsLeft' in request.resource.data)
+          && !('remainingAmount' in request.resource.data)
+          && !('paidSoFar' in request.resource.data)
+          && !('paymentsTotal' in request.resource.data)
+          && !('planMonths' in request.resource.data)
+          && !('monthlyInstallment' in request.resource.data)
+          && !('price' in request.resource.data)
+          && !('advance' in request.resource.data)
+          && !('markupPercent' in request.resource.data);
+        allow update: if ownsShop(shopId)
+          && request.resource.data.tid == resource.data.tid
+          && request.resource.data.amount == resource.data.amount
+          && request.resource.data.method == resource.data.method
+          && request.resource.data.phoneDocId == resource.data.phoneDocId
+          && resource.data.status == 'pending'
+          && request.resource.data.status in ['verified', 'rejected']
+          && ((request.resource.data.status == 'verified'
+               && request.resource.data.verifiedBy == request.auth.uid)
+              || (request.resource.data.status == 'rejected'
+                  && request.resource.data.rejectedBy == request.auth.uid
+                  && request.resource.data.rejectReason is string
+                  && request.resource.data.rejectReason.size() > 0));
+        allow delete: if false;
+      }
+      match /audit/{auditId} {
+        allow read: if ownsShop(shopId);
+        allow create: if (isAdmin()
+              && request.resource.data.createdBy == request.auth.uid)
+            || (ownsShop(shopId)
+              && request.resource.data.action in ['TID_VERIFIED', 'TID_REJECTED']
+              && request.resource.data.actorUid == request.auth.uid);
+        allow update, delete: if false;
+      }
+    }
+    match /alerts/{alertId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // v52 BINDING CANDIDATE (NOT published - the USER publishes this in
+    // the Firebase Console, exactly like v49/v51 were published).
+    // = v51 verbatim + TWO changes:
+    //  R1 (H0 hardware binding): the shop bind update must now also set
+    //  boundHardwareId (non-empty, was empty/missing); the diff becomes
+    //  {status, boundImei, boundHardwareId}. WITHOUT this file published,
+    //  the v4.36 binding-fix TEST build's bind PATCH fails the v51 diff
+    //  check and keyed setup fail-closes — the H0 test CANNOT pass on
+    //  v51 rules. Publish v52 BEFORE running the binding tests.
+    //  R2 (H6a shops ownership): a shop user may update their own shops
+    //  doc only for name/contact/graceDays; retailerUid/distributorUid
+    //  are admin-only (doCloudLink re-link with the SAME uid still passes
+    //  because an unchanged field is not in the diff; a different-uid
+    //  re-link is denied by design).
+    // Everything else = v51 verbatim. DO NOT publish any other file.
+    match /jilanKeys/{keyId} {
+      allow get, list, create, update, delete: if isAdmin();
+      allow get: if request.auth != null
+        && resource.data.shopId is string
+        && resource.data.shopId.size() > 0
+        && resource.data.shopId == 'shop_' + request.auth.uid;
+      // v54 (2026-11-07): a shop may LIST its own keys. The Shop app's
+      // "My Keys" screen queries jilanKeys where shopId == its own shopId;
+      // rules check every returned doc, so a shop can only ever list keys
+      // whose shopId is its own. (Before v54, shops could GET one key doc
+      // but NOT list — the key list would fail with permission-denied.)
+      // v56 (2026-11-10): DIRECT shopId check — no get() on the shops
+      // doc. v55's isShopSide() get() returned 403 on the list query
+      // even though retailerUid matched the signed-in shop UID, so the
+      // list now compares shopId to 'shop_' + uid directly. Admin is
+      // still covered by the isAdmin() line above.
+      allow list: if request.auth != null
+        && resource.data.shopId is string
+        && resource.data.shopId.size() > 0
+        && resource.data.shopId == 'shop_' + request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.shopId is string
+        && resource.data.shopId.size() > 0
+        && isShopSide(resource.data.shopId)
+        && resource.data.status == 'unused'
+        && resource.data.boundImei == ''
+        && ( !('boundHardwareId' in resource.data) || resource.data.boundHardwareId == '' )
+        && request.resource.data.status == 'used'
+        && request.resource.data.boundImei is string
+        && request.resource.data.boundImei.size() > 0
+        && request.resource.data.boundHardwareId is string
+        && request.resource.data.boundHardwareId.size() > 0
+        && request.resource.data.key == resource.data.key
+        && request.resource.data.key == keyId
+        && request.resource.data.shop == resource.data.shop
+        && request.resource.data.contact == resource.data.contact
+        && request.resource.data.shopId == resource.data.shopId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'boundImei', 'boundHardwareId']);
+      // v55 (2026-11-09): a shop may RESERVE one of its own unused keys
+      // for the next customer setup, and clear the reservation. The Shop
+      // app sets reserved=true + reservedAt (millis) on tap; the customer
+      // app auto-fills the most recently reserved unused key after Cloud
+      // Connect. Reservation never changes status/key/shop/contact/shopId,
+      // and the bind rule above is untouched. The Shop app must always
+      // send BOTH reserved and reservedAt in the update.
+      allow update: if request.auth != null
+        && resource.data.shopId is string
+        && resource.data.shopId.size() > 0
+        && isShopSide(resource.data.shopId)
+        && resource.data.status == 'unused'
+        && resource.data.boundImei == ''
+        && ( !('boundHardwareId' in resource.data) || resource.data.boundHardwareId == '' )
+        && request.resource.data.status == 'unused'
+        && request.resource.data.key == resource.data.key
+        && request.resource.data.key == keyId
+        && request.resource.data.shop == resource.data.shop
+        && request.resource.data.contact == resource.data.contact
+        && request.resource.data.shopId == resource.data.shopId
+        && request.resource.data.reserved is bool
+        && request.resource.data.reservedAt is int
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reserved', 'reservedAt']);
+    }
+
+
+    // ================= v54 SHOP KEY LIST (2026-11-07, DRAFT — NOT PUBLISHED) ====
+    // = v53 verbatim + ONE addition: shops may LIST jilanKeys whose shopId
+    // is their own (see the `allow list` line in match /jilanKeys above).
+    // Publish THIS file (not v53) so the Shop app's "My Keys" screen works.
+    // The USER publishes rules himself in Firebase Console — this file is a
+    // draft only and is NOT live until he pastes + Publishes it.
+    //
+    // ================= v53 NEW COLLECTIONS (2026-11-06, DRAFT — NOT PUBLISHED) ====
+    // = v52 verbatim + the rules below. Publish THIS file (not v52) so the
+    // binding fix (H0) and the new dashboard features are covered together.
+    // The USER publishes rules himself in Firebase Console — this file is a
+    // draft only and is NOT live until he pastes + Publishes it.
+    //
+    // WHAT THE USER MUST DO HIMSELF (Firebase Console > Firestore > Rules):
+    //   1. Open this file, copy ALL of it.
+    //   2. Paste it over the current rules, click Publish.
+    //   3. If Publish reports an error, do NOT save a partial file — send the
+    //      error text back. Nothing here is live until Publish succeeds.
+    //   4. Staff Auth users are created by the USER in Firebase Console >
+    //      Authentication (the dashboard only records staff metadata/roles).
+    //   5. A staff doc gets its `uid` field when the user links it to the Auth
+    //      user he created (Console or a later admin tool) — until then the
+    //      staff member reads nothing of their own doc.
+    //   6. Referral bonus: `bonusGranted`/`status` flips are admin-only
+    //      (Console or Master dashboard later). No auto-grant exists yet.
+    //   7. Dealer key pools do NOT change jilanKeys docs — the single-key
+    //      flow is untouched. Master-app key-generator sync is a follow-up.
+    //
+    // CREDIT CHECK needs NO new rule: it reads only shops/{id}/phones the
+    // logged-in user already owns (ownsShop), i.e. existing rules cover it.
+
+    // Staff metadata/roles — Firestore only (staff/{autoId}).
+    // Auth user creation is the user's job in Firebase Console.
+    match /staff/{staffId} {
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Activity log (activity/{autoId}: staffId, action, target, timestamp).
+    // Read: admin only. Create: admin, or the staff member logging their
+    // own action. Never updated/deleted (append-only audit trail).
+    match /activity/{actId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        || (request.auth != null
+            && request.resource.data.staffId == request.auth.uid
+            && request.resource.data.action is string
+            && request.resource.data.timestamp is timestamp);
+      allow update, delete: if false;
+    }
+
+    // Dealer key pools (dealers/{dealerId}: name, contact, keyPool[]).
+    // Admin only — dealers never read/write this directly.
+    match /dealers/{dealerId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Referrals (referrals/{autoId}: code, referrerUid, referredName,
+    // referredContact, status, bonusGranted). Referrer reads/creates their
+    // own; only admin flips status / grants the bonus.
+    match /referrals/{refId} {
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.referrerUid == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.referrerUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.bonusGranted == false;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Agreement metadata (shops/{shopId}/agreements/{agId}) — reserved for
+    // the agreement/receipt feature; same ownership as the shop's phones.
+    match /shops/{shopId}/agreements/{agId} {
+      allow read, write: if ownsShop(shopId);
+    }
+
+  }
+}
