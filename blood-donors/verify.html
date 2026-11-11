@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Member — Basti Dawa Blood Society (BDBS)</title>
+<meta name="description" content="Verify a Basti Dawa Blood Society (BDBS) member by QR code — check membership validity. Blood donation Multan, Basti Dawa.">
+<meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, verify member">
+<link rel="icon" href="logo.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#fdf2f2 0,#f7f5f3 240px,#f7f5f3 100%);color:#1f2937}
+header{background:linear-gradient(135deg,#7f1d1d 0%,#991b1b 55%,#b91c1c 100%);color:#fff;padding:22px 12px 18px;text-align:center;box-shadow:0 4px 18px rgba(127,29,29,.35)}
+header img{width:92px;height:92px;border-radius:50%;border:4px solid #fff;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.wrap{max-width:540px;margin:0 auto;padding:18px 14px 44px}
+.card{background:#fff;border:1px solid #f1e4e4;border-radius:16px;padding:24px 18px;text-align:center;box-shadow:0 10px 30px rgba(127,29,29,.10)}
+.card img.photo{width:110px;height:110px;object-fit:cover;border-radius:12px;border:2px solid #f1e4e4}
+.card h2{font-family:Georgia,"Times New Roman",serif;color:#7f1d1d}
+.verified{font-size:28px;color:#15803d;font-weight:700}
+.notverified{font-size:28px;color:#b91c1c;font-weight:700}
+.mut{color:#6b7280;font-size:13px}.pill{display:inline-block;background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca;border-radius:20px;padding:3px 12px;font-weight:700}
+.setup{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;margin:12px 0;font-size:14px;text-align:left}
+footer{text-align:center;color:#6b7280;font-size:12px;padding:16px}
+
+</style>
+</head>
+<body>
+<header>
+<img src="logo.png" alt="BDBS logo">
+<h2 style="margin:8px 0 2px">Basti Dawa Blood Society</h2>
+<p style="margin:0;font-size:13px">Member Verification &bull; BDBS</p>
+</header>
+<div class="wrap">
+<div id="out"><p class="mut" style="text-align:center">Checking membership…</p></div>
+<p style="text-align:center"><a href="index.html">← Back to BDBS home</a></p>
+</div>
+<footer>Under Supervision — Basti Dawa Welfare Organization<br>&copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>Developed by Dr Asif &bull; WhatsApp: 0300-7379385 &bull; doctorasifattari0012@gmail.com</footer>
+<script>
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
+function notVerified(msg){
+  document.getElementById('out').innerHTML = '<div class="card"><p class="notverified">✗ NOT VERIFIED</p><p class="mut">'+esc(msg||'This membership could not be verified. It may be expired, removed, or the QR code may be wrong.')+'</p></div>';
+}
+function showMember(m){
+  var today = new Date().toISOString().slice(0,10);
+  if (!m || !m.expiry || m.expiry < today) { notVerified('This membership is expired or invalid.'); return; }
+  document.getElementById('out').innerHTML = '<div class="card">' +
+    (m.photo ? '<img class="photo" src="'+m.photo+'" alt="Member photo"><br><br>' : '') +
+    '<p class="verified">✓ VERIFIED MEMBER</p>' +
+    '<h2 style="margin:6px 0">'+esc(m.name)+'</h2>' +
+    '<p>'+esc(m.designation||'')+' &nbsp;•&nbsp; ID No.: <b>'+esc(m.idNo||'')+'</b></p>' +
+    '<p>Blood Group: <span class="pill">'+esc(m.group||'')+'</span></p>' +
+    '<p>Membership valid till: <b>'+esc(fmtD(m.expiry))+'</b></p>' +
+    '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
+}
+(function(){
+  var id = new URLSearchParams(location.search).get('id');
+  if (!id) { notVerified('No member ID in this QR code.'); return; }
+  var CFG = window.BDBS_FIREBASE_CONFIG || {};
+  var configured = !!(CFG.apiKey && CFG.apiKey.indexOf('PASTE') !== 0);
+  if (configured && typeof firebase !== 'undefined') {
+    try {
+      firebase.initializeApp(CFG);
+      firebase.firestore().collection('membersPublic').doc(id).get().then(function(d){
+        if (d.exists) showMember(d.data()); else notVerified();
+      }).catch(function(){ notVerified(); });
+      return;
+    } catch(e) { /* fall through to local demo check */ }
+  }
+  // Local demo mode: check the demo members stored on this device.
+  try {
+    var list = JSON.parse(localStorage.getItem('bdbs_membersPub') || '[]');
+    var m = null; list.forEach(function(x){ if (x.id === id) m = x; });
+    if (m) showMember(m);
+    else {
+      document.getElementById('out').innerHTML = '<div class="card"><p class="notverified">✗ NOT VERIFIED</p><p class="mut">Member not found on this device.</p><div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Live verification needs the Firebase setup from SETUP.md. Demo members saved on this device can still be verified here.</div></div>';
+    }
+  } catch(e) { notVerified(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin = any signed-in user (Email/Password Auth). Only the admin
+    // account created in Firebase Console can sign in.
+    function isAdmin() { return request.auth != null; }
+
+    // Full donor records (phone, CNIC, address, disease, father name).
+    // NEVER public — admin only.
+    match /donors/{id} {
+      allow read, write: if isAdmin();
+    }
+    // Public-safe donor mirror: name, blood group, city, last donation
+    // only. Written by the app together with the full record.
+    match /donorsPublic/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Full member records. NEVER public — admin only.
+    match /members/{id} {
+      allow read, write: if isAdmin();
+    }
+    // Public-safe member mirror for QR verification: photo, name,
+    // designation, ID No., blood group, valid till only.
+    match /membersPublic/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blood requests: anyone may SUBMIT a request (public create).
+    // Full records (phone, CNIC) are admin-only.
+    match /requests/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    // Public-safe request mirror: patient first name, blood group needed,
+    // hospital, city only. Written by the app together with the request.
+    match /requestsPublic/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Daily activities: public to read, admin to publish.
+    match /activities/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Appreciation certificates: admin only (name, blood group, units,
+    // date, reference no. — no phone/CNIC inside).
+    match /certificates/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Yearly certificate counters (BDBS-CERT-YYYY-XXXX).
+    match /counters/{id} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

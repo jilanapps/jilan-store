@@ -3,185 +3,659 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blood Donors — Find a Donor Near You</title>
+<title>Basti Dawa Blood Society (BDBS) — Blood Donors</title>
+<meta name="description" content="Basti Dawa Blood Society (BDBS) — find blood donors, request blood, register as a donor. Blood donation in Multan and Basti Malook. Donate blood, save lives.">
+<meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, blood donors Multan, donate blood, Basti Dawa Blood Society">
+<link rel="icon" href="logo.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="firebase-config.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #fdf2f2; color: #222; }
-  header { background: #c8102e; color: #fff; padding: 22px 16px; text-align: center; }
-  header h1 { font-size: 28px; letter-spacing: 0.5px; }
-  header p { font-size: 14px; opacity: 0.92; margin-top: 4px; }
-  .wrap { max-width: 640px; margin: 0 auto; padding: 16px; }
-  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-  .card h2 { font-size: 18px; color: #c8102e; margin-bottom: 12px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
-  input, select { width: 100%; padding: 11px 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
-  input:focus, select:focus { outline: 2px solid #c8102e; border-color: #c8102e; }
-  .row { display: flex; gap: 10px; }
-  .row > div { flex: 1; }
-  .btn { display: block; width: 100%; padding: 12px; margin-top: 14px; font-size: 16px; font-weight: 700; color: #fff; background: #c8102e; border: none; border-radius: 8px; cursor: pointer; }
-  .btn:active { background: #a50d26; }
-  .btn.ghost { background: #fff; color: #c8102e; border: 1.5px solid #c8102e; }
-  .donor { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #c8102e; }
-  .donor .top { display: flex; align-items: center; gap: 10px; }
-  .donor .name { font-size: 17px; font-weight: 700; flex: 1; }
-  .badge { background: #c8102e; color: #fff; font-weight: 800; font-size: 15px; padding: 6px 10px; border-radius: 8px; min-width: 46px; text-align: center; }
-  .donor .meta { font-size: 14px; color: #555; margin-top: 6px; }
-  .donor .actions { display: flex; gap: 10px; margin-top: 10px; }
-  .donor .actions a { flex: 1; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 15px; }
-  .call { background: #c8102e; color: #fff; }
-  .wa { background: #25d366; color: #fff; }
-  .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
-  .tag.demo { background: #ffe9a8; color: #7a5b00; }
-  .tag.user { background: #d6f5dd; color: #146c2e; }
-  .empty { text-align: center; color: #777; padding: 24px 8px; font-size: 15px; }
-  .count { font-size: 14px; color: #666; margin: 4px 0 12px; }
-  footer { text-align: center; font-size: 12px; color: #999; padding: 18px 12px 28px; }
-  .note { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.5; }
+:root{--maroon:#7f1d1d;--maroon2:#991b1b;--red:#b91c1c;--blue:#dbeafe;--blue2:#bfdbfe;--gold:#b45309;--gold2:#d97706;--gold-soft:#fef3c7;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--green:#15803d;--radius:16px;--shadow:0 10px 30px rgba(127,29,29,.10)}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fdf2f2 0,#f7f5f3 240px,#f7f5f3 100%)}
+header{background:linear-gradient(135deg,#7f1d1d 0%,#991b1b 55%,#b91c1c 100%);color:#fff;padding:24px 12px 20px;text-align:center;box-shadow:0 4px 18px rgba(127,29,29,.35)}
+header img{width:104px;height:104px;border-radius:50%;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.35);background:#fff}
+header h1{margin:10px 0 2px;font-size:24px;letter-spacing:.4px}
+header p{margin:3px 0;font-size:13px;opacity:.92}
+header .tagline{font-size:12px;color:#fde68a;letter-spacing:3px;text-transform:uppercase;font-weight:600}
+nav{position:sticky;top:0;z-index:10;background:#fff;display:flex;overflow-x:auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+nav button{flex:1;white-space:nowrap;background:none;border:0;color:var(--maroon);padding:13px 10px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:var(--red);border-bottom-color:var(--gold2)}
+.wrap{max-width:880px;margin:0 auto;padding:18px 14px 70px}
+.sec{display:none}.sec.on{display:block}
+.card{background:#fff;border:1px solid #f1e4e4;border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;color:var(--maroon);font-size:20px;padding-bottom:9px;border-bottom:2px solid var(--gold-soft);position:relative}
+.card h2:after{content:"";position:absolute;left:0;bottom:-2px;width:56px;height:2px;background:var(--gold2)}
+.card h3{margin:12px 0 6px;color:var(--maroon);font-size:16px}
+.mut{color:var(--mut);font-size:13px}.small{font-size:12px}
+.leader{border-left:4px solid var(--gold2)}
+.btn{background:linear-gradient(135deg,#991b1b,#b91c1c);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;margin:4px 4px 4px 0;box-shadow:0 4px 12px rgba(185,28,28,.28);letter-spacing:.2px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(185,28,28,.35)}
+.btn.ghost{background:#fff;color:var(--red);border:1.5px solid var(--red);box-shadow:none}
+.btn.green{background:linear-gradient(135deg,#166534,#15803d);box-shadow:0 4px 12px rgba(21,128,61,.28)}
+.btn:disabled{opacity:.5}
+input,select,textarea{width:100%;padding:12px;border:1.5px solid #e7d5d5;border-radius:10px;font-size:15px;margin:5px 0 10px;background:#fff;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--maroon);box-shadow:0 0 0 3px rgba(185,28,28,.14)}
+label{font-size:13px;font-weight:600;color:#374151}
+.row{display:flex;gap:12px}.row>*{flex:1}
+.stat{background:linear-gradient(135deg,#fff,#fef2f2);border:1px solid #f1e4e4;border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:28px;color:var(--maroon)}
+.stat span{font-size:12px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
+.pill{display:inline-block;background:#fee2e2;color:var(--maroon);border:1px solid #fecaca;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px}
+.badge{display:inline-block;background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+.badge.demo{background:#e0e7ff;color:#3730a3}
+.ok{color:var(--green);font-weight:700}.err{color:var(--red);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+th{background:#fef2f2;color:var(--maroon)}
+.person{display:flex;gap:14px;align-items:flex-start}
+.person img{width:76px;height:76px;object-fit:cover;border-radius:12px;border:2px solid #f1e4e4}
+.mcard{border:3px solid var(--maroon);outline:1.5px solid var(--gold2);outline-offset:5px;border-radius:16px;padding:22px;background:linear-gradient(180deg,#fff,#fffdf5);max-width:540px;box-shadow:0 14px 34px rgba(127,29,29,.16)}
+.mcard .mhead{text-align:center;border-bottom:2px solid var(--gold-soft);padding-bottom:12px;margin-bottom:12px}
+.mcard .mhead img{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold2)}
+.mcard .mhead .ctitle{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
+.mcard .qr{text-align:center;margin:14px 0}
+.mcard .qrbox{display:inline-block;padding:12px;border:1.5px solid var(--gold-soft);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.mcard .sig{font-size:12px;color:var(--mut);text-align:center;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.cert{border:4px double var(--gold2);border-radius:14px;padding:30px 24px;text-align:center;background:linear-gradient(180deg,#fffdf5,#fff);max-width:660px;margin:12px auto;box-shadow:0 14px 34px rgba(180,83,9,.14)}
+.cert h2{font-family:Georgia,"Times New Roman",serif;color:var(--maroon);margin:6px 0;letter-spacing:.5px}
+.cert .seal{display:inline-flex;width:64px;height:64px;border-radius:50%;border:2px solid var(--gold2);color:var(--gold2);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin:6px auto}
+.cert .ref{display:inline-block;border:1.5px dashed var(--gold2);border-radius:8px;padding:8px 16px;font-weight:700;letter-spacing:1px;color:var(--maroon);background:#fff}
+.cert .cname{font-family:Georgia,"Times New Roman",serif;font-size:26px;color:var(--ink)}
+.verified{font-size:26px;color:var(--green);font-weight:700}
+.notverified{font-size:26px;color:var(--red);font-weight:700}
+.setup{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;margin:12px 0;font-size:14px}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
+@media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}}
+@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>&#128137; Blood Donors</h1>
-  <p>Find a blood donor near you — one call can save a life.</p>
+<img src="logo.png" alt="BDBS logo">
+<h1>Basti Dawa Blood Society</h1>
+<p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p>
+<p class="tagline">Donate Blood &bull; Save Lives</p>
 </header>
-
+<nav id="nav">
+<button data-s="home" class="on" onclick="show('home')">Home</button>
+<button data-s="find" onclick="show('find')">Find Donor</button>
+<button data-s="request" onclick="show('request')">Request Blood</button>
+<button data-s="donor" onclick="show('donor')">Become Donor</button>
+<button data-s="members" onclick="show('members')">Members</button>
+<button data-s="activity" onclick="show('activity')">Activity</button>
+<button data-s="certificate" onclick="show('certificate')">Certificate</button>
+<button data-s="login" onclick="show('login')">Login / Admin</button>
+</nav>
 <div class="wrap">
 
-  <div class="card">
-    <h2>Find a Donor</h2>
-    <div class="row">
-      <div>
-        <label for="qGroup">Blood Group</label>
-        <select id="qGroup">
-          <option value="">All Groups</option>
-          <option>A+</option><option>A-</option>
-          <option>B+</option><option>B-</option>
-          <option>O+</option><option>O-</option>
-          <option>AB+</option><option>AB-</option>
-        </select>
-      </div>
-      <div>
-        <label for="qCity">City</label>
-        <input id="qCity" type="text" placeholder="e.g. Multan" autocomplete="off">
-      </div>
-    </div>
-    <button class="btn" onclick="doSearch()">Search</button>
-    <button class="btn ghost" onclick="clearSearch()">Clear</button>
-  </div>
+<!-- ================= HOME ================= -->
+<section class="sec on" id="s-home">
+<div class="card">
+<h2>Welcome to Basti Dawa Blood Society</h2>
+<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor and patient personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login.</p>
+<div class="row">
+<div class="card leader" style="flex:1"><h3>Patron In Chief</h3><b>Dr Muhammad Naeem Asghar</b><br><span class="mut">Phone: 0301-5626609</span></div>
+<div class="card leader" style="flex:1"><h3>Founder &amp; Chief Executive</h3><b>Muhammad Asif Javaid</b><br><span class="mut">Phone: 03069140867</span></div>
+</div>
+<p><b>Follow us:</b>
+<!-- TODO-SOCIAL-LINKS: replace the # links below with the real links -->
+<a class="btn ghost" href="#" onclick="return todoSocial('WhatsApp')">WhatsApp</a>
+<a class="btn ghost" href="#" onclick="return todoSocial('Facebook')">Facebook</a>
+<a class="btn ghost" href="#" onclick="return todoSocial('TikTok')">TikTok</a>
+<span class="mut small">(Social links coming soon)</span></p>
+</div>
+<div class="card"><h2>At a glance</h2><div id="stats" class="mut">Loading…</div></div>
+<div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
+</section>
 
-  <div class="count" id="count"></div>
-  <div id="list"></div>
+<!-- ================= FIND DONOR ================= -->
+<section class="sec" id="s-find">
+<div class="card">
+<h2>Find a Blood Donor</h2>
+<p class="mut">Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.</p>
+<div class="row">
+<div><label>Blood Group</label>
+<select id="fGroup"><option value="">All groups</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+<div><label>City / Area</label><input id="fCity" placeholder="e.g. Multan"></div>
+</div>
+<button class="btn" onclick="searchDonors()">Search Donors</button>
+<button class="btn ghost" onclick="show('request')">Request Blood</button>
+<div id="findResults" style="margin-top:10px"></div>
+</div>
+</section>
 
-  <div class="card">
-    <h2>Register as Donor</h2>
-    <label for="fName">Full Name</label>
-    <input id="fName" type="text" placeholder="Your name" autocomplete="off">
-    <div class="row">
-      <div>
-        <label for="fGroup">Blood Group</label>
-        <select id="fGroup">
-          <option value="">Select group</option>
-          <option>A+</option><option>A-</option>
-          <option>B+</option><option>B-</option>
-          <option>O+</option><option>O-</option>
-          <option>AB+</option><option>AB-</option>
-        </select>
-      </div>
-      <div>
-        <label for="fCity">City</label>
-        <input id="fCity" type="text" placeholder="Your city" autocomplete="off">
-      </div>
-    </div>
-    <label for="fPhone">Mobile Number</label>
-    <input id="fPhone" type="tel" placeholder="03xx-xxxxxxx" autocomplete="off">
-    <button class="btn" onclick="registerDonor()">Register</button>
-    <p class="note">Your details are saved only on this phone (no account, no server). Share your number only if you are happy to be contacted by patients in need.</p>
-  </div>
+<!-- ================= REQUEST BLOOD ================= -->
+<section class="sec" id="s-request">
+<div class="card">
+<h2>Blood Donation Request</h2>
+<p class="mut">Your request is sent to the BDBS admin. The public list shows only the patient's first name, blood group needed, hospital and city — never phone or CNIC.</p>
+<div class="row">
+<div><label>Pt Name *</label><input id="rName" placeholder="Patient name"></div>
+<div><label>Father Name *</label><input id="rFather" placeholder="Father name"></div>
+</div>
+<div class="row">
+<div><label>CNIC (optional)</label><input id="rCnic" placeholder="CNIC (optional)"></div>
+<div><label>Age *</label><input id="rAge" type="number" min="0" max="120" placeholder="Age"></div>
+</div>
+<div class="row">
+<div><label>Blood Group Needed *</label>
+<select id="rGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+<div><label>Hospital *</label><input id="rHospital" placeholder="Hospital name"></div>
+</div>
+<div class="row">
+<div><label>Disease *</label><input id="rDisease" placeholder="Disease / reason"></div>
+<div><label>Phone No. *</label><input id="rPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+</div>
+<label>Address *</label><input id="rAddress" placeholder="Patient address">
+<button class="btn" onclick="submitRequest()">Submit Request</button>
+<div id="rMsg"></div>
+</div>
+<div class="card"><h2>Open Blood Requests</h2><div id="requestList" class="mut">Loading…</div></div>
+</section>
+
+<!-- ================= BECOME DONOR ================= -->
+<section class="sec" id="s-donor">
+<div class="card">
+<h2>Donor Registration</h2>
+<p class="mut">Register as a blood donor. Your phone, CNIC, address and disease are <b>private</b> — only the BDBS admin can see them. The public donor list shows only your name, blood group, city and last donation date.</p>
+<div class="row">
+<div><label>Donor Name *</label><input id="dName" placeholder="Full name"></div>
+<div><label>Father Name *</label><input id="dFather" placeholder="Father name"></div>
+</div>
+<div class="row">
+<div><label>Donor No. *</label><input id="dNo" placeholder="e.g. D-001"></div>
+<div><label>Donor Profile Photo (optional)</label><input id="dPhoto" type="file" accept="image/*"></div>
+</div>
+<div class="row">
+<div><label>CNIC *</label><input id="dCnic" placeholder="35202-xxxxxxx-x"></div>
+<div><label>Blood Group *</label>
+<select id="dGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+</div>
+<div class="row">
+<div><label>Age *</label><input id="dAge" type="number" min="18" max="65" placeholder="Age (18-65)"></div>
+<div><label>Phone *</label><input id="dPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+</div>
+<label>Address *</label><input id="dAddress" placeholder="Your address">
+<div class="row">
+<div><label>Disease *</label><input id="dDisease" placeholder="Any disease (write None if healthy)"></div>
+<div><label>Last Blood Donation *</label><input id="dLast" type="date"></div>
+</div>
+<label>Total Units of Blood Donated *</label><input id="dUnits" type="number" min="0" placeholder="e.g. 3">
+<button class="btn" onclick="submitDonor()">Register as Donor</button>
+<div id="dMsg"></div>
+</div>
+</section>
+
+<!-- ================= MEMBERS ================= -->
+<section class="sec" id="s-members">
+<div class="card">
+<h2>Our Members</h2>
+<p class="mut">Public member list shows only name, designation, ID No., blood group and membership validity. Phone, CNIC, email and address are never public.</p>
+<div id="memberList" class="mut">Loading…</div>
+</div>
+<div class="card">
+<h2>Add Member</h2>
+<p class="mut">Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.</p>
+<div class="row">
+<div><label>Photo</label><input id="mPhoto" type="file" accept="image/*"></div>
+<div><label>Name *</label><input id="mName" placeholder="Full name"></div>
+</div>
+<div class="row">
+<div><label>Father Name *</label><input id="mFather" placeholder="Father name"></div>
+<div><label>Designation *</label><input id="mDesig" placeholder="e.g. Member, Volunteer"></div>
+</div>
+<div class="row">
+<div><label>ID No. *</label><input id="mId" placeholder="e.g. 001"></div>
+<div><label>CNIC *</label><input id="mCnic" placeholder="CNIC"></div>
+</div>
+<div class="row">
+<div><label>Blood Group *</label>
+<select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+<div><label>Age *</label><input id="mAge" type="number" min="0" max="120" placeholder="Age"></div>
+</div>
+<div class="row">
+<div><label>Education *</label><input id="mEdu" placeholder="Education"></div>
+<div><label>Phone *</label><input id="mPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+</div>
+<div class="row">
+<div><label>Email *</label><input id="mEmail" type="email" placeholder="Email"></div>
+<div><label>Address *</label><input id="mAddress" placeholder="Address"></div>
+</div>
+<div class="row">
+<div><label>Issue Date *</label><input id="mIssue" type="date"></div>
+<div><label>Expiry Date *</label><input id="mExpiry" type="date"></div>
+</div>
+<button class="btn" onclick="submitMember()">Add Member &amp; Generate Card</button>
+<div id="mMsg"></div>
+<div id="memberCard"></div>
+</div>
+</section>
+
+<!-- ================= ACTIVITY ================= -->
+<section class="sec" id="s-activity">
+<div class="card"><h2>Daily Activity &amp; Gallery</h2><div id="activityList" class="mut">Loading…</div></div>
+<div class="card" id="activityPublish" style="display:none">
+<h2>Publish Activity (Admin)</h2>
+<label>Title *</label><input id="aTitle" placeholder="Activity title">
+<label>Details *</label><textarea id="aText" rows="3" placeholder="What happened today?"></textarea>
+<label>Photo (optional)</label><input id="aPhoto" type="file" accept="image/*">
+<button class="btn" onclick="publishActivity()">Publish</button>
+<div id="aMsg"></div>
+</div>
+</section>
+
+<!-- ================= CERTIFICATE ================= -->
+<section class="sec" id="s-certificate">
+<div class="card">
+<h2>Donor Appreciation Certificate</h2>
+<p class="mut">After a blood donation, the admin generates an auto-generated appreciation certificate with a verified reference number. Enter a reference number to check a certificate.</p>
+<div class="row">
+<div><label>Certificate Reference No.</label><input id="cRef" placeholder="e.g. BDBS-CERT-2026-0001"></div>
+</div>
+<button class="btn" onclick="lookupCert()">Check Certificate</button>
+<div id="certView" style="margin-top:10px"></div>
+</div>
+</section>
+
+<!-- ================= LOGIN / ADMIN ================= -->
+<section class="sec" id="s-login">
+<div class="card" id="loginCard">
+<h2>Admin Login</h2>
+<div id="setupWarn"></div>
+<label>Email</label><input id="lEmail" type="email" placeholder="Admin email">
+<label>Password</label><input id="lPass" type="password" placeholder="Password">
+<button class="btn" onclick="doLogin()">Login</button>
+<button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
+<div id="lMsg"></div>
+<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Forgot Password sends a reset email to the admin email.</p>
+</div>
+<div class="card" id="adminCard" style="display:none">
+<h2>Admin Panel <span id="adminEmail" class="mut"></span></h2>
+<button class="btn ghost" onclick="doLogout()">Logout</button>
+<button class="btn ghost" onclick="show('activity')">Publish Activity</button>
+<div id="adminTables"></div>
+</div>
+</section>
 
 </div>
-
-<footer>&copy; 2026 Jilan Apps Official. All rights reserved.</footer>
+<footer>
+Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
+&copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>
+Developed by Dr Asif &bull; WhatsApp: 0300-7379385 &bull; doctorasifattari0012@gmail.com
+</footer>
 
 <script>
-var GROUPS = ["A+","A-","B+","B-","O+","O-","AB+","AB-"];
-var DEMO = [
-  { name: "Demo Donor 1", group: "O+",  city: "Multan",    phone: "03000000001", demo: true },
-  { name: "Demo Donor 2", group: "A+",  city: "Lahore",    phone: "03000000002", demo: true },
-  { name: "Demo Donor 3", group: "B+",  city: "Karachi",   phone: "03000000003", demo: true },
-  { name: "Demo Donor 4", group: "AB+", city: "Islamabad", phone: "03000000004", demo: true },
-  { name: "Demo Donor 5", group: "A-",  city: "Faisalabad",phone: "03000000005", demo: true },
-  { name: "Demo Donor 6", group: "O-",  city: "Rawalpindi",phone: "03000000006", demo: true }
-];
-var KEY = "bloodDonorsUser";
-
-function loadUser() {
-  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; }
-}
-function saveUser(list) {
-  try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
-}
-function allDonors() { return DEMO.concat(loadUser()); }
-function waLink(phone) {
-  var digits = phone.replace(/\D/g, "");
-  if (digits.charAt(0) === "0") digits = "92" + digits.substring(1);
-  return "https://wa.me/" + digits;
-}
-function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-function render(list) {
-  var box = document.getElementById("list");
-  var c = document.getElementById("count");
-  c.textContent = list.length + (list.length === 1 ? " donor found" : " donors found");
-  if (!list.length) {
-    box.innerHTML = '<div class="empty">No donor found. Try another blood group or city — or register as a donor below.</div>';
-    return;
+/* ================= BDBS app ================= */
+var SITE_BASE = 'https://jilanapps.github.io/jilan-store/bdbs/';
+var CFG = (window.BDBS_FIREBASE_CONFIG || {});
+var CONFIGURED = !!(CFG.apiKey && CFG.apiKey.indexOf('PASTE') !== 0);
+var FB_OK = false, db = null, auth = null;
+try {
+  if (CONFIGURED && typeof firebase !== 'undefined') {
+    firebase.initializeApp(CFG);
+    db = firebase.firestore(); auth = firebase.auth(); FB_OK = true;
   }
-  var html = "";
-  list.forEach(function (d) {
-    html += '<div class="donor"><div class="top"><span class="name">' + esc(d.name) +
-      (d.demo ? '<span class="tag demo">DEMO</span>' : '<span class="tag user">REGISTERED</span>') +
-      '</span><span class="badge">' + esc(d.group) + '</span></div>' +
-      '<div class="meta">&#128205; ' + esc(d.city) + ' &nbsp;|&nbsp; &#128222; ' + esc(d.phone) + '</div>' +
-      '<div class="actions"><a class="call" href="tel:' + esc(d.phone) + '">Call</a>' +
-      '<a class="wa" href="' + waLink(d.phone) + '" target="_blank" rel="noopener">WhatsApp</a></div></div>';
+} catch (e) { FB_OK = false; }
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
+function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
+function firstName(n){return String(n||'').trim().split(/\s+/)[0] || 'Patient';}
+function todoSocial(n){alert(n + ' link coming soon — the organisation will share the real link.'); return false;}
+function show(s){
+  document.querySelectorAll('.sec').forEach(function(el){el.classList.remove('on');});
+  var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
+  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests();
+  if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
+  window.scrollTo(0,0);
+}
+
+/* ---------- local store (used when Firebase is not configured) ---------- */
+var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', seeded:'bdbs_seeded' };
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function seedLocal(){
+  if (localStorage.getItem(LS.seeded)) return;
+  var donors = [
+    {id:'demo_d1',name:'Demo Donor 1',father:'Demo Father 1',donorNo:'D-001',photo:'',cnic:'35202-0000001-1',group:'B+',age:28,address:'Demo Address, Multan',phone:'0300-0000001',disease:'None',lastDonation:'2026-09-12',units:4,demo:true},
+    {id:'demo_d2',name:'Demo Donor 2',father:'Demo Father 2',donorNo:'D-002',photo:'',cnic:'35202-0000002-2',group:'O-',age:32,address:'Demo Address, Basti Malook',phone:'0300-0000002',disease:'None',lastDonation:'2026-10-03',units:2,demo:true},
+    {id:'demo_d3',name:'Demo Donor 3',father:'Demo Father 3',donorNo:'D-003',photo:'',cnic:'35202-0000003-3',group:'A+',age:25,address:'Demo Address, Multan',phone:'0300-0000003',disease:'None',lastDonation:'2026-08-20',units:6,demo:true},
+    {id:'demo_d4',name:'Demo Donor 4',father:'Demo Father 4',donorNo:'D-004',photo:'',cnic:'35202-0000004-4',group:'AB+',age:40,address:'Demo Address, Lahore',phone:'0300-0000004',disease:'None',lastDonation:'2026-11-01',units:1,demo:true}
+  ];
+  var members = [
+    {id:'demo_m1',photo:'',name:'Demo Member One',father:'Demo Father',designation:'Member',idNo:'001',cnic:'35202-0000001-1',group:'B+',age:30,education:'Matric',phone:'0300-0000001',email:'demo1@example.com',address:'Demo Address, Multan',issue:'2026-01-01',expiry:'2027-01-01',demo:true},
+    {id:'demo_m2',photo:'',name:'Demo Member Two',father:'Demo Father',designation:'Volunteer',idNo:'002',cnic:'35202-0000002-2',group:'O+',age:27,education:'FSc',phone:'0300-0000002',email:'demo2@example.com',address:'Demo Address, Basti Malook',issue:'2026-01-01',expiry:'2027-01-01',demo:true}
+  ];
+  lsSet(LS.donors, donors); lsSet(LS.donorsPub, donors.map(donorPub));
+  lsSet(LS.members, members); lsSet(LS.membersPub, members.map(memberPub));
+  lsSet(LS.requests, [{id:'demo_r1',name:'Demo Patient',father:'Demo Father',cnic:'',age:45,group:'O+',hospital:'Demo Hospital, Multan',disease:'Surgery',phone:'0300-0000009',address:'Demo Address',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.requestsPub, [{id:'demo_r1',firstName:'Demo',group:'O+',hospital:'Demo Hospital, Multan',city:'Multan',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.activities, [{id:'demo_a1',title:'Welcome to BDBS',text:'Basti Dawa Blood Society is now live. Donate blood, save lives.',photo:'',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.certs, []);
+  localStorage.setItem(LS.seeded, '1');
+}
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',demo:!!d.demo};}
+function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,designation:m.designation,idNo:m.idNo,group:m.group,expiry:m.expiry,demo:!!m.demo};}
+function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+
+/* ---------- data access (Firestore when configured, else local) ---------- */
+function qAll(coll, cb){
+  if (FB_OK) { db.collection(coll).orderBy('createdAt','desc').limit(200).get()
+    .then(function(s){cb(s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;}));})
+    .catch(function(){cb([]);}); }
+  else { var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,donors:LS.donors,members:LS.members,requests:LS.requests,certificates:LS.certs};
+    cb(lsGet(map[coll]||LS.activities)); }
+}
+function qAdd(coll, obj, cb){
+  if (FB_OK) { var ref = obj.id ? db.collection(coll).doc(obj.id) : db.collection(coll).doc(); obj.id = ref.id;
+    ref.set(obj).then(function(){cb(true, obj);}).catch(function(){cb(false);}); }
+  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
+    var arr = lsGet(map[coll]); arr.unshift(obj); lsSet(map[coll], arr); cb(true, obj); }
+}
+function qDel(coll, id, cb){
+  if (FB_OK) { db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){cb(false);}); }
+  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
+    var arr = lsGet(map[coll]).filter(function(x){return x.id!==id;}); lsSet(map[coll], arr); cb(true); }
+}
+
+/* ---------- photo helper (resize to max 300px, JPEG) ---------- */
+function readPhoto(input, done){
+  var f = input && input.files && input.files[0];
+  if (!f) return done('');
+  var r = new FileReader();
+  r.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      var s = Math.min(1, 300 / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      done(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = function(){ done(''); };
+    img.src = r.result;
+  };
+  r.onerror = function(){ done(''); };
+  r.readAsDataURL(f);
+}
+function val(id){var e=document.getElementById(id); return e ? e.value.trim() : '';}
+function need(ids){for (var i=0;i<ids.length;i++){if(!val(ids[i])) return ids[i];} return null;}
+
+/* ---------- public rendering (NEVER shows phone/CNIC/address/disease) ---------- */
+function loadHome(){
+  qAll('donorsPublic', function(ds){
+    qAll('activities', function(acts){
+      qAll('requestsPublic', function(rs){
+        var units = 0; ds.forEach(function(d){units += 0;});
+        document.getElementById('stats').innerHTML =
+          '<div class="row"><div class="stat"><b>' + ds.length + '</b><span>Donors</span></div>' +
+          '<div class="stat"><b>' + rs.length + '</b><span>Open requests</span></div>' +
+          '<div class="stat"><b>' + acts.length + '</b><span>Activities</span></div></div>' +
+          (FB_OK ? '' : ' <p class="small mut" style="margin-top:8px">LOCAL DEMO MODE — Firebase setup pending (see SETUP.md).</p>');
+        document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
+          return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+        }).join('') : '<span class="mut">No activity yet.</span>';
+      });
+    });
   });
-  box.innerHTML = html;
 }
-function doSearch() {
-  var g = document.getElementById("qGroup").value;
-  var city = document.getElementById("qCity").value.trim().toLowerCase();
-  var out = allDonors().filter(function (d) {
-    if (g && d.group !== g) return false;
-    if (city && d.city.toLowerCase().indexOf(city) === -1) return false;
-    return true;
+function searchDonors(){
+  var g = val('fGroup'), c = val('fCity').toLowerCase();
+  qAll('donorsPublic', function(ds){
+    var out = ds.filter(function(d){
+      if (g && d.group !== g) return false;
+      if (c && (d.city||'').toLowerCase().indexOf(c) === -1) return false;
+      return true;
+    });
+    var box = document.getElementById('findResults');
+    if (!out.length) { box.innerHTML = '<p class="mut">No donor found for this search. Try another blood group or city — or submit a blood request.</p>'; return; }
+    box.innerHTML = '<p class="mut">'+out.length+' donor(s) found. Contact via a blood request — the admin will connect you.</p>' + out.map(function(d){
+      return '<div class="card person"><div><b>'+esc(d.name)+'</b>'+(d.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="pill">'+esc(d.group)+'</span> <span class="mut">'+esc(d.city||'')+'</span><br><span class="mut small">Last donation: '+esc(fmtD(d.lastDonation))+'</span></div></div>';
+    }).join('');
   });
-  render(out);
 }
-function clearSearch() {
-  document.getElementById("qGroup").value = "";
-  document.getElementById("qCity").value = "";
-  render(allDonors());
+function loadRequests(){
+  qAll('requestsPublic', function(rs){
+    var box = document.getElementById('requestList');
+    if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
+    box.innerHTML = rs.map(function(r){
+      return '<div class="card"><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' — needs <span class="pill">'+esc(r.group)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div>';
+    }).join('');
+  });
 }
-function registerDonor() {
-  var name = document.getElementById("fName").value.trim();
-  var group = document.getElementById("fGroup").value;
-  var city = document.getElementById("fCity").value.trim();
-  var phone = document.getElementById("fPhone").value.trim();
-  if (!name || !group || !city || !phone) { alert("Please fill all fields."); return; }
-  var digits = phone.replace(/\D/g, "");
-  if (digits.length < 10 || digits.length > 12) { alert("Please enter a valid mobile number (e.g. 0300-1234567)."); return; }
-  var list = loadUser();
-  list.push({ name: name, group: group, city: city, phone: phone, demo: false });
-  saveUser(list);
-  document.getElementById("fName").value = "";
-  document.getElementById("fGroup").value = "";
-  document.getElementById("fCity").value = "";
-  document.getElementById("fPhone").value = "";
-  alert("Thank you, " + name + "! You are registered as a " + group + " donor in " + city + ".");
-  clearSearch();
+function loadMembers(){
+  qAll('membersPublic', function(ms){
+    var box = document.getElementById('memberList');
+    if (!ms.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
+    box.innerHTML = ms.map(function(m){
+      var valid = m.expiry && m.expiry >= new Date().toISOString().slice(0,10);
+      return '<div class="card person">' + (m.photo ? '<img src="'+m.photo+'" alt="">' : '') +
+        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(m.designation||'')+' • ID: '+esc(m.idNo||'')+'</span><br><span class="pill">'+esc(m.group||'')+'</span> <span class="mut small">Valid till: '+esc(fmtD(m.expiry))+' '+(valid?'<span class="ok">✓ Valid</span>':'<span class="err">Expired</span>')+'</span><br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card &amp; QR</button></div></div>';
+    }).join('');
+  });
 }
-render(allDonors());
+function loadActivities(){
+  qAll('activities', function(acts){
+    var box = document.getElementById('activityList');
+    if (!acts.length) { box.innerHTML = '<span class="mut">No activity yet.</span>'; return; }
+    box.innerHTML = acts.map(function(a){
+      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+    }).join('');
+  });
+  document.getElementById('activityPublish').style.display = (FB_OK && auth && auth.currentUser) ? 'block' : 'none';
+}
+
+/* ---------- forms ---------- */
+function submitRequest(){
+  var miss = need(['rName','rFather','rAge','rGroup','rHospital','rDisease','rPhone','rAddress']);
+  if (miss) { document.getElementById('rMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  var id = uid('req');
+  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), createdAt:Date.now()};
+  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), createdAt:Date.now()};
+  qAdd('requests', full, function(ok){
+    if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+    qAdd('requestsPublic', pub, function(){
+      document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. The admin will contact you.</span>';
+      ['rName','rFather','rCnic','rAge','rHospital','rDisease','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
+      document.getElementById('rGroup').value=''; loadRequests();
+    });
+  });
+}
+function submitDonor(){
+  var miss = need(['dName','dFather','dNo','dCnic','dGroup','dAge','dPhone','dAddress','dDisease','dLast','dUnits']);
+  if (miss) { document.getElementById('dMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  var age = parseInt(val('dAge'),10);
+  if (age < 18 || age > 65) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor age must be 18–65.</span>'; return; }
+  readPhoto(document.getElementById('dPhoto'), function(photo){
+    var id = uid('donor');
+    var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:val('dNo'), photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, createdAt:Date.now()};
+    var pub = donorPub(full); pub.city = full.address.split(',').pop().trim();
+    qAdd('donors', full, function(ok){
+      if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+      qAdd('donorsPublic', pub, function(){
+        document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
+        ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
+        document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value='';
+      });
+    });
+  });
+}
+function submitMember(){
+  var miss = need(['mName','mFather','mDesig','mId','mCnic','mGroup','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry']);
+  if (miss) { document.getElementById('mMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  readPhoto(document.getElementById('mPhoto'), function(photo){
+    var id = uid('member');
+    var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:val('mId'), cnic:val('mCnic'), group:val('mGroup'), age:val('mAge'), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
+    var pub = memberPub(full);
+    qAdd('members', full, function(ok){
+      if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+      qAdd('membersPublic', pub, function(){
+        document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. Membership card is ready below.</span>';
+        renderMemberCard(full); loadMembers();
+        ['mName','mFather','mDesig','mId','mCnic','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
+        document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
+      });
+    });
+  });
+}
+function renderMemberCard(m){
+  var url = SITE_BASE + '?verify=' + encodeURIComponent(m.id);
+  var html = '<div class="mcard print-area"><div class="mhead"><img src="logo.png" alt="BDBS logo"><div class="ctitle">Membership Card</div><b style="font-size:18px;color:#7f1d1d">Basti Dawa Blood Society</b></div>' +
+    '<div class="person" style="margin-top:6px">' + (m.photo?'<img src="'+m.photo+'" alt="">':'') +
+    '<div><b style="font-size:17px">'+esc(m.name)+'</b><br><span class="mut">'+esc(m.designation||'')+'</span><br>ID No.: <b>'+esc(m.idNo||'')+'</b> &nbsp; Blood Group: <span class="pill">'+esc(m.group||'')+'</span><br><span class="mut small">Issue: '+esc(fmtD(m.issue))+' &nbsp; Expiry: '+esc(fmtD(m.expiry))+'</span></div></div>' +
+    '<div class="qr"><div class="qrbox" id="qrBox"></div></div><div style="text-align:center" class="small mut">'+esc(url)+'</div>' +
+    '<div class="sig">Verified Signature Authorized<br>Under Supervision — Basti Dawa Welfare Organization</div></div>' +
+    '<button class="btn" onclick="window.print()">Print Card</button>';
+  document.getElementById('memberCard').innerHTML = html;
+  if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
+}
+function viewMemberCard(id){
+  qAll('members', function(ms){
+    var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
+    if (!m) { qAll('membersPublic', function(ps){ var p=null; ps.forEach(function(x){if(x.id===id)p=x;});
+      if (p) renderMemberCard({id:p.id, photo:p.photo, name:p.name, designation:p.designation, idNo:p.idNo, group:p.group, issue:'', expiry:p.expiry});
+      document.getElementById('memberCard').scrollIntoView(); }); return; }
+    renderMemberCard(m); document.getElementById('memberCard').scrollIntoView();
+  });
+}
+function publishActivity(){
+  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
+  if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
+  readPhoto(document.getElementById('aPhoto'), function(photo){
+    qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
+      document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
+      if (ok) { document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
+    });
+  });
+}
+
+/* ---------- certificates ---------- */
+function nextCertRef(cb){
+  var y = new Date().getFullYear();
+  if (!FB_OK) {
+    var k = 'bdbs_certCounter_' + y, n = parseInt(localStorage.getItem(k)||'0',10) + 1;
+    localStorage.setItem(k, String(n));
+    cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); return;
+  }
+  var ref = db.collection('counters').doc('cert-' + y);
+  db.runTransaction(function(tx){
+    return tx.get(ref).then(function(d){
+      var n = (d.exists ? (d.data().n||0) : 0) + 1;
+      tx.set(ref, {n:n}); return n;
+    });
+  }).then(function(n){ cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); })
+    .catch(function(){ cb('BDBS-CERT-' + y + '-ERR' + Date.now().toString().slice(-4)); });
+}
+function generateCert(donorId){
+  qAll('donors', function(ds){
+    var d = null; ds.forEach(function(x){ if (x.id===donorId) d=x; });
+    if (!d) return;
+    nextCertRef(function(ref){
+      var cert = {ref:ref, donorId:d.id, donorName:d.name, group:d.group, units:d.units||0, date:new Date().toISOString().slice(0,10), createdAt:Date.now()};
+      qAdd('certificates', cert, function(ok){
+        if (!ok) { alert('Could not generate certificate.'); return; }
+        show('certificate'); renderCert(cert);
+      });
+    });
+  });
+}
+function renderCert(c){
+  document.getElementById('certView').innerHTML =
+    '<div class="cert print-area"><img src="logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid #d97706"><div class="seal">&#10003;</div><h2>Certificate of Appreciation</h2>' +
+    '<p class="mut">Basti Dawa Blood Society proudly appreciates</p><div class="cname">'+esc(c.donorName)+'</div>' +
+    '<p>for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br>Your gift saves lives.</p>' +
+    '<p><span class="ref">Verified Reference No: '+esc(c.ref)+'</span></p><p class="verified">✓ VERIFIED</p>' +
+    '<p class="mut small">Under Supervision — Basti Dawa Welfare Organization</p></div>' +
+    '<button class="btn" onclick="window.print()">Print Certificate</button>';
+}
+function lookupCert(){
+  var ref = val('cRef');
+  if (!ref) { document.getElementById('certView').innerHTML = '<span class="err">Enter a reference number.</span>'; return; }
+  qAll('certificates', function(cs){
+    var c = null; cs.forEach(function(x){ if ((x.ref||'').toUpperCase() === ref.toUpperCase()) c=x; });
+    if (c) renderCert(c);
+    else document.getElementById('certView').innerHTML = '<p class="notverified">✗ NOT VERIFIED</p><p class="mut">No certificate found with this reference number.</p>';
+  });
+}
+
+/* ---------- auth & admin ---------- */
+function renderLogin(){
+  var w = document.getElementById('setupWarn');
+  if (!FB_OK) {
+    w.innerHTML = '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login works here.</div>';
+    document.querySelector('#loginCard .btn').disabled = true;
+  } else { w.innerHTML = ''; document.querySelector('#loginCard .btn').disabled = false; }
+  if (FB_OK && auth) {
+    auth.onAuthStateChanged(function(u){
+      document.getElementById('loginCard').style.display = u ? 'none' : 'block';
+      document.getElementById('adminCard').style.display = u ? 'block' : 'none';
+      if (u) { document.getElementById('adminEmail').textContent = '(' + u.email + ')'; renderAdmin(); }
+    });
+  }
+}
+function doLogin(){
+  if (!FB_OK) return;
+  var em = val('lEmail'), pw = val('lPass');
+  if (!em || !pw) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter email and password.</span>'; return; }
+  auth.signInWithEmailAndPassword(em, pw).then(function(){
+    document.getElementById('lMsg').innerHTML = '<span class="ok">Logged in.</span>';
+  }).catch(function(e){
+    document.getElementById('lMsg').innerHTML = '<span class="err">Login failed — check email and password.</span>';
+  });
+}
+function doLogout(){ if (FB_OK && auth) auth.signOut(); }
+function doForgot(){
+  if (!FB_OK) return;
+  var em = val('lEmail');
+  if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your admin email first, then Forgot Password.</span>'; return; }
+  auth.sendPasswordResetEmail(em).then(function(){
+    document.getElementById('lMsg').innerHTML = '<span class="ok">Reset email sent to '+esc(em)+'.</span>';
+  }).catch(function(){
+    document.getElementById('lMsg').innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
+  });
+}
+function renderAdmin(){
+  var box = document.getElementById('adminTables');
+  box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
+  qAll('donors', function(ds){
+    qAll('members', function(ms){
+      qAll('requests', function(rs){
+        qAll('certificates', function(cs){
+          var h = '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
+          ds.forEach(function(d){
+            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button></td></tr>';
+          });
+          h += '</table></div>';
+          h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th></tr>';
+          ms.forEach(function(m){
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td></tr>';
+          });
+          h += '</table></div>';
+          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th></tr>';
+          rs.forEach(function(r){
+            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td></tr>';
+          });
+          h += '</table></div>';
+          h += '<h3>Certificates ('+cs.length+')</h3>' + (cs.length ? cs.map(function(c){
+            return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.donorName)+' ('+esc(c.group)+', '+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
+          }).join('') : '<p class="mut">No certificates yet. Use the Certificate button on a donor row.</p>');
+          box.innerHTML = h;
+        });
+      });
+    });
+  });
+}
+
+/* ---------- init ---------- */
+if (!FB_OK) seedLocal();
+loadHome();
+renderLogin();
 </script>
 </body>
 </html>
