@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Donors — Find a Donor Near You</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #fdf2f2; color: #222; }
+  header { background: #c8102e; color: #fff; padding: 22px 16px; text-align: center; }
+  header h1 { font-size: 28px; letter-spacing: 0.5px; }
+  header p { font-size: 14px; opacity: 0.92; margin-top: 4px; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 18px; color: #c8102e; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  input, select { width: 100%; padding: 11px 12px; font-size: 15px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+  input:focus, select:focus { outline: 2px solid #c8102e; border-color: #c8102e; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .btn { display: block; width: 100%; padding: 12px; margin-top: 14px; font-size: 16px; font-weight: 700; color: #fff; background: #c8102e; border: none; border-radius: 8px; cursor: pointer; }
+  .btn:active { background: #a50d26; }
+  .btn.ghost { background: #fff; color: #c8102e; border: 1.5px solid #c8102e; }
+  .donor { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #c8102e; }
+  .donor .top { display: flex; align-items: center; gap: 10px; }
+  .donor .name { font-size: 17px; font-weight: 700; flex: 1; }
+  .badge { background: #c8102e; color: #fff; font-weight: 800; font-size: 15px; padding: 6px 10px; border-radius: 8px; min-width: 46px; text-align: center; }
+  .donor .meta { font-size: 14px; color: #555; margin-top: 6px; }
+  .donor .actions { display: flex; gap: 10px; margin-top: 10px; }
+  .donor .actions a { flex: 1; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .call { background: #c8102e; color: #fff; }
+  .wa { background: #25d366; color: #fff; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
+  .tag.demo { background: #ffe9a8; color: #7a5b00; }
+  .tag.user { background: #d6f5dd; color: #146c2e; }
+  .empty { text-align: center; color: #777; padding: 24px 8px; font-size: 15px; }
+  .count { font-size: 14px; color: #666; margin: 4px 0 12px; }
+  footer { text-align: center; font-size: 12px; color: #999; padding: 18px 12px 28px; }
+  .note { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>&#128137; Blood Donors</h1>
+  <p>Find a blood donor near you — one call can save a life.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Find a Donor</h2>
+    <div class="row">
+      <div>
+        <label for="qGroup">Blood Group</label>
+        <select id="qGroup">
+          <option value="">All Groups</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>O+</option><option>O-</option>
+          <option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+      <div>
+        <label for="qCity">City</label>
+        <input id="qCity" type="text" placeholder="e.g. Multan" autocomplete="off">
+      </div>
+    </div>
+    <button class="btn" onclick="doSearch()">Search</button>
+    <button class="btn ghost" onclick="clearSearch()">Clear</button>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+
+  <div class="card">
+    <h2>Register as Donor</h2>
+    <label for="fName">Full Name</label>
+    <input id="fName" type="text" placeholder="Your name" autocomplete="off">
+    <div class="row">
+      <div>
+        <label for="fGroup">Blood Group</label>
+        <select id="fGroup">
+          <option value="">Select group</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>O+</option><option>O-</option>
+          <option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+      <div>
+        <label for="fCity">City</label>
+        <input id="fCity" type="text" placeholder="Your city" autocomplete="off">
+      </div>
+    </div>
+    <label for="fPhone">Mobile Number</label>
+    <input id="fPhone" type="tel" placeholder="03xx-xxxxxxx" autocomplete="off">
+    <button class="btn" onclick="registerDonor()">Register</button>
+    <p class="note">Your details are saved only on this phone (no account, no server). Share your number only if you are happy to be contacted by patients in need.</p>
+  </div>
+
+</div>
+
+<footer>&copy; 2026 Jilan Apps Official. All rights reserved.</footer>
+
+<script>
+var GROUPS = ["A+","A-","B+","B-","O+","O-","AB+","AB-"];
+var DEMO = [
+  { name: "Demo Donor 1", group: "O+",  city: "Multan",    phone: "03000000001", demo: true },
+  { name: "Demo Donor 2", group: "A+",  city: "Lahore",    phone: "03000000002", demo: true },
+  { name: "Demo Donor 3", group: "B+",  city: "Karachi",   phone: "03000000003", demo: true },
+  { name: "Demo Donor 4", group: "AB+", city: "Islamabad", phone: "03000000004", demo: true },
+  { name: "Demo Donor 5", group: "A-",  city: "Faisalabad",phone: "03000000005", demo: true },
+  { name: "Demo Donor 6", group: "O-",  city: "Rawalpindi",phone: "03000000006", demo: true }
+];
+var KEY = "bloodDonorsUser";
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; }
+}
+function saveUser(list) {
+  try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+}
+function allDonors() { return DEMO.concat(loadUser()); }
+function waLink(phone) {
+  var digits = phone.replace(/\D/g, "");
+  if (digits.charAt(0) === "0") digits = "92" + digits.substring(1);
+  return "https://wa.me/" + digits;
+}
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function render(list) {
+  var box = document.getElementById("list");
+  var c = document.getElementById("count");
+  c.textContent = list.length + (list.length === 1 ? " donor found" : " donors found");
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">No donor found. Try another blood group or city — or register as a donor below.</div>';
+    return;
+  }
+  var html = "";
+  list.forEach(function (d) {
+    html += '<div class="donor"><div class="top"><span class="name">' + esc(d.name) +
+      (d.demo ? '<span class="tag demo">DEMO</span>' : '<span class="tag user">REGISTERED</span>') +
+      '</span><span class="badge">' + esc(d.group) + '</span></div>' +
+      '<div class="meta">&#128205; ' + esc(d.city) + ' &nbsp;|&nbsp; &#128222; ' + esc(d.phone) + '</div>' +
+      '<div class="actions"><a class="call" href="tel:' + esc(d.phone) + '">Call</a>' +
+      '<a class="wa" href="' + waLink(d.phone) + '" target="_blank" rel="noopener">WhatsApp</a></div></div>';
+  });
+  box.innerHTML = html;
+}
+function doSearch() {
+  var g = document.getElementById("qGroup").value;
+  var city = document.getElementById("qCity").value.trim().toLowerCase();
+  var out = allDonors().filter(function (d) {
+    if (g && d.group !== g) return false;
+    if (city && d.city.toLowerCase().indexOf(city) === -1) return false;
+    return true;
+  });
+  render(out);
+}
+function clearSearch() {
+  document.getElementById("qGroup").value = "";
+  document.getElementById("qCity").value = "";
+  render(allDonors());
+}
+function registerDonor() {
+  var name = document.getElementById("fName").value.trim();
+  var group = document.getElementById("fGroup").value;
+  var city = document.getElementById("fCity").value.trim();
+  var phone = document.getElementById("fPhone").value.trim();
+  if (!name || !group || !city || !phone) { alert("Please fill all fields."); return; }
+  var digits = phone.replace(/\D/g, "");
+  if (digits.length < 10 || digits.length > 12) { alert("Please enter a valid mobile number (e.g. 0300-1234567)."); return; }
+  var list = loadUser();
+  list.push({ name: name, group: group, city: city, phone: phone, demo: false });
+  saveUser(list);
+  document.getElementById("fName").value = "";
+  document.getElementById("fGroup").value = "";
+  document.getElementById("fCity").value = "";
+  document.getElementById("fPhone").value = "";
+  alert("Thank you, " + name + "! You are registered as a " + group + " donor in " + city + ".");
+  clearSearch();
+}
+render(allDonors());
+</script>
+</body>
+</html>
