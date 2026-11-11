@@ -9,7 +9,8 @@ APK: https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v1-test.a
 app. No card, no paid service, no Firebase Storage in v1.
 
 ## 1. Create a NEW Firebase project (do NOT reuse the Installock project)
-1. Open https://console.firebase.google.com/ in a browser (on the laptop).
+1. **Sign in to Google with the society's Gmail: `bastidawabloodsociety@gmail.com`** (NOT a personal Gmail) — the project and all donor/member data will belong to the society.
+2. Open https://console.firebase.google.com/ in a browser (on the laptop).
 2. Click **Add project** → project name: `basti-dawa-blood-society` →
    **Continue** → Google Analytics: **OFF** (not needed) → **Create project**.
 3. Wait for "Your new project is ready" → **Continue**.
@@ -45,7 +46,7 @@ app. No card, no paid service, no Firebase Storage in v1.
 
 ## 6. Create the admin account
 1. **Authentication → Users → Add user**.
-2. Email: the admin email (e.g. the organisation email). Password: a
+2. Email: `bastidawabloodsociety@gmail.com` (the society's Gmail). Password: a
    strong password — write it down safely. **Never share it.**
 3. This is the only login for the app + web admin panel.
 4. Forgot password works from the app's Login screen (Firebase sends a

@@ -89,6 +89,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button data-s="activity" onclick="show('activity')">Activity</button>
 <button data-s="certificate" onclick="show('certificate')">Certificate</button>
 <button data-s="login" onclick="show('login')">Login / Admin</button>
+<button data-s="home" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView();},80)">Contact Us</button>
 </nav>
 <div class="wrap">
 
@@ -108,6 +109,14 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 </div>
 <div class="card"><h2>At a glance</h2><div id="stats" class="mut">Loading…</div></div>
 <div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
+<div class="card" id="contact"><h2>Contact Us</h2>
+<p class="mut">Reach out to Basti Dawa Blood Society for blood donation, membership or any question.</p>
+<p><b>Email:</b> <a href="mailto:bastidawabloodsociety@gmail.com">bastidawabloodsociety@gmail.com</a></p>
+<p><b>WhatsApp (Founder Muhammad Asif Javaid):</b><br><a class="btn" style="margin-top:10px" href="https://wa.me/923069140867?text=Assalam-o-Alaikum%2C%20I%20want%20to%20contact%20Basti%20Dawa%20Blood%20Society%20regarding%20blood%20donation." target="_blank" rel="noopener">WhatsApp</a></p>
+<p><b>Follow us:</b>
+<a class="btn ghost" href="https://www.facebook.com/profile.php?id=61568131213778" target="_blank" rel="noopener">Facebook</a>
+<a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
+</div>
 </section>
 
 <!-- ================= FIND DONOR ================= -->
