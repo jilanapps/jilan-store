@@ -51,9 +51,13 @@ app. No card, no paid service, no Firebase Storage in v1.
 4. Forgot password works from the app's Login screen (Firebase sends a
    reset email to the admin email).
 
-## 7. Add the social links
-In `index.html`, find `TODO-SOCIAL-LINKS` and replace the three `#`
-placeholders with the real WhatsApp / Facebook / TikTok links.
+## 7. Social links (already set)
+The real links are already in `index.html`:
+- WhatsApp: https://wa.me/923069140867 (Founder Muhammad Asif Javaid, 03069140867)
+- Facebook: https://www.facebook.com/profile.php?id=61568131213778
+- TikTok: https://www.tiktok.com/@basti.dawa.bloodsociety
+
+Only change them in `index.html` if the organisation's links change.
 
 ## 8. Photos — size limit (v1)
 Donor/member photos are stored as small base64 text inside Firestore
