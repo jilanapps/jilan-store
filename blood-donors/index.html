@@ -7,97 +7,222 @@
 <meta name="description" content="Basti Dawa Blood Society (BDBS) — find blood donors, request blood, register as a donor. Blood donation in Multan and Basti Malook. Donate blood, save lives.">
 <meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, blood donors Multan, donate blood, Basti Dawa Blood Society">
 <link rel="icon" href="logo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="firebase-config.js"></script>
 <style>
-:root{--maroon:#7f1d1d;--maroon2:#991b1b;--red:#b91c1c;--blue:#dbeafe;--blue2:#bfdbfe;--gold:#b45309;--gold2:#d97706;--gold-soft:#fef3c7;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--green:#15803d;--radius:16px;--shadow:0 10px 30px rgba(127,29,29,.10)}
-*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fdf2f2 0,#f7f5f3 240px,#f7f5f3 100%)}
-header{background:linear-gradient(135deg,#7f1d1d 0%,#991b1b 55%,#b91c1c 100%);color:#fff;padding:24px 12px 20px;text-align:center;box-shadow:0 4px 18px rgba(127,29,29,.35)}
-header img{width:104px;height:104px;border-radius:50%;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.35);background:#fff}
-header h1{margin:10px 0 2px;font-size:24px;letter-spacing:.4px}
-header p{margin:3px 0;font-size:13px;opacity:.92}
-header .tagline{font-size:12px;color:#fde68a;letter-spacing:3px;text-transform:uppercase;font-weight:600}
-nav{position:sticky;top:0;z-index:10;background:#fff;display:flex;overflow-x:auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-nav button{flex:1;white-space:nowrap;background:none;border:0;color:var(--maroon);padding:13px 10px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
-nav button.on{color:var(--red);border-bottom-color:var(--gold2)}
-.wrap{max-width:880px;margin:0 auto;padding:18px 14px 70px}
-.sec{display:none}.sec.on{display:block}
-.card{background:#fff;border:1px solid #f1e4e4;border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:var(--shadow)}
-.card h2{margin:0 0 10px;color:var(--maroon);font-size:20px;padding-bottom:9px;border-bottom:2px solid var(--gold-soft);position:relative}
-.card h2:after{content:"";position:absolute;left:0;bottom:-2px;width:56px;height:2px;background:var(--gold2)}
-.card h3{margin:12px 0 6px;color:var(--maroon);font-size:16px}
+/* ============ BDBS Premium Medical / NGO design system ============
+   Primary crimson #DC2626, deep burgundy #7F1D1D, bg #F8FAFC,
+   slate text #1E293B, emerald #10B981. Inter / Poppins.
+   This is the critical CSS: it carries the full design even when the
+   Tailwind CDN cannot load (APK offline bundled copy). */
+:root{
+  --red:#DC2626; --red2:#B91C1C; --red3:#991B1B; --burgundy:#7F1D1D;
+  --bg:#F8FAFC; --card:#FFFFFF; --ink:#1E293B; --ink2:#334155; --mut:#64748B;
+  --line:#E2E8F0; --line2:#F1F5F9; --gold:#D97706; --gold-soft:#FEF3C7;
+  --green:#10B981; --green-d:#047857; --green-soft:#ECFDF5;
+  --radius:16px; --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+  --shadow-lg:0 2px 6px rgba(15,23,42,.08),0 16px 40px rgba(15,23,42,.12);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:"Inter","Poppins","Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);padding-bottom:86px;line-height:1.5}
+h1,h2,h3{margin:0;color:var(--ink)}
+p{margin:0 0 10px}
+a{color:var(--red);text-decoration:none}
+img{max-width:100%}
+button{font-family:inherit}
+
+/* ---------- header ---------- */
+header{background:linear-gradient(135deg,#7F1D1D 0%,#B91C1C 55%,#DC2626 100%);color:#fff;padding:18px 16px 20px;box-shadow:0 4px 20px rgba(127,29,29,.35)}
+.hwrap{max-width:880px;margin:0 auto;display:flex;gap:14px;align-items:center}
+.mark{flex:0 0 auto;width:52px;height:52px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
+.mark svg{width:52px;height:52px;display:block}
+header h1{font-size:21px;font-weight:800;letter-spacing:.2px;line-height:1.2}
+header p{margin:3px 0 0;font-size:12.5px;opacity:.92}
+header .tagline{font-size:11px;color:#FDE68A;letter-spacing:2.5px;text-transform:uppercase;font-weight:700}
+
+/* ---------- layout / sections ---------- */
+.wrap{max-width:880px;margin:0 auto;padding:18px 14px 28px}
+.sec{display:none}.sec.on{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:19px;font-weight:800;padding-bottom:9px;border-bottom:2px solid var(--line2);position:relative}
+.card h2:after{content:"";position:absolute;left:0;bottom:-2px;width:56px;height:2px;background:var(--red)}
+.card h3{margin:14px 0 8px;font-size:16px;font-weight:700}
 .mut{color:var(--mut);font-size:13px}.small{font-size:12px}
-.leader{border-left:4px solid var(--gold2)}
-.btn{display:inline-block;background:linear-gradient(135deg,#991b1b,#b91c1c);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;margin:4px 4px 4px 0;box-shadow:0 4px 12px rgba(185,28,28,.28);letter-spacing:.2px;text-decoration:none}
-.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(185,28,28,.35)}
+.leader{border-left:4px solid var(--gold)}
+.ok{color:var(--green-d);font-weight:700}.err{color:var(--red);font-weight:700}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(150deg,#7F1D1D 0%,#B91C1C 52%,#DC2626 100%);border-radius:20px;padding:26px 20px 22px;color:#fff;margin:6px 0 14px;box-shadow:0 16px 40px rgba(127,29,29,.35);text-align:center;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07);top:-90px;right:-60px}
+.hero:after{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-70px;left:-40px}
+.hero .hero-mark{width:76px;height:76px;margin:0 auto 8px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));position:relative}
+.hero .hero-mark svg{width:76px;height:76px;display:block}
+.hero h1{font-size:25px;font-weight:800;color:#fff;line-height:1.2}
+.hero .hero-sub{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#FDE68A;font-weight:700;margin:6px 0 4px}
+.hero .hero-text{font-size:14px;opacity:.94;max-width:520px;margin:0 auto 16px;position:relative}
+.hero-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;position:relative}
+.hstat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:12px 6px;text-align:center;backdrop-filter:blur(2px)}
+.hstat b{display:block;font-size:24px;font-weight:800;color:#fff;line-height:1.1}
+.hstat span{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;opacity:.9}
+.hero-note{font-size:12px;opacity:.85;margin:12px 0 0;position:relative}
+.hero-demo{display:none;font-size:12px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 10px;margin:12px auto 0;max-width:520px;position:relative}
+
+/* ---------- about / organisation ---------- */
+.about{text-align:center}
+.org-emblem{width:96px;height:96px;border-radius:50%;border:4px solid #fff;box-shadow:0 8px 22px rgba(15,23,42,.18);background:#fff;margin:-58px auto 10px;display:block;position:relative}
+.about h2{border-bottom:0;padding-bottom:0}
+.about h2:after{display:none}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-block;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0;box-shadow:0 4px 14px rgba(220,38,38,.32);letter-spacing:.2px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(220,38,38,.4)}
+.btn:active{transform:translateY(0) scale(.98)}
 .btn.ghost{background:#fff;color:var(--red);border:1.5px solid var(--red);box-shadow:none}
-.btn.green{background:linear-gradient(135deg,#166534,#15803d);box-shadow:0 4px 12px rgba(21,128,61,.28)}
-.btn:disabled{opacity:.5}
-input,select,textarea{width:100%;padding:12px;border:1.5px solid #e7d5d5;border-radius:10px;font-size:15px;margin:5px 0 10px;background:#fff;font-family:inherit}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--maroon);box-shadow:0 0 0 3px rgba(185,28,28,.14)}
-label{font-size:13px;font-weight:600;color:#374151}
-.row{display:flex;gap:12px}.row>*{flex:1}
-.stat{background:linear-gradient(135deg,#fff,#fef2f2);border:1px solid #f1e4e4;border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
-.stat b{display:block;font-size:28px;color:var(--maroon)}
-.stat span{font-size:12px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
-.pill{display:inline-block;background:#fee2e2;color:var(--maroon);border:1px solid #fecaca;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px}
-.badge{display:inline-block;background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
-.badge.demo{background:#e0e7ff;color:#3730a3}
-.ok{color:var(--green);font-weight:700}.err{color:var(--red);font-weight:700}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
-th{background:#fef2f2;color:var(--maroon)}
+.btn.green{background:linear-gradient(135deg,#059669,#10B981);box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.btn.light{background:#fff;color:var(--red2);box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.btn.oline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.85);box-shadow:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- bottom navigation ---------- */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(15,23,42,.10);display:flex;padding:6px 4px calc(8px + env(safe-area-inset-bottom));}
+.bnav button{flex:1;min-width:0;background:none;border:0;padding:4px 2px 2px;cursor:pointer;color:var(--mut);font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;border-radius:8px 8px 0 0}
+.bnav button svg{width:23px;height:23px}
+.bnav button.on{color:var(--red);border-top-color:var(--red)}
+.bnav button:active{transform:scale(.94)}
+
+/* ---------- forms: floating labels + wizard ---------- */
+input,select,textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-size:15px;margin:5px 0 10px;background:#fff;font-family:inherit;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.13)}
+input.invalid,select.invalid,textarea.invalid{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(220,38,38,.16)!important}
+label{font-size:13px;font-weight:600;color:var(--ink2)}
+.fld{position:relative;margin:4px 0 12px}
+.fld input,.fld select,.fld textarea{margin:0;padding:20px 12px 8px}
+.fld>label{position:absolute;left:12px;top:14px;font-size:15px;font-weight:500;color:var(--mut);pointer-events:none;transition:all .15s ease}
+.fld input:focus+label,.fld input:not(:placeholder-shown)+label,.fld textarea:focus+label,.fld textarea:not(:placeholder-shown)+label{top:6px;font-size:11px;font-weight:700;color:var(--red)}
+.fld.static>label{top:6px;font-size:11px;font-weight:700;color:var(--mut)}
+.fld.static select:focus+label,.fld.static input:focus+label{color:var(--red)}
+.fld input[type="file"]{padding-top:22px;font-size:13px}
+.fld input[type="date"]{padding-top:20px}
+.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}
+.wprog{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:4px 0 4px}
+.wprog-fill{height:100%;width:33%;background:linear-gradient(90deg,#DC2626,#F59E0B);border-radius:99px;transition:width .35s ease}
+.wprog-label{font-size:12px;color:var(--mut);font-weight:600;margin-bottom:12px}
+.wstep{display:none}.wstep.on{display:block;animation:fadeUp .3s ease}
+.wstep h3{margin:2px 0 12px}
+.wbtns{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
+.wbtns .btn{margin:0}
+.wmsg{margin-top:8px}
+
+/* ---------- donor / member cards & pills ---------- */
+.bgpill{display:inline-flex;align-items:center;justify-content:center;min-width:44px;background:linear-gradient(135deg,#DC2626,#991B1B);color:#fff;border-radius:999px;padding:5px 13px;font-size:14px;font-weight:800;letter-spacing:.3px;box-shadow:0 0 0 3px rgba(220,38,38,.14),0 5px 12px rgba(220,38,38,.35)}
+.pill{display:inline-block;background:#FEE2E2;color:var(--burgundy);border:1px solid #FECACA;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px}
+.badge{display:inline-block;background:var(--gold-soft);color:#92400E;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+.badge.demo{background:#E0E7FF;color:#3730A3}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0;box-shadow:var(--shadow)}
+.dcard-top{display:flex;gap:12px;align-items:center}
+.dcard-top .bgpill{flex:0 0 auto}
+.dcard .dmeta{margin-top:8px}
+.idcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
+.idcard-head{background:linear-gradient(135deg,#7F1D1D,#DC2626);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.idcard-head .bgpill{box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.idcard-body{padding:16px;display:flex;gap:14px;align-items:flex-start}
+.idphoto{width:64px;height:64px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
+.vbadge{display:inline-flex;align-items:center;gap:4px;background:var(--green-soft);color:var(--green-d);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700}
+.vbadge.bad{background:#FEF2F2;color:var(--red)}
 .person{display:flex;gap:14px;align-items:flex-start}
-.person img{width:76px;height:76px;object-fit:cover;border-radius:12px;border:2px solid #f1e4e4}
-.mcard{border:3px solid var(--maroon);outline:1.5px solid var(--gold2);outline-offset:5px;border-radius:16px;padding:22px;background:linear-gradient(180deg,#fff,#fffdf5);max-width:540px;box-shadow:0 14px 34px rgba(127,29,29,.16)}
+.person img{width:76px;height:76px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
+
+/* ---------- modal / sheet ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.55)}
+.modal.open{display:flex}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:20px 20px 28px;animation:slideUp .28s ease;position:relative}
+.modal-box h3{font-size:18px;margin:0 0 12px}
+.mclose{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--mut);font-size:15px;cursor:pointer}
+.sheet-btn{display:block;width:100%;text-align:left;background:var(--line2);border:0;border-radius:12px;padding:14px 16px;font-size:15px;font-weight:600;color:var(--ink);margin:8px 0;cursor:pointer}
+.sheet-btn:active{transform:scale(.98)}
+@media(min-width:640px){.modal{align-items:center;padding:20px}.modal-box{border-radius:20px;animation:popIn .22s ease}}
+
+/* ---------- member card & certificate ---------- */
+.mcard{border:3px solid var(--burgundy);outline:1.5px solid var(--gold);outline-offset:5px;border-radius:16px;padding:22px;background:linear-gradient(180deg,#fff,#FFFDF5);max-width:540px;box-shadow:var(--shadow-lg)}
 .mcard .mhead{text-align:center;border-bottom:2px solid var(--gold-soft);padding-bottom:12px;margin-bottom:12px}
-.mcard .mhead img{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold2)}
+.mcard .mhead img{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold)}
 .mcard .mhead .ctitle{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
 .mcard .qr{text-align:center;margin:14px 0}
 .mcard .qrbox{display:inline-block;padding:12px;border:1.5px solid var(--gold-soft);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
 .mcard .sig{font-size:12px;color:var(--mut);text-align:center;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
-.cert{border:4px double var(--gold2);border-radius:14px;padding:30px 24px;text-align:center;background:linear-gradient(180deg,#fffdf5,#fff);max-width:660px;margin:12px auto;box-shadow:0 14px 34px rgba(180,83,9,.14)}
-.cert h2{font-family:Georgia,"Times New Roman",serif;color:var(--maroon);margin:6px 0;letter-spacing:.5px}
-.cert .seal{display:inline-flex;width:64px;height:64px;border-radius:50%;border:2px solid var(--gold2);color:var(--gold2);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin:6px auto}
-.cert .ref{display:inline-block;border:1.5px dashed var(--gold2);border-radius:8px;padding:8px 16px;font-weight:700;letter-spacing:1px;color:var(--maroon);background:#fff}
+.cert{border:4px double var(--gold);border-radius:14px;padding:30px 24px;text-align:center;background:linear-gradient(180deg,#FFFDF5,#fff);max-width:660px;margin:12px auto;box-shadow:0 14px 34px rgba(180,83,9,.14)}
+.cert h2{font-family:Georgia,"Times New Roman",serif;color:var(--burgundy);margin:6px 0;letter-spacing:.5px;border:0;padding:0}
+.cert h2:after{display:none}
+.cert .seal{display:inline-flex;width:64px;height:64px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin:6px auto}
+.cert .ref{display:inline-block;border:1.5px dashed var(--gold);border-radius:8px;padding:8px 16px;font-weight:700;letter-spacing:1px;color:var(--burgundy);background:#fff}
 .cert .cname{font-family:Georgia,"Times New Roman",serif;font-size:26px;color:var(--ink)}
-.verified{font-size:26px;color:var(--green);font-weight:700}
+.verified{font-size:26px;color:var(--green-d);font-weight:700}
 .notverified{font-size:26px;color:var(--red);font-weight:700}
-.setup{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;margin:12px 0;font-size:14px}
+
+/* ---------- stats / tables / misc ---------- */
+.stat{background:linear-gradient(135deg,#fff,#FEF2F2);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:28px;color:var(--burgundy)}
+.stat span{font-size:12px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+th{background:#FEF2F2;color:var(--burgundy);font-weight:700}
+.setup{background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
-@media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}}
-@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}}
+@media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:22px}header h1{font-size:18px}}
+@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.bnav,header{display:none!important}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 </style>
 </head>
 <body>
 <header>
-<img src="logo.png" alt="BDBS logo">
-<h1>Basti Dawa Blood Society</h1>
-<p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p>
-<p class="tagline">Donate Blood &bull; Save Lives</p>
+<div class="hwrap">
+<span class="mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg1)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span>
+<div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Donate Blood &bull; Save Lives</p></div>
+</div>
 </header>
-<nav id="nav">
-<button data-s="home" class="on" onclick="show('home')">Home</button>
-<button data-s="find" onclick="show('find')">Find Donor</button>
-<button data-s="request" onclick="show('request')">Request Blood</button>
-<button data-s="donor" onclick="show('donor')">Become Donor</button>
-<button data-s="members" onclick="show('members')">Members</button>
-<button data-s="activity" onclick="show('activity')">Activity</button>
-<button data-s="certificate" onclick="show('certificate')">Certificate</button>
-<button data-s="login" onclick="show('login')">Login / Admin</button>
-<button data-s="home" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView();},80)">Contact Us</button>
-</nav>
 <div class="wrap">
 
 <!-- ================= HOME ================= -->
 <section class="sec on" id="s-home">
-<div class="card">
+<div class="hero">
+<div class="hero-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg2)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+<h1>Basti Dawa Blood Society</h1>
+<p class="hero-sub">Donate Blood &bull; Save Lives</p>
+<p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts.</p>
+<div class="hero-actions">
+<button class="btn light" onclick="show('find')">🩸 Find Donor</button>
+<button class="btn oline" onclick="show('request')">+ Request Blood</button>
+</div>
+<div class="hero-stats">
+<div class="hstat"><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
+<div class="hstat"><b id="statRequests" data-v="0">0</b><span>Active Requests</span></div>
+<div class="hstat"><b id="statLives" data-v="0">0</b><span>Lives Saved</span></div>
+<div class="hstat"><b id="statActivities" data-v="0">0</b><span>Activities</span></div>
+</div>
+<p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
+<p id="demoNote" class="hero-demo">LOCAL DEMO MODE — Firebase setup pending (see SETUP.md).</p>
+</div>
+<div class="card about">
+<img src="logo.png" class="org-emblem" alt="BDBS official logo">
 <h2>Welcome to Basti Dawa Blood Society</h2>
 <p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor and patient personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login.</p>
+<p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
+</div>
+<div class="card">
+<h2>Our Leadership</h2>
 <div class="row">
 <div class="card leader" style="flex:1"><h3>Patron In Chief</h3><b>Dr Muhammad Naeem Asghar</b><br><span class="mut">Phone: 0301-5626609</span></div>
 <div class="card leader" style="flex:1"><h3>Founder &amp; Chief Executive</h3><b>Muhammad Asif Javaid</b><br><span class="mut">Phone: 03069140867</span><br><a class="btn" style="margin-top:10px" href="https://wa.me/923069140867?text=Assalam-o-Alaikum%2C%20I%20want%20to%20contact%20Basti%20Dawa%20Blood%20Society%20regarding%20blood%20donation." target="_blank" rel="noopener">WhatsApp</a></div>
@@ -107,7 +232,6 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <a class="btn ghost" href="https://www.facebook.com/profile.php?id=61568131213778" target="_blank" rel="noopener">Facebook</a>
 <a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
 </div>
-<div class="card"><h2>At a glance</h2><div id="stats" class="mut">Loading…</div></div>
 <div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
 <div class="card" id="contact"><h2>Contact Us</h2>
 <p class="mut">Reach out to Basti Dawa Blood Society for blood donation, membership or any question.</p>
@@ -125,9 +249,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <h2>Find a Blood Donor</h2>
 <p class="mut">Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.</p>
 <div class="row">
-<div><label>Blood Group</label>
-<select id="fGroup"><option value="">All groups</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
-<div><label>City / Area</label><input id="fCity" placeholder="e.g. Multan"></div>
+<div class="fld static"><select id="fGroup"><option value="">All groups</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="fGroup">Blood Group</label></div>
+<div class="fld"><input id="fCity" placeholder=" "><label for="fCity">City / Area</label></div>
 </div>
 <button class="btn" onclick="searchDonors()">Search Donors</button>
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
@@ -137,63 +260,85 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 
 <!-- ================= REQUEST BLOOD ================= -->
 <section class="sec" id="s-request">
-<div class="card">
+<div class="card" id="wz-request" data-step="0">
 <h2>Blood Donation Request</h2>
 <p class="mut">Your request is sent to the BDBS admin. The public list shows only the patient's first name, blood group needed, hospital and city — never phone or CNIC.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 3</div>
+<div class="wstep on">
+<h3>1 &bull; Patient Details</h3>
 <div class="row">
-<div><label>Pt Name *</label><input id="rName" placeholder="Patient name"></div>
-<div><label>Father Name *</label><input id="rFather" placeholder="Father name"></div>
+<div class="fld"><input id="rName" placeholder=" "><label for="rName">Pt Name *</label></div>
+<div class="fld"><input id="rFather" placeholder=" "><label for="rFather">Father Name *</label></div>
 </div>
 <div class="row">
-<div><label>CNIC (optional)</label><input id="rCnic" placeholder="CNIC (optional)"></div>
-<div><label>Age *</label><input id="rAge" type="number" min="0" max="120" placeholder="Age"></div>
+<div class="fld"><input id="rCnic" placeholder=" "><label for="rCnic">CNIC (optional)</label></div>
+<div class="fld"><input id="rAge" type="number" min="0" max="120" placeholder=" "><label for="rAge">Age *</label></div>
 </div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('request',['rName','rFather','rAge'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Blood Needed</h3>
 <div class="row">
-<div><label>Blood Group Needed *</label>
-<select id="rGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
-<div><label>Hospital *</label><input id="rHospital" placeholder="Hospital name"></div>
+<div class="fld static"><select id="rGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="rGroup">Blood Group Needed *</label></div>
+<div class="fld"><input id="rHospital" placeholder=" "><label for="rHospital">Hospital *</label></div>
 </div>
-<div class="row">
-<div><label>Disease *</label><input id="rDisease" placeholder="Disease / reason"></div>
-<div><label>Phone No. *</label><input id="rPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+<div class="fld"><input id="rDisease" placeholder=" "><label for="rDisease">Disease *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="wizNext('request',['rGroup','rHospital','rDisease'])">Next →</button></div>
 </div>
-<label>Address *</label><input id="rAddress" placeholder="Patient address">
-<button class="btn" onclick="submitRequest()">Submit Request</button>
-<div id="rMsg"></div>
+<div class="wstep">
+<h3>3 &bull; Contact</h3>
+<div class="fld"><input id="rPhone" type="tel" placeholder=" "><label for="rPhone">Phone No. *</label></div>
+<div class="fld"><input id="rAddress" placeholder=" "><label for="rAddress">Address *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="submitRequest()">Submit Request</button></div>
+</div>
+<div class="wmsg" id="rMsg"></div>
 </div>
 <div class="card"><h2>Open Blood Requests</h2><div id="requestList" class="mut">Loading…</div></div>
 </section>
 
 <!-- ================= BECOME DONOR ================= -->
 <section class="sec" id="s-donor">
-<div class="card">
+<div class="card" id="wz-donor" data-step="0">
 <h2>Donor Registration</h2>
 <p class="mut">Register as a blood donor. Your phone, CNIC, address and disease are <b>private</b> — only the BDBS admin can see them. The public donor list shows only your name, blood group, city and last donation date.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 3</div>
+<div class="wstep on">
+<h3>1 &bull; Personal Details</h3>
 <div class="row">
-<div><label>Donor Name *</label><input id="dName" placeholder="Full name"></div>
-<div><label>Father Name *</label><input id="dFather" placeholder="Father name"></div>
+<div class="fld"><input id="dName" placeholder=" "><label for="dName">Donor Name *</label></div>
+<div class="fld"><input id="dFather" placeholder=" "><label for="dFather">Father Name *</label></div>
 </div>
 <div class="row">
-<div><label>Donor No. *</label><input id="dNo" placeholder="e.g. D-001"></div>
-<div><label>Donor Profile Photo (optional)</label><input id="dPhoto" type="file" accept="image/*"></div>
+<div class="fld"><input id="dNo" placeholder=" "><label for="dNo">Donor No. *</label></div>
+<div class="fld static"><input id="dPhoto" type="file" accept="image/*"><label for="dPhoto">Donor Profile Photo (optional)</label></div>
+</div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('donor',['dName','dFather','dNo'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Identity &amp; Health</h3>
+<div class="row">
+<div class="fld"><input id="dCnic" placeholder=" "><label for="dCnic">CNIC *</label></div>
+<div class="fld static"><select id="dGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="dGroup">Blood Group *</label></div>
 </div>
 <div class="row">
-<div><label>CNIC *</label><input id="dCnic" placeholder="35202-xxxxxxx-x"></div>
-<div><label>Blood Group *</label>
-<select id="dGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+<div class="fld"><input id="dAge" type="number" min="18" max="65" placeholder=" "><label for="dAge">Age *</label></div>
+<div class="fld"><input id="dPhone" type="tel" placeholder=" "><label for="dPhone">Phone *</label></div>
 </div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="wizNext('donor',['dCnic','dGroup','dAge','dPhone'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>3 &bull; Address &amp; Donation</h3>
+<div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
 <div class="row">
-<div><label>Age *</label><input id="dAge" type="number" min="18" max="65" placeholder="Age (18-65)"></div>
-<div><label>Phone *</label><input id="dPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+<div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
+<div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation *</label></div>
 </div>
-<label>Address *</label><input id="dAddress" placeholder="Your address">
-<div class="row">
-<div><label>Disease *</label><input id="dDisease" placeholder="Any disease (write None if healthy)"></div>
-<div><label>Last Blood Donation *</label><input id="dLast" type="date"></div>
+<div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="submitDonor()">Register as Donor</button></div>
 </div>
-<label>Total Units of Blood Donated *</label><input id="dUnits" type="number" min="0" placeholder="e.g. 3">
-<button class="btn" onclick="submitDonor()">Register as Donor</button>
-<div id="dMsg"></div>
+<div class="wmsg" id="dMsg"></div>
 </div>
 </section>
 
@@ -204,41 +349,56 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <p class="mut">Public member list shows only name, designation, ID No., blood group and membership validity. Phone, CNIC, email and address are never public.</p>
 <div id="memberList" class="mut">Loading…</div>
 </div>
-<div class="card">
+<div class="card" id="wz-member" data-step="0">
 <h2>Add Member</h2>
 <p class="mut">Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 4</div>
+<div class="wstep on">
+<h3>1 &bull; Personal</h3>
 <div class="row">
-<div><label>Photo</label><input id="mPhoto" type="file" accept="image/*"></div>
-<div><label>Name *</label><input id="mName" placeholder="Full name"></div>
+<div class="fld static"><input id="mPhoto" type="file" accept="image/*"><label for="mPhoto">Photo</label></div>
+<div class="fld"><input id="mName" placeholder=" "><label for="mName">Name *</label></div>
 </div>
 <div class="row">
-<div><label>Father Name *</label><input id="mFather" placeholder="Father name"></div>
-<div><label>Designation *</label><input id="mDesig" placeholder="e.g. Member, Volunteer"></div>
+<div class="fld"><input id="mFather" placeholder=" "><label for="mFather">Father Name *</label></div>
+<div class="fld"><input id="mDesig" placeholder=" "><label for="mDesig">Designation *</label></div>
+</div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('member',['mName','mFather','mDesig'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Identity</h3>
+<div class="row">
+<div class="fld"><input id="mId" placeholder=" "><label for="mId">ID No. *</label></div>
+<div class="fld"><input id="mCnic" placeholder=" "><label for="mCnic">CNIC *</label></div>
 </div>
 <div class="row">
-<div><label>ID No. *</label><input id="mId" placeholder="e.g. 001"></div>
-<div><label>CNIC *</label><input id="mCnic" placeholder="CNIC"></div>
+<div class="fld static"><select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="mGroup">Blood Group *</label></div>
+<div class="fld"><input id="mAge" type="number" min="0" max="120" placeholder=" "><label for="mAge">Age *</label></div>
+</div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mId','mCnic','mGroup','mAge'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>3 &bull; Contact &amp; Education</h3>
+<div class="row">
+<div class="fld"><input id="mEdu" placeholder=" "><label for="mEdu">Education *</label></div>
+<div class="fld"><input id="mPhone" type="tel" placeholder=" "><label for="mPhone">Phone *</label></div>
 </div>
 <div class="row">
-<div><label>Blood Group *</label>
-<select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
-<div><label>Age *</label><input id="mAge" type="number" min="0" max="120" placeholder="Age"></div>
+<div class="fld"><input id="mEmail" type="email" placeholder=" "><label for="mEmail">Email *</label></div>
+<div class="fld"><input id="mAddress" placeholder=" "><label for="mAddress">Address *</label></div>
 </div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mEdu','mPhone','mEmail','mAddress'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>4 &bull; Membership</h3>
 <div class="row">
-<div><label>Education *</label><input id="mEdu" placeholder="Education"></div>
-<div><label>Phone *</label><input id="mPhone" type="tel" placeholder="0300-xxxxxxx"></div>
+<div class="fld static"><input id="mIssue" type="date"><label for="mIssue">Issue Date *</label></div>
+<div class="fld static"><input id="mExpiry" type="date"><label for="mExpiry">Expiry Date *</label></div>
 </div>
-<div class="row">
-<div><label>Email *</label><input id="mEmail" type="email" placeholder="Email"></div>
-<div><label>Address *</label><input id="mAddress" placeholder="Address"></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="submitMember()">Add Member &amp; Generate Card</button></div>
 </div>
-<div class="row">
-<div><label>Issue Date *</label><input id="mIssue" type="date"></div>
-<div><label>Expiry Date *</label><input id="mExpiry" type="date"></div>
-</div>
-<button class="btn" onclick="submitMember()">Add Member &amp; Generate Card</button>
-<div id="mMsg"></div>
-<div id="memberCard"></div>
+<div class="wmsg" id="mMsg"></div>
 </div>
 </section>
 
@@ -289,6 +449,28 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 </section>
 
 </div>
+
+<nav class="bnav" id="bnav">
+<button data-s="home" class="on" onclick="show('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></button>
+<button data-s="find" onclick="show('find')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.8 6 11a6 6 0 0 1-12 0c0-4.2 6-11 6-11z"/></svg><span>Find Donor</span></button>
+<button data-s="request" onclick="show('request')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Request</span></button>
+<button data-s="members" onclick="show('members')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M17.5 15.4c2 .6 3.5 2 4 4.6"/></svg><span>Members</span></button>
+<button data-s="login" onclick="show('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Admin</span></button>
+<button onclick="openModal('moreSheet')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
+</nav>
+<div class="modal" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
+<div class="modal-box"><button class="mclose" onclick="closeModal('memberModal')" aria-label="Close">&#10005;</button><div id="memberCardBody"></div></div>
+</div>
+<div class="modal" id="moreSheet" onclick="if(event.target===this)closeModal('moreSheet')">
+<div class="modal-box">
+<h3>More</h3>
+<button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
+<button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
+<button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
+<button class="sheet-btn" onclick="closeModal('moreSheet')">Close</button>
+</div>
+</div>
+
 <footer>
 Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
 &copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>
@@ -315,7 +497,8 @@ function firstName(n){return String(n||'').trim().split(/\s+/)[0] || 'Patient';}
 function show(s){
   document.querySelectorAll('.sec').forEach(function(el){el.classList.remove('on');});
   var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
-  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
+  document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
+  closeModal('memberModal'); closeModal('moreSheet');
   if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests();
   if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
   window.scrollTo(0,0);
@@ -346,8 +529,8 @@ function seedLocal(){
   lsSet(LS.certs, []);
   localStorage.setItem(LS.seeded, '1');
 }
-function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',demo:!!d.demo};}
-function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,designation:m.designation,idNo:m.idNo,group:m.group,expiry:m.expiry,demo:!!m.demo};}
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,designation:m.designation,idNo:m.idNo,group:m.group,expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
 function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access (Firestore when configured, else local) ---------- */
@@ -398,15 +581,20 @@ function loadHome(){
   qAll('donorsPublic', function(ds){
     qAll('activities', function(acts){
       qAll('requestsPublic', function(rs){
-        var units = 0; ds.forEach(function(d){units += 0;});
-        document.getElementById('stats').innerHTML =
-          '<div class="row"><div class="stat"><b>' + ds.length + '</b><span>Donors</span></div>' +
-          '<div class="stat"><b>' + rs.length + '</b><span>Open requests</span></div>' +
-          '<div class="stat"><b>' + acts.length + '</b><span>Activities</span></div></div>' +
-          (FB_OK ? '' : ' <p class="small mut" style="margin-top:8px">LOCAL DEMO MODE — Firebase setup pending (see SETUP.md).</p>');
-        document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
-          return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
-        }).join('') : '<span class="mut">No activity yet.</span>';
+        qAll('donors', function(full){
+          var units = 0;
+          var src = (full && full.length) ? full : ds;
+          src.forEach(function(d){ units += parseInt(d.units||0,10)||0; });
+          setStat('statDonors', ds.length);
+          setStat('statRequests', rs.length);
+          setStat('statLives', units*3);
+          setStat('statActivities', acts.length);
+          var dn = document.getElementById('demoNote');
+          if (dn) dn.style.display = FB_OK ? 'none' : 'block';
+          document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
+            return '<div class="dcard"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+          }).join('') : '<span class="mut">No activity yet.</span>';
+        });
       });
     });
   });
@@ -422,7 +610,7 @@ function searchDonors(){
     var box = document.getElementById('findResults');
     if (!out.length) { box.innerHTML = '<p class="mut">No donor found for this search. Try another blood group or city — or submit a blood request.</p>'; return; }
     box.innerHTML = '<p class="mut">'+out.length+' donor(s) found. Contact via a blood request — the admin will connect you.</p>' + out.map(function(d){
-      return '<div class="card person"><div><b>'+esc(d.name)+'</b>'+(d.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="pill">'+esc(d.group)+'</span> <span class="mut">'+esc(d.city||'')+'</span><br><span class="mut small">Last donation: '+esc(fmtD(d.lastDonation))+'</span></div></div>';
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(d.group)+'</span><div><b>'+esc(d.name)+'</b>'+(d.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(d.city||'')+'</span></div></div><div class="mut small dmeta">Last donation: '+esc(fmtD(d.lastDonation))+'</div></div>';
     }).join('');
   });
 }
@@ -431,7 +619,7 @@ function loadRequests(){
     var box = document.getElementById('requestList');
     if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
     box.innerHTML = rs.map(function(r){
-      return '<div class="card"><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' — needs <span class="pill">'+esc(r.group)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div>';
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div></div></div>';
     }).join('');
   });
 }
@@ -441,8 +629,9 @@ function loadMembers(){
     if (!ms.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
     box.innerHTML = ms.map(function(m){
       var valid = m.expiry && m.expiry >= new Date().toISOString().slice(0,10);
-      return '<div class="card person">' + (m.photo ? '<img src="'+m.photo+'" alt="">' : '') +
-        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(m.designation||'')+' • ID: '+esc(m.idNo||'')+'</span><br><span class="pill">'+esc(m.group||'')+'</span> <span class="mut small">Valid till: '+esc(fmtD(m.expiry))+' '+(valid?'<span class="ok">✓ Valid</span>':'<span class="err">Expired</span>')+'</span><br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card &amp; QR</button></div></div>';
+      return '<div class="idcard"><div class="idcard-head"><span class="bgpill">'+esc(m.group||'')+'</span><span class="vbadge'+(valid?'':' bad')+'">'+(valid?'✓ Verified Member':'Expired')+'</span></div>' +
+        '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
+        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(m.designation||'')+' • ID: '+esc(m.idNo||'')+'</span><br><span class="mut small">Valid till: '+esc(fmtD(m.expiry))+'</span><br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card &amp; QR</button></div></div></div>';
     }).join('');
   });
 }
@@ -514,20 +703,20 @@ function renderMemberCard(m){
   var url = SITE_BASE + '?verify=' + encodeURIComponent(m.id);
   var html = '<div class="mcard print-area"><div class="mhead"><img src="logo.png" alt="BDBS logo"><div class="ctitle">Membership Card</div><b style="font-size:18px;color:#7f1d1d">Basti Dawa Blood Society</b></div>' +
     '<div class="person" style="margin-top:6px">' + (m.photo?'<img src="'+m.photo+'" alt="">':'') +
-    '<div><b style="font-size:17px">'+esc(m.name)+'</b><br><span class="mut">'+esc(m.designation||'')+'</span><br>ID No.: <b>'+esc(m.idNo||'')+'</b> &nbsp; Blood Group: <span class="pill">'+esc(m.group||'')+'</span><br><span class="mut small">Issue: '+esc(fmtD(m.issue))+' &nbsp; Expiry: '+esc(fmtD(m.expiry))+'</span></div></div>' +
+    '<div><b style="font-size:17px">'+esc(m.name)+'</b><br><span class="mut">'+esc(m.designation||'')+'</span><br>ID No.: <b>'+esc(m.idNo||'')+'</b> &nbsp; Blood Group: <span class="bgpill" style="min-width:0">'+esc(m.group||'')+'</span><br><span class="mut small">Issue: '+esc(fmtD(m.issue))+' &nbsp; Expiry: '+esc(fmtD(m.expiry))+'</span></div></div>' +
     '<div class="qr"><div class="qrbox" id="qrBox"></div></div><div style="text-align:center" class="small mut">'+esc(url)+'</div>' +
     '<div class="sig">Verified Signature Authorized<br>Under Supervision — Basti Dawa Welfare Organization</div></div>' +
     '<button class="btn" onclick="window.print()">Print Card</button>';
-  document.getElementById('memberCard').innerHTML = html;
+  document.getElementById('memberCardBody').innerHTML = html;
+  openModal('memberModal');
   if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
 }
 function viewMemberCard(id){
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
     if (!m) { qAll('membersPublic', function(ps){ var p=null; ps.forEach(function(x){if(x.id===id)p=x;});
-      if (p) renderMemberCard({id:p.id, photo:p.photo, name:p.name, designation:p.designation, idNo:p.idNo, group:p.group, issue:'', expiry:p.expiry});
-      document.getElementById('memberCard').scrollIntoView(); }); return; }
-    renderMemberCard(m); document.getElementById('memberCard').scrollIntoView();
+      if (p) renderMemberCard({id:p.id, photo:p.photo, name:p.name, designation:p.designation, idNo:p.idNo, group:p.group, issue:'', expiry:p.expiry}); }); return; }
+    renderMemberCard(m);
   });
 }
 function publishActivity(){
@@ -658,7 +847,50 @@ function renderAdmin(){
   });
 }
 
+/* ---------- modal, wizard & stat helpers ---------- */
+function openModal(id){ var m=document.getElementById(id); if(m) m.classList.add('open'); }
+function closeModal(id){ var m=document.getElementById(id); if(m) m.classList.remove('open'); }
+function closeMore(){ closeModal('moreSheet'); }
+function setStat(id, val){
+  var el = document.getElementById(id); if(!el) return;
+  var target = parseInt(val,10)||0;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = target; el.setAttribute('data-v', String(target)); return; }
+  var start = parseInt(el.getAttribute('data-v')||'0',10);
+  el.setAttribute('data-v', String(target));
+  if (start === target) { el.textContent = target; return; }
+  var t0 = null;
+  function step(ts){ if(!t0) t0=ts; var p=Math.min(1,(ts-t0)/700); el.textContent = Math.round(start+(target-start)*p); if(p<1) requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+}
+function wizGo(form, idx){
+  var root = document.getElementById('wz-'+form); if(!root) return;
+  var steps = root.querySelectorAll('.wstep');
+  idx = Math.max(0, Math.min(idx, steps.length-1));
+  steps.forEach(function(s,i){ s.classList.toggle('on', i===idx); });
+  var fill = root.querySelector('.wprog-fill'); if(fill) fill.style.width = ((idx+1)/steps.length*100)+'%';
+  var label = root.querySelector('.wprog-label'); if(label) label.textContent = 'Step '+(idx+1)+' of '+steps.length;
+  root.setAttribute('data-step', String(idx));
+}
+function wizNext(form, requiredIds){
+  var root = document.getElementById('wz-'+form);
+  var miss = need(requiredIds);
+  var msgBox = root ? root.querySelector('.wmsg') : null;
+  if (miss) {
+    var e = document.getElementById(miss); if(e){ e.classList.add('invalid'); }
+    if (msgBox) msgBox.innerHTML = '<span class="err">Please fill all required fields in this step.</span>';
+    return;
+  }
+  if (msgBox) msgBox.innerHTML = '';
+  wizGo(form, parseInt(root.getAttribute('data-step')||'0',10)+1);
+}
+function wizBack(form){
+  var root = document.getElementById('wz-'+form);
+  wizGo(form, parseInt(root.getAttribute('data-step')||'0',10)-1);
+}
+
 /* ---------- init ---------- */
+document.addEventListener('input', function(e){ if (e.target && e.target.classList) e.target.classList.remove('invalid'); });
+wizGo('donor', 0); wizGo('request', 0); wizGo('member', 0);
 if (!FB_OK) seedLocal();
 loadHome();
 renderLogin();
