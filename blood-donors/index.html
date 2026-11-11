@@ -431,14 +431,49 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <!-- ================= LOGIN / ADMIN ================= -->
 <section class="sec" id="s-login">
 <div class="card" id="loginCard">
-<h2>Admin Login</h2>
+<h2>Login</h2>
 <div id="setupWarn"></div>
-<label>Email</label><input id="lEmail" type="email" placeholder="Admin email">
+<label>Email</label><input id="lEmail" type="email" placeholder="Your email">
 <label>Password</label><input id="lPass" type="password" placeholder="Password">
 <button class="btn" onclick="doLogin()">Login</button>
 <button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
 <div id="lMsg"></div>
-<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Forgot Password sends a reset email to the admin email.</p>
+<p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
+<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up. Forgot Password sends a reset email.</p>
+</div>
+<div class="card" id="signupCard" style="display:none">
+<h2>Create Account</h2>
+<div id="setupWarn2"></div>
+<label>Full Name</label><input id="suName" placeholder="Your full name">
+<label>Email</label><input id="suEmail" type="email" placeholder="Your email">
+<label>Password</label><input id="suPass" type="password" placeholder="At least 6 characters">
+<label>Confirm Password</label><input id="suPass2" type="password" placeholder="Repeat password">
+<button class="btn" onclick="doSignup()">Create Account</button>
+<div id="suMsg"></div>
+<p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
+<p class="mut small">Your account is a donor account. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
+</div>
+<div class="card" id="donorCard" style="display:none">
+<h2>My Profile <span id="donorEmail" class="mut"></span></h2>
+<button class="btn ghost" onclick="doLogout()">Logout</button>
+<div id="linkBox">
+<p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.</p>
+<label>Donor No.</label><input id="pDonorNo" placeholder="e.g. D-001">
+<button class="btn" onclick="linkDonorRecord()">Link My Donor Record</button>
+<div id="pLinkMsg"></div>
+</div>
+<div id="profileBox" style="display:none">
+<div id="myRecord"></div>
+<h3>Update My Last Donation</h3>
+<div class="row">
+<div class="fld static"><input id="pLast" type="date"><label for="pLast">Last Blood Donation</label></div>
+<div class="fld"><input id="pUnits" type="number" min="0" placeholder=" "><label for="pUnits">Total Units Donated</label></div>
+</div>
+<button class="btn" onclick="updateMyDonation()">Update</button>
+<div id="pUpdateMsg"></div>
+<h3>My Certificates</h3>
+<div id="myCerts" class="mut">Loading…</div>
+</div>
 </div>
 <div class="card" id="adminCard" style="display:none">
 <h2>Admin Panel <span id="adminEmail" class="mut"></span></h2>
@@ -455,7 +490,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button data-s="find" onclick="show('find')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.8 6 11a6 6 0 0 1-12 0c0-4.2 6-11 6-11z"/></svg><span>Find Donor</span></button>
 <button data-s="request" onclick="show('request')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Request</span></button>
 <button data-s="members" onclick="show('members')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M17.5 15.4c2 .6 3.5 2 4 4.6"/></svg><span>Members</span></button>
-<button data-s="login" onclick="show('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Admin</span></button>
+<button data-s="login" onclick="show('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Account</span></button>
 <button onclick="openModal('moreSheet')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
 </nav>
 <div class="modal" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
@@ -492,6 +527,7 @@ try {
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
+function lookupKey(no){ return String(no||'').trim().replace(/\//g,'-') || 'x'; }
 function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
 function firstName(n){return String(n||'').trim().split(/\s+/)[0] || 'Patient';}
 function show(s){
@@ -506,7 +542,7 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', seeded:'bdbs_seeded' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', seeded:'bdbs_seeded' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function seedLocal(){
@@ -544,13 +580,21 @@ function qAll(coll, cb){
 function qAdd(coll, obj, cb){
   if (FB_OK) { var ref = obj.id ? db.collection(coll).doc(obj.id) : db.collection(coll).doc(); obj.id = ref.id;
     ref.set(obj).then(function(){cb(true, obj);}).catch(function(){cb(false);}); }
-  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
+  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup};
     var arr = lsGet(map[coll]); arr.unshift(obj); lsSet(map[coll], arr); cb(true, obj); }
 }
 function qDel(coll, id, cb){
   if (FB_OK) { db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){cb(false);}); }
   else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
     var arr = lsGet(map[coll]).filter(function(x){return x.id!==id;}); lsSet(map[coll], arr); cb(true); }
+}
+
+function qUpdate(coll, id, fields, cb){
+  if (FB_OK) { db.collection(coll).doc(id).update(fields).then(function(){cb(true);}).catch(function(){cb(false);}); }
+  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,donorLookup:LS.donorLookup};
+    var arr = lsGet(map[coll]); var found=false;
+    arr.forEach(function(x){ if (x.id===id) { for (var k in fields) x[k]=fields[k]; found=true; } });
+    lsSet(map[coll], arr); cb(found); }
 }
 
 /* ---------- photo helper (resize to max 300px, JPEG) ---------- */
@@ -643,7 +687,7 @@ function loadActivities(){
       return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
     }).join('');
   });
-  document.getElementById('activityPublish').style.display = (FB_OK && auth && auth.currentUser) ? 'block' : 'none';
+  document.getElementById('activityPublish').style.display = (FB_OK && auth && isAdminUser(auth.currentUser)) ? 'block' : 'none';
 }
 
 /* ---------- forms ---------- */
@@ -674,6 +718,7 @@ function submitDonor(){
     qAdd('donors', full, function(ok){
       if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
       qAdd('donorsPublic', pub, function(){
+        qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
         document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
         ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
         document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value='';
@@ -720,7 +765,7 @@ function viewMemberCard(id){
   });
 }
 function publishActivity(){
-  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
+  if (!FB_OK || !auth || !isAdminUser(auth.currentUser)) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
   if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
   readPhoto(document.getElementById('aPhoto'), function(photo){
     qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
@@ -772,26 +817,79 @@ function renderCert(c){
 function lookupCert(){
   var ref = val('cRef');
   if (!ref) { document.getElementById('certView').innerHTML = '<span class="err">Enter a reference number.</span>'; return; }
-  qAll('certificates', function(cs){
+  var done = function(cs){
     var c = null; cs.forEach(function(x){ if ((x.ref||'').toUpperCase() === ref.toUpperCase()) c=x; });
     if (c) renderCert(c);
     else document.getElementById('certView').innerHTML = '<p class="notverified">✗ NOT VERIFIED</p><p class="mut">No certificate found with this reference number.</p>';
-  });
+  };
+  /* A signed-in donor may only read their OWN certificates, so scope
+     the lookup to their linked donor record. Admin keeps the full list. */
+  if (FB_OK && auth && auth.currentUser && !isAdminUser(auth.currentUser)) {
+    db.collection('users').doc(auth.currentUser.uid).get().then(function(d){
+      var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+      if (!linkedId) { done([]); return; }
+      db.collection('certificates').where('donorId','==',linkedId).get().then(function(s){
+        done(s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;}));
+      }).catch(function(){ done([]); });
+    }).catch(function(){ done([]); });
+    return;
+  }
+  qAll('certificates', done);
 }
 
-/* ---------- auth & admin ---------- */
+/* ---------- auth, signup & roles ---------- */
+var ADMIN_EMAIL = 'bastidawabloodsociety@gmail.com';
+function isAdminUser(u){ return !!(u && (u.email||'').toLowerCase() === ADMIN_EMAIL); }
+function showSignupForm(){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('signupCard').style.display='block';
+  document.getElementById('donorCard').style.display='none';
+  document.getElementById('adminCard').style.display='none';
+}
+function showLoginForm(){
+  document.getElementById('signupCard').style.display='none';
+  document.getElementById('donorCard').style.display='none';
+  document.getElementById('adminCard').style.display='none';
+  document.getElementById('loginCard').style.display='block';
+}
+var authListenerSet = false;
+function routeAuth(u){
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('signupCard').style.display = 'none';
+  document.getElementById('adminCard').style.display = 'none';
+  document.getElementById('donorCard').style.display = 'none';
+  if (!u) { document.getElementById('loginCard').style.display = 'block'; return; }
+  if (isAdminUser(u)) {
+    document.getElementById('adminEmail').textContent = '(' + u.email + ')';
+    document.getElementById('adminCard').style.display = 'block';
+    renderAdmin();
+  } else {
+    document.getElementById('donorEmail').textContent = '(' + u.email + ')';
+    document.getElementById('donorCard').style.display = 'block';
+    renderDonor(u);
+  }
+}
 function renderLogin(){
+  var setupHtml = '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login and signup work here.</div>';
   var w = document.getElementById('setupWarn');
+  var w2 = document.getElementById('setupWarn2');
   if (!FB_OK) {
-    w.innerHTML = '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login works here.</div>';
-    document.querySelector('#loginCard .btn').disabled = true;
-  } else { w.innerHTML = ''; document.querySelector('#loginCard .btn').disabled = false; }
+    if (w) w.innerHTML = setupHtml;
+    if (w2) w2.innerHTML = setupHtml;
+    var lb = document.querySelector('#loginCard .btn'); if (lb) lb.disabled = true;
+    var sb = document.querySelector('#signupCard .btn'); if (sb) sb.disabled = true;
+  } else {
+    if (w) w.innerHTML = '';
+    if (w2) w2.innerHTML = '';
+    var lb2 = document.querySelector('#loginCard .btn'); if (lb2) lb2.disabled = false;
+    var sb2 = document.querySelector('#signupCard .btn'); if (sb2) sb2.disabled = false;
+  }
   if (FB_OK && auth) {
-    auth.onAuthStateChanged(function(u){
-      document.getElementById('loginCard').style.display = u ? 'none' : 'block';
-      document.getElementById('adminCard').style.display = u ? 'block' : 'none';
-      if (u) { document.getElementById('adminEmail').textContent = '(' + u.email + ')'; renderAdmin(); }
-    });
+    if (!authListenerSet) {
+      authListenerSet = true;
+      auth.onAuthStateChanged(function(u){ routeAuth(u); });
+    }
+    routeAuth(auth.currentUser);
   }
 }
 function doLogin(){
@@ -808,11 +906,112 @@ function doLogout(){ if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) return;
   var em = val('lEmail');
-  if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your admin email first, then Forgot Password.</span>'; return; }
+  if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
   auth.sendPasswordResetEmail(em).then(function(){
     document.getElementById('lMsg').innerHTML = '<span class="ok">Reset email sent to '+esc(em)+'.</span>';
   }).catch(function(){
     document.getElementById('lMsg').innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
+  });
+}
+function doSignup(){
+  if (!FB_OK) return;
+  var name = val('suName'), em = val('suEmail'), pw = val('suPass'), pw2 = val('suPass2');
+  var msg = document.getElementById('suMsg');
+  if (!name) { msg.innerHTML = '<span class="err">Enter your full name.</span>'; return; }
+  if (!em || em.indexOf('@') === -1 || em.indexOf('.') === -1) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  if (!pw || pw.length < 6) { msg.innerHTML = '<span class="err">Password must be at least 6 characters.</span>'; return; }
+  if (pw !== pw2) { msg.innerHTML = '<span class="err">Passwords do not match.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Creating your account…</span>';
+  auth.createUserWithEmailAndPassword(em, pw).then(function(cred){
+    var u = cred.user;
+    return db.collection('users').doc(u.uid).set({name:name, email:em, role:'donor', createdAt:Date.now()}).then(function(){
+      msg.innerHTML = '<span class="ok">Account created. Welcome, '+esc(name)+'!</span>';
+      routeAuth(u);
+    });
+  }).catch(function(e){
+    var t = 'Could not create account.';
+    if (e && e.code === 'auth/email-already-in-use') t = 'This email is already registered — try Login instead.';
+    else if (e && e.code === 'auth/invalid-email') t = 'Enter a valid email address.';
+    else if (e && e.code === 'auth/weak-password') t = 'Password must be at least 6 characters.';
+    msg.innerHTML = '<span class="err">'+t+'</span>';
+  });
+}
+
+/* ---------- donor profile (own record only — never other donors) ---------- */
+function renderDonor(u){
+  document.getElementById('pUpdateMsg').innerHTML = '';
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var data = d.exists ? d.data() : {};
+    var linkedId = data.linkedDonorId || '';
+    document.getElementById('linkBox').style.display = linkedId ? 'none' : 'block';
+    document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
+    if (!linkedId) document.getElementById('pLinkMsg').innerHTML = '';
+    if (linkedId) loadMyRecord(u, linkedId);
+  }).catch(function(){
+    document.getElementById('linkBox').style.display = 'block';
+    document.getElementById('profileBox').style.display = 'none';
+  });
+}
+function loadMyRecord(u, donorId){
+  db.collection('donors').doc(donorId).get().then(function(d){
+    if (!d.exists) { document.getElementById('myRecord').innerHTML = '<p class="err">Your linked donor record was not found. Ask the admin to check it.</p>'; return; }
+    var r = d.data(); r.id = d.id;
+    document.getElementById('myRecord').innerHTML =
+      '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
+      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b>'+esc(r.units||0)+'</b></div></div>';
+    document.getElementById('pLast').value = r.lastDonation || '';
+    document.getElementById('pUnits').value = (r.units==null?'':r.units);
+    db.collection('certificates').where('donorId','==',donorId).orderBy('createdAt','desc').limit(20).get().then(function(s){
+      var cs = s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;});
+      document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
+        return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
+      }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
+    }).catch(function(){
+      document.getElementById('myCerts').innerHTML = '<span class="mut">Certificates could not be loaded.</span>';
+    });
+  }).catch(function(){
+    document.getElementById('myRecord').innerHTML = '<p class="err">Could not load your donor record.</p>';
+  });
+}
+function linkDonorRecord(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var no = val('pDonorNo');
+  var msg = document.getElementById('pLinkMsg');
+  if (!no) { msg.innerHTML = '<span class="err">Enter your Donor No.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Linking…</span>';
+  var u = auth.currentUser;
+  db.collection('donorLookup').doc(lookupKey(no)).get().then(function(d){
+    if (!d.exists) { msg.innerHTML = '<span class="err">No donor found with this Donor No. Check the number and try again.</span>'; return; }
+    var donorId = d.data().donorId;
+    return db.collection('donors').doc(donorId).update({linkedUid: u.uid}).then(function(){
+      return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: no}, {merge:true});
+    }).then(function(){
+      msg.innerHTML = '<span class="ok">Donor record linked.</span>';
+      renderDonor(u);
+    });
+  }).catch(function(){
+    msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
+  });
+}
+function updateMyDonation(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var msg = document.getElementById('pUpdateMsg');
+  var last = val('pLast'), units = val('pUnits');
+  if (!last && units === '') { msg.innerHTML = '<span class="err">Enter a last donation date or total units.</span>'; return; }
+  var u = auth.currentUser;
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+    if (!linkedId) { msg.innerHTML = '<span class="err">Link your donor record first.</span>'; return; }
+    var fields = {};
+    if (last) fields.lastDonation = last;
+    if (units !== '') fields.units = parseInt(units,10)||0;
+    qUpdate('donors', linkedId, fields, function(ok){
+      if (!ok) { msg.innerHTML = '<span class="err">Could not update. Please try again.</span>'; return; }
+      qUpdate('donorsPublic', linkedId, fields, function(){
+        msg.innerHTML = '<span class="ok">Updated. Thank you for donating!</span>';
+        loadMyRecord(u, linkedId);
+      });
+    });
   });
 }
 function renderAdmin(){

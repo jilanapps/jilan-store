@@ -2,18 +2,62 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Admin = any signed-in user (Email/Password Auth). Only the admin
-    // account created in Firebase Console can sign in.
-    function isAdmin() { return request.auth != null; }
+    // ADMIN = ONLY the society account. No other signed-in user is admin.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'bastidawabloodsociety@gmail.com';
+    }
+
+    // The signed-in user's linked donor record id (from their users doc).
+    function linkedDonorId() {
+      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return u.exists ? u.data.get('linkedDonorId', '') : '';
+    }
+
+    // User accounts created by Sign Up: role is always 'donor'.
+    // Admin status comes from the email allowlist above, never from role.
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == 'donor'
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt']);
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'linkedDonorId', 'linkedDonorNo']));
+      allow delete: if isAdmin();
+    }
 
     // Full donor records (phone, CNIC, address, disease, father name).
-    // NEVER public — admin only.
+    // NEVER public — admin only, except: the linked donor may READ their
+    // own record, UPDATE only lastDonation/units, and LINK it (set
+    // linkedUid to their own uid, only while it is still unset).
     match /donors/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin() || (request.auth != null
+        && resource.data.get('linkedUid', null) == request.auth.uid);
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (request.auth != null
+        && resource.data.get('linkedUid', null) == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+      allow update: if request.auth != null
+        && resource.data.get('linkedUid', null) == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedUid'])
+        && request.resource.data.linkedUid == request.auth.uid;
+      allow delete: if isAdmin();
     }
     // Public-safe donor mirror: name, blood group, city, last donation
-    // only. Written by the app together with the full record.
+    // only. Written by the app together with the full record. The linked
+    // donor may update only their own lastDonation/units here too.
     match /donorsPublic/{id} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+      allow delete: if isAdmin();
+    }
+
+    // Donor No. -> donor doc lookup, so a signed-up donor can link their
+    // own record. Maps a donor number to a doc id only — no private data.
+    match /donorLookup/{id} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -49,10 +93,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Appreciation certificates: admin only (name, blood group, units,
-    // date, reference no. — no phone/CNIC inside).
+    // Appreciation certificates: admin only to write; a linked donor may
+    // read ONLY certificates of their own linked donor record. (Name,
+    // blood group, units, date, reference no. — no phone/CNIC inside.)
     match /certificates/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin() || (request.auth != null
+        && linkedDonorId() == resource.data.get('donorId', ''));
+      allow write: if isAdmin();
     }
 
     // Yearly certificate counters (BDBS-CERT-YYYY-XXXX).
