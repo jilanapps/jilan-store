@@ -14,16 +14,22 @@ service cloud.firestore {
       return u.exists ? u.data.get('linkedDonorId', '') : '';
     }
 
+    // The signed-in user's linked member record id (from their users doc).
+    function linkedMemberId() {
+      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return u.exists ? u.data.get('linkedMemberId', '') : '';
+    }
+
     // User accounts created by Sign Up: role is always 'donor'.
     // Admin status comes from the email allowlist above, never from role.
     match /users/{userId} {
       allow create: if request.auth != null && request.auth.uid == userId
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.role == 'donor'
-        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt']);
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt', 'phone']);
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'linkedDonorId', 'linkedDonorNo']));
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'linkedDonorId', 'linkedDonorNo', 'linkedMemberId', 'linkedMemberNo']));
       allow delete: if isAdmin();
     }
 
@@ -62,9 +68,17 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Full member records. NEVER public — admin only.
-    match /members/{id} {
-      allow read, write: if isAdmin();
+    // Full member records. NEVER public — admin only, except: the linked
+    // member may READ their own record (via linkedMemberId in users doc).
+    match /members/{memberId} {
+      allow read: if isAdmin() || (request.auth != null && linkedMemberId() == memberId);
+      allow write: if isAdmin();
+    }
+    // Member ID -> member doc lookup, so a signed-in member can link
+    // their own card. Maps a Member ID (001, 002…) to a doc id only.
+    match /memberLookup/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
     // Public-safe member mirror for QR verification: photo, name,
     // designation, ID No., blood group, valid till only.

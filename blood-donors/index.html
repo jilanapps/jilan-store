@@ -220,6 +220,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="hero-actions">
 <button class="btn light" onclick="show('find')">🩸 Find Donor</button>
 <button class="btn oline" onclick="show('request')">+ Request Blood</button>
+<button class="btn oline" onclick="show('donor')">Register as Donor</button>
 </div>
 <div class="hero-stats">
 <div class="hstat"><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
@@ -593,6 +594,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 </div>
 <button class="btn" onclick="searchDonors()">Search Donors</button>
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
+<p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
 <div id="findResults" style="margin-top:10px"></div>
 </div>
 </section>
@@ -779,25 +781,26 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="card" id="loginCard">
 <h2>Login</h2>
 <div id="setupWarn"></div>
-<label>Email</label><input id="lEmail" type="email" placeholder="Your email">
+<label>Email ya Phone Number</label><input id="lEmail" type="text" placeholder="Your email or phone number">
 <label>Password</label><input id="lPass" type="password" placeholder="Password">
 <button class="btn" onclick="doLogin()">Login</button>
 <button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
 <div id="lMsg"></div>
 <p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
-<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up. Forgot Password sends a reset email.</p>
+<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up — email ya phone number se. Forgot Password sends a reset email (email accounts only; phone accounts contact the admin).</p>
 </div>
 <div class="card" id="signupCard" style="display:none">
 <h2>Create Account</h2>
 <div id="setupWarn2"></div>
 <label>Full Name</label><input id="suName" placeholder="Your full name">
-<label>Email</label><input id="suEmail" type="email" placeholder="Your email">
+<label>Email</label><input id="suEmail" type="email" placeholder="Your email (optional if phone given)">
+<label>Phone Number</label><input id="suPhone" type="tel" placeholder="e.g. 0300-1234567 (optional if email given)">
 <label>Password</label><input id="suPass" type="password" placeholder="At least 6 characters">
 <label>Confirm Password</label><input id="suPass2" type="password" placeholder="Repeat password">
 <button class="btn" onclick="doSignup()">Create Account</button>
 <div id="suMsg"></div>
 <p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
-<p class="mut small">Your account is a donor account. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
+<p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
 </div>
 <div class="card" id="donorCard" style="display:none">
 <h2>My Profile <span id="donorEmail" class="mut"></span></h2>
@@ -819,6 +822,15 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div id="pUpdateMsg"></div>
 <h3>My Certificates</h3>
 <div id="myCerts" class="mut">Loading…</div>
+</div>
+<div id="memberBox" style="margin-top:14px;border-top:1px solid #eee;padding-top:10px">
+<h3>Member Login</h3>
+<p class="mut">Society members: enter your Member ID and the phone number on your card to link your membership card here.</p>
+<label>Member ID</label><input id="mLinkId" placeholder="e.g. 001">
+<label>Phone Number (on your card)</label><input id="mLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
+<button class="btn" onclick="linkMemberRecord()">Link My Member Card</button>
+<div id="mLinkMsg"></div>
+<div id="myMemberCard" style="display:none"></div>
 </div>
 </div>
 <div class="card" id="adminCard" style="display:none">
@@ -845,6 +857,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="modal" id="moreSheet" onclick="if(event.target===this)closeModal('moreSheet')">
 <div class="modal-box">
 <h3>More</h3>
+<button class="sheet-btn" onclick="show('donor')">🩸 &nbsp;Register as Donor</button>
 <button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
@@ -888,7 +901,7 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', seeded:'bdbs_seeded' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', seeded:'bdbs_seeded' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function seedLocal(){
@@ -931,7 +944,7 @@ function qAll(coll, cb){
 function qAdd(coll, obj, cb){
   if (FB_OK) { var ref = obj.id ? db.collection(coll).doc(obj.id) : db.collection(coll).doc(); obj.id = ref.id;
     ref.set(obj).then(function(){cb(true, obj);}).catch(function(){cb(false);}); }
-  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup};
+  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup};
     var arr = lsGet(map[coll]); arr.unshift(obj); lsSet(map[coll], arr); cb(true, obj); }
 }
 function qDel(coll, id, cb){
@@ -1098,6 +1111,7 @@ function submitMember(){
     qAdd('members', full, function(ok){
       if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
       qAdd('membersPublic', pub, function(){
+        qAdd('memberLookup', {id: nextId, memberId: id}, function(){});
         document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
         renderMemberCard(full); loadMembers();
         ['mName','mFather','mDesig','mCnic','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
@@ -1304,45 +1318,76 @@ function renderLogin(){
     routeAuth(auth.currentUser);
   }
 }
+/* ---------- phone-or-email login ----------
+   Donors/recipients log in with email OR phone number + password.
+   Phone accounts use a synthetic email in Firebase Auth
+   (<digits>@phone.bdbs.local); the real phone is stored in users doc. */
+function normPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 11 && d.charAt(0) === '0') d = '92' + d.slice(1);
+  else if (d.length === 10 && d.charAt(0) === '3') d = '92' + d;
+  return d;
+}
+function phoneToEmail(p){ return normPhone(p) + '@phone.bdbs.local'; }
+function fmtPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 12 && d.indexOf('92') === 0) return '0' + d.slice(2,5) + '-' + d.slice(5);
+  return p || '';
+}
 function doLogin(){
   if (!FB_OK) return;
-  var em = val('lEmail'), pw = val('lPass');
-  if (!em || !pw) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter email and password.</span>'; return; }
+  var inp = val('lEmail'), pw = val('lPass');
+  var msg = document.getElementById('lMsg');
+  if (!inp || !pw) { msg.innerHTML = '<span class="err">Enter email or phone number, and password.</span>'; return; }
+  var em = inp;
+  if (inp.indexOf('@') === -1) {
+    if (normPhone(inp).length < 10) { msg.innerHTML = '<span class="err">Enter a valid email or phone number.</span>'; return; }
+    em = phoneToEmail(inp);
+  }
   auth.signInWithEmailAndPassword(em, pw).then(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="ok">Logged in.</span>';
+    msg.innerHTML = '<span class="ok">Logged in.</span>';
   }).catch(function(e){
-    document.getElementById('lMsg').innerHTML = '<span class="err">Login failed — check email and password.</span>';
+    msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
   });
 }
 function doLogout(){ if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) return;
-  var em = val('lEmail');
-  if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
-  auth.sendPasswordResetEmail(em).then(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="ok">Reset email sent to '+esc(em)+'.</span>';
+  var inp = val('lEmail');
+  var msg = document.getElementById('lMsg');
+  if (!inp) { msg.innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
+  if (inp.indexOf('@') === -1) { msg.innerHTML = '<span class="err">Phone-number accounts cannot reset by email — contact the admin to reset your password.</span>'; return; }
+  auth.sendPasswordResetEmail(inp).then(function(){
+    msg.innerHTML = '<span class="ok">Reset email sent to '+esc(inp)+'.</span>';
   }).catch(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
+    msg.innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
   });
 }
 function doSignup(){
   if (!FB_OK) return;
-  var name = val('suName'), em = val('suEmail'), pw = val('suPass'), pw2 = val('suPass2');
+  var name = val('suName'), em = val('suEmail'), ph = val('suPhone'), pw = val('suPass'), pw2 = val('suPass2');
   var msg = document.getElementById('suMsg');
   if (!name) { msg.innerHTML = '<span class="err">Enter your full name.</span>'; return; }
-  if (!em || em.indexOf('@') === -1 || em.indexOf('.') === -1) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  var hasEmail = em && em.indexOf('@') !== -1 && em.indexOf('.') !== -1;
+  var phone = normPhone(ph);
+  if (!hasEmail && !phone) { msg.innerHTML = '<span class="err">Enter an email address or a phone number.</span>'; return; }
+  if (em && !hasEmail) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  if (ph && phone.length < 10) { msg.innerHTML = '<span class="err">Enter a valid phone number.</span>'; return; }
   if (!pw || pw.length < 6) { msg.innerHTML = '<span class="err">Password must be at least 6 characters.</span>'; return; }
   if (pw !== pw2) { msg.innerHTML = '<span class="err">Passwords do not match.</span>'; return; }
+  var authEmail = hasEmail ? em : phoneToEmail(phone);
   msg.innerHTML = '<span class="mut">Creating your account…</span>';
-  auth.createUserWithEmailAndPassword(em, pw).then(function(cred){
+  auth.createUserWithEmailAndPassword(authEmail, pw).then(function(cred){
     var u = cred.user;
-    return db.collection('users').doc(u.uid).set({name:name, email:em, role:'donor', createdAt:Date.now()}).then(function(){
+    var doc = {name:name, email:authEmail, role:'donor', createdAt:Date.now()};
+    if (phone) doc.phone = phone;
+    return db.collection('users').doc(u.uid).set(doc).then(function(){
       msg.innerHTML = '<span class="ok">Account created. Welcome, '+esc(name)+'!</span>';
       routeAuth(u);
     });
   }).catch(function(e){
     var t = 'Could not create account.';
-    if (e && e.code === 'auth/email-already-in-use') t = 'This email is already registered — try Login instead.';
+    if (e && e.code === 'auth/email-already-in-use') t = 'This email or phone number is already registered — try Login instead.';
     else if (e && e.code === 'auth/invalid-email') t = 'Enter a valid email address.';
     else if (e && e.code === 'auth/weak-password') t = 'Password must be at least 6 characters.';
     msg.innerHTML = '<span class="err">'+t+'</span>';
@@ -1359,6 +1404,11 @@ function renderDonor(u){
     document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
     if (!linkedId) document.getElementById('pLinkMsg').innerHTML = '';
     if (linkedId) loadMyRecord(u, linkedId);
+    var linkedMember = data.linkedMemberId || '';
+    var de = document.getElementById('donorEmail');
+    if (de && data.phone) de.textContent = '(' + fmtPhone(data.phone) + ')';
+    if (linkedMember) loadMyMemberCard(linkedMember);
+    else { var mb = document.getElementById('myMemberCard'); if (mb) { mb.style.display='none'; mb.innerHTML=''; } }
   }).catch(function(){
     document.getElementById('linkBox').style.display = 'block';
     document.getElementById('profileBox').style.display = 'none';
@@ -1405,6 +1455,46 @@ function linkDonorRecord(){
     msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
   });
 }
+/* ---------- member login (separate from donor login) ----------
+   A member signs in with the simple login first, then links their
+   Member ID here. The phone number on their card is checked as well.
+   After linking, they can open their own full member card. */
+function linkMemberRecord(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var idNo = String(val('mLinkId')||'').replace(/\D/g,'');
+  var ph = normPhone(val('mLinkPhone'));
+  var msg = document.getElementById('mLinkMsg');
+  if (!idNo) { msg.innerHTML = '<span class="err">Enter your Member ID (e.g. 001).</span>'; return; }
+  idNo = idNo.padStart(3,'0');
+  if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your member card.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Checking…</span>';
+  var u = auth.currentUser;
+  db.collection('memberLookup').doc(idNo).get().then(function(d){
+    if (!d.exists) { msg.innerHTML = '<span class="err">No member found with this ID. Check the ID and try again.</span>'; return; }
+    var memberId = d.data().memberId;
+    db.collection('membersPublic').doc(memberId).get().then(function(p){
+      var cardPhone = (p.exists && p.data().phone) ? normPhone(p.data().phone) : '';
+      if (!cardPhone || cardPhone !== ph) { msg.innerHTML = '<span class="err">Phone number does not match this Member ID.</span>'; return; }
+      db.collection('users').doc(u.uid).set({linkedMemberId: memberId, linkedMemberNo: idNo}, {merge:true}).then(function(){
+        msg.innerHTML = '<span class="ok">Member card linked.</span>';
+        loadMyMemberCard(memberId);
+      }).catch(function(){ msg.innerHTML = '<span class="err">Could not link. Please try again.</span>'; });
+    }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+  }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+}
+function loadMyMemberCard(memberId){
+  var box = document.getElementById('myMemberCard');
+  if (!box) return;
+  if (!memberId) { box.style.display='none'; box.innerHTML=''; return; }
+  db.collection('members').doc(memberId).get().then(function(d){
+    if (!d.exists) { box.style.display='none'; return; }
+    var m = d.data(); m.id = d.id;
+    window._myMember = m;
+    box.style.display='block';
+    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button>';
+  }).catch(function(){ box.style.display='none'; });
+}
+function openMyMemberCard(){ if (window._myMember) renderMemberCard(window._myMember); }
 function updateMyDonation(){
   if (!FB_OK || !auth || !auth.currentUser) return;
   var msg = document.getElementById('pUpdateMsg');
