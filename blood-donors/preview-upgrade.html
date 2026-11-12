@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basti Dawa Blood Society (BDBS) — Blood Donors</title>
+<meta name="description" content="Basti Dawa Blood Society (BDBS) — find blood donors, request blood, register as a donor. Blood donation in Multan and Basti Malook. Donate blood, save lives.">
+<meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, blood donors Multan, donate blood, Basti Dawa Blood Society">
+<link rel="icon" href="logo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+/* ============ BDBS Premium Medical / NGO design system ============
+   Primary crimson #DC2626, deep burgundy #7F1D1D, bg #F8FAFC,
+   slate text #1E293B, emerald #10B981. Inter / Poppins.
+   This is the critical CSS: it carries the full design even when the
+   Tailwind CDN cannot load (APK offline bundled copy). */
+:root{
+  --red:#DC2626; --red2:#B91C1C; --red3:#991B1B; --burgundy:#7F1D1D;
+  --bg:#F8FAFC; --card:#FFFFFF; --ink:#0F172A; --ink2:#334155; --mut:#64748B;
+  --line:#E2E8F0; --line2:#F1F5F9; --gold:#D97706; --gold-soft:#FEF3C7;
+  --green:#10B981; --green-d:#047857; --green-soft:#ECFDF5;
+  --radius:12px; --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+  --shadow-lg:0 2px 6px rgba(15,23,42,.08),0 16px 40px rgba(15,23,42,.12);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:"Inter","Poppins","Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);padding-bottom:86px;line-height:1.5}
+h1,h2,h3{margin:0;color:var(--ink)}
+p{margin:0 0 10px}
+a{color:var(--red);text-decoration:none}
+img{max-width:100%}
+button{font-family:inherit}
+
+/* ---------- header ---------- */
+header{background:linear-gradient(135deg,#DC2626 0%,#EF4444 55%,#F87171 100%);color:#fff;padding:18px 16px 20px;box-shadow:0 4px 20px rgba(220,38,38,.35)}
+.hwrap{max-width:880px;margin:0 auto;display:flex;gap:14px;align-items:center}
+.mark{flex:0 0 auto;width:52px;height:52px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
+.mark svg{width:52px;height:52px;display:block}
+header h1{font-size:21px;font-weight:800;letter-spacing:.2px;line-height:1.2;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+header p{margin:3px 0 0;font-size:12.5px;opacity:.92}
+header .tagline{font-size:11px;color:#FDE68A;letter-spacing:2.5px;text-transform:uppercase;font-weight:700}
+
+/* ---------- layout / sections ---------- */
+.wrap{max-width:880px;margin:0 auto;padding:18px 14px 28px}
+.sec{display:none}.sec.on{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:19px;font-weight:800;padding-bottom:9px;border-bottom:2px solid var(--line2);position:relative}
+.card h2:after{content:"";position:absolute;left:0;bottom:-2px;width:56px;height:2px;background:var(--red)}
+.card h3{margin:14px 0 8px;font-size:16px;font-weight:700}
+.mut{color:var(--mut);font-size:13px}.small{font-size:12px}
+.leader{border-left:4px solid var(--gold)}
+.ok{color:var(--green-d);font-weight:700}.err{color:var(--red);font-weight:700}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(150deg,#7F1D1D 0%,#B91C1C 52%,#DC2626 100%);border-radius:20px;padding:26px 20px 22px;color:#fff;margin:6px 0 14px;box-shadow:0 16px 40px rgba(127,29,29,.35);text-align:center;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07);top:-90px;right:-60px}
+.hero:after{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-70px;left:-40px}
+.hero .hero-mark{width:76px;height:76px;margin:0 auto 8px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));position:relative}
+.hero .hero-mark svg{width:76px;height:76px;display:block}
+.hero h1{font-size:25px;font-weight:800;color:#fff;line-height:1.2}
+.hero .hero-sub{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#FDE68A;font-weight:700;margin:6px 0 4px}
+.hero .hero-text{font-size:14px;opacity:.94;max-width:520px;margin:0 auto 16px;position:relative}
+.hero-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;position:relative}
+.hstat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:12px 6px;text-align:center;backdrop-filter:blur(2px)}
+.hstat b{display:block;font-size:24px;font-weight:800;color:#fff;line-height:1.1}
+.hstat span{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;opacity:.9}
+.gstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:2px 0 12px}
+.gstat{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:10px 4px;text-align:center}
+.gstat b{display:block;font-size:22px;font-weight:800;color:#B91C1C;line-height:1.1}
+.gstat span{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:#7F1D1D}
+.hero-note{font-size:12px;opacity:.85;margin:12px 0 0;position:relative}
+.hero-demo{display:none;font-size:12px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 10px;margin:12px auto 0;max-width:520px;position:relative}
+
+/* ---------- about / organisation ---------- */
+.about{text-align:center}
+.org-emblem{width:96px;height:96px;border-radius:50%;border:4px solid #fff;box-shadow:0 8px 22px rgba(15,23,42,.18);background:#fff;margin:-58px auto 10px;display:block;position:relative}
+.about h2{border-bottom:0;padding-bottom:0}
+.about h2:after{display:none}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-block;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0;box-shadow:0 4px 14px rgba(220,38,38,.32);letter-spacing:.2px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(220,38,38,.4)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.ghost{background:#fff;color:var(--red);border:1.5px solid var(--red);box-shadow:none}
+.btn.green{background:linear-gradient(135deg,#059669,#10B981);box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.btn.light{background:#fff;color:var(--red2);box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.btn.oline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.85);box-shadow:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- bottom navigation ---------- */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(15,23,42,.10);display:flex;padding:6px 4px calc(8px + env(safe-area-inset-bottom));}
+.bnav button{flex:1;min-width:0;background:none;border:0;padding:4px 2px 2px;cursor:pointer;color:var(--mut);font-size:10.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;border-radius:8px 8px 0 0}
+.bnav button svg{width:23px;height:23px}
+.bnav button.on{color:var(--red);border-top-color:var(--red)}
+.bnav button:active{transform:scale(.94)}
+
+/* ---------- forms: floating labels + wizard ---------- */
+input,select,textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-size:15px;margin:5px 0 10px;background:#fff;font-family:inherit;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.13)}
+input.invalid,select.invalid,textarea.invalid{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(220,38,38,.16)!important}
+label{font-size:13px;font-weight:600;color:var(--ink2)}
+.fld{position:relative;margin:4px 0 12px}
+.fld input,.fld select,.fld textarea{margin:0;padding:20px 12px 8px}
+.fld>label{position:absolute;left:12px;top:14px;font-size:15px;font-weight:500;color:var(--mut);pointer-events:none;transition:all .15s ease}
+.fld input:focus+label,.fld input:not(:placeholder-shown)+label,.fld textarea:focus+label,.fld textarea:not(:placeholder-shown)+label{top:6px;font-size:11px;font-weight:700;color:var(--red)}
+.fld.static>label{top:6px;font-size:11px;font-weight:700;color:var(--mut)}
+.fld.static select:focus+label,.fld.static input:focus+label{color:var(--red)}
+.fld input[type="file"]{padding-top:22px;font-size:13px}
+.fld input[type="date"]{padding-top:20px}
+.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}
+.wprog{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:4px 0 4px}
+.wprog-fill{height:100%;width:33%;background:linear-gradient(90deg,#DC2626,#F59E0B);border-radius:99px;transition:width .35s ease}
+.wprog-label{font-size:12px;color:var(--mut);font-weight:600;margin-bottom:12px}
+.wstep{display:none}.wstep.on{display:block;animation:fadeUp .3s ease}
+.wstep h3{margin:2px 0 12px}
+.wbtns{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
+.wbtns .btn{margin:0}
+.wmsg{margin-top:8px}
+
+/* ---------- donor / member cards & pills ---------- */
+.bgpill{display:inline-flex;align-items:center;justify-content:center;min-width:44px;background:linear-gradient(135deg,#DC2626,#991B1B);color:#fff;border-radius:999px;padding:5px 13px;font-size:14px;font-weight:800;letter-spacing:.3px;box-shadow:0 0 0 3px rgba(220,38,38,.14),0 5px 12px rgba(220,38,38,.35)}
+.pill{display:inline-block;background:#FEE2E2;color:var(--burgundy);border:1px solid #FECACA;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px}
+.badge{display:inline-block;background:var(--gold-soft);color:#92400E;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+.badge.demo{background:#E0E7FF;color:#3730A3}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0;box-shadow:var(--shadow)}
+.dcard-top{display:flex;gap:12px;align-items:center}
+.dcard-top .bgpill{flex:0 0 auto}
+.dcard .dmeta{margin-top:8px}
+.idcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
+.idcard-head{background:linear-gradient(135deg,#7F1D1D,#DC2626);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.idcard-head .bgpill{box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.idcard-body{padding:16px;display:flex;gap:14px;align-items:flex-start}
+.idphoto{width:64px;height:64px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
+.vbadge{display:inline-flex;align-items:center;gap:4px;background:var(--green-soft);color:var(--green-d);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700}
+.vbadge.bad{background:#FEF2F2;color:var(--red)}
+.person{display:flex;gap:14px;align-items:flex-start}
+.person img{width:76px;height:76px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
+
+/* ---------- modal / sheet ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.55)}
+.modal.open{display:flex}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:20px 20px 28px;animation:slideUp .28s ease;position:relative}
+.modal-box h3{font-size:18px;margin:0 0 12px}
+.mclose{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--mut);font-size:15px;cursor:pointer}
+.sheet-btn{display:block;width:100%;text-align:left;background:var(--line2);border:0;border-radius:12px;padding:14px 16px;font-size:15px;font-weight:600;color:var(--ink);margin:8px 0;cursor:pointer}
+.sheet-btn:active{transform:scale(.98)}
+@media(min-width:640px){.modal{align-items:center;padding:20px}.modal-box{border-radius:20px;animation:popIn .22s ease}}
+
+/* ---------- member card & certificate ---------- */
+.mcard{border:3px solid var(--burgundy);outline:1.5px solid var(--gold);outline-offset:5px;border-radius:16px;padding:22px;background:linear-gradient(180deg,#fff,#FFFDF5);max-width:540px;box-shadow:var(--shadow-lg)}
+.mcard .mhead{text-align:center;border-bottom:2px solid var(--gold-soft);padding-bottom:12px;margin-bottom:12px}
+.mcard .mhead img{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold)}
+.mcard .mhead .ctitle{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
+.mcard .qr{text-align:center;margin:14px 0}
+.mcard .qrbox{display:inline-block;padding:12px;border:1.5px solid var(--gold-soft);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.mcard .sig{font-size:12px;color:var(--mut);text-align:center;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.mcard .side-label{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:8px}
+.mcard .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+.mcard .kv span{color:var(--mut)}
+.mcard .kv b{text-align:right}
+.mcard + .mcard{margin-top:16px}
+.cert .qverse{font-size:15px;color:#7f1d1d;margin:4px 0 10px}
+.cert .thanks{color:#1e40af;font-weight:700;letter-spacing:.5px;font-size:15px}
+.cert .sigrow{display:flex;justify-content:space-between;gap:10px;margin-top:18px;font-size:13px}
+.cert .sigrow div{flex:1}
+.cert .sigrow .sline{border-top:1.5px solid #7f1d1d;padding-top:6px;margin-top:26px}
+.cert{border:4px double var(--gold);border-radius:14px;padding:30px 24px;text-align:center;background:linear-gradient(180deg,#FFFDF5,#fff);max-width:660px;margin:12px auto;box-shadow:0 14px 34px rgba(180,83,9,.14)}
+.cert h2{font-family:Georgia,"Times New Roman",serif;color:var(--burgundy);margin:6px 0;letter-spacing:.5px;border:0;padding:0}
+.cert h2:after{display:none}
+.cert .seal{display:inline-flex;width:64px;height:64px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin:6px auto}
+.cert .ref{display:inline-block;border:1.5px dashed var(--gold);border-radius:8px;padding:8px 16px;font-weight:700;letter-spacing:1px;color:var(--burgundy);background:#fff}
+.cert .cname{font-family:Georgia,"Times New Roman",serif;font-size:26px;color:var(--ink)}
+.verified{font-size:26px;color:var(--green-d);font-weight:700}
+.notverified{font-size:26px;color:var(--red);font-weight:700}
+
+/* ---------- stats / tables / misc ---------- */
+.stat{background:linear-gradient(135deg,#fff,#FEF2F2);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:28px;color:var(--burgundy)}
+.stat span{font-size:12px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+th{background:#FEF2F2;color:var(--burgundy);font-weight:700}
+.setup{background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
+/* ---------- professional upgrade: header, pills, donor grid ---------- */
+.hwrap{flex-wrap:wrap}
+.hside{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hside .btn{margin:0;padding:10px 14px;font-size:14px}
+.hdr-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
+.hdr-badge b{font-size:15px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.gpill{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
+.gpill.on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.3)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.toggle input{width:auto;margin:0;accent-color:var(--red)}
+.row .toggle{flex:0 0 auto;align-self:center}
+.donor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:12px}
+.donor-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.status-pill{display:inline-block;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.status-pill.ok{background:var(--green-soft);color:var(--green-d)}
+.status-pill.cool{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.dc-name{font-size:16px;font-weight:800}
+.dc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
+.empty{text-align:center;padding:28px 12px}
+
+@media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:22px}header h1{font-size:18px}}
+@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.bnav,header{display:none!important}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<header>
+<div class="hwrap">
+<span class="mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg1)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span>
+<div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Donate Blood &bull; Save Lives</p></div>
+<div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light" onclick="show('donor')">+ Register as Donor</button></div>
+</div>
+</header>
+<div class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="sec on" id="s-home">
+<div class="hero">
+<div class="hero-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg2)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+<h1>Find Verified Blood Donors Near You in Seconds</h1>
+<p class="hero-sub">Basti Dawa Blood Society &bull; Donate Blood &bull; Save Lives</p>
+<p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts.</p>
+<div class="hero-actions">
+<button class="btn light" onclick="show('find')">🩸 Find Donor</button>
+<button class="btn oline" onclick="show('request')">+ Request Blood</button>
+<button class="btn oline" onclick="show('donor')">Register as Donor</button>
+</div>
+<div class="hero-stats">
+<div class="hstat"><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
+<div class="hstat"><b id="statRequests" data-v="0">0</b><span>Active Requests</span></div>
+<div class="hstat"><b id="statLives" data-v="0">0</b><span>Lives Saved</span></div>
+<div class="hstat"><b id="statActivities" data-v="0">0</b><span>Activities</span></div>
+</div>
+<p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
+<p id="demoNote" class="hero-demo">LOCAL DEMO MODE — Firebase setup pending (see SETUP.md).</p>
+</div>
+<div class="card about">
+<img src="logo.png" class="org-emblem" alt="BDBS official logo">
+<h2>Welcome to Basti Dawa Blood Society</h2>
+<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor and patient personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login.</p>
+<p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
+</div>
+<div class="card">
+<h2>Our Leadership</h2>
+<div class="row">
+<div class="card leader" style="flex:1"><h3>Patron In Chief</h3><b>Dr Muhammad Naeem Asghar</b><br><span class="mut">Phone: 0301-5626609</span></div>
+<div class="card leader" style="flex:1"><h3>Founder &amp; Chief Executive</h3><b>Muhammad Asif Javaid</b><br><span class="mut">Phone: 03069140867</span><br><a class="btn" style="margin-top:10px" href="https://wa.me/923069140867?text=Assalam-o-Alaikum%2C%20I%20want%20to%20contact%20Basti%20Dawa%20Blood%20Society%20regarding%20blood%20donation." target="_blank" rel="noopener">WhatsApp</a></div>
+</div>
+<p><b>Follow us:</b>
+<a class="btn ghost" href="https://wa.me/923069140867?text=Assalam-o-Alaikum%2C%20I%20want%20to%20contact%20Basti%20Dawa%20Blood%20Society%20regarding%20blood%20donation." target="_blank" rel="noopener">WhatsApp</a>
+<a class="btn ghost" href="https://www.facebook.com/profile.php?id=61568131213778" target="_blank" rel="noopener">Facebook</a>
+<a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
+</div>
+<div class="card" id="psca">
+<h2>PSCA Virtual Blood Bank — Punjab Safe Cities Authority</h2>
+<h3>English</h3>
+<p>The Punjab Safe Cities Authority (PSCA) Virtual Blood Bank is a system that helps connect patients in Punjab who need blood with voluntary blood donors.</p>
+<p>Its main purpose is to help provide timely blood for emergency, operation, delivery, thalassemia and other patients.</p>
+<h3>How to get blood</h3>
+<ol>
+<li>Call <b>15</b> from any mobile phone in Punjab.</li>
+<li>Tell the call operator that you need blood.</li>
+<li>Select <b>Option 4</b> for the Virtual Blood Bank service.</li>
+<li>Tell the patient&rsquo;s required blood group.</li>
+<li>Tell the patient&rsquo;s city and hospital.</li>
+<li>Provide your contact number and the details of the need.</li>
+<li>Get guidance about contacting the relevant donors and their availability.</li>
+</ol>
+<h3>Information needed for the patient</h3>
+<p>Keep this information ready before calling:</p>
+<ul>
+<li>Patient&rsquo;s full name</li>
+<li>Required blood group (A+, B+, O+ etc.)</li>
+<li>How many units of blood are needed?</li>
+<li>Hospital name and city</li>
+<li>Ward or relevant department</li>
+<li>Blood type: Whole Blood, RBCs, Platelets or Plasma</li>
+<li>Patient attendant&rsquo;s active mobile number</li>
+</ul>
+<h3>What happens next?</h3>
+<ul>
+<li>The PSCA team searches its registered donor list.</li>
+<li>Possible donors are found according to blood group and the patient&rsquo;s location.</li>
+<li>The relevant donors are helped to contact the patient&rsquo;s family; in some cases a conference call is also arranged.</li>
+<li>The donor goes to the hospital blood bank and donates blood.</li>
+<li>The hospital does the donor&rsquo;s medical screening and the patient&rsquo;s blood cross-match.</li>
+</ul>
+<p>Please note: the Virtual Blood Bank helps in finding a donor; blood testing and transfusion are the hospital&rsquo;s job.</p>
+<h3>Donor registration</h3>
+<p>If someone wants to donate blood voluntarily:</p>
+<ol>
+<li>Open the PSCA official website.</li>
+<li>Go to Volunteer Registration.</li>
+<li>Enter your name, father&rsquo;s name, CNIC and date of birth.</li>
+<li>Enter your mobile number and district.</li>
+<li>Enter your full address and select your blood group.</li>
+<li>Provide disease-related information and submit the form.</li>
+<li>The PSCA team will verify the information and, after verification, include the donor in the network.</li>
+</ol>
+<p><b>Emergency Helpline:</b> <a href="tel:15">15</a> &bull; <b>Virtual Blood Bank WhatsApp:</b> <a href="https://wa.me/923171000015" target="_blank" rel="noopener">0317-1000015</a> &bull; <b>Email:</b> <a href="mailto:bloodbank@psca.gop.pk">bloodbank@psca.gop.pk</a> &bull; <b>Website:</b> <a href="https://psca.gop.pk/" target="_blank" rel="noopener">PSCA official website</a></p>
+<p class="mut">This service is available 24/7. Patient requests and donor registration are free; the hospital&rsquo;s own tests or other charges may be separate.</p>
+<p><b>Note for Basti Dawa Blood Society:</b> register all BDBS registered donors with PSCA Virtual Blood Bank too — it can further strengthen the donor network for needy patients in Multan, Basti Malook and other areas of Punjab.</p>
+<hr>
+<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>اردو</h3>
+<p>پنجاب سیف سٹیز اتھارٹی (PSCA) کا Virtual Blood Bank ایک ایسا نظام ہے جس کے ذریعے پنجاب میں خون کے ضرورت مند مریضوں کو رضاکارانہ خون عطیہ کرنے والے ڈونرز سے رابطہ کروانے میں مدد دی جاتی ہے۔</p>
+<p>اس سروس کا بنیادی مقصد ایمرجنسی، آپریشن، ڈلیوری اور تھیلیسیمیا سمیت دیگر مریضوں کے لیے بروقت خون کی فراہمی میں معاونت کرنا ہے۔</p>
+<h3>خون حاصل کرنے کا طریقہ</h3>
+<ol>
+<li>پنجاب میں کسی بھی موبائل فون سے 15 پر کال کریں۔</li>
+<li>کال آپریٹر کو بتائیں کہ آپ کو خون کی ضرورت ہے۔</li>
+<li>Virtual Blood Bank سروس کے لیے Option 4 منتخب کریں۔</li>
+<li>مریض کا مطلوبہ بلڈ گروپ بتائیں۔</li>
+<li>مریض کا شہر اور ہسپتال بتائیں۔</li>
+<li>اپنا رابطہ نمبر اور ضرورت کی تفصیلات فراہم کریں۔</li>
+<li>متعلقہ ڈونرز سے رابطے اور دستیابی کے سلسلے میں رہنمائی حاصل کریں۔</li>
+</ol>
+<h3>مریض کے لیے کون سی معلومات ضروری ہیں؟</h3>
+<p>کال کرنے سے پہلے یہ معلومات تیار رکھیں:</p>
+<ul>
+<li>مریض کا مکمل نام</li>
+<li>مطلوبہ بلڈ گروپ (A+، B+، O+ وغیرہ)</li>
+<li>کتنے یونٹ خون درکار ہیں؟</li>
+<li>ہسپتال کا نام اور شہر</li>
+<li>وارڈ یا متعلقہ شعبہ</li>
+<li>خون کی قسم: Whole Blood، RBCs، Platelets یا Plasma</li>
+<li>مریض کے اٹینڈنٹ کا فعال موبائل نمبر</li>
+</ul>
+<h3>اس کے بعد کیا ہوتا ہے؟</h3>
+<ul>
+<li>PSCA ٹیم اپنی رجسٹرڈ ڈونر لسٹ میں تلاش کرتی ہے۔</li>
+<li>بلڈ گروپ اور مریض کے مقام کے مطابق ممکنہ ڈونرز تلاش کیے جاتے ہیں۔</li>
+<li>متعلقہ ڈونرز کو مریض کے اہل خانہ سے رابطہ کروانے میں مدد دی جاتی ہے، بعض صورتوں میں کانفرنس کال بھی ہوتی ہے۔</li>
+<li>ڈونر ہسپتال کے بلڈ بینک میں جا کر خون عطیہ کرتا ہے۔</li>
+<li>ہسپتال ڈونر کی میڈیکل اسکریننگ اور مریض کے خون کا Cross-match کرتا ہے۔</li>
+</ul>
+<p>یاد رہے کہ Virtual Blood Bank ڈونر تلاش کرنے میں مدد کرتا ہے؛ خون کی جانچ اور منتقلی ہسپتال کا کام ہے۔</p>
+<h3>ڈونر رجسٹریشن کا طریقہ</h3>
+<p>اگر کوئی شخص رضاکارانہ خون عطیہ کرنا چاہتا ہے تو:</p>
+<ol>
+<li>PSCA کی آفیشل ویب سائٹ کھولے۔</li>
+<li>Volunteer Registration میں جائے۔</li>
+<li>اپنا نام، والد کا نام، CNIC اور تاریخ پیدائش درج کرے۔</li>
+<li>موبائل نمبر اور ضلع درج کرے۔</li>
+<li>اپنا مکمل پتہ اور بلڈ گروپ منتخب کرے۔</li>
+<li>بیماری سے متعلق معلومات فراہم کرکے فارم جمع کروائے۔</li>
+<li>PSCA کی ٹیم معلومات کی تصدیق کرے گی اور تصدیق کے بعد ڈونر نیٹ ورک میں شامل کرے گی۔</li>
+</ol>
+<p><b>ایمرجنسی ہیلپ لائن:</b> <a href="tel:15">15</a> &bull; <b>Virtual Blood Bank واٹس ایپ:</b> <a href="https://wa.me/923171000015" target="_blank" rel="noopener">0317-1000015</a> &bull; <b>ای میل:</b> <a href="mailto:bloodbank@psca.gop.pk">bloodbank@psca.gop.pk</a></p>
+<p>یہ سروس 24/7 دستیاب ہے اور مریض کی درخواست اور ڈونر رجسٹریشن مفت ہے۔ ہسپتال کے اپنے ٹیسٹ یا دیگر چارجز الگ ہو سکتے ہیں۔</p>
+<p><b>بستی دوا بلڈ سوسائٹی کے لیے اہم تجویز:</b> آپ اپنی Basti Dawa Blood Society کے تمام رجسٹرڈ ڈونرز کو بھی PSCA Virtual Blood Bank میں رجسٹر کروائیں۔ اس سے ملتان، بستی ملوک اور پنجاب کے دوسرے علاقوں میں ضرورت مند مریضوں کے لیے ڈونرز کا نیٹ ورک مزید مضبوط ہو سکتا ہے۔</p>
+</div>
+</div>
+<div class="card" id="sops">
+<h2>Standard Operating Procedures (SOPs) for Blood Donors</h2>
+<h3>English</h3>
+<h3>1. Donor Registration</h3>
+<ul>
+<li>Every donor&rsquo;s full name, mobile number and blood group should be recorded.</li>
+<li>The record should be saved with the donor&rsquo;s consent.</li>
+<li>The date of previous blood donation should be recorded.</li>
+</ul>
+<h3>2. Donor Eligibility</h3>
+<ul>
+<li>The donor&rsquo;s age should generally be 18 to 65 years.</li>
+<li>Weight should be at least 50 kilograms.</li>
+<li>Hemoglobin and blood pressure should be according to the prescribed medical standards.</li>
+<li>The donor should be physically healthy.</li>
+<li>Final approval will be given by the authorized blood bank staff.</li>
+</ul>
+<h3>3. Before Donating Blood</h3>
+<ul>
+<li>Complete a good night&rsquo;s sleep.</li>
+<li>Eat a proper meal.</li>
+<li>Drink adequate water.</li>
+<li>Do not donate blood on an empty stomach.</li>
+<li>Give correct information about your medicines and illnesses.</li>
+</ul>
+<h3>4. During Blood Donation</h3>
+<ul>
+<li>Blood should be donated only at an authorized blood bank.</li>
+<li>A new and sterile needle should be used.</li>
+<li>The donor&rsquo;s full consent should be obtained.</li>
+<li>Trained medical staff should collect the blood.</li>
+</ul>
+<h3>5. After Donating Blood</h3>
+<ul>
+<li>Rest for at least 10 to 15 minutes.</li>
+<li>Drink water or juice.</li>
+<li>Avoid heavy work and strenuous exercise for a few hours.</li>
+<li>If you feel dizzy or weak, inform the medical staff.</li>
+</ul>
+<h3>6. Interval Between Donations</h3>
+<ul>
+<li>After a normal Whole Blood Donation, generally keep a gap of at least 3 months.</li>
+<li>Medical eligibility must be re-checked every time.</li>
+<li>Intervals for platelets and plasma donations are different.</li>
+</ul>
+<h3>7. Donor Privacy</h3>
+<ul>
+<li>The donor&rsquo;s personal information should be kept safe.</li>
+<li>Do not share anyone&rsquo;s mobile number or medical information without permission.</li>
+<li>The decision to donate or not is the donor&rsquo;s own right.</li>
+</ul>
+<h3>8. Society&rsquo;s Responsibilities</h3>
+<ul>
+<li>No money should be taken from any donor in exchange for blood donation.</li>
+<li>Proper contact should be arranged between the patient and the donor.</li>
+<li>Buying and selling of blood should be discouraged.</li>
+<li>The patient should be referred to an authorized blood bank.</li>
+<li>A record of every donation should be kept.</li>
+</ul>
+<p><b>Our Pledge:</b> We will give top priority to the respect, health, consent and privacy of blood donors.</p>
+<p>BASTI DAWA BLOOD SOCIETY &bull; Chief Executive: Muhammad Asif Javaid</p>
+<p class="mut">Note: This is a draft of the basic SOPs for the society. Final medical rules will be set according to Pakistan&rsquo;s relevant blood transfusion laws, Punjab&rsquo;s rules and the authorized blood bank&rsquo;s policy.</p>
+<hr>
+<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>اردو</h3>
+<h3>1۔ ڈونر کی رجسٹریشن</h3>
+<ul>
+<li>ہر ڈونر کا مکمل نام، موبائل نمبر اور بلڈ گروپ درج کیا جائے۔</li>
+<li>ڈونر کی رضامندی سے ریکارڈ محفوظ کیا جائے۔</li>
+<li>سابقہ خون عطیہ کرنے کی تاریخ درج کی جائے۔</li>
+</ul>
+<h3>2۔ ڈونر کی اہلیت</h3>
+<ul>
+<li>ڈونر کی عمر عموماً 18 سے 65 سال ہو۔</li>
+<li>وزن کم از کم 50 کلوگرام ہو۔</li>
+<li>ہیموگلوبن اور بلڈ پریشر مقررہ طبی معیار کے مطابق ہوں۔</li>
+<li>ڈونر جسمانی طور پر صحت مند ہو۔</li>
+<li>حتمی منظوری مستند بلڈ بینک کا عملہ دے گا۔</li>
+</ul>
+<h3>3۔ خون عطیہ کرنے سے پہلے</h3>
+<ul>
+<li>اچھی نیند پوری کریں۔</li>
+<li>مناسب غذا کھائیں۔</li>
+<li>پانی کا مناسب استعمال کریں۔</li>
+<li>خالی پیٹ خون عطیہ نہ کریں۔</li>
+<li>اپنی ادویات اور بیماریوں کے متعلق درست معلومات دیں۔</li>
+</ul>
+<h3>4۔ خون عطیہ کرنے کے دوران</h3>
+<ul>
+<li>خون صرف مستند بلڈ بینک میں عطیہ کیا جائے۔</li>
+<li>نئی اور جراثیم سے پاک سوئی استعمال کی جائے۔</li>
+<li>ڈونر کی مکمل رضامندی حاصل کی جائے۔</li>
+<li>تربیت یافتہ طبی عملہ خون جمع کرے۔</li>
+</ul>
+<h3>5۔ خون عطیہ کرنے کے بعد</h3>
+<ul>
+<li>کم از کم 10 سے 15 منٹ آرام کریں۔</li>
+<li>پانی یا جوس استعمال کریں۔</li>
+<li>چند گھنٹوں تک بھاری کام اور سخت ورزش سے گریز کریں۔</li>
+<li>چکر آنے یا کمزوری محسوس ہونے پر طبی عملے کو بتائیں۔</li>
+</ul>
+<h3>6۔ دوبارہ خون عطیہ کرنے کا وقفہ</h3>
+<ul>
+<li>عام Whole Blood Donation کے بعد عموماً کم از کم 3 ماہ کا وقفہ رکھا جائے۔</li>
+<li>ہر مرتبہ طبی اہلیت کی دوبارہ جانچ ضروری ہے۔</li>
+<li>پلیٹلیٹس اور پلازما کے عطیات کے وقفے مختلف ہوتے ہیں۔</li>
+</ul>
+<h3>7۔ ڈونر کی رازداری</h3>
+<ul>
+<li>ڈونر کی ذاتی معلومات محفوظ رکھی جائیں۔</li>
+<li>کسی کی اجازت کے بغیر موبائل نمبر یا طبی معلومات شیئر نہ کی جائیں۔</li>
+<li>عطیہ دینے یا نہ دینے کا فیصلہ ڈونر کا اپنا حق ہے۔</li>
+</ul>
+<h3>8۔ سوسائٹی کی ذمہ داریاں</h3>
+<ul>
+<li>کسی ڈونر سے خون عطیہ کرنے کے بدلے رقم وصول نہ کی جائے۔</li>
+<li>مریض اور ڈونر کے درمیان مناسب رابطہ کروایا جائے۔</li>
+<li>خون کی خرید و فروخت کی حوصلہ شکنی کی جائے۔</li>
+<li>مریض کو مستند بلڈ بینک سے رجوع کروایا جائے۔</li>
+<li>ہر عطیہ کا ریکارڈ رکھا جائے۔</li>
+</ul>
+<p><b>ہمارا عہد:</b> ہم خون عطیہ کرنے والوں کی عزت، صحت، رضامندی اور رازداری کو اولین ترجیح دیں گے۔</p>
+<p>BASTI DAWA BLOOD SOCIETY &bull; Chief Executive: Muhammad Asif Javaid</p>
+<p>نوٹ: یہ سوسائٹی کے لیے بنیادی SOPs کا مسودہ ہے۔ حتمی طبی اصول پاکستان کے متعلقہ بلڈ ٹرانسفیوژن قوانین، پنجاب کے قواعد اور مستند بلڈ بینک کی پالیسی کے مطابق طے کیے جائیں۔</p>
+</div>
+</div>
+<div class="card" id="tribute">
+<h2>🩸 Salute to All Blood Donors!</h2>
+<h3>English</h3>
+<p><b>To all the great people who donate blood!</b></p>
+<p>You are all a precious asset of our society. Your donation is a new hope of life for a needy patient, happiness for a mother, a smile for a child, and peace for a family.</p>
+<p>You take out your precious time to serve humanity — this spirit is truly praiseworthy.</p>
+<p>We thank all our blood-donating brothers and sisters from the bottom of our hearts. May Allah accept this noble deed, and grant you health, safety and a life full of happiness. Ameen! 🤲</p>
+<p><b>Remember!</b> The price of your donated blood is not paid in money, but in a human life.</p>
+<p>🩸 <b>BASTI DAWA BLOOD SOCIETY</b> &bull; <i>Salute to All Blood Donors!</i> &bull; <b>Your donation, someone&rsquo;s life!</b></p>
+<hr>
+<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>اردو</h3>
+<p><b>خون عطیہ کرنے والے تمام عظیم انسانوں کے نام!</b></p>
+<p>آپ سب لوگ ہمارے معاشرے کا قیمتی سرمایہ ہیں۔ آپ کا عطیہ کسی ضرورت مند مریض کے لیے زندگی کی نئی امید، کسی ماں کے لیے خوشی، کسی بچے کے لیے مسکراہٹ اور کسی خاندان کے لیے سکون کا باعث بنتا ہے۔</p>
+<p>آپ اپنا قیمتی وقت نکال کر انسانیت کی خدمت کرتے ہیں، یہ جذبہ یقیناً قابلِ تحسین ہے۔</p>
+<p>ہم دل کی گہرائیوں سے تمام خون عطیہ کرنے والے بھائیوں اور بہنوں کا شکریہ ادا کرتے ہیں۔ اللہ تعالیٰ آپ کے اس نیک عمل کو اپنی بارگاہ میں قبول فرمائے، آپ کو صحت، سلامتی اور خوشیوں بھری زندگی عطا فرمائے۔ آمین! 🤲</p>
+<p><b>یاد رکھیں!</b> آپ کے عطیہ کردہ خون کی قیمت پیسوں سے نہیں، بلکہ کسی انسان کی زندگی سے ادا ہوتی ہے۔</p>
+<p>🩸 <b>BASTI DAWA BLOOD SOCIETY</b> &bull; <i>Salute to All Blood Donors!</i> &bull; <b>آپ کا عطیہ، کسی کی زندگی!</b></p>
+</div>
+</div>
+<div class="card" id="benefits">
+<h2>🩸 Benefits of Blood Donation</h2>
+<h3>English</h3>
+<p>Blood donation is a great act of human service. It is not only a means of saving a needy person&rsquo;s life, but it also promotes love, sympathy and the spirit of humanity in society.</p>
+<h3>15 Important Benefits of Blood Donation</h3>
+<ol>
+<li><b>Saving a precious life:</b> Your donation can give a person a new life.</li>
+<li><b>Helping thalassemia children:</b> Such children regularly need blood.</li>
+<li><b>Helping pregnant women:</b> In case of heavy bleeding during delivery, blood can save a life.</li>
+<li><b>Helping accident patients:</b> In road accidents and other emergencies, blood is extremely important.</li>
+<li><b>Helping surgery patients:</b> Blood may be needed during major operations.</li>
+<li><b>Helping cancer patients:</b> Some patients need blood and platelets during treatment.</li>
+<li><b>Initial health check:</b> Before donating blood, blood pressure, pulse and hemoglobin are checked.</li>
+<li><b>Reduction in iron levels:</b> Donating blood reduces the amount of iron in the body, which can be beneficial for some people.</li>
+<li><b>Mental satisfaction:</b> Taking part in saving a life brings happiness and peace.</li>
+<li><b>Serving humanity:</b> Blood donation is service to humanity above colour, race, language and religion.</li>
+<li><b>Promoting the spirit of volunteering:</b> It encourages others to donate blood too.</li>
+<li><b>Blood bank availability:</b> It helps maintain blood stocks in hospitals.</li>
+<li><b>Social unity:</b> Blood donation activities bring people closer to each other.</li>
+<li><b>Help in emergencies:</b> Blood available on time can prove extremely valuable in any emergency.</li>
+<li><b>A chance to save lives:</b> One donated blood can be divided into different components and used to treat more than one patient.</li>
+</ol>
+<h3>Precautions Before Donating Blood</h3>
+<ul>
+<li>Complete a good night&rsquo;s sleep.</li>
+<li>Eat a proper meal; do not donate blood on an empty stomach.</li>
+<li>Drink adequate water.</li>
+<li>Get your hemoglobin checked before donating.</li>
+<li>Do not donate blood in case of fever, illness or severe weakness.</li>
+<li>Rest a while after donating.</li>
+<li>Always donate blood at an authorized blood bank.</li>
+</ul>
+<h3>How Often Can Blood Be Donated?</h3>
+<p>Generally a gap of about 3 months is kept between Whole Blood Donations; however, the final interval depends on the blood bank&rsquo;s medical standards and the donor&rsquo;s health.</p>
+<p><b>Our message:</b> Blood donation takes only a few minutes, but it can become a whole life for someone. Your donated blood can give life to a mother, bring a smile to a child&rsquo;s face, bring a father back to his family, and save a family from falling apart. Come! Donate blood, save lives, and fulfil the duty of humanity.</p>
+<p>🩸 BASTI DAWA BLOOD SOCIETY &bull; Our Mission – Saving Lives Through Voluntary Blood Donation. &bull; Chief Executive: Muhammad Asif Javaid</p>
+<hr>
+<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>اردو</h3>
+<p>خون کا عطیہ ایک عظیم انسانی خدمت ہے۔ یہ نہ صرف کسی ضرورت مند انسان کی جان بچانے کا ذریعہ ہے بلکہ معاشرے میں محبت، ہمدردی اور انسانیت کے جذبے کو بھی فروغ دیتا ہے۔</p>
+<h3>خون عطیہ کرنے کے 15 اہم فوائد</h3>
+<ol>
+<li><b>قیمتی جان بچانا:</b> آپ کا عطیہ کسی انسان کو نئی زندگی دے سکتا ہے۔</li>
+<li><b>تھیلیسیمیا کے بچوں کی مدد:</b> ایسے بچوں کو باقاعدگی سے خون کی ضرورت ہوتی ہے۔</li>
+<li><b>حاملہ خواتین کی مدد:</b> زچگی کے دوران زیادہ خون بہنے کی صورت میں خون زندگی بچا سکتا ہے۔</li>
+<li><b>حادثات کے مریضوں کی مدد:</b> روڈ حادثات اور دیگر ایمرجنسی میں خون انتہائی اہم ہوتا ہے۔</li>
+<li><b>آپریشن کے مریضوں کی مدد:</b> بڑے آپریشنز کے دوران خون کی ضرورت پڑ سکتی ہے۔</li>
+<li><b>کینسر کے مریضوں کی مدد:</b> بعض مریضوں کو علاج کے دوران خون اور پلیٹلیٹس درکار ہوتے ہیں۔</li>
+<li><b>صحت کا ابتدائی جائزہ:</b> خون عطیہ کرنے سے پہلے بلڈ پریشر، نبض اور ہیموگلوبن چیک کیا جاتا ہے۔</li>
+<li><b>آئرن کی مقدار میں کمی:</b> خون عطیہ کرنے سے جسم میں موجود آئرن کی مقدار کم ہوتی ہے، جو بعض افراد کے لیے مفید ہو سکتی ہے۔</li>
+<li><b>ذہنی اطمینان:</b> کسی کی جان بچانے میں حصہ لینے سے خوشی اور سکون محسوس ہوتا ہے۔</li>
+<li><b>انسانیت کی خدمت:</b> خون کا عطیہ رنگ، نسل، زبان اور مذہب سے بالاتر ہو کر انسانیت کی خدمت ہے۔</li>
+<li><b>رضاکارانہ جذبے کو فروغ:</b> دوسروں کو بھی خون عطیہ کرنے کی ترغیب ملتی ہے۔</li>
+<li><b>بلڈ بینک کی دستیابی:</b> ہسپتالوں میں خون کے ذخیرے کو برقرار رکھنے میں مدد ملتی ہے۔</li>
+<li><b>معاشرتی اتحاد:</b> خون عطیہ کرنے کی سرگرمیاں لوگوں کو ایک دوسرے کے قریب لاتی ہیں۔</li>
+<li><b>ایمرجنسی میں مدد:</b> بروقت دستیاب خون کسی بھی ہنگامی صورتحال میں انتہائی قیمتی ثابت ہو سکتا ہے۔</li>
+<li><b>زندگی بچانے کا موقع:</b> ایک عطیہ شدہ خون کو مختلف اجزاء میں تقسیم کرکے ایک سے زیادہ مریضوں کے علاج میں استعمال کیا جا سکتا ہے۔</li>
+</ol>
+<h3>خون عطیہ کرنے سے پہلے احتیاطی تدابیر</h3>
+<ul>
+<li>اچھی نیند پوری کریں۔</li>
+<li>مناسب غذا کھائیں، خالی پیٹ خون عطیہ نہ کریں۔</li>
+<li>پانی کا مناسب استعمال کریں۔</li>
+<li>عطیہ کرنے سے پہلے ہیموگلوبن چیک کروائیں۔</li>
+<li>بخار، بیماری یا شدید کمزوری کی صورت میں خون عطیہ نہ کریں۔</li>
+<li>عطیہ کرنے کے بعد کچھ دیر آرام کریں۔</li>
+<li>خون ہمیشہ مستند بلڈ بینک میں عطیہ کریں۔</li>
+</ul>
+<h3>خون کتنے عرصے بعد عطیہ کیا جا سکتا ہے؟</h3>
+<p>عام طور پر Whole Blood Donation کے درمیان تقریباً 3 ماہ کا وقفہ رکھا جاتا ہے، تاہم حتمی وقفہ بلڈ بینک کے طبی معیار اور ڈونر کی صحت کے مطابق ہوتا ہے۔</p>
+<p><b>ہمارا پیغام:</b> خون کا عطیہ صرف چند منٹ لیتا ہے، لیکن کسی کے لیے پوری زندگی بن سکتا ہے۔ آپ کا دیا ہوا خون کسی ماں کو زندگی دے سکتا ہے، کسی بچے کے چہرے پر مسکراہٹ لا سکتا ہے، کسی باپ کو اس کے خاندان کے پاس واپس لا سکتا ہے، کسی خاندان کو بکھرنے سے بچا سکتا ہے۔ آئیے! خون عطیہ کریں، زندگی بچائیں اور انسانیت کا فرض ادا کریں۔</p>
+<p>🩸 BASTI DAWA BLOOD SOCIETY &bull; Our Mission – Saving Lives Through Voluntary Blood Donation. &bull; Chief Executive: Muhammad Asif Javaid</p>
+</div>
+</div>
+<div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
+<div class="card" id="contact"><h2>Contact Us</h2>
+<p class="mut">Reach out to Basti Dawa Blood Society for blood donation, membership or any question.</p>
+<p><b>Email:</b> <a href="mailto:bastidawabloodsociety@gmail.com">bastidawabloodsociety@gmail.com</a></p>
+<p><b>WhatsApp (Founder Muhammad Asif Javaid):</b><br><a class="btn" style="margin-top:10px" href="https://wa.me/923069140867?text=Assalam-o-Alaikum%2C%20I%20want%20to%20contact%20Basti%20Dawa%20Blood%20Society%20regarding%20blood%20donation." target="_blank" rel="noopener">WhatsApp</a></p>
+<p><b>Follow us:</b>
+<a class="btn ghost" href="https://www.facebook.com/profile.php?id=61568131213778" target="_blank" rel="noopener">Facebook</a>
+<a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
+</div>
+</section>
+
+<!-- ================= FIND DONOR ================= -->
+<section class="sec" id="s-find">
+<div class="card">
+<h2>Find a Blood Donor</h2>
+<p class="mut">Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.</p>
+<div class="pills" id="groupPills">
+<button class="gpill on" data-g="" onclick="setGroupFilter('',this)">All</button>
+<button class="gpill" data-g="A+" onclick="setGroupFilter('A+',this)">A+</button>
+<button class="gpill" data-g="A-" onclick="setGroupFilter('A-',this)">A-</button>
+<button class="gpill" data-g="B+" onclick="setGroupFilter('B+',this)">B+</button>
+<button class="gpill" data-g="B-" onclick="setGroupFilter('B-',this)">B-</button>
+<button class="gpill" data-g="O+" onclick="setGroupFilter('O+',this)">O+</button>
+<button class="gpill" data-g="O-" onclick="setGroupFilter('O-',this)">O-</button>
+<button class="gpill" data-g="AB+" onclick="setGroupFilter('AB+',this)">AB+</button>
+<button class="gpill" data-g="AB-" onclick="setGroupFilter('AB-',this)">AB-</button>
+</div>
+<div class="row">
+<div class="fld"><input id="fCity" placeholder=" " oninput="searchDonors()"><label for="fCity">City / Area</label></div>
+<label class="toggle"><input type="checkbox" id="fAvail" onchange="searchDonors()"> Available Only</label>
+</div>
+<button class="btn ghost" onclick="show('request')">Request Blood</button>
+<p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
+<div id="findResults" style="margin-top:10px"></div>
+</div>
+</section>
+
+<!-- ================= REQUEST BLOOD ================= -->
+<section class="sec" id="s-request">
+<div class="card" id="wz-request" data-step="0">
+<h2>Blood Donation Request</h2>
+<p class="mut">Your request is sent to the BDBS admin. The public list shows only the patient's first name, blood group needed, hospital and city — never phone or CNIC.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 3</div>
+<div class="wstep on">
+<h3>1 &bull; Patient Details</h3>
+<div class="row">
+<div class="fld"><input id="rName" placeholder=" "><label for="rName">Pt Name *</label></div>
+<div class="fld"><input id="rFather" placeholder=" "><label for="rFather">Father Name *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="rCnic" placeholder=" "><label for="rCnic">CNIC (optional)</label></div>
+<div class="fld"><input id="rAge" type="number" min="0" max="120" placeholder=" "><label for="rAge">Age *</label></div>
+</div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('request',['rName','rFather','rAge'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Blood Needed</h3>
+<div class="row">
+<div class="fld static"><select id="rGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="rGroup">Blood Group Needed *</label></div>
+<div class="fld"><input id="rHospital" placeholder=" "><label for="rHospital">Hospital *</label></div>
+</div>
+<div class="fld"><input id="rDisease" placeholder=" "><label for="rDisease">Disease *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="wizNext('request',['rGroup','rHospital','rDisease'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>3 &bull; Contact</h3>
+<div class="fld"><input id="rPhone" type="tel" placeholder=" "><label for="rPhone">Phone No. *</label></div>
+<div class="fld"><input id="rAddress" placeholder=" "><label for="rAddress">Address *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="submitRequest()">Submit Request</button></div>
+</div>
+<div class="wmsg" id="rMsg"></div>
+</div>
+<div class="card"><h2>Open Blood Requests</h2><div id="requestList" class="mut">Loading…</div></div>
+</section>
+
+<!-- ================= BECOME DONOR ================= -->
+<section class="sec" id="s-donor">
+<div class="card" id="wz-donor" data-step="0">
+<h2>Donor Registration</h2>
+<p class="mut">Register as a blood donor. Your phone, CNIC, address and disease are <b>private</b> — only the BDBS admin can see them. The public donor list shows only your name, blood group, city and last donation date.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 3</div>
+<div class="wstep on">
+<h3>1 &bull; Personal Details</h3>
+<div class="row">
+<div class="fld"><input id="dName" placeholder=" "><label for="dName">Donor Name *</label></div>
+<div class="fld"><input id="dFather" placeholder=" "><label for="dFather">Father Name *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="dNo" placeholder=" "><label for="dNo">Donor No. *</label></div>
+<div class="fld static"><input id="dPhoto" type="file" accept="image/*"><label for="dPhoto">Donor Profile Photo (optional)</label></div>
+</div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('donor',['dName','dFather','dNo'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Identity &amp; Health</h3>
+<div class="row">
+<div class="fld"><input id="dCnic" placeholder=" "><label for="dCnic">CNIC *</label></div>
+<div class="fld static"><select id="dGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="dGroup">Blood Group *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="dAge" type="number" min="18" max="65" placeholder=" "><label for="dAge">Age *</label></div>
+<div class="fld"><input id="dPhone" type="tel" placeholder=" "><label for="dPhone">Phone *</label></div>
+</div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="wizNext('donor',['dCnic','dGroup','dAge','dPhone'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>3 &bull; Address &amp; Donation</h3>
+<div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
+<div class="row">
+<div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
+<div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation *</label></div>
+</div>
+<div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated *</label></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="submitDonor()">Register as Donor</button></div>
+</div>
+<div class="wmsg" id="dMsg"></div>
+</div>
+</section>
+
+<!-- ================= MEMBERS ================= -->
+<section class="sec" id="s-members">
+<div class="card">
+<h2>Our Members</h2>
+<p class="mut">Public member list shows only name, phone number and photo. All other member details are secret — admin only. Scan a member's QR code to verify membership.</p>
+<div id="memberList" class="mut">Loading…</div>
+</div>
+<div class="card" id="wz-member" data-step="0">
+<h2>Add Member</h2>
+<p class="mut">Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.</p>
+<div class="wprog"><div class="wprog-fill"></div></div>
+<div class="wprog-label">Step 1 of 4</div>
+<div class="wstep on">
+<h3>1 &bull; Personal</h3>
+<div class="row">
+<div class="fld static"><input id="mPhoto" type="file" accept="image/*"><label for="mPhoto">Photo</label></div>
+<div class="fld"><input id="mName" placeholder=" "><label for="mName">Name *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="mFather" placeholder=" "><label for="mFather">Father Name *</label></div>
+<div class="fld"><input id="mDesig" placeholder=" "><label for="mDesig">Designation *</label></div>
+</div>
+<div class="wbtns"><span></span><button class="btn" onclick="wizNext('member',['mName','mFather','mDesig'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>2 &bull; Identity</h3>
+<div class="row">
+<div class="fld"><input id="mCnic" placeholder=" "><label for="mCnic">CNIC *</label></div>
+<div class="fld"><input id="mAge" type="number" min="0" max="120" placeholder=" "><label for="mAge">Age *</label></div>
+</div>
+<div class="row">
+<div class="fld static"><select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="mGroup">Blood Group *</label></div>
+<div class="fld"><span class="mut small">ID No. auto-assign hogi — pehle member 001, phir 002, 003…</span></div>
+</div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mCnic','mGroup','mAge'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>3 &bull; Contact &amp; Education</h3>
+<div class="row">
+<div class="fld"><input id="mEdu" placeholder=" "><label for="mEdu">Education *</label></div>
+<div class="fld"><input id="mPhone" type="tel" placeholder=" "><label for="mPhone">Phone *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="mEmail" type="email" placeholder=" "><label for="mEmail">Email *</label></div>
+<div class="fld"><input id="mAddress" placeholder=" "><label for="mAddress">Address *</label></div>
+</div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mEdu','mPhone','mEmail','mAddress'])">Next →</button></div>
+</div>
+<div class="wstep">
+<h3>4 &bull; Membership</h3>
+<div class="row">
+<div class="fld static"><input id="mIssue" type="date"><label for="mIssue">Issue Date *</label></div>
+<div class="fld static"><input id="mExpiry" type="date"><label for="mExpiry">Expiry Date *</label></div>
+</div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="submitMember()">Add Member &amp; Generate Card</button></div>
+</div>
+<div class="wmsg" id="mMsg"></div>
+</div>
+</section>
+
+<!-- ================= ACTIVITY ================= -->
+<section class="sec" id="s-activity">
+<div class="card"><h2>Daily Activity &amp; Gallery</h2>
+<div class="gstats">
+<div class="gstat"><b id="gDonors" data-v="0">0</b><span>Total Donors</span></div>
+<div class="gstat"><b id="gUnits" data-v="0">0</b><span>Donations</span></div>
+<div class="gstat"><b id="gMembers" data-v="0">0</b><span>Members</span></div>
+<div class="gstat"><b id="gCamps" data-v="0">0</b><span>Camps &amp; Activities</span></div>
+</div>
+<div id="activityList" class="mut">Loading…</div></div>
+<div class="card" id="activityPublish" style="display:none">
+<h2>Publish Activity (Admin)</h2>
+<label>Title *</label><input id="aTitle" placeholder="Activity title">
+<label>Details *</label><textarea id="aText" rows="3" placeholder="What happened today?"></textarea>
+<label>Photo (optional)</label><input id="aPhoto" type="file" accept="image/*">
+<button class="btn" onclick="publishActivity()">Publish</button>
+<div id="aMsg"></div>
+</div>
+</section>
+
+<!-- ================= CERTIFICATE ================= -->
+<section class="sec" id="s-certificate">
+<div class="card">
+<h2>Donor Appreciation Certificate</h2>
+<p class="mut">After a blood donation, the admin generates an auto-generated appreciation certificate with a verified reference number. Enter a reference number to check a certificate.</p>
+<div class="row">
+<div><label>Certificate Reference No.</label><input id="cRef" placeholder="e.g. BDBS-CERT-2026-0001"></div>
+</div>
+<button class="btn" onclick="lookupCert()">Check Certificate</button>
+<div id="certView" style="margin-top:10px"></div>
+</div>
+</section>
+
+<!-- ================= LOGIN / ADMIN ================= -->
+<section class="sec" id="s-login">
+<div class="card" id="loginCard">
+<h2>Login</h2>
+<div id="setupWarn"></div>
+<label>Email ya Phone Number</label><input id="lEmail" type="text" placeholder="Your email or phone number">
+<label>Password</label><input id="lPass" type="password" placeholder="Password">
+<button class="btn" onclick="doLogin()">Login</button>
+<button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
+<div id="lMsg"></div>
+<p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
+<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up — email ya phone number se. Forgot Password sends a reset email (email accounts only; phone accounts contact the admin).</p>
+</div>
+<div class="card" id="signupCard" style="display:none">
+<h2>Create Account</h2>
+<div id="setupWarn2"></div>
+<label>Full Name</label><input id="suName" placeholder="Your full name">
+<label>Email</label><input id="suEmail" type="email" placeholder="Your email (optional if phone given)">
+<label>Phone Number</label><input id="suPhone" type="tel" placeholder="e.g. 0300-1234567 (optional if email given)">
+<label>Password</label><input id="suPass" type="password" placeholder="At least 6 characters">
+<label>Confirm Password</label><input id="suPass2" type="password" placeholder="Repeat password">
+<button class="btn" onclick="doSignup()">Create Account</button>
+<div id="suMsg"></div>
+<p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
+<p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
+</div>
+<div class="card" id="donorCard" style="display:none">
+<h2>My Profile <span id="donorEmail" class="mut"></span></h2>
+<button class="btn ghost" onclick="doLogout()">Logout</button>
+<div id="linkBox">
+<p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.</p>
+<label>Donor No.</label><input id="pDonorNo" placeholder="e.g. D-001">
+<button class="btn" onclick="linkDonorRecord()">Link My Donor Record</button>
+<div id="pLinkMsg"></div>
+</div>
+<div id="profileBox" style="display:none">
+<div id="myRecord"></div>
+<h3>Update My Last Donation</h3>
+<div class="row">
+<div class="fld static"><input id="pLast" type="date"><label for="pLast">Last Blood Donation</label></div>
+<div class="fld"><input id="pUnits" type="number" min="0" placeholder=" "><label for="pUnits">Total Units Donated</label></div>
+</div>
+<button class="btn" onclick="updateMyDonation()">Update</button>
+<div id="pUpdateMsg"></div>
+<h3>My Certificates</h3>
+<div id="myCerts" class="mut">Loading…</div>
+</div>
+<div id="memberBox" style="margin-top:14px;border-top:1px solid #eee;padding-top:10px">
+<h3>Member Login</h3>
+<p class="mut">Society members: enter your Member ID and the phone number on your card to link your membership card here.</p>
+<label>Member ID</label><input id="mLinkId" placeholder="e.g. 001">
+<label>Phone Number (on your card)</label><input id="mLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
+<button class="btn" onclick="linkMemberRecord()">Link My Member Card</button>
+<div id="mLinkMsg"></div>
+<div id="myMemberCard" style="display:none"></div>
+</div>
+</div>
+<div class="card" id="adminCard" style="display:none">
+<h2>Admin Panel <span id="adminEmail" class="mut"></span></h2>
+<button class="btn ghost" onclick="doLogout()">Logout</button>
+<button class="btn ghost" onclick="show('activity')">Publish Activity</button>
+<div id="adminTables"></div>
+</div>
+</section>
+
+</div>
+
+<nav class="bnav" id="bnav">
+<button data-s="home" class="on" onclick="show('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></button>
+<button data-s="find" onclick="show('find')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.8 6 11a6 6 0 0 1-12 0c0-4.2 6-11 6-11z"/></svg><span>Find Donor</span></button>
+<button data-s="request" onclick="show('request')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Request</span></button>
+<button data-s="members" onclick="show('members')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M17.5 15.4c2 .6 3.5 2 4 4.6"/></svg><span>Members</span></button>
+<button data-s="login" onclick="show('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Account</span></button>
+<button onclick="openModal('moreSheet')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
+</nav>
+<div class="modal" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
+<div class="modal-box"><button class="mclose" onclick="closeModal('memberModal')" aria-label="Close">&#10005;</button><div id="memberCardBody"></div></div>
+</div>
+<div class="modal" id="moreSheet" onclick="if(event.target===this)closeModal('moreSheet')">
+<div class="modal-box">
+<h3>More</h3>
+<button class="sheet-btn" onclick="show('donor')">🩸 &nbsp;Register as Donor</button>
+<button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
+<button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
+<button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
+<button class="sheet-btn" onclick="closeModal('moreSheet')">Close</button>
+</div>
+</div>
+
+<footer>
+Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
+&copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>
+Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-Alaikum%20Dr%20Asif%2C%20I%20have%20a%20question%20about%20the%20Basti%20Dawa%20Blood%20Society%20app.">WhatsApp: 0300-7379385</a> &bull; <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a>
+</footer>
+
+<script>
+/* ================= BDBS app ================= */
+var SITE_BASE = 'https://jilanapps.github.io/jilan-store/bdbs/';
+var CFG = (window.BDBS_FIREBASE_CONFIG || {});
+var CONFIGURED = !!(CFG.apiKey && CFG.apiKey.indexOf('PASTE') !== 0);
+var FB_OK = false, db = null, auth = null;
+try {
+  if (CONFIGURED && typeof firebase !== 'undefined') {
+    firebase.initializeApp(CFG);
+    db = firebase.firestore(); auth = firebase.auth(); FB_OK = true;
+  }
+} catch (e) { FB_OK = false; }
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
+function lookupKey(no){ return String(no||'').trim().replace(/\//g,'-') || 'x'; }
+function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
+function firstName(n){return String(n||'').trim().split(/\s+/)[0] || 'Patient';}
+function show(s){
+  document.querySelectorAll('.sec').forEach(function(el){el.classList.remove('on');});
+  var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
+  document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
+  closeModal('memberModal'); closeModal('moreSheet');
+  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests();
+  if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
+  window.scrollTo(0,0);
+}
+
+/* ---------- local store (used when Firebase is not configured) ---------- */
+var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', seeded:'bdbs_seeded' };
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function seedLocal(){
+  if (localStorage.getItem(LS.seeded)) return;
+  var donors = [
+    {id:'demo_d1',name:'Demo Donor 1',father:'Demo Father 1',donorNo:'D-001',photo:'',cnic:'35202-0000001-1',group:'B+',age:28,address:'Demo Address, Multan',phone:'0300-0000001',disease:'None',lastDonation:'2026-09-12',units:4,demo:true},
+    {id:'demo_d2',name:'Demo Donor 2',father:'Demo Father 2',donorNo:'D-002',photo:'',cnic:'35202-0000002-2',group:'O-',age:32,address:'Demo Address, Basti Malook',phone:'0300-0000002',disease:'None',lastDonation:'2026-10-03',units:2,demo:true},
+    {id:'demo_d3',name:'Demo Donor 3',father:'Demo Father 3',donorNo:'D-003',photo:'',cnic:'35202-0000003-3',group:'A+',age:25,address:'Demo Address, Multan',phone:'0300-0000003',disease:'None',lastDonation:'2026-08-20',units:6,demo:true},
+    {id:'demo_d4',name:'Demo Donor 4',father:'Demo Father 4',donorNo:'D-004',photo:'',cnic:'35202-0000004-4',group:'AB+',age:40,address:'Demo Address, Lahore',phone:'0300-0000004',disease:'None',lastDonation:'2026-11-01',units:1,demo:true}
+  ];
+  var members = [
+    {id:'demo_m1',photo:'',name:'Demo Member One',father:'Demo Father',designation:'Member',idNo:'001',cnic:'35202-0000001-1',group:'B+',age:30,education:'Matric',phone:'0300-0000001',email:'demo1@example.com',address:'Demo Address, Multan',issue:'2026-01-01',expiry:'2027-01-01',demo:true},
+    {id:'demo_m2',photo:'',name:'Demo Member Two',father:'Demo Father',designation:'Volunteer',idNo:'002',cnic:'35202-0000002-2',group:'O+',age:27,education:'FSc',phone:'0300-0000002',email:'demo2@example.com',address:'Demo Address, Basti Malook',issue:'2026-01-01',expiry:'2027-01-01',demo:true}
+  ];
+  lsSet(LS.donors, donors); lsSet(LS.donorsPub, donors.map(donorPub));
+  lsSet(LS.members, members); lsSet(LS.membersPub, members.map(memberPub));
+  lsSet(LS.requests, [{id:'demo_r1',name:'Demo Patient',father:'Demo Father',cnic:'',age:45,group:'O+',hospital:'Demo Hospital, Multan',disease:'Surgery',phone:'0300-0000009',address:'Demo Address',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.requestsPub, [{id:'demo_r1',firstName:'Demo',group:'O+',hospital:'Demo Hospital, Multan',city:'Multan',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.activities, [{id:'demo_a1',title:'Welcome to BDBS',text:'Basti Dawa Blood Society is now live. Donate blood, save lives.',photo:'',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.certs, []);
+  localStorage.setItem(LS.seeded, '1');
+}
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+/* Public member record: ONLY name, phone number and photo are public.
+   Expiry stays in the record ONLY so the QR verify page can check validity —
+   it is never displayed anywhere public. Everything else (CNIC, age,
+   education, email, address, father, designation, ID, blood group) is
+   admin-only in the private 'members' collection. */
+function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
+function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+
+/* ---------- data access (Firestore when configured, else local) ---------- */
+function qAll(coll, cb){
+  if (FB_OK) { db.collection(coll).orderBy('createdAt','desc').limit(200).get()
+    .then(function(s){cb(s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;}));})
+    .catch(function(){cb([]);}); }
+  else { var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,donors:LS.donors,members:LS.members,requests:LS.requests,certificates:LS.certs};
+    cb(lsGet(map[coll]||LS.activities)); }
+}
+function qAdd(coll, obj, cb){
+  if (FB_OK) { var ref = obj.id ? db.collection(coll).doc(obj.id) : db.collection(coll).doc(); obj.id = ref.id;
+    ref.set(obj).then(function(){cb(true, obj);}).catch(function(){cb(false);}); }
+  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup};
+    var arr = lsGet(map[coll]); arr.unshift(obj); lsSet(map[coll], arr); cb(true, obj); }
+}
+function qDel(coll, id, cb){
+  if (FB_OK) { db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){cb(false);}); }
+  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
+    var arr = lsGet(map[coll]).filter(function(x){return x.id!==id;}); lsSet(map[coll], arr); cb(true); }
+}
+
+function qUpdate(coll, id, fields, cb){
+  if (FB_OK) { db.collection(coll).doc(id).update(fields).then(function(){cb(true);}).catch(function(){cb(false);}); }
+  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,donorLookup:LS.donorLookup};
+    var arr = lsGet(map[coll]); var found=false;
+    arr.forEach(function(x){ if (x.id===id) { for (var k in fields) x[k]=fields[k]; found=true; } });
+    lsSet(map[coll], arr); cb(found); }
+}
+
+/* ---------- photo helper (resize to max 300px, JPEG) ---------- */
+function readPhoto(input, done){
+  var f = input && input.files && input.files[0];
+  if (!f) return done('');
+  var r = new FileReader();
+  r.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      var s = Math.min(1, 300 / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      done(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = function(){ done(''); };
+    img.src = r.result;
+  };
+  r.onerror = function(){ done(''); };
+  r.readAsDataURL(f);
+}
+function val(id){var e=document.getElementById(id); return e ? e.value.trim() : '';}
+function need(ids){for (var i=0;i<ids.length;i++){if(!val(ids[i])) return ids[i];} return null;}
+
+/* ---------- public rendering (NEVER shows phone/CNIC/address/disease) ---------- */
+function loadHome(){
+  qAll('donorsPublic', function(ds){
+    qAll('activities', function(acts){
+      qAll('requestsPublic', function(rs){
+        qAll('donors', function(full){
+          var units = 0;
+          var src = (full && full.length) ? full : ds;
+          src.forEach(function(d){ units += parseInt(d.units||0,10)||0; });
+          setStat('statDonors', ds.length);
+          setStat('hdrDonors', ds.length);
+          setStat('statRequests', rs.length);
+          setStat('statLives', units*3);
+          setStat('statActivities', acts.length);
+          var dn = document.getElementById('demoNote');
+          if (dn) dn.style.display = FB_OK ? 'none' : 'block';
+          document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
+            return '<div class="dcard"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+          }).join('') : '<span class="mut">No activity yet.</span>';
+        });
+      });
+    });
+  });
+}
+/* ---------- smart donor search: pills + instant city filter + availability ----------
+   Public cards show name, blood group, city and last donation date only.
+   Call Now / WhatsApp buttons are ADMIN ONLY — they use the phone from the
+   private 'donors' collection, never from the public record. */
+var _fGroup = '';
+function setGroupFilter(g, btn){
+  _fGroup = g;
+  document.querySelectorAll('#groupPills .gpill').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-g') === g); });
+  searchDonors();
+}
+function resetFilters(){
+  _fGroup = '';
+  var c = document.getElementById('fCity'); if (c) c.value = '';
+  var a = document.getElementById('fAvail'); if (a) a.checked = false;
+  document.querySelectorAll('#groupPills .gpill').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-g') === ''); });
+  searchDonors();
+}
+function donorStatus(last){
+  if (!last) return {ok:true, label:'Available', daysLeft:0};
+  var d = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+  if (isNaN(d) || d >= 90) return {ok:true, label:'Available', daysLeft:0};
+  return {ok:false, label:'Cooldown', daysLeft: 90 - d};
+}
+function waNum(p){ var n = String(p||'').replace(/\D/g,''); if (n.charAt(0)==='0') n = '92' + n.slice(1); return n; }
+function searchDonors(){
+  var g = _fGroup, c = val('fCity').toLowerCase();
+  var availOnly = document.getElementById('fAvail') && document.getElementById('fAvail').checked;
+  var admin = (FB_OK && auth && auth.currentUser && isAdminUser(auth.currentUser));
+  var render = function(ds, phoneById){
+    var out = ds.filter(function(d){
+      if (g && d.group !== g) return false;
+      if (c && (d.city||'').toLowerCase().indexOf(c) === -1) return false;
+      if (availOnly && !donorStatus(d.lastDonation).ok) return false;
+      return true;
+    });
+    var box = document.getElementById('findResults');
+    if (!out.length) {
+      box.innerHTML = '<div class="empty"><b>No donors found</b><br><span class="mut">Try another blood group or city — or submit a blood request.</span><br><button class="btn" style="margin-top:12px" onclick="resetFilters()">Reset Filters</button></div>';
+      return;
+    }
+    var head = '<p class="mut">' + out.length + ' donor(s) found.' + (admin ? ' <b>Admin view — contact buttons are visible to you only.</b>' : ' Contact via a blood request — the admin will connect you.') + '</p>';
+    box.innerHTML = head + '<div class="donor-grid">' + out.map(function(d){
+      var st = donorStatus(d.lastDonation);
+      var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + (st.ok ? 'ok' : 'cool') + '">● ' + st.label + '</span></div>' +
+        '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
+        '<div class="mut small">📍 ' + esc(d.city || '') + '</div>' +
+        '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>';
+      if (admin && phoneById[d.id]) {
+        var msg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. ' + (d.group || '') + ' blood ki zaroorat hai. Kya aap blood donate kar sakte hain? Shukriya.';
+        var num = waNum(phoneById[d.id]);
+        card += '<div class="dc-actions"><a class="btn block" href="tel:' + esc(phoneById[d.id]) + '">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/' + num + '?text=' + encodeURIComponent(msg) + '">WhatsApp</a></div>';
+      }
+      return card + '</div>';
+    }).join('') + '</div>';
+  };
+  qAll('donorsPublic', function(ds){
+    if (admin) {
+      qAll('donors', function(full){
+        var m = {}; full.forEach(function(d){ m[d.id] = d.phone || ''; });
+        render(ds, m);
+      });
+    } else render(ds, {});
+  });
+}
+function loadRequests(){
+  qAll('requestsPublic', function(rs){
+    var box = document.getElementById('requestList');
+    if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
+    box.innerHTML = rs.map(function(r){
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div></div></div>';
+    }).join('');
+  });
+}
+function loadMembers(){
+  qAll('membersPublic', function(ms){
+    var box = document.getElementById('memberList');
+    if (!ms.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
+    box.innerHTML = ms.map(function(m){
+      return '<div class="idcard">' +
+        '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
+        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span></div></div></div>';
+    }).join('');
+  });
+}
+function loadActivities(){
+  /* Gallery stats: total donors, total donation units, total members, camps & activities — public counts only */
+  qAll('donorsPublic', function(ds){
+    var units = 0; ds.forEach(function(d){ units += parseInt(d.units||0,10)||0; });
+    setStat('gDonors', ds.length);
+    setStat('gUnits', units);
+    qAll('membersPublic', function(ms){ setStat('gMembers', ms.length); });
+  });
+  qAll('activities', function(acts){
+    setStat('gCamps', acts.length);
+    var box = document.getElementById('activityList');
+    if (!acts.length) { box.innerHTML = '<span class="mut">No activity yet.</span>'; return; }
+    box.innerHTML = acts.map(function(a){
+      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+    }).join('');
+  });
+  document.getElementById('activityPublish').style.display = (FB_OK && auth && isAdminUser(auth.currentUser)) ? 'block' : 'none';
+}
+
+/* ---------- forms ---------- */
+function submitRequest(){
+  var miss = need(['rName','rFather','rAge','rGroup','rHospital','rDisease','rPhone','rAddress']);
+  if (miss) { document.getElementById('rMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  var id = uid('req');
+  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), createdAt:Date.now()};
+  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), createdAt:Date.now()};
+  qAdd('requests', full, function(ok){
+    if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+    qAdd('requestsPublic', pub, function(){
+      document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. The admin will contact you.</span>';
+      ['rName','rFather','rCnic','rAge','rHospital','rDisease','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
+      document.getElementById('rGroup').value=''; loadRequests();
+    });
+  });
+}
+function submitDonor(){
+  var miss = need(['dName','dFather','dNo','dCnic','dGroup','dAge','dPhone','dAddress','dDisease','dLast','dUnits']);
+  if (miss) { document.getElementById('dMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  var age = parseInt(val('dAge'),10);
+  if (age < 18 || age > 65) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor age must be 18–65.</span>'; return; }
+  readPhoto(document.getElementById('dPhoto'), function(photo){
+    var id = uid('donor');
+    var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:val('dNo'), photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, createdAt:Date.now()};
+    var pub = donorPub(full); pub.city = full.address.split(',').pop().trim();
+    qAdd('donors', full, function(ok){
+      if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+      qAdd('donorsPublic', pub, function(){
+        qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
+        document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
+        ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
+        document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value='';
+      });
+    });
+  });
+}
+function submitMember(){
+  var miss = need(['mName','mFather','mDesig','mCnic','mGroup','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry']);
+  if (miss) { document.getElementById('mMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  /* Member IDs are sequential: first member 001, second 002, third 003… */
+  qAll('members', function(ms){
+    var max = 0; ms.forEach(function(x){ var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > max) max = n; });
+    var nextId = String(max + 1).padStart(3,'0');
+    readPhoto(document.getElementById('mPhoto'), function(photo){
+    var id = uid('member');
+    var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:nextId, cnic:val('mCnic'), group:val('mGroup'), age:val('mAge'), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
+    var pub = memberPub(full);
+    qAdd('members', full, function(ok){
+      if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+      qAdd('membersPublic', pub, function(){
+        qAdd('memberLookup', {id: nextId, memberId: id}, function(){});
+        document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
+        renderMemberCard(full); loadMembers();
+        ['mName','mFather','mDesig','mCnic','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
+        document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
+      });
+    });
+    });
+  });
+}
+function renderMemberCard(m){
+  var url = SITE_BASE + '?verify=' + encodeURIComponent(m.id);
+  window._lastMemberCard = m;
+  /* Front side: photo, name, father name, designation, ID number + QR.
+     Back side: all other details (CNIC, age, education, phone, email,
+     address, blood group, issue/expiry) — personal data, admin only. */
+  var html = '<div class="print-area">' +
+    '<div class="mcard"><div class="side-label">Front Side</div><div class="mhead"><img src="logo.png" alt="BDBS logo"><div class="ctitle">Membership Card</div><b style="font-size:18px;color:#7f1d1d">Basti Dawa Blood Society</b></div>' +
+    '<div class="person" style="margin-top:6px">' + (m.photo?'<img src="'+m.photo+'" alt="">':'') +
+    '<div><b style="font-size:17px">'+esc(m.name)+'</b><br><span class="mut">Father: '+esc(m.father||'—')+'</span><br><span class="mut">'+esc(m.designation||'')+'</span><br>ID No.: <b>'+esc(m.idNo||'')+'</b> &nbsp; Blood Group: <span class="bgpill" style="min-width:0">'+esc(m.group||'')+'</span><br><span class="mut small">Issue: '+esc(fmtD(m.issue))+' &nbsp; Expiry: '+esc(fmtD(m.expiry))+'</span></div></div>' +
+    '<div class="qr"><div class="qrbox" id="qrBox"></div></div><div style="text-align:center" class="small mut">'+esc(url)+'</div>' +
+    '<div class="sig">Verified Signature Authorized<br>Under Supervision — Basti Dawa Welfare Organization</div></div>' +
+    '<div class="mcard"><div class="side-label">Back Side — Personal Details (Admin Only)</div><div class="mhead"><b style="font-size:16px;color:#7f1d1d">Member Details</b></div>' +
+    '<div class="kv"><span>CNIC</span><b>'+esc(m.cnic||'—')+'</b></div>' +
+    '<div class="kv"><span>Age</span><b>'+esc(m.age||'—')+'</b></div>' +
+    '<div class="kv"><span>Education</span><b>'+esc(m.education||'—')+'</b></div>' +
+    '<div class="kv"><span>Phone</span><b>'+esc(m.phone||'—')+'</b></div>' +
+    '<div class="kv"><span>Email</span><b>'+esc(m.email||'—')+'</b></div>' +
+    '<div class="kv"><span>Address</span><b>'+esc(m.address||'—')+'</b></div>' +
+    '<div class="kv"><span>Blood Group</span><b>'+esc(m.group||'—')+'</b></div>' +
+    '<div class="kv"><span>Issue Date</span><b>'+esc(fmtD(m.issue))+'</b></div>' +
+    '<div class="kv"><span>Expiry Date</span><b>'+esc(fmtD(m.expiry))+'</b></div>' +
+    '<div class="sig">Personal details are admin-only. Scan the QR on the front to verify membership.</div></div>' +
+    '</div><button class="btn" onclick="window.print()">Print Card</button> <button class="btn" onclick="shareMemberCardPDF()">Share Card as PDF</button>';
+  document.getElementById('memberCardBody').innerHTML = html;
+  openModal('memberModal');
+  if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
+}
+/* Card as PDF (front page + back page) for printing/sharing. Falls back
+   to the print dialog when the PDF library is unavailable (offline). */
+function shareMemberCardPDF(){
+  var m = window._lastMemberCard; if (!m) return;
+  if (typeof window.jspdf === 'undefined') { window.print(); return; }
+  try {
+    var doc = new window.jspdf.jsPDF();
+    var y, rows, i, lines, j;
+    function cardPage(title, rows){
+      var yy = 18;
+      doc.setFontSize(16); doc.text('Basti Dawa Blood Society', 105, yy, {align:'center'}); yy += 8;
+      doc.setFontSize(12); doc.text(title, 105, yy, {align:'center'}); yy += 10;
+      doc.setFontSize(11);
+      for (i=0;i<rows.length;i++){
+        lines = doc.splitTextToSize((rows[i][0]||'') + ': ' + (rows[i][1]||'—'), 170);
+        for (j=0;j<lines.length;j++){ doc.text(lines[j], 20, yy); yy += 7; }
+        yy += 1;
+      }
+      return yy;
+    }
+    y = cardPage('Membership Card — Front Side', [['Name', m.name], ['Father Name', m.father], ['Designation', m.designation], ['ID No.', m.idNo], ['Blood Group', m.group], ['Issue Date', fmtD(m.issue)], ['Expiry Date', fmtD(m.expiry)]]);
+    doc.text('Verify: ' + SITE_BASE + '?verify=' + encodeURIComponent(m.id), 20, y + 4);
+    doc.text('Verified Signature Authorized — Under Supervision, Basti Dawa Welfare Organization', 20, y + 12);
+    doc.addPage();
+    cardPage('Membership Card — Back Side (Personal Details, Admin Only)', [['CNIC', m.cnic], ['Age', m.age], ['Education', m.education], ['Phone', m.phone], ['Email', m.email], ['Address', m.address], ['Blood Group', m.group], ['Issue Date', fmtD(m.issue)], ['Expiry Date', fmtD(m.expiry)]]);
+    var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
+    var blob = doc.output('blob');
+    var file = new File([blob], fname, {type:'application/pdf'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      navigator.share({files:[file], title:'BDBS Member Card', text:'Membership Card — ' + (m.name||'')}).catch(function(){ doc.save(fname); });
+    } else { doc.save(fname); }
+  } catch(e){ window.print(); }
+}
+function viewMemberCard(id){
+  qAll('members', function(ms){
+    var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
+    if (!m) { qAll('membersPublic', function(ps){ var p=null; ps.forEach(function(x){if(x.id===id)p=x;});
+      if (p) renderMemberCard({id:p.id, photo:p.photo, name:p.name, designation:p.designation, idNo:p.idNo, group:p.group, issue:'', expiry:p.expiry}); }); return; }
+    renderMemberCard(m);
+  });
+}
+function publishActivity(){
+  if (!FB_OK || !auth || !isAdminUser(auth.currentUser)) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
+  if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
+  readPhoto(document.getElementById('aPhoto'), function(photo){
+    qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
+      document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
+      if (ok) { document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
+    });
+  });
+}
+
+/* ---------- certificates ---------- */
+function nextCertRef(cb){
+  var y = new Date().getFullYear();
+  if (!FB_OK) {
+    var k = 'bdbs_certCounter_' + y, n = parseInt(localStorage.getItem(k)||'0',10) + 1;
+    localStorage.setItem(k, String(n));
+    cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); return;
+  }
+  var ref = db.collection('counters').doc('cert-' + y);
+  db.runTransaction(function(tx){
+    return tx.get(ref).then(function(d){
+      var n = (d.exists ? (d.data().n||0) : 0) + 1;
+      tx.set(ref, {n:n}); return n;
+    });
+  }).then(function(n){ cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); })
+    .catch(function(){ cb('BDBS-CERT-' + y + '-ERR' + Date.now().toString().slice(-4)); });
+}
+function generateCert(donorId){
+  qAll('donors', function(ds){
+    var d = null; ds.forEach(function(x){ if (x.id===donorId) d=x; });
+    if (!d) return;
+    nextCertRef(function(ref){
+      var cert = {ref:ref, donorId:d.id, donorName:d.name, group:d.group, units:d.units||0, date:new Date().toISOString().slice(0,10), createdAt:Date.now()};
+      qAdd('certificates', cert, function(ok){
+        if (!ok) { alert('Could not generate certificate.'); return; }
+        show('certificate'); renderCert(cert);
+      });
+    });
+  });
+}
+function renderCert(c){
+  document.getElementById('certView').innerHTML =
+    '<div class="cert print-area"><img src="logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid #d97706"><div class="seal">&#10003;</div><h2>Certificate of Appreciation</h2>' +
+    '<p class="mut">Basti Dawa Blood Society proudly appreciates</p><div class="cname">'+esc(c.donorName)+'</div>' +
+    '<p>for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br>Your gift saves lives.</p>' +
+    '<p><span class="ref">Verified Reference No: '+esc(c.ref)+'</span></p><p class="verified">✓ VERIFIED</p>' +
+    '<p class="mut small">Under Supervision — Basti Dawa Welfare Organization</p></div>' +
+    '<button class="btn" onclick="window.print()">Print Certificate</button>';
+}
+function lookupCert(){
+  var ref = val('cRef');
+  if (!ref) { document.getElementById('certView').innerHTML = '<span class="err">Enter a reference number.</span>'; return; }
+  var done = function(cs){
+    var c = null; cs.forEach(function(x){ if ((x.ref||'').toUpperCase() === ref.toUpperCase()) c=x; });
+    if (c) renderCert(c);
+    else document.getElementById('certView').innerHTML = '<p class="notverified">✗ NOT VERIFIED</p><p class="mut">No certificate found with this reference number.</p>';
+  };
+  /* A signed-in donor may only read their OWN certificates, so scope
+     the lookup to their linked donor record. Admin keeps the full list. */
+  if (FB_OK && auth && auth.currentUser && !isAdminUser(auth.currentUser)) {
+    db.collection('users').doc(auth.currentUser.uid).get().then(function(d){
+      var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+      if (!linkedId) { done([]); return; }
+      db.collection('certificates').where('donorId','==',linkedId).get().then(function(s){
+        done(s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;}));
+      }).catch(function(){ done([]); });
+    }).catch(function(){ done([]); });
+    return;
+  }
+  qAll('certificates', done);
+}
+
+/* ---------- auth, signup & roles ---------- */
+var ADMIN_EMAIL = 'bastidawabloodsociety@gmail.com';
+function isAdminUser(u){ return !!(u && (u.email||'').toLowerCase() === ADMIN_EMAIL); }
+function showSignupForm(){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('signupCard').style.display='block';
+  document.getElementById('donorCard').style.display='none';
+  document.getElementById('adminCard').style.display='none';
+}
+function showLoginForm(){
+  document.getElementById('signupCard').style.display='none';
+  document.getElementById('donorCard').style.display='none';
+  document.getElementById('adminCard').style.display='none';
+  document.getElementById('loginCard').style.display='block';
+}
+var authListenerSet = false;
+function routeAuth(u){
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('signupCard').style.display = 'none';
+  document.getElementById('adminCard').style.display = 'none';
+  document.getElementById('donorCard').style.display = 'none';
+  if (!u) { document.getElementById('loginCard').style.display = 'block'; return; }
+  if (isAdminUser(u)) {
+    document.getElementById('adminEmail').textContent = '(' + u.email + ')';
+    document.getElementById('adminCard').style.display = 'block';
+    renderAdmin();
+  } else {
+    document.getElementById('donorEmail').textContent = '(' + u.email + ')';
+    document.getElementById('donorCard').style.display = 'block';
+    renderDonor(u);
+  }
+}
+function renderLogin(){
+  var setupHtml = '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login and signup work here.</div>';
+  var w = document.getElementById('setupWarn');
+  var w2 = document.getElementById('setupWarn2');
+  if (!FB_OK) {
+    if (w) w.innerHTML = setupHtml;
+    if (w2) w2.innerHTML = setupHtml;
+    var lb = document.querySelector('#loginCard .btn'); if (lb) lb.disabled = true;
+    var sb = document.querySelector('#signupCard .btn'); if (sb) sb.disabled = true;
+  } else {
+    if (w) w.innerHTML = '';
+    if (w2) w2.innerHTML = '';
+    var lb2 = document.querySelector('#loginCard .btn'); if (lb2) lb2.disabled = false;
+    var sb2 = document.querySelector('#signupCard .btn'); if (sb2) sb2.disabled = false;
+  }
+  if (FB_OK && auth) {
+    if (!authListenerSet) {
+      authListenerSet = true;
+      auth.onAuthStateChanged(function(u){ routeAuth(u); });
+    }
+    routeAuth(auth.currentUser);
+  }
+}
+/* ---------- phone-or-email login ----------
+   Donors/recipients log in with email OR phone number + password.
+   Phone accounts use a synthetic email in Firebase Auth
+   (<digits>@phone.bdbs.local); the real phone is stored in users doc. */
+function normPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 11 && d.charAt(0) === '0') d = '92' + d.slice(1);
+  else if (d.length === 10 && d.charAt(0) === '3') d = '92' + d;
+  return d;
+}
+function phoneToEmail(p){ return normPhone(p) + '@phone.bdbs.local'; }
+function fmtPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 12 && d.indexOf('92') === 0) return '0' + d.slice(2,5) + '-' + d.slice(5);
+  return p || '';
+}
+function doLogin(){
+  if (!FB_OK) return;
+  var inp = val('lEmail'), pw = val('lPass');
+  var msg = document.getElementById('lMsg');
+  if (!inp || !pw) { msg.innerHTML = '<span class="err">Enter email or phone number, and password.</span>'; return; }
+  var em = inp;
+  if (inp.indexOf('@') === -1) {
+    if (normPhone(inp).length < 10) { msg.innerHTML = '<span class="err">Enter a valid email or phone number.</span>'; return; }
+    em = phoneToEmail(inp);
+  }
+  auth.signInWithEmailAndPassword(em, pw).then(function(){
+    msg.innerHTML = '<span class="ok">Logged in.</span>';
+  }).catch(function(e){
+    msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
+  });
+}
+function doLogout(){ if (FB_OK && auth) auth.signOut(); }
+function doForgot(){
+  if (!FB_OK) return;
+  var inp = val('lEmail');
+  var msg = document.getElementById('lMsg');
+  if (!inp) { msg.innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
+  if (inp.indexOf('@') === -1) { msg.innerHTML = '<span class="err">Phone-number accounts cannot reset by email — contact the admin to reset your password.</span>'; return; }
+  auth.sendPasswordResetEmail(inp).then(function(){
+    msg.innerHTML = '<span class="ok">Reset email sent to '+esc(inp)+'.</span>';
+  }).catch(function(){
+    msg.innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
+  });
+}
+function doSignup(){
+  if (!FB_OK) return;
+  var name = val('suName'), em = val('suEmail'), ph = val('suPhone'), pw = val('suPass'), pw2 = val('suPass2');
+  var msg = document.getElementById('suMsg');
+  if (!name) { msg.innerHTML = '<span class="err">Enter your full name.</span>'; return; }
+  var hasEmail = em && em.indexOf('@') !== -1 && em.indexOf('.') !== -1;
+  var phone = normPhone(ph);
+  if (!hasEmail && !phone) { msg.innerHTML = '<span class="err">Enter an email address or a phone number.</span>'; return; }
+  if (em && !hasEmail) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  if (ph && phone.length < 10) { msg.innerHTML = '<span class="err">Enter a valid phone number.</span>'; return; }
+  if (!pw || pw.length < 6) { msg.innerHTML = '<span class="err">Password must be at least 6 characters.</span>'; return; }
+  if (pw !== pw2) { msg.innerHTML = '<span class="err">Passwords do not match.</span>'; return; }
+  var authEmail = hasEmail ? em : phoneToEmail(phone);
+  msg.innerHTML = '<span class="mut">Creating your account…</span>';
+  auth.createUserWithEmailAndPassword(authEmail, pw).then(function(cred){
+    var u = cred.user;
+    var doc = {name:name, email:authEmail, role:'donor', createdAt:Date.now()};
+    if (phone) doc.phone = phone;
+    return db.collection('users').doc(u.uid).set(doc).then(function(){
+      msg.innerHTML = '<span class="ok">Account created. Welcome, '+esc(name)+'!</span>';
+      routeAuth(u);
+    });
+  }).catch(function(e){
+    var t = 'Could not create account.';
+    if (e && e.code === 'auth/email-already-in-use') t = 'This email or phone number is already registered — try Login instead.';
+    else if (e && e.code === 'auth/invalid-email') t = 'Enter a valid email address.';
+    else if (e && e.code === 'auth/weak-password') t = 'Password must be at least 6 characters.';
+    msg.innerHTML = '<span class="err">'+t+'</span>';
+  });
+}
+
+/* ---------- donor profile (own record only — never other donors) ---------- */
+function renderDonor(u){
+  document.getElementById('pUpdateMsg').innerHTML = '';
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var data = d.exists ? d.data() : {};
+    var linkedId = data.linkedDonorId || '';
+    document.getElementById('linkBox').style.display = linkedId ? 'none' : 'block';
+    document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
+    if (!linkedId) document.getElementById('pLinkMsg').innerHTML = '';
+    if (linkedId) loadMyRecord(u, linkedId);
+    var linkedMember = data.linkedMemberId || '';
+    var de = document.getElementById('donorEmail');
+    if (de && data.phone) de.textContent = '(' + fmtPhone(data.phone) + ')';
+    if (linkedMember) loadMyMemberCard(linkedMember);
+    else { var mb = document.getElementById('myMemberCard'); if (mb) { mb.style.display='none'; mb.innerHTML=''; } }
+  }).catch(function(){
+    document.getElementById('linkBox').style.display = 'block';
+    document.getElementById('profileBox').style.display = 'none';
+  });
+}
+function loadMyRecord(u, donorId){
+  db.collection('donors').doc(donorId).get().then(function(d){
+    if (!d.exists) { document.getElementById('myRecord').innerHTML = '<p class="err">Your linked donor record was not found. Ask the admin to check it.</p>'; return; }
+    var r = d.data(); r.id = d.id;
+    document.getElementById('myRecord').innerHTML =
+      '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
+      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b>'+esc(r.units||0)+'</b></div></div>';
+    document.getElementById('pLast').value = r.lastDonation || '';
+    document.getElementById('pUnits').value = (r.units==null?'':r.units);
+    db.collection('certificates').where('donorId','==',donorId).orderBy('createdAt','desc').limit(20).get().then(function(s){
+      var cs = s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;});
+      document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
+        return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
+      }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
+    }).catch(function(){
+      document.getElementById('myCerts').innerHTML = '<span class="mut">Certificates could not be loaded.</span>';
+    });
+  }).catch(function(){
+    document.getElementById('myRecord').innerHTML = '<p class="err">Could not load your donor record.</p>';
+  });
+}
+function linkDonorRecord(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var no = val('pDonorNo');
+  var msg = document.getElementById('pLinkMsg');
+  if (!no) { msg.innerHTML = '<span class="err">Enter your Donor No.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Linking…</span>';
+  var u = auth.currentUser;
+  db.collection('donorLookup').doc(lookupKey(no)).get().then(function(d){
+    if (!d.exists) { msg.innerHTML = '<span class="err">No donor found with this Donor No. Check the number and try again.</span>'; return; }
+    var donorId = d.data().donorId;
+    return db.collection('donors').doc(donorId).update({linkedUid: u.uid}).then(function(){
+      return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: no}, {merge:true});
+    }).then(function(){
+      msg.innerHTML = '<span class="ok">Donor record linked.</span>';
+      renderDonor(u);
+    });
+  }).catch(function(){
+    msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
+  });
+}
+/* ---------- member login (separate from donor login) ----------
+   A member signs in with the simple login first, then links their
+   Member ID here. The phone number on their card is checked as well.
+   After linking, they can open their own full member card. */
+function linkMemberRecord(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var idNo = String(val('mLinkId')||'').replace(/\D/g,'');
+  var ph = normPhone(val('mLinkPhone'));
+  var msg = document.getElementById('mLinkMsg');
+  if (!idNo) { msg.innerHTML = '<span class="err">Enter your Member ID (e.g. 001).</span>'; return; }
+  idNo = idNo.padStart(3,'0');
+  if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your member card.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Checking…</span>';
+  var u = auth.currentUser;
+  db.collection('memberLookup').doc(idNo).get().then(function(d){
+    if (!d.exists) { msg.innerHTML = '<span class="err">No member found with this ID. Check the ID and try again.</span>'; return; }
+    var memberId = d.data().memberId;
+    db.collection('membersPublic').doc(memberId).get().then(function(p){
+      var cardPhone = (p.exists && p.data().phone) ? normPhone(p.data().phone) : '';
+      if (!cardPhone || cardPhone !== ph) { msg.innerHTML = '<span class="err">Phone number does not match this Member ID.</span>'; return; }
+      db.collection('users').doc(u.uid).set({linkedMemberId: memberId, linkedMemberNo: idNo}, {merge:true}).then(function(){
+        msg.innerHTML = '<span class="ok">Member card linked.</span>';
+        loadMyMemberCard(memberId);
+      }).catch(function(){ msg.innerHTML = '<span class="err">Could not link. Please try again.</span>'; });
+    }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+  }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+}
+function loadMyMemberCard(memberId){
+  var box = document.getElementById('myMemberCard');
+  if (!box) return;
+  if (!memberId) { box.style.display='none'; box.innerHTML=''; return; }
+  db.collection('members').doc(memberId).get().then(function(d){
+    if (!d.exists) { box.style.display='none'; return; }
+    var m = d.data(); m.id = d.id;
+    window._myMember = m;
+    box.style.display='block';
+    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button>';
+  }).catch(function(){ box.style.display='none'; });
+}
+function openMyMemberCard(){ if (window._myMember) renderMemberCard(window._myMember); }
+function updateMyDonation(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var msg = document.getElementById('pUpdateMsg');
+  var last = val('pLast'), units = val('pUnits');
+  if (!last && units === '') { msg.innerHTML = '<span class="err">Enter a last donation date or total units.</span>'; return; }
+  var u = auth.currentUser;
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+    if (!linkedId) { msg.innerHTML = '<span class="err">Link your donor record first.</span>'; return; }
+    var fields = {};
+    if (last) fields.lastDonation = last;
+    if (units !== '') fields.units = parseInt(units,10)||0;
+    qUpdate('donors', linkedId, fields, function(ok){
+      if (!ok) { msg.innerHTML = '<span class="err">Could not update. Please try again.</span>'; return; }
+      qUpdate('donorsPublic', linkedId, fields, function(){
+        msg.innerHTML = '<span class="ok">Updated. Thank you for donating!</span>';
+        loadMyRecord(u, linkedId);
+      });
+    });
+  });
+}
+function renderAdmin(){
+  var box = document.getElementById('adminTables');
+  box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
+  qAll('donors', function(ds){
+    qAll('members', function(ms){
+      qAll('requests', function(rs){
+        qAll('certificates', function(cs){
+          var h = '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
+          ds.forEach(function(d){
+            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button></td></tr>';
+          });
+          h += '</table></div>';
+          h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
+          ms.forEach(function(m){
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button></td></tr>';
+          });
+          h += '</table></div>';
+          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th></tr>';
+          rs.forEach(function(r){
+            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td></tr>';
+          });
+          h += '</table></div>';
+          /* Request → donor contact: a request comes to the admin first, then
+             the admin messages matching donors (same blood group) via
+             WhatsApp from inside the app. Donor phones stay admin-only;
+             the donor connects directly and the donation is arranged. */
+          h += '<h3>Contact Donors for Requests</h3><p class="mut">Requests come to the admin first. Message the matching donors from here — the donor connects directly and the donation is arranged.</p>';
+          rs.forEach(function(r){
+            var match = ds.filter(function(d){ return d.group === r.group; });
+            h += '<div class="card"><b>'+esc(firstName(r.name))+' — '+esc(r.group)+' needed</b> <span class="mut small">'+esc(r.hospital||'')+' • '+esc(r.address||'')+'</span><br>';
+            if (!match.length) { h += '<span class="mut">No donor of this blood group registered yet.</span>'; }
+            else {
+              h += '<span class="mut small">'+match.length+' matching donor(s):</span><br>';
+              match.forEach(function(d){
+                var msg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. ' + (r.group||'') + ' blood ki zaroorat hai — ' + (r.hospital||'') + ', ' + (r.address||'') + '. Patient: ' + firstName(r.name||'') + '. Kya aap blood donate kar sakte hain? Shukriya.';
+                var num = String(d.phone||'').replace(/\D/g,''); if (num.charAt(0)==='0') num = '92' + num.slice(1);
+                h += '<a class="btn green" style="margin:4px 4px 0 0" target="_blank" href="https://wa.me/'+num+'?text='+encodeURIComponent(msg)+'">WhatsApp '+esc(firstName(d.name||'Donor'))+' ('+esc(d.group)+')</a> <span class="mut small">Last donation: '+esc(fmtD(d.lastDonation))+'</span><br>';
+              });
+            }
+            h += '</div>';
+          });
+          h += '<h3>Certificates ('+cs.length+')</h3>' + (cs.length ? cs.map(function(c){
+            return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.donorName)+' ('+esc(c.group)+', '+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
+          }).join('') : '<p class="mut">No certificates yet. Use the Certificate button on a donor row.</p>');
+          box.innerHTML = h;
+        });
+      });
+    });
+  });
+}
+
+/* ---------- modal, wizard & stat helpers ---------- */
+function openModal(id){ var m=document.getElementById(id); if(m) m.classList.add('open'); }
+function closeModal(id){ var m=document.getElementById(id); if(m) m.classList.remove('open'); }
+function closeMore(){ closeModal('moreSheet'); }
+function setStat(id, val){
+  var el = document.getElementById(id); if(!el) return;
+  var target = parseInt(val,10)||0;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = target; el.setAttribute('data-v', String(target)); return; }
+  var start = parseInt(el.getAttribute('data-v')||'0',10);
+  el.setAttribute('data-v', String(target));
+  if (start === target) { el.textContent = target; return; }
+  var t0 = null;
+  function step(ts){ if(!t0) t0=ts; var p=Math.min(1,(ts-t0)/700); el.textContent = Math.round(start+(target-start)*p); if(p<1) requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+}
+function wizGo(form, idx){
+  var root = document.getElementById('wz-'+form); if(!root) return;
+  var steps = root.querySelectorAll('.wstep');
+  idx = Math.max(0, Math.min(idx, steps.length-1));
+  steps.forEach(function(s,i){ s.classList.toggle('on', i===idx); });
+  var fill = root.querySelector('.wprog-fill'); if(fill) fill.style.width = ((idx+1)/steps.length*100)+'%';
+  var label = root.querySelector('.wprog-label'); if(label) label.textContent = 'Step '+(idx+1)+' of '+steps.length;
+  root.setAttribute('data-step', String(idx));
+}
+function wizNext(form, requiredIds){
+  var root = document.getElementById('wz-'+form);
+  var miss = need(requiredIds);
+  var msgBox = root ? root.querySelector('.wmsg') : null;
+  if (miss) {
+    var e = document.getElementById(miss); if(e){ e.classList.add('invalid'); }
+    if (msgBox) msgBox.innerHTML = '<span class="err">Please fill all required fields in this step.</span>';
+    return;
+  }
+  if (msgBox) msgBox.innerHTML = '';
+  wizGo(form, parseInt(root.getAttribute('data-step')||'0',10)+1);
+}
+function wizBack(form){
+  var root = document.getElementById('wz-'+form);
+  wizGo(form, parseInt(root.getAttribute('data-step')||'0',10)-1);
+}
+
+/* ---------- init ---------- */
+document.addEventListener('input', function(e){ if (e.target && e.target.classList) e.target.classList.remove('invalid'); });
+wizGo('donor', 0); wizGo('request', 0); wizGo('member', 0);
+if (!FB_OK) seedLocal();
+loadHome();
+renderLogin();
+</script>
+</body>
+</html>
