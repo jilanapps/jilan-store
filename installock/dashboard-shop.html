@@ -282,7 +282,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 
 <script>
 let db, auth, myUid, myRole='retailer', allPhones=[], allAlerts=[], shopNames={};
-let pendingCmds={}, pendingByShop={};
+let pendingCmds={}, pendingByShop={}, pendingDocIdsByShop={}, pendingDocIds={};
 // v4.0 PRO state
 let myShopsArr=[], allPayments=[], allEvents=[], docCtx=null;
 let allTidRequests=[];
@@ -475,17 +475,21 @@ async function startListeners(){
   });
   // v3.3: pending-command state — buttons show "pending until phone is
   // online"; commands queue server-side and land on the phone's next poll.
+  // v3.4 (2026-11-12): pendingDocIdsByShop also keeps each pending command's
+  // doc id, so a pending command can be CANCELLED from the dashboard.
   for(const s of myShops){
     db.collection('shops').doc(s._id).collection('commands')
       .where('status','==','pending')
       .onSnapshot(snap=>{
         const set = {};
+        const idMap = {};
         snap.forEach(d=>{
           const c = d.data();
-          if(c.targetImei && c.type) set[c.targetImei+'|'+c.type]=true;
-          if(c.targetPhoneId && c.type) set[c.targetPhoneId+'|'+c.type]=true;
+          if(c.targetImei && c.type){ set[c.targetImei+'|'+c.type]=true; (idMap[c.targetImei+'|'+c.type]=idMap[c.targetImei+'|'+c.type]||[]).push(d.id); }
+          if(c.targetPhoneId && c.type){ set[c.targetPhoneId+'|'+c.type]=true; (idMap[c.targetPhoneId+'|'+c.type]=idMap[c.targetPhoneId+'|'+c.type]||[]).push(d.id); }
         });
         pendingByShop[s._id]=set;
+        pendingDocIdsByShop[s._id]=idMap;
         rebuildPending();
         renderPhones();
       });
@@ -535,8 +539,16 @@ async function startListeners(){
 
 function rebuildPending(){
   pendingCmds = {};
+  pendingDocIds = {};
   Object.keys(pendingByShop).forEach(sid=>{
     Object.keys(pendingByShop[sid]).forEach(k=>{ pendingCmds[k]=true; });
+  });
+  Object.keys(pendingDocIdsByShop).forEach(sid=>{
+    Object.keys(pendingDocIdsByShop[sid]).forEach(k=>{
+      pendingDocIdsByShop[sid][k].forEach(id=>{
+        (pendingDocIds[k]=pendingDocIds[k]||[]).push({shop:sid, id:id});
+      });
+    });
   });
 }
 function isPending(imei, type){ return !!pendingCmds[(imei||'')+'|'+type]; }
@@ -545,10 +557,51 @@ function pendTag(p){
   const tags = [];
   Object.keys(pendingCmds).forEach(k=>{
     const parts = k.split('|');
-    if(parts[0]===(p._id||'') || parts[0]===(p.imei||'')) tags.push(parts[1]);
+    if(parts[0]===(p._id||'') || parts[0]===(p.imei||'')) tags.push(parts[1]+' <button class="small danger" style="padding:1px 7px;margin-left:2px" onclick="cancelCmd(\''+(p.imei||'')+'\',\''+(p._id||'')+'\',\''+parts[1]+'\')" title="Cancel '+parts[1]+'">✕</button>');
   });
   return tags.length ? '<br><span style="color:#e8b93c">⏳ Pending: '+tags.join(', ')
     +' — phone online hone par apply hoga</span>' : '';
+}
+// v3.4 (2026-11-12): pending command cancel — pehle confirm, phir is phone
+// + type ke saare pending command docs delete. Map (pendingDocIds) se
+// miltay hain to wohi use hotay hain, warna owned shops me live query.
+// Sirf status=='pending' wale delete hotay hain — applied docs ko haath
+// nahi lagta, aur doosre phone/type ke commands bhi nahi. Delete ke baad
+// live listener khud pending line dobara banata hai (refresh ki zaroorat
+// nahi). Rules v57: commands delete ownsShop ko allowed hai.
+async function cancelCmd(imei, phoneId, type){
+  if(!confirm(type+' command cancel karna hai? Phone par apply nahi hoga.')) return;
+  try{
+    let targets = [];
+    const seen = {};
+    [imei, phoneId].forEach(function(t){
+      if(!t) return;
+      (pendingDocIds[t+'|'+type]||[]).forEach(function(x){
+        const k2 = x.shop+'/'+x.id;
+        if(!seen[k2]){ seen[k2]=true; targets.push(x); }
+      });
+    });
+    if(!targets.length){
+      for(const s of myShopsArr){
+        const snap = await db.collection('shops').doc(s._id).collection('commands')
+          .where('status','==','pending').where('type','==',type).get();
+        snap.forEach(function(d){
+          const c = d.data();
+          if((imei && c.targetImei===imei) || (phoneId && c.targetPhoneId===phoneId)){
+            const k2 = s._id+'/'+d.id;
+            if(!seen[k2]){ seen[k2]=true; targets.push({shop:s._id, id:d.id}); }
+          }
+        });
+      }
+    }
+    if(!targets.length){ alert('Cancel karne ke liye koi pending '+type+' command nahi mila.'); return; }
+    const batch = db.batch();
+    targets.forEach(function(t){
+      batch.delete(db.collection('shops').doc(t.shop).collection('commands').doc(t.id));
+    });
+    await batch.commit();
+    alert(type+' command cancel kar diya ✅');
+  }catch(e){ alert('Cancel nahi ho saka: '+e.message); }
 }
 
 function chip(status){
