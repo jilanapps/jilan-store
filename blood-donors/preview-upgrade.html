@@ -857,6 +857,10 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div id="pUpdateMsg"></div>
 <h3>My Certificates</h3>
 <div id="myCerts" class="mut">Loading…</div>
+<h3>Delete My Account</h3>
+<p class="mut">This deletes your login account and your linked donor record. This cannot be undone.</p>
+<button class="btn ghost" onclick="deleteMyAccount()">Delete My Account</button>
+<div id="delMsg"></div>
 </div>
 <div id="memberBox" style="margin-top:14px;border-top:1px solid #eee;padding-top:10px">
 <h3>Member Login</h3>
@@ -903,7 +907,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <footer>
 Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
 &copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>
-Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-Alaikum%20Dr%20Asif%2C%20I%20have%20a%20question%20about%20the%20Basti%20Dawa%20Blood%20Society%20app.">WhatsApp: 0300-7379385</a> &bull; <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a>
+Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-Alaikum%20Dr%20Asif%2C%20I%20have%20a%20question%20about%20the%20Basti%20Dawa%20Blood%20Society%20app.">WhatsApp: 0300-7379385</a> &bull; <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a><br>
+<a href="privacy-policy.html">Privacy Policy</a> &bull; <a href="delete-account.html">Delete Account</a>
 </footer>
 
 <script>
@@ -1617,6 +1622,45 @@ function updateMyDonation(){
         loadMyRecord(u, linkedId);
       });
     });
+  });
+}
+/* ---------- account deletion (Play Store requirement) ----------
+   Deletes the login account and the linked donor record (private +
+   public listing + certificates). Asks for a fresh login first if
+   Firebase requires recent authentication. */
+function deleteMyCerts(donorId, cb){
+  if (!FB_OK) { var cs = lsGet(LS.certs).filter(function(x){return x.donorId!==donorId;}); lsSet(LS.certs, cs); cb(); return; }
+  db.collection('certificates').where('donorId','==',donorId).get().then(function(s){
+    var batch = db.batch(); s.docs.forEach(function(d){ batch.delete(d.ref); });
+    return batch.commit();
+  }).then(function(){ cb(); }).catch(function(){ cb(); });
+}
+function deleteMyAccount(){
+  if (!FB_OK || !auth || !auth.currentUser) return;
+  var msg = document.getElementById('delMsg');
+  var u = auth.currentUser;
+  if (!confirm('Delete your account? Your login and linked donor record will be removed. This cannot be undone.')) return;
+  msg.innerHTML = '<span class="mut">Deleting…</span>';
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+    var finish = function(){
+      db.collection('users').doc(u.uid).delete().catch(function(){});
+      u.delete().then(function(){
+        msg.innerHTML = '<span class="ok">Your account has been deleted.</span>';
+        setTimeout(function(){ doLogout(); }, 1200);
+      }).catch(function(){
+        msg.innerHTML = '<span class="err">Please log out and log in again, then try deleting once more.</span>';
+      });
+    };
+    if (linkedId) {
+      deleteMyCerts(linkedId, function(){
+        qDel('donors', linkedId, function(){
+          qDel('donorsPublic', linkedId, function(){ finish(); });
+        });
+      });
+    } else finish();
+  }).catch(function(){
+    msg.innerHTML = '<span class="err">Could not delete. Please try again.</span>';
   });
 }
 function renderAdmin(){
