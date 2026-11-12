@@ -5,10 +5,10 @@
    mode: public pages work, login-gated parts show "Setup pending".
    NEVER commit real user data here — this file holds only project keys. */
 window.BDBS_FIREBASE_CONFIG = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyCseoMlxv_tWZeA4vFZ7OzC2xembVQpR6E",
+  authDomain: "basti-dawa-blood-society.firebaseapp.com",
+  projectId: "basti-dawa-blood-society",
+  storageBucket: "basti-dawa-blood-society.firebasestorage.app",
+  messagingSenderId: "114673177161",
+  appId: "1:114673177161:web:1922874f15b12b07822598"
 };
