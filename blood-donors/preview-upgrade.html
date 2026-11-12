@@ -217,6 +217,11 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 .dc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
 .empty{text-align:center;padding:28px 12px}
+.rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
+.rpill.st-received{background:#E2E8F0;color:#334155}
+.rpill.st-contacting{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.rpill.st-found{background:var(--green-soft);color:var(--green-d)}
+.rpill.st-done{background:var(--green-d);color:#fff}
 
 @media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:22px}header h1{font-size:18px}}
 @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.bnav,header{display:none!important}}
@@ -258,7 +263,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="card about">
 <img src="logo.png" class="org-emblem" alt="BDBS official logo">
 <h2>Welcome to Basti Dawa Blood Society</h2>
-<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor and patient personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login.</p>
+<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.</p>
 <p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
 </div>
 <div class="card">
@@ -633,7 +638,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec" id="s-request">
 <div class="card" id="wz-request" data-step="0">
 <h2>Blood Donation Request</h2>
-<p class="mut">Your request is sent to the BDBS admin. The public list shows only the patient's first name, blood group needed, hospital and city — never phone or CNIC.</p>
+<p class="mut">Your request is sent to the BDBS admin. The public list shows the patient's first name, blood group needed, hospital, city, request date, phone number and current progress — so donors can contact you directly. CNIC is never shown.</p>
 <div class="wprog"><div class="wprog-fill"></div></div>
 <div class="wprog-label">Step 1 of 3</div>
 <div class="wstep on">
@@ -948,8 +953,8 @@ function seedLocal(){
   ];
   lsSet(LS.donors, donors); lsSet(LS.donorsPub, donors.map(donorPub));
   lsSet(LS.members, members); lsSet(LS.membersPub, members.map(memberPub));
-  lsSet(LS.requests, [{id:'demo_r1',name:'Demo Patient',father:'Demo Father',cnic:'',age:45,group:'O+',hospital:'Demo Hospital, Multan',disease:'Surgery',phone:'0300-0000009',address:'Demo Address',createdAt:Date.now(),demo:true}]);
-  lsSet(LS.requestsPub, [{id:'demo_r1',firstName:'Demo',group:'O+',hospital:'Demo Hospital, Multan',city:'Multan',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.requests, [{id:'demo_r1',name:'Demo Patient',father:'Demo Father',cnic:'',age:45,group:'O+',hospital:'Demo Hospital, Multan',disease:'Surgery',phone:'0300-0000009',address:'Demo Address',status:'Received',createdAt:Date.now(),demo:true}]);
+  lsSet(LS.requestsPub, [{id:'demo_r1',firstName:'Demo',group:'O+',hospital:'Demo Hospital, Multan',city:'Multan',phone:'0300-0000009',status:'Received',createdAt:Date.now(),demo:true}]);
   lsSet(LS.activities, [{id:'demo_a1',title:'Welcome to BDBS',text:'Basti Dawa Blood Society is now live. Donate blood, save lives.',photo:'',createdAt:Date.now(),demo:true}]);
   lsSet(LS.certs, []);
   localStorage.setItem(LS.seeded, '1');
@@ -961,7 +966,7 @@ function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||
    education, email, address, father, designation, ID, blood group) is
    admin-only in the private 'members' collection. */
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
-function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access (Firestore when configured, else local) ---------- */
 function qAll(coll, cb){
@@ -1107,8 +1112,26 @@ function loadRequests(){
     var box = document.getElementById('requestList');
     if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
     box.innerHTML = rs.map(function(r){
-      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span></div></div></div>';
+      var st = (r.status||'Received');
+      var cls = st==='Completed' ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+(r.phone?'<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span>':'')+'</div></div></div>';
     }).join('');
+  });
+}
+/* ---------- request progress (admin advances the stage) ----------
+   Stages: Received → Contacting Donors → Donor Found → Completed.
+   The stage shows publicly on the request card, so the requester and
+   donors can see where the request stands. Only the admin can change it. */
+var REQ_STAGES = ['Received','Contacting Donors','Donor Found','Completed'];
+function nextReqStatus(cur){
+  var i = REQ_STAGES.indexOf(cur||'Received');
+  return (i >= 0 && i < REQ_STAGES.length - 1) ? REQ_STAGES[i+1] : null;
+}
+function advanceReqStatus(id, cur){
+  var nxt = nextReqStatus(cur);
+  if (!nxt) return;
+  qUpdate('requests', id, {status:nxt}, function(){
+    qUpdate('requestsPublic', id, {status:nxt}, function(){ renderAdmin(); loadRequests(); });
   });
 }
 function loadMembers(){
@@ -1146,8 +1169,8 @@ function submitRequest(){
   var miss = need(['rName','rFather','rAge','rGroup','rHospital','rDisease','rPhone','rAddress']);
   if (miss) { document.getElementById('rMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
   var id = uid('req');
-  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), createdAt:Date.now()};
-  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), createdAt:Date.now()};
+  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', createdAt:Date.now()};
+  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
   qAdd('requests', full, function(ok){
     if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
     qAdd('requestsPublic', pub, function(){
@@ -1613,9 +1636,11 @@ function renderAdmin(){
             h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button></td></tr>';
           });
           h += '</table></div>';
-          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th></tr>';
+          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
           rs.forEach(function(r){
-            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td></tr>';
+            var cur = r.status||'Received';
+            var nxt = nextReqStatus(cur);
+            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b></td><td>'+(nxt?'<button class="btn" onclick="advanceReqStatus(\''+esc(r.id)+'\',\''+esc(cur)+'\')">→ '+esc(nxt)+'</button>':'<span class="ok">✓ Done</span>')+'</td></tr>';
           });
           h += '</table></div>';
           /* Request → donor contact: a request comes to the admin first, then
