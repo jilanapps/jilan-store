@@ -1107,7 +1107,7 @@ function loadRequests(){
     var box = document.getElementById('requestList');
     if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
     box.innerHTML = rs.map(function(r){
-      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div></div></div>';
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span></div></div></div>';
     }).join('');
   });
 }
