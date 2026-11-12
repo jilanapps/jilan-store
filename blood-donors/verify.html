@@ -57,9 +57,7 @@ function showMember(m){
     (m.photo ? '<img class="photo" src="'+m.photo+'" alt="Member photo"><br><br>' : '') +
     '<p class="verified">✓ VERIFIED MEMBER</p>' +
     '<h2 style="margin:6px 0">'+esc(m.name)+'</h2>' +
-    '<p>'+esc(m.designation||'')+' &nbsp;•&nbsp; ID No.: <b>'+esc(m.idNo||'')+'</b></p>' +
-    '<p>Blood Group: <span class="pill">'+esc(m.group||'')+'</span></p>' +
-    '<p>Membership valid till: <b>'+esc(fmtD(m.expiry))+'</b></p>' +
+    '<p>Phone: <b>'+esc(m.phone||'—')+'</b></p>' +
     '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
 }
 (function(){
