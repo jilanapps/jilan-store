@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>BDBS Member Card Preview</title>
+    <style>
+      :root {
+        --red: #DC2626;
+        --red-dark: #991B1B;
+        --red-soft: #FEF2F2;
+        --ink: #1F2937;
+        --muted: #6B7280;
+        --line: #E5E7EB;
+        --bg: #FFFFFF;
+        --card-bg: #FFFFFF;
+        --soft-bg: #F9FAFB;
+        --shadow: 0 10px 30px rgba(153, 27, 27, 0.10), 0 2px 8px rgba(0,0,0,0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ink: #F3F4F6;
+          --muted: #9CA3AF;
+          --line: #374151;
+          --bg: #111827;
+          --card-bg: #1F2937;
+          --soft-bg: #1F2937;
+          --red-soft: #2A1518;
+          --shadow: 0 10px 30px rgba(0,0,0,0.45);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+
+      /* ---------- Preview banner ---------- */
+      .preview-banner {
+        background: var(--red);
+        color: #fff;
+        border-radius: 14px;
+        padding: 16px 18px;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .preview-banner .en {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        margin: 0;
+      }
+      .preview-banner .ur {
+        font-size: 19px;
+        margin: 4px 0 0;
+        direction: rtl;
+        font-family: "Noto Nastaliq Urdu", "Segoe UI", serif;
+      }
+      .preview-note {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13.5px;
+        margin: 0 0 26px;
+      }
+
+      h2.section-title {
+        font-size: 19px;
+        font-weight: 700;
+        margin: 34px 0 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      h2.section-title::before {
+        content: "";
+        width: 5px;
+        height: 22px;
+        background: var(--red);
+        border-radius: 3px;
+        flex: none;
+      }
+      .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 16px 31px; }
+
+      /* ---------- ID card ---------- */
+      .id-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .id-head {
+        background: var(--red);
+        color: #fff;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo-badge {
+        width: 56px; height: 56px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex: none;
+      }
+      .id-head h3 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: 0.4px; }
+      .id-head p { margin: 2px 0 0; font-size: 13.5px; opacity: 0.92; }
+      .id-body { padding: 18px; }
+      .front-top { display: flex; gap: 16px; }
+      .photo-ph {
+        width: 108px; height: 132px;
+        border: 1.5px dashed var(--muted);
+        border-radius: 10px;
+        background: var(--soft-bg);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        color: var(--muted);
+        font-size: 11.5px;
+        text-align: center;
+        flex: none;
+        gap: 6px;
+        padding: 6px;
+      }
+      .front-fields { flex: 1; min-width: 0; }
+      .member-name { font-size: 21px; font-weight: 800; margin: 0 0 2px; }
+      .designation { color: var(--red); font-weight: 700; font-size: 14.5px; margin: 0 0 10px; }
+      .field { font-size: 14px; margin: 0 0 6px; }
+      .field .lbl { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; display: block; }
+      .field .val { font-weight: 600; }
+      .pill {
+        display: inline-block;
+        background: var(--red);
+        color: #fff;
+        font-weight: 800;
+        font-size: 14px;
+        padding: 3px 14px;
+        border-radius: 999px;
+        letter-spacing: 0.5px;
+      }
+      .front-bottom {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+      .dates { flex: 1; display: flex; gap: 20px; flex-wrap: wrap; }
+      .qr-box { text-align: center; flex: none; }
+      .qr-frame {
+        width: 96px; height: 96px;
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        padding: 6px;
+        background: #fff;
+        margin: 0 auto;
+      }
+      .qr-frame svg { display: block; width: 100%; height: 100%; }
+      .qr-box p { margin: 5px 0 0; font-size: 11px; color: var(--muted); }
+      .sig-line {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--line);
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .sig-line strong { color: var(--ink); display: block; font-size: 13.5px; }
+
+      /* back side */
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 9px 2px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14.5px;
+      }
+      .detail-row:last-of-type { border-bottom: none; }
+      .detail-row .k { color: var(--muted); flex: none; }
+      .detail-row .v { font-weight: 600; text-align: right; word-break: break-word; }
+      .admin-note {
+        margin-top: 14px;
+        background: var(--red-soft);
+        color: var(--red-dark);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-align: center;
+      }
+      @media (prefers-color-scheme: dark) {
+        .admin-note { color: #FCA5A5; }
+      }
+
+      /* ---------- Info boxes ---------- */
+      .info-box {
+        border: 1.5px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+        background: var(--card-bg);
+        box-shadow: var(--shadow);
+      }
+      .info-box h3 { margin: 0 0 10px; font-size: 16.5px; display: flex; align-items: center; gap: 9px; }
+      .info-box p { margin: 0 0 10px; font-size: 14.5px; }
+      .info-box p:last-child { margin-bottom: 0; }
+      .info-box .public-line { color: #15803D; font-weight: 700; }
+      @media (prefers-color-scheme: dark) { .info-box .public-line { color: #4ADE80; } }
+      .info-box .secret-line { color: var(--red-dark); font-weight: 700; }
+      @media (prefers-color-scheme: dark) { .info-box .secret-line { color: #FCA5A5; } }
+      .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+      .steps li {
+        counter-increment: step;
+        position: relative;
+        padding: 0 0 12px 44px;
+        font-size: 14.5px;
+      }
+      .steps li:last-child { padding-bottom: 0; }
+      .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 30px; height: 30px;
+        background: var(--red);
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 14px;
+      }
+      .icon { width: 22px; height: 22px; flex: none; }
+
+      footer {
+        margin-top: 40px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      footer strong { color: var(--red); }
+
+      @media (max-width: 420px) {
+        .front-top { flex-direction: column; align-items: center; text-align: center; }
+        .front-fields { width: 100%; }
+        .front-bottom { flex-direction: column; align-items: center; text-align: center; }
+        .dates { justify-content: center; }
+        .detail-row { font-size: 13.5px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- Preview banner -->
+      <div class="preview-banner" role="note">
+        <p class="en">PREVIEW — NOT LIVE YET</p>
+        <p class="ur" lang="ur">یہ صرف نمونہ ہے — ابھی لائیو نہیں</p>
+      </div>
+      <p class="preview-note">This page shows the proposed member card design with sample data only. Nothing here is published on the live site.</p>
+
+      <!-- ============ FRONT ============ -->
+      <h2 class="section-title">Membership Card — Front Side</h2>
+      <p class="section-sub">What appears on the printed card.</p>
+
+      <div class="id-card">
+        <div class="id-head">
+          <div class="logo-badge" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2.5C12 2.5 5.5 10.2 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10.2 12 2.5 12 2.5Z" fill="#DC2626"/>
+              <path d="M9.2 15.2a2.9 2.9 0 0 0 2 3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Membership Card</h3>
+            <p>Basti Dawa Blood Society</p>
+          </div>
+        </div>
+        <div class="id-body">
+          <div class="front-top">
+            <div class="photo-ph" aria-label="Sample photo placeholder">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8.5" r="3.6" fill="#9CA3AF"/>
+                <path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" fill="#9CA3AF"/>
+              </svg>
+              <span>Sample<br/>Photo</span>
+            </div>
+            <div class="front-fields">
+              <p class="member-name">Sample Member</p>
+              <p class="designation">Sample Designation</p>
+              <p class="field"><span class="lbl">Father Name</span><span class="val">Sample Father</span></p>
+              <p class="field"><span class="lbl">ID No.</span><span class="val">000</span></p>
+              <p class="field"><span class="lbl">Blood Group</span><span class="pill">O+</span></p>
+            </div>
+          </div>
+          <div class="front-bottom">
+            <div class="dates">
+              <p class="field"><span class="lbl">Issue Date</span><span class="val">01-01-2026</span></p>
+              <p class="field"><span class="lbl">Expiry Date</span><span class="val">31-12-2027</span></p>
+            </div>
+            <div class="qr-box">
+              <div class="qr-frame" aria-label="QR code placeholder">
+                <svg viewBox="0 0 100 100" aria-hidden="true">
+                  <rect x="4" y="4" width="26" height="26" fill="none" stroke="#111" stroke-width="5"/>
+                  <rect x="13" y="13" width="8" height="8" fill="#111"/>
+                  <rect x="70" y="4" width="26" height="26" fill="none" stroke="#111" stroke-width="5"/>
+                  <rect x="79" y="13" width="8" height="8" fill="#111"/>
+                  <rect x="4" y="70" width="26" height="26" fill="none" stroke="#111" stroke-width="5"/>
+                  <rect x="13" y="79" width="8" height="8" fill="#111"/>
+                  <rect x="42" y="8" width="8" height="8" fill="#111"/>
+                  <rect x="56" y="16" width="8" height="8" fill="#111"/>
+                  <rect x="42" y="30" width="8" height="8" fill="#111"/>
+                  <rect x="70" y="42" width="8" height="8" fill="#111"/>
+                  <rect x="86" y="50" width="8" height="8" fill="#111"/>
+                  <rect x="44" y="48" width="10" height="10" fill="#111"/>
+                  <rect x="58" y="62" width="8" height="8" fill="#111"/>
+                  <rect x="76" y="70" width="8" height="8" fill="#111"/>
+                  <rect x="44" y="80" width="8" height="8" fill="#111"/>
+                  <rect x="86" y="86" width="8" height="8" fill="#111"/>
+                  <rect x="64" y="86" width="8" height="8" fill="#111"/>
+                </svg>
+              </div>
+              <p>QR — Verify Member</p>
+            </div>
+          </div>
+          <div class="sig-line">
+            <strong>Verified Signature Authorized</strong>
+            Under Supervision, Basti Dawa Welfare Organization
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ BACK ============ -->
+      <h2 class="section-title">Membership Card — Back Side</h2>
+      <p class="section-sub">Full member details, printed on the back of the card.</p>
+
+      <div class="id-card">
+        <div class="id-head">
+          <div>
+            <h3>Member Details</h3>
+            <p>Basti Dawa Blood Society</p>
+          </div>
+        </div>
+        <div class="id-body">
+          <div class="detail-row"><span class="k">CNIC</span><span class="v">00000-0000000-0</span></div>
+          <div class="detail-row"><span class="k">Age</span><span class="v">00 Years</span></div>
+          <div class="detail-row"><span class="k">Education</span><span class="v">Sample Education</span></div>
+          <div class="detail-row"><span class="k">Phone</span><span class="v">0300-0000000</span></div>
+          <div class="detail-row"><span class="k">Email</span><span class="v">sample@example.com</span></div>
+          <div class="detail-row"><span class="k">Address</span><span class="v">Sample Address</span></div>
+          <div class="detail-row"><span class="k">Blood Group</span><span class="v">O+</span></div>
+          <div class="detail-row"><span class="k">Issue Date</span><span class="v">01-01-2026</span></div>
+          <div class="detail-row"><span class="k">Expiry Date</span><span class="v">31-12-2027</span></div>
+          <p class="admin-note">Personal details are admin-only.</p>
+        </div>
+      </div>
+
+      <!-- ============ PRIVACY RULE ============ -->
+      <h2 class="section-title">Privacy Rule</h2>
+      <p class="section-sub">What the public can see — and what stays secret.</p>
+
+      <div class="info-box">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3Z" stroke="#DC2626" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M9 12l2.2 2.2L15.5 10" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Who Sees What
+        </h3>
+        <p><span class="public-line">Public:</span> only name, phone number and photo.</p>
+        <p><span class="secret-line">Secret — admin only:</span> everything else (CNIC, age, education, email, address, father name, designation, ID, blood group).</p>
+        <p>A QR scan shows only photo, name, phone and <strong>VERIFIED MEMBER</strong>.</p>
+      </div>
+
+      <!-- ============ REQUEST FLOW ============ -->
+      <h2 class="section-title">Blood Request Flow</h2>
+      <p class="section-sub">How a blood request reaches a donor.</p>
+
+      <div class="info-box">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3.2C12 3.2 6 9.9 6 14a6 6 0 0 0 12 0c0-4.1-6-10.8-6-10.8Z" fill="#DC2626"/>
+          </svg>
+          From Request to Donation
+        </h3>
+        <ol class="steps">
+          <li>A blood request comes to the <strong>admin first</strong>.</li>
+          <li>The admin messages matching donors (same blood group) via <strong>WhatsApp from inside the app</strong>.</li>
+          <li>The donor connects directly and the donation is arranged.</li>
+          <li><strong>Donor phone numbers stay admin-only</strong> — they are never shown publicly.</li>
+        </ol>
+      </div>
+
+      <footer>
+        <strong>Basti Dawa Blood Society</strong><br/>
+        Preview only — sample data, not a real member card.
+      </footer>
+
+    </div>
+  </body>
+</html>
