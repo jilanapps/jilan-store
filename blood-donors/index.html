@@ -670,7 +670,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <h3>3 &bull; Contact</h3>
 <div class="fld"><input id="rPhone" type="tel" placeholder=" "><label for="rPhone">Phone No. *</label></div>
 <div class="fld"><input id="rAddress" placeholder=" "><label for="rAddress">Address *</label></div>
-<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="submitRequest()">Submit Request</button></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" id="rSubmitBtn" onclick="submitRequest()">Submit Request</button></div>
 </div>
 <div class="wmsg" id="rMsg"></div>
 </div>
@@ -716,7 +716,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation *</label></div>
 </div>
 <div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated *</label></div>
-<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="submitDonor()">Register as Donor</button></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" id="dSubmitBtn" onclick="submitDonor()">Register as Donor</button></div>
 </div>
 <div class="wmsg" id="dMsg"></div>
 </div>
@@ -1188,36 +1188,56 @@ function loadActivities(){
 
 /* ---------- forms ---------- */
 function submitRequest(){
+  var btn = document.getElementById('rSubmitBtn');
+  if (btn && btn.disabled) return;
   var miss = need(['rName','rFather','rAge','rGroup','rHospital','rDisease','rPhone','rAddress']);
   if (miss) { document.getElementById('rMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
-  var id = uid('req');
-  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', createdAt:Date.now()};
-  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
-  qAdd('requests', full, function(ok){
-    if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
-    qAdd('requestsPublic', pub, function(){
-      document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. The admin will contact you.</span>';
-      ['rName','rFather','rCnic','rAge','rHospital','rDisease','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
-      document.getElementById('rGroup').value=''; loadRequests();
+  if (btn) btn.disabled = true;
+  var ph = waNum(val('rPhone')), grp = val('rGroup');
+  /* Duplicate guard: same phone + same blood group with an open request
+     must never create a second record (double-tap / slow-net retry). */
+  qAll('requests', function(rs){
+    var dup = rs.some(function(r){ return waNum(r.phone) === ph && r.group === grp && (r.status||'Received') !== 'Completed'; });
+    if (dup) { document.getElementById('rMsg').innerHTML = '<span class="err">A request for this phone and blood group is already open.</span>'; if (btn) btn.disabled = false; return; }
+    var id = uid('req');
+    var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', createdAt:Date.now()};
+    var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
+    qAdd('requests', full, function(ok){
+      if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
+      qAdd('requestsPublic', pub, function(){
+        document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. The admin will contact you.</span>';
+        ['rName','rFather','rCnic','rAge','rHospital','rDisease','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
+        document.getElementById('rGroup').value=''; if (btn) btn.disabled = false; loadRequests();
+      });
     });
   });
 }
 function submitDonor(){
+  var btn = document.getElementById('dSubmitBtn');
+  if (btn && btn.disabled) return;
   var miss = need(['dName','dFather','dNo','dCnic','dGroup','dAge','dPhone','dAddress','dDisease','dLast','dUnits']);
   if (miss) { document.getElementById('dMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
   var age = parseInt(val('dAge'),10);
   if (age < 18 || age > 65) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor age must be 18–65.</span>'; return; }
+  if (btn) btn.disabled = true;
   readPhoto(document.getElementById('dPhoto'), function(photo){
-    var id = uid('donor');
-    var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:val('dNo'), photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, createdAt:Date.now()};
-    var pub = donorPub(full); pub.city = full.address.split(',').pop().trim();
-    qAdd('donors', full, function(ok){
-      if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
-      qAdd('donorsPublic', pub, function(){
-        qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
-        document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
-        ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
-        document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value='';
+    var ph = waNum(val('dPhone')), cn = val('dCnic').replace(/\D/g,'');
+    /* Duplicate guard: same phone or same CNIC already registered — a
+       double-tap / slow-net retry must never create a second record. */
+    qAll('donors', function(ds){
+      var dup = ds.some(function(d){ return waNum(d.phone) === ph || (cn && String(d.cnic||'').replace(/\D/g,'') === cn); });
+      if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
+      var id = uid('donor');
+      var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:val('dNo'), photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, createdAt:Date.now()};
+      var pub = donorPub(full); pub.city = full.address.split(',').pop().trim();
+      qAdd('donors', full, function(ok){
+        if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
+        qAdd('donorsPublic', pub, function(){
+          qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
+          document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
+          ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
+          document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
+        });
       });
     });
   });
@@ -1889,6 +1909,36 @@ function deleteMyAccount(){
     msg.innerHTML = '<span class="err">Could not delete. Please try again.</span>';
   });
 }
+/* ---------- duplicates cleanup (admin only) ----------
+   Same donor/request saved twice (double-tap, slow net) shows twice.
+   Keep the OLDEST copy of each, delete the rest from both the private
+   and the public collection. Run from the Admin Panel button. */
+function dedupList(list, keyFn){
+  var seen = {}, drop = [];
+  list.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); }).forEach(function(x){
+    var k = keyFn(x);
+    if (seen[k]) drop.push(x.id); else seen[k] = 1;
+  });
+  return drop;
+}
+function removeDuplicates(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var msg = document.getElementById('dupMsg');
+  var say = function(t){ if (msg) msg.innerHTML = t; };
+  say('<span class="mut">Checking…</span>');
+  qAll('donors', function(ds){
+    var dropD = dedupList(ds, function(d){ return waNum(d.phone) || ('n:'+String(d.name||'').toLowerCase()+'|'+(d.group||'')); });
+    qAll('requests', function(rs){
+      var dropR = dedupList(rs, function(r){ return waNum(r.phone)+'|'+(r.group||''); });
+      if (!dropD.length && !dropR.length) { say('<span class="ok">No duplicates found.</span>'); return; }
+      if (!confirm('Remove ' + (dropD.length + dropR.length) + ' duplicate record(s)? The oldest copy of each is kept.')) { say(''); return; }
+      var done = 0, total = dropD.length + dropR.length;
+      var one = function(){ done++; if (done >= total) { say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); } };
+      dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
+      dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
+    });
+  });
+}
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -1896,7 +1946,8 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span></div>';
+          h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
             h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button></td></tr>';
           });
