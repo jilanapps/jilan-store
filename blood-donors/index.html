@@ -16,6 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="firebase-config.js"></script>
 <style>
 /* ============ BDBS Premium Medical / NGO design system ============
@@ -228,7 +229,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="hstat"><b id="statActivities" data-v="0">0</b><span>Activities</span></div>
 </div>
 <p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
-<p id="demoNote" class="hero-demo">LOCAL DEMO MODE — Firebase setup pending (see SETUP.md).</p>
+<p id="demoNote" class="hero-demo">Offline — saved data works on this phone. New changes will sync when internet returns.</p>
 </div>
 <div class="card about">
 <img src="logo.png" class="org-emblem" alt="BDBS official logo">
@@ -886,29 +887,18 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', seeded:'bdbs_seeded' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function seedLocal(){
-  if (localStorage.getItem(LS.seeded)) return;
-  var donors = [
-    {id:'demo_d1',name:'Demo Donor 1',father:'Demo Father 1',donorNo:'D-001',photo:'',cnic:'35202-0000001-1',group:'B+',age:28,address:'Demo Address, Multan',phone:'0300-0000001',disease:'None',lastDonation:'2026-09-12',units:4,demo:true},
-    {id:'demo_d2',name:'Demo Donor 2',father:'Demo Father 2',donorNo:'D-002',photo:'',cnic:'35202-0000002-2',group:'O-',age:32,address:'Demo Address, Basti Malook',phone:'0300-0000002',disease:'None',lastDonation:'2026-10-03',units:2,demo:true},
-    {id:'demo_d3',name:'Demo Donor 3',father:'Demo Father 3',donorNo:'D-003',photo:'',cnic:'35202-0000003-3',group:'A+',age:25,address:'Demo Address, Multan',phone:'0300-0000003',disease:'None',lastDonation:'2026-08-20',units:6,demo:true},
-    {id:'demo_d4',name:'Demo Donor 4',father:'Demo Father 4',donorNo:'D-004',photo:'',cnic:'35202-0000004-4',group:'AB+',age:40,address:'Demo Address, Lahore',phone:'0300-0000004',disease:'None',lastDonation:'2026-11-01',units:1,demo:true}
-  ];
-  var members = [
-    {id:'demo_m1',photo:'',name:'Demo Member One',father:'Demo Father',designation:'Member',idNo:'001',cnic:'35202-0000001-1',group:'B+',age:30,education:'Matric',phone:'0300-0000001',email:'demo1@example.com',address:'Demo Address, Multan',issue:'2026-01-01',expiry:'2027-01-01',demo:true},
-    {id:'demo_m2',photo:'',name:'Demo Member Two',father:'Demo Father',designation:'Volunteer',idNo:'002',cnic:'35202-0000002-2',group:'O+',age:27,education:'FSc',phone:'0300-0000002',email:'demo2@example.com',address:'Demo Address, Basti Malook',issue:'2026-01-01',expiry:'2027-01-01',demo:true}
-  ];
-  lsSet(LS.donors, donors); lsSet(LS.donorsPub, donors.map(donorPub));
-  lsSet(LS.members, members); lsSet(LS.membersPub, members.map(memberPub));
-  lsSet(LS.requests, [{id:'demo_r1',name:'Demo Patient',father:'Demo Father',cnic:'',age:45,group:'O+',hospital:'Demo Hospital, Multan',disease:'Surgery',phone:'0300-0000009',address:'Demo Address',createdAt:Date.now(),demo:true}]);
-  lsSet(LS.requestsPub, [{id:'demo_r1',firstName:'Demo',group:'O+',hospital:'Demo Hospital, Multan',city:'Multan',createdAt:Date.now(),demo:true}]);
-  lsSet(LS.activities, [{id:'demo_a1',title:'Welcome to BDBS',text:'Basti Dawa Blood Society is now live. Donate blood, save lives.',photo:'',createdAt:Date.now(),demo:true}]);
-  lsSet(LS.certs, []);
-  localStorage.setItem(LS.seeded, '1');
-}
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+/* Public member record: ONLY name, phone number and photo are public.
+   Expiry stays in the record ONLY so the QR verify page can check validity —
+   it is never displayed anywhere public. Everything else (CNIC, age,
+   education, email, address, father, designation, ID, blood group) is
+   admin-only in the private 'members' collection. */
+function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
+function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+
 function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
 /* Public member record: ONLY name, phone number and photo are public.
    Expiry stays in the record ONLY so the QR verify page can check validity —
@@ -918,32 +908,61 @@ function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
 function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
-/* ---------- data access (Firestore when configured, else local) ---------- */
+/* ---------- data access: Firestore when online, local cache when offline ----------
+   Every successful online read/write is mirrored into the phone's local
+   cache, so the app keeps working with REAL data when the internet drops.
+   Writes made offline are queued and pushed to Firestore when net returns.
+   (The old demo seeding is gone — offline now shows real saved data.) */
+function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup}; return map[coll]||LS.activities; }
+function cacheUpsert(coll, obj){ var k=lsKey(coll), arr=lsGet(k), found=false; arr.forEach(function(x){ if(x.id===obj.id){ for(var p in obj) x[p]=obj[p]; found=true; } }); if(!found) arr.unshift(obj); lsSet(k,arr); }
+function cacheRemove(coll, id){ var k=lsKey(coll); lsSet(k, lsGet(k).filter(function(x){return x.id!==id;})); }
+function queueOp(op){ var q=lsGet(LS.queue); q.push(op); lsSet(LS.queue,q); setOfflineBanner(); }
+function flushSync(){
+  if (!FB_OK || !db) return;
+  var q = lsGet(LS.queue); if (!q.length) return;
+  var op = q[0];
+  var done = function(ok){ if (ok) { q.shift(); lsSet(LS.queue, q); setOfflineBanner(); flushSync(); } };
+  if (op.kind==='add') { db.collection(op.coll).doc(op.obj.id).set(op.obj).then(function(){done(true);}).catch(function(){done(false);}); }
+  else if (op.kind==='del') { db.collection(op.coll).doc(op.id).delete().then(function(){done(true);}).catch(function(){done(false);}); }
+  else if (op.kind==='update') { db.collection(op.coll).doc(op.id).update(op.fields).then(function(){done(true);}).catch(function(){done(false);}); }
+}
+function setOfflineBanner(){
+  var dn = document.getElementById('demoNote'); if (!dn) return;
+  var q = lsGet(LS.queue).length;
+  if (!navigator.onLine) { dn.style.display='block'; dn.textContent = q ? ('Offline — ' + q + ' change(s) saved on this phone, will sync when internet returns.') : 'Offline — saved data works on this phone. New changes will sync when internet returns.'; }
+  else if (q) { dn.style.display='block'; dn.textContent = 'Syncing — ' + q + ' change(s) pending…'; }
+  else { dn.style.display='none'; }
+}
+window.addEventListener('online', function(){ setOfflineBanner(); flushSync(); });
+window.addEventListener('offline', function(){ setOfflineBanner(); });
 function qAll(coll, cb){
   if (FB_OK) { db.collection(coll).orderBy('createdAt','desc').limit(200).get()
-    .then(function(s){cb(s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;}));})
-    .catch(function(){cb([]);}); }
-  else { var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,donors:LS.donors,members:LS.members,requests:LS.requests,certificates:LS.certs};
-    cb(lsGet(map[coll]||LS.activities)); }
+    .then(function(s){ var list = s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;});
+      var k = lsKey(coll);
+      lsSet(k, lsGet(k).filter(function(x){ return !x.demo; }));
+      list.forEach(function(o){ cacheUpsert(coll, o); });
+      cb(list); })
+    .catch(function(){ cb(lsGet(lsKey(coll))); }); }
+  else { cb(lsGet(lsKey(coll))); }
 }
 function qAdd(coll, obj, cb){
   if (FB_OK) { var ref = obj.id ? db.collection(coll).doc(obj.id) : db.collection(coll).doc(); obj.id = ref.id;
-    ref.set(obj).then(function(){cb(true, obj);}).catch(function(){cb(false);}); }
-  else { obj.id = obj.id || uid('x'); var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup};
-    var arr = lsGet(map[coll]); arr.unshift(obj); lsSet(map[coll], arr); cb(true, obj); }
+    cacheUpsert(coll, obj);
+    ref.set(obj).then(function(){cb(true, obj);}).catch(function(){ queueOp({kind:'add', coll:coll, obj:obj}); cb(true, obj); }); }
+  else { obj.id = obj.id || uid('x'); cacheUpsert(coll, obj); queueOp({kind:'add', coll:coll, obj:obj}); cb(true, obj); }
 }
 function qDel(coll, id, cb){
-  if (FB_OK) { db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){cb(false);}); }
-  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup};
-    var arr = lsGet(map[coll]).filter(function(x){return x.id!==id;}); lsSet(map[coll], arr); cb(true); }
+  if (FB_OK) { cacheRemove(coll, id);
+    db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){ queueOp({kind:'del', coll:coll, id:id}); cb(true); }); }
+  else { cacheRemove(coll, id); queueOp({kind:'del', coll:coll, id:id}); cb(true); }
 }
 
 function qUpdate(coll, id, fields, cb){
-  if (FB_OK) { db.collection(coll).doc(id).update(fields).then(function(){cb(true);}).catch(function(){cb(false);}); }
-  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,donorLookup:LS.donorLookup};
-    var arr = lsGet(map[coll]); var found=false;
-    arr.forEach(function(x){ if (x.id===id) { for (var k in fields) x[k]=fields[k]; found=true; } });
-    lsSet(map[coll], arr); cb(found); }
+  if (FB_OK) { var k=lsKey(coll), arr=lsGet(k); arr.forEach(function(x){ if (x.id===id) { for (var p in fields) x[p]=fields[p]; } }); lsSet(k, arr);
+    db.collection(coll).doc(id).update(fields).then(function(){cb(true);}).catch(function(){ queueOp({kind:'update', coll:coll, id:id, fields:fields}); cb(true); }); }
+  else { var arr2 = lsGet(lsKey(coll)); var found=false;
+    arr2.forEach(function(x){ if (x.id===id) { for (var p in fields) x[p]=fields[p]; found=true; } });
+    lsSet(lsKey(coll), arr2); queueOp({kind:'update', coll:coll, id:id, fields:fields}); cb(found); }
 }
 
 /* ---------- photo helper (resize to max 300px, JPEG) ---------- */
@@ -982,8 +1001,7 @@ function loadHome(){
           setStat('statRequests', rs.length);
           setStat('statLives', units*3);
           setStat('statActivities', acts.length);
-          var dn = document.getElementById('demoNote');
-          if (dn) dn.style.display = FB_OK ? 'none' : 'block';
+          setOfflineBanner();
           document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
             return '<div class="dcard"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
           }).join('') : '<span class="mut">No activity yet.</span>';
@@ -1020,7 +1038,7 @@ function loadMembers(){
   qAll('membersPublic', function(ms){
     var box = document.getElementById('memberList');
     if (!ms.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
-    var isAdm = (FB_OK && auth && auth.currentUser && isAdminUser(auth.currentUser));
+    var isAdm = isAdmin();
     box.innerHTML = ms.map(function(m){
       return '<div class="idcard">' +
         '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
@@ -1046,7 +1064,7 @@ function loadActivities(){
       return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
     }).join('');
   });
-  document.getElementById('activityPublish').style.display = (FB_OK && auth && isAdminUser(auth.currentUser)) ? 'block' : 'none';
+  document.getElementById('activityPublish').style.display = isAdmin() ? 'block' : 'none';
 }
 
 /* ---------- forms ---------- */
@@ -1198,7 +1216,96 @@ function saveBlob(blob, fname){
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
+function dataURLToBytes(dataURL){ var bin = atob(dataURL.split(',')[1]); var bytes = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i); return bytes; }
+/* PDF from card images (JPEG pages): the shared PDF looks like the actual
+   membership card — front side on page 1, back side on page 2. Built with
+   a small built-in writer (JPEG bytes go in raw, DCTDecode), so it needs
+   no PDF library and works offline. */
+function cardImagePDF(imgs){
+  function enc(str){ var b = new Uint8Array(str.length); for (var i=0;i<str.length;i++) b[i] = str.charCodeAt(i) & 0xff; return b; }
+  var objs = [];
+  objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  var kids = [], nextObj = 3;
+  imgs.forEach(function(im){
+    var pageObj = nextObj++, imgObj = nextObj++, contentObj = nextObj++;
+    kids.push(pageObj + ' 0 R');
+    var maxW = 595 - 72, maxH = 842 - 72;
+    var scale = Math.min(maxW / im.w, maxH / im.h, 1);
+    var dw = im.w * scale, dh = im.h * scale;
+    var x = (595 - dw) / 2, y = (842 - dh) / 2;
+    var stream = 'q ' + dw.toFixed(2) + ' 0 0 ' + dh.toFixed(2) + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' cm /Im1 Do Q';
+    objs[pageObj] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im1 ' + imgObj + ' 0 R >> >> /Contents ' + contentObj + ' 0 R >>';
+    objs[imgObj] = {jpeg: im};
+    objs[contentObj] = {stream: stream};
+  });
+  objs[2] = '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + imgs.length + ' >>';
+  var parts = [], offsets = [0], i, j;
+  var header = enc('%PDF-1.4\n');
+  parts.push(header);
+  var pos = header.length;
+  for (i=1;i<objs.length;i++){
+    if (!objs[i]) continue;
+    offsets[i] = pos;
+    var head = enc(i + ' 0 obj\n');
+    parts.push(head); pos += head.length;
+    var body;
+    if (typeof objs[i] === 'string') {
+      body = enc(objs[i] + '\nendobj\n');
+      parts.push(body); pos += body.length;
+    } else if (objs[i].stream !== undefined) {
+      body = enc('<< /Length ' + objs[i].stream.length + ' >>\nstream\n' + objs[i].stream + '\nendstream\nendobj\n');
+      parts.push(body); pos += body.length;
+    } else if (objs[i].jpeg) {
+      var im = objs[i].jpeg;
+      body = enc('<< /Type /XObject /Subtype /Image /Width ' + im.w + ' /Height ' + im.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + im.data.length + ' >>\nstream\n');
+      parts.push(body); pos += body.length;
+      parts.push(im.data); pos += im.data.length;
+      var tail = enc('\nendstream\nendobj\n');
+      parts.push(tail); pos += tail.length;
+    }
+  }
+  var xrefPos = pos;
+  var xref = 'xref\n0 ' + objs.length + '\n0000000000 65535 f \n';
+  for (j=1;j<objs.length;j++){ xref += ('0000000000'+(offsets[j]||0)).slice(-10) + ' 00000 n \n'; }
+  xref += 'trailer\n<< /Size ' + objs.length + ' /Root 1 0 R >>\nstartxref\n' + xrefPos + '\n%%EOF';
+  parts.push(enc(xref));
+  return new Blob(parts, {type:'application/pdf'});
+}
 function shareMemberCardPDF(){
+  var m = window._lastMemberCard; if (!m) return;
+  var cards = document.querySelectorAll('#memberCardBody .mcard');
+  /* Visual card first: capture the front + back cards as images and share
+     them as a 2-page PDF that looks exactly like the card on screen.
+     Falls back to the text PDF when the capture library is unavailable. */
+  if (window.html2canvas && cards.length) {
+    var shareBtn = null;
+    document.querySelectorAll('#memberCardBody button').forEach(function(b){ if (b.textContent.indexOf('Share Card') !== -1) shareBtn = b; });
+    if (shareBtn) { shareBtn.disabled = true; shareBtn.textContent = 'Preparing card…'; }
+    var done = 0, imgs = [];
+    var finish = function(){
+      if (shareBtn) { shareBtn.disabled = false; shareBtn.textContent = 'Share Card as PDF'; }
+      imgs = imgs.filter(function(x){ return !!x; });
+      if (!imgs.length) { shareMemberCardPDFText(); return; }
+      try {
+        var blob = cardImagePDF(imgs);
+        var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
+        var file = new File([blob], fname, {type:'application/pdf'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+          navigator.share({files:[file], title:'BDBS Member Card', text:'Membership Card - ' + (m.name||'')}).catch(function(){ saveBlob(blob, fname); });
+        } else { saveBlob(blob, fname); }
+      } catch(e){ shareMemberCardPDFText(); }
+    };
+    cards.forEach(function(card, idx){
+      window.html2canvas(card, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
+        try { imgs[idx] = {data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}; } catch(e){}
+        done++; if (done === cards.length) finish();
+      }).catch(function(){ done++; if (done === cards.length) finish(); });
+    });
+    return;
+  }
+  shareMemberCardPDFText();
+}
+function shareMemberCardPDFText(){
   var m = window._lastMemberCard; if (!m) return;
   try {
     var front = ['Name: ' + (m.name||''), 'Father Name: ' + (m.father||''), 'Designation: ' + (m.designation||''), 'ID No.: ' + (m.idNo||''), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry), '', 'Verify: ' + SITE_BASE + '?verify=' + encodeURIComponent(m.id), 'Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization'];
@@ -1214,7 +1321,7 @@ function shareMemberCardPDF(){
 /* Admin-only member removal: deletes the private record, the public
    listing and the member lookup entry, then refreshes both views. */
 function removeMember(id){
-  if (!FB_OK || !auth || !isAdminUser(auth.currentUser)) { alert('Admin login required.'); return; }
+  if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Remove this member? The member record, public listing and card will be deleted. This cannot be undone.')) return;
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
@@ -1236,7 +1343,7 @@ function viewMemberCard(id){
   });
 }
 function publishActivity(){
-  if (!FB_OK || !auth || !isAdminUser(auth.currentUser)) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
+  if (!isAdmin()) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
   if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
   readPhoto(document.getElementById('aPhoto'), function(photo){
     qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
@@ -1311,6 +1418,10 @@ function lookupCert(){
 /* ---------- auth, signup & roles ---------- */
 var ADMIN_EMAIL = 'bastidawabloodsociety@gmail.com';
 function isAdminUser(u){ return !!(u && (u.email||'').toLowerCase() === ADMIN_EMAIL); }
+/* Admin check that also works offline: after one online admin login, a
+   marker stays on this phone, so admin buttons keep working without net.
+   The server still enforces admin-only writes when the queue syncs. */
+function isAdmin(){ return (FB_OK && auth && auth.currentUser && isAdminUser(auth.currentUser)) || (localStorage.getItem('bdbs_admin')==='1'); }
 function showSignupForm(){
   document.getElementById('loginCard').style.display='none';
   document.getElementById('signupCard').style.display='block';
@@ -1329,19 +1440,23 @@ function routeAuth(u){
   document.getElementById('signupCard').style.display = 'none';
   document.getElementById('adminCard').style.display = 'none';
   document.getElementById('donorCard').style.display = 'none';
-  if (!u) { document.getElementById('loginCard').style.display = 'block'; return; }
+  if (!u) { localStorage.removeItem('bdbs_admin'); document.getElementById('loginCard').style.display = 'block'; return; }
   if (isAdminUser(u)) {
+    localStorage.setItem('bdbs_admin', '1');
     document.getElementById('adminEmail').textContent = '(' + u.email + ')';
     document.getElementById('adminCard').style.display = 'block';
     renderAdmin();
   } else {
+    localStorage.removeItem('bdbs_admin');
     document.getElementById('donorEmail').textContent = '(' + u.email + ')';
     document.getElementById('donorCard').style.display = 'block';
     renderDonor(u);
   }
 }
 function renderLogin(){
-  var setupHtml = '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login and signup work here.</div>';
+  var setupHtml = CONFIGURED
+    ? '<div class="setup"><b>You are offline.</b><br>Login needs internet the first time. Your saved data still works on this phone.</div>'
+    : '<div class="setup"><b>Setup pending — Firebase keys needed.</b><br>Follow SETUP.md: create a free Firebase project, paste the keys into firebase-config.js, then login and signup work here.</div>';
   var w = document.getElementById('setupWarn');
   var w2 = document.getElementById('setupWarn2');
   if (!FB_OK) {
@@ -1364,7 +1479,7 @@ function renderLogin(){
   }
 }
 function doLogin(){
-  if (!FB_OK) return;
+  if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Login needs internet the first time.</span>'; return; }
   var em = val('lEmail'), pw = val('lPass');
   if (!em || !pw) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter email and password.</span>'; return; }
   auth.signInWithEmailAndPassword(em, pw).then(function(){
@@ -1373,9 +1488,9 @@ function doLogin(){
     document.getElementById('lMsg').innerHTML = '<span class="err">Login failed — check email and password.</span>';
   });
 }
-function doLogout(){ if (FB_OK && auth) auth.signOut(); }
+function doLogout(){ localStorage.removeItem('bdbs_admin'); if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
-  if (!FB_OK) return;
+  if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Password reset needs internet.</span>'; return; }
   var em = val('lEmail');
   if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
   auth.sendPasswordResetEmail(em).then(function(){
@@ -1445,7 +1560,7 @@ function loadMyRecord(u, donorId){
   });
 }
 function linkDonorRecord(){
-  if (!FB_OK || !auth || !auth.currentUser) return;
+  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('pLinkMsg').innerHTML = '<span class="err">Linking needs internet.</span>'; return; }
   var no = val('pDonorNo');
   var msg = document.getElementById('pLinkMsg');
   if (!no) { msg.innerHTML = '<span class="err">Enter your Donor No.</span>'; return; }
@@ -1465,7 +1580,7 @@ function linkDonorRecord(){
   });
 }
 function updateMyDonation(){
-  if (!FB_OK || !auth || !auth.currentUser) return;
+  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('pUpdateMsg').innerHTML = '<span class="err">Update needs internet.</span>'; return; }
   var msg = document.getElementById('pUpdateMsg');
   var last = val('pLast'), units = val('pUnits');
   if (!last && units === '') { msg.innerHTML = '<span class="err">Enter a last donation date or total units.</span>'; return; }
@@ -1580,7 +1695,8 @@ function wizBack(form){
 /* ---------- init ---------- */
 document.addEventListener('input', function(e){ if (e.target && e.target.classList) e.target.classList.remove('invalid'); });
 wizGo('donor', 0); wizGo('request', 0); wizGo('member', 0);
-if (!FB_OK) seedLocal();
+setOfflineBanner(); if (FB_OK) flushSync();
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { try { navigator.serviceWorker.register('sw.js'); } catch(e){} }
 loadHome();
 renderLogin();
 </script>
