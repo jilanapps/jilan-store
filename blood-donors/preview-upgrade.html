@@ -746,13 +746,13 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <h3>2 &bull; Identity</h3>
 <div class="row">
 <div class="fld"><input id="mCnic" placeholder=" "><label for="mCnic">CNIC *</label></div>
-<div class="fld"><input id="mAge" type="number" min="0" max="120" placeholder=" "><label for="mAge">Age *</label></div>
+<div class="fld static"><input id="mDob" type="date"><label for="mDob">Date of Birth *</label></div>
 </div>
 <div class="row">
 <div class="fld static"><select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="mGroup">Blood Group *</label></div>
 <div class="fld"><span class="mut small">ID No. auto-assign hogi — pehle member 001, phir 002, 003…</span></div>
 </div>
-<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mCnic','mGroup','mAge'])">Next →</button></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mCnic','mGroup','mDob'])">Next →</button></div>
 </div>
 <div class="wstep">
 <h3>3 &bull; Contact &amp; Education</h3>
@@ -772,7 +772,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="fld static"><input id="mIssue" type="date"><label for="mIssue">Issue Date *</label></div>
 <div class="fld static"><input id="mExpiry" type="date"><label for="mExpiry">Expiry Date *</label></div>
 </div>
-<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="submitMember()">Add Member &amp; Generate Card</button></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn ghost" onclick="resetMemberForm()">Reset Form</button><button class="btn" id="mSubmitBtn" onclick="submitMember()">Add Member &amp; Generate Card</button></div>
 </div>
 <div class="wmsg" id="mMsg"></div>
 </div>
@@ -928,6 +928,8 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
 function lookupKey(no){ return String(no||'').trim().replace(/\//g,'-') || 'x'; }
 function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
+function ageFromDob(dob){ var d = new Date(String(dob||'') + 'T00:00:00'); if (isNaN(d.getTime())) return ''; var t = new Date(); var a = t.getFullYear() - d.getFullYear(); var mo = t.getMonth() - d.getMonth(); if (mo < 0 || (mo === 0 && t.getDate() < d.getDate())) a--; return a < 0 ? '' : a; }
+function samePhone(a, b){ function n(p){ var s = String(p||'').replace(/\D/g,''); if (s.charAt(0) === '0') s = '92' + s.slice(1); return s; } var x = n(a), y = n(b); return x.length >= 10 && x === y; }
 function firstName(n){return String(n||'').trim().split(/\s+/)[0] || 'Patient';}
 function show(s){
   document.querySelectorAll('.sec').forEach(function(el){el.classList.remove('on');});
@@ -989,7 +991,7 @@ function qAdd(coll, obj, cb){
 }
 function qDel(coll, id, cb){
   if (FB_OK) { db.collection(coll).doc(id).delete().then(function(){cb(true);}).catch(function(){cb(false);}); }
-  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs};
+  else { var map={donors:LS.donors,donorsPublic:LS.donorsPub,members:LS.members,membersPublic:LS.membersPub,requests:LS.requests,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup};
     var arr = lsGet(map[coll]).filter(function(x){return x.id!==id;}); lsSet(map[coll], arr); cb(true); }
 }
 
@@ -1143,10 +1145,13 @@ function loadMembers(){
   qAll('membersPublic', function(ms){
     var box = document.getElementById('memberList');
     if (!ms.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
+    var isAdm = (FB_OK && auth && auth.currentUser && isAdminUser(auth.currentUser));
     box.innerHTML = ms.map(function(m){
       return '<div class="idcard">' +
         '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
-        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span></div></div></div>';
+        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span>' +
+        (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
+        '</div></div></div>';
     }).join('');
   });
 }
@@ -1206,28 +1211,46 @@ function submitDonor(){
   });
 }
 function submitMember(){
-  var miss = need(['mName','mFather','mDesig','mCnic','mGroup','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry']);
+  var btn = document.getElementById('mSubmitBtn');
+  if (btn && btn.disabled) return;
+  var miss = need(['mName','mFather','mDesig','mCnic','mGroup','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry']);
   if (miss) { document.getElementById('mMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  var age = ageFromDob(val('mDob'));
+  if (age === '' || age < 0) { document.getElementById('mMsg').innerHTML = '<span class="err">Enter a valid date of birth.</span>'; return; }
+  if (btn) btn.disabled = true;
   /* Member IDs are sequential: first member 001, second 002, third 003… */
   qAll('members', function(ms){
+    /* Duplicate guard: same phone or same CNIC already registered — a
+       network retry must never create a second record. */
+    var ph = val('mPhone'), cn = val('mCnic').replace(/\D/g,'');
+    var dup = null; ms.forEach(function(x){ if (!dup && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
+    if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(dup.idNo||'')+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
     var max = 0; ms.forEach(function(x){ var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > max) max = n; });
     var nextId = String(max + 1).padStart(3,'0');
     readPhoto(document.getElementById('mPhoto'), function(photo){
     var id = uid('member');
-    var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:nextId, cnic:val('mCnic'), group:val('mGroup'), age:val('mAge'), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
+    var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:nextId, cnic:val('mCnic'), group:val('mGroup'), dob:val('mDob'), age:String(age), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
     var pub = memberPub(full);
     qAdd('members', full, function(ok){
-      if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
+      if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
       qAdd('membersPublic', pub, function(){
         qAdd('memberLookup', {id: nextId, memberId: id}, function(){});
         document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
         renderMemberCard(full); loadMembers();
-        ['mName','mFather','mDesig','mCnic','mAge','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
+        ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
         document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
+        if (btn) btn.disabled = false;
       });
     });
     });
   });
+}
+function resetMemberForm(){
+  ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value=''; });
+  var g = document.getElementById('mGroup'); if (g) g.value='';
+  var ph = document.getElementById('mPhoto'); if (ph) ph.value='';
+  var msg = document.getElementById('mMsg'); if (msg) msg.innerHTML='';
+  wizGo('member', 0);
 }
 function renderMemberCard(m){
   var url = SITE_BASE + '?verify=' + encodeURIComponent(m.id);
@@ -1244,6 +1267,7 @@ function renderMemberCard(m){
     '<div class="mcard"><div class="side-label">Back Side — Personal Details (Admin Only)</div><div class="mhead"><b style="font-size:16px;color:#7f1d1d">Member Details</b></div>' +
     '<div class="kv"><span>CNIC</span><b>'+esc(m.cnic||'—')+'</b></div>' +
     '<div class="kv"><span>Age</span><b>'+esc(m.age||'—')+'</b></div>' +
+    '<div class="kv"><span>Date of Birth</span><b>'+esc(m.dob?fmtD(m.dob):'—')+'</b></div>' +
     '<div class="kv"><span>Education</span><b>'+esc(m.education||'—')+'</b></div>' +
     '<div class="kv"><span>Phone</span><b>'+esc(m.phone||'—')+'</b></div>' +
     '<div class="kv"><span>Email</span><b>'+esc(m.email||'—')+'</b></div>' +
@@ -1257,38 +1281,76 @@ function renderMemberCard(m){
   openModal('memberModal');
   if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
 }
-/* Card as PDF (front page + back page) for printing/sharing. Falls back
-   to the print dialog when the PDF library is unavailable (offline). */
+/* Card as PDF (front page + back page) for printing/sharing. Built with a
+   small built-in PDF writer — no CDN library, so it works even when the
+   network is down (that is why the share failed during the network error). */
+function simplePDF(pages){
+  function escPdf(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[^\x20-\x7E]/g,'?'); }
+  var objs = [];
+  objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  var kids = [];
+  pages.forEach(function(pg, idx){
+    var pageObj = 4 + idx*2, contObj = 5 + idx*2;
+    kids.push(pageObj + ' 0 R');
+    var stream = 'BT /F1 16 Tf 72 770 Td (' + escPdf('Basti Dawa Blood Society') + ') Tj ET\n';
+    stream += 'BT /F1 12 Tf 72 748 Td (' + escPdf(pg.title||'') + ') Tj ET\n';
+    var y = 720;
+    (pg.lines||[]).forEach(function(ln){
+      var s = escPdf(ln), parts = [];
+      while (s.length > 90) { parts.push(s.slice(0,90)); s = s.slice(90); }
+      parts.push(s);
+      parts.forEach(function(part){
+        stream += 'BT /F1 11 Tf 72 ' + y + ' Td (' + part + ') Tj ET\n';
+        y -= 16;
+      });
+      y -= 4;
+    });
+    objs[pageObj] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ' + contObj + ' 0 R >>';
+    objs[contObj] = '<< /Length ' + stream.length + ' >>\nstream\n' + stream + 'endstream';
+  });
+  objs[2] = '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + pages.length + ' >>';
+  objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';
+  var pdf = '%PDF-1.4\n', offsets = [0], i, j;
+  for (i=1;i<objs.length;i++){ offsets[i] = pdf.length; pdf += i + ' 0 obj\n' + objs[i] + '\nendobj\n'; }
+  var xrefPos = pdf.length, n = objs.length;
+  pdf += 'xref\n0 ' + n + '\n0000000000 65535 f \n';
+  for (j=1;j<n;j++){ pdf += ('0000000000'+offsets[j]).slice(-10) + ' 00000 n \n'; }
+  pdf += 'trailer\n<< /Size ' + n + ' /Root 1 0 R >>\nstartxref\n' + xrefPos + '\n%%EOF';
+  return new Blob([pdf], {type:'application/pdf'});
+}
+function saveBlob(blob, fname){
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
 function shareMemberCardPDF(){
   var m = window._lastMemberCard; if (!m) return;
-  if (typeof window.jspdf === 'undefined') { window.print(); return; }
   try {
-    var doc = new window.jspdf.jsPDF();
-    var y, rows, i, lines, j;
-    function cardPage(title, rows){
-      var yy = 18;
-      doc.setFontSize(16); doc.text('Basti Dawa Blood Society', 105, yy, {align:'center'}); yy += 8;
-      doc.setFontSize(12); doc.text(title, 105, yy, {align:'center'}); yy += 10;
-      doc.setFontSize(11);
-      for (i=0;i<rows.length;i++){
-        lines = doc.splitTextToSize((rows[i][0]||'') + ': ' + (rows[i][1]||'—'), 170);
-        for (j=0;j<lines.length;j++){ doc.text(lines[j], 20, yy); yy += 7; }
-        yy += 1;
-      }
-      return yy;
-    }
-    y = cardPage('Membership Card — Front Side', [['Name', m.name], ['Father Name', m.father], ['Designation', m.designation], ['ID No.', m.idNo], ['Blood Group', m.group], ['Issue Date', fmtD(m.issue)], ['Expiry Date', fmtD(m.expiry)]]);
-    doc.text('Verify: ' + SITE_BASE + '?verify=' + encodeURIComponent(m.id), 20, y + 4);
-    doc.text('Verified Signature Authorized — Under Supervision, Basti Dawa Welfare Organization', 20, y + 12);
-    doc.addPage();
-    cardPage('Membership Card — Back Side (Personal Details, Admin Only)', [['CNIC', m.cnic], ['Age', m.age], ['Education', m.education], ['Phone', m.phone], ['Email', m.email], ['Address', m.address], ['Blood Group', m.group], ['Issue Date', fmtD(m.issue)], ['Expiry Date', fmtD(m.expiry)]]);
+    var front = ['Name: ' + (m.name||''), 'Father Name: ' + (m.father||''), 'Designation: ' + (m.designation||''), 'ID No.: ' + (m.idNo||''), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry), '', 'Verify: ' + SITE_BASE + '?verify=' + encodeURIComponent(m.id), 'Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization'];
+    var back = ['CNIC: ' + (m.cnic||''), 'Date of Birth: ' + (m.dob?fmtD(m.dob):'-'), 'Age: ' + (m.age||''), 'Education: ' + (m.education||''), 'Phone: ' + (m.phone||''), 'Email: ' + (m.email||''), 'Address: ' + (m.address||''), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry)];
     var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
-    var blob = doc.output('blob');
+    var blob = simplePDF([{title:'Membership Card - Front Side', lines:front}, {title:'Membership Card - Back Side (Personal Details, Admin Only)', lines:back}]);
     var file = new File([blob], fname, {type:'application/pdf'});
     if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
-      navigator.share({files:[file], title:'BDBS Member Card', text:'Membership Card — ' + (m.name||'')}).catch(function(){ doc.save(fname); });
-    } else { doc.save(fname); }
+      navigator.share({files:[file], title:'BDBS Member Card', text:'Membership Card - ' + (m.name||'')}).catch(function(){ saveBlob(blob, fname); });
+    } else { saveBlob(blob, fname); }
   } catch(e){ window.print(); }
+}
+/* Admin-only member removal: deletes the private record, the public
+   listing and the member lookup entry, then refreshes both views. */
+function removeMember(id){
+  if (!FB_OK || !auth || !isAdminUser(auth.currentUser)) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this member? The member record, public listing and card will be deleted. This cannot be undone.')) return;
+  qAll('members', function(ms){
+    var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
+    var idNo = m ? (m.idNo||'') : '';
+    var done = function(){ renderAdmin(); loadMembers(); loadHome(); };
+    qDel('members', id, function(){
+      qDel('membersPublic', id, function(){
+        if (idNo) qDel('memberLookup', idNo, function(){ done(); }); else done();
+      });
+    });
+  });
 }
 function viewMemberCard(id){
   qAll('members', function(ms){
@@ -1677,7 +1739,7 @@ function renderAdmin(){
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
           ms.forEach(function(m){
-            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button></td></tr>';
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
