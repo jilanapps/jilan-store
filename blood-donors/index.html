@@ -1528,6 +1528,31 @@ function removeMember(id){
     });
   });
 }
+/* Admin-only donor removal: deletes the private record, the public
+   listing and the donor lookup entry, then refreshes both views. */
+function removeDonor(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this donor? The donor record and public listing will be deleted. This cannot be undone.')) return;
+  qAll('donors', function(ds){
+    var d = null; ds.forEach(function(x){ if (x.id === id) d = x; });
+    var dNo = d ? (d.donorNo||'') : '';
+    var done = function(){ renderAdmin(); searchDonors(); loadHome(); };
+    qDel('donors', id, function(){
+      qDel('donorsPublic', id, function(){
+        if (dNo) qDel('donorLookup', lookupKey(dNo), function(){ done(); }); else done();
+      });
+    });
+  });
+}
+/* Admin-only request removal: deletes the request and its public card. */
+function removeRequest(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this blood request? It will be deleted from the public list too. This cannot be undone.')) return;
+  var done = function(){ renderAdmin(); loadRequests(); loadHome(); };
+  qDel('requests', id, function(){
+    qDel('requestsPublic', id, function(){ done(); });
+  });
+}
 function viewMemberCard(id){
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
@@ -1949,7 +1974,7 @@ function renderAdmin(){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
-            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button></td></tr>';
+            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button> <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
@@ -1961,7 +1986,7 @@ function renderAdmin(){
           rs.forEach(function(r){
             var cur = r.status||'Received';
             var nxt = nextReqStatus(cur);
-            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b></td><td>'+(nxt?'<button class="btn" onclick="advanceReqStatus(\''+esc(r.id)+'\',\''+esc(cur)+'\')">→ '+esc(nxt)+'</button>':'<span class="ok">✓ Done</span>')+'</td></tr>';
+            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b></td><td>'+(nxt?'<button class="btn" onclick="advanceReqStatus(\''+esc(r.id)+'\',\''+esc(cur)+'\')">→ '+esc(nxt)+'</button>':'<span class="ok">✓ Done</span>')+' <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           /* Request → donor contact: a request comes to the admin first, then
