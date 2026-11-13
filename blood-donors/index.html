@@ -28,10 +28,10 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
    Tailwind CDN cannot load (APK offline bundled copy). */
 :root{
   --red:#DC2626; --red2:#B91C1C; --red3:#991B1B; --burgundy:#7F1D1D;
-  --bg:#F8FAFC; --card:#FFFFFF; --ink:#1E293B; --ink2:#334155; --mut:#64748B;
+  --bg:#F8FAFC; --card:#FFFFFF; --ink:#0F172A; --ink2:#334155; --mut:#64748B;
   --line:#E2E8F0; --line2:#F1F5F9; --gold:#D97706; --gold-soft:#FEF3C7;
   --green:#10B981; --green-d:#047857; --green-soft:#ECFDF5;
-  --radius:16px; --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+  --radius:12px; --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
   --shadow-lg:0 2px 6px rgba(15,23,42,.08),0 16px 40px rgba(15,23,42,.12);
 }
 *{box-sizing:border-box}
@@ -199,6 +199,34 @@ th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:to
 th{background:#FEF2F2;color:var(--burgundy);font-weight:700}
 .setup{background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
+/* ---------- professional upgrade: header, pills, donor grid ---------- */
+.hwrap{flex-wrap:wrap}
+.hside{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hside .btn{margin:0;padding:10px 14px;font-size:14px}
+.hdr-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
+.hdr-badge b{font-size:15px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.gpill{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
+.gpill.on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.3)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.toggle input{width:auto;margin:0;accent-color:var(--red)}
+.row .toggle{flex:0 0 auto;align-self:center}
+.donor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:12px}
+.donor-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.status-pill{display:inline-block;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.status-pill.ok{background:var(--green-soft);color:var(--green-d)}
+.status-pill.cool{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.dc-name{font-size:16px;font-weight:800}
+.dc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
+.empty{text-align:center;padding:28px 12px}
+.rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
+.rpill.st-received{background:#E2E8F0;color:#334155}
+.rpill.st-contacting{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.rpill.st-found{background:var(--green-soft);color:var(--green-d)}
+.rpill.st-done{background:var(--green-d);color:#fff}
+
 @media(max-width:560px){.row{flex-direction:column;display:block}.person img{width:60px;height:60px}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:22px}header h1{font-size:18px}}
 @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.bnav,header{display:none!important}.print-area .side-label,.print-area .verify-url{display:none!important}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -210,6 +238,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="hwrap">
 <span class="mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg1)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span>
 <div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Donate Blood &bull; Save Lives</p></div>
+<div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light" onclick="show('donor')">+ Register as Donor</button></div>
 </div>
 </header>
 <div class="wrap">
@@ -218,12 +247,13 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec on" id="s-home">
 <div class="hero">
 <div class="hero-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg2)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></div>
-<h1>Basti Dawa Blood Society</h1>
-<p class="hero-sub">Donate Blood &bull; Save Lives</p>
+<h1>Find Verified Blood Donors Near You in Seconds</h1>
+<p class="hero-sub">Basti Dawa Blood Society &bull; Donate Blood &bull; Save Lives</p>
 <p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts.</p>
 <div class="hero-actions">
 <button class="btn light" onclick="show('find')">🩸 Find Donor</button>
 <button class="btn oline" onclick="show('request')">+ Request Blood</button>
+<button class="btn oline" onclick="show('donor')">Register as Donor</button>
 </div>
 <div class="hero-stats">
 <div class="hstat"><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
@@ -237,7 +267,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="card about">
 <img src="logo.png" class="org-emblem" alt="BDBS official logo">
 <h2>Welcome to Basti Dawa Blood Society</h2>
-<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor and patient personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login.</p>
+<p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.</p>
 <p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
 </div>
 <div class="card">
@@ -587,12 +617,23 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="card">
 <h2>Find a Blood Donor</h2>
 <p class="mut">Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.</p>
-<div class="row">
-<div class="fld static"><select id="fGroup"><option value="">All groups</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="fGroup">Blood Group</label></div>
-<div class="fld"><input id="fCity" placeholder=" "><label for="fCity">City / Area</label></div>
+<div class="pills" id="groupPills">
+<button class="gpill on" data-g="" onclick="setGroupFilter('',this)">All</button>
+<button class="gpill" data-g="A+" onclick="setGroupFilter('A+',this)">A+</button>
+<button class="gpill" data-g="A-" onclick="setGroupFilter('A-',this)">A-</button>
+<button class="gpill" data-g="B+" onclick="setGroupFilter('B+',this)">B+</button>
+<button class="gpill" data-g="B-" onclick="setGroupFilter('B-',this)">B-</button>
+<button class="gpill" data-g="O+" onclick="setGroupFilter('O+',this)">O+</button>
+<button class="gpill" data-g="O-" onclick="setGroupFilter('O-',this)">O-</button>
+<button class="gpill" data-g="AB+" onclick="setGroupFilter('AB+',this)">AB+</button>
+<button class="gpill" data-g="AB-" onclick="setGroupFilter('AB-',this)">AB-</button>
 </div>
-<button class="btn" onclick="searchDonors()">Search Donors</button>
+<div class="row">
+<div class="fld"><input id="fCity" placeholder=" " oninput="searchDonors()"><label for="fCity">City / Area</label></div>
+<label class="toggle"><input type="checkbox" id="fAvail" onchange="searchDonors()"> Available Only</label>
+</div>
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
+<p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
 <div id="findResults" style="margin-top:10px"></div>
 </div>
 </section>
@@ -601,7 +642,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec" id="s-request">
 <div class="card" id="wz-request" data-step="0">
 <h2>Blood Donation Request</h2>
-<p class="mut">Your request is sent to the BDBS admin. The public list shows only the patient's first name, blood group needed, hospital and city — never phone or CNIC.</p>
+<p class="mut">Your request is sent to the BDBS admin. The public list shows the patient's first name, blood group needed, hospital, city, request date, phone number and current progress — so donors can contact you directly. CNIC is never shown.</p>
 <div class="wprog"><div class="wprog-fill"></div></div>
 <div class="wprog-label">Step 1 of 3</div>
 <div class="wstep on">
@@ -779,25 +820,26 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="card" id="loginCard">
 <h2>Login</h2>
 <div id="setupWarn"></div>
-<label>Email</label><input id="lEmail" type="email" placeholder="Your email">
+<label>Email ya Phone Number</label><input id="lEmail" type="text" placeholder="Your email or phone number">
 <label>Password</label><input id="lPass" type="password" placeholder="Password">
 <button class="btn" onclick="doLogin()">Login</button>
 <button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
 <div id="lMsg"></div>
 <p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
-<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up. Forgot Password sends a reset email.</p>
+<p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up — email ya phone number se. Forgot Password sends a reset email (email accounts only; phone accounts contact the admin).</p>
 </div>
 <div class="card" id="signupCard" style="display:none">
 <h2>Create Account</h2>
 <div id="setupWarn2"></div>
 <label>Full Name</label><input id="suName" placeholder="Your full name">
-<label>Email</label><input id="suEmail" type="email" placeholder="Your email">
+<label>Email</label><input id="suEmail" type="email" placeholder="Your email (optional if phone given)">
+<label>Phone Number</label><input id="suPhone" type="tel" placeholder="e.g. 0300-1234567 (optional if email given)">
 <label>Password</label><input id="suPass" type="password" placeholder="At least 6 characters">
 <label>Confirm Password</label><input id="suPass2" type="password" placeholder="Repeat password">
 <button class="btn" onclick="doSignup()">Create Account</button>
 <div id="suMsg"></div>
 <p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
-<p class="mut small">Your account is a donor account. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
+<p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
 </div>
 <div class="card" id="donorCard" style="display:none">
 <h2>My Profile <span id="donorEmail" class="mut"></span></h2>
@@ -819,6 +861,19 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div id="pUpdateMsg"></div>
 <h3>My Certificates</h3>
 <div id="myCerts" class="mut">Loading…</div>
+<h3>Delete My Account</h3>
+<p class="mut">This deletes your login account and your linked donor record. This cannot be undone.</p>
+<button class="btn ghost" onclick="deleteMyAccount()">Delete My Account</button>
+<div id="delMsg"></div>
+</div>
+<div id="memberBox" style="margin-top:14px;border-top:1px solid #eee;padding-top:10px">
+<h3>Member Login</h3>
+<p class="mut">Society members: enter your Member ID and the phone number on your card to link your membership card here.</p>
+<label>Member ID</label><input id="mLinkId" placeholder="e.g. 001">
+<label>Phone Number (on your card)</label><input id="mLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
+<button class="btn" onclick="linkMemberRecord()">Link My Member Card</button>
+<div id="mLinkMsg"></div>
+<div id="myMemberCard" style="display:none"></div>
 </div>
 </div>
 <div class="card" id="adminCard" style="display:none">
@@ -845,6 +900,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="modal" id="moreSheet" onclick="if(event.target===this)closeModal('moreSheet')">
 <div class="modal-box">
 <h3>More</h3>
+<button class="sheet-btn" onclick="show('donor')">🩸 &nbsp;Register as Donor</button>
 <button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
@@ -855,7 +911,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <footer>
 Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
 &copy; 2026 Basti Dawa Blood Society. All rights reserved.<br>
-Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-Alaikum%20Dr%20Asif%2C%20I%20have%20a%20question%20about%20the%20Basti%20Dawa%20Blood%20Society%20app.">WhatsApp: 0300-7379385</a> &bull; <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a>
+Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-Alaikum%20Dr%20Asif%2C%20I%20have%20a%20question%20about%20the%20Basti%20Dawa%20Blood%20Society%20app.">WhatsApp: 0300-7379385</a> &bull; <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a><br>
+<a href="privacy-policy.html">Privacy Policy</a> &bull; <a href="delete-account.html">Delete Account</a>
 </footer>
 
 <script>
@@ -901,15 +958,6 @@ function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||
    admin-only in the private 'members' collection. */
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
 function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
-
-function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
-/* Public member record: ONLY name, phone number and photo are public.
-   Expiry stays in the record ONLY so the QR verify page can check validity —
-   it is never displayed anywhere public. Everything else (CNIC, age,
-   education, email, address, father, designation, ID, blood group) is
-   admin-only in the private 'members' collection. */
-function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
-function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
    Every successful online read/write is mirrored into the phone's local
@@ -1001,6 +1049,7 @@ function loadHome(){
           var src = (full && full.length) ? full : ds;
           src.forEach(function(d){ units += parseInt(d.units||0,10)||0; });
           setStat('statDonors', ds.length);
+          setStat('hdrDonors', ds.length);
           setStat('statRequests', rs.length);
           setStat('statLives', units*3);
           setStat('statActivities', acts.length);
@@ -1013,19 +1062,68 @@ function loadHome(){
     });
   });
 }
+/* ---------- smart donor search: pills + instant city filter + availability ----------
+   Public cards show name, blood group, city and last donation date only.
+   Call Now / WhatsApp buttons are ADMIN ONLY — they use the phone from the
+   private 'donors' collection, never from the public record. */
+var _fGroup = '';
+function setGroupFilter(g, btn){
+  _fGroup = g;
+  document.querySelectorAll('#groupPills .gpill').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-g') === g); });
+  searchDonors();
+}
+function resetFilters(){
+  _fGroup = '';
+  var c = document.getElementById('fCity'); if (c) c.value = '';
+  var a = document.getElementById('fAvail'); if (a) a.checked = false;
+  document.querySelectorAll('#groupPills .gpill').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-g') === ''); });
+  searchDonors();
+}
+function donorStatus(last){
+  if (!last) return {ok:true, label:'Available', daysLeft:0};
+  var d = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+  if (isNaN(d) || d >= 90) return {ok:true, label:'Available', daysLeft:0};
+  return {ok:false, label:'Cooldown', daysLeft: 90 - d};
+}
+function waNum(p){ var n = String(p||'').replace(/\D/g,''); if (n.charAt(0)==='0') n = '92' + n.slice(1); return n; }
 function searchDonors(){
-  var g = val('fGroup'), c = val('fCity').toLowerCase();
-  qAll('donorsPublic', function(ds){
+  var g = _fGroup, c = val('fCity').toLowerCase();
+  var availOnly = document.getElementById('fAvail') && document.getElementById('fAvail').checked;
+  var admin = isAdmin();
+  var render = function(ds, phoneById){
     var out = ds.filter(function(d){
       if (g && d.group !== g) return false;
       if (c && (d.city||'').toLowerCase().indexOf(c) === -1) return false;
+      if (availOnly && !donorStatus(d.lastDonation).ok) return false;
       return true;
     });
     var box = document.getElementById('findResults');
-    if (!out.length) { box.innerHTML = '<p class="mut">No donor found for this search. Try another blood group or city — or submit a blood request.</p>'; return; }
-    box.innerHTML = '<p class="mut">'+out.length+' donor(s) found. Contact via a blood request — the admin will connect you.</p>' + out.map(function(d){
-      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(d.group)+'</span><div><b>'+esc(d.name)+'</b>'+(d.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(d.city||'')+'</span></div></div><div class="mut small dmeta">Last donation: '+esc(fmtD(d.lastDonation))+'</div></div>';
-    }).join('');
+    if (!out.length) {
+      box.innerHTML = '<div class="empty"><b>No donors found</b><br><span class="mut">Try another blood group or city — or submit a blood request.</span><br><button class="btn" style="margin-top:12px" onclick="resetFilters()">Reset Filters</button></div>';
+      return;
+    }
+    var head = '<p class="mut">' + out.length + ' donor(s) found.' + (admin ? ' <b>Admin view — contact buttons are visible to you only.</b>' : ' Contact via a blood request — the admin will connect you.') + '</p>';
+    box.innerHTML = head + '<div class="donor-grid">' + out.map(function(d){
+      var st = donorStatus(d.lastDonation);
+      var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + (st.ok ? 'ok' : 'cool') + '">● ' + st.label + '</span></div>' +
+        '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
+        '<div class="mut small">📍 ' + esc(d.city || '') + '</div>' +
+        '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>';
+      if (admin && phoneById[d.id]) {
+        var msg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. ' + (d.group || '') + ' blood ki zaroorat hai. Kya aap blood donate kar sakte hain? Shukriya.';
+        var num = waNum(phoneById[d.id]);
+        card += '<div class="dc-actions"><a class="btn block" href="tel:' + esc(phoneById[d.id]) + '">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/' + num + '?text=' + encodeURIComponent(msg) + '">WhatsApp</a></div>';
+      }
+      return card + '</div>';
+    }).join('') + '</div>';
+  };
+  qAll('donorsPublic', function(ds){
+    if (admin) {
+      qAll('donors', function(full){
+        var m = {}; full.forEach(function(d){ m[d.id] = d.phone || ''; });
+        render(ds, m);
+      });
+    } else render(ds, {});
   });
 }
 function loadRequests(){
@@ -1033,8 +1131,26 @@ function loadRequests(){
     var box = document.getElementById('requestList');
     if (!rs.length) { box.innerHTML = '<span class="mut">No open requests.</span>'; return; }
     box.innerHTML = rs.map(function(r){
-      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span></div></div></div>';
+      var st = (r.status||'Received');
+      var cls = st==='Completed' ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+(r.phone?'<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span>':'')+'</div></div></div>';
     }).join('');
+  });
+}
+/* ---------- request progress (admin advances the stage) ----------
+   Stages: Received → Contacting Donors → Donor Found → Completed.
+   The stage shows publicly on the request card, so the requester and
+   donors can see where the request stands. Only the admin can change it. */
+var REQ_STAGES = ['Received','Contacting Donors','Donor Found','Completed'];
+function nextReqStatus(cur){
+  var i = REQ_STAGES.indexOf(cur||'Received');
+  return (i >= 0 && i < REQ_STAGES.length - 1) ? REQ_STAGES[i+1] : null;
+}
+function advanceReqStatus(id, cur){
+  var nxt = nextReqStatus(cur);
+  if (!nxt) return;
+  qUpdate('requests', id, {status:nxt}, function(){
+    qUpdate('requestsPublic', id, {status:nxt}, function(){ renderAdmin(); loadRequests(); });
   });
 }
 function loadMembers(){
@@ -1075,8 +1191,8 @@ function submitRequest(){
   var miss = need(['rName','rFather','rAge','rGroup','rHospital','rDisease','rPhone','rAddress']);
   if (miss) { document.getElementById('rMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
   var id = uid('req');
-  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), createdAt:Date.now()};
-  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), createdAt:Date.now()};
+  var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', createdAt:Date.now()};
+  var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
   qAdd('requests', full, function(ok){
     if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; return; }
     qAdd('requestsPublic', pub, function(){
@@ -1536,45 +1652,76 @@ function renderLogin(){
     routeAuth(auth.currentUser);
   }
 }
+/* ---------- phone-or-email login ----------
+   Donors/recipients log in with email OR phone number + password.
+   Phone accounts use a synthetic email in Firebase Auth
+   (<digits>@phone.bdbs.local); the real phone is stored in users doc. */
+function normPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 11 && d.charAt(0) === '0') d = '92' + d.slice(1);
+  else if (d.length === 10 && d.charAt(0) === '3') d = '92' + d;
+  return d;
+}
+function phoneToEmail(p){ return normPhone(p) + '@phone.bdbs.local'; }
+function fmtPhone(p){
+  var d = String(p||'').replace(/\D/g,'');
+  if (d.length === 12 && d.indexOf('92') === 0) return '0' + d.slice(2,5) + '-' + d.slice(5);
+  return p || '';
+}
 function doLogin(){
   if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Login needs internet the first time.</span>'; return; }
-  var em = val('lEmail'), pw = val('lPass');
-  if (!em || !pw) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter email and password.</span>'; return; }
+  var inp = val('lEmail'), pw = val('lPass');
+  var msg = document.getElementById('lMsg');
+  if (!inp || !pw) { msg.innerHTML = '<span class="err">Enter email or phone number, and password.</span>'; return; }
+  var em = inp;
+  if (inp.indexOf('@') === -1) {
+    if (normPhone(inp).length < 10) { msg.innerHTML = '<span class="err">Enter a valid email or phone number.</span>'; return; }
+    em = phoneToEmail(inp);
+  }
   auth.signInWithEmailAndPassword(em, pw).then(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="ok">Logged in.</span>';
+    msg.innerHTML = '<span class="ok">Logged in.</span>';
   }).catch(function(e){
-    document.getElementById('lMsg').innerHTML = '<span class="err">Login failed — check email and password.</span>';
+    msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
   });
 }
 function doLogout(){ localStorage.removeItem('bdbs_admin'); if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Password reset needs internet.</span>'; return; }
-  var em = val('lEmail');
-  if (!em) { document.getElementById('lMsg').innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
-  auth.sendPasswordResetEmail(em).then(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="ok">Reset email sent to '+esc(em)+'.</span>';
+  var inp = val('lEmail');
+  var msg = document.getElementById('lMsg');
+  if (!inp) { msg.innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
+  if (inp.indexOf('@') === -1) { msg.innerHTML = '<span class="err">Phone-number accounts cannot reset by email — contact the admin to reset your password.</span>'; return; }
+  auth.sendPasswordResetEmail(inp).then(function(){
+    msg.innerHTML = '<span class="ok">Reset email sent to '+esc(inp)+'.</span>';
   }).catch(function(){
-    document.getElementById('lMsg').innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
+    msg.innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
   });
 }
 function doSignup(){
   if (!FB_OK) return;
-  var name = val('suName'), em = val('suEmail'), pw = val('suPass'), pw2 = val('suPass2');
+  var name = val('suName'), em = val('suEmail'), ph = val('suPhone'), pw = val('suPass'), pw2 = val('suPass2');
   var msg = document.getElementById('suMsg');
   if (!name) { msg.innerHTML = '<span class="err">Enter your full name.</span>'; return; }
-  if (!em || em.indexOf('@') === -1 || em.indexOf('.') === -1) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  var hasEmail = em && em.indexOf('@') !== -1 && em.indexOf('.') !== -1;
+  var phone = normPhone(ph);
+  if (!hasEmail && !phone) { msg.innerHTML = '<span class="err">Enter an email address or a phone number.</span>'; return; }
+  if (em && !hasEmail) { msg.innerHTML = '<span class="err">Enter a valid email address.</span>'; return; }
+  if (ph && phone.length < 10) { msg.innerHTML = '<span class="err">Enter a valid phone number.</span>'; return; }
   if (!pw || pw.length < 6) { msg.innerHTML = '<span class="err">Password must be at least 6 characters.</span>'; return; }
   if (pw !== pw2) { msg.innerHTML = '<span class="err">Passwords do not match.</span>'; return; }
+  var authEmail = hasEmail ? em : phoneToEmail(phone);
   msg.innerHTML = '<span class="mut">Creating your account…</span>';
-  auth.createUserWithEmailAndPassword(em, pw).then(function(cred){
+  auth.createUserWithEmailAndPassword(authEmail, pw).then(function(cred){
     var u = cred.user;
-    return db.collection('users').doc(u.uid).set({name:name, email:em, role:'donor', createdAt:Date.now()}).then(function(){
+    var doc = {name:name, email:authEmail, role:'donor', createdAt:Date.now()};
+    if (phone) doc.phone = phone;
+    return db.collection('users').doc(u.uid).set(doc).then(function(){
       msg.innerHTML = '<span class="ok">Account created. Welcome, '+esc(name)+'!</span>';
       routeAuth(u);
     });
   }).catch(function(e){
     var t = 'Could not create account.';
-    if (e && e.code === 'auth/email-already-in-use') t = 'This email is already registered — try Login instead.';
+    if (e && e.code === 'auth/email-already-in-use') t = 'This email or phone number is already registered — try Login instead.';
     else if (e && e.code === 'auth/invalid-email') t = 'Enter a valid email address.';
     else if (e && e.code === 'auth/weak-password') t = 'Password must be at least 6 characters.';
     msg.innerHTML = '<span class="err">'+t+'</span>';
@@ -1591,6 +1738,11 @@ function renderDonor(u){
     document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
     if (!linkedId) document.getElementById('pLinkMsg').innerHTML = '';
     if (linkedId) loadMyRecord(u, linkedId);
+    var linkedMember = data.linkedMemberId || '';
+    var de = document.getElementById('donorEmail');
+    if (de && data.phone) de.textContent = '(' + fmtPhone(data.phone) + ')';
+    if (linkedMember) loadMyMemberCard(linkedMember);
+    else { var mb = document.getElementById('myMemberCard'); if (mb) { mb.style.display='none'; mb.innerHTML=''; } }
   }).catch(function(){
     document.getElementById('linkBox').style.display = 'block';
     document.getElementById('profileBox').style.display = 'none';
@@ -1637,6 +1789,46 @@ function linkDonorRecord(){
     msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
   });
 }
+/* ---------- member login (separate from donor login) ----------
+   A member signs in with the simple login first, then links their
+   Member ID here. The phone number on their card is checked as well.
+   After linking, they can open their own full member card. */
+function linkMemberRecord(){
+  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('mLinkMsg').innerHTML = '<span class="err">Linking needs internet.</span>'; return; }
+  var idNo = String(val('mLinkId')||'').replace(/\D/g,'');
+  var ph = normPhone(val('mLinkPhone'));
+  var msg = document.getElementById('mLinkMsg');
+  if (!idNo) { msg.innerHTML = '<span class="err">Enter your Member ID (e.g. 001).</span>'; return; }
+  idNo = idNo.padStart(3,'0');
+  if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your member card.</span>'; return; }
+  msg.innerHTML = '<span class="mut">Checking…</span>';
+  var u = auth.currentUser;
+  db.collection('memberLookup').doc(idNo).get().then(function(d){
+    if (!d.exists) { msg.innerHTML = '<span class="err">No member found with this ID. Check the ID and try again.</span>'; return; }
+    var memberId = d.data().memberId;
+    db.collection('membersPublic').doc(memberId).get().then(function(p){
+      var cardPhone = (p.exists && p.data().phone) ? normPhone(p.data().phone) : '';
+      if (!cardPhone || cardPhone !== ph) { msg.innerHTML = '<span class="err">Phone number does not match this Member ID.</span>'; return; }
+      db.collection('users').doc(u.uid).set({linkedMemberId: memberId, linkedMemberNo: idNo}, {merge:true}).then(function(){
+        msg.innerHTML = '<span class="ok">Member card linked.</span>';
+        loadMyMemberCard(memberId);
+      }).catch(function(){ msg.innerHTML = '<span class="err">Could not link. Please try again.</span>'; });
+    }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+  }).catch(function(){ msg.innerHTML = '<span class="err">Could not check. Please try again.</span>'; });
+}
+function loadMyMemberCard(memberId){
+  var box = document.getElementById('myMemberCard');
+  if (!box) return;
+  if (!memberId) { box.style.display='none'; box.innerHTML=''; return; }
+  db.collection('members').doc(memberId).get().then(function(d){
+    if (!d.exists) { box.style.display='none'; return; }
+    var m = d.data(); m.id = d.id;
+    window._myMember = m;
+    box.style.display='block';
+    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button>';
+  }).catch(function(){ box.style.display='none'; });
+}
+function openMyMemberCard(){ if (window._myMember) renderMemberCard(window._myMember); }
 function updateMyDonation(){
   if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('pUpdateMsg').innerHTML = '<span class="err">Update needs internet.</span>'; return; }
   var msg = document.getElementById('pUpdateMsg');
@@ -1658,6 +1850,45 @@ function updateMyDonation(){
     });
   });
 }
+/* ---------- account deletion (Play Store requirement) ----------
+   Deletes the login account and the linked donor record (private +
+   public listing + certificates). Asks for a fresh login first if
+   Firebase requires recent authentication. */
+function deleteMyCerts(donorId, cb){
+  if (!FB_OK) { var cs = lsGet(LS.certs).filter(function(x){return x.donorId!==donorId;}); lsSet(LS.certs, cs); cb(); return; }
+  db.collection('certificates').where('donorId','==',donorId).get().then(function(s){
+    var batch = db.batch(); s.docs.forEach(function(d){ batch.delete(d.ref); });
+    return batch.commit();
+  }).then(function(){ cb(); }).catch(function(){ cb(); });
+}
+function deleteMyAccount(){
+  if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('delMsg').innerHTML = '<span class="err">Account delete needs internet.</span>'; return; }
+  var msg = document.getElementById('delMsg');
+  var u = auth.currentUser;
+  if (!confirm('Delete your account? Your login and linked donor record will be removed. This cannot be undone.')) return;
+  msg.innerHTML = '<span class="mut">Deleting…</span>';
+  db.collection('users').doc(u.uid).get().then(function(d){
+    var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
+    var finish = function(){
+      db.collection('users').doc(u.uid).delete().catch(function(){});
+      u.delete().then(function(){
+        msg.innerHTML = '<span class="ok">Your account has been deleted.</span>';
+        setTimeout(function(){ doLogout(); }, 1200);
+      }).catch(function(){
+        msg.innerHTML = '<span class="err">Please log out and log in again, then try deleting once more.</span>';
+      });
+    };
+    if (linkedId) {
+      deleteMyCerts(linkedId, function(){
+        qDel('donors', linkedId, function(){
+          qDel('donorsPublic', linkedId, function(){ finish(); });
+        });
+      });
+    } else finish();
+  }).catch(function(){
+    msg.innerHTML = '<span class="err">Could not delete. Please try again.</span>';
+  });
+}
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -1675,9 +1906,11 @@ function renderAdmin(){
             h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
-          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th></tr>';
+          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
           rs.forEach(function(r){
-            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td></tr>';
+            var cur = r.status||'Received';
+            var nxt = nextReqStatus(cur);
+            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b></td><td>'+(nxt?'<button class="btn" onclick="advanceReqStatus(\''+esc(r.id)+'\',\''+esc(cur)+'\')">→ '+esc(nxt)+'</button>':'<span class="ok">✓ Done</span>')+'</td></tr>';
           });
           h += '</table></div>';
           /* Request → donor contact: a request comes to the admin first, then
