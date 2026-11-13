@@ -241,6 +241,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light" onclick="show('donor')">+ Register as Donor</button></div>
 </div>
 </header>
+<div id="updateBanner" style="display:none;background:#FEF2F2;border-bottom:2px solid #DC2626;padding:10px 14px;text-align:center"><b>🆕 Nayi version <span class="upd-ver"></span> aa gayi hai.</b> <button class="btn upd-btn" style="margin-left:8px">Update karein</button> <button class="btn ghost" onclick="document.getElementById('updateBanner').style.display='none'">Baad me</button></div>
 <div class="wrap">
 
 <!-- ================= HOME ================= -->
@@ -915,6 +916,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
+<button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update</button>
 <button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
 <button class="sheet-btn" onclick="closeModal('moreSheet')">Close</button>
 </div>
@@ -939,6 +941,35 @@ try {
     db = firebase.firestore(); auth = firebase.auth(); FB_OK = true;
   }
 } catch (e) { FB_OK = false; }
+
+/* ---------- in-app update (sirf app me — website par nahi) ----------
+   App bundled file:// se chalti hai; website https:// se. Sirf app me
+   version.json check karo: nayi version ho to banner dikhao, Update
+   dabane se APK download hoti hai (Android DownloadManager) aur
+   notification se install hoti hai. APP_VERSION har APK release par
+   barhao — yehi version.json se compare hota hai. */
+var APP_VERSION = 'v9';
+function checkAppUpdate(force){
+  if (location.protocol !== 'file:') { if (force) alert('Update check sirf app me chalta hai.'); return; }
+  if (!navigator.onLine) { if (force) alert('Internet nahi hai — update check nahi ho saka.'); return; }
+  fetch('https://jilanapps.github.io/jilan-store/blood-donors/version.json?ts='+Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+    .then(function(v){
+      var cur = parseInt(String(APP_VERSION||'v0').replace(/\D/g,''),10)||0;
+      var lat = parseInt(String((v&&v.version)||'v0').replace(/\D/g,''),10)||0;
+      if (lat > cur) showUpdateBanner(v);
+      else if (force) alert('App latest version par hai ('+APP_VERSION+').');
+    })
+    .catch(function(){ if (force) alert('Update check nahi ho saka — dobara koshish karein.'); });
+}
+function showUpdateBanner(v){
+  var b = document.getElementById('updateBanner'); if (!b) return;
+  b.style.display = 'block';
+  var s = b.querySelector('.upd-ver'); if (s) s.textContent = v.version || '';
+  var btn = b.querySelector('.upd-btn');
+  if (btn) btn.onclick = function(){ window.location.href = 'https://jilanapps.github.io/jilan-store/blood-donors/' + (v.apk || 'blood-donors-v9.apk'); };
+}
+setTimeout(checkAppUpdate, 2000);
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
