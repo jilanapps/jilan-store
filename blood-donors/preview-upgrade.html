@@ -1162,7 +1162,7 @@ function loadMembers(){
       return '<div class="idcard">' +
         '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
         '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span>' +
-        (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
+        (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
         '</div></div></div>';
     }).join('');
   });
@@ -1222,6 +1222,29 @@ function submitDonor(){
     });
   });
 }
+var _editMemberId = null;
+function exitMemberEdit(){
+  _editMemberId = null;
+  var b = document.getElementById('mSubmitBtn'); if (b) b.textContent = 'Add Member & Generate Card';
+}
+function editMember(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  qAll('members', function(ms){
+    var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
+    if (!m) { alert('Member not found.'); return; }
+    _editMemberId = id;
+    var set = function(i, v){ var e = document.getElementById(i); if (e) e.value = v || ''; };
+    set('mName', m.name); set('mFather', m.father); set('mDesig', m.designation);
+    set('mCnic', m.cnic); set('mDob', m.dob); set('mGroup', m.group);
+    set('mEdu', m.education); set('mPhone', m.phone); set('mEmail', m.email);
+    set('mAddress', m.address); set('mIssue', m.issue); set('mExpiry', m.expiry);
+    var ph = document.getElementById('mPhoto'); if (ph) ph.value = '';
+    var b = document.getElementById('mSubmitBtn'); if (b) b.textContent = 'Save Changes';
+    document.getElementById('mMsg').innerHTML = '<span class="mut">Editing ID No. ' + esc(m.idNo || '') + ' — ' + esc(m.name || '') + '. Photo change karni ho to nayi photo chunein, warna purani photo hi rahe gi. Save Changes dabayein.</span>';
+    wizGo('member', 0);
+    var nm = document.getElementById('mName'); if (nm) nm.scrollIntoView();
+  });
+}
 function submitMember(){
   var btn = document.getElementById('mSubmitBtn');
   if (btn && btn.disabled) return;
@@ -1235,8 +1258,28 @@ function submitMember(){
     /* Duplicate guard: same phone or same CNIC already registered — a
        network retry must never create a second record. */
     var ph = val('mPhone'), cn = val('mCnic').replace(/\D/g,'');
-    var dup = null; ms.forEach(function(x){ if (!dup && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
+    var editId = _editMemberId;
+    var dup = null; ms.forEach(function(x){ if (!dup && x.id !== editId && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
     if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(dup.idNo||'')+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
+    if (editId) {
+      var old = null; ms.forEach(function(x){ if (x.id === editId) old = x; });
+      if (!old) { document.getElementById('mMsg').innerHTML = '<span class="err">Member not found.</span>'; if (btn) btn.disabled = false; exitMemberEdit(); return; }
+      readPhoto(document.getElementById('mPhoto'), function(photo){
+        var fields = {name:val('mName'), father:val('mFather'), designation:val('mDesig'), cnic:val('mCnic'), group:val('mGroup'), dob:val('mDob'), age:String(age), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry')};
+        if (photo) fields.photo = photo; else fields.photo = old.photo || '';
+        var updated = {}; for (var k in old) updated[k] = old[k]; for (var k2 in fields) updated[k2] = fields[k2];
+        qUpdate('members', editId, fields, function(){
+          qUpdate('membersPublic', editId, memberPub(updated), function(){
+            document.getElementById('mMsg').innerHTML = '<span class="ok">Member updated. ID No. '+esc(updated.idNo||'')+' — card is ready below.</span>';
+            renderMemberCard(updated); loadMembers(); exitMemberEdit();
+            ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
+            document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
+            if (btn) btn.disabled = false;
+          });
+        });
+      });
+      return;
+    }
     var used = {}; ms.forEach(function(x){ var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > 0) used[n] = true; });
     var nextN = 1; while (used[nextN]) nextN++;
     var nextId = String(nextN).padStart(3,'0');
@@ -1259,6 +1302,7 @@ function submitMember(){
   });
 }
 function resetMemberForm(){
+  exitMemberEdit();
   ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value=''; });
   var g = document.getElementById('mGroup'); if (g) g.value='';
   var ph = document.getElementById('mPhoto'); if (ph) ph.value='';
@@ -1859,7 +1903,7 @@ function renderAdmin(){
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
           ms.forEach(function(m){
-            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
