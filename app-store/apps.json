@@ -2673,6 +2673,20 @@
    "web": "https://jilanapps.github.io/jilan-store/j-fire/"
   },
   {
+   "apk": "https://jilanapps.github.io/jilan-store/multan-drive/multan-drive.apk",
+   "category": "games",
+   "color": "#dc2626",
+   "desc": "GTA-style open-world driving in Multan — walk on foot, drive your red car, missions, coins, police chases, offline",
+   "icon": "icons/multandrive.png",
+   "id": "multandrive",
+   "name": "Multan Drive",
+   "package": "com.jilanapps.multandrive",
+   "size": 189014,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/multan-drive/"
+  },
+  {
    "apk": "https://jilanapps.github.io/jilan-store/jilanplay/jilanplay.apk",
    "category": "games",
    "color": "#9333ea",

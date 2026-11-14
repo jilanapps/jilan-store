@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Multan Drive — GTA-style Open World Driving</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,Helvetica,sans-serif;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none}
+#game{position:fixed;inset:0}
+#game canvas{display:block;width:100%;height:100%}
+.hidden{display:none!important}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,15,25,.88);z-index:30;padding:20px;text-align:center}
+.logo{font-size:46px;font-weight:900;letter-spacing:2px;color:#ef4444;text-shadow:0 3px 0 #7f1d1d,0 6px 18px rgba(0,0,0,.7);margin:0}
+.logo span{color:#fbbf24}
+.tag{font-size:14px;letter-spacing:3px;color:#a7f3d0;margin:6px 0 22px}
+.btn{display:block;width:270px;max-width:82vw;margin:8px auto;padding:15px 10px;font-size:19px;font-weight:800;border:none;border-radius:12px;cursor:pointer;color:#fff;background:#dc2626;box-shadow:0 4px 0 #7f1d1d}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7f1d1d}
+.btn.green{background:#15803d;box-shadow:0 4px 0 #14532d}
+.btn.blue{background:#1d4ed8;box-shadow:0 4px 0 #172554}
+.btn.dark{background:#334155;box-shadow:0 4px 0 #0f172a}
+.small{font-size:13px;color:#cbd5e1;line-height:1.7;max-width:420px}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+.chip{background:rgba(0,0,0,.55);border-radius:10px;padding:6px 10px;font-size:14px;font-weight:700;text-shadow:0 1px 2px #000}
+#topLeft{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:6px;max-width:62vw}
+#areaChip{font-size:16px;color:#fde68a}
+#missionChip{font-size:13px;line-height:1.5}
+#missionChip b{color:#fbbf24}
+#topRight{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#minimap{width:150px;height:150px;border-radius:10px;border:2px solid rgba(255,255,255,.6);background:#14532d}
+#coinsChip{font-size:16px;color:#fde68a}
+#heatWrap{width:150px}
+#heatLabel{font-size:11px;font-weight:800;color:#fca5a5;text-align:right;text-shadow:0 1px 2px #000}
+#heatBar{height:10px;background:rgba(0,0,0,.55);border-radius:6px;overflow:hidden;margin-top:2px}
+#heatFill{height:100%;width:0%;background:#3b82f6;transition:width .3s}
+#speedo{position:absolute;right:14px;bottom:118px;text-align:right;text-shadow:0 2px 6px #000}
+#speedNum{font-size:52px;font-weight:900;line-height:1}
+#speedUnit{font-size:14px;font-weight:700;color:#e5e7eb}
+#modeChip{font-size:13px;font-weight:800;color:#a7f3d0;margin-top:2px}
+#banner{position:absolute;top:22%;left:50%;transform:translateX(-50%);background:rgba(21,128,61,.92);padding:12px 20px;border-radius:12px;font-size:18px;font-weight:800;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);max-width:88vw}
+#banner.warn{background:rgba(185,28,28,.92)}
+#banner.police{background:rgba(29,78,216,.92);animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.55}}
+#hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;color:#e5e7eb;text-shadow:0 1px 3px #000;white-space:nowrap}
+#touch{position:fixed;inset:0;z-index:12;pointer-events:none}
+.tbtn{position:absolute;pointer-events:auto;border:none;border-radius:50%;color:#fff;font-weight:800;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.45);cursor:pointer;text-align:center}
+.tbtn:active{background:rgba(255,255,255,.35)}
+#btnLeft{left:16px;bottom:24px;width:74px;height:74px;font-size:30px}
+#btnRight{left:104px;bottom:24px;width:74px;height:74px;font-size:30px}
+#btnGas{right:16px;bottom:24px;width:84px;height:84px;font-size:15px;background:rgba(21,128,61,.7)}
+#btnBrake{right:112px;bottom:24px;width:74px;height:74px;font-size:15px;background:rgba(185,28,28,.7)}
+#btnCar{right:16px;bottom:210px;width:96px;height:44px;border-radius:12px;font-size:13px;background:rgba(29,78,216,.75)}
+#btnMission{left:16px;bottom:112px;width:96px;height:40px;border-radius:10px;font-size:12px;background:rgba(0,0,0,.5)}
+#btnPause{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:44px;height:44px;font-size:18px;pointer-events:auto}
+#debug{position:fixed;left:0;bottom:0;font-size:10px;color:#0f0;background:rgba(0,0,0,.4);z-index:40;pointer-events:none;white-space:pre;display:none}
+@media (max-width:600px){
+  #minimap{width:110px;height:110px}
+  #heatWrap{width:110px}
+  #speedNum{font-size:40px}
+  #speedo{bottom:120px}
+  .logo{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud" class="hidden">
+  <div id="topLeft">
+    <div class="chip" id="areaChip">📍 Basti Malook</div>
+    <div class="chip" id="missionChip">🎯 <b>Drive to Multan City</b><br>Distance: — &nbsp;•&nbsp; Time: —</div>
+  </div>
+  <div id="topRight">
+    <canvas id="minimap" width="150" height="150"></canvas>
+    <div class="chip" id="coinsChip">🪙 Coins: 0</div>
+    <div id="heatWrap"><div id="heatLabel">POLICE HEAT</div><div id="heatBar"><div id="heatFill"></div></div></div>
+  </div>
+  <div id="speedo"><div id="speedNum">0</div><div id="speedUnit">km/h</div><div id="modeChip">🚗 DRIVING</div></div>
+  <div id="banner" class="hidden"></div>
+  <div id="hint">WASD / Arrows — drive &nbsp;•&nbsp; E — enter / exit car &nbsp;•&nbsp; P — pause</div>
+</div>
+<div id="touch" class="hidden">
+  <button class="tbtn" id="btnLeft">◀</button>
+  <button class="tbtn" id="btnRight">▶</button>
+  <button class="tbtn" id="btnGas">GAS</button>
+  <button class="tbtn" id="btnBrake">BRAKE</button>
+  <button class="tbtn" id="btnCar">🚗 ENTER CAR</button>
+  <button class="tbtn" id="btnMission">🎯 FREE ROAM</button>
+  <button class="tbtn" id="btnPause">⏸</button>
+</div>
+<div id="menu" class="overlay">
+  <h1 class="logo">MULTAN <span>DRIVE</span></h1>
+  <p class="tag">OPEN WORLD • MULTAN • PAKISTAN</p>
+  <button class="btn" id="btnStartDrive">🚗 START DRIVING</button>
+  <button class="btn green" id="btnStartWalk">🚶 START ON FOOT</button>
+  <p class="small">Drive from Basti Malook through Multan city to Dunyapur and Bahawalpur.
+  Walk on foot, hop in and out of your red car, collect coins, follow missions.
+  Careful — crash into traffic and the police will chase you!<br>
+  <b>Keyboard:</b> WASD / Arrows to drive or walk • E to enter / exit car • P to pause<br>
+  <b>Phone:</b> on-screen buttons — steer, GAS, BRAKE, ENTER CAR.</p>
+  <p class="small" style="color:#86efac">100% offline • No ads • Made by Jilan Apps</p>
+</div>
+<div id="pauseMenu" class="overlay hidden">
+  <h1 class="logo" style="font-size:34px">PAUSED</h1>
+  <button class="btn green" id="btnResume">▶ RESUME</button>
+  <button class="btn blue" id="btnRestart">↻ RESTART</button>
+  <button class="btn dark" id="btnQuit">🏠 MAIN MENU</button>
+</div>
+<div id="busted" class="overlay hidden">
+  <h1 class="logo" style="font-size:34px">🚨 CAUGHT!</h1>
+  <p class="small" id="bustedText">The police caught you. Fine paid: 50 coins.<br>Drive carefully next time!</p>
+  <button class="btn green" id="btnBustedOk">OK — KEEP DRIVING</button>
+</div>
+<div id="debug"></div>
+<script src="three.min.js"></script>
+<script>
+'use strict';
+/* ================= MULTAN DRIVE — GTA-style open world =================
+   Open-world Multan: Basti Malook (start) -> Shujabad -> Jalalpur Pirwala
+   -> Multan city grid -> Lodhran -> Dunyapur -> Bahawalpur.
+   Walk on foot, enter/exit the red car, traffic, pedestrians, police,
+   minimap, missions, coins. Low-poly, offline, phone-friendly. */
+var Q = new URLSearchParams(location.search);
+var IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || (new URLSearchParams(location.search)).has('touch');
+
+/* ---------- towns & missions ---------- */
+var TOWNS = [
+  {name:'Basti Malook',       p:[0, 0, 0]},
+  {name:'Shujabad',           p:[-120, 0, -700]},
+  {name:'Jalalpur Pirwala',   p:[150, 0, -1400]},
+  {name:'Multan',             p:[0, 0, -2100]},
+  {name:'Lodhran',            p:[250, 0, -3000]},
+  {name:'Dunyapur',           p:[-200, 0, -3900]},
+  {name:'Bahawalpur',         p:[100, 0, -5000]}
+];
+var MISSIONS = [
+  {name:'Drive to Multan City', town:'Multan',     time:300},
+  {name:'Reach Dunyapur',       town:'Dunyapur',   time:360},
+  {name:'Reach Bahawalpur',     town:'Bahawalpur', time:420},
+  {name:'Reach Basti Malook',   town:'Basti Malook', time:420},
+  {name:'Reach Lodhran',        town:'Lodhran',    time:300},
+  {name:'Reach Shujabad',       town:'Shujabad',   time:300}
+];
+
+/* ---------- three.js setup ---------- */
+var container = document.getElementById('game');
+var renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x87ceeb, 1);
+container.appendChild(renderer.domElement);
+var scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x87ceeb, 130, 950);
+var camera = new THREE.PerspectiveCamera(68, window.innerWidth/window.innerHeight, 0.1, 2500);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x3f7a3a, 0.95));
+var sun = new THREE.DirectionalLight(0xfff2cc, 0.9);
+sun.position.set(300, 500, 200);
+scene.add(sun);
+window.addEventListener('resize', function(){
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ---------- helpers ---------- */
+function mat(color){ return new THREE.MeshLambertMaterial({color:color}); }
+function box(w,h,d,color,x,y,z,ry){
+  var m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(color));
+  m.position.set(x,y,z); if (ry) m.rotation.y = ry; scene.add(m); return m;
+}
+function makeTextTexture(text, sub, fg, bg){
+  var c = document.createElement('canvas'); c.width = 512; c.height = 192;
+  var g = c.getContext('2d');
+  g.fillStyle = bg; g.fillRect(0,0,512,192);
+  g.strokeStyle = fg; g.lineWidth = 10; g.strokeRect(8,8,496,176);
+  g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = 'bold 64px Arial'; g.fillText(text, 256, sub ? 76 : 96);
+  if (sub){ g.font = 'bold 40px Arial'; g.fillText(sub, 256, 148); }
+  var t = new THREE.CanvasTexture(c); return t;
+}
+function rand(a,b){ return a + Math.random()*(b-a); }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function lerpAngle(a,b,t){
+  var d = b - a;
+  while (d > Math.PI) d -= Math.PI*2;
+  while (d < -Math.PI) d += Math.PI*2;
+  return a + d*t;
+}
+var V3 = function(x,y,z){ return new THREE.Vector3(x,y,z); };
+
+/* ---------- highway curve (Basti Malook -> Bahawalpur) ---------- */
+var HWY_PTS = [
+  V3(0,0,260), V3(0,0,0), V3(-120,0,-700), V3(150,0,-1400),
+  V3(0,0,-2100), V3(250,0,-3000), V3(-200,0,-3900), V3(100,0,-5000), V3(100,0,-5300)
+];
+var hwyCurve = new THREE.CatmullRomCurve3(HWY_PTS, false, 'catmullrom', 0.35);
+var HWY_LEN = hwyCurve.getLength();
+var HWY_N = 560;
+var hwySamples = [];
+for (var si=0; si<=HWY_N; si++) hwySamples.push(hwyCurve.getPointAt(si/HWY_N));
+function nearestHwy(p){
+  var best = 1e9, bp = null;
+  for (var i=0;i<hwySamples.length;i++){
+    var s = hwySamples[i];
+    var dx = p.x-s.x, dz = p.z-s.z, d = dx*dx+dz*dz;
+    if (d < best){ best = d; bp = s; }
+  }
+  return {d: Math.sqrt(best), p: bp};
+}
+function townPos(name){
+  for (var i=0;i<TOWNS.length;i++) if (TOWNS[i].name === name) return V3(TOWNS[i].p[0], 0, TOWNS[i].p[2]);
+  return V3(0,0,0);
+}
+
+/* ---------- ground & fields ---------- */
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(7000, 7000), mat(0x58a447));
+ground.rotation.x = -Math.PI/2; ground.position.set(0, 0, -2500); scene.add(ground);
+/* crop-field patches (away from highway + city) */
+var fieldCols = [0x7fb539, 0x9acd32, 0xd9c25a, 0x6aa84f, 0x8fbc5a];
+for (var fi=0; fi<46; fi++){
+  var fx = rand(-1400, 1400), fz = rand(200, -5200);
+  if (Math.abs(fx) < 320 && fz < -1750 && fz > -2450) continue; /* city */
+  if (nearestHwy(V3(fx,0,fz)).d < 55) continue;
+  var fw = rand(90, 260), fd = rand(90, 260);
+  var f = new THREE.Mesh(new THREE.PlaneGeometry(fw, fd), mat(fieldCols[fi % fieldCols.length]));
+  f.rotation.x = -Math.PI/2; f.rotation.z = rand(0, Math.PI);
+  f.position.set(fx, 0.03, fz); scene.add(f);
+}
+/* river + bridge (between Jalalpur Pirwala and Multan) */
+var river = new THREE.Mesh(new THREE.PlaneGeometry(1100, 90), mat(0x3b82c4));
+river.rotation.x = -Math.PI/2; river.position.set(60, 0.02, -1570); scene.add(river);
+
+/* ---------- highway ribbon + markings ---------- */
+function ribbon(points, width, y, color){
+  var pos = [], idx = [];
+  for (var i=0;i<points.length;i++){
+    var p = points[i];
+    var tan = (i < points.length-1) ? V3(points[i+1].x-p.x, 0, points[i+1].z-p.z)
+                                    : V3(p.x-points[i-1].x, 0, p.z-points[i-1].z);
+    tan.normalize();
+    var nx = -tan.z, nz = tan.x, hw = width/2;
+    pos.push(p.x + nx*hw, y, p.z + nz*hw, p.x - nx*hw, y, p.z - nz*hw);
+    if (i > 0){ var a = (i-1)*2; idx.push(a, a+2, a+1, a+1, a+2, a+3); }
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  var m = new THREE.Mesh(g, mat(color)); scene.add(m); return m;
+}
+ribbon(hwySamples, 12, 0.08, 0x3a3a40);
+ribbon(hwySamples, 0.6, 0.12, 0xffffff); /* center line base (covered by dashes below) */
+for (var di=0; di<hwySamples.length; di+=3){
+  var dp = hwySamples[di];
+  var dt = hwyCurve.getTangentAt(Math.min(di/HWY_N, 1));
+  var dash = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 4), mat(0xffffff));
+  dash.rotation.x = -Math.PI/2; dash.rotation.z = -Math.atan2(dt.x, dt.z);
+  dash.position.set(dp.x, 0.12, dp.z); scene.add(dash);
+}
+/* bridge rails over the river */
+(function(){
+  var a = hwyCurve.getPointAt(0.30), b = hwyCurve.getPointAt(0.335);
+  var mid = V3((a.x+b.x)/2, 0, (a.z+b.z)/2);
+  var len = Math.hypot(b.x-a.x, b.z-a.z) + 10;
+  var ang = Math.atan2(b.x-a.x, b.z-a.z);
+  box(0.5, 1.1, len, 0xd6d6d6, mid.x-6.2, 0.7, mid.z, ang);
+  box(0.5, 1.1, len, 0xd6d6d6, mid.x+6.2, 0.7, mid.z, ang);
+})();
+
+/* ---------- Multan city grid ---------- */
+var CITY = {x0:-300, x1:300, z0:-2400, z1:-1800, cx:0, cz:-2100};
+var AVENUES = [-240,-120,0,120,240];
+var STREETS = [-2340,-2220,-2100,-1980,-1860];
+STREETS.forEach(function(z){
+  var s = new THREE.Mesh(new THREE.PlaneGeometry(620, 14), mat(0x3f3f46));
+  s.rotation.x = -Math.PI/2; s.position.set(0, 0.06, z); scene.add(s);
+});
+AVENUES.forEach(function(x){
+  var s = new THREE.Mesh(new THREE.PlaneGeometry(14, 620), mat(0x3f3f46));
+  s.rotation.x = -Math.PI/2; s.position.set(x, 0.06, -2100); scene.add(s);
+});
+/* street dashes in the city */
+for (var ci=0; ci<5; ci++){
+  for (var dz=-290; dz<=290; dz+=30){
+    var d1 = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 3.4), mat(0xfbbf24));
+    d1.rotation.x = -Math.PI/2; d1.position.set(AVENUES[ci], 0.1, -2100+dz); scene.add(d1);
+  }
+}
+/* city blocks (sidewalk slabs) + buildings */
+var buildings = []; /* {x0,x1,z0,z1,h} for collision */
+var bCols = [0xd6c9a8, 0xc9a06a, 0x9db3c8, 0xe0a899, 0xb8b8b8, 0xf0e6d2, 0x7fa88f];
+function addBuilding(x, z, w, d, h, color){
+  var b = box(w, h, d, color, x, h/2 + 0.08, z, 0);
+  var roof = box(w*0.7, 0.8, d*0.7, 0x555555, x, h + 0.4, z, 0);
+  buildings.push({x0:x-w/2, x1:x+w/2, z0:z-d/2, z1:z+d/2, h:h});
+  return b;
+}
+for (var bi=0; bi<4; bi++){
+  for (var bj=0; bj<4; bj++){
+    var bx0 = AVENUES[bi] + 12, bx1 = AVENUES[bi+1] - 12;
+    var bz0 = STREETS[bj] + 12, bz1 = STREETS[bj+1] - 12;
+    if (bx1-bx0 < 24 || bz1-bz0 < 24) continue;
+    var slab = new THREE.Mesh(new THREE.PlaneGeometry(bx1-bx0, bz1-bz0), mat(0x9a9a8a));
+    slab.rotation.x = -Math.PI/2; slab.position.set((bx0+bx1)/2, 0.04, (bz0+bz1)/2); scene.add(slab);
+    var nB = 2 + Math.floor(Math.random()*3);
+    for (var k=0;k<nB;k++){
+      var bw = rand(18, 30), bd = rand(16, 26), bh = rand(9, 34);
+      var px = rand(bx0+bw/2+3, bx1-bw/2-3), pz = rand(bz0+bd/2+3, bz1-bd/2-3);
+      if (nearestHwy(V3(px,0,pz)).d < 26) continue; /* keep the highway clear */
+      addBuilding(px, pz, bw, bd, bh, bCols[Math.floor(Math.random()*bCols.length)]);
+    }
+  }
+}
+/* Ghanta Ghar (Clock Tower) — Multan landmark at city centre */
+(function(){
+  var t = box(14, 42, 14, 0xd9a441, 40, 21, -2100, 0);
+  var dome = new THREE.Mesh(new THREE.SphereGeometry(6, 10, 8, 0, Math.PI*2, 0, Math.PI/2), mat(0x1e6f5c));
+  dome.position.set(40, 42, -2100); scene.add(dome);
+  var clock = new THREE.Mesh(new THREE.CircleGeometry(3.4, 20), mat(0xffffff));
+  clock.position.set(40, 34, -2092.8); scene.add(clock);
+  buildings.push({x0:32, x1:48, z0:-2108, z1:-2092, h:42});
+})();
+/* Shrine (blue dome) near the city */
+(function(){
+  box(20, 10, 16, 0xf5f5f0, -60, 5, -2220, 0);
+  var dome = new THREE.Mesh(new THREE.SphereGeometry(7, 12, 8, 0, Math.PI*2, 0, Math.PI/2), mat(0x2563eb));
+  dome.position.set(-60, 10, -2220); scene.add(dome);
+  buildings.push({x0:-71, x1:-49, z0:-2229, z1:-2211, h:14});
+})();
+
+/* ---------- trees ---------- */
+var trunkGeo = new THREE.CylinderGeometry(0.35, 0.5, 3, 6);
+var leafGeo = new THREE.ConeGeometry(2.6, 7, 7);
+var trunkMat = mat(0x6b4423), leafMat = mat(0x2f7d32), leafMat2 = mat(0x3f9e3f);
+function addTree(x, z, s){
+  s = s || 1;
+  var tr = new THREE.Mesh(trunkGeo, trunkMat); tr.position.set(x, 1.5*s, z); tr.scale.setScalar(s); scene.add(tr);
+  var lf = new THREE.Mesh(leafGeo, Math.random() < 0.5 ? leafMat : leafMat2);
+  lf.position.set(x, (3+3.2)*s, z); lf.scale.setScalar(s); scene.add(lf);
+}
+for (var ti=0; ti<170; ti++){
+  var tx = rand(-1300, 1300), tz = rand(220, -5250);
+  if (tx > -320 && tx < 320 && tz > -2420 && tz < -1780) continue; /* city: handled below */
+  if (nearestHwy(V3(tx,0,tz)).d < 26) continue;
+  addTree(tx, tz, rand(0.8, 1.5));
+}
+/* trees along city sidewalks */
+for (var tj=0; tj<34; tj++){
+  var ax = AVENUES[Math.floor(Math.random()*5)] + (Math.random()<0.5 ? -10 : 10);
+  addTree(ax, rand(-2380, -1820), rand(0.8, 1.1));
+}
+
+/* ---------- town sign boards ---------- */
+function addSign(text, sub, x, z, ry){
+  var tex = makeTextTexture(text, sub, '#ffffff', '#166534');
+  var board = new THREE.Mesh(new THREE.PlaneGeometry(11, 4.1), new THREE.MeshLambertMaterial({map:tex}));
+  board.position.set(x, 4.4, z); board.rotation.y = ry || 0; scene.add(board);
+  box(0.5, 3, 0.5, 0x666666, x-4, 1.5, z, 0);
+  box(0.5, 3, 0.5, 0x666666, x+4, 1.5, z, 0);
+}
+TOWNS.forEach(function(t){
+  var p = townPos(t.name);
+  var s = nearestHwy(V3(p.x, 0, p.z + 90));
+  addSign(t.name.toUpperCase(), 'WELCOME', s.p.x + 11, s.p.z, 0);
+});
+/* Multan gate (south entry) — placed on the actual road */
+(function(){
+  var gi = 0, gd = 1e9;
+  hwySamples.forEach(function(s, i){ var d = Math.abs(s.z + 1830); if (d < gd){ gd = d; gi = i; } });
+  var gp = hwySamples[gi];
+  var gt = hwyCurve.getTangentAt(gi/HWY_N);
+  var gang = Math.atan2(gt.x, gt.z);
+  var tex = makeTextTexture('MULTAN', 'THE CITY OF SAINTS', '#fbbf24', '#7f1d1d');
+  var beam = new THREE.Mesh(new THREE.PlaneGeometry(26, 5), new THREE.MeshLambertMaterial({map:tex}));
+  beam.position.set(gp.x, 9, gp.z); beam.rotation.y = gang; scene.add(beam);
+  var px = -gt.z, pz = gt.x;
+  box(2, 9, 2, 0x7f1d1d, gp.x + px*14, 4.5, gp.z + pz*14, 0);
+  box(2, 9, 2, 0x7f1d1d, gp.x - px*14, 4.5, gp.z - pz*14, 0);
+  buildings.push({x0:gp.x+px*14-1, x1:gp.x+px*14+1, z0:gp.z+pz*14-1, z1:gp.z+pz*14+1, h:9});
+  buildings.push({x0:gp.x-px*14-1, x1:gp.x-px*14+1, z0:gp.z-pz*14-1, z1:gp.z-pz*14+1, h:9});
+})();
+
+/* ---------- coins ---------- */
+var coins = [];
+var coinGeo = new THREE.CylinderGeometry(1.1, 1.1, 0.35, 12);
+var coinMat = new THREE.MeshLambertMaterial({color:0xfbbf24, emissive:0x92600a});
+function spawnCoins(){
+  coins.forEach(function(c){ scene.remove(c.mesh); });
+  coins = [];
+  for (var i=0;i<42;i++){
+    var d = 120 + i*125;
+    var u = clamp(d/HWY_LEN, 0, 0.995);
+    var p = hwyCurve.getPointAt(u);
+    var tan = hwyCurve.getTangentAt(u);
+    var side = (i % 2 === 0) ? 3 : -3;
+    var m = new THREE.Mesh(coinGeo, coinMat);
+    m.position.set(p.x - tan.z*side, 1.1, p.z + tan.x*side);
+    m.rotation.x = Math.PI/2; scene.add(m);
+    coins.push({mesh:m, taken:false});
+  }
+}
+spawnCoins();
+
+/* ---------- car builder ---------- */
+function makeCar(color, police){
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.62, 4.4), mat(color));
+  body.position.y = 0.62; g.add(body);
+  var cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.58, 2.1), mat(0x1f2937));
+  cabin.position.set(0, 1.18, -0.25); g.add(cabin);
+  var wg = new THREE.CylinderGeometry(0.42, 0.42, 0.35, 10);
+  var wm = mat(0x111111);
+  [[-1.0,1.35],[1.0,1.35],[-1.0,-1.35],[1.0,-1.35]].forEach(function(p){
+    var w = new THREE.Mesh(wg, wm);
+    w.rotation.z = Math.PI/2; w.position.set(p[0], 0.42, p[1]); g.add(w);
+  });
+  var hl = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.18, 0.1), mat(0xfff7cc));
+  hl.position.set(0, 0.72, 2.21); g.add(hl);
+  var tl = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.18, 0.1), mat(0xdc2626));
+  tl.position.set(0, 0.72, -2.21); g.add(tl);
+  if (police){
+    var bar = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.5), mat(0x111111));
+    bar.position.set(0, 1.55, -0.25); g.add(bar);
+    var r = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.24, 0.5), new THREE.MeshLambertMaterial({color:0xff0000, emissive:0x880000}));
+    r.position.set(-0.28, 1.55, -0.25); g.add(r);
+    var b = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.24, 0.5), new THREE.MeshLambertMaterial({color:0x0000ff, emissive:0x000088}));
+    b.position.set(0.28, 1.55, -0.25); g.add(b);
+    g.userData.lights = [r, b];
+  }
+  /* blob shadow */
+  var sh = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 5.2), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.28}));
+  sh.rotation.x = -Math.PI/2; sh.position.y = 0.06; g.add(sh);
+  scene.add(g);
+  return g;
+}
+
+/* ---------- player ---------- */
+var playerCar = makeCar(0xdc2626, false);
+var player = {
+  pos: V3(4, 0, 41), heading: Math.PI, speed: 0,
+  mode: 'drive', /* drive | walk | menu */
+  steer: 0, throttle: 0, brake: 0
+};
+/* character (on foot) */
+var charGroup = new THREE.Group();
+(function(){
+  var legL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.85, 0.24), mat(0x1f2937));
+  legL.position.set(-0.14, 0.42, 0); charGroup.add(legL);
+  var legR = legL.clone(); legR.position.x = 0.14; charGroup.add(legR);
+  var body = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.85, 0.34), mat(0xf5f5f0));
+  body.position.y = 1.28; charGroup.add(body);
+  var head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), mat(0xd9a066));
+  head.position.y = 1.95; charGroup.add(head);
+  var cap = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.14, 0.46), mat(0x166534));
+  cap.position.y = 2.2; charGroup.add(cap);
+  charGroup.userData.legs = [legL, legR];
+  scene.add(charGroup);
+})();
+var walker = { pos: V3(3, 0, 40), heading: Math.PI, speed: 0, walkPhase: 0 };
+
+/* ---------- traffic ---------- */
+var trafficCols = [0xf5f5f5, 0x2563eb, 0xf59e0b, 0x16a34a, 0x9333ea, 0x0ea5e9];
+var traffic = [];
+function addTrafficHwy(u, speed, dir, lane){
+  var g = makeCar(trafficCols[traffic.length % trafficCols.length], false);
+  var p0 = hwyCurve.getPointAt(u), t0 = hwyCurve.getTangentAt(u);
+  g.position.set(p0.x - t0.z*lane, 0, p0.z + t0.x*lane);
+  g.rotation.y = Math.atan2(t0.x*dir, t0.z*dir);
+  traffic.push({mesh:g, kind:'hwy', u:u, speed:speed, dir:dir, lane:lane});
+}
+addTrafficHwy(0.10, 14, 1, 3); addTrafficHwy(0.22, 17, -1, -3); addTrafficHwy(0.38, 13, 1, -3);
+addTrafficHwy(0.55, 16, -1, 3); addTrafficHwy(0.72, 15, 1, 3); addTrafficHwy(0.88, 12, -1, -3);
+/* city loop traffic (rectangles around blocks) */
+function cityLoop(cx, cz, w, d, speed, color){
+  var g = makeCar(color, false);
+  var pts = [V3(cx-w/2,0,cz-d/2), V3(cx+w/2,0,cz-d/2), V3(cx+w/2,0,cz+d/2), V3(cx-w/2,0,cz+d/2)];
+  g.position.copy(pts[0]);
+  traffic.push({mesh:g, kind:'city', pts:pts, seg:0, speed:speed});
+}
+cityLoop(-180, -2100, 120, 240, 10, 0xf5f5f5);
+cityLoop(180, -2100, 120, 240, 11, 0x2563eb);
+
+/* ---------- pedestrians (city sidewalks, non-violent) ---------- */
+var peds = [];
+var pedCols = [0xffffff, 0x3b82f6, 0x92400e, 0x15803d, 0x6b7280, 0xdb2777];
+for (var pi=0; pi<12; pi++){
+  var g = new THREE.Group();
+  var pb = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.8, 0.3), mat(pedCols[pi % pedCols.length]));
+  pb.position.y = 1.25; g.add(pb);
+  var ph = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.38, 0.38), mat(0xd9a066));
+  ph.position.y = 1.9; g.add(ph);
+  var pl1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.22), mat(0x1f2937));
+  pl1.position.set(-0.13, 0.4, 0); g.add(pl1);
+  var pl2 = pl1.clone(); pl2.position.x = 0.13; g.add(pl2);
+  g.userData.legs = [pl1, pl2];
+  scene.add(g);
+  var horizontal = pi % 2 === 0;
+  var av = AVENUES[1 + (pi % 4)];
+  var st = STREETS[pi % 5];
+  peds.push({
+    mesh:g, horiz:horizontal,
+    x: horizontal ? rand(-230, 230) : av + (pi % 3 === 0 ? -9 : 9),
+    z: horizontal ? st + (pi % 3 === 0 ? -9 : 9) : rand(-2330, -1870),
+    dir: Math.random() < 0.5 ? 1 : -1, speed: rand(1.0, 1.7), phase: rand(0, 6),
+    dodge: 0
+  });
+}
+
+/* ---------- police ---------- */
+var policeCar = makeCar(0xf8fafc, true);
+policeCar.visible = false;
+var police = { active:false, pos:V3(0,0,0), heading:0, speed:0, closeT:0, farT:0, flash:0 };
+
+/* ---------- game state ---------- */
+var game = {
+  started:false, paused:false, freeRoam:false,
+  coins:0, heat:0, heatIdle:0, lastHit:0,
+  missionIdx:0, missionTime:0, missionDone:false,
+  area:'Basti Malook', distToTarget:0, targetPos:townPos('Multan'),
+  bannerT:0, elapsed:0
+};
+function curMission(){ return MISSIONS[game.missionIdx % MISSIONS.length]; }
+function setMission(i){
+  game.missionIdx = i;
+  var m = curMission();
+  game.targetPos = townPos(m.town);
+  game.missionTime = m.time;
+  game.missionDone = false;
+  showBanner('🎯 New mission: ' + m.name, '', false);
+}
+function showBanner(text, cls, warn){
+  var b = document.getElementById('banner');
+  b.textContent = text;
+  b.className = warn ? 'warn' : (cls || '');
+  b.classList.remove('hidden');
+  game.bannerT = 3.5;
+}
+
+/* ---------- input ---------- */
+var keys = {};
+window.addEventListener('keydown', function(e){
+  keys[e.key.toLowerCase()] = true;
+  if (e.key === 'e' || e.key === 'E') tryToggleCar();
+  if (e.key === 'p' || e.key === 'P') togglePause();
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(e.key.toLowerCase()) >= 0) e.preventDefault();
+});
+window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
+var touch = {left:false, right:false, gas:false, brake:false};
+function bindBtn(id, prop){
+  var el = document.getElementById(id);
+  var on = function(e){ e.preventDefault(); touch[prop] = true; };
+  var off = function(e){ e.preventDefault(); touch[prop] = false; };
+  el.addEventListener('touchstart', on, {passive:false});
+  el.addEventListener('touchend', off); el.addEventListener('touchcancel', off);
+  el.addEventListener('mousedown', on); el.addEventListener('mouseup', off); el.addEventListener('mouseleave', off);
+}
+bindBtn('btnLeft','left'); bindBtn('btnRight','right'); bindBtn('btnGas','gas'); bindBtn('btnBrake','brake');
+document.getElementById('btnCar').addEventListener('click', function(){ tryToggleCar(); });
+document.getElementById('btnMission').addEventListener('click', function(){
+  game.freeRoam = !game.freeRoam;
+  document.getElementById('btnMission').textContent = game.freeRoam ? '🎯 MISSIONS' : '🎯 FREE ROAM';
+  if (!game.freeRoam) setMission(game.missionIdx);
+  showBanner(game.freeRoam ? 'Free Roam — drive anywhere!' : 'Missions ON: ' + curMission().name, '', false);
+});
+document.getElementById('btnPause').addEventListener('click', function(){ togglePause(); });
+function togglePause(){
+  if (!game.started) return;
+  game.paused = !game.paused;
+  document.getElementById('pauseMenu').classList.toggle('hidden', !game.paused);
+}
+function inputState(){
+  var left = keys['a'] || keys['arrowleft'] || touch.left;
+  var right = keys['d'] || keys['arrowright'] || touch.right;
+  var gas = keys['w'] || keys['arrowup'] || touch.gas || Q.has('demo');
+  var brake = keys['s'] || keys['arrowdown'] || touch.brake;
+  return {left:left, right:right, gas:gas, brake:brake, steer: Q.has('demo') ? demoSteer() : 0};
+}
+/* self-driving for the ?demo= test: steer toward the road ahead */
+function demoSteer(){
+  var bi = 0, bd = 1e9;
+  var pp = player.mode === 'walk' ? walker.pos : player.pos;
+  var hd = player.mode === 'walk' ? walker.heading : player.heading;
+  for (var i=0;i<hwySamples.length;i++){
+    var s = hwySamples[i];
+    var d = (s.x-pp.x)*(s.x-pp.x) + (s.z-pp.z)*(s.z-pp.z);
+    if (d < bd){ bd = d; bi = i; }
+  }
+  var ti = 0, td = 1e9;
+  var tp = game.targetPos;
+  for (var j=0;j<hwySamples.length;j++){
+    var s2 = hwySamples[j];
+    var d2 = (s2.x-tp.x)*(s2.x-tp.x) + (s2.z-tp.z)*(s2.z-tp.z);
+    if (d2 < td){ td = d2; ti = j; }
+  }
+  /* steer forward along the road, or backward if the mission target is behind */
+  var ai = ti < bi - 3 ? Math.max(bi-5, 0) : Math.min(bi+5, hwySamples.length-1);
+  var ahead = hwySamples[ai];
+  var want = Math.atan2(ahead.x - pp.x, ahead.z - pp.z);
+  var diff = want - hd;
+  while (diff > Math.PI) diff -= Math.PI*2;
+  while (diff < -Math.PI) diff += Math.PI*2;
+  return clamp(diff*1.5, -1, 1);
+}
+function tryToggleCar(){
+  if (!game.started || game.paused) return;
+  if (player.mode === 'drive'){
+    if (Math.abs(player.speed) > 0.6) { showBanner('Stop the car first!', '', true); return; }
+    player.mode = 'walk';
+    var fx = Math.sin(player.heading), fz = Math.cos(player.heading);
+    walker.pos.set(player.pos.x - fz*2.5, 0, player.pos.z + fx*2.5);
+    walker.heading = player.heading;
+    document.getElementById('btnCar').textContent = '🚗 ENTER CAR';
+  } else {
+    var d = Math.hypot(walker.pos.x - player.pos.x, walker.pos.z - player.pos.z);
+    if (d < 7){
+      player.mode = 'drive';
+      document.getElementById('btnCar').textContent = '🚶 EXIT CAR';
+      showBanner('You are driving!', '', false);
+    } else {
+      showBanner('Walk closer to your car first!', '', true);
+    }
+  }
+}
+
+/* ---------- audio (tiny beep, optional) ---------- */
+var audioCtx = null;
+function beep(freq){
+  try{
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = freq; o.type = 'sine';
+    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.2);
+  }catch(e){}
+}
+
+/* ---------- collisions & road checks ---------- */
+function collideBuildings(p, r){
+  var hit = false;
+  for (var i=0;i<buildings.length;i++){
+    var b = buildings[i];
+    if (p.x > b.x0-r && p.x < b.x1+r && p.z > b.z0-r && p.z < b.z1+r){
+      var dxl = p.x-(b.x0-r), dxr = (b.x1+r)-p.x, dzl = p.z-(b.z0-r), dzr = (b.z1+r)-p.z;
+      var m = Math.min(dxl, dxr, dzl, dzr);
+      if (m === dxl) p.x = b.x0-r; else if (m === dxr) p.x = b.x1+r;
+      else if (m === dzl) p.z = b.z0-r; else p.z = b.z1+r;
+      hit = true;
+    }
+  }
+  return hit;
+}
+function onCityStreet(p){
+  if (p.x < CITY.x0 || p.x > CITY.x1 || p.z < CITY.z0 || p.z > CITY.z1) return false;
+  for (var i=0;i<AVENUES.length;i++) if (Math.abs(p.x - AVENUES[i]) < 8) return true;
+  for (var j=0;j<STREETS.length;j++) if (Math.abs(p.z - STREETS[j]) < 8) return true;
+  return false;
+}
+function isOffRoad(p){
+  if (nearestHwy(p).d < 9) return false;
+  if (onCityStreet(p)) return false;
+  return true;
+}
+function currentArea(p){
+  var best = null, bd = 1e9;
+  TOWNS.forEach(function(t){
+    var d = Math.hypot(p.x-t.p[0], p.z-t.p[2]);
+    if (d < bd){ bd = d; best = t.name; }
+  });
+  if (bd < 320) return best;
+  if (p.x > CITY.x0 && p.x < CITY.x1 && p.z > CITY.z0 && p.z < CITY.z1) return 'Multan City';
+  return 'Countryside';
+}
+function heatHit(n){
+  var now = game.elapsed;
+  if (now - game.lastHit < 1) return;
+  game.lastHit = now; game.heat = Math.min(100, game.heat + n);
+  if (game.heat >= 50 && !police.active) activatePolice();
+}
+
+/* ---------- police ---------- */
+function activatePolice(){
+  police.active = true;
+  policeCar.visible = true;
+  var n = nearestHwy(player.pos);
+  police.pos.copy(n.p);
+  police.heading = 0; police.speed = 0; police.closeT = 0; police.farT = 0;
+  showBanner('🚨 POLICE! Drive away to escape!', 'police', false);
+  document.getElementById('banner').classList.add('police');
+}
+function deactivatePolice(){
+  police.active = false; policeCar.visible = false;
+  document.getElementById('banner').classList.remove('police');
+}
+function busted(){
+  deactivatePolice();
+  game.heat = 0;
+  player.speed = 0;
+  var fine = Math.min(50, game.coins);
+  game.coins -= fine;
+  document.getElementById('bustedText').innerHTML =
+    'The police caught you. Fine paid: ' + fine + ' coins.<br>Drive carefully next time!';
+  document.getElementById('busted').classList.remove('hidden');
+  game.paused = true;
+}
+
+/* ---------- mission beacon ---------- */
+var beacon = new THREE.Group();
+(function(){
+  var cyl = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 60, 12, 1, true),
+    new THREE.MeshBasicMaterial({color:0xfbbf24, transparent:true, opacity:0.35, side:THREE.DoubleSide}));
+  cyl.position.y = 30; beacon.add(cyl);
+  var ring = new THREE.Mesh(new THREE.TorusGeometry(8, 0.7, 8, 24), mat(0xfbbf24));
+  ring.rotation.x = Math.PI/2; ring.position.y = 0.4; beacon.add(ring);
+  scene.add(beacon);
+})();
+
+/* ---------- minimap ---------- */
+var mm = document.getElementById('minimap').getContext('2d');
+function mapX(x){ return (x + 500) / 1000 * 150; }
+function mapY(z){ return (300 - z) / 5600 * 150; }
+function drawMinimap(){
+  mm.fillStyle = '#14532d'; mm.fillRect(0, 0, 150, 150);
+  mm.strokeStyle = '#6b7280'; mm.lineWidth = 2.5; mm.beginPath();
+  for (var i=0;i<hwySamples.length;i+=6){
+    var x = mapX(hwySamples[i].x), y = mapY(hwySamples[i].z);
+    if (i === 0) mm.moveTo(x, y); else mm.lineTo(x, y);
+  }
+  mm.stroke();
+  mm.strokeStyle = '#9ca3af'; mm.lineWidth = 1.5;
+  AVENUES.forEach(function(x){ mm.beginPath(); mm.moveTo(mapX(x), mapY(-1800)); mm.lineTo(mapX(x), mapY(-2400)); mm.stroke(); });
+  STREETS.forEach(function(z){ mm.beginPath(); mm.moveTo(mapX(-300), mapY(z)); mm.lineTo(mapX(300), mapY(z)); mm.stroke(); });
+  TOWNS.forEach(function(t){
+    mm.fillStyle = '#fbbf24'; mm.beginPath();
+    mm.arc(mapX(t.p[0]), mapY(t.p[2]), 3, 0, Math.PI*2); mm.fill();
+  });
+  if (!game.freeRoam){
+    var pulse = 4 + Math.sin(game.elapsed*4)*1.5;
+    mm.strokeStyle = '#fde047'; mm.lineWidth = 2; mm.beginPath();
+    mm.arc(mapX(game.targetPos.x), mapY(game.targetPos.z), pulse+3, 0, Math.PI*2); mm.stroke();
+  }
+  if (police.active){
+    mm.fillStyle = '#3b82f6'; mm.beginPath();
+    mm.arc(mapX(police.pos.x), mapY(police.pos.z), 3.5, 0, Math.PI*2); mm.fill();
+  }
+  var px = mapX(player.mode === 'walk' ? walker.pos.x : player.pos.x);
+  var py = mapY(player.mode === 'walk' ? walker.pos.z : player.pos.z);
+  var hd = player.mode === 'walk' ? walker.heading : player.heading;
+  mm.fillStyle = '#ffffff';
+  mm.beginPath();
+  mm.moveTo(px + Math.sin(hd)*6, py - Math.cos(hd)*6);
+  mm.lineTo(px + Math.sin(hd+2.6)*5, py - Math.cos(hd+2.6)*5);
+  mm.lineTo(px + Math.sin(hd-2.6)*5, py - Math.cos(hd-2.6)*5);
+  mm.closePath(); mm.fill();
+}
+
+/* ---------- HUD ---------- */
+var elArea = document.getElementById('areaChip'),
+    elMission = document.getElementById('missionChip'),
+    elCoins = document.getElementById('coinsChip'),
+    elHeat = document.getElementById('heatFill'),
+    elSpeed = document.getElementById('speedNum'),
+    elMode = document.getElementById('modeChip');
+function updateHUD(){
+  var p = player.mode === 'walk' ? walker.pos : player.pos;
+  elArea.textContent = '📍 ' + game.area;
+  if (game.freeRoam){
+    elMission.innerHTML = '🎯 <b>Free Roam</b><br>Explore Multan and beyond!';
+  } else {
+    var m = curMission();
+    elMission.innerHTML = '🎯 <b>' + m.name + '</b><br>Distance: ' + Math.round(game.distToTarget) + ' m &nbsp;•&nbsp; Time: ' +
+      Math.max(0, Math.ceil(game.missionTime)) + 's';
+  }
+  elCoins.textContent = '🪙 Coins: ' + game.coins;
+  elHeat.style.width = game.heat + '%';
+  elHeat.style.background = game.heat >= 50 ? '#ef4444' : '#3b82f6';
+  var kmh = Math.round(Math.abs(player.mode === 'walk' ? walker.speed : player.speed) * 3.6);
+  elSpeed.textContent = kmh;
+  elMode.textContent = player.mode === 'walk' ? '🚶 ON FOOT — press E near car' : '🚗 DRIVING';
+  var nearCar = player.mode === 'walk' &&
+    Math.hypot(walker.pos.x - player.pos.x, walker.pos.z - player.pos.z) < 7;
+  document.getElementById('btnCar').style.display =
+    (player.mode === 'drive' || nearCar) ? 'block' : 'none';
+  if (game.bannerT > 0){
+    game.bannerT -= 0.016;
+    if (game.bannerT <= 0) document.getElementById('banner').classList.add('hidden');
+  }
+}
+
+/* ---------- main loop ---------- */
+var clock = new THREE.Clock();
+var debugT = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  if (!game.started || game.paused){ renderer.render(scene, camera); return; }
+  update(dt);
+  renderer.render(scene, camera);
+}
+function update(dt){
+  game.elapsed += dt;
+  var inp = inputState();
+  var offroad = false;
+
+  if (player.mode === 'drive'){
+    var steerTarget = inp.steer || ((inp.left ? 1 : 0) - (inp.right ? 1 : 0));
+    player.steer += (steerTarget - player.steer) * Math.min(1, dt*8);
+    var p = player.pos;
+    offroad = isOffRoad(p);
+    var maxSpd = offroad ? 18 : 52;
+    if (inp.gas) player.speed += 24 * dt;
+    if (inp.brake){
+      if (player.speed > 0.5) player.speed -= 34 * dt;
+      else player.speed -= 10 * dt;
+    }
+    if (!inp.gas && !inp.brake) player.speed -= player.speed * 0.5 * dt;
+    if (offroad) player.speed -= player.speed * 0.6 * dt;
+    player.speed = clamp(player.speed, -10, maxSpd);
+    if (Math.abs(player.speed) < 0.05 && !inp.gas && !inp.brake) player.speed = 0;
+    var turn = player.steer * 1.75 * clamp(Math.abs(player.speed)/9, 0.12, 1) * (player.speed >= 0 ? 1 : -1);
+    player.heading += turn * dt;
+    var fx = Math.sin(player.heading), fz = Math.cos(player.heading);
+    p.x += fx * player.speed * dt;
+    p.z += fz * player.speed * dt;
+    if (collideBuildings(p, 1.6)) player.speed *= 0.45;
+    playerCar.position.copy(p);
+    playerCar.rotation.y = player.heading;
+    /* camera chase */
+    var cx = p.x - fx*11, cz = p.z - fz*11;
+    camera.position.x += (cx - camera.position.x) * Math.min(1, dt*5);
+    camera.position.y += (4.6 - camera.position.y) * Math.min(1, dt*5);
+    camera.position.z += (cz - camera.position.z) * Math.min(1, dt*5);
+    camera.lookAt(p.x + fx*8, 1.6, p.z + fz*8);
+  } else {
+    /* on foot */
+    var wturn = (inp.steer || ((inp.left ? 1 : 0) - (inp.right ? 1 : 0))) * 2.4 * dt;
+    walker.heading += wturn;
+    walker.speed = (inp.gas ? 7 : 0);
+    if (inp.brake) walker.speed = 3.5;
+    var wfx = Math.sin(walker.heading), wfz = Math.cos(walker.heading);
+    walker.pos.x += wfx * walker.speed * dt;
+    walker.pos.z += wfz * walker.speed * dt;
+    collideBuildings(walker.pos, 0.5);
+    walker.walkPhase += walker.speed * dt * 1.6;
+    var sw = Math.sin(walker.walkPhase) * (walker.speed > 0 ? 0.5 : 0);
+    charGroup.userData.legs[0].rotation.x = sw;
+    charGroup.userData.legs[1].rotation.x = -sw;
+    charGroup.position.copy(walker.pos);
+    charGroup.rotation.y = walker.heading;
+    var wx = walker.pos.x - wfx*6.5, wz = walker.pos.z - wfz*6.5;
+    camera.position.x += (wx - camera.position.x) * Math.min(1, dt*6);
+    camera.position.y += (3.0 - camera.position.y) * Math.min(1, dt*6);
+    camera.position.z += (wz - camera.position.z) * Math.min(1, dt*6);
+    camera.lookAt(walker.pos.x + wfx*3, 1.4, walker.pos.z + wfz*3);
+    /* traffic can nudge the walker (no harm) */
+    traffic.forEach(function(t){
+      var d = Math.hypot(t.mesh.position.x - walker.pos.x, t.mesh.position.z - walker.pos.z);
+      if (d < 2.2){
+        walker.pos.x += (walker.pos.x - t.mesh.position.x) * 0.4;
+        walker.pos.z += (walker.pos.z - t.mesh.position.z) * 0.4;
+      }
+    });
+  }
+
+  var pp = player.mode === 'walk' ? walker.pos : player.pos;
+  game.area = currentArea(pp);
+  game.distToTarget = Math.hypot(pp.x - game.targetPos.x, pp.z - game.targetPos.z);
+
+  /* missions */
+  if (!game.freeRoam){
+    game.missionTime -= dt;
+    if (game.distToTarget < 28){
+      game.coins += 100;
+      showBanner('✅ Mission complete! +100 coins', '', false);
+      beep(880);
+      spawnCoins();
+      setMission(game.missionIdx + 1);
+    } else if (game.missionTime <= 0){
+      showBanner('⏰ Time up! Try again — ' + curMission().name, '', true);
+      setMission(game.missionIdx);
+    }
+    beacon.visible = true;
+    beacon.position.set(game.targetPos.x, 0, game.targetPos.z);
+    beacon.rotation.y += dt;
+  } else {
+    beacon.visible = false;
+  }
+
+  /* coins */
+  coins.forEach(function(c){
+    if (c.taken) return;
+    c.mesh.rotation.y += dt * 2;
+    var d = Math.hypot(c.mesh.position.x - pp.x, c.mesh.position.z - pp.z);
+    if (d < (player.mode === 'walk' ? 2.2 : 3.6)){
+      c.taken = true; c.mesh.visible = false;
+      game.coins += 10; beep(660);
+    }
+  });
+
+  /* traffic */
+  traffic.forEach(function(t){
+    if (t.kind === 'hwy'){
+      t.u += t.dir * t.speed * dt / HWY_LEN;
+      if (t.u > 1) t.u -= 1; if (t.u < 0) t.u += 1;
+      var p = hwyCurve.getPointAt(t.u);
+      var tan = hwyCurve.getTangentAt(t.u);
+      var lx = -tan.z * t.lane, lz = tan.x * t.lane;
+      t.mesh.position.set(p.x + lx, 0, p.z + lz);
+      t.mesh.rotation.y = Math.atan2(tan.x * t.dir, tan.z * t.dir);
+    } else {
+      var tp = t.pts[t.seg], np = t.pts[(t.seg+1) % 4];
+      var dx = np.x - t.mesh.position.x, dz = np.z - t.mesh.position.z;
+      var dl = Math.hypot(dx, dz);
+      if (dl < 2){ t.seg = (t.seg+1) % 4; }
+      else {
+        t.mesh.position.x += dx/dl * t.speed * dt;
+        t.mesh.position.z += dz/dl * t.speed * dt;
+        t.mesh.rotation.y = Math.atan2(dx, dz);
+      }
+    }
+    if (player.mode === 'drive'){
+      var d = Math.hypot(t.mesh.position.x - player.pos.x, t.mesh.position.z - player.pos.z);
+      if (d < 2.5 && game.elapsed - (t.lastCrash || 0) > 1.5){
+        t.lastCrash = game.elapsed;
+        player.speed *= 0.6;
+        player.pos.x -= Math.sin(player.heading) * 2;
+        player.pos.z -= Math.cos(player.heading) * 2;
+        t.speed *= 0.85;
+        heatHit(15);
+        showBanner('💥 Crash! Police heat rising…', '', true);
+      }
+    }
+  });
+
+  /* pedestrians */
+  peds.forEach(function(pd){
+    if (pd.dodge > 0){
+      pd.dodge -= dt;
+      if (pd.horiz) pd.z += (pd.z > -2100 ? 1 : -1) * 3.5 * dt;
+      else pd.x += (pd.x > 0 ? 1 : -1) * 3.5 * dt;
+    } else {
+      if (pd.horiz){
+        pd.x += pd.dir * pd.speed * dt;
+        if (pd.x > 230 || pd.x < -230) pd.dir *= -1;
+      } else {
+        pd.z += pd.dir * pd.speed * dt;
+        if (pd.z > -1870 || pd.z < -2330) pd.dir *= -1;
+      }
+    }
+    pd.phase += pd.speed * dt * 2.2;
+    var sw2 = Math.sin(pd.phase) * 0.45;
+    pd.mesh.userData.legs[0].rotation.x = sw2;
+    pd.mesh.userData.legs[1].rotation.x = -sw2;
+    pd.mesh.position.set(pd.x, 0, pd.z);
+    pd.mesh.rotation.y = pd.horiz ? (pd.dir > 0 ? Math.PI/2 : -Math.PI/2) : (pd.dir > 0 ? 0 : Math.PI);
+    if (player.mode === 'drive'){
+      var d = Math.hypot(pd.x - player.pos.x, pd.z - player.pos.z);
+      if (d < 7 && pd.dodge <= 0) pd.dodge = 1.4;
+      if (d < 2.6 && (!pd.lastScare || game.elapsed - pd.lastScare > 2)){
+        pd.lastScare = game.elapsed;
+        heatHit(10);
+        showBanner('😲 Careful! Pedestrian scared.', '', true);
+      }
+    }
+  });
+
+  /* police chase */
+  if (police.active){
+    police.flash += dt;
+    var l = policeCar.userData.lights;
+    if (l){
+      var on = Math.floor(police.flash * 4) % 2 === 0;
+      l[0].material.emissive.setHex(on ? 0xff0000 : 0x220000);
+      l[1].material.emissive.setHex(on ? 0x000022 : 0x0000ff);
+    }
+    var dx = player.pos.x - police.pos.x, dz = player.pos.z - police.pos.z;
+    var dist = Math.hypot(dx, dz);
+    var want = Math.atan2(dx, dz);
+    police.heading = lerpAngle(police.heading, want, Math.min(1, dt*2.2));
+    var targetSpeed = clamp(dist*1.2, 10, 46);
+    police.speed += (targetSpeed - police.speed) * Math.min(1, dt*2);
+    police.pos.x += Math.sin(police.heading) * police.speed * dt;
+    police.pos.z += Math.cos(police.heading) * police.speed * dt;
+    policeCar.position.copy(police.pos);
+    policeCar.rotation.y = police.heading;
+    if (dist < 8){ police.closeT += dt; police.farT = 0; } else { police.closeT = 0; }
+    if (dist > 160){ police.farT += dt; } else { police.farT = 0; }
+    if (police.closeT > 2){ busted(); }
+    else if (police.farT > 6){ deactivatePolice(); game.heat = 15; showBanner('💨 You escaped the police!', '', false); }
+  }
+  /* heat decay */
+  if (game.elapsed - game.lastHit > 4 && game.heat > 0){
+    game.heat = Math.max(0, game.heat - 2.5 * dt);
+    if (game.heat < 50 && police.active && police.farT > 2){ deactivatePolice(); }
+  }
+
+  /* player car visible in walk mode, parked */
+  playerCar.visible = true;
+  if (player.mode === 'walk'){
+    playerCar.position.copy(player.pos);
+    playerCar.rotation.y = player.heading;
+  }
+  drawMinimap();
+  updateHUD();
+
+  debugT += dt;
+  if (debugT > 0.5){
+    debugT = 0;
+    var nb = null, nd = 1e9, nt = 1e9;
+    buildings.forEach(function(b){
+      var cx = Math.max(b.x0, Math.min(pp.x, b.x1));
+      var cz = Math.max(b.z0, Math.min(pp.z, b.z1));
+      var d = Math.hypot(cx - pp.x, cz - pp.z);
+      if (d < nd){ nd = d; nb = b; }
+    });
+    traffic.forEach(function(t){
+      var d = Math.hypot(t.mesh.position.x - pp.x, t.mesh.position.z - pp.z);
+      if (d < nt) nt = d;
+    });
+    var st = {mode:player.mode, speed:Math.round((player.mode==='walk'?walker.speed:player.speed)*10)/10,
+      x:Math.round(pp.x), z:Math.round(pp.z), area:game.area, coins:game.coins,
+      heat:Math.round(game.heat), mission:game.freeRoam?'free':curMission().name,
+      dist:Math.round(game.distToTarget), police:police.active, offroad:offroad,
+      nearB:nd < 40 ? [Math.round(nb.x0), Math.round(nb.x1), Math.round(nb.z0), Math.round(nb.z1), +nd.toFixed(1)] : null,
+      nearT:+nt.toFixed(1)};
+    document.getElementById('debug').textContent = JSON.stringify(st);
+    window.MD = st;
+  }
+}
+
+/* ---------- menu wiring ---------- */
+function start(mode){
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  if (IS_TOUCH) document.getElementById('touch').classList.remove('hidden');
+  game.started = true;
+  player.mode = mode;
+  if (mode === 'walk'){
+    walker.pos.set(player.pos.x - 3, 0, player.pos.z + 4);
+    walker.heading = player.heading;
+    document.getElementById('btnCar').textContent = '🚗 ENTER CAR';
+  } else {
+    document.getElementById('btnCar').textContent = '🚶 EXIT CAR';
+  }
+  camera.position.set(player.pos.x, 5, player.pos.z + 12);
+  setMission(0);
+  showBanner('Welcome to Multan! Follow the mission.', '', false);
+  animate();
+}
+document.getElementById('btnStartDrive').addEventListener('click', function(){ start('drive'); });
+document.getElementById('btnStartWalk').addEventListener('click', function(){ start('walk'); });
+document.getElementById('btnResume').addEventListener('click', function(){ togglePause(); });
+document.getElementById('btnRestart').addEventListener('click', function(){ location.reload(); });
+document.getElementById('btnQuit').addEventListener('click', function(){ location.reload(); });
+document.getElementById('btnBustedOk').addEventListener('click', function(){
+  document.getElementById('busted').classList.add('hidden');
+  game.paused = false;
+});
+/* idle scene behind the menu */
+playerCar.position.copy(player.pos);
+playerCar.rotation.y = player.heading;
+camera.position.set(10, 6, 55);
+camera.lookAt(0, 1, -40);
+renderer.render(scene, camera);
+if (Q.has('autostart')) start(Q.get('walk') ? 'walk' : 'drive');
+if (Q.has('heat')){ game.heat = parseInt(Q.get('heat'), 10) || 0; if (game.heat >= 50) activatePolice(); }
+/* headless test hook: fast-forward the simulation without rendering */
+if (Q.has('ff') && game.started){
+  var ffN = Math.min(36000, (parseInt(Q.get('ff'), 10) || 5) * 60);
+  for (var ffi=0; ffi<ffN; ffi++) update(1/60);
+  updateHUD();
+}
+window.MD = {mode:'menu'};
+</script>
+</body>
+</html>
