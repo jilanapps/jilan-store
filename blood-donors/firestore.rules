@@ -82,7 +82,7 @@ service cloud.firestore {
     // The linked donor may update only their own lastDonation/units here too.
     match /donorsPublic/{id} {
       allow read: if true;
-      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','group','city','area','phone','address','lastDonation','units','createdAt','demo']);
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','donorNo','group','city','area','phone','address','lastDonation','units','createdAt','demo']);
       allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
       // Same requester-anchored credit as /donors above (v23).
