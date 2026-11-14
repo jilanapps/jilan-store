@@ -43,7 +43,7 @@ service cloud.firestore {
     match /donors/{id} {
       allow read: if isAdmin() || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid);
-      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','donorNo','photo','cnic','group','age','address','phone','disease','lastDonation','units','createdAt','demo'])
+      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','donorNo','photo','cnic','group','age','address','area','phone','disease','lastDonation','units','consent','consentAt','createdAt','demo'])
         && !('linkedUid' in request.resource.data));
       allow update: if isAdmin() || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid
@@ -60,7 +60,7 @@ service cloud.firestore {
     // The linked donor may update only their own lastDonation/units here too.
     match /donorsPublic/{id} {
       allow read: if true;
-      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','group','city','phone','address','lastDonation','units','createdAt','demo']);
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','group','city','area','phone','address','lastDonation','units','createdAt','demo']);
       allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
       allow delete: if isAdmin();
