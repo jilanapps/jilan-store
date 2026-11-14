@@ -442,7 +442,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <div class="wstep">
 <h3>3 &bull; Address &amp; Donation</h3>
 <div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
-<div class="fld static"><select id="dArea"><option value="">Select Area</option></select><label for="dArea">Area / City *</label></div>
+<div class="fld static"><select id="dArea"><option value="">Select Area</option></select><label for="dArea">Area / City (optional)</label></div>
 <div class="row">
 <div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
@@ -1256,6 +1256,7 @@ ur: {
 "This service is available 24/7. Patient requests and donor registration are free; the hospital's own tests or other charges may be separate.": "یہ سروس 24/7 دستیاب ہے اور مریض کی درخواست اور ڈونر رجسٹریشن مفت ہے۔ ہسپتال کے اپنے ٹیسٹ یا دیگر چارجز الگ ہو سکتے ہیں۔",
 "Area / City": "علاقہ / شہر",
 "Area / City *": "علاقہ / شہر *",
+"Area / City (optional)": "علاقہ / شہر (اختیاری)",
 "Select Area": "علاقہ منتخب کریں",
 "All Areas": "تمام علاقے",
 "No donors found": "کوئی ڈونر نہیں ملا",
@@ -1547,6 +1548,7 @@ I18N.ar = {
 "This service is available 24/7. Patient requests and donor registration are free; the hospital's own tests or other charges may be separate.": "هذه الخدمة متاحة على مدار الساعة. طلبات المرضى وتسجيل المتبرعين مجانية؛ أما فحوصات المستشفى أو الرسوم الأخرى فقد تكون منفصلة.",
 "Area / City": "المنطقة / المدينة",
 "Area / City *": "المنطقة / المدينة *",
+"Area / City (optional)": "المنطقة / المدينة (اختياري)",
 "Select Area": "اختر المنطقة",
 "All Areas": "كل المناطق",
 "No donors found": "لم يتم العثور على متبرعين",
@@ -1668,7 +1670,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v21';
+var APP_VERSION = 'v22';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -2399,7 +2401,7 @@ function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) retu
 function submitDonor(){
   var btn = document.getElementById('dSubmitBtn');
   if (btn && btn.disabled) return;
-  var miss = need(['dName','dFather','dGroup','dAge','dPhone','dAddress','dArea','dDisease']);
+  var miss = need(['dName','dFather','dGroup','dAge','dPhone','dAddress','dDisease']);
   if (miss) { document.getElementById('dMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
   if (!document.getElementById('dConsent').checked) { document.getElementById('dMsg').innerHTML = '<span class="err">Please tick the permission box (Ijazat Nama) to continue.</span>'; return; }
   var age = parseInt(val('dAge'),10);
