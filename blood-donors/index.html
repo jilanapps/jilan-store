@@ -594,7 +594,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="btn ghost" onclick="doLogout()">Logout</button>
 <div id="linkBox">
 <p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.</p>
-<label>Donor No.</label><input id="pDonorNo" placeholder="e.g. D-001">
+<label>Donor No.</label><input id="pDonorNo" placeholder="e.g. 1">
 <button class="btn" onclick="linkDonorRecord()">Link My Donor Record</button>
 <div id="pLinkMsg"></div>
 </div>
@@ -1691,7 +1691,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v23';
+var APP_VERSION = 'v24';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1739,7 +1739,7 @@ var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_membe
   requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function donorPub(d){return {id:d.id,name:d.name,group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+function donorPub(d){return {id:d.id,name:d.name,donorNo:d.donorNo||'',group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
 /* Public member record: ONLY name, phone number, photo, designation and
    ID No. are public (designation + ID are on the card front and shown on
    the QR verify page).
@@ -2026,6 +2026,46 @@ function renumberMemberIds(){
             s.forEach(function(u){ db.collection('users').doc(u.id).update({linkedMemberNo:j.want}).catch(function(){}); });
           }).catch(function(){});
         }
+      });
+    });
+  });
+}
+/* Admin: renumber all donors 1, 2, 3… in registration order (oldest first).
+   Fixes the double D-001: the old numbering read the admin-only 'donors'
+   list, which a public visitor cannot read — so a fresh phone computed
+   from an empty list and issued D-001 again. v24 numbers come from the
+   public list, and this one-tap fix renumbers the existing donors and
+   rebuilds the donorLookup table, so login by Donor No. keeps working. */
+function renumberDonorNos(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var msg = document.getElementById('renumDonorMsg');
+  var say = function(t){ if (msg) msg.innerHTML = t; };
+  say('<span class="mut">Checking…</span>');
+  qAll('donors', function(ds){
+    ds.sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+    var jobs = [];
+    ds.forEach(function(d, i){
+      var want = String(i+1);
+      if ((d.donorNo||'') !== want) jobs.push({d:d, want:want});
+    });
+    if (!jobs.length) { say('<span class="ok">Donor Nos. are already in order (1, 2, 3…). Nothing to change.</span>'); return; }
+    if (!confirm('Renumber ' + jobs.length + ' donor(s)? Nos. will become 1, 2, 3… in registration order.')) { say(''); return; }
+    var done = 0;
+    var one = function(){ done++; if (done >= jobs.length) { say('<span class="ok">Renumbered ' + jobs.length + ' donor(s). Nos. are now 1, 2, 3…</span>'); renderAdmin(); } };
+    jobs.forEach(function(j){
+      var oldNo = j.d.donorNo||'';
+      qUpdate('donors', j.d.id, {donorNo:j.want}, function(){
+        qUpdate('donorsPublic', j.d.id, {donorNo:j.want}, function(){
+          var afterLookup = function(){ one(); };
+          if (oldNo && oldNo !== j.want) {
+            qDel('donorLookup', lookupKey(oldNo), function(){ qAdd('donorLookup', {id:lookupKey(j.want), donorId:j.d.id}, afterLookup); });
+          } else { qAdd('donorLookup', {id:lookupKey(j.want), donorId:j.d.id}, afterLookup); }
+          if (FB_OK && db) {
+            db.collection('users').where('linkedDonorId','==',j.d.id).get().then(function(s){
+              s.forEach(function(u){ db.collection('users').doc(u.id).update({linkedDonorNo:j.want}).catch(function(){}); });
+            }).catch(function(){});
+          }
+        });
       });
     });
   });
@@ -2345,12 +2385,12 @@ function closeMyRequest(id){
     var r = doc.data(); r.id = doc.id;
     if ((r.status||'Received') === 'Completed') { alert('This request is already completed.'); loadRequests(); return; }
     if (!r.requesterPhoneNorm || normPhone(r.requesterPhoneNorm) !== MY_PHONE_NORM) { alert('This request is not yours.'); return; }
-    var no = prompt('Enter the Donor ID who donated for this request (e.g. D-001).\nLeave empty to close without a donor.');
+    var no = prompt('Enter the Donor ID who donated for this request (e.g. 1).\nLeave empty to close without a donor.');
     if (no === null) return;
     no = String(no||'').trim().toUpperCase();
     if (!no) { if (!confirm('Close this request without recording a donor?')) return; doCloseRequest(r, null); return; }
     db.collection('donorLookup').doc(lookupKey(no)).get().then(function(lk){
-      if (!lk.exists || !lk.data().donorId) { alert('Donor ID ' + no + ' not found. Check the Donor No. (e.g. D-001).'); return; }
+      if (!lk.exists || !lk.data().donorId) { alert('Donor ID ' + no + ' not found. Check the Donor No. (e.g. 1).'); return; }
       var donorId = lk.data().donorId;
       return db.collection('donorsPublic').doc(donorId).get().then(function(dd){
         if (!dd.exists) { alert('Donor ID ' + no + ' not found.'); return; }
@@ -2502,15 +2542,18 @@ function submitRequest(){
     });
   });
 }
-/* Donor No. auto-numbering (2026-11-14, user ka hukm: numbering auto honi chahiye):
-   Donor No. kabhi type nahi hota — app khud deta hai: D-001, D-002, ...
-   = sab se bara maujooda number + 1. Submit ke waqt taaza list se dobara
-   gin kar lagaya jata hai taake aik hi waqt me do registrations par bhi
-   number double na ho. */
+/* Donor No. auto-numbering (2026-11-14, user ka hukm: numbering auto honi chahiye;
+   v24: plain numbers 1, 2, 3… — 'D-001' style khatam, user: professional banao):
+   Donor No. kabhi type nahi hota — app khud deta hai: 1, 2, 3, ...
+   = sab se bara maujooda number + 1. Number PUBLIC list (donorsPublic) se
+   banta hai — pehle admin-only 'donors' list se banta tha, jo public
+   visitor par khulti nahi thi; khali list se dobara 1 ban jata tha (wahi
+   D-001 double hua tha). Submit ke waqt taaza list se dobara gin kar
+   lagaya jata hai. */
 function donorNoNum(d){ var m = String(d.donorNo||'').match(/(\d+)\s*$/); return m ? parseInt(m[1],10) : 0; }
 function pad3(n){ n = String(n); while (n.length < 3) n = '0' + n; return n; }
-function nextDonorNo(ds){ var mx = 0; (ds||[]).forEach(function(d){ var n = donorNoNum(d); if (n > mx) mx = n; }); return 'D-' + pad3(mx+1); }
-function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) return; qAll('donors', function(ds){ if (!val('dNo')) e.value = nextDonorNo(ds); e.readOnly = true; }); }
+function nextDonorNo(ds){ var mx = 0; (ds||[]).forEach(function(d){ var n = donorNoNum(d); if (n > mx) mx = n; }); return String(mx+1); }
+function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) return; qAll('donorsPublic', function(ds){ if (!val('dNo')) e.value = nextDonorNo(ds); e.readOnly = true; }); }
 function submitDonor(){
   var btn = document.getElementById('dSubmitBtn');
   if (btn && btn.disabled) return;
@@ -2529,8 +2572,8 @@ function submitDonor(){
        cannot read at all — that is why duplicates slipped through. */
     checkDonorKeys(ph, cn, function(keyDup){
       if (keyDup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.</span>'; if (btn) btn.disabled = false; return; }
-    qAll('donors', function(ds){
-      var dup = ds.some(function(d){ return waNum(d.phone) === ph || (cn && String(d.cnic||'').replace(/\D/g,'') === cn); });
+    qAll('donorsPublic', function(ds){
+      var dup = ds.some(function(d){ return waNum(d.phone) === ph; });
       if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
       var id = uid('donor');
       var dno = nextDonorNo(ds);
@@ -3412,7 +3455,7 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
