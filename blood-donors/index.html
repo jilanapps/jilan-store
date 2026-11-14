@@ -131,6 +131,9 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .wstep{display:none}.wstep.on{display:block;animation:fadeUp .3s ease}
 .wstep h3{margin:2px 0 12px}
 .wbtns{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
+.consent{border:2px solid #b91c1c;border-radius:10px;padding:10px 12px;margin:6px 0 12px;background:#fef2f2;font-size:14px;line-height:1.5}
+.consent input{width:20px;height:20px;accent-color:#b91c1c;vertical-align:middle;margin-right:6px}
+.consent label{cursor:pointer}
 .wbtns .btn{margin:0}
 .wmsg{margin-top:8px}
 
@@ -217,6 +220,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 .hwrap{flex-wrap:wrap}
 .hside{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .hside .btn{margin:0;padding:10px 14px;font-size:14px}
+.bellwrap{position:relative}
+.bell-badge{position:absolute;top:-7px;right:-7px;background:#DC2626;color:#fff;border-radius:999px;min-width:18px;height:18px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px #fff}
 .hdr-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
 .hdr-badge b{font-size:15px}
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
@@ -245,6 +250,18 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 @media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.bnav,header{display:none!important}.print-area .side-label,.print-area .verify-url{display:none!important}.cert,.cert *{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cert{box-shadow:none!important}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* ---------- language (v17) ---------- */
+.langsw{display:flex;align-items:center;gap:6px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--mut);flex-wrap:wrap}
+.langbtn{border:1.5px solid var(--line2);background:#fff;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
+.langbtn.on{background:var(--red);border-color:var(--red);color:#fff}
+.lang-ur{display:none}
+html[lang="ur"] .lang-en{display:none}
+html[lang="ur"] .lang-ur{display:block}
+html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
+[dir="rtl"] .fld>label{left:auto;right:12px}
+[dir="rtl"] .card h2:after{left:auto;right:0}
+[dir="rtl"] .hero:after{left:auto;right:-40px}
+[dir="rtl"] input,[dir="rtl"] select,[dir="rtl"] textarea{text-align:right}
 </style>
 </head>
 <body>
@@ -252,8 +269,9 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="hwrap">
 <span class="mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg1)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span>
 <div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Donate Blood &bull; Save Lives</p></div>
-<div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light" onclick="show('donor')">+ Register as Donor</button></div>
+<div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light" onclick="show('donor')">+ Register as Donor</button><button class="btn light bellwrap" onclick="show('notif')">🔔 <span>Notifications</span><span id="bellCount" class="bell-badge" style="display:none">0</span></button></div>
 </div>
+<div class="langsw"><span>Language / زبان / اللغة:</span><button class="langbtn" data-lang-btn="en" onclick="setLang('en')">English</button><button class="langbtn" data-lang-btn="ur" onclick="setLang('ur')">اردو</button><button class="langbtn" data-lang-btn="ar" onclick="setLang('ar')">عربي</button></div>
 </header>
 <div id="updateBanner" style="display:none;background:#FEF2F2;border-bottom:2px solid #DC2626;padding:10px 14px;text-align:center"><b>🆕 Nayi version <span class="upd-ver"></span> aa gayi hai.</b> <button class="btn upd-btn" style="margin-left:8px">Update karein</button> <button class="btn ghost" onclick="document.getElementById('updateBanner').style.display='none'">Baad me</button></div>
 <div class="wrap">
@@ -324,12 +342,21 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button class="gpill" data-g="AB-" onclick="setGroupFilter('AB-',this)">AB-</button>
 </div>
 <div class="row">
-<div class="fld"><input id="fCity" placeholder=" " oninput="searchDonors()"><label for="fCity">City / Area</label></div>
+<div class="fld static"><select id="fCity" onchange="searchDonors()"><option value="">All Areas</option><option>Basti Malook</option><option>Multan City</option><option>Bosan Road</option><option>Gulgasht Colony</option><option>Cantt</option><option>Shah Rukn-e-Alam Colony</option><option>Mumtazabad</option><option>Shalimar Colony</option><option>Jalalpur Pirwala</option><option>Shujabad</option><option>Dunyapur</option><option>Kabirwala</option><option>Khanewal</option><option>Vehari</option><option>Lodhran</option><option>Qasim Bela</option><option>Budhla Sant</option><option>Chowk Kumharanwala</option><option>Vehari Road</option><option>Peer Khursheed Colony</option></select><label for="fCity">Area / City</label></div>
 <label class="toggle"><input type="checkbox" id="fAvail" onchange="searchDonors()"> Available Only</label>
 </div>
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
 <p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
 <div id="findResults" style="margin-top:10px"></div>
+</div>
+</section>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<section class="sec" id="s-notif">
+<div class="card">
+<h2>🔔 Notifications</h2>
+<p class="mut">New blood requests for your blood group appear here. Login with your donor account to see only your group's requests.</p>
+<div id="notifList" class="mut">Loading…</div>
 </div>
 </section>
 
@@ -398,23 +425,25 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <div class="wstep">
 <h3>2 &bull; Identity &amp; Health</h3>
 <div class="row">
-<div class="fld"><input id="dCnic" placeholder=" "><label for="dCnic">CNIC *</label></div>
+<div class="fld"><input id="dCnic" placeholder=" "><label for="dCnic">CNIC (optional)</label></div>
 <div class="fld static"><select id="dGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="dGroup">Blood Group *</label></div>
 </div>
 <div class="row">
 <div class="fld"><input id="dAge" type="number" min="18" max="65" placeholder=" "><label for="dAge">Age *</label></div>
 <div class="fld"><input id="dPhone" type="tel" placeholder=" "><label for="dPhone">Phone *</label></div>
 </div>
-<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="wizNext('donor',['dCnic','dGroup','dAge','dPhone'])">Next →</button></div>
+<div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" onclick="wizNext('donor',['dGroup','dAge','dPhone'])">Next →</button></div>
 </div>
 <div class="wstep">
 <h3>3 &bull; Address &amp; Donation</h3>
 <div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
+<div class="fld static"><select id="dArea"><option value="">Select Area</option><option>Basti Malook</option><option>Multan City</option><option>Bosan Road</option><option>Gulgasht Colony</option><option>Cantt</option><option>Shah Rukn-e-Alam Colony</option><option>Mumtazabad</option><option>Shalimar Colony</option><option>Jalalpur Pirwala</option><option>Shujabad</option><option>Dunyapur</option><option>Kabirwala</option><option>Khanewal</option><option>Vehari</option><option>Lodhran</option><option>Qasim Bela</option><option>Budhla Sant</option><option>Chowk Kumharanwala</option><option>Vehari Road</option><option>Peer Khursheed Colony</option></select><label for="dArea">Area / City *</label></div>
 <div class="row">
 <div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
 </div>
-<div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated *</label></div>
+<div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated (optional — 0 if never donated)</label></div>
+<div class="consent"><label><input type="checkbox" id="dConsent"> <span><b>Permission (Ijazat Nama) *</b> — I agree that my name, phone number, address and blood group will be shown publicly so patients can contact me directly. Anyone can see them.<br><span dir="rtl" class="consent-ur">میں راضی ہوں کہ میرا نام، فون نمبر، پتہ اور بلڈ گروپ سب کو دکھایا جائے گا تاکہ مریض مجھ سے براہ راست رابطہ کر سکیں۔ کوئی بھی اسے دیکھ سکتا ہے۔</span></span></label></div>
 <div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" id="dSubmitBtn" onclick="submitDonor()">Register as Donor</button></div>
 </div>
 <div class="wmsg" id="dMsg"></div>
@@ -525,6 +554,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
 <div id="lMsg"></div>
 <p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
+<p class="mut small">If you signed up with Gmail, login with your Gmail. If you signed up with your phone number, login with your phone number.</p>
 <p class="mut small">Admin account is created by the organisation in Firebase Console (see SETUP.md). Donors create their own account with Sign up — email ya phone number se. Forgot Password sends a reset email (email accounts only; phone accounts contact the admin).</p>
 </div>
 <div class="card" id="signupCard" style="display:none">
@@ -587,6 +617,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec" id="s-psca">
 <div class="card" id="psca">
 <h2>PSCA Virtual Blood Bank — Punjab Safe Cities Authority</h2>
+<div class="lang-en">
 <h3>English</h3>
 <p>The Punjab Safe Cities Authority (PSCA) Virtual Blood Bank is a system that helps connect patients in Punjab who need blood with voluntary blood donors.</p>
 <p>Its main purpose is to help provide timely blood for emergency, operation, delivery, thalassemia and other patients.</p>
@@ -635,7 +666,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <p class="mut">This service is available 24/7. Patient requests and donor registration are free; the hospital&rsquo;s own tests or other charges may be separate.</p>
 <p><b>Note for Basti Dawa Blood Society:</b> register all BDBS registered donors with PSCA Virtual Blood Bank too — it can further strengthen the donor network for needy patients in Multan, Basti Malook and other areas of Punjab.</p>
 <hr>
-<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+</div>
+<div class="lang-ur" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
 <h3>اردو</h3>
 <p>پنجاب سیف سٹیز اتھارٹی (PSCA) کا Virtual Blood Bank ایک ایسا نظام ہے جس کے ذریعے پنجاب میں خون کے ضرورت مند مریضوں کو رضاکارانہ خون عطیہ کرنے والے ڈونرز سے رابطہ کروانے میں مدد دی جاتی ہے۔</p>
 <p>اس سروس کا بنیادی مقصد ایمرجنسی، آپریشن، ڈلیوری اور تھیلیسیمیا سمیت دیگر مریضوں کے لیے بروقت خون کی فراہمی میں معاونت کرنا ہے۔</p>
@@ -692,6 +724,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec" id="s-sops">
 <div class="card" id="sops">
 <h2>Standard Operating Procedures (SOPs) for Blood Donors</h2>
+<div class="lang-en">
 <h3>English</h3>
 <h3>1. Donor Registration</h3>
 <ul>
@@ -753,7 +786,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <p>BASTI DAWA BLOOD SOCIETY &bull; Chief Executive: Muhammad Asif Javaid</p>
 <p class="mut">Note: This is a draft of the basic SOPs for the society. Final medical rules will be set according to Pakistan&rsquo;s relevant blood transfusion laws, Punjab&rsquo;s rules and the authorized blood bank&rsquo;s policy.</p>
 <hr>
-<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+</div>
+<div class="lang-ur" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
 <h3>اردو</h3>
 <h3>1۔ ڈونر کی رجسٹریشن</h3>
 <ul>
@@ -818,6 +852,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 </div>
 <div class="card" id="tribute">
 <h2>🩸 Salute to All Blood Donors!</h2>
+<div class="lang-en">
 <h3>English</h3>
 <p><b>To all the great people who donate blood!</b></p>
 <p>You are all a precious asset of our society. Your donation is a new hope of life for a needy patient, happiness for a mother, a smile for a child, and peace for a family.</p>
@@ -826,7 +861,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <p><b>Remember!</b> The price of your donated blood is not paid in money, but in a human life.</p>
 <p>🩸 <b>BASTI DAWA BLOOD SOCIETY</b> &bull; <i>Salute to All Blood Donors!</i> &bull; <b>Your donation, someone&rsquo;s life!</b></p>
 <hr>
-<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+</div>
+<div class="lang-ur" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
 <h3>اردو</h3>
 <p><b>خون عطیہ کرنے والے تمام عظیم انسانوں کے نام!</b></p>
 <p>آپ سب لوگ ہمارے معاشرے کا قیمتی سرمایہ ہیں۔ آپ کا عطیہ کسی ضرورت مند مریض کے لیے زندگی کی نئی امید، کسی ماں کے لیے خوشی، کسی بچے کے لیے مسکراہٹ اور کسی خاندان کے لیے سکون کا باعث بنتا ہے۔</p>
@@ -838,6 +874,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 </div>
 <div class="card" id="benefits">
 <h2>🩸 Benefits of Blood Donation</h2>
+<div class="lang-en">
 <h3>English</h3>
 <p>Blood donation is a great act of human service. It is not only a means of saving a needy person&rsquo;s life, but it also promotes love, sympathy and the spirit of humanity in society.</p>
 <h3>15 Important Benefits of Blood Donation</h3>
@@ -873,7 +910,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <p><b>Our message:</b> Blood donation takes only a few minutes, but it can become a whole life for someone. Your donated blood can give life to a mother, bring a smile to a child&rsquo;s face, bring a father back to his family, and save a family from falling apart. Come! Donate blood, save lives, and fulfil the duty of humanity.</p>
 <p>🩸 BASTI DAWA BLOOD SOCIETY &bull; Our Mission – Saving Lives Through Voluntary Blood Donation. &bull; Chief Executive: Muhammad Asif Javaid</p>
 <hr>
-<div dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+</div>
+<div class="lang-ur" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
 <h3>اردو</h3>
 <p>خون کا عطیہ ایک عظیم انسانی خدمت ہے۔ یہ نہ صرف کسی ضرورت مند انسان کی جان بچانے کا ذریعہ ہے بلکہ معاشرے میں محبت، ہمدردی اور انسانیت کے جذبے کو بھی فروغ دیتا ہے۔</p>
 <h3>خون عطیہ کرنے کے 15 اہم فوائد</h3>
@@ -934,7 +972,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
-<button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update</button>
+<button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update <span class="mut small" id="installedVer"></span></button>
 <button class="sheet-btn" onclick="show('home');setTimeout(function(){var c=document.getElementById('contact');if(c)c.scrollIntoView({behavior:'smooth'});},100)">✉️ &nbsp;Contact Us</button>
 <button class="sheet-btn" onclick="closeModal('moreSheet')">Close</button>
 </div>
@@ -947,6 +985,651 @@ Developed by Dr Asif &bull; <a href="https://wa.me/923007379385?text=Assalam-o-A
 <a href="privacy-policy.html">Privacy Policy</a> &bull; <a href="delete-account.html">Delete Account</a>
 </footer>
 
+<script>
+/* BDBS i18n v17 — English / Urdu / Arabic. Dictionary + text-node walker.
+   English is the base (already in the file). UR/AR translations live here.
+   applyLang() walks text nodes and replaces whole-node matches; dynamic
+   content rendered later is caught by the MutationObserver. Long EN/UR
+   content blocks (SOPs/PSCA/tribute) are shown/hidden by CSS on html[lang]. */
+var I18N = {
+ur: {
+"Home": "ہوم",
+"Find Donor": "ڈونر تلاش کریں",
+"Request": "درخواست",
+"Members": "ممبرز",
+"Account": "اکاؤنٹ",
+"More": "مزید",
+"Total Registered Donors": "کل رجسٹرڈ ڈونرز",
+"+ Register as Donor": "+ ڈونر کے طور پر رجسٹر کریں",
+"Donate Blood • Save Lives": "خون عطیہ کریں • زندگیاں بچائیں",
+"Basti Dawa Blood Society • Donate Blood • Save Lives": "بستی دوا بلڈ سوسائٹی • خون عطیہ کریں • زندگیاں بچائیں",
+"Under Supervision — Basti Dawa Welfare Organization": "زیرِ نگرانی — بستی دوا ویلفیئر آرگنائزیشن",
+"BDBS • Under Supervision — Basti Dawa Welfare Organization": "BDBS • زیرِ نگرانی — بستی دوا ویلفیئر آرگنائزیشن",
+"Find Verified Blood Donors Near You in Seconds": "اپنے قریب تصدیق شدہ خون عطیہ کرنے والے سیکنڈوں میں تلاش کریں",
+"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts.": "ملتان اور بستی ملوک میں خون کے ضرورت مند مریضوں کو ڈونرز سے ملانا۔ ہر قطرہ قیمتی ہے۔",
+"🩸 Find Donor": "🩸 ڈونر تلاش کریں",
+"+ Request Blood": "+ خون کی درخواست کریں",
+"Register as Donor": "ڈونر کے طور پر رجسٹر کریں",
+"Total Donors": "کل ڈونرز",
+"Active Requests": "فعال درخواستیں",
+"Lives Saved": "بچائی گئی زندگیاں",
+"Each unit of donated blood can save up to 3 lives.": "عطیہ کردہ خون کا ہر یونٹ 3 زندگیاں بچا سکتا ہے۔",
+"Offline — saved data works on this phone. New changes will sync when internet returns.": "آف لائن — محفوظ شدہ ڈیٹا اس فون پر کام کرتا ہے۔ انٹرنیٹ واپس آنے پر نئی تبدیلیاں سنک ہو جائیں گی۔",
+"Welcome to Basti Dawa Blood Society": "بستی دوا بلڈ سوسائٹی میں خوش آمدید",
+"Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are": "بستی دوا بلڈ سوسائٹی (BDBS) خون عطیہ کرنے والوں کو ضرورت مند مریضوں سے ملاتی ہے۔ ڈونر کی ذاتی تفصیلات (فون، CNIC، پتہ، بیماری)",
+"never public": "کبھی عوامی نہیں ہوتیں",
+"— only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.": "— صرف ایڈمن لاگ ان کے بعد مکمل ریکارڈ دیکھ سکتا ہے۔ خون کی درخواست کے فون نمبر عوامی طور پر دکھائے جاتے ہیں تاکہ ڈونر مریضوں سے براہ راست رابطہ کر سکیں۔",
+"Our Leadership": "ہماری قیادت",
+"Patron In Chief": "سرپرستِ اعلیٰ",
+"Founder & Chief Executive": "بانی و چیف ایگزیکٹو",
+"Follow us:": "ہمیں فالو کریں:",
+"Latest activity": "تازہ ترین سرگرمی",
+"Contact Us": "ہم سے رابطہ کریں",
+"Reach out to Basti Dawa Blood Society for blood donation, membership or any question.": "خون عطیہ کرنے، ممبرشپ یا کسی بھی سوال کے لیے بستی دوا بلڈ سوسائٹی سے رابطہ کریں۔",
+"Email:": "ای میل:",
+"WhatsApp (Founder Muhammad Asif Javaid):": "واٹس ایپ (بانی محمد آصف جاوید):",
+"Loading…": "لوڈ ہو رہا ہے…",
+"Daily Activity & Gallery": "روزانہ سرگرمی اور گیلری",
+"Camps & Activities": "کیمپ اور سرگرمیاں",
+"Find a Blood Donor": "خون کا ڈونر تلاش کریں",
+"City / Area": "شہر / علاقہ",
+"Blood Group": "بلڈ گروپ",
+"Available Only": "صرف دستیاب",
+"All": "سب",
+"Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.": "عوامی نتائج میں صرف نام، بلڈ گروپ، شہر اور آخری عطیہ کی تاریخ دکھائی جاتی ہے۔ فون نمبر اور ذاتی تفصیلات یہاں کبھی نہیں دکھائی جاتیں۔ ڈونر سے رابطے کے لیے خون کی درخواست جمع کروائیں — ایڈمن آپ کو ملا دے گا۔",
+"Blood Donation Request": "خون عطیہ کرنے کی درخواست",
+"1 • Patient Details": "1 • مریض کی تفصیلات",
+"Pt Name *": "مریض کا نام *",
+"Age *": "عمر *",
+"Blood Group Needed *": "مطلوبہ بلڈ گروپ *",
+"Hospital *": "ہسپتال *",
+"2 • Blood Needed": "2 • مطلوبہ خون",
+"Units Needed *": "مطلوبہ یونٹس *",
+"Details *": "تفصیلات *",
+"3 • Contact": "3 • رابطہ",
+"Phone *": "فون *",
+"Submit Request": "درخواست جمع کروائیں",
+"Your request is sent to the BDBS admin. The public list shows the patient's first name, blood group needed, units needed, hospital, city, request date, phone number and current progress — so donors can contact you directly. CNIC is never shown.": "آپ کی درخواست BDBS ایڈمن کو بھیج دی جاتی ہے۔ عوامی فہرست میں مریض کا پہلا نام، مطلوبہ بلڈ گروپ، مطلوبہ یونٹس، ہسپتال، شہر، درخواست کی تاریخ، فون نمبر اور موجودہ پیش رفت دکھائی جاتی ہے — تاکہ ڈونر آپ سے براہ راست رابطہ کر سکیں۔ CNIC کبھی نہیں دکھایا جاتا۔",
+"Donor Registration": "ڈونر رجسٹریشن",
+"Register as a blood donor. Your name, phone, address and blood group will be shown publicly so patients can contact you directly. Your CNIC, age and disease are": "خون کے ڈونر کے طور پر رجسٹر کریں۔ آپ کا نام، فون، پتہ اور بلڈ گروپ عوامی طور پر دکھایا جائے گا تاکہ مریض آپ سے براہ راست رابطہ کر سکیں۔ آپ کا CNIC، عمر اور بیماری",
+"private": "نجی",
+"— only the BDBS admin can see them.": "ہیں — صرف BDBS ایڈمن انہیں دیکھ سکتا ہے۔",
+"Step 1 of 3": "مرحلہ 1 از 3",
+"Step 1 of 4": "مرحلہ 1 از 4",
+"1 • Personal": "1 • ذاتی",
+"1 • Personal Details": "1 • ذاتی تفصیلات",
+"Full Name": "پورا نام",
+"Father Name *": "والد کا نام *",
+"Donor No. * (auto)": "ڈونر نمبر * (خودکار)",
+"Donor Profile Photo (optional)": "ڈونر کی پروفائل تصویر (اختیاری)",
+"2 • Identity": "2 • شناخت",
+"2 • Identity & Health": "2 • شناخت اور صحت",
+"Blood Group *": "بلڈ گروپ *",
+"Age *": "عمر *",
+"Phone *": "فون *",
+"3 • Address & Donation": "3 • پتہ اور عطیہ",
+"Address *": "پتہ *",
+"Disease *": "بیماری *",
+"Last Blood Donation": "آخری خون کا عطیہ",
+"Last Blood Donation (optional — only if donated before)": "آخری خون کا عطیہ (اختیاری — صرف اگر پہلے عطیہ کیا ہو)",
+"Total Units of Blood Donated (optional — 0 if never donated)": "عطیہ کردہ خون کے کل یونٹس (اختیاری — اگر کبھی عطیہ نہ کیا ہو تو 0)",
+"Permission (Ijazat Nama) *": "اجازت نامہ *",
+"— I agree that my name, phone number, address and blood group will be shown publicly so patients can contact me directly. Anyone can see them.": "— میں راضی ہوں کہ میرا نام، فون نمبر، پتہ اور بلڈ گروپ سب کو دکھایا جائے گا تاکہ مریض مجھ سے براہ راست رابطہ کر سکیں۔ کوئی بھی اسے دیکھ سکتا ہے۔",
+"← Back": "← واپس",
+"Next →": "اگلا →",
+"Reset Form": "فارم صاف کریں",
+"Add Member": "ممبر شامل کریں",
+"Add Member & Generate Card": "ممبر شامل کریں اور کارڈ بنائیں",
+"Member ID": "ممبر ID",
+"Designation *": "عہدہ *",
+"Date of Birth *": "تاریخ پیدائش *",
+"Education *": "تعلیم *",
+"Email *": "ای میل *",
+"Phone No. *": "فون نمبر *",
+"Expiry Date *": "اختتامی تاریخ *",
+"Issue Date *": "جاری کرنے کی تاریخ *",
+"Photo (optional)": "تصویر (اختیاری)",
+"4 • Membership": "4 • ممبرشپ",
+"3 • Contact & Education": "3 • رابطہ اور تعلیم",
+"ID No. auto-assign hogi — pehle member 001, phir 002, 003…": "ID نمبر خودکار طور پر ملے گا — پہلا ممبر 001، پھر 002، 003…",
+"Society members: enter your Member ID and the phone number on your card to link your membership card here.": "سوسائٹی کے ممبرز: اپنا ممبر کارڈ یہاں لنک کرنے کے لیے اپنا ممبر ID اور کارڈ پر موجود فون نمبر درج کریں۔",
+"Public member list shows only name, phone number and photo. All other member details are secret — admin only. Scan a member's QR code to verify membership.": "عوامی ممبر فہرست میں صرف نام، فون نمبر اور تصویر دکھائی جاتی ہے۔ ممبر کی باقی تمام تفصیلات خفیہ ہیں — صرف ایڈمن کے لیے۔ ممبرشپ کی تصدیق کے لیے ممبر کا QR کوڈ اسکین کریں۔",
+"Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.": "ممبرشپ کارڈ QR کوڈ کے ساتھ جاری کیا جاتا ہے۔ ممبر کی تصدیق کے لیے QR اسکین کریں۔ ذاتی تفصیلات صرف ایڈمن دیکھ سکتا ہے۔",
+"Login": "لاگ ان",
+"Member Login": "ممبر لاگ ان",
+"Sign up": "سائن اپ",
+"Create Account": "اکاؤنٹ بنائیں",
+"Email ya Phone Number": "ای میل یا فون نمبر",
+"Password": "پاس ورڈ",
+"Confirm Password": "پاس ورڈ کی تصدیق کریں",
+"Forgot Password?": "پاس ورڈ بھول گئے؟",
+"Already have an account?": "کیا آپ کا اکاؤنٹ پہلے سے موجود ہے؟",
+"New user?": "نئے صارف؟",
+"Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.": "آپ کا اکاؤنٹ ڈونر اکاؤنٹ ہے۔ اپنی ای میل یا فون نمبر + پاس ورڈ سے لاگ ان کریں۔ آپ کا CNIC، عمر اور بیماری نجی رہتے ہیں — صرف BDBS ایڈمن مکمل ریکارڈ دیکھ سکتا ہے۔ آپ کا نام، فون، پتہ اور بلڈ گروپ عوامی ہیں۔",
+"Link My Donor Record": "میرا ڈونر ریکارڈ لنک کریں",
+"Link My Member Card": "میرا ممبر کارڈ لنک کریں",
+"Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.": "اپنے عطیہ کی تفصیلات اور سرٹیفکیٹ دیکھنے کے لیے اپنا ڈونر ریکارڈ لنک کریں۔ وہ ڈونر نمبر درج کریں جو ڈونر کے طور پر رجسٹر کرتے وقت آپ کو دیا گیا تھا۔",
+"My Profile": "میری پروفائل",
+"My Certificates": "میرے سرٹیفکیٹ",
+"Update My Last Donation": "میرا آخری عطیہ اپڈیٹ کریں",
+"Delete My Account": "میرا اکاؤنٹ حذف کریں",
+"Delete Account": "اکاؤنٹ حذف کریں",
+"This deletes your login account and your linked donor record. This cannot be undone.": "اس سے آپ کا لاگ ان اکاؤنٹ اور اس سے منسلک ڈونر ریکارڈ حذف ہو جائے گا۔ یہ واپس نہیں ہو سکتا۔",
+"Logout": "لاگ آؤٹ",
+"Admin Panel": "ایڈمن پینل",
+"Donor No.": "ڈونر نمبر",
+"Check for Update": "اپڈیٹ چیک کریں",
+"Privacy Policy": "پرائیویسی پالیسی",
+"Publish Activity": "سرگرمی شائع کریں",
+"Publish Activity (Admin)": "سرگرمی شائع کریں (ایڈمن)",
+"Donor Guidelines (SOPs)": "ڈونر رہنما اصول (SOPs)",
+"PSCA Blood Bank": "PSCA بلڈ بینک",
+"PSCA Virtual Blood Bank — Punjab Safe Cities Authority": "PSCA ورچوئل بلڈ بینک — پنجاب سیف سٹیز اتھارٹی",
+"Open Blood Requests": "کھلی خون کی درخواستیں",
+"Closed Requests": "بند درخواستیں",
+"Open the PSCA official website.": "PSCA کی آفیشل ویب سائٹ کھولیں۔",
+"Close": "بند کریں",
+"Update": "اپڈیٹ",
+"Update karein": "اپڈیٹ کریں",
+"Baad me": "بعد میں",
+"aa gayi hai.": "آ گئی ہے۔",
+"Title *": "عنوان *",
+"Select": "منتخب کریں",
+"Call": "کال کریں",
+"Donor Appreciation Certificate": "ڈونر تعریفی سرٹیفکیٹ",
+"Certificate Reference No.": "سرٹیفکیٹ ریفرنس نمبر",
+"Check Certificate": "سرٹیفکیٹ چیک کریں",
+"After a blood donation, the admin generates an auto-generated appreciation certificate with a verified reference number. Enter a reference number to check a certificate.": "خون عطیہ کرنے کے بعد، ایڈمن تصدیق شدہ ریفرنس نمبر کے ساتھ خودکار تعریفی سرٹیفکیٹ بناتا ہے۔ سرٹیفکیٹ چیک کرنے کے لیے ریفرنس نمبر درج کریں۔",
+"Verified Reference No:": "تصدیق شدہ ریفرنس نمبر:",
+"BDBS Certificate": "BDBS سرٹیفکیٹ",
+"CERTIFICATE OF APPRECIATION": "تعریفی سرٹیفکیٹ",
+"Basti Dawa Blood Society proudly appreciates": "بستی دوا بلڈ سوسائٹی فخر سے تعریف کرتی ہے",
+"Your gift saved a life.": "آپ کے عطیے نے ایک زندگی بچائی۔",
+"Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization": "تصدیق شدہ دستخط — زیرِ نگرانی، بستی دوا ویلفیئر آرگنائزیشن",
+"Share Certificate": "سرٹیفکیٹ شیئر کریں",
+"Share Certificate as PDF": "سرٹیفکیٹ PDF کے طور پر شیئر کریں",
+"Print Certificate": "سرٹیفکیٹ پرنٹ کریں",
+"Share Card": "کارڈ شیئر کریں",
+"Share Card as PDF": "کارڈ PDF کے طور پر شیئر کریں",
+"Certificate": "سرٹیفکیٹ",
+"Old Certificate": "پرانا سرٹیفکیٹ",
+"New Certificate": "نیا سرٹیفکیٹ",
+"Available": "دستیاب",
+"Cooldown": "وقفہ",
+"Call Now": "ابھی کال کریں",
+"View / Download": "دیکھیں / ڈاؤن لوڈ کریں",
+"Next Stage": "اگلا مرحلہ",
+"Remove": "ہٹائیں",
+"Save Changes": "تبدیلیاں محفوظ کریں",
+"Completed": "مکمل",
+"Donor Found": "ڈونر مل گیا",
+"Contacting Donors": "ڈونرز سے رابطہ ہو رہا ہے",
+"Received": "موصول",
+"Please fill all required fields.": "براہ کرم تمام ضروری فیلڈز بھریں۔",
+"Please fill all required fields in this step.": "براہ کرم اس مرحلے کے تمام ضروری فیلڈز بھریں۔",
+"Please tick the permission box (Ijazat Nama) to continue.": "جاری رکھنے کے لیے براہ کرم اجازت نامہ والے باکس پر ٹک کریں۔",
+"Donor age must be 18–65.": "ڈونر کی عمر 18 سے 65 کے درمیان ہونی چاہیے۔",
+"This donor is already registered (same phone or CNIC).": "یہ ڈونر پہلے سے رجسٹرڈ ہے (وہی فون یا CNIC)۔",
+"This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.": "یہ ڈونر پہلے سے رجسٹرڈ ہے (وہی فون یا CNIC)۔ ایک CNIC / ایک فون نمبر = صرف ایک ڈونر۔",
+"Could not save. Please try again.": "محفوظ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
+"Password must be at least 6 characters.": "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے۔",
+"Enter a valid email address.": "درست ای میل ایڈریس درج کریں۔",
+"This email or phone number is already registered — try Login instead.": "یہ ای میل یا فون نمبر پہلے سے رجسٹرڈ ہے — اس کے بجائے لاگ ان کریں۔",
+"Member not found.": "ممبر نہیں ملا۔",
+"Admin login required.": "ایڈمن لاگ ان ضروری ہے۔",
+"Certificate sirf admin (owner) bana sakta hai.": "سرٹیفکیٹ صرف ایڈمن (مالک) بنا سکتا ہے۔",
+"Is donor ne abhi tak khoon nahi diya — certificate sirf donation ke baad banta hai.": "اس ڈونر نے ابھی تک خون نہیں دیا — سرٹیفکیٹ صرف عطیہ کے بعد بنتا ہے۔",
+"Is donor ka koi purana certificate nahi mila.": "اس ڈونر کا کوئی پرانا سرٹیفکیٹ نہیں ملا۔",
+"Donation ki date (YYYY-MM-DD)?": "عطیہ کی تاریخ (YYYY-MM-DD)؟",
+"Is donation ke units kitne hain?": "اس عطیہ کے کتنے یونٹس ہیں؟",
+"Units 1 ya zyada hone chahiye.": "یونٹس 1 یا زیادہ ہونے چاہئیں۔",
+"Date YYYY-MM-DD format me likhein, jaisay 2026-11-14.": "تاریخ YYYY-MM-DD فارمیٹ میں لکھیں، جیسے 2026-11-14۔",
+"Internet nahi hai — update check nahi ho saka.": "انٹرنیٹ نہیں ہے — اپڈیٹ چیک نہیں ہو سکا۔",
+"Update check nahi ho saka — dobara koshish karein.": "اپڈیٹ چیک نہیں ہو سکا — دوبارہ کوشش کریں۔",
+"App latest version par hai (": "ایپ تازہ ترین ورژن پر ہے (",
+"installed)": "انسٹال ہے)",
+"Remove this blood request? It will be deleted from the public list too. This cannot be undone.": "کیا یہ خون کی درخواست ہٹا دی جائے؟ یہ عوامی فہرست سے بھی حذف ہو جائے گی۔ یہ واپس نہیں ہو سکتا۔",
+"Remove this donor? The donor record and public listing will be deleted. This cannot be undone.": "کیا یہ ڈونر ہٹا دیا جائے؟ ڈونر ریکارڈ اور عوامی فہرست حذف ہو جائے گی۔ یہ واپس نہیں ہو سکتا۔",
+"Remove this member? The member record, public listing and card will be deleted. This cannot be undone.": "کیا یہ ممبر ہٹا دیا جائے؟ ممبر ریکارڈ، عوامی فہرست اور کارڈ حذف ہو جائے گا۔ یہ واپس نہیں ہو سکتا۔",
+"Delete your account? Your login and linked donor record will be removed. This cannot be undone.": "کیا آپ اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ آپ کا لاگ ان اور منسلک ڈونر ریکارڈ ہٹا دیا جائے گا۔ یہ واپس نہیں ہو سکتا۔",
+"Could not create account.": "اکاؤنٹ نہیں بن سکا۔",
+"Could not generate certificate.": "سرٹیفکیٹ نہیں بن سکا۔",
+"Preparing card…": "کارڈ تیار ہو رہا ہے…",
+"Preparing…": "تیار ہو رہا ہے…",
+"Update check sirf app me chalta hai.": "اپڈیٹ چیک صرف ایپ میں چلتا ہے۔",
+"How to get blood": "خون کیسے حاصل کریں",
+"Information needed for the patient": "مریض کے لیے درکار معلومات",
+"What happens next?": "اس کے بعد کیا ہوتا ہے؟",
+"Donor registration": "ڈونر رجسٹریشن",
+"How Often Can Blood Be Donated?": "خون کتنے عرصے بعد عطیہ کیا جا سکتا ہے؟",
+"Precautions Before Donating Blood": "خون عطیہ کرنے سے پہلے احتیاطی تدابیر",
+"15 Important Benefits of Blood Donation": "خون عطیہ کرنے کے 15 اہم فوائد",
+"Standard Operating Procedures (SOPs) for Blood Donors": "خون عطیہ کرنے والوں کے لیے معیاری طریقہ کار (SOPs)",
+"🩸 Salute to All Blood Donors!": "🩸 خون عطیہ کرنے والے تمام عظیم انسانوں کو سلام!",
+"🩸 Benefits of Blood Donation": "🩸 خون عطیہ کرنے کے فوائد",
+"Want to donate?": "عطیہ کرنا چاہتے ہیں؟",
+"Go to Volunteer Registration.": "رضاکار رجسٹریشن پر جائیں۔",
+"Your donation, someone's life!": "آپ کا عطیہ، کسی کی زندگی!",
+"Your donation can give a person a new life.": "آپ کا عطیہ کسی انسان کو نئی زندگی دے سکتا ہے۔",
+"We thank all our blood-donating brothers and sisters from the bottom of our hearts. May Allah accept this noble deed, and grant you health, safety and a life full of happiness. Ameen! 🤲": "ہم دل کی گہرائیوں سے تمام خون عطیہ کرنے والے بھائیوں اور بہنوں کا شکریہ ادا کرتے ہیں۔ اللہ تعالیٰ آپ کے اس نیک عمل کو اپنی بارگاہ میں قبول فرمائے، آپ کو صحت، سلامتی اور خوشیوں بھری زندگی عطا فرمائے۔ آمین! 🤲",
+"You are all a precious asset of our society. Your donation is a new hope of life for a needy patient, happiness for a mother, a smile for a child, and peace for a family.": "آپ سب لوگ ہمارے معاشرے کا قیمتی سرمایہ ہیں۔ آپ کا عطیہ کسی ضرورت مند مریض کے لیے زندگی کی نئی امید، کسی ماں کے لیے خوشی، کسی بچے کے لیے مسکراہٹ اور کسی خاندان کے لیے سکون کا باعث بنتا ہے۔",
+"You take out your precious time to serve humanity — this spirit is truly praiseworthy.": "آپ اپنا قیمتی وقت نکال کر انسانیت کی خدمت کرتے ہیں، یہ جذبہ یقیناً قابلِ تحسین ہے۔",
+"To all the great people who donate blood!": "خون عطیہ کرنے والے تمام عظیم انسانوں کے نام!",
+"We will give top priority to the respect, health, consent and privacy of blood donors.": "ہم خون عطیہ کرنے والوں کی عزت، صحت، رضامندی اور رازداری کو اولین ترجیح دیں گے۔",
+"Remember!": "یاد رکھیں!",
+"Our Pledge:": "ہمارا عہد:",
+"Our message:": "ہمارا پیغام:",
+"Note for Basti Dawa Blood Society:": "بستی دوا بلڈ سوسائٹی کے لیے اہم تجویز:",
+"register all BDBS registered donors with PSCA Virtual Blood Bank too — it can further strengthen the donor network for needy patients in Multan, Basti Malook and other areas of Punjab.": "آپ اپنی Basti Dawa Blood Society کے تمام رجسٹرڈ ڈونرز کو بھی PSCA Virtual Blood Bank میں رجسٹر کروائیں۔ اس سے ملتان، بستی ملوک اور پنجاب کے دوسرے علاقوں میں ضرورت مند مریضوں کے لیے ڈونرز کا نیٹ ورک مزید مضبوط ہو سکتا ہے۔",
+"© 2026 Basti Dawa Blood Society. All rights reserved.": "© 2026 بستی دوا بلڈ سوسائٹی۔ جملہ حقوق محفوظ ہیں۔",
+"Developed by Dr Asif •": "ڈاکٹر آصف کی جانب سے تیار کردہ •",
+"🩸 BASTI DAWA BLOOD SOCIETY • Our Mission – Saving Lives Through Voluntary Blood Donation. • Chief Executive: Muhammad Asif Javaid": "🩸 بستی دوا بلڈ سوسائٹی • ہمارا مشن – رضاکارانہ خون عطیہ کے ذریعے زندگیاں بچانا۔ • چیف ایگزیکٹو: محمد آصف جاوید",
+"BASTI DAWA BLOOD SOCIETY • Chief Executive: Muhammad Asif Javaid": "بستی دوا بلڈ سوسائٹی • چیف ایگزیکٹو: محمد آصف جاوید",
+"Donor": "ڈونر",
+"Step": "مرحلہ",
+"Phone:": "فون:",
+"Email:": "ای میل:",
+"Name:": "نام:",
+"Father Name:": "والد کا نام:",
+"CNIC:": "CNIC:",
+"Blood Group:": "بلڈ گروپ:",
+"Age:": "عمر:",
+"Date of Birth:": "تاریخ پیدائش:",
+"Designation:": "عہدہ:",
+"Education:": "تعلیم:",
+"Expiry Date:": "اختتامی تاریخ:",
+"Issue Date:": "جاری کرنے کی تاریخ:",
+"ID No.:": "ID نمبر:",
+"Address:": "پتہ:",
+"Membership Card -": "ممبرشپ کارڈ -",
+"Blood Donation Certificate -": "خون عطیہ سرٹیفکیٹ -",
+"Emergency Helpline:": "ایمرجنسی ہیلپ لائن:",
+"Virtual Blood Bank WhatsApp:": "ورچوئل بلڈ بینک واٹس ایپ:",
+"Website:": "ویب سائٹ:",
+"PSCA official website": "PSCA کی آفیشل ویب سائٹ",
+"Please note: the Virtual Blood Bank helps in finding a donor; blood testing and transfusion are the hospital's job.": "یاد رہے کہ ورچوئل بلڈ بینک ڈونر تلاش کرنے میں مدد کرتا ہے؛ خون کی جانچ اور منتقلی ہسپتال کا کام ہے۔",
+"This service is available 24/7. Patient requests and donor registration are free; the hospital's own tests or other charges may be separate.": "یہ سروس 24/7 دستیاب ہے اور مریض کی درخواست اور ڈونر رجسٹریشن مفت ہے۔ ہسپتال کے اپنے ٹیسٹ یا دیگر چارجز الگ ہو سکتے ہیں۔",
+"Area / City": "علاقہ / شہر",
+"Area / City *": "علاقہ / شہر *",
+"Select Area": "علاقہ منتخب کریں",
+"All Areas": "تمام علاقے",
+"No donors found": "کوئی ڈونر نہیں ملا",
+"Try another blood group or city — or submit a blood request.": "کوئی اور بلڈ گروپ یا شہر آزمائیں — یا خون کی درخواست جمع کروائیں۔",
+"Password reset needs internet.": "پاس ورڈ ری سیٹ کے لیے انٹرنیٹ چاہیے۔",
+"Enter your email first, then Forgot Password.": "پہلے اپنی ای میل لکھیں، پھر Forgot Password دبائیں۔",
+"Could not send reset email — check the email address.": "ری سیٹ ای میل نہیں بھیجی جا سکی — ای میل ایڈریس چیک کریں۔",
+"Phone-number accounts cannot reset by email. Contact the admin on WhatsApp to reset your password.": "فون نمبر والے اکاؤنٹس ای میل سے ری سیٹ نہیں ہو سکتے۔ پاس ورڈ ری سیٹ کے لیے واٹس ایپ پر ایڈمن سے رابطہ کریں۔",
+"Contact Admin on WhatsApp": "واٹس ایپ پر ایڈمن سے رابطہ کریں",
+"Check your inbox (and spam) — open the link to set a new password.": "اپنا ان باکس (اور اسپام) چیک کریں — نیا پاس ورڈ سیٹ کرنے کے لیے لنک کھولیں۔",
+"CNIC (optional)": "شناختی کارڈ (اختیاری)",
+"Notifications": "اطلاعات",
+"New blood requests for your blood group appear here. Login with your donor account to see only your group's requests.": "آپ کے بلڈ گروپ کی نئی خون کی درخواستیں یہاں نظر آئیں گی۔ صرف اپنے گروپ کی درخواستیں دیکھنے کے لیے اپنے ڈونر اکاؤنٹ سے لاگ ان کریں۔",
+"No new notifications": "کوئی نئی اطلاع نہیں",
+"No open blood requests": "کوئی کھلی خون کی درخواست نہیں",
+"for blood group": "بلڈ گروپ کے لیے",
+"right now.": "ابھی۔",
+"open blood request(s)": "کھلی خون کی درخواستیں",
+"If you signed up with Gmail, login with your Gmail. If you signed up with your phone number, login with your phone number.": "اگر آپ نے جی میل سے اکاؤنٹ بنایا تھا تو جی میل سے لاگ ان کریں۔ اگر فون نمبر سے بنایا تھا تو فون نمبر سے لاگ ان کریں۔",
+"Login failed — check email/phone number and password.": "لاگ ان ناکام — ای میل / فون نمبر اور پاس ورڈ چیک کریں۔",
+"This phone number has a donor record, but the account may be Gmail-based. Try logging in with your Gmail, or contact the admin.": "اس نمبر پر ڈونر ریکارڈ ہے، لیکن اکاؤنٹ جی میل سے بنا ہو سکتا ہے۔ اپنی جی میل سے لاگ ان کر کے دیکھیں، یا ایڈمن سے رابطہ کریں۔",
+"No account found for this phone number. If you signed up with Gmail, login with your Gmail — or Sign up first.": "اس نمبر پر کوئی اکاؤنٹ نہیں ملا۔ اگر آپ نے جی میل سے اکاؤنٹ بنایا تھا تو جی میل سے لاگ ان کریں — یا پہلے Sign up کریں۔",
+"English": "انگریزی"
+}
+};
+I18N.ar = {
+"Home": "الرئيسية",
+"Find Donor": "ابحث عن متبرع",
+"Request": "طلب",
+"Members": "الأعضاء",
+"Account": "الحساب",
+"More": "المزيد",
+"Total Registered Donors": "إجمالي المتبرعين المسجلين",
+"+ Register as Donor": "+ سجّل كمتبرع",
+"Donate Blood • Save Lives": "تبرع بالدم • أنقذ الأرواح",
+"Basti Dawa Blood Society • Donate Blood • Save Lives": "جمعية بستي دوا للدم • تبرع بالدم • أنقذ الأرواح",
+"Under Supervision — Basti Dawa Welfare Organization": "تحت إشراف — منظمة بستي دوا للرعاية الاجتماعية",
+"BDBS • Under Supervision — Basti Dawa Welfare Organization": "BDBS • تحت إشراف — منظمة بستي دوا للرعاية الاجتماعية",
+"Find Verified Blood Donors Near You in Seconds": "ابحث عن متبرعين موثوقين بالقرب منك في ثوانٍ",
+"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts.": "نصل المتبرعين بالدم بالمرضى المحتاجين في ملتان وبستي ملوك. كل قطرة مهمة.",
+"🩸 Find Donor": "🩸 ابحث عن متبرع",
+"+ Request Blood": "+ اطلب الدم",
+"Register as Donor": "سجّل كمتبرع",
+"Total Donors": "إجمالي المتبرعين",
+"Active Requests": "الطلبات النشطة",
+"Lives Saved": "الأرواح التي تم إنقاذها",
+"Each unit of donated blood can save up to 3 lives.": "كل وحدة دم متبرع بها يمكن أن تنقذ حتى 3 أرواح.",
+"Offline — saved data works on this phone. New changes will sync when internet returns.": "دون اتصال — البيانات المحفوظة تعمل على هذا الهاتف. ستتم مزامنة التغييرات الجديدة عند عودة الإنترنت.",
+"Welcome to Basti Dawa Blood Society": "مرحباً بك في جمعية بستي دوا للدم",
+"Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are": "تربط جمعية بستي دوا للدم المتبرعين بالمرضى المحتاجين. التفاصيل الشخصية للمتبرع (الهاتف، الهوية، العنوان، المرض)",
+"never public": "ليست عامة أبداً",
+"— only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.": "— يمكن للمسؤول فقط رؤية السجلات الكاملة بعد تسجيل الدخول. تُعرض أرقام هواتف طلبات الدم علناً ليتمكن المتبرعون من الاتصال بالمرضى مباشرة.",
+"Our Leadership": "قيادتنا",
+"Patron In Chief": "الراعي العام",
+"Founder & Chief Executive": "المؤسس والرئيس التنفيذي",
+"Follow us:": "تابعنا:",
+"Latest activity": "أحدث الأنشطة",
+"Contact Us": "اتصل بنا",
+"Reach out to Basti Dawa Blood Society for blood donation, membership or any question.": "تواصل مع جمعية بستي دوا للدم للتبرع بالدم أو العضوية أو أي سؤال.",
+"Email:": "البريد الإلكتروني:",
+"WhatsApp (Founder Muhammad Asif Javaid):": "واتساب (المؤسس محمد آصف جاويد):",
+"Loading…": "جارٍ التحميل…",
+"Daily Activity & Gallery": "النشاط اليومي والمعرض",
+"Camps & Activities": "المخيمات والأنشطة",
+"Find a Blood Donor": "ابحث عن متبرع بالدم",
+"City / Area": "المدينة / المنطقة",
+"Blood Group": "فصيلة الدم",
+"Available Only": "المتاحون فقط",
+"All": "الكل",
+"Public results show only name, blood group, city and last donation date. Phone numbers and personal details are never shown here. To contact a donor, submit a blood request — the admin will connect you.": "تعرض النتائج العامة الاسم وفصيلة الدم والمدينة وتاريخ آخر تبرع فقط. لا تُعرض أرقام الهواتف والتفاصيل الشخصية هنا أبداً. للاتصال بمتبرع، قدّم طلب دم — وسيصلك المسؤول به.",
+"Blood Donation Request": "طلب التبرع بالدم",
+"1 • Patient Details": "1 • تفاصيل المريض",
+"Pt Name *": "اسم المريض *",
+"Age *": "العمر *",
+"Blood Group Needed *": "فصيلة الدم المطلوبة *",
+"Hospital *": "المستشفى *",
+"2 • Blood Needed": "2 • الدم المطلوب",
+"Units Needed *": "الوحدات المطلوبة *",
+"Details *": "التفاصيل *",
+"3 • Contact": "3 • الاتصال",
+"Phone *": "الهاتف *",
+"Submit Request": "قدّم الطلب",
+"Your request is sent to the BDBS admin. The public list shows the patient's first name, blood group needed, units needed, hospital, city, request date, phone number and current progress — so donors can contact you directly. CNIC is never shown.": "يُرسل طلبك إلى مسؤول الجمعية. تعرض القائمة العامة الاسم الأول للمريض وفصيلة الدم المطلوبة والوحدات المطلوبة والمستشفى والمدينة وتاريخ الطلب ورقم الهاتف والتقدم الحالي — ليتمكن المتبرعون من الاتصال بك مباشرة. لا تُعرض الهوية أبداً.",
+"Donor Registration": "تسجيل متبرع",
+"Register as a blood donor. Your name, phone, address and blood group will be shown publicly so patients can contact you directly. Your CNIC, age and disease are": "سجّل كمتبرع بالدم. سيُعرض اسمك وهاتفك وعنوانك وفصيلة دمك علناً ليتمكن المرضى من الاتصال بك مباشرة. هويتك وعمرك ومرضك",
+"private": "خاصة",
+"— only the BDBS admin can see them.": "— يمكن لمسؤول الجمعية فقط رؤيتها.",
+"Step 1 of 3": "الخطوة 1 من 3",
+"Step 1 of 4": "الخطوة 1 من 4",
+"1 • Personal": "1 • شخصي",
+"1 • Personal Details": "1 • التفاصيل الشخصية",
+"Full Name": "الاسم الكامل",
+"Father Name *": "اسم الأب *",
+"Donor No. * (auto)": "رقم المتبرع * (تلقائي)",
+"Donor Profile Photo (optional)": "صورة الملف الشخصي للمتبرع (اختياري)",
+"2 • Identity": "2 • الهوية",
+"2 • Identity & Health": "2 • الهوية والصحة",
+"Blood Group *": "فصيلة الدم *",
+"Age *": "العمر *",
+"Phone *": "الهاتف *",
+"3 • Address & Donation": "3 • العنوان والتبرع",
+"Address *": "العنوان *",
+"Disease *": "المرض *",
+"Last Blood Donation": "آخر تبرع بالدم",
+"Last Blood Donation (optional — only if donated before)": "آخر تبرع بالدم (اختياري — فقط إذا تبرعت من قبل)",
+"Total Units of Blood Donated (optional — 0 if never donated)": "إجمالي وحدات الدم المتبرع بها (اختياري — 0 إذا لم تتبرع أبداً)",
+"Permission (Ijazat Nama) *": "إذن *",
+"— I agree that my name, phone number, address and blood group will be shown publicly so patients can contact me directly. Anyone can see them.": "— أوافق على عرض اسمي ورقم هاتفي وعنواني وفصيلة دمي علناً ليتمكن المرضى من الاتصال بي مباشرة. يمكن لأي شخص رؤيتها.",
+"← Back": "← رجوع",
+"Next →": "التالي →",
+"Reset Form": "مسح النموذج",
+"Add Member": "أضف عضواً",
+"Add Member & Generate Card": "أضف عضواً وأنشئ البطاقة",
+"Member ID": "رقم العضو",
+"Designation *": "المنصب *",
+"Date of Birth *": "تاريخ الميلاد *",
+"Education *": "التعليم *",
+"Email *": "البريد الإلكتروني *",
+"Phone No. *": "رقم الهاتف *",
+"Expiry Date *": "تاريخ الانتهاء *",
+"Issue Date *": "تاريخ الإصدار *",
+"Photo (optional)": "الصورة (اختياري)",
+"4 • Membership": "4 • العضوية",
+"3 • Contact & Education": "3 • الاتصال والتعليم",
+"ID No. auto-assign hogi — pehle member 001, phir 002, 003…": "سيُخصص رقم العضو تلقائياً — العضو الأول 001، ثم 002، 003…",
+"Society members: enter your Member ID and the phone number on your card to link your membership card here.": "أعضاء الجمعية: أدخل رقم عضويتك ورقم الهاتف الموجود على بطاقتك لربط بطاقة عضويتك هنا.",
+"Public member list shows only name, phone number and photo. All other member details are secret — admin only. Scan a member's QR code to verify membership.": "تعرض قائمة الأعضاء العامة الاسم ورقم الهاتف والصورة فقط. جميع تفاصيل الأعضاء الأخرى سرية — للمسؤول فقط. امسح رمز QR الخاص بالعضو للتحقق من العضوية.",
+"Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.": "تُصدر بطاقة العضوية برمز QR. امسح الرمز للتحقق من العضو. التفاصيل الشخصية للمسؤول فقط.",
+"Login": "تسجيل الدخول",
+"Member Login": "دخول الأعضاء",
+"Sign up": "إنشاء حساب",
+"Create Account": "أنشئ حساباً",
+"Email ya Phone Number": "البريد الإلكتروني أو رقم الهاتف",
+"Password": "كلمة المرور",
+"Confirm Password": "تأكيد كلمة المرور",
+"Forgot Password?": "نسيت كلمة المرور؟",
+"Already have an account?": "هل لديك حساب بالفعل؟",
+"New user?": "مستخدم جديد؟",
+"Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.": "حسابك حساب متبرع. سجّل الدخول ببريدك الإلكتروني أو رقم هاتفك + كلمة المرور. تبقى هويتك وعمرك ومرضك خاصة — يمكن لمسؤول الجمعية فقط رؤية السجلات الكاملة. اسمك وهاتفك وعنوانك وفصيلة دمك عامة.",
+"Link My Donor Record": "اربط سجل تبرعي",
+"Link My Member Card": "اربط بطاقة عضويتي",
+"Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.": "اربط سجل تبرعك لعرض تفاصيل تبرعاتك وشهاداتك. أدخل رقم المتبرع الذي حصلت عليه عند تسجيلك كمتبرع.",
+"My Profile": "ملفي الشخصي",
+"My Certificates": "شهاداتي",
+"Update My Last Donation": "حدّث آخر تبرع لي",
+"Delete My Account": "احذف حسابي",
+"Delete Account": "حذف الحساب",
+"This deletes your login account and your linked donor record. This cannot be undone.": "سيؤدي هذا إلى حذف حساب تسجيل دخولك وسجل تبرعك المرتبط به. لا يمكن التراجع عن هذا.",
+"Logout": "تسجيل الخروج",
+"Admin Panel": "لوحة المسؤول",
+"Donor No.": "رقم المتبرع",
+"Check for Update": "تحقق من التحديث",
+"Privacy Policy": "سياسة الخصوصية",
+"Publish Activity": "انشر نشاطاً",
+"Publish Activity (Admin)": "انشر نشاطاً (المسؤول)",
+"Donor Guidelines (SOPs)": "إرشادات المتبرعين",
+"PSCA Blood Bank": "بنك دم PSCA",
+"PSCA Virtual Blood Bank — Punjab Safe Cities Authority": "بنك الدم الافتراضي PSCA — هيئة المدن الآمنة في البنجاب",
+"Open Blood Requests": "طلبات الدم المفتوحة",
+"Closed Requests": "الطلبات المغلقة",
+"Open the PSCA official website.": "افتح الموقع الرسمي لـ PSCA.",
+"Close": "إغلاق",
+"Update": "تحديث",
+"Update karein": "حدّث",
+"Baad me": "لاحقاً",
+"aa gayi hai.": "أصبح متاحاً.",
+"Title *": "العنوان *",
+"Select": "اختر",
+"Call": "اتصال",
+"Donor Appreciation Certificate": "شهادة تقدير المتبرع",
+"Certificate Reference No.": "الرقم المرجعي للشهادة",
+"Check Certificate": "تحقق من الشهادة",
+"After a blood donation, the admin generates an auto-generated appreciation certificate with a verified reference number. Enter a reference number to check a certificate.": "بعد التبرع بالدم، يُنشئ المسؤول شهادة تقدير تلقائية برقم مرجعي موثق. أدخل الرقم المرجعي للتحقق من الشهادة.",
+"Verified Reference No:": "الرقم المرجعي الموثق:",
+"BDBS Certificate": "شهادة BDBS",
+"CERTIFICATE OF APPRECIATION": "شهادة تقدير",
+"Basti Dawa Blood Society proudly appreciates": "تعرب جمعية بستي دوا للدم عن تقديرها",
+"Your gift saved a life.": "هديتك أنقذت حياة.",
+"Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization": "توقيع موثق ومعتمد — تحت إشراف منظمة بستي دوا الخيرية",
+"Share Certificate": "شارك الشهادة",
+"Share Certificate as PDF": "شارك الشهادة كملف PDF",
+"Print Certificate": "اطبع الشهادة",
+"Share Card": "شارك البطاقة",
+"Share Card as PDF": "شارك البطاقة كملف PDF",
+"Certificate": "الشهادة",
+"Old Certificate": "الشهادة القديمة",
+"New Certificate": "شهادة جديدة",
+"Available": "متاح",
+"Cooldown": "فترة الانتظار",
+"Call Now": "اتصل الآن",
+"View / Download": "عرض / تنزيل",
+"Next Stage": "المرحلة التالية",
+"Remove": "إزالة",
+"Save Changes": "احفظ التغييرات",
+"Completed": "مكتمل",
+"Donor Found": "تم العثور على متبرع",
+"Contacting Donors": "جارٍ الاتصال بالمتبرعين",
+"Received": "تم الاستلام",
+"Please fill all required fields.": "يرجى ملء جميع الحقول المطلوبة.",
+"Please fill all required fields in this step.": "يرجى ملء جميع الحقول المطلوبة في هذه الخطوة.",
+"Please tick the permission box (Ijazat Nama) to continue.": "يرجى تحديد مربع الإذن للمتابعة.",
+"Donor age must be 18–65.": "يجب أن يكون عمر المتبرع بين 18 و65.",
+"This donor is already registered (same phone or CNIC).": "هذا المتبرع مسجل بالفعل (نفس الهاتف أو الهوية).",
+"This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.": "هذا المتبرع مسجل بالفعل (نفس الهاتف أو الهوية). هوية واحدة / رقم هاتف واحد = متبرع واحد فقط.",
+"Could not save. Please try again.": "تعذر الحفظ. حاول مرة أخرى.",
+"Password must be at least 6 characters.": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+"Enter a valid email address.": "أدخل بريداً إلكترونياً صحيحاً.",
+"This email or phone number is already registered — try Login instead.": "هذا البريد أو رقم الهاتف مسجل بالفعل — جرّب تسجيل الدخول بدلاً من ذلك.",
+"Member not found.": "لم يتم العثور على العضو.",
+"Admin login required.": "يلزم تسجيل دخول المسؤول.",
+"Certificate sirf admin (owner) bana sakta hai.": "يمكن للمسؤول (المالك) فقط إنشاء الشهادة.",
+"Is donor ne abhi tak khoon nahi diya — certificate sirf donation ke baad banta hai.": "لم يتبرع هذا المتبرع بالدم بعد — تُنشأ الشهادة فقط بعد التبرع.",
+"Is donor ka koi purana certificate nahi mila.": "لم يتم العثور على شهادة قديمة لهذا المتبرع.",
+"Donation ki date (YYYY-MM-DD)?": "تاريخ التبرع (YYYY-MM-DD)؟",
+"Is donation ke units kitne hain?": "كم عدد وحدات هذا التبرع؟",
+"Units 1 ya zyada hone chahiye.": "يجب أن تكون الوحدات 1 أو أكثر.",
+"Date YYYY-MM-DD format me likhein, jaisay 2026-11-14.": "اكتب التاريخ بصيغة YYYY-MM-DD، مثل 2026-11-14.",
+"Internet nahi hai — update check nahi ho saka.": "لا يوجد اتصال بالإنترنت — تعذر التحقق من التحديث.",
+"Update check nahi ho saka — dobara koshish karein.": "تعذر التحقق من التحديث — حاول مرة أخرى.",
+"App latest version par hai (": "التطبيق على أحدث إصدار (",
+"installed)": "مثبت)",
+"Remove this blood request? It will be deleted from the public list too. This cannot be undone.": "هل تريد إزالة طلب الدم هذا؟ سيُحذف من القائمة العامة أيضاً. لا يمكن التراجع عن هذا.",
+"Remove this donor? The donor record and public listing will be deleted. This cannot be undone.": "هل تريد إزالة هذا المتبرع؟ سيُحذف سجل المتبرع والقائمة العامة. لا يمكن التراجع عن هذا.",
+"Remove this member? The member record, public listing and card will be deleted. This cannot be undone.": "هل تريد إزالة هذا العضو؟ سيُحذف سجل العضو والقائمة العامة والبطاقة. لا يمكن التراجع عن هذا.",
+"Delete your account? Your login and linked donor record will be removed. This cannot be undone.": "هل تريد حذف حسابك؟ سيتم حذف تسجيل دخولك وسجل تبرعك المرتبط. لا يمكن التراجع عن هذا.",
+"Could not create account.": "تعذر إنشاء الحساب.",
+"Could not generate certificate.": "تعذر إنشاء الشهادة.",
+"Preparing card…": "جارٍ تجهيز البطاقة…",
+"Preparing…": "جارٍ التجهيز…",
+"Update check sirf app me chalta hai.": "التحقق من التحديث يعمل في التطبيق فقط.",
+"How to get blood": "كيف تحصل على الدم",
+"Information needed for the patient": "المعلومات المطلوبة للمريض",
+"What happens next?": "ماذا يحدث بعد ذلك؟",
+"Donor registration": "تسجيل المتبرع",
+"How Often Can Blood Be Donated?": "كم مرة يمكن التبرع بالدم؟",
+"Precautions Before Donating Blood": "احتياطات قبل التبرع بالدم",
+"15 Important Benefits of Blood Donation": "15 فائدة مهمة للتبرع بالدم",
+"Standard Operating Procedures (SOPs) for Blood Donors": "الإجراءات التشغيلية القياسية للمتبرعين بالدم",
+"🩸 Salute to All Blood Donors!": "🩸 تحية لجميع المتبرعين بالدم!",
+"🩸 Benefits of Blood Donation": "🩸 فوائد التبرع بالدم",
+"Want to donate?": "هل تريد التبرع؟",
+"Go to Volunteer Registration.": "انتقل إلى تسجيل المتطوعين.",
+"Your donation, someone's life!": "تبرعك، حياة شخص ما!",
+"Your donation can give a person a new life.": "يمكن لتبرعك أن يمنح شخصاً حياة جديدة.",
+"We thank all our blood-donating brothers and sisters from the bottom of our hearts. May Allah accept this noble deed, and grant you health, safety and a life full of happiness. Ameen! 🤲": "نشكر من أعماق قلوبنا جميع الإخوة والأخوات المتبرعين بالدم. تقبّل الله هذا العمل النبيل، ومنحكم الصحة والسلامة وحياة مليئة بالسعادة. آمين! 🤲",
+"You are all a precious asset of our society. Your donation is a new hope of life for a needy patient, happiness for a mother, a smile for a child, and peace for a family.": "أنتم جميعاً ثروة ثمينة لمجتمعنا. تبرعكم أمل جديد في الحياة لمريض محتاج، وسعادة لأم، وابتسامة لطفل، وسلام لعائلة.",
+"You take out your precious time to serve humanity — this spirit is truly praiseworthy.": "تقتطعون من وقتكم الثمين لخدمة الإنسانية — هذه الروح تستحق التقدير حقاً.",
+"To all the great people who donate blood!": "إلى جميع الأشخاص العظماء الذين يتبرعون بالدم!",
+"We will give top priority to the respect, health, consent and privacy of blood donors.": "سنولي احترام المتبرعين بالدم وصحتهم وموافقتهم وخصوصيتهم الأولوية القصوى.",
+"Remember!": "تذكّر!",
+"Our Pledge:": "عهدنا:",
+"Our message:": "رسالتنا:",
+"Note for Basti Dawa Blood Society:": "ملاحظة لجمعية بستي دوا للدم:",
+"register all BDBS registered donors with PSCA Virtual Blood Bank too — it can further strengthen the donor network for needy patients in Multan, Basti Malook and other areas of Punjab.": "سجّلوا أيضاً جميع المتبرعين المسجلين في الجمعية في بنك الدم الافتراضي PSCA — فهذا يمكن أن يعزز شبكة المتبرعين للمرضى المحتاجين في ملتان وبستي ملوك ومناطق أخرى من البنجاب.",
+"© 2026 Basti Dawa Blood Society. All rights reserved.": "© 2026 جمعية بستي دوا للدم. جميع الحقوق محفوظة.",
+"Developed by Dr Asif •": "طُوّر بواسطة الدكتور آصف •",
+"🩸 BASTI DAWA BLOOD SOCIETY • Our Mission – Saving Lives Through Voluntary Blood Donation. • Chief Executive: Muhammad Asif Javaid": "🩸 جمعية بستي دوا للدم • مهمتنا – إنقاذ الأرواح من خلال التبرع الطوعي بالدم. • الرئيس التنفيذي: محمد آصف جاويد",
+"BASTI DAWA BLOOD SOCIETY • Chief Executive: Muhammad Asif Javaid": "جمعية بستي دوا للدم • الرئيس التنفيذي: محمد آصف جاويد",
+"Donor": "متبرع",
+"Step": "خطوة",
+"Phone:": "الهاتف:",
+"Email:": "البريد الإلكتروني:",
+"Name:": "الاسم:",
+"Father Name:": "اسم الأب:",
+"CNIC:": "CNIC:",
+"Blood Group:": "فصيلة الدم:",
+"Age:": "العمر:",
+"Date of Birth:": "تاريخ الميلاد:",
+"Designation:": "المنصب:",
+"Education:": "التعليم:",
+"Expiry Date:": "تاريخ الانتهاء:",
+"Issue Date:": "تاريخ الإصدار:",
+"ID No.:": "رقم الهوية:",
+"Address:": "العنوان:",
+"Membership Card -": "بطاقة العضوية -",
+"Blood Donation Certificate -": "شهادة التبرع بالدم -",
+"Emergency Helpline:": "خط المساعدة الطارئ:",
+"Virtual Blood Bank WhatsApp:": "واتساب بنك الدم الافتراضي:",
+"Website:": "الموقع الإلكتروني:",
+"PSCA official website": "الموقع الرسمي لـ PSCA",
+"Please note: the Virtual Blood Bank helps in finding a donor; blood testing and transfusion are the hospital's job.": "يرجى ملاحظة أن بنك الدم الافتراضي يساعد في العثور على متبرع؛ أما فحص الدم ونقله فهو من عمل المستشفى.",
+"This service is available 24/7. Patient requests and donor registration are free; the hospital's own tests or other charges may be separate.": "هذه الخدمة متاحة على مدار الساعة. طلبات المرضى وتسجيل المتبرعين مجانية؛ أما فحوصات المستشفى أو الرسوم الأخرى فقد تكون منفصلة.",
+"Area / City": "المنطقة / المدينة",
+"Area / City *": "المنطقة / المدينة *",
+"Select Area": "اختر المنطقة",
+"All Areas": "كل المناطق",
+"No donors found": "لم يتم العثور على متبرعين",
+"Try another blood group or city — or submit a blood request.": "جرّب فصيلة دم أو مدينة أخرى — أو أرسل طلب دم.",
+"Password reset needs internet.": "إعادة تعيين كلمة المرور تحتاج إلى اتصال بالإنترنت.",
+"Enter your email first, then Forgot Password.": "أدخل بريدك الإلكتروني أولاً، ثم اضغط على نسيت كلمة المرور.",
+"Could not send reset email — check the email address.": "تعذر إرسال بريد إعادة التعيين — تحقق من عنوان البريد الإلكتروني.",
+"Phone-number accounts cannot reset by email. Contact the admin on WhatsApp to reset your password.": "لا يمكن إعادة تعيين حسابات أرقام الهاتف عبر البريد الإلكتروني. تواصل مع المسؤول عبر واتساب لإعادة تعيين كلمة المرور.",
+"Contact Admin on WhatsApp": "تواصل مع المسؤول عبر واتساب",
+"Check your inbox (and spam) — open the link to set a new password.": "تحقق من بريدك الوارد (والبريد غير المرغوب فيه) — افتح الرابط لتعيين كلمة مرور جديدة.",
+"CNIC (optional)": "بطاقة الهوية الوطنية (اختياري)",
+"Notifications": "الإشعارات",
+"New blood requests for your blood group appear here. Login with your donor account to see only your group's requests.": "ستظهر طلبات الدم الجديدة الخاصة بفصيلة دمك هنا. سجّل الدخول بحساب المتبرع الخاص بك لعرض طلبات مجموعتك فقط.",
+"No new notifications": "لا توجد إشعارات جديدة",
+"No open blood requests": "لا توجد طلبات دم مفتوحة",
+"for blood group": "لفصيلة الدم",
+"right now.": "الآن.",
+"open blood request(s)": "طلبات دم مفتوحة",
+"If you signed up with Gmail, login with your Gmail. If you signed up with your phone number, login with your phone number.": "إذا سجّلت باستخدام Gmail، سجّل الدخول باستخدام Gmail. وإذا سجّلت باستخدام رقم هاتفك، سجّل الدخول باستخدام رقم هاتفك.",
+"Login failed — check email/phone number and password.": "فشل تسجيل الدخول — تحقق من البريد الإلكتروني / رقم الهاتف وكلمة المرور.",
+"This phone number has a donor record, but the account may be Gmail-based. Try logging in with your Gmail, or contact the admin.": "يوجد سجل متبرع لهذا الرقم، لكن الحساب قد يكون مبنياً على Gmail. حاول تسجيل الدخول باستخدام Gmail، أو تواصل مع المسؤول.",
+"No account found for this phone number. If you signed up with Gmail, login with your Gmail — or Sign up first.": "لم يتم العثور على حساب لهذا الرقم. إذا سجّلت باستخدام Gmail، سجّل الدخول باستخدام Gmail — أو سجّل أولاً.",
+"English": "الإنجليزية"
+};
+
+/* ---------- engine ---------- */
+function __i18nNorm(s){ return String(s).replace(/\s+/g, " ").trim(); }
+var I18N_N = {};
+(function(){ for (var __l in I18N){ var __m = {}; for (var __k in I18N[__l]) __m[__i18nNorm(__k)] = I18N[__l][__k]; I18N_N[__l] = __m; } })();
+var LANG = "en";
+try {
+  var __q = null;
+  if (typeof URLSearchParams !== "undefined") __q = new URLSearchParams(location.search).get("lang");
+  LANG = (__q && I18N[__q]) ? __q : (localStorage.getItem("bdbs_lang") || "en");
+  if (LANG !== "en" && !I18N[LANG]) LANG = "en";
+} catch (e) { LANG = "en"; }
+function tr(en){
+  if (LANG === "en") return en;
+  var m = I18N_N[LANG];
+  var v = m ? m[__i18nNorm(en)] : undefined;
+  return (v === undefined) ? en : v;
+}
+function applyLang(){
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(n){
+      if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      var p = n.parentElement;
+      if (!p) return NodeFilter.FILTER_REJECT;
+      var tag = p.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA") return NodeFilter.FILTER_REJECT;
+      if (p.closest("[data-no-i18n]")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  var nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (var i = 0; i < nodes.length; i++){
+    var n = nodes[i], cur = n.nodeValue;
+    var orig = n._en || __i18nNorm(cur);
+    if (!n._en) n._en = orig;
+    var target = tr(orig);
+    var lead = (cur.match(/^\s*/) || [""])[0], trail = (cur.match(/\s*$/) || [""])[0];
+    var nv = lead + target + trail;
+    if (nv !== cur) n.nodeValue = nv;
+  }
+  var phs = document.querySelectorAll("[placeholder]");
+  for (var j = 0; j < phs.length; j++){
+    var el = phs[j], ph = el.getAttribute("placeholder");
+    if (!ph || !ph.trim()) continue;
+    var o = el._enPh || __i18nNorm(ph);
+    if (!el._enPh) el._enPh = o;
+    var r = tr(o);
+    if (el.getAttribute("placeholder") !== r) el.setAttribute("placeholder", r);
+  }
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = (LANG === "ur" || LANG === "ar") ? "rtl" : "ltr";
+  var btns = document.querySelectorAll("[data-lang-btn]");
+  for (var k = 0; k < btns.length; k++) btns[k].classList.toggle("on", btns[k].getAttribute("data-lang-btn") === LANG);
+  try { localStorage.setItem("bdbs_lang", LANG); } catch (e) {}
+}
+function setLang(l){ if (l === "en" || I18N[l]) { LANG = l; applyLang(); } }
+var __langTimer = null;
+function __watchLang(){
+  if (!("MutationObserver" in window)) return;
+  var ob = new MutationObserver(function(){
+    if (__langTimer) return;
+    __langTimer = setTimeout(function(){ __langTimer = null; applyLang(); }, 150);
+  });
+  ob.observe(document.body, {childList: true, characterData: true, subtree: true});
+}
+function __i18nInit(){ applyLang(); __watchLang(); }
+if (document.readyState !== "loading") { __i18nInit(); }
+else { document.addEventListener("DOMContentLoaded", __i18nInit); }
+
+</script>
 <script>
 /* ================= BDBS app ================= */
 var SITE_BASE = 'https://jilanapps.github.io/jilan-store/bdbs/';
@@ -966,7 +1649,10 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v14';
+var APP_VERSION = 'v19';
+/* More menu: update check ke sath installed version dikhao — taake pata
+   chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
+var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
 function checkAppUpdate(force){
   if (location.protocol !== 'file:') { if (force) alert('Update check sirf app me chalta hai.'); return; }
   if (!navigator.onLine) { if (force) alert('Internet nahi hai — update check nahi ho saka.'); return; }
@@ -1001,7 +1687,7 @@ function show(s){
   var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
   document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
   closeModal('memberModal'); closeModal('moreSheet');
-  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests();
+  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests(); if (s==='notif') loadNotifs();
   if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
   window.scrollTo(0,0);
 }
@@ -1011,13 +1697,15 @@ var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_membe
   requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
-/* Public member record: ONLY name, phone number and photo are public.
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+/* Public member record: ONLY name, phone number, photo, designation and
+   ID No. are public (designation + ID are on the card front and shown on
+   the QR verify page).
    Expiry stays in the record ONLY so the QR verify page can check validity —
    it is never displayed anywhere public. Everything else (CNIC, age,
-   education, email, address, father, designation, ID, blood group) is
+   education, email, address, father, blood group) is
    admin-only in the private 'members' collection. */
-function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
+function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
 function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
@@ -1122,6 +1810,7 @@ function loadHome(){
       });
     });
   });
+  updateBell();
 }
 /* ---------- smart donor search: pills + instant city filter + availability ----------
    Public cards show name, blood group, address, phone and last donation
@@ -1306,7 +1995,7 @@ function searchDonors(){
   var render = function(ds, phoneById){
     var out = ds.filter(function(d){
       if (g && d.group !== g) return false;
-      if (c && (d.city||'').toLowerCase().indexOf(c) === -1) return false;
+      if (c && (d.area||'').toLowerCase() !== c && (d.city||'').toLowerCase().indexOf(c) === -1 && (d.address||'').toLowerCase().indexOf(c) === -1) return false;
       if (availOnly && !donorStatus(d.lastDonation).ok) return false;
       return true;
     });
@@ -1369,6 +2058,48 @@ function renderReqList(boxId, list, emptyMsg){
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
     return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+contact+'</div></div></div>';
   }).join('');
+}
+/* ---------- notifications: new blood requests, same-group first ----------
+   No new collection and no rules change: a notification IS a blood request.
+   The bell reads requestsPublic (already public), counts open requests
+   newer than the last time this phone opened Notifications, and only
+   counts the signed-in donor's own blood group when it is known.
+   This is an in-app notification (seen when the app is opened) — a
+   phone-buzzing background push needs FCM setup, a separate job. */
+function myGroup(){ try { return localStorage.getItem('bdbs_myGroup') || ''; } catch(e){ return ''; } }
+function notifSeen(){ try { return parseInt(localStorage.getItem('bdbs_notif_seen') || '0', 10) || 0; } catch(e){ return 0; } }
+function updateBell(){
+  var b = document.getElementById('bellCount'); if (!b) return;
+  qAll('requestsPublic', function(rs){
+    var g = myGroup(), seen = notifSeen();
+    var n = rs.filter(function(r){ return (r.status||'Received') !== 'Completed' && (!g || r.group === g) && (r.createdAt||0) > seen; }).length;
+    b.textContent = n > 9 ? '9+' : String(n);
+    b.style.display = n ? 'flex' : 'none';
+  });
+}
+function loadNotifs(){
+  var box = document.getElementById('notifList'); if (!box) return;
+  var g = myGroup();
+  qAll('requestsPublic', function(rs){
+    var open = rs.filter(function(r){ return (r.status||'Received') !== 'Completed'; });
+    open.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+    var list = g ? open.filter(function(r){ return r.group === g; }) : open;
+    if (!list.length) {
+      box.innerHTML = '<div class="empty"><b>No new notifications</b><br><span class="mut"><span>No open blood requests</span>' + (g ? ' <span>for blood group</span> <b>'+esc(g)+'</b>' : '') + ' <span>right now.</span></span></div>';
+    } else {
+      box.innerHTML = '<p class="mut">' + list.length + ' <span>open blood request(s)</span>' + (g ? ' <span>for blood group</span> <b>'+esc(g)+'</b>' : '') + '.</p>' + list.map(function(r){
+        var where = r.address || r.city || '';
+        var contact = '';
+        if (r.phone) {
+          var cmsg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. Main blood donate karna chahta hun. Shukriya.';
+          contact = '<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span><div class="dc-actions"><a class="btn block" href="tel:'+esc(r.phone)+'">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/'+waNum(r.phone)+'?text='+encodeURIComponent(cmsg)+'">WhatsApp</a></div>';
+        }
+        return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||r.firstName||'Patient')+'</b> needs <b>'+esc(r.units||1)+' unit(s)</b> of blood <span class="rpill">'+esc(r.status||'Received')+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where)+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+contact+'</div></div></div>';
+      }).join('');
+    }
+    try { localStorage.setItem('bdbs_notif_seen', String(Date.now())); } catch(e){}
+    var b = document.getElementById('bellCount'); if (b) b.style.display = 'none';
+  });
 }
 function loadRequests(){
   qAll('requestsPublic', function(rs){
@@ -1548,8 +2279,9 @@ function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) retu
 function submitDonor(){
   var btn = document.getElementById('dSubmitBtn');
   if (btn && btn.disabled) return;
-  var miss = need(['dName','dFather','dCnic','dGroup','dAge','dPhone','dAddress','dDisease','dUnits']);
+  var miss = need(['dName','dFather','dGroup','dAge','dPhone','dAddress','dArea','dDisease']);
   if (miss) { document.getElementById('dMsg').innerHTML = '<span class="err">Please fill all required fields.</span>'; return; }
+  if (!document.getElementById('dConsent').checked) { document.getElementById('dMsg').innerHTML = '<span class="err">Please tick the permission box (Ijazat Nama) to continue.</span>'; return; }
   var age = parseInt(val('dAge'),10);
   if (age < 18 || age > 65) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor age must be 18–65.</span>'; return; }
   if (btn) btn.disabled = true;
@@ -1567,15 +2299,15 @@ function submitDonor(){
       if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
       var id = uid('donor');
       var dno = nextDonorNo(ds);
-      var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, createdAt:Date.now()};
-      var pub = donorPub(full); pub.city = full.address.split(',').pop().trim();
+      var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+      var pub = donorPub(full); pub.city = full.area || full.address.split(',').pop().trim();
       qAdd('donors', full, function(ok){
         if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
         qAdd('donorsPublic', pub, function(){
           qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
           writeDonorKeys(full.id, full.phone, full.cnic, function(){});
           document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
-          ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';}); autofillDonorNo();
+          ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo();
           document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
         });
       });
@@ -1694,7 +2426,7 @@ function renderMemberCard(m){
     '<div class="kv"><span>Issue Date</span><b>'+esc(fmtD(m.issue))+'</b></div>' +
     '<div class="kv"><span>Expiry Date</span><b>'+esc(fmtD(m.expiry))+'</b></div>' +
     '<div class="sig">Personal details are admin-only. Scan the QR on the front to verify membership.</div></div>' +
-    '</div><button class="btn" onclick="window.print()">Print Card</button> <button class="btn" onclick="shareMemberCardPDF()">Share Card as PDF</button>';
+    '</div><button class="btn" onclick="printPageJS()">Print Card</button> <button class="btn" onclick="shareMemberCardPDF()">Share Card as PDF</button>';
   document.getElementById('memberCardBody').innerHTML = html;
   openModal('memberModal');
   if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
@@ -1737,9 +2469,26 @@ function simplePDF(pages){
   return new Blob([pdf], {type:'application/pdf'});
 }
 function saveBlob(blob, fname){
+  /* App (WebView) me blob: download aur navigator.share kaam nahi karte -
+     is liye app ka BDBS bridge use karo: PDF Downloads folder me save hota
+     hai aur share sheet khulti hai. Browser me purana download tareeqa. */
+  if (window.BDBS && window.BDBS.savePdf) {
+    var r = new FileReader();
+    r.onload = function(){ try { window.BDBS.savePdf(r.result, fname); } catch(e){ saveBlobWeb(blob, fname); } };
+    r.onerror = function(){ saveBlobWeb(blob, fname); };
+    r.readAsDataURL(blob);
+    return;
+  }
+  saveBlobWeb(blob, fname);
+}
+function saveBlobWeb(blob, fname){
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function printPageJS(){
+  if (window.BDBS && window.BDBS.printPage) { try { window.BDBS.printPage(); return; } catch(e){} }
+  window.print();
 }
 function dataURLToBytes(dataURL){ var bin = atob(dataURL.split(',')[1]); var bytes = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i); return bytes; }
 /* PDF from card images (JPEG pages): the shared PDF looks like the actual
@@ -1993,11 +2742,11 @@ function renderCert(c){
     '<p class="app">Basti Dawa Blood Society proudly appreciates</p><div class="cname">'+esc(c.donorName)+'</div>' +
     (c.donorFather ? '<p class="son">S/O '+esc(c.donorFather)+'</p>' : '') +
     '<p class="dline">for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br><span class="thanks">Your gift saved a life.</span></p>' +
-    '<div class="sealrow"><img class="sealimg" src="bdwo-monogram.jpg"><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
+    '<div class="sealrow"><img class="sealimg" src="bdwo-monogram.png"><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
     '<p class="sup">Under Supervision — Basti Dawa Welfare Organization</p>' +
     '<div class="sigrow"><div><div class="scr">Naeem Asghar</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Dr Muhammad Naeem Asghar<span>Patron In Chief</span></div></div><div><div class="scr">Asif Javaid</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Muhammad Asif Javaid<span>Founder &amp; Chief Executive</span></div></div></div>' +
     '<p class="credit">Developed by Dr Asif — Jilan Apps Official</p></div></div></div>' +
-    '<button class="btn" onclick="window.print()">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
+    '<button class="btn" onclick="printPageJS()">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
 }
 function shareCertPDF(){
   var c = window._lastCert; if (!c) return;
@@ -2054,6 +2803,14 @@ function lookupCert(){
     return;
   }
   qAll('certificates', done);
+}
+
+/* Donor apna certificate khud download kare: My Certificates se ref le
+   kar Check Certificate kholo — wahan se Share as PDF hota hai. */
+function viewMyCert(ref){
+  var inp = document.getElementById('cRef'); if (inp) inp.value = ref || '';
+  show('certificate');
+  lookupCert();
 }
 
 /* ---------- auth, signup & roles ---------- */
@@ -2143,23 +2900,38 @@ function doLogin(){
   var em = inp;
   if (inp.indexOf('@') === -1) {
     if (normPhone(inp).length < 10) { msg.innerHTML = '<span class="err">Enter a valid email or phone number.</span>'; return; }
-    em = phoneToEmail(inp);
+    var mapped = '';
+    try { mapped = (JSON.parse(localStorage.getItem('bdbs_loginMap') || '{}'))[normPhone(inp)] || ''; } catch(e){}
+    em = mapped || phoneToEmail(inp);
   }
   auth.signInWithEmailAndPassword(em, pw).then(function(){
     msg.innerHTML = '<span class="ok">Logged in.</span>';
   }).catch(function(e){
-    msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
+    if (inp.indexOf('@') === -1) {
+      qAll('donorsPublic', function(ds){
+        var ph = waNum(inp);
+        var found = ds.some(function(d){ return waNum(d.phone) === ph; });
+        if (found) msg.innerHTML = '<span class="err">This phone number has a donor record, but the account may be Gmail-based. Try logging in with your Gmail, or contact the admin.</span>';
+        else msg.innerHTML = '<span class="err">No account found for this phone number. If you signed up with Gmail, login with your Gmail — or Sign up first.</span>';
+      });
+    } else {
+      msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
+    }
   });
 }
-function doLogout(){ localStorage.removeItem('bdbs_admin'); if (FB_OK && auth) auth.signOut(); }
+function doLogout(){ localStorage.removeItem('bdbs_admin'); try { localStorage.removeItem('bdbs_myGroup'); } catch(e){} if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Password reset needs internet.</span>'; return; }
   var inp = val('lEmail');
   var msg = document.getElementById('lMsg');
   if (!inp) { msg.innerHTML = '<span class="err">Enter your email first, then Forgot Password.</span>'; return; }
-  if (inp.indexOf('@') === -1) { msg.innerHTML = '<span class="err">Phone-number accounts cannot reset by email — contact the admin to reset your password.</span>'; return; }
+  if (inp.indexOf('@') === -1) {
+    var wa = 'https://wa.me/923069140867?text=' + encodeURIComponent('Assalam-o-Alaikum, I forgot my BDBS account password. My phone number is ' + inp + '. Please help me reset it.');
+    msg.innerHTML = '<span class="err">Phone-number accounts cannot reset by email. Contact the admin on WhatsApp to reset your password.</span><br><a class="btn green" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa + '">Contact Admin on WhatsApp</a>';
+    return;
+  }
   auth.sendPasswordResetEmail(inp).then(function(){
-    msg.innerHTML = '<span class="ok">Reset email sent to '+esc(inp)+'.</span>';
+    msg.innerHTML = '<span class="ok">Reset link sent to '+esc(inp)+'.</span><br><span class="mut">Check your inbox (and spam) — open the link to set a new password.</span>';
   }).catch(function(){
     msg.innerHTML = '<span class="err">Could not send reset email — check the email address.</span>';
   });
@@ -2200,6 +2972,7 @@ function renderDonor(u){
   document.getElementById('pUpdateMsg').innerHTML = '';
   db.collection('users').doc(u.uid).get().then(function(d){
     var data = d.exists ? d.data() : {};
+    try { if (data.phone && u.email) { var lm = JSON.parse(localStorage.getItem('bdbs_loginMap') || '{}'); lm[normPhone(data.phone)] = u.email; localStorage.setItem('bdbs_loginMap', JSON.stringify(lm)); } } catch(e){}
     var linkedId = data.linkedDonorId || '';
     document.getElementById('linkBox').style.display = linkedId ? 'none' : 'block';
     document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
@@ -2219,6 +2992,7 @@ function loadMyRecord(u, donorId){
   db.collection('donors').doc(donorId).get().then(function(d){
     if (!d.exists) { document.getElementById('myRecord').innerHTML = '<p class="err">Your linked donor record was not found. Ask the admin to check it.</p>'; return; }
     var r = d.data(); r.id = d.id;
+    try { if (r.group) { localStorage.setItem('bdbs_myGroup', r.group); updateBell(); } } catch(e){}
     document.getElementById('myRecord').innerHTML =
       '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
       '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b>'+esc(r.units||0)+'</b></div></div>';
@@ -2227,7 +3001,7 @@ function loadMyRecord(u, donorId){
     db.collection('certificates').where('donorId','==',donorId).orderBy('createdAt','desc').limit(20).get().then(function(s){
       var cs = s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;});
       document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
-        return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
+        return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')<br><button class="btn ghost" onclick="viewMyCert(\''+esc(c.ref)+'\')">View / Download</button></div>';
       }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
     }).catch(function(){
       document.getElementById('myCerts').innerHTML = '<span class="mut">Certificates could not be loaded.</span>';
