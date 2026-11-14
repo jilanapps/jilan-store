@@ -126,12 +126,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Appreciation certificates: admin only to write; a linked donor may
-    // read ONLY certificates of their own linked donor record. (Name,
-    // blood group, units, date, reference no. — no phone/CNIC inside.)
+    // Appreciation certificates: admin only to write. READ is public by
+    // design — the donor shares the PDF, and the QR printed on it links
+    // to the public verify page (?cert=<ref>). A certificate carries only
+    // name, blood group, units and date — the same details already public
+    // on the donor list. No phone or CNIC is stored in a certificate.
     match /certificates/{id} {
-      allow read: if isAdmin() || (request.auth != null
-        && linkedDonorId() == resource.data.get('donorId', ''));
+      allow read: if true;
       allow write: if isAdmin();
     }
 

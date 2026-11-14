@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify Member — Basti Dawa Blood Society (BDBS)</title>
+<title>Verify Member & Certificate — Basti Dawa Blood Society (BDBS)</title>
 <meta name="description" content="Verify a Basti Dawa Blood Society (BDBS) member by QR code — check membership validity. Blood donation Multan, Basti Dawa.">
 <meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, verify member">
 <link rel="icon" href="logo.png">
@@ -37,7 +37,7 @@ footer{text-align:center;color:#64748B;font-size:12px;padding:16px}
 <header>
 <img src="logo.png" alt="BDBS logo">
 <h2 style="margin:8px 0 2px">Basti Dawa Blood Society</h2>
-<p style="margin:0;font-size:13px">Member Verification &bull; BDBS</p>
+<p style="margin:0;font-size:13px">Member & Certificate Verification &bull; BDBS</p>
 </header>
 <div class="wrap">
 <div id="out"><p class="mut" style="text-align:center">Checking membership…</p></div>
@@ -62,11 +62,35 @@ function showMember(m){
     '<p>Phone: <b>'+esc(m.phone||'—')+'</b></p>' +
     '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
 }
+function showCert(c){
+  document.getElementById('out').innerHTML = '<div class="card">' +
+    '<p class="verified">✓ VERIFIED CERTIFICATE</p>' +
+    '<h2 style="margin:6px 0">'+esc(c.donorName)+'</h2>' +
+    '<p>Blood Group: <span class="pill">'+esc(c.group)+'</span></p>' +
+    '<p>Donated <b>'+esc(c.units)+' unit(s)</b> of blood on <b>'+esc(fmtD(c.date))+'</b></p>' +
+    '<p>Reference No: <b>'+esc(c.ref)+'</b></p>' +
+    '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
+}
 (function(){
-  var id = new URLSearchParams(location.search).get('id');
-  if (!id) { notVerified('No member ID in this QR code.'); return; }
+  var q = new URLSearchParams(location.search);
+  var certRef = q.get('cert');
+  var id = q.get('id');
   var CFG = window.BDBS_FIREBASE_CONFIG || {};
   var configured = !!(CFG.apiKey && CFG.apiKey.indexOf('PASTE') !== 0);
+  if (certRef) {
+    if (configured && typeof firebase !== 'undefined') {
+      try {
+        firebase.initializeApp(CFG);
+        firebase.firestore().collection('certificates').where('ref','==',certRef).limit(1).get().then(function(s){
+          if (!s.empty) showCert(s.docs[0].data()); else notVerified('This certificate could not be verified. It may be fake, removed, or the QR code may be wrong.');
+        }).catch(function(){ notVerified(); });
+        return;
+      } catch(e) { notVerified(); return; }
+    }
+    notVerified('Live certificate verification needs the Firebase setup from SETUP.md.');
+    return;
+  }
+  if (!id) { notVerified('No member ID in this QR code.'); return; }
   if (configured && typeof firebase !== 'undefined') {
     try {
       firebase.initializeApp(CFG);
