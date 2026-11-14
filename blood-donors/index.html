@@ -244,6 +244,16 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 .dc-name{font-size:16px;font-weight:800}
 .dc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .stars button{background:none;border:none;font-size:30px;line-height:1;color:#f59e0b;padding:2px 4px;cursor:pointer}
+.help-msgs{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.help-msg{max-width:88%;padding:8px 12px;border-radius:12px;line-height:1.5;white-space:pre-wrap}
+.help-msg.bot{background:#fef2f2;border:1px solid #fecaca;align-self:flex-start}
+.help-msg.user{background:#dcfce7;border:1px solid #bbf7d0;align-self:flex-end}
+.help-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.help-chips button{border:1px solid #b45309;background:#fffbeb;color:#7f1d1d;border-radius:16px;padding:6px 10px;font-size:13px;cursor:pointer}
+.faith-banner{margin:14px 0 4px;padding:14px 12px;background:rgba(255,255,255,.94);border:1px solid #fcd34d;border-radius:14px;color:#7f1d1d;text-align:center}
+.faith-ar{font-size:20px;line-height:1.9;margin:4px 0}
+.faith-ur{font-size:15px;line-height:1.7;margin:4px 0 10px}
+.faith-ref{font-size:12px;color:#92400e}
 .btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
 .empty{text-align:center;padding:28px 12px}
 .rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
@@ -287,6 +297,12 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <div class="hero">
 <div class="hero-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg2)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></div>
 <h1>Find Verified Blood Donors Near You in Seconds</h1>
+<div class="faith-banner" data-no-i18n>
+<p class="faith-ar" dir="rtl">وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا</p>
+<p class="faith-ur" dir="rtl">اور جس نے ایک جان بچائی، گویا اس نے تمام انسانوں کی جان بچائی۔ <span class="faith-ref">(سورۃ المائدہ 5:32)</span></p>
+<p class="faith-ar" dir="rtl">مَنْ نَفَّسَ عَنْ مُؤْمِنٍ كُرْبَةً مِنْ كُرَبِ الدُّنْيَا نَفَّسَ اللَّهُ عَنْهُ كُرْبَةً مِنْ كُرَبِ يَوْمِ الْقِيَامَةِ</p>
+<p class="faith-ur" dir="rtl">جو کسی مسلمان کی دنیاوی تکلیف دور کرے، اللہ تعالیٰ قیامت کے دن اس کی تکلیف دور کرے گا۔ <span class="faith-ref">(صحیح مسلم 2699)</span></p>
+</div>
 <p class="hero-sub">Basti Dawa Blood Society &bull; Donate Blood &bull; Save Lives</p>
 <p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts.</p>
 <div class="hero-actions">
@@ -547,6 +563,16 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <label>Your Review *</label><textarea id="vText" rows="3" placeholder="How was your experience with Basti Dawa Blood Society?"></textarea>
 <button class="btn" onclick="submitReview()">Submit Review</button>
 <div id="vMsg"></div></div>
+</section>
+
+<!-- ================= HELP / MADAD BOX ================= -->
+<section class="sec" id="s-help">
+<div class="card"><h2>💬 Madad Box</h2>
+<p class="mut">Type your question below or tap a button — you will get an answer right away. This help box also works offline.</p>
+<div id="helpMsgs" class="help-msgs"></div>
+<div id="helpChips" class="help-chips"></div>
+<div style="display:flex;gap:8px;margin-top:8px"><input id="helpInput" style="flex:1" placeholder="Apna sawal likhein…" onkeydown="if(event.key==='Enter')sendHelpMsg()"><button class="btn" style="white-space:nowrap" onclick="sendHelpMsg()">Send</button></div>
+</div>
 </section>
 
 <!-- ================= CERTIFICATE ================= -->
@@ -990,6 +1016,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('reviews')">⭐ &nbsp;Reviews</button>
+<button class="sheet-btn" onclick="show('help')">💬 &nbsp;Madad Box</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
 <button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update <span class="mut small" id="installedVer"></span></button>
@@ -1051,6 +1078,9 @@ ur: {
 "Loading…": "لوڈ ہو رہا ہے…",
 "Daily Activity & Gallery": "روزانہ سرگرمی اور گیلری",
 "Reviews": "جائزے",
+"💬 Madad Box": "💬 مدد بکس",
+"Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "نیچے اپنا سوال لکھیں یا ایک بٹن دبائیں — فوراً جواب ملے گا۔ یہ مدد بکس بغیر نیٹ کے بھی چلتا ہے۔",
+"Send": "بھیجیں",
 "Write a Review": "جائزہ لکھیں",
 "Submit Review": "جائزہ بھیجیں",
 "Camps & Activities": "کیمپ اور سرگرمیاں",
@@ -1346,6 +1376,9 @@ I18N.ar = {
 "Loading…": "جارٍ التحميل…",
 "Daily Activity & Gallery": "النشاط اليومي والمعرض",
 "Reviews": "التقييمات",
+"💬 Madad Box": "💬 صندوق المساعدة",
+"Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "اكتب سؤالك أدناه أو اضغط على زر — ستحصل على إجابة فورًا. صندوق المساعدة هذا يعمل دون إنترنت أيضًا.",
+"Send": "إرسال",
 "Write a Review": "اكتب تقييمًا",
 "Submit Review": "أرسل التقييم",
 "Camps & Activities": "المخيمات والأنشطة",
@@ -1691,7 +1724,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v24';
+var APP_VERSION = 'v27';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1729,7 +1762,7 @@ function show(s){
   var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
   document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
   closeModal('memberModal'); closeModal('moreSheet');
-  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests(); if (s==='reviews') loadReviews(); if (s==='notif') loadNotifs();
+  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests(); if (s==='reviews') loadReviews(); if (s==='help') openHelp(); if (s==='notif') loadNotifs();
   if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
   window.scrollTo(0,0);
 }
@@ -2512,6 +2545,65 @@ function loadReviews(){
 }
 function removeReview(id){ if (!isAdmin()) { alert('Admin login required.'); return; } if (!confirm('Remove this review?')) return; qDel('reviews', id, function(){ loadReviews(); }); }
 
+/* ---------- Madad Box (v26, user hukm 2026-11-15: option 1) ----------
+   Offline auto-reply help. NO server, NO API key, NO cost — answers are
+   pre-written and matched by keywords in the question. This is NOT a
+   thinking AI. Unknown question -> fallback with admin contact; the bot
+   never invents an answer. Answers are EN + Urdu (AR falls back to EN).
+   Attribution rule (user 2026-11-15): 'kis ne bataya' -> WhatsApp
+   0300-7379385, Gmail jilanappsofficial@gmail.com, Jilan Apps Official. */
+var HELP_WELCOME_EN = 'Assalam-o-Alaikum! I am the BDBS Help Box. Type your question below or tap a button — you will get an answer right away.';
+var HELP_WELCOME_UR = 'السلام علیکم! میں BDBS مدد بکس ہوں۔ نیچے اپنا سوال لکھیں یا ایک بٹن دبائیں — فوراً جواب ملے گا۔';
+var HELP_FALLBACK_EN = 'Sorry, I do not have an answer for this yet. Please contact the admin: WhatsApp 0300-7379385, Gmail jilanappsofficial@gmail.com.';
+var HELP_FALLBACK_UR = 'معاف کیجیے، اس سوال کا جواب میرے پاس ابھی نہیں ہے۔ براہ کرم ایڈمن سے رابطہ کریں: واٹس ایپ 0300-7379385، جی میل jilanappsofficial@gmail.com۔';
+var HELP_FAQS = [
+{q:'Who made this app?', qu:'یہ ایپ کس نے بنائی؟', keys:['kis ne banaya','kisne banaya','kis ne btaya','kisne btaya','kis ne bataya','who made','who built','who told','banaya kis','btaya kis','jilan apps','developer'], a:'This app was made by Jilan Apps Official. Contact: WhatsApp 0300-7379385, Gmail jilanappsofficial@gmail.com.', au:'یہ ایپ Jilan Apps Official نے بنائی ہے۔ رابطہ: واٹس ایپ 0300-7379385، جی میل jilanappsofficial@gmail.com۔'},
+{q:'How do I become a donor?', qu:'ڈونر کیسے بنیں؟', keys:['donor ban','donor bano','register','donor kaise','khoon dena','blood dena','donate','ڈونر','رجسٹر','خون دینا','donor banna'], a:'Tap "Register as Donor" in the More menu and fill the form: name, father name, blood group, phone, address, age 18-65. CNIC is optional. After submitting, you will get a Donor No. — please save it, you will need it to link your account.', au:'More مینیو میں "Register as Donor" دبائیں اور فارم بھریں: نام، والد کا نام، بلڈ گروپ، فون، پتہ، عمر 18 سے 65۔ شناختی کارڈ لازمی نہیں۔ فارم جمع کرانے پر آپ کو ڈونر نمبر ملے گا — اسے سنبھال کر رکھیں، اکاؤنٹ جوڑنے کے لیے اس کی ضرورت پڑے گی۔'},
+{q:'How do I request blood?', qu:'خون کی درخواست کیسے کریں؟', keys:['request','blood chahiye','khoon chahiye','patient','mareez','hospital','خون چاہیے','درخواست','مریض','ہسپتال'], a:'Tap "Request" at the bottom, then fill the form: patient name, hospital, blood group, units needed, phone and area. The request goes to the admin, who contacts matching donors on WhatsApp.', au:'نیچے "Request" دبائیں، پھر فارم بھریں: مریض کا نام، ہسپتال، بلڈ گروپ، کتنے یونٹ چاہییں، فون اور علاقہ۔ درخواست ایڈمن کے پاس جائے گی، پھر ملتے جلتے گروپ کے ڈونرز کو واٹس ایپ کیا جائے گا۔'},
+{q:'How do I find a donor?', qu:'ڈونر کیسے ڈھونڈیں؟', keys:['find donor','donor dhoond','donor dhoondh','donor find','talash','ڈھونڈ','تلاش','donor chahiye'], a:'Tap "Find Donor" at the bottom, select the blood group and area. You will see donors with phone numbers — tap Call or WhatsApp to contact them directly.', au:'نیچے "Find Donor" دبائیں، بلڈ گروپ اور علاقہ منتخب کریں۔ آپ کو ڈونرز کے فون نمبر دکھیں گے — کال یا واٹس ایپ سے براہ راست رابطہ کریں۔'},
+{q:'How do I link my donor account?', qu:'اپنا اکاؤنٹ کیسے جوڑیں؟', keys:['link','donor no','donor number','account link','link karo','جوڑ','لنک','donor id'], a:'Go to Account, then "Link Donor Record" and enter your Donor No. (like 1, 2, 3). After linking, your donations and certificates will show on your profile.', au:'Account میں جائیں، پھر "Link Donor Record" میں اپنا ڈونر نمبر لکھیں (جیسے 1، 2، 3)۔ جوڑنے کے بعد آپ کی عطیات اور سرٹیفکیٹ آپ کی پروفائل پر دکھیں گے۔'},
+{q:'How do I get my certificate?', qu:'سرٹیفکیٹ کیسے ملے گا؟', keys:['certificate','cert','sanad','سرٹیفکیٹ','سند'], a:'The certificate is made only after a blood donation, by the admin. You can check it in the Certificate section with its reference number, or scan its QR code to verify it.', au:'سرٹیفکیٹ صرف خون دینے کے بعد ایڈمن بناتا ہے۔ آپ اسے Certificate والے حصے میں ریفرنس نمبر سے دیکھ سکتے ہیں، یا اس کے QR کوڈ کو اسکین کر کے تصدیق کر سکتے ہیں۔'},
+{q:'How do I become a member?', qu:'ممبر کیسے بنیں؟', keys:['member','membership','ممبر','رکن'], a:'Tap "Members" at the bottom to see members. A member card has your photo, name, designation, Member ID and a QR code — anyone can scan the QR to verify membership.', au:'نیچے "Members" دبائیں۔ ممبر کارڈ پر آپ کی تصویر، نام، عہدہ، ممبر نمبر اور QR کوڈ ہوتا ہے — کوئی بھی QR اسکین کر کے رکنیت کی تصدیق کر سکتا ہے۔'},
+{q:'How do I login or sign up?', qu:'لاگ ان یا سائن اپ کیسے کریں؟', keys:['login','sign in','signin','signup','sign up','account banao','لاگ ان','سائن اپ','اکاؤنٹ'], a:'Tap Account, then Login with your email or phone number + password. New user? Tap "Sign up" and create your account first.', au:'Account میں جائیں، پھر ای میل یا فون نمبر اور پاسورڈ سے لاگ ان کریں۔ نئے ہیں؟ پہلے "Sign up" سے اکاؤنٹ بنائیں۔'},
+{q:'I forgot my password', qu:'پاسورڈ بھول گیا', keys:['password','forgot','bhool','پاسورڈ','بھول'], a:'On the Login page tap "Forgot Password?". If your account was made with Gmail, a reset link will come to your inbox. If it was made with a phone number, contact the admin on WhatsApp: 0300-7379385.', au:'لاگ ان والے صفحے پر "Forgot Password?" دبائیں۔ اگر اکاؤنٹ جی میل سے بنا تھا تو ری سیٹ لنک ان باکس میں آئے گا۔ اگر فون نمبر سے بنا تھا تو ایڈمن سے واٹس ایپ پر رابطہ کریں: 0300-7379385۔'},
+{q:'Which blood group can donate to whom?', qu:'کون سا گروپ کس کو دے سکتا ہے؟', keys:['compatibility','kon sa group','kis ko de','o negative','ab positive','universal','گروپ','کون سا'], a:'O Negative can donate to every group (universal donor). AB Positive can receive from every group (universal recipient). Select your group in Find Donor to see matching donors.', au:'O Negative ہر گروپ کو دے سکتا ہے۔ AB Positive ہر گروپ سے لے سکتا ہے۔ Find Donor میں اپنا گروپ منتخب کریں تو ملتے جلتے ڈونر دکھیں گے۔'},
+{q:'When can I donate again?', qu:'دوبارہ کب خون دے سکتے ہیں؟', keys:['dobara','again','90','3 mahine','3 maheen','kab de','کتنے دن','دوبارہ'], a:'You can donate again after 90 days (3 months). The app shows "Cooldown" on your card until 90 days have passed.', au:'آپ 90 دن (3 ماہ) کے بعد دوبارہ خون دے سکتے ہیں۔ 90 دن پورے ہونے تک ایپ میں "Cooldown" دکھے گا۔'},
+{q:'How do I check my request status?', qu:'درخواست کی حالت کیسے دیکھیں؟', keys:['status','progress','request kahan','halat','حالت','سٹیٹس'], a:'Open the Request tab — every request card shows its stage: Received, then Contacting Donors, then Donor Found, then Completed.', au:'Request والے حصے کو کھولیں — ہر درخواست پر اس کا مرحلہ لکھا ہوتا ہے: Received، پھر Contacting Donors، پھر Donor Found، پھر Completed۔'},
+{q:'How do I update the app?', qu:'ایپ اپڈیٹ کیسے کریں؟', keys:['update','new version','naya version','اپڈیٹ','نیا ورژن'], a:'Open the More menu and tap "Check for Update". When a new version is available, an update banner also appears when you open the app.', au:'More مینیو کھولیں اور "Check for Update" دبائیں۔ نیا ورژن آنے پر ایپ کھولتے ہی اپڈیٹ کا بینر بھی آتا ہے۔'},
+{q:'How do I contact the admin?', qu:'ایڈمن سے رابطہ کیسے کریں؟', keys:['admin','contact','rabta','whatsapp','gmail','رابطہ','ایڈمن','واٹس ایپ'], a:'Contact the admin on WhatsApp: 0300-7379385, or Gmail: jilanappsofficial@gmail.com.', au:'ایڈمن سے رابطہ کریں: واٹس ایپ 0300-7379385، یا جی میل jilanappsofficial@gmail.com۔'}
+];
+function helpPick(q){
+  var s = String(q||'').toLowerCase();
+  for (var i=0;i<HELP_FAQS.length;i++){ var f=HELP_FAQS[i]; for (var j=0;j<f.keys.length;j++){ if (s.indexOf(f.keys[j].toLowerCase())!==-1) return f; } }
+  return null;
+}
+function helpSay(who, text){
+  var box=document.getElementById('helpMsgs'); if(!box) return;
+  var d=document.createElement('div'); d.className='help-msg '+who; d.textContent=text; box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function helpAsk(q){
+  helpSay('user', q);
+  var f=helpPick(q);
+  if (f) helpSay('bot', LANG==='ur' ? (f.au||f.a) : f.a);
+  else helpSay('bot', LANG==='ur' ? HELP_FALLBACK_UR : HELP_FALLBACK_EN);
+}
+function sendHelpMsg(){
+  var e=document.getElementById('helpInput'); if(!e) return;
+  var v=e.value.trim(); if(!v) return; e.value=''; helpAsk(v);
+}
+function openHelp(){
+  var chips=document.getElementById('helpChips');
+  if (chips && !chips.children.length){
+    HELP_FAQS.forEach(function(f){
+      var b=document.createElement('button'); b.type='button';
+      b.textContent = LANG==='ur' ? (f.qu||f.q) : f.q;
+      b.onclick=function(){ helpAsk(f.q); };
+      chips.appendChild(b);
+    });
+  }
+  if (!window._helpWelcomed){ window._helpWelcomed=true; helpSay('bot', LANG==='ur' ? HELP_WELCOME_UR : HELP_WELCOME_EN); }
+}
+
 /* ---------- forms ---------- */
 function submitRequest(){
   var btn = document.getElementById('rSubmitBtn');
@@ -2847,7 +2939,11 @@ function shareMemberCardPDF(){
       if (shareBtn) { shareBtn.disabled = false; shareBtn.textContent = 'Share Card as PDF'; }
       if (cardBody) cardBody.classList.remove('pdf-capture');
       imgs = imgs.filter(function(x){ return !!x; });
-      if (!imgs.length) { shareMemberCardPDFText(); return; }
+      /* If ANY card failed to capture (front card in the app: a local
+         image taints the canvas), fall back to the text PDF — a partial
+         PDF (back page only) is worse than a complete text one. The
+         text PDF always has both pages. */
+      if (imgs.length !== cards.length) { shareMemberCardPDFText(); return; }
       try {
         var blob = cardImagePDF(imgs);
         var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
