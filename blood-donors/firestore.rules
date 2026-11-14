@@ -139,5 +139,20 @@ service cloud.firestore {
     match /counters/{id} {
       allow read, write: if isAdmin();
     }
+
+    // Donation claims: a logged-in LINKED donor marks "I Donated" for an
+    // open request of their own blood group. Create only by that linked
+    // donor (donorId must match their link), so a random visitor cannot
+    // file claims for other donors. The admin reads/updates/deletes;
+    // the claimant may read their own claim.
+    match /donationClaims/{id} {
+      allow read: if isAdmin() || (request.auth != null
+        && resource.data.get('donorId', '') == linkedDonorId());
+      allow create: if request.auth != null && linkedDonorId() != ''
+        && request.resource.data.donorId == linkedDonorId()
+        && request.resource.data.keys().hasOnly(['id','requestId','donorId','donorName','group','status','createdAt'])
+        && request.resource.data.status == 'Pending';
+      allow update, delete: if isAdmin();
+    }
   }
 }
