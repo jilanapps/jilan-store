@@ -168,7 +168,7 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .mcard .mhead img{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold)}
 .mcard .mhead .ctitle{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
 .mcard .qr{text-align:center;margin:14px 0}
-.mcard .qrbox{display:inline-block;padding:12px;border:1.5px solid var(--gold-soft);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.mcard .qrbox{display:block;width:max-content;margin:0 auto;padding:12px;border:1.5px solid var(--gold-soft);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
 .mcard .sig{font-size:12px;color:var(--mut);text-align:center;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
 .mcard .side-label{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:8px}
 .pdf-capture .side-label,.pdf-capture .verify-url{display:none!important}
@@ -948,7 +948,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v10';
+var APP_VERSION = 'v11';
 function checkAppUpdate(force){
   if (location.protocol !== 'file:') { if (force) alert('Update check sirf app me chalta hai.'); return; }
   if (!navigator.onLine) { if (force) alert('Internet nahi hai — update check nahi ho saka.'); return; }
