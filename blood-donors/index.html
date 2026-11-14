@@ -342,7 +342,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="gpill" data-g="AB-" onclick="setGroupFilter('AB-',this)">AB-</button>
 </div>
 <div class="row">
-<div class="fld static"><select id="fCity" onchange="searchDonors()"><option value="">All Areas</option><option>Basti Malook</option><option>Multan City</option><option>Bosan Road</option><option>Gulgasht Colony</option><option>Cantt</option><option>Shah Rukn-e-Alam Colony</option><option>Mumtazabad</option><option>Shalimar Colony</option><option>Jalalpur Pirwala</option><option>Shujabad</option><option>Dunyapur</option><option>Kabirwala</option><option>Khanewal</option><option>Vehari</option><option>Lodhran</option><option>Qasim Bela</option><option>Budhla Sant</option><option>Chowk Kumharanwala</option><option>Vehari Road</option><option>Peer Khursheed Colony</option></select><label for="fCity">Area / City</label></div>
+<div class="fld static"><select id="fCity" onchange="searchDonors()"><option value="">All Areas</option></select><label for="fCity">Area / City</label></div>
 <label class="toggle"><input type="checkbox" id="fAvail" onchange="searchDonors()"> Available Only</label>
 </div>
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
@@ -437,7 +437,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <div class="wstep">
 <h3>3 &bull; Address &amp; Donation</h3>
 <div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
-<div class="fld static"><select id="dArea"><option value="">Select Area</option><option>Basti Malook</option><option>Multan City</option><option>Bosan Road</option><option>Gulgasht Colony</option><option>Cantt</option><option>Shah Rukn-e-Alam Colony</option><option>Mumtazabad</option><option>Shalimar Colony</option><option>Jalalpur Pirwala</option><option>Shujabad</option><option>Dunyapur</option><option>Kabirwala</option><option>Khanewal</option><option>Vehari</option><option>Lodhran</option><option>Qasim Bela</option><option>Budhla Sant</option><option>Chowk Kumharanwala</option><option>Vehari Road</option><option>Peer Khursheed Colony</option></select><label for="dArea">Area / City *</label></div>
+<div class="fld static"><select id="dArea"><option value="">Select Area</option></select><label for="dArea">Area / City *</label></div>
 <div class="row">
 <div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
@@ -1273,6 +1273,11 @@ ur: {
 "Login failed — check email/phone number and password.": "لاگ ان ناکام — ای میل / فون نمبر اور پاس ورڈ چیک کریں۔",
 "This phone number has a donor record, but the account may be Gmail-based. Try logging in with your Gmail, or contact the admin.": "اس نمبر پر ڈونر ریکارڈ ہے، لیکن اکاؤنٹ جی میل سے بنا ہو سکتا ہے۔ اپنی جی میل سے لاگ ان کر کے دیکھیں، یا ایڈمن سے رابطہ کریں۔",
 "No account found for this phone number. If you signed up with Gmail, login with your Gmail — or Sign up first.": "اس نمبر پر کوئی اکاؤنٹ نہیں ملا۔ اگر آپ نے جی میل سے اکاؤنٹ بنایا تھا تو جی میل سے لاگ ان کریں — یا پہلے Sign up کریں۔",
+"I Donated for this request": "میں نے اس درخواست پر خون دیا",
+"Donations to Confirm": "تصدیق کے لیے عطیات",
+"No donation claims waiting.": "کوئی عطیہ تصدیق کا منتظر نہیں۔",
+"Confirm — close request": "تصدیق کریں — درخواست بند کریں",
+"Reject": "مسترد کریں",
 "English": "انگریزی"
 }
 };
@@ -1557,6 +1562,11 @@ I18N.ar = {
 "Login failed — check email/phone number and password.": "فشل تسجيل الدخول — تحقق من البريد الإلكتروني / رقم الهاتف وكلمة المرور.",
 "This phone number has a donor record, but the account may be Gmail-based. Try logging in with your Gmail, or contact the admin.": "يوجد سجل متبرع لهذا الرقم، لكن الحساب قد يكون مبنياً على Gmail. حاول تسجيل الدخول باستخدام Gmail، أو تواصل مع المسؤول.",
 "No account found for this phone number. If you signed up with Gmail, login with your Gmail — or Sign up first.": "لم يتم العثور على حساب لهذا الرقم. إذا سجّلت باستخدام Gmail، سجّل الدخول باستخدام Gmail — أو سجّل أولاً.",
+"I Donated for this request": "تبرعت بالدم لهذا الطلب",
+"Donations to Confirm": "تبرعات بانتظار التأكيد",
+"No donation claims waiting.": "لا توجد مطالبات تبرع بانتظار التأكيد.",
+"Confirm — close request": "تأكيد — إغلاق الطلب",
+"Reject": "رفض",
 "English": "الإنجليزية"
 };
 
@@ -1649,7 +1659,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v19';
+var APP_VERSION = 'v20';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1988,6 +1998,21 @@ function renumberMemberIds(){
     });
   });
 }
+/* ---------- Pakistan-wide areas (v20) ----------
+   Donor form + Find Donor share ONE list: the 20 Multan localities
+   first, then major cities/towns of every province, GB and AJK.
+   Both selects are filled from here on load — the HTML keeps only
+   its placeholder option. */
+var PK_AREAS = ['Basti Malook','Multan City','Bosan Road','Gulgasht Colony','Cantt','Shah Rukn-e-Alam Colony','Mumtazabad','Shalimar Colony','Jalalpur Pirwala','Shujabad','Dunyapur','Kabirwala','Khanewal','Vehari','Lodhran','Qasim Bela','Budhla Sant','Chowk Kumharanwala','Vehari Road','Peer Khursheed Colony','Lahore','Faisalabad','Rawalpindi','Gujranwala','Sialkot','Bahawalpur','Sargodha','Gujrat','Jhelum','Sheikhupura','Kasur','Okara','Sahiwal','Rahim Yar Khan','Dera Ghazi Khan','Jhang','Chakwal','Attock','Mianwali','Bhakkar','Layyah','Muzaffargarh','Bahawalnagar','Toba Tek Singh','Mandi Bahauddin','Hafizabad','Narowal','Nankana Sahib','Chiniot','Pakpattan','Khushab','Rajanpur','Murree','Taxila','Wah Cantt','Kamalia','Burewala','Arifwala','Hasilpur','Chishtian','Haroonabad','Fort Abbas','Kot Addu','Jampur','Taunsa','Sadiqabad','Khanpur','Liaquatpur','Ahmedpur East','Gojra','Karachi','Hyderabad','Sukkur','Larkana','Mirpur Khas','Nawabshah','Jacobabad','Shikarpur','Khairpur','Dadu','Thatta','Badin','Umerkot','Mithi','Tando Adam','Tando Allahyar','Ghotki','Kandhkot','Naushahro Feroze','Sanghar','Peshawar','Abbottabad','Mardan','Mingora','Kohat','Dera Ismail Khan','Bannu','Nowshera','Charsadda','Swabi','Mansehra','Haripur','Chitral','Hangu','Karak','Tank','Quetta','Gwadar','Turbat','Khuzdar','Sibi','Zhob','Loralai','Chaman','Pishin','Mastung','Kalat','Nushki','Hub','Gilgit','Skardu','Hunza','Chilas','Ghizer','Muzaffarabad','Mirpur','Kotli','Rawalakot','Bagh','Bhimber','Islamabad'];
+function fillAreaSelects(){
+  ['fCity','dArea'].forEach(function(id){
+    var s = document.getElementById(id); if (!s) return;
+    var keep = s.querySelector('option[value=""]');
+    s.innerHTML = '';
+    if (keep) s.appendChild(keep);
+    PK_AREAS.forEach(function(a){ var o = document.createElement('option'); o.textContent = a; s.appendChild(o); });
+  });
+}
 function searchDonors(){
   var g = _fGroup, c = val('fCity').toLowerCase();
   var availOnly = document.getElementById('fAvail') && document.getElementById('fAvail').checked;
@@ -2055,8 +2080,9 @@ function renderReqList(boxId, list, emptyMsg){
       contact = '<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span><div class="dc-actions"><a class="btn block" href="tel:'+esc(r.phone)+'">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/'+waNum(r.phone)+'?text='+encodeURIComponent(cmsg)+'">WhatsApp</a></div>';
     }
     var donated = (r.donatedBy && (st==='Donor Found' || st==='Completed')) ? '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>' : '';
+    var claimBtn = (MY_DONOR && st !== 'Completed' && MY_DONOR.group === r.group) ? '<br><button class="btn green" onclick="claimDonation(\''+esc(r.id)+'\')">🩸 I Donated for this request</button>' : '';
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
-    return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+contact+'</div></div></div>';
+    return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+contact+'</div></div></div>';
   }).join('');
 }
 /* ---------- notifications: new blood requests, same-group first ----------
@@ -2124,6 +2150,62 @@ function loadRequests(){
         show();
       });
     } else show();
+  });
+}
+/* ---------- donation claims: donor marks "I Donated", admin confirms ----------
+   A donor who gave blood taps "I Donated" on the open request card. The
+   claim lands in the donationClaims collection; the admin confirms it in
+   the Admin Panel — Confirm closes the request (Donor Found -> Completed,
+   which also updates the donor's last donation + units) and deletes the
+   claim. The requester cannot close a request directly: requestsPublic
+   updates are admin-only by rule, so the donor's claim is the record. */
+var MY_DONOR = null;
+function claimDonation(reqId){
+  if (!MY_DONOR) { alert('Login with your donor account first.'); return; }
+  if (!confirm('Confirm: did you donate blood for this request?')) return;
+  qAll('donationClaims', function(cs){
+    var dup = cs.some(function(c){ return c.requestId === reqId && c.donorId === MY_DONOR.id && (c.status||'Pending') === 'Pending'; });
+    if (dup) { alert('You already marked this request — the admin will confirm it.'); return; }
+    qAdd('donationClaims', {id: reqId + '_' + MY_DONOR.id, requestId: reqId, donorId: MY_DONOR.id, donorName: MY_DONOR.name, group: MY_DONOR.group, status: 'Pending', createdAt: Date.now()}, function(){
+      alert('Thank you! The admin has your record — once confirmed, the request will close.');
+      loadRequests();
+    });
+  });
+}
+function confirmClaim(cid){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Confirm this donation? The request will close and the donor record will update.')) return;
+  qAll('donationClaims', function(cs){
+    var c = null; cs.forEach(function(x){ if (x.id === cid) c = x; });
+    if (!c) { alert('Claim not found.'); return; }
+    var patch = {status:'Donor Found', donatedBy:c.donorName||'', donatedById:c.donorId||''};
+    qUpdate('requests', c.requestId, patch, function(){
+      qUpdate('requestsPublic', c.requestId, patch, function(){
+        advanceReqStatus(c.requestId, 'Donor Found');
+        qDel('donationClaims', cid, function(){ renderAdmin(); });
+      });
+    });
+  });
+}
+function rejectClaim(cid){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Reject this donation claim?')) return;
+  qDel('donationClaims', cid, function(){ renderAdmin(); });
+}
+function loadClaimsAdmin(){
+  var box = document.getElementById('claimsBox'); if (!box) return;
+  qAll('donationClaims', function(cs){
+    var pend = cs.filter(function(c){ return (c.status||'Pending') === 'Pending'; });
+    if (!pend.length) { box.innerHTML = '<h3>Donations to Confirm (0)</h3><span class="mut">No donation claims waiting.</span>'; return; }
+    qAll('requests', function(rs){
+      var h = '<h3>Donations to Confirm ('+pend.length+')</h3>';
+      pend.forEach(function(c){
+        var rq = null; rs.forEach(function(x){ if (x.id === c.requestId) rq = x; });
+        var who = rq ? (rq.name||rq.firstName||'Patient') : c.requestId;
+        h += '<div class="card"><b>'+esc(c.donorName||'')+'</b> ('+esc(c.group||'')+') donated for <b>'+esc(who)+'</b>'+(rq && rq.hospital ? ' — '+esc(rq.hospital) : '')+' <span class="mut small">'+esc(fmtD(c.createdAt))+'</span><br><button class="btn green" onclick="confirmClaim(\''+esc(c.id)+'\')">✓ Confirm — close request</button> <button class="btn ghost" onclick="rejectClaim(\''+esc(c.id)+'\')">Reject</button></div>';
+      });
+      box.innerHTML = h;
+    });
   });
 }
 /* ---------- request progress (admin advances the stage) ----------
@@ -2919,7 +3001,7 @@ function doLogin(){
     }
   });
 }
-function doLogout(){ localStorage.removeItem('bdbs_admin'); try { localStorage.removeItem('bdbs_myGroup'); } catch(e){} if (FB_OK && auth) auth.signOut(); }
+function doLogout(){ MY_DONOR = null; localStorage.removeItem('bdbs_admin'); try { localStorage.removeItem('bdbs_myGroup'); } catch(e){} if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Password reset needs internet.</span>'; return; }
   var inp = val('lEmail');
@@ -2993,6 +3075,8 @@ function loadMyRecord(u, donorId){
     if (!d.exists) { document.getElementById('myRecord').innerHTML = '<p class="err">Your linked donor record was not found. Ask the admin to check it.</p>'; return; }
     var r = d.data(); r.id = d.id;
     try { if (r.group) { localStorage.setItem('bdbs_myGroup', r.group); updateBell(); } } catch(e){}
+    MY_DONOR = {id: donorId, name: r.name||'', group: r.group||''};
+    loadRequests();
     document.getElementById('myRecord').innerHTML =
       '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
       '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b>'+esc(r.units||0)+'</b></div></div>';
@@ -3168,6 +3252,7 @@ function renderAdmin(){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
+          h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
             /* Certificate: first time one button; once a certificate
@@ -3223,6 +3308,7 @@ function renderAdmin(){
             return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.donorName)+' ('+esc(c.group)+', '+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
           }).join('') : '<p class="mut">No certificates yet. Use the Certificate button on a donor row.</p>');
           box.innerHTML = h;
+          loadClaimsAdmin();
         });
       });
     });
@@ -3275,6 +3361,7 @@ document.addEventListener('input', function(e){ if (e.target && e.target.classLi
 wizGo('donor', 0); wizGo('request', 0); wizGo('member', 0);
 setOfflineBanner(); if (FB_OK) flushSync();
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { try { navigator.serviceWorker.register('sw.js'); } catch(e){} }
+fillAreaSelects();
 loadHome();
 autofillDonorNo();
 renderLogin();
