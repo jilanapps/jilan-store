@@ -183,7 +183,7 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .cert{max-width:660px;margin:12px auto;text-align:center;background-color:#fbf3d5;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23b45309%22%20stroke-width%3D%222%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2229%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2223%22%20stroke-width%3D%221.2%22%20stroke%3D%22%23d97706%22%2F%3E%3Cpath%20d%3D%22M36%2C13%20L59%2C36%20L36%2C59%20L13%2C36%20Z%22%20stroke-width%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%2211%22%2F%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%220%22%20r%3D%2211%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%2272%22%20r%3D%2211%22%2F%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%2272%22%20r%3D%2211%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23b45309%22%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2213%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2259%22%20cy%3D%2213%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2259%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2259%22%20cy%3D%2259%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%22M36%2C1%20C36%2C1%2031%2C9%2031%2C12%20A5%2C5%200%201%2C0%2041%2C12%20C41%2C9%2036%2C1%2036%2C1%20Z%22%20fill%3D%22%23991b1b%22%20stroke%3D%22%237f1d1d%22%20stroke-width%3D%220.8%22%2F%3E%3C%2Fsvg%3E");background-size:72px 72px;padding:46px;border-radius:3px;box-shadow:0 16px 40px rgba(120,53,15,.18);position:relative}
 .cert .cert-inner{background:#fffdf6;border:2px solid #b45309;outline:1px solid #7f1d1d;outline-offset:4px;border-radius:2px;padding:30px 26px 26px;position:relative}
 .cert .frame{border:1px solid #d97706;border-radius:2px;padding:24px 20px 20px;position:relative}
-.cert .logo{position:absolute;top:14px;left:14px;width:88px;height:88px;border-radius:50%;border:3px solid #b45309;margin:0;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.cert .logo{position:absolute;top:14px;left:14px;width:92px;height:92px;border-radius:50%;border:3px solid #b45309;margin:0;box-shadow:0 4px 12px rgba(0,0,0,.3);object-fit:cover}
 .cert h2{font-family:Georgia,"Times New Roman",serif;color:#7f1d1d;font-size:34px;margin:104px 0 6px;letter-spacing:.5px;border:0;padding:0}
 .cert h2:after{display:none}
 .cert .qverse{font-size:15px;color:#334155;font-style:italic;line-height:1.65;margin:4px 10px 12px}
@@ -243,6 +243,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 .status-pill.cool{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
 .dc-name{font-size:16px;font-weight:800}
 .dc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.stars button{background:none;border:none;font-size:30px;line-height:1;color:#f59e0b;padding:2px 4px;cursor:pointer}
 .btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
 .empty{text-align:center;padding:28px 12px}
 .rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
@@ -533,6 +534,19 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="btn" onclick="publishActivity()">Publish</button>
 <div id="aMsg"></div>
 </div>
+</section>
+
+<!-- ================= REVIEWS ================= -->
+<section class="sec" id="s-reviews">
+<div class="card"><h2>Reviews</h2>
+<p class="mut" id="revAvg">Loading…</p>
+<div id="revList" class="mut">Loading…</div></div>
+<div class="card"><h2>Write a Review</h2>
+<label>Your Name *</label><input id="vName" placeholder="Your name">
+<label>Rating *</label><div class="stars" id="revStars"><button type="button" onclick="setStars(1)">☆</button><button type="button" onclick="setStars(2)">☆</button><button type="button" onclick="setStars(3)">☆</button><button type="button" onclick="setStars(4)">☆</button><button type="button" onclick="setStars(5)">☆</button></div>
+<label>Your Review *</label><textarea id="vText" rows="3" placeholder="How was your experience with Basti Dawa Blood Society?"></textarea>
+<button class="btn" onclick="submitReview()">Submit Review</button>
+<div id="vMsg"></div></div>
 </section>
 
 <!-- ================= CERTIFICATE ================= -->
@@ -975,6 +989,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="sheet-btn" onclick="show('donor')">🩸 &nbsp;Register as Donor</button>
 <button class="sheet-btn" onclick="show('activity')">📅 &nbsp;Daily Activity &amp; Gallery</button>
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
+<button class="sheet-btn" onclick="show('reviews')">⭐ &nbsp;Reviews</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
 <button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update <span class="mut small" id="installedVer"></span></button>
@@ -1035,6 +1050,9 @@ ur: {
 "WhatsApp (Founder Muhammad Asif Javaid):": "واٹس ایپ (بانی محمد آصف جاوید):",
 "Loading…": "لوڈ ہو رہا ہے…",
 "Daily Activity & Gallery": "روزانہ سرگرمی اور گیلری",
+"Reviews": "جائزے",
+"Write a Review": "جائزہ لکھیں",
+"Submit Review": "جائزہ بھیجیں",
 "Camps & Activities": "کیمپ اور سرگرمیاں",
 "Find a Blood Donor": "خون کا ڈونر تلاش کریں",
 "City / Area": "شہر / علاقہ",
@@ -1327,6 +1345,9 @@ I18N.ar = {
 "WhatsApp (Founder Muhammad Asif Javaid):": "واتساب (المؤسس محمد آصف جاويد):",
 "Loading…": "جارٍ التحميل…",
 "Daily Activity & Gallery": "النشاط اليومي والمعرض",
+"Reviews": "التقييمات",
+"Write a Review": "اكتب تقييمًا",
+"Submit Review": "أرسل التقييم",
 "Camps & Activities": "المخيمات والأنشطة",
 "Find a Blood Donor": "ابحث عن متبرع بالدم",
 "City / Area": "المدينة / المنطقة",
@@ -1670,7 +1691,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v22';
+var APP_VERSION = 'v23';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1708,14 +1729,14 @@ function show(s){
   var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
   document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
   closeModal('memberModal'); closeModal('moreSheet');
-  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests(); if (s==='notif') loadNotifs();
+  if (s==='home') loadHome(); if (s==='find') searchDonors(); if (s==='request') loadRequests(); if (s==='reviews') loadReviews(); if (s==='notif') loadNotifs();
   if (s==='members') loadMembers(); if (s==='activity') loadActivities(); if (s==='login') renderLogin();
   window.scrollTo(0,0);
 }
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', queue:'bdbs_syncQueue' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function donorPub(d){return {id:d.id,name:d.name,group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
@@ -1727,14 +1748,14 @@ function donorPub(d){return {id:d.id,name:d.name,group:d.group,area:d.area||'',c
    education, email, address, father, blood group) is
    admin-only in the private 'members' collection. */
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
-function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',requesterPhoneNorm:r.requesterPhoneNorm||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
    Every successful online read/write is mirrored into the phone's local
    cache, so the app keeps working with REAL data when the internet drops.
    Writes made offline are queued and pushed to Firestore when net returns.
    (The old demo seeding is gone — offline now shows real saved data.) */
-function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup}; return map[coll]||LS.activities; }
+function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews}; return map[coll]||LS.activities; }
 function cacheUpsert(coll, obj){ var k=lsKey(coll), arr=lsGet(k), found=false; arr.forEach(function(x){ if(x.id===obj.id){ for(var p in obj) x[p]=obj[p]; found=true; } }); if(!found) arr.unshift(obj); lsSet(k,arr); }
 function cacheRemove(coll, id){ var k=lsKey(coll); lsSet(k, lsGet(k).filter(function(x){return x.id!==id;})); }
 function queueOp(op){ var q=lsGet(LS.queue); q.push(op); lsSet(LS.queue,q); setOfflineBanner(); }
@@ -2092,9 +2113,10 @@ function renderReqList(boxId, list, emptyMsg){
     }
     var donated = (r.donatedBy && (st==='Donor Found' || st==='Completed')) ? '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>' : '';
     var claimBtn = (MY_DONOR && st !== 'Completed' && MY_DONOR.group === r.group) ? '<br><button class="btn green" onclick="claimDonation(\''+esc(r.id)+'\')">🩸 I Donated for this request</button>' : '';
+    var myCloseBtn = (MY_PHONE_NORM && r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM && st !== 'Completed') ? '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>' : '';
     var adminBtns = (isAdmin() && st !== 'Completed') ? '<br><button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : '';
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
-    return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+adminBtns+contact+'</div></div></div>';
+    return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+contact+'</div></div></div>';
   }).join('');
 }
 /* ---------- notifications: new blood requests, same-group first ----------
@@ -2169,9 +2191,12 @@ function loadRequests(){
    claim lands in the donationClaims collection; the admin confirms it in
    the Admin Panel — Confirm closes the request (Donor Found -> Completed,
    which also updates the donor's last donation + units) and deletes the
-   claim. The requester cannot close a request directly: requestsPublic
-   updates are admin-only by rule, so the donor's claim is the record. */
+   claim.
+   v23: the requester CAN close their own request too (closeMyRequest) —
+   the request's requesterPhoneNorm must match the signed-in user's phoneNorm. */
 var MY_DONOR = null;
+var MY_PHONE_NORM = '';
+try { MY_PHONE_NORM = localStorage.getItem('bdbs_myPhoneNorm') || ''; } catch(e){}
 function claimDonation(reqId){
   if (!MY_DONOR) { alert('Login with your donor account first.'); return; }
   if (!confirm('Confirm: did you donate blood for this request?')) return;
@@ -2305,6 +2330,61 @@ function completeRequest(id){
     });
   });
 }
+/* ---------- requester close: requester closes their own request ----------
+   The requester (same phone as on the request) can close their own request
+   and attach the donor who donated — no admin step. The donor's record is
+   credited (lastDonation + units) exactly like the admin Complete does.
+   Uses direct SDK calls (NOT qUpdate) so a rules rejection shows a REAL
+   error instead of the silent local-only "success" qUpdate gives. */
+function closeMyRequest(id){
+  if (!FB_OK) { alert('Closing needs internet.'); return; }
+  if (!auth || !auth.currentUser) { alert('Please login first.'); return; }
+  if (!MY_PHONE_NORM) { alert('Please login with your phone number first.'); return; }
+  db.collection('requestsPublic').doc(id).get().then(function(doc){
+    if (!doc.exists) { alert('Request not found.'); return; }
+    var r = doc.data(); r.id = doc.id;
+    if ((r.status||'Received') === 'Completed') { alert('This request is already completed.'); loadRequests(); return; }
+    if (!r.requesterPhoneNorm || normPhone(r.requesterPhoneNorm) !== MY_PHONE_NORM) { alert('This request is not yours.'); return; }
+    var no = prompt('Enter the Donor ID who donated for this request (e.g. D-001).\nLeave empty to close without a donor.');
+    if (no === null) return;
+    no = String(no||'').trim().toUpperCase();
+    if (!no) { if (!confirm('Close this request without recording a donor?')) return; doCloseRequest(r, null); return; }
+    db.collection('donorLookup').doc(lookupKey(no)).get().then(function(lk){
+      if (!lk.exists || !lk.data().donorId) { alert('Donor ID ' + no + ' not found. Check the Donor No. (e.g. D-001).'); return; }
+      var donorId = lk.data().donorId;
+      return db.collection('donorsPublic').doc(donorId).get().then(function(dd){
+        if (!dd.exists) { alert('Donor ID ' + no + ' not found.'); return; }
+        var d = dd.data(); d.id = dd.id;
+        if (!confirm('Close this request?\nDonated by: ' + (d.name||'') + ' (' + no + ')')) return;
+        doCloseRequest(r, d);
+      });
+    }).catch(function(){ alert('Could not look up the donor. Check internet and try again.'); });
+  }).catch(function(){ alert('Could not load the request. Check internet and try again.'); });
+}
+function doCloseRequest(r, d){
+  var patch = {status:'Completed'};
+  if (d) { patch.donatedBy = d.name||''; patch.donatedById = d.id; }
+  db.collection('requests').doc(r.id).update(patch).then(function(){
+    return db.collection('requestsPublic').doc(r.id).update(patch);
+  }).then(function(){
+    loadRequests();
+    if (!d) { alert('Request closed.'); return; }
+    var today = new Date().toISOString().slice(0,10);
+    var reqUnits = parseInt(r.units||0,10)||1;
+    var credit = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits, lastClosedRequestId: r.id};
+    db.collection('donors').doc(d.id).update(credit).then(function(){
+      return db.collection('donorsPublic').doc(d.id).update(credit);
+    }).then(function(){
+      alert('Request closed. Donated by ' + (d.name||'') + ' recorded.');
+      loadRequests();
+    }).catch(function(){
+      alert('Request closed, but the donor record could not be updated. Please tell the admin.');
+      loadRequests();
+    });
+  }).catch(function(){
+    alert('Could not close the request. Check internet and try again — or ask the admin.');
+  });
+}
 /* One-time repair: older public request cards (e.g. Muhammad, 2026-11-12)
    were saved before the phone went public, so donors see no Call/WhatsApp
    buttons on them. Copies the phone from the private record to the public
@@ -2359,6 +2439,39 @@ function loadActivities(){
   document.getElementById('activityPublish').style.display = isAdmin() ? 'block' : 'none';
 }
 
+/* ---------- reviews: public star ratings for the society ---------- */
+var REV_STARS = 0;
+function setStars(n){ REV_STARS = n; var b = document.querySelectorAll('#revStars button'); b.forEach(function(x,i){ x.textContent = i < n ? '★' : '☆'; }); }
+function starTxt(n){ var s=''; for (var i=0;i<5;i++) s += i<n?'★':'☆'; return s; }
+function submitReview(){
+  var name = val('vName').slice(0,60), text = val('vText').slice(0,500);
+  var msg = document.getElementById('vMsg');
+  if (!name) { msg.innerHTML = '<span class="err">Please enter your name.</span>'; return; }
+  if (!REV_STARS) { msg.innerHTML = '<span class="err">Please tap the stars to rate.</span>'; return; }
+  if (!text) { msg.innerHTML = '<span class="err">Please write your review.</span>'; return; }
+  var obj = {id: uid('rev'), name:name, stars:REV_STARS, text:text, createdAt:Date.now()};
+  qAdd('reviews', obj, function(){
+    msg.innerHTML = '<span class="ok">Thank you! Your review has been posted.</span>';
+    document.getElementById('vName').value=''; document.getElementById('vText').value=''; setStars(0);
+    loadReviews();
+  });
+}
+function loadReviews(){
+  var vn = document.getElementById('vName'); if (vn && !vn.value && MY_DONOR) vn.value = MY_DONOR.name;
+  qAll('reviews', function(rs){
+    var avg = document.getElementById('revAvg');
+    if (!rs.length) { avg.innerHTML = 'No reviews yet — be the first to share your experience.'; }
+    else { var sum=0; rs.forEach(function(r){ sum += parseInt(r.stars||0,10)||0; }); var a=(sum/rs.length); avg.innerHTML = '<b>'+starTxt(Math.round(a))+'</b> ' + a.toFixed(1) + ' out of 5 (' + rs.length + ' review' + (rs.length===1?'':'s') + ')'; }
+    var box = document.getElementById('revList');
+    if (!rs.length) { box.innerHTML = ''; return; }
+    box.innerHTML = rs.map(function(r){
+      var del = isAdmin() ? ' <button class="btn ghost" onclick="removeReview(\''+esc(r.id)+'\')">Remove</button>' : '';
+      return '<div class="card"><b>'+esc(r.name)+'</b> <span style="color:#f59e0b">'+starTxt(parseInt(r.stars||0,10)||0)+'</span><br><span class="mut small">'+esc(fmtD(r.createdAt))+'</span><br>'+esc(r.text)+del+'</div>';
+    }).join('');
+  });
+}
+function removeReview(id){ if (!isAdmin()) { alert('Admin login required.'); return; } if (!confirm('Remove this review?')) return; qDel('reviews', id, function(){ loadReviews(); }); }
+
 /* ---------- forms ---------- */
 function submitRequest(){
   var btn = document.getElementById('rSubmitBtn');
@@ -2377,8 +2490,8 @@ function submitRequest(){
     var dup = rs.some(function(r){ return waNum(r.phone) === ph && r.group === grp && (r.status||'Received') !== 'Completed'; });
     if (dup) { document.getElementById('rMsg').innerHTML = '<span class="err">A request for this phone and blood group is already open.</span>'; if (btn) btn.disabled = false; return; }
     var id = uid('req');
-    var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
-    var pub = {id:id, name:full.name, firstName:firstName(full.name), group:full.group, units:un, hospital:full.hospital, address:full.address, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:normPhone(val('rPhone')), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var pub = {id:id, name:full.name, firstName:firstName(full.name), group:full.group, units:un, hospital:full.hospital, address:full.address, city:full.address.split(',').pop().trim(), phone:full.phone, requesterPhoneNorm:normPhone(val('rPhone')), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
     qAdd('requests', full, function(ok){
       if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
       qAdd('requestsPublic', pub, function(){
@@ -2867,7 +2980,7 @@ function renderCert(c){
     '<div class="sealrow"><div class="certqr-wrap"><div id="certQrBox" class="certqr"></div><div class="qr-cap">Scan to verify</div></div><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
     '<p class="sup">Under Supervision — Basti Dawa Welfare Organization</p>' +
     '<div class="sigrow"><div><div class="scr">Naeem Asghar</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Dr Muhammad Naeem Asghar<span>Patron In Chief</span></div></div><div><div class="scr">Asif Javaid</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Muhammad Asif Javaid<span>Founder &amp; Chief Executive</span></div></div></div>' +
-    '<p class="credit">Developed by Dr Asif — Jilan Apps Official</p></div></div></div>' +
+    '</div></div></div>' +
     '<button class="btn" onclick="printPageJS()">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
   var qb = document.getElementById('certQrBox');
   if (qb && typeof QRCode !== 'undefined') { try { new QRCode(qb, {text:'https://jilanapps.github.io/jilan-store/blood-donors/verify.html?cert=' + encodeURIComponent(c.ref), width:123, height:123, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
@@ -3046,7 +3159,7 @@ function doLogin(){
     }
   });
 }
-function doLogout(){ MY_DONOR = null; localStorage.removeItem('bdbs_admin'); try { localStorage.removeItem('bdbs_myGroup'); } catch(e){} if (FB_OK && auth) auth.signOut(); }
+function doLogout(){ MY_DONOR = null; MY_PHONE_NORM = ''; try { localStorage.removeItem('bdbs_myPhoneNorm'); } catch(e){} localStorage.removeItem('bdbs_admin'); try { localStorage.removeItem('bdbs_myGroup'); } catch(e){} if (FB_OK && auth) auth.signOut(); }
 function doForgot(){
   if (!FB_OK) { document.getElementById('lMsg').innerHTML = '<span class="err">Password reset needs internet.</span>'; return; }
   var inp = val('lEmail');
@@ -3081,6 +3194,7 @@ function doSignup(){
     var u = cred.user;
     var doc = {name:name, email:authEmail, role:'donor', createdAt:Date.now()};
     if (phone) doc.phone = phone;
+    if (phone) doc.phoneNorm = phone;
     return db.collection('users').doc(u.uid).set(doc).then(function(){
       msg.innerHTML = '<span class="ok">Account created. Welcome, '+esc(name)+'!</span>';
       routeAuth(u);
@@ -3100,6 +3214,8 @@ function renderDonor(u){
   db.collection('users').doc(u.uid).get().then(function(d){
     var data = d.exists ? d.data() : {};
     try { if (data.phone && u.email) { var lm = JSON.parse(localStorage.getItem('bdbs_loginMap') || '{}'); lm[normPhone(data.phone)] = u.email; localStorage.setItem('bdbs_loginMap', JSON.stringify(lm)); } } catch(e){}
+    var pn = data.phoneNorm || (data.phone ? normPhone(data.phone) : '');
+    if (pn) { MY_PHONE_NORM = pn; try { localStorage.setItem('bdbs_myPhoneNorm', pn); } catch(e){} if (!data.phoneNorm && data.phone) { db.collection('users').doc(u.uid).update({phoneNorm: pn}).catch(function(){}); } }
     var linkedId = data.linkedDonorId || '';
     document.getElementById('linkBox').style.display = linkedId ? 'none' : 'block';
     document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
