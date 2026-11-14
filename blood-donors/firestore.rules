@@ -34,13 +34,17 @@ service cloud.firestore {
     }
 
     // Full donor records (phone, CNIC, address, disease, father name).
-    // NEVER public — admin only, except: the linked donor may READ their
+    // READ is never public — admin only, except: the linked donor may READ their
     // own record, UPDATE only lastDonation/units, and LINK it (set
     // linkedUid to their own uid, only while it is still unset).
+    // CREATE is public so anyone can register as a donor without login;
+    // the field list is fixed and linkedUid cannot be set at create
+    // time, so a public write can never claim or read a record.
     match /donors/{id} {
       allow read: if isAdmin() || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid);
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','donorNo','photo','cnic','group','age','address','phone','disease','lastDonation','units','createdAt','demo'])
+        && !('linkedUid' in request.resource.data));
       allow update: if isAdmin() || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
@@ -50,12 +54,13 @@ service cloud.firestore {
         && request.resource.data.linkedUid == request.auth.uid;
       allow delete: if isAdmin();
     }
-    // Public-safe donor mirror: name, blood group, city, last donation
-    // only. Written by the app together with the full record. The linked
-    // donor may update only their own lastDonation/units here too.
+    // Public-safe donor mirror: name, blood group, city, phone, address,
+    // last donation only. Written by the app together with the full
+    // record. CREATE is public (same as the full record, same reason).
+    // The linked donor may update only their own lastDonation/units here too.
     match /donorsPublic/{id} {
       allow read: if true;
-      allow create: if isAdmin();
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','group','city','phone','address','lastDonation','units','createdAt','demo']);
       allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
       allow delete: if isAdmin();
@@ -63,9 +68,23 @@ service cloud.firestore {
 
     // Donor No. -> donor doc lookup, so a signed-up donor can link their
     // own record. Maps a donor number to a doc id only — no private data.
+    // CREATE is public (written together with a donor registration);
+    // create never overwrites an existing doc, only the admin can change one.
     match /donorLookup/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Donor duplicate-check keys: SHA-256 hashes of a donor's phone /
+    // CNIC only — no private data inside. Anyone may read and create
+    // them; that is how the "one phone / one CNIC = one donor" check
+    // works for public visitors on any phone. Only the admin may
+    // update or delete a key (e.g. when a donor record is removed).
+    match /donorKeys/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['id','donorId','kind','createdAt']);
+      allow update, delete: if isAdmin();
     }
 
     // Full member records. NEVER public — admin only, except: the linked

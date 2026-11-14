@@ -362,7 +362,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <section class="sec" id="s-donor">
 <div class="card" id="wz-donor" data-step="0">
 <h2>Donor Registration</h2>
-<p class="mut">Register as a blood donor. Your phone, CNIC, address and disease are <b>private</b> — only the BDBS admin can see them. The public donor list shows only your name, blood group, city and last donation date.</p>
+<p class="mut">Register as a blood donor. Your name, phone, address and blood group will be shown publicly so patients can contact you directly. Your CNIC, age and disease are <b>private</b> — only the BDBS admin can see them.</p>
 <div class="wprog"><div class="wprog-fill"></div></div>
 <div class="wprog-label">Step 1 of 3</div>
 <div class="wstep on">
@@ -520,7 +520,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 10px 32px}
 <button class="btn" onclick="doSignup()">Create Account</button>
 <div id="suMsg"></div>
 <p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
-<p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your phone, CNIC, address and disease stay private — only the BDBS admin can see full records.</p>
+<p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.</p>
 </div>
 <div class="card" id="donorCard" style="display:none">
 <h2>My Profile <span id="donorEmail" class="mut"></span></h2>
@@ -948,7 +948,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v9';
+var APP_VERSION = 'v10';
 function checkAppUpdate(force){
   if (location.protocol !== 'file:') { if (force) alert('Update check sirf app me chalta hai.'); return; }
   if (!navigator.onLine) { if (force) alert('Internet nahi hai — update check nahi ho saka.'); return; }
@@ -993,14 +993,14 @@ var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_membe
   requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
+function donorPub(d){return {id:d.id,name:d.name,group:d.group,city:(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
 /* Public member record: ONLY name, phone number and photo are public.
    Expiry stays in the record ONLY so the QR verify page can check validity —
    it is never displayed anywhere public. Everything else (CNIC, age,
    education, email, address, father, designation, ID, blood group) is
    admin-only in the private 'members' collection. */
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
-function reqPub(r){return {id:r.id,firstName:firstName(r.name),group:r.group,hospital:r.hospital,city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),group:r.group,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',status:r.status||'Received',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
    Every successful online read/write is mirrored into the phone's local
@@ -1106,9 +1106,9 @@ function loadHome(){
   });
 }
 /* ---------- smart donor search: pills + instant city filter + availability ----------
-   Public cards show name, blood group, city and last donation date only.
-   Call Now / WhatsApp buttons are ADMIN ONLY — they use the phone from the
-   private 'donors' collection, never from the public record. */
+   Public cards show name, blood group, address, phone and last donation
+   date — patients contact the donor directly. The donor's CNIC, age and
+   disease stay private (admin only) and are never in the public record. */
 var _fGroup = '';
 function setGroupFilter(g, btn){
   _fGroup = g;
@@ -1129,6 +1129,158 @@ function donorStatus(last){
   return {ok:false, label:'Cooldown', daysLeft: 90 - d};
 }
 function waNum(p){ var n = String(p||'').replace(/\D/g,''); if (n.charAt(0)==='0') n = '92' + n.slice(1); return n; }
+/* ---------- SHA-256 (sync, no dependency; verified vs Node crypto) ----------
+   Used for the duplicate guard: the public 'donorKeys' collection stores
+   ONLY hashes of a donor's phone / CNIC — never the numbers themselves —
+   so any phone or browser can check "already registered" without ever
+   reading the private 'donors' collection. */
+function sha256hex(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var maxWord=Math.pow(2,32), i, j, result='';
+  var words=[], asciiBitLength=ascii.length*8;
+  var hash=sha256hex.h=sha256hex.h||[], k=sha256hex.k=sha256hex.k||[];
+  var primeCounter=k.length, isComposite={};
+  for(var candidate=2; primeCounter<64; candidate++){
+    if(!isComposite[candidate]){
+      for(i=0;i<313;i+=candidate){isComposite[i]=candidate;}
+      hash[primeCounter]=(Math.pow(candidate,.5)*maxWord)|0;
+      k[primeCounter++]=(Math.pow(candidate,1/3)*maxWord)|0;
+    }
+  }
+  ascii+='\x80';
+  while(ascii.length%64-56) ascii+='\x00';
+  for(i=0;i<ascii.length;i++){
+    j=ascii.charCodeAt(i); if(j>>8) return '';
+    words[i>>2]|=j<<((3-i)%4)*8;
+  }
+  words[words.length]=((asciiBitLength/maxWord)|0);
+  words[words.length]=(asciiBitLength);
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16), oldHash=hash;
+    hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15], w2=w[i-2];
+      var a=hash[0], e=hash[4];
+      var temp1=hash[7]
+        +(rr(e,6)^rr(e,11)^rr(e,25))
+        +((e&hash[5])^((~e)&hash[6]))
+        +k[i]
+        +(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var temp2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(temp1+temp2)|0].concat(hash);
+      hash[4]=(hash[4]+temp1)|0;
+    }
+    for(i=0;i<8;i++){hash[i]=(hash[i]+oldHash[i])|0;}
+  }
+  for(i=0;i<8;i++){
+    for(j=3;j+1;j--){
+      var b=(hash[i]>>(j*8))&255;
+      result+=((b<16)?0:'')+b.toString(16);
+    }
+  }
+  return result;
+}
+function donorKeyId(kind, value){
+  var v = (kind === 'phone') ? waNum(value) : String(value||'').replace(/\D/g,'');
+  if (!v) return '';
+  return kind + '_' + sha256hex('bdbs-' + kind + ':' + v);
+}
+/* Duplicate check that works for EVERYONE (public, any phone/browser):
+   reads only the public donorKeys docs (hashes, no private data).
+   Offline it falls back to the donors cached on this phone. cb(true)
+   means "this phone or CNIC is already registered". */
+function checkDonorKeys(ph, cn, cb){
+  var kp = donorKeyId('phone', ph), kc = donorKeyId('cnic', cn);
+  var localHit = function(){
+    var keys = lsGet('bdbs_donorKeys');
+    for (var i=0;i<keys.length;i++){ if (keys[i]===kp || (kc && keys[i]===kc)) return true; }
+    return false;
+  };
+  if (!FB_OK || !db) { cb(localHit()); return; }
+  var checks = [];
+  if (kp) checks.push(db.collection('donorKeys').doc(kp).get());
+  if (kc) checks.push(db.collection('donorKeys').doc(kc).get());
+  if (!checks.length) { cb(false); return; }
+  Promise.all(checks.map(function(p){ return p.catch(function(){ return null; }); })).then(function(ds){
+    for (var i=0;i<ds.length;i++){ if (ds[i] && ds[i].exists) { cb(true); return; } }
+    cb(localHit());
+  });
+}
+function writeDonorKeys(donorId, ph, cn, done){
+  var kp = donorKeyId('phone', ph), kc = donorKeyId('cnic', cn);
+  var keys = lsGet('bdbs_donorKeys');
+  if (kp && keys.indexOf(kp) === -1) keys.push(kp);
+  if (kc && keys.indexOf(kc) === -1) keys.push(kc);
+  lsSet('bdbs_donorKeys', keys);
+  var pending = 0;
+  var one = function(){ pending--; if (pending <= 0 && done) done(); };
+  if (kp) { pending++; qAdd('donorKeys', {id:kp, donorId:donorId, kind:'phone', createdAt:Date.now()}, one); }
+  if (kc) { pending++; qAdd('donorKeys', {id:kc, donorId:donorId, kind:'cnic', createdAt:Date.now()}, one); }
+  if (!pending && done) done();
+}
+function deleteDonorKeys(ph, cn, done){
+  var kp = donorKeyId('phone', ph), kc = donorKeyId('cnic', cn);
+  var keys = lsGet('bdbs_donorKeys').filter(function(k){ return k !== kp && k !== kc; });
+  lsSet('bdbs_donorKeys', keys);
+  var pending = 0;
+  var one = function(){ pending--; if (pending <= 0 && done) done(); };
+  if (kp) { pending++; qDel('donorKeys', kp, one); }
+  if (kc) { pending++; qDel('donorKeys', kc, one); }
+  if (!pending && done) done();
+}
+/* Admin: rebuild donorKeys for every donor still in the register
+   (repairs keys missing from older versions; run after cleanup). */
+function rebuildDonorKeysBtn(){
+  var m = document.getElementById('keysMsg');
+  if (m) m.innerHTML = '<span class="mut">Rebuilding…</span>';
+  rebuildDonorKeys(function(n){
+    if (m) m.innerHTML = '<span class="ok">Donor keys rebuilt for ' + n + ' donor(s).</span>';
+    renderAdmin();
+  });
+}
+function rebuildDonorKeys(done){
+  qAll('donors', function(ds){
+    if (!ds.length) { if (done) done(0); return; }
+    var n = ds.length, c = 0;
+    ds.forEach(function(d){ writeDonorKeys(d.id, d.phone, d.cnic, function(){ c++; if (c >= n && done) done(n); }); });
+  });
+}
+/* Admin: renumber all members 001, 002, 003… in join order (oldest first).
+   Fixes gaps left by removed members — e.g. Javaid 004 becomes 002 when
+   only two members remain. Updates the lookup table too, so login by
+   Member ID keeps working. */
+function renumberMemberIds(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var msg = document.getElementById('renumMsg');
+  var say = function(t){ if (msg) msg.innerHTML = t; };
+  say('<span class="mut">Checking…</span>');
+  qAll('members', function(ms){
+    ms.sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+    var jobs = [];
+    ms.forEach(function(m, i){
+      var want = String(i+1).padStart(3,'0');
+      if ((m.idNo||'') !== want) jobs.push({m:m, want:want});
+    });
+    if (!jobs.length) { say('<span class="ok">Member IDs are already in order (001, 002, 003…). Nothing to change.</span>'); return; }
+    if (!confirm('Renumber ' + jobs.length + ' member(s)? IDs will become 001, 002, 003… in join order.')) { say(''); return; }
+    var done = 0;
+    var one = function(){ done++; if (done >= jobs.length) { say('<span class="ok">Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…</span>'); renderAdmin(); loadMembers(); } };
+    jobs.forEach(function(j){
+      var oldNo = j.m.idNo||'';
+      qUpdate('members', j.m.id, {idNo:j.want}, function(){
+        var afterLookup = function(){ one(); };
+        if (oldNo && oldNo !== j.want) {
+          qDel('memberLookup', oldNo, function(){ qAdd('memberLookup', {id:j.want, memberId:j.m.id}, afterLookup); });
+        } else { qAdd('memberLookup', {id:j.want, memberId:j.m.id}, afterLookup); }
+        if (FB_OK && db) {
+          db.collection('users').where('linkedMemberId','==',j.m.id).get().then(function(s){
+            s.forEach(function(u){ db.collection('users').doc(u.id).update({linkedMemberNo:j.want}).catch(function(){}); });
+          }).catch(function(){});
+        }
+      });
+    });
+  });
+}
 function searchDonors(){
   var g = _fGroup, c = val('fCity').toLowerCase();
   var availOnly = document.getElementById('fAvail') && document.getElementById('fAvail').checked;
@@ -1145,17 +1297,19 @@ function searchDonors(){
       box.innerHTML = '<div class="empty"><b>No donors found</b><br><span class="mut">Try another blood group or city — or submit a blood request.</span><br><button class="btn" style="margin-top:12px" onclick="resetFilters()">Reset Filters</button></div>';
       return;
     }
-    var head = '<p class="mut">' + out.length + ' donor(s) found.' + (admin ? ' <b>Admin view — contact buttons are visible to you only.</b>' : ' Contact via a blood request — the admin will connect you.') + '</p>';
+    var head = '<p class="mut">' + out.length + ' donor(s) found. Contact the donor directly on the number below.</p>';
     box.innerHTML = head + '<div class="donor-grid">' + out.map(function(d){
       var st = donorStatus(d.lastDonation);
+      var ph = d.phone || phoneById[d.id] || '';
       var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + (st.ok ? 'ok' : 'cool') + '">● ' + st.label + '</span></div>' +
         '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
-        '<div class="mut small">📍 ' + esc(d.city || '') + '</div>' +
+        '<div class="mut small">📍 ' + esc(d.address || d.city || '') + '</div>' +
         '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>';
-      if (admin && phoneById[d.id]) {
+      if (ph) {
         var msg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. ' + (d.group || '') + ' blood ki zaroorat hai. Kya aap blood donate kar sakte hain? Shukriya.';
-        var num = waNum(phoneById[d.id]);
-        card += '<div class="dc-actions"><a class="btn block" href="tel:' + esc(phoneById[d.id]) + '">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/' + num + '?text=' + encodeURIComponent(msg) + '">WhatsApp</a></div>';
+        var num = waNum(ph);
+        card += '<div class="mut small">📞 <a href="tel:' + esc(ph) + '">' + esc(ph) + '</a></div>' +
+          '<div class="dc-actions"><a class="btn block" href="tel:' + esc(ph) + '">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/' + num + '?text=' + encodeURIComponent(msg) + '">WhatsApp</a></div>';
       }
       return card + '</div>';
     }).join('') + '</div>';
@@ -1176,7 +1330,9 @@ function loadRequests(){
     box.innerHTML = rs.map(function(r){
       var st = (r.status||'Received');
       var cls = st==='Completed' ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
-      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(r.firstName)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(r.city||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+(r.phone?'<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span>':'')+'</div></div></div>';
+      var nm = r.name || r.firstName || 'Patient';
+      var where = r.address || r.city || '';
+      return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+(r.phone?'<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span>':'')+'</div></div></div>';
     }).join('');
   });
 }
@@ -1238,13 +1394,15 @@ function submitRequest(){
   if (btn) btn.disabled = true;
   var ph = waNum(val('rPhone')), grp = val('rGroup');
   /* Duplicate guard: same phone + same blood group with an open request
-     must never create a second record (double-tap / slow-net retry). */
-  qAll('requests', function(rs){
+     must never create a second record (double-tap / slow-net retry).
+     Checked against the PUBLIC mirror, so it works for everyone — the
+     private 'requests' collection is admin-only and unreadable here. */
+  qAll('requestsPublic', function(rs){
     var dup = rs.some(function(r){ return waNum(r.phone) === ph && r.group === grp && (r.status||'Received') !== 'Completed'; });
     if (dup) { document.getElementById('rMsg').innerHTML = '<span class="err">A request for this phone and blood group is already open.</span>'; if (btn) btn.disabled = false; return; }
     var id = uid('req');
     var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), status:'Received', createdAt:Date.now()};
-    var pub = {id:id, firstName:firstName(full.name), group:full.group, hospital:full.hospital, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
+    var pub = {id:id, name:full.name, firstName:firstName(full.name), group:full.group, hospital:full.hospital, address:full.address, city:full.address.split(',').pop().trim(), phone:full.phone, status:'Received', createdAt:Date.now()};
     qAdd('requests', full, function(ok){
       if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
       qAdd('requestsPublic', pub, function(){
@@ -1265,8 +1423,13 @@ function submitDonor(){
   if (btn) btn.disabled = true;
   readPhoto(document.getElementById('dPhoto'), function(photo){
     var ph = waNum(val('dPhone')), cn = val('dCnic').replace(/\D/g,'');
-    /* Duplicate guard: same phone or same CNIC already registered — a
-       double-tap / slow-net retry must never create a second record. */
+    /* Duplicate guard (server-side, works for everyone): the same phone
+       or CNIC can register only ONE donor — checked against public
+       donorKeys (hashes only, no private data). The old check below
+       reads the admin-only 'donors' collection, which a public visitor
+       cannot read at all — that is why duplicates slipped through. */
+    checkDonorKeys(ph, cn, function(keyDup){
+      if (keyDup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.</span>'; if (btn) btn.disabled = false; return; }
     qAll('donors', function(ds){
       var dup = ds.some(function(d){ return waNum(d.phone) === ph || (cn && String(d.cnic||'').replace(/\D/g,'') === cn); });
       if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
@@ -1277,11 +1440,13 @@ function submitDonor(){
         if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
         qAdd('donorsPublic', pub, function(){
           qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
-          document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your phone and CNIC stay private.</span>';
+          writeDonorKeys(full.id, full.phone, full.cnic, function(){});
+          document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
           ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
           document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
         });
       });
+    });
     });
   });
 }
@@ -1580,9 +1745,12 @@ function removeDonor(id){
     var d = null; ds.forEach(function(x){ if (x.id === id) d = x; });
     var dNo = d ? (d.donorNo||'') : '';
     var done = function(){ renderAdmin(); searchDonors(); loadHome(); };
+    var afterKeys = function(){
+      if (dNo) qDel('donorLookup', lookupKey(dNo), function(){ done(); }); else done();
+    };
     qDel('donors', id, function(){
       qDel('donorsPublic', id, function(){
-        if (dNo) qDel('donorLookup', lookupKey(dNo), function(){ done(); }); else done();
+        if (d) deleteDonorKeys(d.phone, d.cnic, afterKeys); else afterKeys();
       });
     });
   });
@@ -1636,8 +1804,11 @@ function generateCert(donorId){
   qAll('donors', function(ds){
     var d = null; ds.forEach(function(x){ if (x.id===donorId) d=x; });
     if (!d) return;
+    /* Certificate is ONLY for a real donation — never for a donor who
+       only registered. The certificate date is the donation date. */
+    if (!d.lastDonation) { alert('Is donor ne abhi tak khoon nahi diya — certificate sirf donation ke baad banta hai.'); return; }
     nextCertRef(function(ref){
-      var cert = {ref:ref, donorId:d.id, donorName:d.name, group:d.group, units:d.units||0, date:new Date().toISOString().slice(0,10), createdAt:Date.now()};
+      var cert = {ref:ref, donorId:d.id, donorName:d.name, donorFather:d.father||'', group:d.group, units:d.units||0, date:String(d.lastDonation).slice(0,10), createdAt:Date.now()};
       qAdd('certificates', cert, function(ok){
         if (!ok) { alert('Could not generate certificate.'); return; }
         show('certificate'); renderCert(cert);
@@ -1646,13 +1817,52 @@ function generateCert(donorId){
   });
 }
 function renderCert(c){
+  window._lastCert = c;
   document.getElementById('certView').innerHTML =
     '<div class="cert print-area"><img src="logo.png" style="width:72px;height:72px;border-radius:50%;border:3px solid #d97706"><div class="seal">&#10003;</div><h2>Certificate of Appreciation</h2>' +
+    '<p class="qverse">"Whoever saves a life, it is as if he has saved all of mankind."<br>— Quran 5:32</p>' +
     '<p class="mut">Basti Dawa Blood Society proudly appreciates</p><div class="cname">'+esc(c.donorName)+'</div>' +
-    '<p>for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br>Your gift saves lives.</p>' +
+    (c.donorFather ? '<p class="mut">S/O '+esc(c.donorFather)+'</p>' : '') +
+    '<p>for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br><span class="thanks">Your gift saved a life.</span></p>' +
     '<p><span class="ref">Verified Reference No: '+esc(c.ref)+'</span></p><p class="verified">✓ VERIFIED</p>' +
-    '<p class="mut small">Under Supervision — Basti Dawa Welfare Organization</p></div>' +
-    '<button class="btn" onclick="window.print()">Print Certificate</button>';
+    '<p class="mut small">Under Supervision — Basti Dawa Welfare Organization</p>' +
+    '<div class="sigrow"><div><div class="sline">Dr Muhammad Naeem Asghar<br><span class="mut small">Patron In Chief</span></div></div><div><div class="sline">Akram Malik<br><span class="mut small">President (BDWO)</span></div></div></div>' +
+    '<div class="sigrow"><div><div class="sline">Muhammad Asif Javaid<br><span class="mut small">Organizer</span></div></div><div><div class="sline">Zeeshan Ghafoor<br><span class="mut small">Sub-Organizer</span></div></div></div></div>' +
+    '<button class="btn" onclick="window.print()">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
+}
+function shareCertPDF(){
+  var c = window._lastCert; if (!c) return;
+  var certEl = document.querySelector('#certView .cert');
+  if (window.html2canvas && certEl) {
+    var btn = null;
+    document.querySelectorAll('#certView button').forEach(function(b){ if (b.textContent.indexOf('Share Certificate') !== -1) btn = b; });
+    if (btn) { btn.disabled = true; btn.textContent = 'Preparing…'; }
+    window.html2canvas(certEl, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
+      if (btn) { btn.disabled = false; btn.textContent = 'Share Certificate as PDF'; }
+      try {
+        var blob = cardImagePDF([{data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}]);
+        var fname = 'BDBS-Certificate-' + (c.ref||c.donorName||'') + '.pdf';
+        var file = new File([blob], fname, {type:'application/pdf'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+          navigator.share({files:[file], title:'BDBS Certificate', text:'Blood Donation Certificate - ' + (c.donorName||'')}).catch(function(){ saveBlob(blob, fname); });
+        } else { saveBlob(blob, fname); }
+      } catch(e){ shareCertPDFText(); }
+    }).catch(function(){ if (btn) { btn.disabled = false; btn.textContent = 'Share Certificate as PDF'; } shareCertPDFText(); });
+    return;
+  }
+  shareCertPDFText();
+}
+function shareCertPDFText(){
+  var c = window._lastCert; if (!c) return;
+  try {
+    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision — Basti Dawa Welfare Organization'];
+    var blob = simplePDF([{title:'', lines:lines}]);
+    var fname = 'BDBS-Certificate-' + (c.ref||c.donorName||'') + '.pdf';
+    var file = new File([blob], fname, {type:'application/pdf'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      navigator.share({files:[file], title:'BDBS Certificate', text:'Blood Donation Certificate - ' + (c.donorName||'')}).catch(function(){ saveBlob(blob, fname); });
+    } else { saveBlob(blob, fname); }
+  } catch(e){ window.print(); }
 }
 function lookupCert(){
   var ref = val('cRef');
@@ -2001,7 +2211,7 @@ function removeDuplicates(){
       if (!dropD.length && !dropR.length) { say('<span class="ok">No duplicates found.</span>'); return; }
       if (!confirm('Remove ' + (dropD.length + dropR.length) + ' duplicate record(s)? The oldest copy of each is kept.')) { say(''); return; }
       var done = 0, total = dropD.length + dropR.length;
-      var one = function(){ done++; if (done >= total) { say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); } };
+      var one = function(){ done++; if (done >= total) { rebuildDonorKeys(function(){ say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
       dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
       dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
     });
@@ -2014,10 +2224,11 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span></div>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
-            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td><button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button> <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
+            var certBtn = d.lastDonation ? '<button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button>' : '<span class="mut small">No donation yet</span>';
+            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td>'+certBtn+' <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
