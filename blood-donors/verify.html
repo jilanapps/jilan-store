@@ -57,6 +57,8 @@ function showMember(m){
     (m.photo ? '<img class="photo" src="'+m.photo+'" alt="Member photo"><br><br>' : '') +
     '<p class="verified">✓ VERIFIED MEMBER</p>' +
     '<h2 style="margin:6px 0">'+esc(m.name)+'</h2>' +
+    (m.designation ? '<p>Designation: <b>'+esc(m.designation)+'</b></p>' : '') +
+    (m.idNo ? '<p>Member ID: <b>'+esc(m.idNo)+'</b></p>' : '') +
     '<p>Phone: <b>'+esc(m.phone||'—')+'</b></p>' +
     '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
 }
