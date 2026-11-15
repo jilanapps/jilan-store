@@ -1724,7 +1724,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v28';
+var APP_VERSION = 'v29';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -3056,12 +3056,39 @@ function nextCertRef(cb){
   }).then(function(n){ cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); })
     .catch(function(){ cb('BDBS-CERT-' + y + '-ERR' + Date.now().toString().slice(-4)); });
 }
-function generateCert(donorId){
+/* Add Donation (v29): first-time donors have no lastDonation, so no
+   Certificate button ever appears for them. Admin enters the donation
+   date + units, the donor record gets lastDonation + units, and a
+   certificate is minted for that donation. */
+function addDonation(donorId){
+  if (!isAdmin()) { alert('Sirf admin (owner) donation add kar sakta hai.'); return; }
+  qAll('donors', function(ds){
+    var d = null; ds.forEach(function(x){ if (x.id===donorId) d=x; });
+    if (!d) return;
+    var today = new Date(); var def = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+    var dt = prompt('Donation ki date (YYYY-MM-DD)?', def);
+    if (dt === null) return;
+    dt = String(dt).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dt) || isNaN(new Date(dt + 'T00:00:00').getTime())) { alert('Date YYYY-MM-DD format me likhein, jaisay 2026-11-15.'); return; }
+    var u = prompt('Is donation ke units kitne hain?', '1');
+    if (u === null) return;
+    var units = parseInt(u, 10);
+    if (isNaN(units) || units < 1) { alert('Units 1 ya zyada hone chahiye.'); return; }
+    var total = (parseInt(d.units, 10) || 0) + units;
+    qUpdate('donors', d.id, {lastDonation: dt, units: total}, function(){
+      qUpdate('donorsPublic', d.id, {lastDonation: dt, units: total}, function(){});
+    });
+    generateCert(donorId, dt, units);
+  });
+}
+function generateCert(donorId, presetDt, presetUnits){
   /* Certificate sirf owner (admin) bana sakta hai — user/donor nahi. */
   if (!isAdmin()) { alert('Certificate sirf admin (owner) bana sakta hai.'); return; }
   qAll('donors', function(ds){
     var d = null; ds.forEach(function(x){ if (x.id===donorId) d=x; });
     if (!d) return;
+    var units, dt;
+    if (presetDt) { dt = presetDt; units = presetUnits; } else {
     /* Certificate is ONLY for a real donation — never for a donor who
        only registered. The certificate date is the donation date. */
     if (!d.lastDonation) { alert('Is donor ne abhi tak khoon nahi diya — certificate sirf donation ke baad banta hai.'); return; }
@@ -3075,6 +3102,7 @@ function generateCert(donorId){
     if (dt === null) return;
     dt = String(dt).trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dt) || isNaN(new Date(dt + 'T00:00:00').getTime())) { alert('Date YYYY-MM-DD format me likhein, jaisay 2026-11-14.'); return; }
+    }
     nextCertRef(function(ref){
       var cert = {ref:ref, donorId:d.id, donorName:d.name, donorFather:d.father||'', group:d.group, units:units, date:dt, createdAt:Date.now()};
       /* Donor record bhi sahi date par update — agli dafa certificate
@@ -3544,6 +3572,16 @@ function removeDuplicates(){
     });
   });
 }
+/* Admin donor search (v29): filter the Donors table by Donor No.,
+   Name or CNIC — the row text already holds all three. */
+function filterDonorRows(){
+  var q = (document.getElementById('donorSearch').value || '').toLowerCase().trim();
+  var rows = document.querySelectorAll('#donorTable tr');
+  rows.forEach(function(tr, i){
+    if (i === 0) return;
+    tr.style.display = (!q || tr.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+  });
+}
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -3553,14 +3591,14 @@ function renderAdmin(){
         qAll('certificates', function(cs){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
-          h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
+          h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
             /* Certificate: first time one button; once a certificate
                exists, Old (same number again) and New (fresh number)
                are separate options — a click never silently mints a
                new number over an existing certificate. */
             var hasCert = cs.some(function(c){ return c.donorId === d.id; });
-            var certBtn = d.lastDonation ? (hasCert ? '<button class="btn green" onclick="viewOldCert(\''+esc(d.id)+'\')">Old Certificate</button> <button class="btn" onclick="generateCert(\''+esc(d.id)+'\')">New Certificate</button>' : '<button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button>') : '<span class="mut small">No donation yet</span>';
+            var certBtn = d.lastDonation ? (hasCert ? '<button class="btn green" onclick="viewOldCert(\''+esc(d.id)+'\')">Old Certificate</button> <button class="btn" onclick="generateCert(\''+esc(d.id)+'\')">New Certificate</button>' : '<button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button>') : '<button class="btn green" onclick="addDonation(\''+esc(d.id)+'\')">Add Donation</button>';
             h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td>'+certBtn+' <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
