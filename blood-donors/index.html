@@ -319,6 +319,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.</p>
 <p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
 </div>
+<div style="text-align:center;margin:2px 0 12px"><button class="btn" onclick="openShare()">📣 Share App</button></div>
 <div class="faith-banner" data-no-i18n>
 <p class="faith-ar" dir="rtl">وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا</p>
 <p class="faith-ur" dir="rtl">اور جس نے ایک جان بچائی، گویا اس نے تمام انسانوں کی جان بچائی۔ <span class="faith-ref">(سورۃ المائدہ 5:32)</span></p>
@@ -1017,6 +1018,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('reviews')">⭐ &nbsp;Reviews</button>
 <button class="sheet-btn" onclick="show('help')">💬 &nbsp;Madad Box</button>
+<button class="sheet-btn" onclick="openShare()">📣 &nbsp;Share App</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
 <button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update <span class="mut small" id="installedVer"></span></button>
@@ -1024,6 +1026,19 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="sheet-btn" onclick="closeModal('moreSheet')">Close</button>
 </div>
 </div>
+<div class="modal" id="shareModal" onclick="if(event.target===this)closeModal('shareModal')">
+<div class="modal-box">
+<button class="mclose" onclick="closeModal('shareModal')" aria-label="Close">&#10005;</button>
+<h3>📣 Share App</h3>
+<p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. App ka link doston aur groups me share karein.</p>
+<p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">https://jilanapps.github.io/jilan-store/blood-donors/download.html</p>
+<p id="shareCopyMsg" class="mut small" style="min-height:16px"></p>
+<a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
+<a class="btn block" style="margin:6px 0" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
+<button class="btn ghost block" style="margin:6px 0" onclick="copyShareLink()">Copy Link</button>
+</div>
+</div>
+
 
 <footer>
 Basti Dawa Blood Society (BDBS) &bull; Under Supervision — Basti Dawa Welfare Organization<br>
@@ -1079,6 +1094,7 @@ ur: {
 "Daily Activity & Gallery": "روزانہ سرگرمی اور گیلری",
 "Reviews": "جائزے",
 "💬 Madad Box": "💬 مدد بکس",
+"📣 Share App": "📣 ایپ شیئر کریں",
 "Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "نیچے اپنا سوال لکھیں یا ایک بٹن دبائیں — فوراً جواب ملے گا۔ یہ مدد بکس بغیر نیٹ کے بھی چلتا ہے۔",
 "Send": "بھیجیں",
 "Write a Review": "جائزہ لکھیں",
@@ -1377,6 +1393,7 @@ I18N.ar = {
 "Daily Activity & Gallery": "النشاط اليومي والمعرض",
 "Reviews": "التقييمات",
 "💬 Madad Box": "💬 صندوق المساعدة",
+"📣 Share App": "📣 شارك التطبيق",
 "Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "اكتب سؤالك أدناه أو اضغط على زر — ستحصل على إجابة فورًا. صندوق المساعدة هذا يعمل دون إنترنت أيضًا.",
 "Send": "إرسال",
 "Write a Review": "اكتب تقييمًا",
@@ -1724,7 +1741,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v29';
+var APP_VERSION = 'v30';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -3654,6 +3671,25 @@ function renderAdmin(){
 }
 
 /* ---------- modal, wizard & stat helpers ---------- */
+/* ---------- Share App (v30) ---------- */
+var SHARE_LINK = 'https://jilanapps.github.io/jilan-store/blood-donors/download.html';
+function openShare(){ closeModal('moreSheet'); openModal('shareModal'); }
+function copyShareLink(){
+  var msg = document.getElementById('shareCopyMsg');
+  function done(ok){ if (msg) msg.textContent = ok ? 'Link copy ho gaya ✓' : 'Copy nahi hua — link ko dabaye rakhein aur copy karein.'; }
+  function legacyCopy(){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = SHARE_LINK; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta); done(ok);
+    } catch(e){ done(false); }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(SHARE_LINK).then(function(){ done(true); }, function(){ legacyCopy(); });
+  } else { legacyCopy(); }
+}
 function openModal(id){ var m=document.getElementById(id); if(m) m.classList.add('open'); }
 function closeModal(id){ var m=document.getElementById(id); if(m) m.classList.remove('open'); }
 function closeMore(){ closeModal('moreSheet'); }
