@@ -1053,14 +1053,18 @@ function renderPhones(){
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
+      + '<button class="small ghost" onclick="blockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">🚫 App Block</button>'
+      + '<button class="small ghost" onclick="unblockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">✅ App Unblock</button>'
+      + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" style="width:86px"> <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" style="width:86px"> <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">⏰ Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
       + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
+      + '<button class="small danger" onclick="wipePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')">🧨 Wipe</button>'
       + '<button class="small ghost" onclick="openAgreement(\''+p._shop+'\',\''+p._id+'\')">📄 Agreement</button>'
       + '<button class="small ghost" onclick="openReceipt(\''+p._shop+'\',\''+p._id+'\')"'
       + (((Number(p.lastPaymentAmount)||0)>0 || (Number(p.lastPaymentAt)||0)>0 || (Number(p.lastPaymentDate)||0)>0)
           ? '' : ' disabled style="opacity:.45"')
       + '>🧾 Receipt</button>'
       + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">\uD83D\uDDD1 Delete</button>'
-      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'')
+      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'<span style="color:#9aa7c7;font-size:12px">📍 Location nahi mili</span>')
       + '</td></tr>';
   });
   document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="7">No phones yet</td></tr>';
@@ -1229,6 +1233,38 @@ async function setMasterPin(shopId, imei){
   }catch(e){ alert('Error: '+e.message); }
 }
 
+/* App Block / Unblock (2026-11-15): quick-pick list ya khud package
+   name. NOTE: BLOCK_APP / UNBLOCK_APP commands Rules v57 ke
+   commands-create allowlist me NAHI hain — v58 publish hone tak
+   permission-denied ayega. */
+function pickAppPkg(){
+  const pick = prompt('1 = Play Store (com.android.vending)\n2 = YouTube (com.google.android.youtube)\n3 = Facebook (com.facebook.katana)\n4 = WhatsApp (com.whatsapp)\n5 = Chrome (com.android.chrome)\n6 = Settings (com.android.settings)\n0 = khud package name likhein');
+  if(pick===null) return null;
+  const map = {'1':'com.android.vending','2':'com.google.android.youtube','3':'com.facebook.katana','4':'com.whatsapp','5':'com.android.chrome','6':'com.android.settings'};
+  const k = pick.trim();
+  if(map[k]) return map[k];
+  if(k==='0'){
+    const pkg = prompt('Package name likhein (jaisay com.example.app):');
+    if(pkg===null) return null;
+    return pkg.trim();
+  }
+  return '';
+}
+
+async function blockApp(shopId, imei){
+  const pkg = pickAppPkg();
+  if(pkg===null) return;
+  if(!/^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/.test(pkg)){ alert('Ghalat package name'); return; }
+  sendCmd(shopId, imei, 'BLOCK_APP', {pkg: pkg}, 'Is app ko block karna hai? (phone online hone par apply hoga)');
+}
+
+async function unblockApp(shopId, imei){
+  const pkg = pickAppPkg();
+  if(pkg===null) return;
+  if(!/^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/.test(pkg)){ alert('Ghalat package name'); return; }
+  sendCmd(shopId, imei, 'UNBLOCK_APP', {pkg: pkg}, 'Is app ko unblock karna hai? (phone online hone par apply hoga)');
+}
+
 /* v2.1: remove a phone record from the dashboard (ghost/sold/test
    phones). Deletes ONLY the Firestore record — the phone itself is
    not touched. Double confirm because there is no undo. */
@@ -1255,6 +1291,23 @@ async function releasePhone(shopId, imei){
   }catch(e){ alert('Error: '+e.message); }
 }
 
+/* Remote wipe (2026-11-15): releasePhone jaisa DOUBLE confirm — data
+   wapas nahi ayega. NOTE: WIPE command Rules v57 ke allowlist me
+   NAHI hai — v58 publish hone tak permission-denied ayega. */
+async function wipePhone(shopId, imei){
+  if(!confirm('⚠️ WIPE: is phone ka SARA data delete ho jaye ga — photos, apps, accounts, sab kuch. Phone factory reset ho jayega.\n\nFRP phir bhi rahe ga — reset ke baad phone SHOP ka Google account mangega.\n\nPakka WIPE karna hai?')) return;
+  if(!confirm('Dobara confirm karein — WIPE ke baad data WAPAS NAHI ayega.')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('commands').add({
+      type: 'WIPE', targetImei: imei, targetPhoneId: phoneIdFor(shopId, imei), status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: myUid
+    });
+    pendingCmds[imei+'|WIPE']=true; renderPhones();
+    alert('WIPE command bhej diya ⚠️ — phone online hone par apply hoga');
+  }catch(e){ alert('Error: '+e.message); }
+}
+
 async function setPlan(shopId, imei){
   const m = prompt('Plan — total months (1-60):');
   if(m===null) return;
@@ -1269,6 +1322,35 @@ async function setPlan(shopId, imei){
     'Plan set karein? '+months+' months'
     +(payload.installmentsLeft ? ', '+payload.installmentsLeft+' qist baqi' : '')
     +' (phone online hone par apply hoga)');
+}
+
+/* Auto lock schedule (2026-11-15): phones doc par schedLock /
+   schedUnlock likhta hai — Rules v57 me phones update allow hai,
+   koi rules change nahi chahiye. */
+async function saveSchedule(shopId, phoneId){
+  const lockEl = document.getElementById('schedL-'+phoneId);
+  const unlockEl = document.getElementById('schedU-'+phoneId);
+  const lock = lockEl ? lockEl.value : '';
+  const unlock = unlockEl ? unlockEl.value : '';
+  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(lock) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(unlock)){ alert('Time HH:MM format me hona chahiye, jaisay 22:00'); return; }
+  if(lock===unlock){ alert('Lock aur unlock time aik jaise nahi ho sakte'); return; }
+  try{
+    await db.collection('shops').doc(shopId).collection('phones').doc(phoneId).update({schedLock: lock, schedUnlock: unlock});
+    alert('Schedule save ho gaya ✅ — lock '+lock+', unlock '+unlock+' (phone ki agli sync par apply hoga)');
+    try{ renderPhones(); }catch(e){}
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+async function clearSchedule(shopId, phoneId){
+  if(!confirm('Schedule clear kar dein? Phone phir sirf due date / manual lock par lock hoga.')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('phones').doc(phoneId).update({schedLock: '', schedUnlock: ''});
+    const lockEl = document.getElementById('schedL-'+phoneId);
+    const unlockEl = document.getElementById('schedU-'+phoneId);
+    if(lockEl) lockEl.value=''; if(unlockEl) unlockEl.value='';
+    alert('Schedule clear ho gaya ✅');
+    try{ renderPhones(); }catch(e){}
+  }catch(e){ alert('Error: '+e.message); }
 }
 
 async function updateAll(){
