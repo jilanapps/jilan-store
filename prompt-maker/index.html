@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Prompt Maker — Photo to Flow Video Prompt</title>
+<style>
+  :root{--navy:#0A1F44;--gold:#C9A227;--ink:#1a2332;--mut:#5b6472;--bg:#f4f6fa;--card:#ffffff;--line:#e3e8f0;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+  header{background:var(--navy);color:#fff;padding:22px 18px 18px;text-align:center}
+  header h1{margin:0;font-size:24px;letter-spacing:.3px}
+  header h1 span{color:var(--gold)}
+  header p{margin:6px 0 0;color:#c7d0e0;font-size:14px}
+  main{max-width:640px;margin:0 auto;padding:16px 14px 40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0;box-shadow:0 1px 4px rgba(10,31,68,.06)}
+  .card h2{margin:0 0 10px;font-size:17px;color:var(--navy)}
+  .card h2 .step{display:inline-block;background:var(--gold);color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;text-align:center;font-size:13px;margin-right:6px}
+  label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+  input[type=file]{width:100%;padding:10px;border:1px dashed #b9c2d0;border-radius:10px;background:#fbfcfe}
+  input[type=text],input[type=password],select,textarea{width:100%;padding:10px 12px;border:1px solid #c6cedb;border-radius:10px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink)}
+  textarea{min-height:120px;resize:vertical}
+  .row{display:flex;gap:10px}
+  .row>div{flex:1}
+  #preview{display:none;max-width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
+  .hint{font-size:13px;color:var(--mut);margin:6px 0 0}
+  .btn{display:inline-block;border:0;border-radius:10px;padding:12px 20px;font-size:16px;font-weight:700;cursor:pointer}
+  .btn-gold{background:var(--gold);color:#fff;width:100%;margin-top:14px}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-ghost{background:#fff;border:1px solid #c6cedb;color:var(--navy)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  #status{font-size:14px;margin-top:10px;min-height:20px}
+  #status.err{color:#b91c1c}
+  #status.ok{color:#15803d}
+  .counter{text-align:center;font-weight:700;color:var(--navy);background:#fff8e1;border:1px solid #f0dc9a;border-radius:10px;padding:10px;margin:14px 0}
+  .out-actions{display:flex;gap:10px;margin-top:10px}
+  .out-actions .btn{flex:1;margin-top:0}
+  footer{text-align:center;color:var(--mut);font-size:13px;padding:8px 16px 26px}
+  footer a{color:var(--navy)}
+  .howto{font-size:14px}
+  .howto li{margin:6px 0}
+  details{font-size:14px}
+  details summary{cursor:pointer;font-weight:600;color:var(--navy)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Jilan <span>Prompt Maker</span></h1>
+  <p>Photo to Flow video prompt — upload a photo, get a ready-to-paste prompt.</p>
+</header>
+<main>
+  <div class="counter" id="counter">5 of 5 prompts left today</div>
+
+  <div class="card">
+    <h2><span class="step">1</span>Upload a photo</h2>
+    <input type="file" id="photo" accept="image/*">
+    <img id="preview" alt="Photo preview">
+    <p class="hint">Your photo stays in your browser. It is sent only to Google's Gemini API to write the prompt — never stored anywhere.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>Choose the video type</h2>
+    <div class="row">
+      <div>
+        <label for="vtype">Video type</label>
+        <select id="vtype">
+          <option value="a cute miniature fantasy scene">Miniature fantasy</option>
+          <option value="a miniature rescue scene">Miniature rescue scene</option>
+          <option value="a tiny people miniature world scene">Tiny people</option>
+          <option value="a relaxing ASMR scene with soft sounds">ASMR</option>
+          <option value="a product tower collapse scene in slow motion">Collapse product</option>
+          <option value="a warm mother's love scene">Mother's love</option>
+          <option value="a fun adventure scene">Adventure</option>
+          <option value="a funny comedy scene">Comedy</option>
+        </select>
+      </div>
+      <div>
+        <label for="aspect">Size</label>
+        <select id="aspect">
+          <option value="vertical 9:16">Vertical 9:16</option>
+          <option value="horizontal 16:9">Horizontal 16:9</option>
+          <option value="square 1:1">Square 1:1</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">Videos are 8 seconds, photorealistic — the Flow / Veo format.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>Free Gemini API key <span style="font-weight:400;font-size:13px;color:var(--mut)">(one-time setup)</span></h2>
+    <label for="apikey">Gemini API key</label>
+    <input type="password" id="apikey" placeholder="Paste your free Gemini API key here" autocomplete="off">
+    <p class="hint">Get a free key here: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio — API keys</a>. The key is saved only in this browser and is sent directly to Google. No key = the guided builder below still works.</p>
+    <button class="btn btn-navy" id="saveKey" type="button">Save key</button>
+    <span id="keyState" style="font-size:13px;margin-left:8px"></span>
+  </div>
+
+  <button class="btn btn-gold" id="generate" type="button">✨ Generate Flow prompt</button>
+  <div id="status"></div>
+
+  <div class="card" id="outCard" style="display:none">
+    <h2>Your Flow prompt</h2>
+    <textarea id="promptOut" readonly></textarea>
+    <div class="out-actions">
+      <button class="btn btn-navy" id="copyBtn" type="button">📋 Copy prompt</button>
+      <button class="btn btn-ghost" id="flowBtn" type="button">Open Flow ↗</button>
+    </div>
+    <p class="hint">Paste this prompt into Google Flow with your photo to make the video. Flow needs your own Google account and its free daily credits.</p>
+  </div>
+
+  <div class="card">
+    <h2>No API key? Guided builder</h2>
+    <p class="hint">Fill these in and build a prompt without any key. It works fully offline.</p>
+    <label for="bSubject">What is in the photo?</label>
+    <input type="text" id="bSubject" placeholder="e.g. A tiny boy in a white shalwar kameez">
+    <label for="bAction">What happens?</label>
+    <input type="text" id="bAction" placeholder="e.g. rescues a kitten from a giant teacup">
+    <label for="bCamera">Camera</label>
+    <select id="bCamera">
+      <option value="slow zoom in">Slow zoom in</option>
+      <option value="slow zoom out">Slow zoom out</option>
+      <option value="gentle pan from left to right">Gentle pan</option>
+      <option value="static close-up shot">Static close-up</option>
+      <option value="low angle tracking shot">Low angle tracking</option>
+    </select>
+    <button class="btn btn-navy" id="buildBtn" type="button" style="width:100%;margin-top:14px">Build prompt</button>
+  </div>
+
+  <div class="card howto">
+    <h2>How it works</h2>
+    <ol>
+      <li>Upload a photo of your product, character or scene.</li>
+      <li>Pick a video type and press Generate. Gemini reads the photo and writes one ready-to-paste Flow prompt.</li>
+      <li>Copy the prompt, open Flow, paste it with your photo — your 8-second video is made with Flow's free credits.</li>
+    </ol>
+    <details>
+      <summary>Is it really free?</summary>
+      <p>Yes for 5 prompts a day. The Gemini free tier covers this easily. Flow video-making itself uses your own Google account's free daily Flow credits (50 a day). This website charges nothing and stores nothing.</p>
+    </details>
+  </div>
+</main>
+<footer>
+  Made by <b>Jilan Apps Official</b> • Photo to Flow prompt • 5 free prompts a day<br>
+  Your photo and API key never leave your browser except the prompt request sent directly to Google.
+</footer>
+<script>
+(function(){
+  "use strict";
+  var LIMIT = 5;
+  var $ = function(id){ return document.getElementById(id); };
+  var statusEl = $("status"), outCard = $("outCard"), promptOut = $("promptOut");
+
+  /* ---------- daily limit (localStorage, resets each day) ---------- */
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function getCount(){
+    try{
+      if(localStorage.getItem("jpm_date") !== todayStr()){
+        localStorage.setItem("jpm_date", todayStr());
+        localStorage.setItem("jpm_count", "0");
+        return 0;
+      }
+      return parseInt(localStorage.getItem("jpm_count") || "0", 10) || 0;
+    }catch(e){ return 0; }
+  }
+  function setCount(n){ try{ localStorage.setItem("jpm_count", String(n)); }catch(e){} }
+  function renderCounter(){
+    var left = Math.max(0, LIMIT - getCount());
+    $("counter").textContent = left + " of " + LIMIT + " prompts left today";
+  }
+  function useOne(){
+    var n = getCount();
+    if(n >= LIMIT) return false;
+    setCount(n + 1); renderCounter(); return true;
+  }
+  renderCounter();
+
+  /* ---------- photo preview + downscale ---------- */
+  var photoData = null, photoMime = "image/jpeg";
+  $("photo").addEventListener("change", function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1024, w = img.width, h = img.height;
+        if(w > max || h > max){ var s = Math.min(max/w, max/h); w = Math.round(w*s); h = Math.round(h*s); }
+        var c = document.createElement("canvas"); c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        var url = c.toDataURL("image/jpeg", 0.85);
+        photoData = url.split(",")[1]; photoMime = "image/jpeg";
+        var pv = $("preview"); pv.src = url; pv.style.display = "block";
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  /* ---------- API key ---------- */
+  try{ var saved = localStorage.getItem("jpm_key"); if(saved){ $("apikey").value = saved; $("keyState").textContent = "✓ key saved"; } }catch(e){}
+  $("saveKey").addEventListener("click", function(){
+    var k = $("apikey").value.trim();
+    if(!k){ $("keyState").textContent = "Paste a key first."; return; }
+    try{ localStorage.setItem("jpm_key", k); }catch(e){}
+    $("keyState").textContent = "✓ key saved in this browser";
+  });
+
+  function setStatus(msg, kind){ statusEl.textContent = msg; statusEl.className = kind || ""; }
+  function showPrompt(text){
+    promptOut.value = text;
+    outCard.style.display = "block";
+    outCard.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  /* ---------- Gemini call ---------- */
+  function geminiPrompt(vtype, aspect){
+    return "You are a prompt writer for Google Flow (Veo 3.1) video generation. " +
+      "Look at this photo and write ONE ready-to-paste video prompt in English. " +
+      "Describe the exact subject from the photo, what it does, the camera movement, the lighting and the mood. " +
+      "Shape the action as " + vtype + ". The video is 8 seconds, " + aspect + ", photorealistic, with real motion. " +
+      "Keep the prompt under 90 words. Output ONLY the prompt, no explanation, no quotes, no headings.";
+  }
+  function callGemini(model, key, instruction){
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key);
+    return fetch(url, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({contents: [{parts: [{text: instruction}, {inline_data: {mime_type: photoMime, data: photoData}}]}]})
+    }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, status: r.status, json: j}; }); });
+  }
+  function extractText(j){
+    try{ return j.candidates[0].content.parts.map(function(p){ return p.text || ""; }).join("").trim(); }
+    catch(e){ return ""; }
+  }
+
+  $("generate").addEventListener("click", function(){
+    if(!photoData){ setStatus("Please choose a photo first.", "err"); return; }
+    if(getCount() >= LIMIT){ setStatus("Today's 5 prompts are used up. Come back tomorrow.", "err"); return; }
+    var key = $("apikey").value.trim();
+    if(!key){ setStatus("Add your free Gemini API key above — or use the guided builder below (no key needed).", "err"); return; }
+    var btn = $("generate"); btn.disabled = true;
+    setStatus("Reading your photo and writing the prompt…", "");
+    var instruction = geminiPrompt($("vtype").value, $("aspect").value);
+    callGemini("gemini-2.5-flash", key, instruction).then(function(res){
+      if(!res.ok && res.status === 404){
+        return callGemini("gemini-2.0-flash", key, instruction);
+      }
+      return res;
+    }).then(function(res){
+      if(!res.ok){
+        var msg = (res.json && res.json.error && res.json.error.message) || ("Google error " + res.status);
+        throw new Error(msg);
+      }
+      var text = extractText(res.json);
+      if(!text) throw new Error("Google returned an empty reply. Try again.");
+      if(!useOne()){ setStatus("Today's 5 prompts are used up. Come back tomorrow.", "err"); return; }
+      showPrompt(text);
+      setStatus("Prompt ready — copy it and paste it into Flow.", "ok");
+    }).catch(function(err){
+      setStatus("Could not write the prompt: " + err.message, "err");
+    }).finally(function(){ btn.disabled = false; });
+  });
+
+  /* ---------- guided builder (no key) ---------- */
+  $("buildBtn").addEventListener("click", function(){
+    var subject = $("bSubject").value.trim();
+    var action = $("bAction").value.trim();
+    if(!subject || !action){ setStatus("Fill in the subject and the action first.", "err"); return; }
+    if(getCount() >= LIMIT){ setStatus("Today's 5 prompts are used up. Come back tomorrow.", "err"); return; }
+    var vtype = $("vtype").value, aspect = $("aspect").value, camera = $("bCamera").value;
+    var prompt = subject + " " + action + ", " + vtype + ", " + camera + ", warm natural light, " + aspect + ", photorealistic, real motion, 8 seconds.";
+    prompt = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+    useOne();
+    showPrompt(prompt);
+    setStatus("Prompt built — no key needed.", "ok");
+  });
+
+  /* ---------- copy + open Flow ---------- */
+  $("copyBtn").addEventListener("click", function(){
+    var t = promptOut.value;
+    function done(){ setStatus("Prompt copied.", "ok"); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done, function(){ promptOut.select(); document.execCommand("copy"); done(); });
+    } else { promptOut.select(); document.execCommand("copy"); done(); }
+  });
+  $("flowBtn").addEventListener("click", function(){
+    window.open("https://flow.google.com", "_blank");
+  });
+})();
+</script>
+</body>
+</html>
