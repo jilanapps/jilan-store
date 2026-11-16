@@ -84,6 +84,8 @@
       </div>
     </div>
     <p class="hint">Videos are 8 seconds, photorealistic — the Flow / Veo format.</p>
+    <label style="font-weight:600;font-size:14px"><input type="checkbox" id="faceLock" checked style="width:auto;accent-color:#0A1F44"> This photo has a person — lock the face (strict identity, face must not change)</label>
+    <p class="hint">Face lock ON: the prompt forces Flow to keep the exact same face and identity as the photo in every frame.</p>
   </div>
 
   <div class="card">
@@ -213,12 +215,26 @@
   }
 
   /* ---------- Gemini call ---------- */
-  function geminiPrompt(vtype, aspect){
-    return "You are a prompt writer for Google Flow (Veo 3.1) video generation. " +
+  function geminiPrompt(vtype, aspect, faceLock){
+    var p = "You are a prompt writer for Google Flow (Veo 3.1) video generation. " +
       "Look at this photo and write ONE ready-to-paste video prompt in English. " +
       "Describe the exact subject from the photo, what it does, the camera movement, the lighting and the mood. " +
       "Shape the action as " + vtype + ". The video is 8 seconds, " + aspect + ", photorealistic, with real motion. " +
       "Keep the prompt under 90 words. Output ONLY the prompt, no explanation, no quotes, no headings.";
+    if(faceLock){
+      p += " STRICT IDENTITY RULE: if the photo shows a person, that person is the same person in the video — lock the identity strictly. " +
+        "Keep the exact same face, facial features, skin tone, hairstyle and identity as the reference photo in every single frame. " +
+        "Do not change, beautify, age, slim or swap the face. The face must stay identical to the photo. " +
+        "Include this face-lock rule as one sentence inside the prompt.";
+    }
+    return p;
+  }
+  var FACE_CLAUSE = " Keep the exact same face and identity as the reference photo — the face must not change in any frame.";
+  function applyFaceLock(text){
+    if(!/same face|identical face|face must (stay|not change)|do not change[^.]{0,40}face/i.test(text)){
+      return text.replace(/\s+$/, "") + FACE_CLAUSE;
+    }
+    return text;
   }
   function callGemini(model, key, instruction){
     var url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key);
@@ -240,7 +256,8 @@
     if(!key){ setStatus("Add your free Gemini API key above — or use the guided builder below (no key needed).", "err"); return; }
     var btn = $("generate"); btn.disabled = true;
     setStatus("Reading your photo and writing the prompt…", "");
-    var instruction = geminiPrompt($("vtype").value, $("aspect").value);
+    var faceLock = $("faceLock").checked;
+    var instruction = geminiPrompt($("vtype").value, $("aspect").value, faceLock);
     callGemini("gemini-2.5-flash", key, instruction).then(function(res){
       if(!res.ok && res.status === 404){
         return callGemini("gemini-2.0-flash", key, instruction);
@@ -253,6 +270,7 @@
       }
       var text = extractText(res.json);
       if(!text) throw new Error("Google returned an empty reply. Try again.");
+      if(faceLock) text = applyFaceLock(text);
       if(!useOne()){ setStatus("Today's 5 prompts are used up. Come back tomorrow.", "err"); return; }
       showPrompt(text);
       setStatus("Prompt ready — copy it and paste it into Flow.", "ok");
@@ -270,6 +288,7 @@
     var vtype = $("vtype").value, aspect = $("aspect").value, camera = $("bCamera").value;
     var prompt = subject + " " + action + ", " + vtype + ", " + camera + ", warm natural light, " + aspect + ", photorealistic, real motion, 8 seconds.";
     prompt = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+    if($("faceLock").checked) prompt = applyFaceLock(prompt);
     useOne();
     showPrompt(prompt);
     setStatus("Prompt built — no key needed.", "ok");
