@@ -1758,7 +1758,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v39';
+var APP_VERSION = 'v40';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1803,7 +1803,7 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', queue:'bdbs_syncQueue' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', auditLog:'bdbs_auditLog', queue:'bdbs_syncQueue' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function donorPub(d){return {id:d.id,name:d.name,donorNo:d.donorNo||'',group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,createdAt:d.createdAt||Date.now(),demo:!!d.demo};}
@@ -1822,7 +1822,7 @@ function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),g
    cache, so the app keeps working with REAL data when the internet drops.
    Writes made offline are queued and pushed to Firestore when net returns.
    (The old demo seeding is gone — offline now shows real saved data.) */
-function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews}; return map[coll]||LS.activities; }
+function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews, auditLog:LS.auditLog}; return map[coll]||LS.activities; }
 function cacheUpsert(coll, obj){ var k=lsKey(coll), arr=lsGet(k), found=false; arr.forEach(function(x){ if(x.id===obj.id){ for(var p in obj) x[p]=obj[p]; found=true; } }); if(!found) arr.unshift(obj); lsSet(k,arr); }
 function cacheRemove(coll, id){ var k=lsKey(coll); lsSet(k, lsGet(k).filter(function(x){return x.id!==id;})); }
 function queueOp(op){ var q=lsGet(LS.queue); q.push(op); lsSet(LS.queue,q); setOfflineBanner(); }
@@ -2061,10 +2061,12 @@ function deleteDonorKeys(ph, cn, done){
 /* Admin: rebuild donorKeys for every donor still in the register
    (repairs keys missing from older versions; run after cleanup). */
 function rebuildDonorKeysBtn(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
   var m = document.getElementById('keysMsg');
   if (m) m.innerHTML = '<span class="mut">Rebuilding…</span>';
   rebuildDonorKeys(function(n){
     if (m) m.innerHTML = '<span class="ok">Donor keys rebuilt for ' + n + ' donor(s).</span>';
+    logAudit('rebuild-donor-keys', '', 'Donor keys rebuilt for ' + n + ' donor(s).');
     renderAdmin();
   });
 }
@@ -2094,7 +2096,7 @@ function renumberMemberIds(){
     if (!jobs.length) { say('<span class="ok">Member IDs are already in order (001, 002, 003…). Nothing to change.</span>'); return; }
     if (!confirm('Renumber ' + jobs.length + ' member(s)? IDs will become 001, 002, 003… in join order.')) { say(''); return; }
     var done = 0;
-    var one = function(){ done++; if (done >= jobs.length) { say('<span class="ok">Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…</span>'); renderAdmin(); loadMembers(); } };
+    var one = function(){ done++; if (done >= jobs.length) { logAudit('renumber-member-ids', '', 'Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…'); say('<span class="ok">Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…</span>'); renderAdmin(); loadMembers(); } };
     jobs.forEach(function(j){
       var oldNo = j.m.idNo||'';
       qUpdate('members', j.m.id, {idNo:j.want}, function(){
@@ -2132,7 +2134,7 @@ function renumberDonorNos(){
     if (!jobs.length) { say('<span class="ok">Donor Nos. are already in order (1, 2, 3…). Nothing to change.</span>'); return; }
     if (!confirm('Renumber ' + jobs.length + ' donor(s)? Nos. will become 1, 2, 3… in registration order.')) { say(''); return; }
     var done = 0;
-    var one = function(){ done++; if (done >= jobs.length) { say('<span class="ok">Renumbered ' + jobs.length + ' donor(s). Nos. are now 1, 2, 3…</span>'); renderAdmin(); } };
+    var one = function(){ done++; if (done >= jobs.length) { logAudit('renumber-donor-nos', '', 'Renumbered ' + jobs.length + ' donor(s). Nos. are now 1, 2, 3…'); say('<span class="ok">Renumbered ' + jobs.length + ' donor(s). Nos. are now 1, 2, 3…</span>'); renderAdmin(); } };
     jobs.forEach(function(j){
       var oldNo = j.d.donorNo||'';
       qUpdate('donors', j.d.id, {donorNo:j.want}, function(){
@@ -2354,7 +2356,7 @@ function confirmClaim(cid){
     qUpdate('requests', c.requestId, patch, function(){
       qUpdate('requestsPublic', c.requestId, patch, function(){
         advanceReqStatus(c.requestId, 'Donor Found');
-        qDel('donationClaims', cid, function(){ renderAdmin(); });
+        qDel('donationClaims', cid, function(){ logAudit('confirm-donation', cid, (c.donorName||'') + ' donated for request ' + (c.requestId||'')); renderAdmin(); });
       });
     });
   });
@@ -2362,7 +2364,10 @@ function confirmClaim(cid){
 function rejectClaim(cid){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Reject this donation claim?')) return;
-  qDel('donationClaims', cid, function(){ renderAdmin(); });
+  qAll('donationClaims', function(cs){
+    var c = null; cs.forEach(function(x){ if (x.id === cid) c = x; });
+    qDel('donationClaims', cid, function(){ logAudit('reject-claim', cid, c ? ((c.donorName||'') + ' — claim for request ' + (c.requestId||'')) : 'Donation claim rejected'); renderAdmin(); });
+  });
 }
 function loadClaimsAdmin(){
   var box = document.getElementById('claimsBox'); if (!box) return;
@@ -2390,6 +2395,7 @@ function nextReqStatus(cur){
   return (i >= 0 && i < REQ_STAGES.length - 1) ? REQ_STAGES[i+1] : null;
 }
 function advanceReqStatus(id, cur){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
   var nxt = nextReqStatus(cur);
   if (!nxt) return;
   qUpdate('requests', id, {status:nxt}, function(){
@@ -2423,6 +2429,7 @@ function advanceReqStatus(id, cur){
    donor (same blood group) and taps → Donor Found. The donor's name is
    saved on both records and shows on the public request card. */
 function markDonorFound(id, cur){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
   var sel = document.getElementById('donorSel_' + id);
   var msg = document.getElementById('donorMsg_' + id);
   var v = sel ? sel.value : '';
@@ -2525,6 +2532,7 @@ function doCloseRequest(r, d){
    buttons on them. Copies the phone from the private record to the public
    card wherever it is missing. */
 function fixRequestPhonesBtn(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
   var m = document.getElementById('phonesMsg');
   qAll('requests', function(full){
     qAll('requestsPublic', function(pub){
@@ -2535,7 +2543,7 @@ function fixRequestPhonesBtn(){
       todo.forEach(function(r){
         qUpdate('requestsPublic', r.id, {phone: map[r.id]}, function(){
           done++;
-          if (done >= todo.length) { if (m) m.innerHTML = '<span class="ok">Fixed ' + todo.length + ' request card(s).</span>'; renderAdmin(); loadRequests(); }
+          if (done >= todo.length) { if (m) m.innerHTML = '<span class="ok">Fixed ' + todo.length + ' request card(s).</span>'; logAudit('fix-request-phones', '', 'Fixed ' + todo.length + ' request card(s).'); renderAdmin(); loadRequests(); }
         });
       });
     });
@@ -2708,6 +2716,13 @@ function donorNoNum(d){ var m = String(d.donorNo||'').match(/(\d+)\s*$/); return
 function pad3(n){ n = String(n); while (n.length < 3) n = '0' + n; return n; }
 function nextDonorNo(ds){ var mx = 0; (ds||[]).forEach(function(d){ var n = donorNoNum(d); if (n > mx) mx = n; }); return String(mx+1); }
 function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) return; qAll('donorsPublic', function(ds){ if (!val('dNo')) e.value = nextDonorNo(ds); e.readOnly = true; }); }
+/* v40 shared donor-submit success UI (transaction path and legacy
+   fallback alike). */
+function donorSubmitSuccess(full, btn){
+  document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
+  ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo();
+  document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
+}
 function submitDonor(){
   var btn = document.getElementById('dSubmitBtn');
   if (btn && btn.disabled) return;
@@ -2718,7 +2733,12 @@ function submitDonor(){
   if (age < 18 || age > 65) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor age must be 18–65.</span>'; return; }
   if (btn) btn.disabled = true;
   readPhoto(document.getElementById('dPhoto'), function(photo){
+    /* v40: normalize BEFORE any check — phone via waNum (0300… and
+       +92… become one number), CNIC digits-only, name lowercase with
+       every whitespace run collapsed + trimmed, so spacing variants
+       cannot slip through the duplicate check. */
     var ph = waNum(val('dPhone')), cn = val('dCnic').replace(/\D/g,'');
+    var nameNorm = normName(val('dName')), group = val('dGroup');
     /* Duplicate guard (server-side, works for everyone): the same phone
        or CNIC can register only ONE donor — checked against public
        donorKeys (hashes only, no private data). The old check below
@@ -2726,26 +2746,100 @@ function submitDonor(){
        cannot read at all — that is why duplicates slipped through. */
     checkDonorKeys(ph, cn, function(keyDup){
       if (keyDup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.</span>'; if (btn) btn.disabled = false; return; }
-    qAll('donorsPublic', function(ds){
-      var dup = ds.some(function(d){ return waNum(d.phone) === ph; });
-      if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
+      /* v40: online -> atomic transaction; offline -> legacy path. */
+      if (FB_OK && db) { submitDonorTx(ph, cn, nameNorm, group, photo, btn); return; }
+      submitDonorLegacy(ph, cn, photo, btn);
+    });
+  });
+}
+/* v40 atomic donor submit: the donorKeys duplicate check, the Donor No.
+   allocation (counters/donors) and ALL writes (donors, donorsPublic,
+   donorLookup, donorKeys) run inside ONE Firestore transaction — two
+   simultaneous submits with the same phone/CNIC cannot both pass: the
+   second transaction sees the first one's key doc and aborts, writing
+   NOTHING. Donor No. = max(counter + 1, highest public Donor No. + 1),
+   so a stale counter can never reuse a number; a missing counter doc
+   is created from the current max in the same transaction. If the
+   transaction cannot run (e.g. the v34 rules are not published yet, so
+   the public counter read is denied), it falls back to the legacy
+   submit so registration never breaks. */
+function submitDonorTx(ph, cn, nameNorm, group, photo, btn){
+  var fail = function(msg){ document.getElementById('dMsg').innerHTML = '<span class="err">'+msg+'</span>'; if (btn) btn.disabled = false; };
+  var kp = donorKeyId('phone', ph), kc = donorKeyId('cnic', cn);
+  var counterRef = db.collection('counters').doc('donors');
+  return db.runTransaction(function(tx){
+    var keyGets = [];
+    if (kp) keyGets.push(tx.get(db.collection('donorKeys').doc(kp)));
+    if (kc) keyGets.push(tx.get(db.collection('donorKeys').doc(kc)));
+    return Promise.all(keyGets.concat([tx.get(counterRef), tx.get(db.collection('donorsPublic').limit(500))])).then(function(res){
+      var i;
+      for (i = 0; i < keyGets.length; i++) { if (res[i].exists) throw new Error('DUPLICATE'); }
+      var counterSnap = res[keyGets.length];
+      var pubSnap = res[keyGets.length + 1];
+      var mx = 0, dup = false;
+      pubSnap.forEach(function(doc){
+        var d = doc.data() || {};
+        var n = donorNoNum(d); if (n > mx) mx = n;
+        /* Same normalized phone = same donor. Normalized name + group
+           only counts together with the same phone — a name alone
+           never blocks (two real donors may share a name). */
+        if (ph && waNum(d.phone) === ph) dup = true;
+        if (nameNorm && normName(d.name) === nameNorm && (d.group||'') === group && ph && waNum(d.phone) === ph) dup = true;
+      });
+      if (dup) throw new Error('DUPLICATE');
+      var nextNo = mx + 1;
+      if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
+      var dno = String(nextNo);
       var id = uid('donor');
-      var dno = nextDonorNo(ds);
-      var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+      var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
       if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
       var pub = donorPub(full); pub.city = full.area || full.address.split(',').pop().trim();
       if (!pub.area) delete pub.area; /* v37: Area optional */
-      qAdd('donors', full, function(ok){
-        if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
-        qAdd('donorsPublic', pub, function(){
-          qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
-          writeDonorKeys(full.id, full.phone, full.cnic, function(){});
-          document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
-          ['dName','dFather','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo();
-          document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
-        });
-      });
+      tx.set(db.collection('donors').doc(id), full);
+      tx.set(db.collection('donorsPublic').doc(id), pub);
+      tx.set(db.collection('donorLookup').doc(lookupKey(dno)), {id:lookupKey(dno), donorId:id});
+      tx.set(counterRef, {n: nextNo});
+      if (kp) tx.set(db.collection('donorKeys').doc(kp), {id:kp, donorId:id, kind:'phone', createdAt:Date.now()});
+      if (kc) tx.set(db.collection('donorKeys').doc(kc), {id:kc, donorId:id, kind:'cnic', createdAt:Date.now()});
+      return {full: full};
     });
+  }).then(function(out){
+    var full = out.full;
+    cacheUpsert('donors', full);
+    cacheUpsert('donorsPublic', donorPub(full));
+    var keys = lsGet('bdbs_donorKeys');
+    if (kp && keys.indexOf(kp) === -1) keys.push(kp);
+    if (kc && keys.indexOf(kc) === -1) keys.push(kc);
+    lsSet('bdbs_donorKeys', keys);
+    donorSubmitSuccess(full, btn);
+  }).catch(function(e){
+    if (e && e.message === 'DUPLICATE') { fail('This donor is already registered (same phone or CNIC). One CNIC / one phone number = one donor only.'); return; }
+    /* Transaction could not run (offline blip, or the v34 rules are not
+       published yet so the counter read is denied) — fall back to the
+       legacy submit so registration still works. */
+    submitDonorLegacy(ph, cn, photo, btn);
+  });
+}
+/* Legacy donor submit (offline, or when the v40 transaction cannot run):
+   same checks and writes as before v40, but NOT atomic — kept so
+   registration never breaks offline or before the v34 rules publish. */
+function submitDonorLegacy(ph, cn, photo, btn){
+  qAll('donorsPublic', function(ds){
+    var dup = ds.some(function(d){ return waNum(d.phone) === ph; });
+    if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
+    var id = uid('donor');
+    var dno = nextDonorNo(ds);
+    var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+    if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
+    var pub = donorPub(full); pub.city = full.area || full.address.split(',').pop().trim();
+    if (!pub.area) delete pub.area; /* v37: Area optional */
+    qAdd('donors', full, function(ok){
+      if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
+      qAdd('donorsPublic', pub, function(){
+        qAdd('donorLookup', {id:lookupKey(full.donorNo), donorId:full.id}, function(){});
+        writeDonorKeys(full.id, full.phone, full.cnic, function(){});
+        donorSubmitSuccess(full, btn);
+      });
     });
   });
 }
@@ -2772,7 +2866,16 @@ function editMember(id){
     var nm = document.getElementById('mName'); if (nm) nm.scrollIntoView();
   });
 }
+/* v40 shared member-submit success UI (transaction path + legacy alike). */
+function memberSubmitSuccess(full, nextId, btn){
+  document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
+  renderMemberCard(full); loadMembers();
+  ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
+  if (btn) btn.disabled = false;
+}
 function submitMember(){
+  if (!isAdmin()) { document.getElementById('mMsg').innerHTML = '<span class="err">Admin login required.</span>'; return; }
   var btn = document.getElementById('mSubmitBtn');
   if (btn && btn.disabled) return;
   var miss = need(['mName','mFather','mDesig','mCnic','mGroup','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry']);
@@ -2780,15 +2883,12 @@ function submitMember(){
   var age = ageFromDob(val('mDob'));
   if (age === '' || age < 0) { document.getElementById('mMsg').innerHTML = '<span class="err">Enter a valid date of birth.</span>'; return; }
   if (btn) btn.disabled = true;
-  /* Member IDs are sequential: first member 001, second 002, third 003… */
-  qAll('members', function(ms){
-    /* Duplicate guard: same phone or same CNIC already registered — a
-       network retry must never create a second record. */
-    var ph = val('mPhone'), cn = val('mCnic').replace(/\D/g,'');
-    var editId = _editMemberId;
-    var dup = null; ms.forEach(function(x){ if (!dup && x.id !== editId && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
-    if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(dup.idNo||'')+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
-    if (editId) {
+  var ph = val('mPhone'), cn = val('mCnic').replace(/\D/g,'');
+  var nameNorm = normName(val('mName'));
+  var editId = _editMemberId;
+  if (editId) {
+    /* Edit path (unchanged): update the existing member, keep its ID. */
+    qAll('members', function(ms){
       var old = null; ms.forEach(function(x){ if (x.id === editId) old = x; });
       if (!old) { document.getElementById('mMsg').innerHTML = '<span class="err">Member not found.</span>'; if (btn) btn.disabled = false; exitMemberEdit(); return; }
       readPhoto(document.getElementById('mPhoto'), function(photo){
@@ -2805,12 +2905,74 @@ function submitMember(){
           });
         });
       });
-      return;
-    }
+    });
+    return;
+  }
+  readPhoto(document.getElementById('mPhoto'), function(photo){
+    /* v40: online -> atomic transaction; offline -> legacy path. */
+    if (FB_OK && db) { submitMemberTx(ph, cn, nameNorm, photo, btn); return; }
+    submitMemberLegacy(ph, cn, photo, btn);
+  });
+}
+/* v40 atomic member submit: the duplicate check (phone/CNIC, normalized),
+   the Member ID allocation (counters/members) and ALL writes (members,
+   membersPublic, memberLookup) run inside ONE transaction — two
+   simultaneous registrations cannot get the same ID or both pass the
+   duplicate check. The counter wins over gap-fill: if counters/members
+   exists, the next ID is counter + 1; if it does not exist yet, it is
+   created from the current highest ID + 1 in the same transaction
+   (gaps stay gaps — Renumber Member IDs still fixes them). */
+function submitMemberTx(ph, cn, nameNorm, photo, btn){
+  var counterRef = db.collection('counters').doc('members');
+  return db.runTransaction(function(tx){
+    return Promise.all([tx.get(counterRef), tx.get(db.collection('members').limit(500))]).then(function(res){
+      var counterSnap = res[0], memSnap = res[1];
+      var mx = 0, dup = null;
+      memSnap.forEach(function(doc){
+        var x = doc.data() || {};
+        var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > mx) mx = n;
+        /* Duplicate guard: same phone or same CNIC already registered —
+           a network retry must never create a second record. The name
+           is normalized too, but only counts together with the same
+           phone — a name alone never blocks (two real members may
+           share a name). */
+        if (!dup && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x;
+        if (!dup && nameNorm && normName(x.name) === nameNorm && (x.group||'') === val('mGroup') && samePhone(x.phone, ph)) dup = x;
+      });
+      if (dup) throw new Error('DUP:' + (dup.idNo||''));
+      var nextN = mx + 1;
+      if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextN) nextN = cnum + 1; }
+      var nextId = String(nextN).padStart(3,'0');
+      var age = ageFromDob(val('mDob'));
+      var id = uid('member');
+      var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:nextId, cnic:val('mCnic'), group:val('mGroup'), dob:val('mDob'), age:String(age), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
+      var pub = memberPub(full);
+      tx.set(db.collection('members').doc(id), full);
+      tx.set(db.collection('membersPublic').doc(id), pub);
+      tx.set(db.collection('memberLookup').doc(nextId), {id: nextId, memberId: id});
+      tx.set(counterRef, {n: nextN});
+      return {full: full, nextId: nextId};
+    });
+  }).then(function(out){
+    cacheUpsert('members', out.full);
+    cacheUpsert('membersPublic', memberPub(out.full));
+    memberSubmitSuccess(out.full, out.nextId, btn);
+  }).catch(function(e){
+    if (e && String(e.message||'').indexOf('DUP:') === 0) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(String(e.message).slice(4))+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
+    /* Transaction could not run — fall back to the legacy submit. */
+    submitMemberLegacy(ph, cn, photo, btn);
+  });
+}
+/* Legacy member submit (offline, or when the v40 transaction cannot run):
+   gap-fill IDs + the same duplicate check as before v40, but NOT atomic. */
+function submitMemberLegacy(ph, cn, photo, btn){
+  qAll('members', function(ms){
+    var dup = null; ms.forEach(function(x){ if (!dup && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
+    if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(dup.idNo||'')+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
     var used = {}; ms.forEach(function(x){ var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > 0) used[n] = true; });
     var nextN = 1; while (used[nextN]) nextN++;
     var nextId = String(nextN).padStart(3,'0');
-    readPhoto(document.getElementById('mPhoto'), function(photo){
+    var age = ageFromDob(val('mDob'));
     var id = uid('member');
     var full = {id:id, photo:photo, name:val('mName'), father:val('mFather'), designation:val('mDesig'), idNo:nextId, cnic:val('mCnic'), group:val('mGroup'), dob:val('mDob'), age:String(age), education:val('mEdu'), phone:val('mPhone'), email:val('mEmail'), address:val('mAddress'), issue:val('mIssue'), expiry:val('mExpiry'), createdAt:Date.now()};
     var pub = memberPub(full);
@@ -2818,13 +2980,8 @@ function submitMember(){
       if (!ok) { document.getElementById('mMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
       qAdd('membersPublic', pub, function(){
         qAdd('memberLookup', {id: nextId, memberId: id}, function(){});
-        document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
-        renderMemberCard(full); loadMembers();
-        ['mName','mFather','mDesig','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
-        document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
-        if (btn) btn.disabled = false;
+        memberSubmitSuccess(full, nextId, btn);
       });
-    });
     });
   });
 }
@@ -3048,7 +3205,7 @@ function removeMember(id){
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
     var idNo = m ? (m.idNo||'') : '';
-    var done = function(){ renderAdmin(); loadMembers(); loadHome(); };
+    var done = function(){ logAudit('remove-member', id, m ? ((m.name||'') + ' (ID No. ' + (idNo||'') + ')') : ''); renderAdmin(); loadMembers(); loadHome(); };
     qDel('members', id, function(){
       qDel('membersPublic', id, function(){
         if (idNo) qDel('memberLookup', idNo, function(){ done(); }); else done();
@@ -3064,7 +3221,7 @@ function removeDonor(id){
   qAll('donors', function(ds){
     var d = null; ds.forEach(function(x){ if (x.id === id) d = x; });
     var dNo = d ? (d.donorNo||'') : '';
-    var done = function(){ renderAdmin(); searchDonors(); loadHome(); };
+    var done = function(){ logAudit('remove-donor', id, d ? ((d.name||'') + ' (Donor No. ' + (dNo||'') + ')') : ''); renderAdmin(); searchDonors(); loadHome(); };
     var afterKeys = function(){
       if (dNo) qDel('donorLookup', lookupKey(dNo), function(){ done(); }); else done();
     };
@@ -3079,7 +3236,7 @@ function removeDonor(id){
 function removeRequest(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Remove this blood request? It will be deleted from the public list too. This cannot be undone.')) return;
-  var done = function(){ renderAdmin(); loadRequests(); loadHome(); };
+  var done = function(){ logAudit('remove-request', id, ''); renderAdmin(); loadRequests(); loadHome(); };
   qDel('requests', id, function(){
     qDel('requestsPublic', id, function(){ done(); });
   });
@@ -3098,7 +3255,7 @@ function publishActivity(){
   readPhoto(document.getElementById('aPhoto'), function(photo){
     qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
       document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
-      if (ok) { document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
+      if (ok) { logAudit('publish-activity', '', val('aTitle')); document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
     });
   });
 }
@@ -3176,7 +3333,7 @@ function generateCert(donorId, presetDt, presetUnits){
       });
       qAdd('certificates', cert, function(ok){
         if (!ok) { alert('Could not generate certificate.'); return; }
-        show('certificate'); renderCert(cert);
+        logAudit('generate-certificate', cert.ref, (d.name||'') + ' — ' + cert.ref + ' (' + (cert.group||'') + ', ' + cert.units + ' unit(s))'); show('certificate'); renderCert(cert);
       });
     });
   });
@@ -3751,7 +3908,7 @@ function removeDuplicates(){
         var droppedNames = [];
         dropD.concat(delPub, dropR).forEach(function(id){ var nm = nameById[id]; if (nm && droppedNames.indexOf(nm) === -1) droppedNames.push(nm); });
         var done = 0, fixed = 0;
-        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.map(esc).join(', ') : '') + '.'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
+        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.map(esc).join(', ') : '') + '.'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ logAudit('remove-duplicates', '', 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.join(', ') : '') + '; fixed ' + fixed + ' donor number(s).'); say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
         dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
         delPub.forEach(function(id){ qDel('donorsPublic', id, one); });
         dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
@@ -3770,6 +3927,34 @@ function filterDonorRows(){
     tr.style.display = (!q || tr.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
   });
 }
+/* ---------- v40 audit log ----------
+   Every admin action is logged to the `auditLog` collection:
+   {id, adminEmail, action, target, detail, createdAt}. Best-effort
+   only — the log write NEVER blocks or fails the admin action, and
+   until the v34 Firestore rules are published the server rejects
+   audit writes (create is admin-only there) — the action itself
+   still succeeds. */
+function auditAdminEmail(){ try { return (auth && auth.currentUser && auth.currentUser.email) || ''; } catch(e){ return ''; } }
+function logAudit(action, target, detail){
+  try {
+    if (!FB_OK || !db || !isAdmin()) return;
+    var eid = uid('audit');
+    var entry = {id:eid, adminEmail:auditAdminEmail(), action:action, target:String(target||''), detail:String(detail||''), createdAt:Date.now()};
+    db.collection('auditLog').doc(eid).set(entry).then(function(){ cacheUpsert('auditLog', entry); }).catch(function(){});
+  } catch(e){}
+}
+function loadAuditLog(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var box = document.getElementById('auditLogBox'); if (!box) return;
+  box.innerHTML = '<span class="mut">Loading…</span>';
+  qAll('auditLog', function(es){
+    var list = (es||[]).slice(0, 50);
+    if (!list.length) { box.innerHTML = '<span class="mut">No audit entries yet.</span>'; return; }
+    box.innerHTML = list.map(function(a){
+      return '<div class="small" style="border-bottom:1px solid #eee;padding:4px 0"><b>'+esc(a.action||'')+'</b> — '+esc(a.target||'')+'<br><span class="mut">'+esc(a.detail||'')+'</span><br><span class="mut small">'+esc(a.adminEmail||'')+' • '+esc(fmtD(a.createdAt))+'</span></div>';
+    }).join('');
+  });
+}
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -3778,6 +3963,7 @@ function renderAdmin(){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
+          h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){

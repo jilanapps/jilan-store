@@ -1,4 +1,7 @@
 rules_version = '2';
+// BDBS Firestore rules v34 (2026-11-16, BDBS v40): + auditLog
+// (admin-only create/read, no update/delete) + public
+// counters/donors increment-by-1 (v40 atomic Donor No.).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -195,9 +198,24 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Yearly certificate counters (BDBS-CERT-YYYY-XXXX).
+    // Yearly certificate counters (BDBS-CERT-YYYY-XXXX) + the v40
+    // allocation counters (counters/members, counters/donors).
+    // members + cert counters stay admin-only. counters/donors is
+    // readable by anyone (it is only a number) and may be created /
+    // incremented by a public donor registration — but ONLY by exactly
+    // +1, so nobody can reserve or jump the Donor No. sequence.
+    // (v34, 2026-11-16 — needed by the v40 transaction in submitDonor.)
     match /counters/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin() || id == 'donors';
+      allow create: if isAdmin() || (id == 'donors'
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n is int
+        && request.resource.data.n >= 1);
+      allow update: if isAdmin() || (id == 'donors'
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n is int
+        && request.resource.data.n == resource.data.n + 1);
+      allow delete: if isAdmin();
     }
 
     // Donation claims: a logged-in LINKED donor marks "I Donated" for an
@@ -213,6 +231,19 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['id','requestId','donorId','donorName','group','status','createdAt'])
         && request.resource.data.status == 'Pending';
       allow update, delete: if isAdmin();
+    }
+
+    // Audit log (v40): one doc per admin action — {id, adminEmail,
+    // action, target, detail, createdAt}. Admin-only to create AND
+    // read; never updated or deleted, so the trail cannot be edited
+    // away. Writes are best-effort in the app: until these v34 rules
+    // are published the server rejects audit writes, and the admin
+    // action itself still succeeds.
+    match /auditLog/{id} {
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'adminEmail', 'action', 'target', 'detail', 'createdAt'])
+        && request.resource.data.adminEmail == request.auth.token.email;
+      allow read: if isAdmin();
     }
   }
 }
