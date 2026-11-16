@@ -295,6 +295,10 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .faith-ar{font-size:20px;line-height:1.9;margin:4px 0}
 .faith-ur{font-size:15px;line-height:1.7;margin:4px 0 10px}
 .faith-ref{font-size:12px;color:var(--mut)}
+.gift-banner{margin:14px 0 4px;padding:16px 14px;background:linear-gradient(180deg,#ffffff,#eefaf8);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:14px;color:var(--navy);text-align:center;box-shadow:var(--shadow)}
+.gift-banner p{margin:6px 0;line-height:1.7}
+.gift-free{font-size:16px;font-weight:800}
+.gift-line{font-size:15px}
 .btn.block{display:block;width:100%;margin:0;text-align:center;padding:11px 8px;font-size:14px}
 .empty{text-align:center;padding:28px 12px}
 .bad{background:#fef2f2;color:var(--red)}
@@ -391,8 +395,14 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <h2>Welcome to Basti Dawa Blood Society</h2>
 <p>Basti Dawa Blood Society (BDBS) connects blood donors with patients in need. Donor personal details (phone, CNIC, address, disease) are <b>never public</b> — only the admin can see full records after login. Blood request phone numbers are shown publicly so donors can contact patients directly.</p>
 <p class="mut">Under Supervision — Basti Dawa Welfare Organization</p>
+<p class="gift-free">🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.</p>
+<p class="gift-line">🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.</p>
 </div>
 <div style="text-align:center;margin:2px 0 12px"><button class="btn" onclick="openShare()">📣 Share App</button></div>
+<div class="gift-banner">
+<p class="gift-free">🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.</p>
+<p class="gift-line">🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.</p>
+</div>
 <div class="faith-banner" data-no-i18n>
 <p class="faith-ar" dir="rtl">وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا</p>
 <p class="faith-ur" dir="rtl">اور جس نے ایک جان بچائی، گویا اس نے تمام انسانوں کی جان بچائی۔ <span class="faith-ref">(سورۃ المائدہ 5:32)</span></p>
@@ -1457,6 +1467,8 @@ ur: {
 "Reject": "مسترد کریں",
 "Complete": "مکمل کریں",
 "Scan to verify": "تصدیق کے لیے اسکین کریں",
+"🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.": "🩸 یہ ایپ بالکل فری ہے۔ یہاں خون اللہ کی رضا کے لیے دیا جاتا ہے اور اللہ کی رضا کے لیے ہی ملتا ہے۔ خون کے کوئی چارجز نہیں لیے جاتے۔",
+"🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.": "🎁 یہ ایپ ہماری طرف سے تحفہ ہے — ڈاکٹر آصف، اونر جیلان ایپس آفیشل۔",
 "English": "انگریزی"
 }
 };
@@ -1760,6 +1772,8 @@ I18N.ar = {
 "Reject": "رفض",
 "Complete": "إكمال",
 "Scan to verify": "امسح للتحقق",
+"🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.": "🩸 هذا التطبيق مجاني تمامًا. يُتبرَّع بالدم هنا لوجه الله، ويُستلم لوجه الله. ولا تُؤخذ أي رسوم مقابل الدم أبدًا.",
+"🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.": "🎁 هذا التطبيق هدية منا — الدكتور آصف، مالك Jilan Apps Official.",
 "English": "الإنجليزية"
 };
 
@@ -1852,7 +1866,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v42';
+var APP_VERSION = 'v43';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
