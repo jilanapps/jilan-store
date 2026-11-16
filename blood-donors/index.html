@@ -1878,7 +1878,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v49';
+var APP_VERSION = 'v50';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -3782,18 +3782,14 @@ function lookupCert(){
     if (c) renderCert(c);
     else document.getElementById('certView').innerHTML = '<p class="notverified">✗ NOT VERIFIED</p><p class="mut">No certificate found with this reference number.</p>';
   };
-  /* A signed-in donor may only read their OWN certificates, so scope
-     the lookup to their linked donor record. Admin keeps the full list. */
-  if (FB_OK && auth && auth.currentUser && !isAdminUser(auth.currentUser)) {
-    db.collection('users').doc(auth.currentUser.uid).get().then(function(d){
-      var linkedId = d.exists ? (d.data().linkedDonorId||'') : '';
-      if (!linkedId) { done([]); return; }
-      db.collection('certificates').where('donorId','==',linkedId).get().then(function(s){
-        done(s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;}));
-      }).catch(function(){ done([]); });
-    }).catch(function(){ done([]); });
-    return;
-  }
+  /* v50: certificate verification is PUBLIC by design — the reference
+     number is the secret, and the rules already allow public read of
+     `certificates` (logged-out users already got the full list). The
+     old scoping to a signed-in donor's linkedDonorId added no privacy
+     and broke donors whose records are split across duplicate donorIds
+     (cert BDBS-CERT-2026-0001 points at a stale twin id, so the scoped
+     query found nothing -> "NOT VERIFIED" for the rightful donor).
+     Wrong ref still shows the same NOT VERIFIED and reveals nothing. */
   qAll('certificates', done);
 }
 
@@ -4255,6 +4251,36 @@ function removeDuplicates(){
         if (!priv || delSet[p.id]) return;
         if ((priv.donorNo || '') && String(p.donorNo || '') !== String(priv.donorNo)) syncJobs.push({id:p.id, no:String(priv.donorNo)});
       });
+      /* v50: certificate re-point — a dropped duplicate's certificates
+         must follow the kept twin, or the donor's certificates stop
+         verifying (their donorId points at a deleted record). Twin =
+         same phone (waNum), else same name+group. The kept twin is the
+         private record when one survives, else the oldest public copy.
+         A dropped donor with no twin is left out — its certificates
+         stay untouched and still verify (lookup is public since v50).
+         NEVER deletes certificates. */
+      var certKeep = {};
+      var droppedIds = dropD.concat(delPub);
+      if (droppedIds.length) {
+        var pool = [];
+        var seenPool = {};
+        ds.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); }).forEach(function(d){ if (!delSet[d.id] && !seenPool[d.id]) { seenPool[d.id] = 1; pool.push(d); } });
+        ps.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); }).forEach(function(p){ if (!delSet[p.id] && !seenPool[p.id]) { seenPool[p.id] = 1; pool.push(p); } });
+        droppedIds.forEach(function(id){
+          var src = null;
+          ds.forEach(function(d){ if (d.id === id) src = d; });
+          if (!src) ps.forEach(function(p){ if (p.id === id) src = p; });
+          if (!src) return;
+          var ph = waNum(src.phone);
+          var twin = null;
+          pool.forEach(function(y){
+            if (twin) return;
+            if (ph && waNum(y.phone) === ph) twin = y;
+            else if (!ph && normName(y.name) === normName(src.name) && (y.group||'') === (src.group||'')) twin = y;
+          });
+          if (twin && twin.id !== id) certKeep[id] = twin.id;
+        });
+      }
       qAll('requests', function(rs){
         var dropR = dedupList(rs, function(r){ return waNum(r.phone)+'|'+(r.group||''); });
         var total = dropD.length + delPub.length + dropR.length;
@@ -4271,8 +4297,19 @@ function removeDuplicates(){
         rs.forEach(function(r){ if (!nameById[r.id]) nameById[r.id] = r.name; });
         var droppedNames = [];
         dropD.concat(delPub, dropR).forEach(function(id){ var nm = nameById[id]; if (nm && droppedNames.indexOf(nm) === -1) droppedNames.push(nm); });
-        var done = 0, fixed = 0;
-        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.map(esc).join(', ') : '') + '.'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ logAudit('remove-duplicates', '', 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.join(', ') : '') + '; fixed ' + fixed + ' donor number(s).'); say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
+        var done = 0, fixed = 0, repointed = 0;
+        var repointCerts = function(cb){
+          var keys = Object.keys(certKeep);
+          if (!keys.length) { cb(); return; }
+          qAll('certificates', function(cs){
+            var jobs = [];
+            cs.forEach(function(c){ if (certKeep[c.donorId]) jobs.push({id: c.id, donorId: certKeep[c.donorId]}); });
+            if (!jobs.length) { cb(); return; }
+            var n = 0;
+            jobs.forEach(function(j){ qUpdate('certificates', j.id, {donorId: j.donorId}, function(){ repointed++; n++; if (n >= jobs.length) cb(); }); });
+          });
+        };
+        var one = function(){ done++; if (done >= totalJobs) { repointCerts(function(){ var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.map(esc).join(', ') : '') + '.'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; if (repointed) t += (t ? ' ' : '') + 'Re-pointed ' + repointed + ' certificate(s) to the kept donor.'; rebuildDonorKeys(function(){ logAudit('remove-duplicates', '', 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.join(', ') : '') + '; fixed ' + fixed + ' donor number(s); re-pointed ' + repointed + ' certificate(s).'); say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); }); } };
         dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
         delPub.forEach(function(id){ qDel('donorsPublic', id, one); });
         dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
