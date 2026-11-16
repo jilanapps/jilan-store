@@ -1,0 +1,251 @@
+rules_version = '2';
+// BDBS Firestore rules v35 (2026-11-16, BDBS v42): + counters/requests
+// (admin-only create/read, no update/delete) + public
+// counters/donors + counters/requests increment-by-1 (v40/v42 atomic Nos.).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ADMIN = the society account + the owner's account (jilanappsofficial).
+    // No other signed-in user is admin. (v33, 2026-11-16: second admin added;
+    // society admin untouched.)
+    function isAdmin() {
+      return request.auth != null
+        && (request.auth.token.email == 'bastidawabloodsociety@gmail.com'
+          || request.auth.token.email == 'jilanappsofficial@gmail.com');
+    }
+
+    // The signed-in user's linked donor record id (from their users doc).
+    function linkedDonorId() {
+      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return u.exists ? u.data.get('linkedDonorId', '') : '';
+    }
+
+    // The signed-in user's linked member record id (from their users doc).
+    function linkedMemberId() {
+      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return u.exists ? u.data.get('linkedMemberId', '') : '';
+    }
+
+    // The signed-in user's normalized phone (from their users doc).
+    // Returns '' when the user has no users doc or no phone on it.
+    // The .exists guard matters: .data on a missing doc errors and would
+    // deny the whole request, even for the admin (separate allow clause).
+    function myPhoneNorm() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).exists
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('phoneNorm', '')
+        : '';
+    }
+
+    // User accounts created by Sign Up: role is always 'donor'.
+    // Admin status comes from the email allowlist above, never from role.
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == 'donor'
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt', 'phone', 'phoneNorm']);
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'linkedDonorId', 'linkedDonorNo', 'linkedMemberId', 'linkedMemberNo', 'phoneNorm']));
+      allow delete: if isAdmin();
+    }
+
+    // Full donor records (phone, CNIC, address, disease, father name).
+    // READ is never public — admin only, except: the linked donor may READ their
+    // own record, UPDATE only lastDonation/units, and LINK it (set
+    // linkedUid to their own uid, only while it is still unset).
+    // CREATE is public so anyone can register as a donor without login;
+    // the field list is fixed and linkedUid cannot be set at create
+    // time, so a public write can never claim or read a record.
+    match /donors/{id} {
+      allow read: if isAdmin() || (request.auth != null
+        && resource.data.get('linkedUid', null) == request.auth.uid);
+      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','donorNo','photo','cnic','group','age','address','area','phone','disease','lastDonation','units','consent','consentAt','createdAt','demo'])
+        && !('linkedUid' in request.resource.data));
+      allow update: if isAdmin() || (request.auth != null
+        && resource.data.get('linkedUid', null) == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+      allow update: if request.auth != null
+        && resource.data.get('linkedUid', null) == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedUid'])
+        && request.resource.data.linkedUid == request.auth.uid;
+      // Requester-anchored donation credit (v23): when a requester closes
+      // their own request with a donor attached, the donor's lastDonation
+      // and units are credited. Allowed ONLY for the donor named on a
+      // Completed request whose requester phone matches the signed-in
+      // user's phone — so nobody can credit an unrelated donor.
+      allow update: if request.auth != null && myPhoneNorm() != ''
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'lastClosedRequestId'])
+        && request.resource.data.get('lastClosedRequestId', '') != ''
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).exists
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('donatedById', '') == id
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('status', '') == 'Completed'
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm();
+      allow delete: if isAdmin();
+    }
+    // Public-safe donor mirror: name, blood group, city, phone, address,
+    // last donation only. Written by the app together with the full
+    // record. CREATE is public (same as the full record, same reason).
+    // The linked donor may update only their own lastDonation/units here too.
+    match /donorsPublic/{id} {
+      allow read: if true;
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','donorNo','group','city','area','phone','address','lastDonation','units','createdAt','demo']);
+      allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+      // Same requester-anchored credit as /donors above (v23).
+      allow update: if request.auth != null && myPhoneNorm() != ''
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'lastClosedRequestId'])
+        && request.resource.data.get('lastClosedRequestId', '') != ''
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).exists
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('donatedById', '') == id
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('status', '') == 'Completed'
+        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm();
+      allow delete: if isAdmin();
+    }
+
+    // Donor No. -> donor doc lookup, so a signed-up donor can link their
+    // own record. Maps a donor number to a doc id only — no private data.
+    // CREATE is public (written together with a donor registration);
+    // create never overwrites an existing doc, only the admin can change one.
+    match /donorLookup/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Donor duplicate-check keys: SHA-256 hashes of a donor's phone /
+    // CNIC only — no private data inside. Anyone may read and create
+    // them; that is how the "one phone / one CNIC = one donor" check
+    // works for public visitors on any phone. Only the admin may
+    // update or delete a key (e.g. when a donor record is removed).
+    match /donorKeys/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['id','donorId','kind','createdAt']);
+      allow update, delete: if isAdmin();
+    }
+
+    // Full member records. NEVER public — admin only, except: the linked
+    // member may READ their own record (via linkedMemberId in users doc).
+    match /members/{memberId} {
+      allow read: if isAdmin() || (request.auth != null && linkedMemberId() == memberId);
+      allow write: if isAdmin();
+    }
+    // Member ID -> member doc lookup, so a signed-in member can link
+    // their own card. Maps a Member ID (001, 002…) to a doc id only.
+    match /memberLookup/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Public-safe member mirror for QR verification: photo, name,
+    // designation, ID No., blood group, valid till only.
+    match /membersPublic/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blood requests: anyone may SUBMIT a request (public create).
+    // Full records (phone, CNIC) are admin-only.
+    // v23: the requester may also CLOSE their own request — only setting
+    // status to 'Completed' (+ donatedBy/donatedById), and only when the
+    // signed-in user's phone matches the request's requesterPhoneNorm.
+    match /requests/{id} {
+      allow create: if true;
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
+        && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById'])
+        && request.resource.data.status == 'Completed');
+    }
+    // Public-safe request mirror: patient first name, blood group needed,
+    // hospital, city only. Written by the app together with the request.
+    // Same requester-close allowance as /requests above (v23).
+    match /requestsPublic/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow delete: if isAdmin();
+      allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
+        && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById'])
+        && request.resource.data.status == 'Completed');
+    }
+
+    // Public reviews: anyone may post a review (star rating + text);
+    // only the admin may change or remove one (v23).
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['id', 'name', 'stars', 'text', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 60
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 1 && request.resource.data.stars <= 5
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500;
+      allow update, delete: if isAdmin();
+    }
+
+    // Daily activities: public to read, admin to publish.
+    match /activities/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Appreciation certificates: admin only to write. READ is public by
+    // design — the donor shares the PDF, and the QR printed on it links
+    // to the public verify page (?cert=<ref>). A certificate carries only
+    // name, blood group, units and date — the same details already public
+    // on the donor list. No phone or CNIC is stored in a certificate.
+    match /certificates/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Yearly certificate counters (BDBS-CERT-YYYY-XXXX) + the v40
+    // allocation counters (counters/members, counters/donors, counters/requests).
+    // members + cert counters stay admin-only. counters/donors and
+    // counters/requests are
+    // readable by anyone (it is only a number) and may be created /
+    // incremented by a public registration / request — but ONLY by exactly
+    // +1, so nobody can reserve or jump the number sequence.
+    // (v34, 2026-11-16 — needed by the v40 transaction in submitDonor;
+    // v35 adds counters/requests for the v42 transaction in submitRequestTx.)
+    match /counters/{id} {
+      allow read: if isAdmin() || id == 'donors' || id == 'requests';
+      allow create: if isAdmin() || (id == 'donors' || id == 'requests'
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n is int
+        && request.resource.data.n >= 1);
+      allow update: if isAdmin() || (id == 'donors' || id == 'requests'
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n is int
+        && request.resource.data.n == resource.data.n + 1);
+      allow delete: if isAdmin();
+    }
+
+    // Donation claims: a logged-in LINKED donor marks "I Donated" for an
+    // open request of their own blood group. Create only by that linked
+    // donor (donorId must match their link), so a random visitor cannot
+    // file claims for other donors. The admin reads/updates/deletes;
+    // the claimant may read their own claim.
+    match /donationClaims/{id} {
+      allow read: if isAdmin() || (request.auth != null
+        && resource.data.get('donorId', '') == linkedDonorId());
+      allow create: if request.auth != null && linkedDonorId() != ''
+        && request.resource.data.donorId == linkedDonorId()
+        && request.resource.data.keys().hasOnly(['id','requestId','donorId','donorName','group','status','createdAt'])
+        && request.resource.data.status == 'Pending';
+      allow update, delete: if isAdmin();
+    }
+
+    // Audit log (v40): one doc per admin action — {id, adminEmail,
+    // action, target, detail, createdAt}. Admin-only to create AND
+    // read; never updated or deleted, so the trail cannot be edited
+    // away. Writes are best-effort in the app: until these v34 rules
+    // are published the server rejects audit writes, and the admin
+    // action itself still succeeds.
+    match /auditLog/{id} {
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'adminEmail', 'action', 'target', 'detail', 'createdAt'])
+        && request.resource.data.adminEmail == request.auth.token.email;
+      allow read: if isAdmin();
+    }
+  }
+}
