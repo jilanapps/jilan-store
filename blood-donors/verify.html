@@ -52,7 +52,9 @@ function notVerified(msg){
 }
 function showMember(m){
   var today = new Date().toISOString().slice(0,10);
-  if (!m || !m.expiry || m.expiry < today) { notVerified('This membership is expired or invalid.'); return; }
+  var exp = m ? m.expiry : null;
+  if (exp && typeof exp.toDate === 'function') { try { exp = exp.toDate().toISOString().slice(0,10); } catch(e) { exp = null; } }
+  if (!m || !exp || exp < today) { notVerified('This membership is expired or invalid.'); return; }
   document.getElementById('out').innerHTML = '<div class="card">' +
     (m.photo ? '<img class="photo" src="'+m.photo+'" alt="Member photo"><br><br>' : '') +
     '<p class="verified">✓ VERIFIED MEMBER</p>' +
@@ -94,9 +96,15 @@ function showCert(c){
   if (configured && typeof firebase !== 'undefined') {
     try {
       firebase.initializeApp(CFG);
-      firebase.firestore().collection('membersPublic').doc(id).get().then(function(d){
-        if (d.exists) showMember(d.data()); else notVerified();
-      }).catch(function(){ notVerified(); });
+      var col = firebase.firestore().collection('membersPublic');
+      col.doc(id).get().then(function(d){
+        if (d.exists) { showMember(d.data()); return; }
+        /* Doc-ID lookup missed (e.g. the public copy was saved under a
+           different document ID). Fall back to the id field in the doc. */
+        col.where('id','==',id).limit(1).get().then(function(s2){
+          if (!s2.empty) showMember(s2.docs[0].data()); else notVerified();
+        }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
+      }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
       return;
     } catch(e) { /* fall through to local demo check */ }
   }

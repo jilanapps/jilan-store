@@ -2210,6 +2210,7 @@ function searchDonors(){
       var ph = d.phone || phoneById[d.id] || '';
       var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + (st.ok ? 'ok' : 'cool') + '">● ' + st.label + '</span></div>' +
         '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
+        (d.donorNo ? '<div class="mut small">Donor No.: ' + esc(d.donorNo) + '</div>' : '') +
         '<div class="mut small">📍 ' + esc(d.address || d.city || '') + '</div>' +
         '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>';
       if (ph) {

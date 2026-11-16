@@ -1741,7 +1741,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v35';
+var APP_VERSION = 'v36';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -2157,6 +2157,7 @@ function searchDonors(){
       var ph = d.phone || phoneById[d.id] || '';
       var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + (st.ok ? 'ok' : 'cool') + '">● ' + st.label + '</span></div>' +
         '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
+        (d.donorNo ? '<div class="mut small">Donor No.: ' + esc(d.donorNo) + '</div>' : '') +
         '<div class="mut small">📍 ' + esc(d.address || d.city || '') + '</div>' +
         '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>';
       if (ph) {
@@ -3574,6 +3575,27 @@ function dedupList(list, keyFn){
   });
   return drop;
 }
+/* Public-list dedup: the same donor saved twice in donorsPublic
+   (double-tap, slow net, or an old public copy with no private record)
+   shows twice in Find Donor. Group by phone (or name+group when no
+   phone); keep the copy that HAS a Donor No. (oldest such), else the
+   oldest copy — so a stale unnumbered copy can never replace the real
+   numbered one. */
+function dedupPublic(ps){
+  var groups = {}, drop = [];
+  ps.forEach(function(p){
+    var k = waNum(p.phone) || ('n:'+String(p.name||'').toLowerCase()+'|'+(p.group||''));
+    (groups[k] = groups[k] || []).push(p);
+  });
+  Object.keys(groups).forEach(function(k){
+    var g = groups[k];
+    if (g.length < 2) return;
+    var numbered = g.filter(function(x){ return x.donorNo; }).sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+    var keep = numbered.length ? numbered[0] : g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
+    g.forEach(function(x){ if (x.id !== keep.id) drop.push(x.id); });
+  });
+  return drop;
+}
 function removeDuplicates(){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   var msg = document.getElementById('dupMsg');
@@ -3581,14 +3603,24 @@ function removeDuplicates(){
   say('<span class="mut">Checking…</span>');
   qAll('donors', function(ds){
     var dropD = dedupList(ds, function(d){ return waNum(d.phone) || ('n:'+String(d.name||'').toLowerCase()+'|'+(d.group||'')); });
-    qAll('requests', function(rs){
-      var dropR = dedupList(rs, function(r){ return waNum(r.phone)+'|'+(r.group||''); });
-      if (!dropD.length && !dropR.length) { say('<span class="ok">No duplicates found.</span>'); return; }
-      if (!confirm('Remove ' + (dropD.length + dropR.length) + ' duplicate record(s)? The oldest copy of each is kept.')) { say(''); return; }
-      var done = 0, total = dropD.length + dropR.length;
-      var one = function(){ done++; if (done >= total) { rebuildDonorKeys(function(){ say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
-      dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
-      dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
+    qAll('donorsPublic', function(ps){
+      /* The old version only scanned the private list, so stale public-only
+         copies (no matching private record) were never seen and never
+         removed — that is why the list still showed duplicates after
+         tapping. The Find Donor list renders from donorsPublic. */
+      var dropP = dedupPublic(ps);
+      var delPub = dropP.filter(function(id){ return dropD.indexOf(id) === -1; });
+      qAll('requests', function(rs){
+        var dropR = dedupList(rs, function(r){ return waNum(r.phone)+'|'+(r.group||''); });
+        var total = dropD.length + delPub.length + dropR.length;
+        if (!total) { say('<span class="ok">No duplicates found.</span>'); return; }
+        if (!confirm('Remove ' + total + ' duplicate record(s)? The oldest copy of each is kept.')) { say(''); return; }
+        var done = 0;
+        var one = function(){ done++; if (done >= total) { rebuildDonorKeys(function(){ say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
+        dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
+        delPub.forEach(function(id){ qDel('donorsPublic', id, one); });
+        dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
+      });
     });
   });
 }
