@@ -2741,7 +2741,9 @@ function submitDonor(){
       var id = uid('donor');
       var dno = nextDonorNo(ds);
       var full = {id:id, name:val('dName'), father:val('dFather'), donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+      if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
       var pub = donorPub(full); pub.city = full.area || full.address.split(',').pop().trim();
+      if (!pub.area) delete pub.area; /* v37: Area optional */
       qAdd('donors', full, function(ok){
         if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
         qAdd('donorsPublic', pub, function(){
