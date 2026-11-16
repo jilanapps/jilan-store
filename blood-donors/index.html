@@ -81,6 +81,9 @@ header .tagline{font-size:11px;color:#FDE68A;letter-spacing:2.5px;text-transform
 .hstat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:12px 6px;text-align:center;backdrop-filter:blur(2px)}
 .hstat b{display:block;font-size:24px;font-weight:800;color:#fff;line-height:1.1}
 .hstat span{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;opacity:.9}
+.hstat small{display:block;font-size:10px;opacity:.85;margin-top:2px}
+.impact-title{margin:18px 0 8px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.85;text-align:center}
+.impact-stats{grid-template-columns:repeat(3,1fr)}
 .gstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:2px 0 12px}
 .gstat{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:10px 4px;text-align:center}
 .gstat b{display:block;font-size:22px;font-weight:800;color:#B91C1C;line-height:1.1}
@@ -309,6 +312,12 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <div class="hstat"><b id="statRequests" data-v="0">0</b><span>Active Requests</span></div>
 <div class="hstat"><b id="statLives" data-v="0">0</b><span>Lives Saved</span></div>
 <div class="hstat"><b id="statActivities" data-v="0">0</b><span>Activities</span></div>
+</div>
+<p class="impact-title">Our Impact</p>
+<div class="hero-stats impact-stats">
+<div class="hstat"><b id="statUnits" data-v="0">0</b><span>Blood Donated</span><small id="statDonatedSub"></small></div>
+<div class="hstat"><b id="statReceived" data-v="0">0</b><span>Blood Received</span></div>
+<div class="hstat"><b id="statCerts" data-v="0">0</b><span>Certificates Issued</span></div>
 </div>
 <p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
 <p id="demoNote" class="hero-demo">Offline — saved data works on this phone. New changes will sync when internet returns.</p>
@@ -1075,6 +1084,10 @@ ur: {
 "Total Donors": "کل ڈونرز",
 "Active Requests": "فعال درخواستیں",
 "Lives Saved": "بچائی گئی زندگیاں",
+"Blood Donated": "عطیہ کیا گیا خون",
+"Blood Received": "موصول ہوا خون",
+"Certificates Issued": "جاری شدہ اسناد",
+"Our Impact": "ہمارا اثر",
 "Each unit of donated blood can save up to 3 lives.": "عطیہ کردہ خون کا ہر یونٹ 3 زندگیاں بچا سکتا ہے۔",
 "Offline — saved data works on this phone. New changes will sync when internet returns.": "آف لائن — محفوظ شدہ ڈیٹا اس فون پر کام کرتا ہے۔ انٹرنیٹ واپس آنے پر نئی تبدیلیاں سنک ہو جائیں گی۔",
 "Welcome to Basti Dawa Blood Society": "بستی دوا بلڈ سوسائٹی میں خوش آمدید",
@@ -1374,6 +1387,10 @@ I18N.ar = {
 "Total Donors": "إجمالي المتبرعين",
 "Active Requests": "الطلبات النشطة",
 "Lives Saved": "الأرواح التي تم إنقاذها",
+"Blood Donated": "الدم المتبرع به",
+"Blood Received": "الدم المستلم",
+"Certificates Issued": "الشهادات الصادرة",
+"Our Impact": "أثرنا",
 "Each unit of donated blood can save up to 3 lives.": "كل وحدة دم متبرع بها يمكن أن تنقذ حتى 3 أرواح.",
 "Offline — saved data works on this phone. New changes will sync when internet returns.": "دون اتصال — البيانات المحفوظة تعمل على هذا الهاتف. ستتم مزامنة التغييرات الجديدة عند عودة الإنترنت.",
 "Welcome to Basti Dawa Blood Society": "مرحباً بك في جمعية بستي دوا للدم",
@@ -1741,7 +1758,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v38';
+var APP_VERSION = 'v39';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1894,6 +1911,20 @@ function loadHome(){
           setStat('statRequests', rs.length);
           setStat('statLives', units*3);
           setStat('statActivities', acts.length);
+          /* v39 Our Impact: units donated + how many donors gave,
+             requests completed (blood received), certificates issued. */
+          var donorsWhoDonated = 0;
+          src.forEach(function(d){ if ((parseInt(d.units||0,10)||0) > 0 || d.lastDonation) donorsWhoDonated++; });
+          setStat('statUnits', units);
+          var dsub = document.getElementById('statDonatedSub');
+          if (dsub) dsub.textContent = donorsWhoDonated + (donorsWhoDonated === 1 ? ' donor' : ' donors');
+          var received = 0;
+          rs.forEach(function(r){ if ((r.status||'') === 'Completed') received++; });
+          setStat('statReceived', received);
+          qAll('certificates', function(cs){
+            if (!FB_OK && !cs.length) { var cel = document.getElementById('statCerts'); if (cel) cel.textContent = '—'; }
+            else setStat('statCerts', cs.length);
+          });
           setOfflineBanner();
           document.getElementById('homeActivity').innerHTML = acts.length ? acts.slice(0,3).map(function(a){
             return '<div class="dcard"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut">'+esc(a.text)+'</span>'+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
@@ -2135,6 +2166,18 @@ function fillAreaSelects(){
     PK_AREAS.forEach(function(a){ var o = document.createElement('option'); o.textContent = a; s.appendChild(o); });
   });
 }
+/* v39: Find Donor list in Donor No. order (1, 2, 3…) — the raw list
+   comes back newest-first, so the numbers looked jumbled. No Donor
+   No. goes last, then newest first. */
+function donorNoSort(a, b){
+  var na = parseInt(a.donorNo, 10), nb = parseInt(b.donorNo, 10);
+  var ha = isNaN(na), hb = isNaN(nb);
+  if (ha && hb) return (b.createdAt||0)-(a.createdAt||0);
+  if (ha) return 1;
+  if (hb) return -1;
+  if (na !== nb) return na - nb;
+  return (b.createdAt||0)-(a.createdAt||0);
+}
 function searchDonors(){
   var g = _fGroup, c = val('fCity').toLowerCase();
   var availOnly = document.getElementById('fAvail') && document.getElementById('fAvail').checked;
@@ -2146,6 +2189,7 @@ function searchDonors(){
       if (availOnly && !donorStatus(d.lastDonation).ok) return false;
       return true;
     });
+    out.sort(donorNoSort);
     var box = document.getElementById('findResults');
     if (!out.length) {
       box.innerHTML = '<div class="empty"><b>No donors found</b><br><span class="mut">Try another blood group or city — or submit a blood request.</span><br><button class="btn" style="margin-top:12px" onclick="resetFilters()">Reset Filters</button></div>';
@@ -3588,44 +3632,76 @@ function dedupList(list, keyFn){
    with DIFFERENT names is never a duplicate (two donors, one number
    clash — fixed by the donorNo sync in removeDuplicates, not by
    deleting anyone). When the private list is passed, the copy whose
-   id matches the private donor for that donorNo is kept. */
+   id matches the private donor for that donorNo is kept. v39: all
+   grouping keys are normalized (name: lowercase, every whitespace
+   run collapsed to one space, trimmed; donorNo: string, trimmed) —
+   a double space or a number-vs-string Donor No. can no longer hide
+   a duplicate. New third pass groups by normalized name + blood
+   group, so one person is caught even when phone AND Donor No.
+   differ. SAFETY: a group holding two different registered donors
+   (two private ids) is never touched. */
+/* v39 dedup normalization: names can carry a double space or a
+   trailing space, donorNo can be a number or a string with spaces —
+   group on the normalized forms so hidden differences never hide a
+   duplicate. */
+function normName(n){ return String(n || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function normNo(v){ return String(v == null ? '' : v).trim(); }
 function dedupPublic(ps, ds){
   var groups = {}, drop = [];
   var byId = {};
   (ds || []).forEach(function(d){ byId[d.id] = d; });
+  /* v39 shared keep rule: prefer the copy whose id is a private
+     donor id; else the oldest copy that HAS a Donor No.; else the
+     oldest copy. */
+  function pickKeep(g){
+    var i, keep = null;
+    for (i = 0; i < g.length; i++) { if (byId[g[i].id]) { keep = g[i]; break; } }
+    if (!keep) {
+      var numbered = g.filter(function(y){ return normNo(y.donorNo); }).sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+      keep = numbered.length ? numbered[0] : g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
+    }
+    return keep;
+  }
+  function dropGroup(g){
+    if (g.length < 2) return;
+    var real = 0, i;
+    for (i = 0; i < g.length; i++) { if (byId[g[i].id]) real++; }
+    if (real >= 2) return;
+    var keep = pickKeep(g);
+    g.forEach(function(x){ if (x.id !== keep.id && drop.indexOf(x.id) === -1) drop.push(x.id); });
+  }
+  /* pass 1: phone (or normalized name+group when no phone) */
   ps.forEach(function(p){
-    var k = waNum(p.phone) || ('n:'+String(p.name||'').toLowerCase()+'|'+(p.group||''));
+    var k = waNum(p.phone) || ('n:'+normName(p.name)+'|'+(p.group||''));
     (groups[k] = groups[k] || []).push(p);
   });
-  Object.keys(groups).forEach(function(k){
-    var g = groups[k];
-    if (g.length < 2) return;
-    var numbered = g.filter(function(x){ return x.donorNo; }).sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
-    var keep = numbered.length ? numbered[0] : g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
-    g.forEach(function(x){ if (x.id !== keep.id) drop.push(x.id); });
-  });
-  /* v38 donorNo + name pass: same Donor No. + same name = same person,
-     even when the phone values differ. Keep the private-matching copy,
-     else the oldest. */
+  Object.keys(groups).forEach(function(k){ dropGroup(groups[k]); });
+  /* pass 2 (v38, v39 normalized): donorNo + same name = same person,
+     even when the phone values differ. Same donorNo with DIFFERENT
+     names is never grouped here. */
   var ng = {};
   ps.forEach(function(p){
     if (drop.indexOf(p.id) !== -1) return;
-    var nm = String(p.name || '').trim().toLowerCase();
-    if (!p.donorNo || !nm) return;
-    var k = 'd:' + String(p.donorNo) + '|' + nm;
+    var nm = normName(p.name);
+    var no = normNo(p.donorNo);
+    if (!no || !nm) return;
+    var k = 'd:' + no + '|' + nm;
     (ng[k] = ng[k] || []).push(p);
   });
-  Object.keys(ng).forEach(function(k){
-    var g = ng[k];
-    if (g.length < 2) return;
-    var keep = null;
-    g.forEach(function(x){
-      var priv = byId[x.id];
-      if (priv && String(priv.donorNo || '') === String(x.donorNo || '')) keep = x;
-    });
-    if (!keep) keep = g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
-    g.forEach(function(x){ if (x.id !== keep.id) drop.push(x.id); });
+  Object.keys(ng).forEach(function(k){ dropGroup(ng[k]); });
+  /* pass 3 (v39): normalized name + blood group = one donor, even
+     when the phone AND the Donor No. differ. Only identical names
+     group here, so two different donors sharing a Donor No.
+     (Yousaf vs Danish) are never touched. */
+  var mg = {};
+  ps.forEach(function(p){
+    if (drop.indexOf(p.id) !== -1) return;
+    var nm = normName(p.name);
+    if (!nm) return;
+    var k = 'm:' + nm + '|' + (p.group || '');
+    (mg[k] = mg[k] || []).push(p);
   });
+  Object.keys(mg).forEach(function(k){ dropGroup(mg[k]); });
   return drop;
 }
 function removeDuplicates(){
@@ -3666,8 +3742,16 @@ function removeDuplicates(){
         var ask = total ? ('Remove ' + total + ' duplicate record(s)? The oldest copy of each is kept.') : '';
         if (syncJobs.length) ask += (ask ? ' Also fix ' : 'Fix ') + syncJobs.length + ' donor number(s) on public cards?';
         if (!confirm(ask)) { say(''); return; }
+        /* v39: name the removed donors in the result, so the admin can
+           verify exactly what was dropped. */
+        var nameById = {};
+        ds.forEach(function(d){ nameById[d.id] = d.name; });
+        ps.forEach(function(p){ if (!nameById[p.id]) nameById[p.id] = p.name; });
+        rs.forEach(function(r){ if (!nameById[r.id]) nameById[r.id] = r.name; });
+        var droppedNames = [];
+        dropD.concat(delPub, dropR).forEach(function(id){ var nm = nameById[id]; if (nm && droppedNames.indexOf(nm) === -1) droppedNames.push(nm); });
         var done = 0, fixed = 0;
-        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s).'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
+        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s)' + (droppedNames.length ? ': ' + droppedNames.map(esc).join(', ') : '') + '.'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
         dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
         delPub.forEach(function(id){ qDel('donorsPublic', id, one); });
         dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
