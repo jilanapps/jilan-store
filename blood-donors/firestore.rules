@@ -2,10 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ADMIN = ONLY the society account. No other signed-in user is admin.
+    // ADMIN = the society account + the owner's account (jilanappsofficial).
+    // No other signed-in user is admin. (v33, 2026-11-16: second admin added;
+    // society admin untouched.)
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.email == 'bastidawabloodsociety@gmail.com';
+        && (request.auth.token.email == 'bastidawabloodsociety@gmail.com'
+          || request.auth.token.email == 'jilanappsofficial@gmail.com');
     }
 
     // The signed-in user's linked donor record id (from their users doc).
