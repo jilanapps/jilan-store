@@ -225,6 +225,7 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .rpill.st-contacting{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
 .rpill.st-found{background:var(--teal-soft);color:var(--teal-d)}
 .rpill.st-done{background:var(--teal-d);color:#fff}
+.dcard.closed{opacity:.72}
 .stat{background:var(--card);border:0;border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
 .stat b{display:block;font-size:22px;font-weight:800;color:var(--navy)}
 .stat span{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut)}
@@ -367,6 +368,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <div class="hero-actions">
 <button class="btn light" onclick="show('find')">🩸 Find Donor</button>
 <button class="btn oline" onclick="show('request')">+ Request Blood</button>
+<button class="btn oline" onclick="show('request');setTimeout(function(){var e=document.getElementById('trackCard');if(e)e.scrollIntoView();},200)">🔍 Track Request</button>
 <button class="btn oline" onclick="show('donor')">Register as Donor</button>
 </div>
 <div class="hero-stats">
@@ -493,6 +495,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 </div>
 <div class="wmsg" id="rMsg"></div>
 </div>
+<div class="card" id="trackCard"><h2>Track Request</h2><p class="mut">Apni request ka number (REQ-001…) aur wohi phone number likhein jo request me diya tha — status aur progress dekh sakte hain.</p><div class="row"><div class="fld"><input id="tReqNo" placeholder=" "><label for="tReqNo">Request No. (e.g. REQ-001)</label></div><div class="fld"><input id="tReqPhone" type="tel" placeholder=" "><label for="tReqPhone">Phone No.</label></div></div><button class="btn" onclick="trackRequest()">Track Request</button> <span id="trackMsg"></span><div id="trackResult" style="margin-top:10px"></div></div>
 <div class="card"><h2>Open Blood Requests</h2><div id="requestList" class="mut">Loading…</div></div>
 <div class="card"><h2>Closed Requests</h2><div id="closedRequestList" class="mut">Loading…</div></div>
 </section>
@@ -1849,7 +1852,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v41';
+var APP_VERSION = 'v42';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -1953,7 +1956,7 @@ function donorPub(d){return {id:d.id,name:d.name,donorNo:d.donorNo||'',group:d.g
    education, email, address, father, blood group) is
    admin-only in the private 'members' collection. */
 function memberPub(m){return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',expiry:m.expiry,createdAt:m.createdAt||Date.now(),demo:!!m.demo};}
-function reqPub(r){return {id:r.id,name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',requesterPhoneNorm:r.requesterPhoneNorm||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+function reqPub(r){return {id:r.id,reqNo:r.reqNo||'',name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',requesterPhoneNorm:r.requesterPhoneNorm||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
    Every successful online read/write is mirrored into the phone's local
@@ -2365,6 +2368,7 @@ function searchDonors(){
 /* Request progress line: the 4 stages with ✓ for done, ● for the
    current stage — so the requester and donors see where it stands. */
 function reqProgress(st){
+  if (st==='Closed') st='Completed';
   var idx = REQ_STAGES.indexOf(st||'Received'); if (idx < 0) idx = 0;
   return '<span class="mut small">Progress: ' + REQ_STAGES.map(function(s, i){
     if (i < idx) return '✓ ' + s;
@@ -2378,7 +2382,9 @@ function renderReqList(boxId, list, emptyMsg){
   if (!list.length) { box.innerHTML = '<span class="mut">' + emptyMsg + '</span>'; return; }
   box.innerHTML = list.map(function(r){
     var st = (r.status||'Received');
-    var cls = st==='Completed' ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
+    var closed = (st==='Completed' || st==='Closed');
+    var cls = closed ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
+    var pill = reqStatusLabel(st);
     var nm = r.name || r.firstName || 'Patient';
     var where = r.address || r.city || '';
     var contact = '';
@@ -2386,12 +2392,12 @@ function renderReqList(boxId, list, emptyMsg){
       var cmsg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. Main blood donate karna chahta hun. Shukriya.';
       contact = '<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span><div class="dc-actions"><a class="btn block" href="tel:'+esc(r.phone)+'">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/'+waNum(r.phone)+'?text='+encodeURIComponent(cmsg)+'">WhatsApp</a></div>';
     }
-    var donated = (r.donatedBy && (st==='Donor Found' || st==='Completed')) ? '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>' : '';
-    var claimBtn = (MY_DONOR && st !== 'Completed' && MY_DONOR.group === r.group) ? '<br><button class="btn green" onclick="claimDonation(\''+esc(r.id)+'\')">🩸 I Donated for this request</button>' : '';
-    var myCloseBtn = (MY_PHONE_NORM && r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM && st !== 'Completed') ? '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>' : '';
-    var adminBtns = (isAdmin() && st !== 'Completed') ? '<br><button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : '';
+    var donated = (r.donatedBy && (st==='Donor Found' || st==='Completed' || st==='Closed')) ? '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>' : '';
+    var claimBtn = (MY_DONOR && !closed && MY_DONOR.group === r.group) ? '<br><button class="btn green" onclick="claimDonation(\''+esc(r.id)+'\')">🩸 I Donated for this request</button>' : '';
+    var myCloseBtn = (MY_PHONE_NORM && r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM && !closed) ? '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>' : '';
+    var adminBtns = (isAdmin() && !closed) ? '<br><button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : '';
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
-    return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(st)+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+contact+'</div></div></div>';
+    return '<div class="dcard'+(closed ? ' closed' : '')+'"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span><div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(pill)+'</span><br>'+(r.reqNo ? '<span class="mut small">Request No.: <b>'+esc(r.reqNo)+'</b></span><br>' : '')+'<span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+contact+'</div></div></div>';
   }).join('');
 }
 /* ---------- notifications: new blood requests, same-group first ----------
@@ -2429,7 +2435,7 @@ function loadNotifs(){
           var cmsg = 'Assalam-o-Alaikum, Basti Dawa Blood Society se rabta kar raha hun. Main blood donate karna chahta hun. Shukriya.';
           contact = '<br><span class="mut small">📞 <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></span><div class="dc-actions"><a class="btn block" href="tel:'+esc(r.phone)+'">Call Now</a><a class="btn green block" target="_blank" rel="noopener" href="https://wa.me/'+waNum(r.phone)+'?text='+encodeURIComponent(cmsg)+'">WhatsApp</a></div>';
         }
-        return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||r.firstName||'Patient')+'</b> needs <b>'+esc(r.units||1)+' unit(s)</b> of blood <span class="rpill">'+esc(r.status||'Received')+'</span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where)+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+contact+'</div></div></div>';
+        return '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||r.firstName||'Patient')+'</b> needs <b>'+esc(r.units||1)+' unit(s)</b> of blood <span class="rpill">'+esc(reqStatusLabel(r.status))+'</span>'+(r.reqNo ? '<br><span class="mut small">Request No.: <b>'+esc(r.reqNo)+'</b></span>' : '')+'<br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where)+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span>'+contact+'</div></div></div>';
       }).join('');
     }
     try { localStorage.setItem('bdbs_notif_seen', String(Date.now())); } catch(e){}
@@ -2459,6 +2465,42 @@ function loadRequests(){
         show();
       });
     } else show();
+  });
+}
+/* v42 Track Request: no login needed. Enter Request No. + the phone
+   number used in the request — the request shows ONLY when the phone
+   matches (normalized, same rule as the v23 requester-close). Wrong
+   number or non-matching phone gets the same "not found" message and
+   reveals NOTHING about the request. */
+function trackRequest(){
+  var no = reqNoParse(val('tReqNo'));
+  var ph = waNum(val('tReqPhone'));
+  var msg = document.getElementById('trackMsg'), box = document.getElementById('trackResult');
+  if (box) box.innerHTML = '';
+  if (!no || !ph) { if (msg) msg.innerHTML = '<span class="err">Please enter the Request No. and your phone number.</span>'; return; }
+  if (msg) msg.innerHTML = '<span class="mut">Searching…</span>';
+  qAll('requestsPublic', function(rs){
+    var r = null;
+    rs.forEach(function(x){ if (reqNoNum(x) === no) r = x; });
+    if (!r || !r.requesterPhoneNorm || normPhone(r.requesterPhoneNorm) !== normPhone(val('tReqPhone'))) {
+      if (msg) msg.innerHTML = '<span class="err">Request not found. Check the Request No. and phone number.</span>';
+      if (box) box.innerHTML = '';
+      return;
+    }
+    if (msg) msg.innerHTML = '';
+    var st = (r.status||'Received');
+    var closed = (st==='Completed' || st==='Closed');
+    var cls = closed ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
+    var closeBtn = '';
+    if (!closed) {
+      if (MY_PHONE_NORM && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM) {
+        closeBtn = '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>';
+      } else {
+        closeBtn = '<br><span class="mut small">Close karne ke liye usi phone number se login karein jo request me diya tha, phir dobara Track karein.</span>';
+      }
+    }
+    var where = r.address || r.city || '';
+    if (box) box.innerHTML = '<div class="dcard'+(closed ? ' closed' : '')+'"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||r.firstName||'Patient')+'</b> needs <b>'+esc(r.units||1)+' unit(s)</b> of blood <span class="rpill '+cls+'">'+esc(reqStatusLabel(st))+'</span><br><span class="mut small">Request No.: <b>'+esc(r.reqNo||'')+'</b></span><br><span class="mut">'+esc(r.hospital||'')+' • '+esc(where)+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+((r.donatedBy && (st==='Donor Found' || st==='Completed' || st==='Closed')) ? '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>' : '')+closeBtn+'</div></div></div>';
   });
 }
 /* ---------- donation claims: donor marks "I Donated", admin confirms ----------
@@ -2687,6 +2729,37 @@ function fixRequestPhonesBtn(){
     });
   });
 }
+/* v42 one-time backfill: assign Request Nos. to older requests that
+   have none, oldest first (oldest request = REQ-001). Safe to run
+   twice — requests that already have a number are skipped, and the
+   counter is set to the highest number actually assigned. */
+function assignRequestNumbersBtn(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var m = document.getElementById('reqNoMsg');
+  if (m) m.innerHTML = '<span class="mut">Working…</span>';
+  qAll('requestsPublic', function(pub){
+    var mx = 0;
+    pub.forEach(function(r){ var n = reqNoNum(r); if (n > mx) mx = n; });
+    var todo = pub.filter(function(r){ return !r.reqNo; });
+    todo.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
+    if (!todo.length) { if (m) m.innerHTML = '<span class="ok">All requests already have a Request No.</span>'; return; }
+    var done = 0;
+    todo.forEach(function(r, i){
+      var rno = reqNoFmt(mx + i + 1);
+      qUpdate('requests', r.id, {reqNo: rno}, function(){
+        qUpdate('requestsPublic', r.id, {reqNo: rno}, function(){
+          done++;
+          if (done >= todo.length) {
+            if (FB_OK && db) db.collection('counters').doc('requests').set({n: mx + done}).catch(function(){});
+            if (m) m.innerHTML = '<span class="ok">Assigned ' + done + ' Request No(s).</span>';
+            logAudit('assign-request-numbers', '', 'Assigned ' + done + ' Request No(s), oldest first.');
+            loadRequests();
+          }
+        });
+      });
+    });
+  });
+}
 function loadMembers(){
   qAll('membersPublic', function(ms){
     var box = document.getElementById('memberList');
@@ -2766,7 +2839,7 @@ var HELP_FALLBACK_EN = 'Sorry, I do not have an answer for this yet. Please cont
 var HELP_FALLBACK_UR = 'معاف کیجیے، اس سوال کا جواب میرے پاس ابھی نہیں ہے۔ براہ کرم ایڈمن سے رابطہ کریں: واٹس ایپ 0300-7379385، جی میل jilanappsofficial@gmail.com۔';
 var HELP_FAQS = [
 {q:'Who made this app?', qu:'یہ ایپ کس نے بنائی؟', keys:['kis ne banaya','kisne banaya','kis ne btaya','kisne btaya','kis ne bataya','who made','who built','who told','banaya kis','btaya kis','jilan apps','developer'], a:'This app was made by Jilan Apps Official. Contact: WhatsApp 0300-7379385, Gmail jilanappsofficial@gmail.com.', au:'یہ ایپ Jilan Apps Official نے بنائی ہے۔ رابطہ: واٹس ایپ 0300-7379385، جی میل jilanappsofficial@gmail.com۔'},
-{q:'How do I check my request status?', qu:'درخواست کی حالت کیسے دیکھیں؟', keys:['status','progress','request kahan','halat','حالت','سٹیٹس'], a:'Open the Request tab — every request card shows its stage: Received, then Contacting Donors, then Donor Found, then Completed.', au:'Request والے حصے کو کھولیں — ہر درخواست پر اس کا مرحلہ لکھا ہوتا ہے: Received، پھر Contacting Donors، پھر Donor Found، پھر Completed۔'},
+{q:'How do I check my request status?', qu:'درخواست کی حالت کیسے دیکھیں؟', keys:['status','progress','request kahan','halat','حالت','سٹیٹس','track','request no','request number','نمبر'], a:'Every request gets a Request No. (REQ-001, REQ-002...). Open the Request tab and use Track Request — enter your Request No. and the phone number from the request to see its status and progress. You can close the request there when the donation is done.', au:'ہر درخواست کو ایک نمبر ملتا ہے (REQ-001، REQ-002…)۔ Request والے حصے میں Track Request کھولیں — اپنا Request No. اور وہی فون نمبر لکھیں جو درخواست میں دیا تھا، حالت اور مرحلہ دیکھ سکیں گے۔ خون مل جائے تو وہیں سے درخواست بند بھی کر سکتے ہیں۔'},
 {q:'How do I become a donor?', qu:'ڈونر کیسے بنیں؟', keys:['donor ban','donor bano','register','donor kaise','khoon dena','blood dena','donate blood','become a donor','become donor','ڈونر','رجسٹر','خون دینا','donor banna'], a:'Tap "Register as Donor" in the More menu and fill the form: name, father name, blood group, phone, address, age 18-65. CNIC is optional. After submitting, you will get a Donor No. — please save it, you will need it to link your account.', au:'More مینیو میں "Register as Donor" دبائیں اور فارم بھریں: نام، والد کا نام، بلڈ گروپ، فون، پتہ، عمر 18 سے 65۔ شناختی کارڈ لازمی نہیں۔ فارم جمع کرانے پر آپ کو ڈونر نمبر ملے گا — اسے سنبھال کر رکھیں، اکاؤنٹ جوڑنے کے لیے اس کی ضرورت پڑے گی۔'},
 {q:'How do I request blood?', qu:'خون کی درخواست کیسے کریں؟', keys:['request','blood chahiye','khoon chahiye','patient','mareez','hospital','خون چاہیے','درخواست','مریض','ہسپتال'], a:'Tap "Request" at the bottom, then fill the form: patient name, hospital, blood group, units needed, phone and area. The request goes to the admin, who contacts matching donors on WhatsApp.', au:'نیچے "Request" دبائیں، پھر فارم بھریں: مریض کا نام، ہسپتال، بلڈ گروپ، کتنے یونٹ چاہییں، فون اور علاقہ۔ درخواست ایڈمن کے پاس جائے گی، پھر ملتے جلتے گروپ کے ڈونرز کو واٹس ایپ کیا جائے گا۔'},
 {q:'How do I find a donor?', qu:'ڈونر کیسے ڈھونڈیں؟', keys:['find donor','find a donor','donor dhoond','donor dhoondh','donor find','talash','ڈھونڈ','تلاش','donor chahiye'], a:'Tap "Find Donor" at the bottom, select the blood group and area. You will see donors with phone numbers — tap Call or WhatsApp to contact them directly.', au:'نیچے "Find Donor" دبائیں، بلڈ گروپ اور علاقہ منتخب کریں۔ آپ کو ڈونرز کے فون نمبر دکھیں گے — کال یا واٹس ایپ سے براہ راست رابطہ کریں۔'},
@@ -2813,6 +2886,10 @@ function openHelp(){
 }
 
 /* ---------- forms ---------- */
+/* v42 Request Nos.: one open request per phone. Every request gets a
+   number REQ-001, REQ-002… at submit time, so it can be found, tracked
+   and closed. Online -> atomic transaction (duplicate guard + number
+   allocation + both writes in one transaction); offline -> legacy path. */
 function submitRequest(){
   var btn = document.getElementById('rSubmitBtn');
   if (btn && btn.disabled) return;
@@ -2822,23 +2899,86 @@ function submitRequest(){
   var ph = waNum(val('rPhone')), grp = val('rGroup');
   var un = parseInt(val('rUnits'),10);
   if (isNaN(un) || un < 1) { document.getElementById('rMsg').innerHTML = '<span class="err">Units 1 ya zyada hone chahiye.</span>'; if (btn) btn.disabled = false; return; }
-  /* Duplicate guard: same phone + same blood group with an open request
-     must never create a second record (double-tap / slow-net retry).
-     Checked against the PUBLIC mirror, so it works for everyone — the
-     private 'requests' collection is admin-only and unreadable here. */
+  var phNorm = normPhone(val('rPhone'));
+  var nameNorm = normName(val('rName'));
+  if (FB_OK && db) { submitRequestTx(ph, phNorm, nameNorm, grp, un, btn); return; }
+  submitRequestLegacy(ph, nameNorm, grp, un, btn);
+}
+/* v42 atomic request submit: the duplicate guard, the Request No.
+   allocation (counters/requests) and BOTH writes (requests,
+   requestsPublic) run inside ONE Firestore transaction. One phone =
+   one open request: if the same requester phone already has an open
+   request, the transaction aborts and NOTHING is written. Request No.
+   = max(counter + 1, highest public Req No. + 1); a missing counter
+   doc is created from the current max in the same transaction.
+   NOTE: counters/requests needs the v35 rules (public read + +1
+   update, same pattern as counters/donors in v34) to be published —
+   until then the transaction read is denied for public visitors and
+   the legacy submit below runs instead, so requests never break. */
+function submitRequestTx(ph, phNorm, nameNorm, group, un, btn){
+  var fail = function(msg){ document.getElementById('rMsg').innerHTML = '<span class="err">'+msg+'</span>'; if (btn) btn.disabled = false; };
+  var counterRef = db.collection('counters').doc('requests');
+  return db.runTransaction(function(tx){
+    return Promise.all([tx.get(counterRef), tx.get(db.collection('requestsPublic').limit(500))]).then(function(res){
+      var counterSnap = res[0], pubSnap = res[1];
+      var mx = 0, dupLabel = '';
+      pubSnap.forEach(function(doc){
+        var d = doc.data() || {};
+        var n = reqNoNum(d); if (n > mx) mx = n;
+        if (!reqIsOpen(d)) return;
+        var hit = false;
+        if (ph && waNum(d.phone) === ph) hit = true;
+        else if (!ph && nameNorm && normName(d.name) === nameNorm && (d.group||'') === group) hit = true;
+        if (hit && !dupLabel) dupLabel = d.reqNo || 'OLD';
+      });
+      if (dupLabel) throw new Error('DUP:' + dupLabel);
+      var nextNo = mx + 1;
+      if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
+      var rno = reqNoFmt(nextNo);
+      var id = uid('req');
+      var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:phNorm, status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+      var pub = reqPub(full);
+      tx.set(db.collection('requests').doc(id), full);
+      tx.set(db.collection('requestsPublic').doc(id), pub);
+      tx.set(counterRef, {n: nextNo});
+      return {rno: rno};
+    });
+  }).then(function(out){
+    requestSubmitSuccess(out.rno, btn);
+  }).catch(function(e){
+    if (e && String(e.message||'').indexOf('DUP:') === 0) { var lbl = String(e.message).slice(4); fail('This phone already has an open request' + (lbl === 'OLD' ? ' (an older request without a number yet)' : ' (' + lbl + ')') + '. Please close it first, or track it in Track Request below.'); return; }
+    submitRequestLegacy(ph, nameNorm, group, un, btn);
+  });
+}
+/* v42 shared request-submit success UI (transaction path and legacy
+   fallback alike). */
+function requestSubmitSuccess(rno, btn){
+  document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. Your Request No. is <b>'+esc(rno)+'</b> — please save it. The admin will contact you. Track it any time in Track Request below.</span>';
+  ['rName','rFather','rCnic','rAge','rHospital','rDisease','rUnits','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('rGroup').value=''; if (btn) btn.disabled = false; loadRequests();
+}
+/* Legacy request submit (offline, or when the v42 transaction cannot
+   run): same guard and numbering, but NOT atomic — kept so requests
+   never break offline or before the v35 rules publish. */
+function submitRequestLegacy(ph, nameNorm, group, un, btn){
   qAll('requestsPublic', function(rs){
-    var dup = rs.some(function(r){ return waNum(r.phone) === ph && r.group === grp && (r.status||'Received') !== 'Completed'; });
-    if (dup) { document.getElementById('rMsg').innerHTML = '<span class="err">A request for this phone and blood group is already open.</span>'; if (btn) btn.disabled = false; return; }
+    var mx = 0, dupLabel = '';
+    rs.forEach(function(r){
+      var n = reqNoNum(r); if (n > mx) mx = n;
+      if (!reqIsOpen(r)) return;
+      var hit = false;
+      if (ph && waNum(r.phone) === ph) hit = true;
+      else if (!ph && nameNorm && normName(r.name) === nameNorm && (r.group||'') === group) hit = true;
+      if (hit && !dupLabel) dupLabel = r.reqNo || 'OLD';
+    });
+    if (dupLabel) { document.getElementById('rMsg').innerHTML = '<span class="err">This phone already has an open request' + (dupLabel === 'OLD' ? ' (an older request without a number yet)' : ' (' + esc(dupLabel) + ')') + '. Please close it first, or track it in Track Request below.</span>'; if (btn) btn.disabled = false; return; }
+    var rno = reqNoFmt(mx + 1);
     var id = uid('req');
-    var full = {id:id, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:val('rGroup'), units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:normPhone(val('rPhone')), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
-    var pub = {id:id, name:full.name, firstName:firstName(full.name), group:full.group, units:un, hospital:full.hospital, address:full.address, city:full.address.split(',').pop().trim(), phone:full.phone, requesterPhoneNorm:normPhone(val('rPhone')), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:normPhone(val('rPhone')), status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var pub = reqPub(full);
     qAdd('requests', full, function(ok){
       if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
-      qAdd('requestsPublic', pub, function(){
-        document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. The admin will contact you.</span>';
-        ['rName','rFather','rCnic','rAge','rHospital','rDisease','rUnits','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
-        document.getElementById('rGroup').value=''; if (btn) btn.disabled = false; loadRequests();
-      });
+      qAdd('requestsPublic', pub, function(){ requestSubmitSuccess(rno, btn); });
     });
   });
 }
@@ -2853,6 +2993,13 @@ function submitRequest(){
 function donorNoNum(d){ var m = String(d.donorNo||'').match(/(\d+)\s*$/); return m ? parseInt(m[1],10) : 0; }
 function pad3(n){ n = String(n); while (n.length < 3) n = '0' + n; return n; }
 function nextDonorNo(ds){ var mx = 0; (ds||[]).forEach(function(d){ var n = donorNoNum(d); if (n > mx) mx = n; }); return String(mx+1); }
+/* v42 Request Nos.: every blood request gets a number REQ-001, REQ-002…
+   like donor numbers, so it can be found, tracked and closed. */
+function reqNoNum(r){ var m = String(r.reqNo||'').match(/(\d+)\s*$/); return m ? parseInt(m[1],10) : 0; }
+function reqNoFmt(n){ return 'REQ-' + pad3(n); }
+function reqNoParse(s){ var m = String(s||'').match(/(\d+)/); return m ? parseInt(m[1],10) : 0; }
+function reqStatusLabel(st){ st = st||'Received'; if (st==='Completed') return 'Completed'; if (st==='Closed') return 'Closed'; if (st==='Donor Found') return 'Donor Found'; return 'Open'; }
+function reqIsOpen(r){ var st = (r.status||'Received'); return st !== 'Completed' && st !== 'Closed'; }
 function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) return; qAll('donorsPublic', function(ds){ if (!val('dNo')) e.value = nextDonorNo(ds); e.readOnly = true; }); }
 /* v40 shared donor-submit success UI (transaction path and legacy
    fallback alike). */
@@ -4100,7 +4247,7 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span></div>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span></div>';
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
@@ -4119,7 +4266,7 @@ function renderAdmin(){
             h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
-          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Units</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
+          h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Req No.</th><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Units</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
           rs.forEach(function(r){
             var cur = r.status||'Received';
             var nxt = nextReqStatus(cur);
@@ -4132,7 +4279,7 @@ function renderAdmin(){
             } else {
               donorCell = '<span class="ok">✓ Done</span>';
             }
-            h += '<tr><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.units||'')+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b>'+(r.donatedBy?'<br><span class="mut small">Donor: '+esc(r.donatedBy)+'</span>':'')+'</td><td>'+donorCell+(cur==='Completed'?'':' <button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button>')+' <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td><b>'+esc(r.reqNo||'')+'</b></td><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.units||'')+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b>'+(r.donatedBy?'<br><span class="mut small">Donor: '+esc(r.donatedBy)+'</span>':'')+'</td><td>'+donorCell+(cur==='Completed'?'':' <button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button>')+' <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           /* Request → donor contact: a request comes to the admin first, then
@@ -4142,7 +4289,7 @@ function renderAdmin(){
           h += '<h3>Contact Donors for Requests</h3><p class="mut">Requests come to the admin first. Message the matching donors from here — the donor connects directly and the donation is arranged.</p>';
           rs.forEach(function(r){
             var match = ds.filter(function(d){ return d.group === r.group; });
-            h += '<div class="card"><b>'+esc(firstName(r.name))+' — '+esc(r.group)+' needed</b> <span class="mut small">'+esc(r.hospital||'')+' • '+esc(r.address||'')+'</span><br>';
+            h += '<div class="card"><b>'+esc(firstName(r.name))+' — '+esc(r.group)+' needed</b>'+(r.reqNo?' <span class="mut small">('+esc(r.reqNo)+')</span>':'')+' <span class="mut small">'+esc(r.hospital||'')+' • '+esc(r.address||'')+'</span><br>';
             if (!match.length) { h += '<span class="mut">No donor of this blood group registered yet.</span>'; }
             else {
               h += '<span class="mut small">'+match.length+' matching donor(s):</span><br>';
