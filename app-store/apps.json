@@ -2741,6 +2741,20 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/nexaworld/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/timelock/jilan-time-lock.apk",
+   "category": "utility",
+   "color": "#1e3a8a",
+   "desc": "Lock password is the current time — changes every minute. Enter HHMM to unlock.",
+   "icon": "icons/timelock.png",
+   "id": "timelock",
+   "name": "Jilan Time Lock",
+   "package": "com.jilanapps.timelock",
+   "size": 25046,
+   "versionCode": 1,
+   "versionName": "1.0",
+   "web": "https://jilanapps.github.io/jilan-store/timelock/"
   }
  ],
  "store": {
