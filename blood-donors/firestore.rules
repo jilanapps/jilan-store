@@ -1,7 +1,7 @@
 rules_version = '2';
-// BDBS Firestore rules v35 (2026-11-16, BDBS v42): + counters/requests
-// (admin-only create/read, no update/delete) + public
-// counters/donors + counters/requests increment-by-1 (v40/v42 atomic Nos.).
+// BDBS Firestore rules v36 (2026-11-16): .exists on a get() result ERRORS
+// in evaluation and denies the request (linked member-card read denied).
+// All such uses replaced with the exists() function (see helpers below).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -15,25 +15,26 @@ service cloud.firestore {
     }
 
     // The signed-in user's linked donor record id (from their users doc).
+    // v36: exists() function — never .exists on a get() result (it errors).
     function linkedDonorId() {
-      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return u.exists ? u.data.get('linkedDonorId', '') : '';
+      let p = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(p) ? get(p).data.get('linkedDonorId', '') : '';
     }
 
     // The signed-in user's linked member record id (from their users doc).
+    // v36: exists() function — never .exists on a get() result (it errors).
     function linkedMemberId() {
-      let u = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return u.exists ? u.data.get('linkedMemberId', '') : '';
+      let p = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(p) ? get(p).data.get('linkedMemberId', '') : '';
     }
 
     // The signed-in user's normalized phone (from their users doc).
     // Returns '' when the user has no users doc or no phone on it.
-    // The .exists guard matters: .data on a missing doc errors and would
-    // deny the whole request, even for the admin (separate allow clause).
+    // v36: .exists on a get() result ERRORS and denies the whole request
+    // (found 2026-11-16: linked member-card read denied). Use exists().
     function myPhoneNorm() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).exists
-        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('phoneNorm', '')
-        : '';
+      let p = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(p) ? get(p).data.get('phoneNorm', '') : '';
     }
 
     // User accounts created by Sign Up: role is always 'donor'.
@@ -76,7 +77,7 @@ service cloud.firestore {
       allow update: if request.auth != null && myPhoneNorm() != ''
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'lastClosedRequestId'])
         && request.resource.data.get('lastClosedRequestId', '') != ''
-        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).exists
+        && exists(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId))
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('donatedById', '') == id
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('status', '') == 'Completed'
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm();
@@ -95,7 +96,7 @@ service cloud.firestore {
       allow update: if request.auth != null && myPhoneNorm() != ''
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'lastClosedRequestId'])
         && request.resource.data.get('lastClosedRequestId', '') != ''
-        && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).exists
+        && exists(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId))
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('donatedById', '') == id
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('status', '') == 'Completed'
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm();
