@@ -1130,6 +1130,7 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <button class="sheet-btn" onclick="show('reviews')">⭐ &nbsp;Reviews</button>
 <button class="sheet-btn" onclick="show('help')">💬 &nbsp;Madad Box</button>
 <button class="sheet-btn" onclick="openShare()">📣 &nbsp;Share App</button>
+<button class="sheet-btn" onclick="openOtherApps()">📱 &nbsp;Our Other Apps</button>
 <button class="sheet-btn" onclick="show('psca')">🩸 &nbsp;PSCA Blood Bank</button>
 <button class="sheet-btn" onclick="show('sops')">📋 &nbsp;Donor Guidelines (SOPs)</button>
 <button class="sheet-btn" onclick="checkAppUpdate(true)">🔄 &nbsp;Check for Update <span class="mut small" id="installedVer"></span></button>
@@ -1147,6 +1148,15 @@ html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 <a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
 <a class="btn block" style="margin:6px 0" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
 <button class="btn ghost block" style="margin:6px 0" onclick="copyShareLink()">Copy Link</button>
+</div>
+</div>
+<div class="modal" id="otherAppsModal" onclick="if(event.target===this)closeModal('otherAppsModal')">
+<div class="modal-box">
+<button class="mclose" onclick="closeModal('otherAppsModal')" aria-label="Close">&#10005;</button>
+<h3>📱 Our Other Apps</h3>
+<p class="mut">Check out our other apps:</p>
+<a class="btn block" style="margin:6px 0" href="https://play.google.com/store/apps/details?id=com.jilanapps.rahenoor" target="_blank" rel="noopener">🌙 Rah-e-Noor — Download on Play Store</a>
+<button class="btn ghost block" style="margin:6px 0" onclick="closeModal('otherAppsModal')">Close</button>
 </div>
 </div>
 
@@ -1210,6 +1220,9 @@ ur: {
 "Reviews": "جائزے",
 "💬 Madad Box": "💬 مدد بکس",
 "📣 Share App": "📣 ایپ شیئر کریں",
+"📱 Our Other Apps": "📱 ہماری دیگر ایپس",
+"Check out our other apps:": "ہماری دیگر ایپس بھی دیکھیں:",
+"🌙 Rah-e-Noor — Download on Play Store": "🌙 راہِ نور — پلے اسٹور سے ڈاؤن لوڈ کریں",
 "Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "نیچے اپنا سوال لکھیں یا ایک بٹن دبائیں — فوراً جواب ملے گا۔ یہ مدد بکس بغیر نیٹ کے بھی چلتا ہے۔",
 "Send": "بھیجیں",
 "Write a Review": "جائزہ لکھیں",
@@ -1515,6 +1528,9 @@ I18N.ar = {
 "Reviews": "التقييمات",
 "💬 Madad Box": "💬 صندوق المساعدة",
 "📣 Share App": "📣 شارك التطبيق",
+"📱 Our Other Apps": "📱 تطبيقاتنا الأخرى",
+"Check out our other apps:": "اطّلع على تطبيقاتنا الأخرى:",
+"🌙 Rah-e-Noor — Download on Play Store": "🌙 راهِ نور — حمّل من متجر بلتطبيقات",
 "Type your question below or tap a button — you will get an answer right away. This help box also works offline.": "اكتب سؤالك أدناه أو اضغط على زر — ستحصل على إجابة فورًا. صندوق المساعدة هذا يعمل دون إنترنت أيضًا.",
 "Send": "إرسال",
 "Write a Review": "اكتب تقييمًا",
@@ -1864,7 +1880,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v45';
+var APP_VERSION = 'v46';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -4331,6 +4347,7 @@ function renderAdmin(){
 /* ---------- Share App (v30) ---------- */
 var SHARE_LINK = 'https://jilanapps.github.io/jilan-store/blood-donors/download.html';
 function openShare(){ closeModal('moreSheet'); openModal('shareModal'); }
+function openOtherApps(){ closeModal('moreSheet'); openModal('otherAppsModal'); }
 function copyShareLink(){
   var msg = document.getElementById('shareCopyMsg');
   function done(ok){ if (msg) msg.textContent = ok ? 'Link copy ho gaya ✓' : 'Copy nahi hua — link ko dabaye rakhein aur copy karein.'; }
