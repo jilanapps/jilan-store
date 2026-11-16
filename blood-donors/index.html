@@ -1741,7 +1741,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v37';
+var APP_VERSION = 'v38';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -3582,9 +3582,17 @@ function dedupList(list, keyFn){
    shows twice in Find Donor. Group by phone (or name+group when no
    phone); keep the copy that HAS a Donor No. (oldest such), else the
    oldest copy — so a stale unnumbered copy can never replace the real
-   numbered one. */
-function dedupPublic(ps){
+   numbered one. v38: also group by donorNo + same name — two public
+   copies of one person can carry different phone values (or one
+   missing), so phone grouping alone never sees them. Same donorNo
+   with DIFFERENT names is never a duplicate (two donors, one number
+   clash — fixed by the donorNo sync in removeDuplicates, not by
+   deleting anyone). When the private list is passed, the copy whose
+   id matches the private donor for that donorNo is kept. */
+function dedupPublic(ps, ds){
   var groups = {}, drop = [];
+  var byId = {};
+  (ds || []).forEach(function(d){ byId[d.id] = d; });
   ps.forEach(function(p){
     var k = waNum(p.phone) || ('n:'+String(p.name||'').toLowerCase()+'|'+(p.group||''));
     (groups[k] = groups[k] || []).push(p);
@@ -3594,6 +3602,28 @@ function dedupPublic(ps){
     if (g.length < 2) return;
     var numbered = g.filter(function(x){ return x.donorNo; }).sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
     var keep = numbered.length ? numbered[0] : g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
+    g.forEach(function(x){ if (x.id !== keep.id) drop.push(x.id); });
+  });
+  /* v38 donorNo + name pass: same Donor No. + same name = same person,
+     even when the phone values differ. Keep the private-matching copy,
+     else the oldest. */
+  var ng = {};
+  ps.forEach(function(p){
+    if (drop.indexOf(p.id) !== -1) return;
+    var nm = String(p.name || '').trim().toLowerCase();
+    if (!p.donorNo || !nm) return;
+    var k = 'd:' + String(p.donorNo) + '|' + nm;
+    (ng[k] = ng[k] || []).push(p);
+  });
+  Object.keys(ng).forEach(function(k){
+    var g = ng[k];
+    if (g.length < 2) return;
+    var keep = null;
+    g.forEach(function(x){
+      var priv = byId[x.id];
+      if (priv && String(priv.donorNo || '') === String(x.donorNo || '')) keep = x;
+    });
+    if (!keep) keep = g.slice().sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); })[0];
     g.forEach(function(x){ if (x.id !== keep.id) drop.push(x.id); });
   });
   return drop;
@@ -3610,18 +3640,38 @@ function removeDuplicates(){
          copies (no matching private record) were never seen and never
          removed — that is why the list still showed duplicates after
          tapping. The Find Donor list renders from donorsPublic. */
-      var dropP = dedupPublic(ps);
+      var dropP = dedupPublic(ps, ds);
       var delPub = dropP.filter(function(id){ return dropD.indexOf(id) === -1; });
+      /* v38: public donorNo sync — a public card whose Donor No. differs
+         from its private record (stale public-only copy) shows the wrong
+         number in Find Donor, and two donors can end up sharing one
+         number. Never deletes anyone; only copies the private number
+         onto the matching public card. */
+      var privById = {};
+      ds.forEach(function(d){ privById[d.id] = d; });
+      var delSet = {};
+      dropD.forEach(function(id){ delSet[id] = 1; });
+      delPub.forEach(function(id){ delSet[id] = 1; });
+      var syncJobs = [];
+      ps.forEach(function(p){
+        var priv = privById[p.id];
+        if (!priv || delSet[p.id]) return;
+        if ((priv.donorNo || '') && String(p.donorNo || '') !== String(priv.donorNo)) syncJobs.push({id:p.id, no:String(priv.donorNo)});
+      });
       qAll('requests', function(rs){
         var dropR = dedupList(rs, function(r){ return waNum(r.phone)+'|'+(r.group||''); });
         var total = dropD.length + delPub.length + dropR.length;
-        if (!total) { say('<span class="ok">No duplicates found.</span>'); return; }
-        if (!confirm('Remove ' + total + ' duplicate record(s)? The oldest copy of each is kept.')) { say(''); return; }
-        var done = 0;
-        var one = function(){ done++; if (done >= total) { rebuildDonorKeys(function(){ say('<span class="ok">Removed ' + total + ' duplicate(s).</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
+        var totalJobs = total + syncJobs.length;
+        if (!totalJobs) { say('<span class="ok">No duplicates found.</span>'); return; }
+        var ask = total ? ('Remove ' + total + ' duplicate record(s)? The oldest copy of each is kept.') : '';
+        if (syncJobs.length) ask += (ask ? ' Also fix ' : 'Fix ') + syncJobs.length + ' donor number(s) on public cards?';
+        if (!confirm(ask)) { say(''); return; }
+        var done = 0, fixed = 0;
+        var one = function(){ done++; if (done >= totalJobs) { var t = ''; if (total) t += 'Removed ' + total + ' duplicate(s).'; if (fixed) t += (t ? ' ' : '') + 'Fixed ' + fixed + ' donor number(s).'; rebuildDonorKeys(function(){ say('<span class="ok">' + t + '</span>'); renderAdmin(); loadRequests(); searchDonors(); }); } };
         dropD.forEach(function(id){ qDel('donors', id, function(){ qDel('donorsPublic', id, one); }); });
         delPub.forEach(function(id){ qDel('donorsPublic', id, one); });
         dropR.forEach(function(id){ qDel('requests', id, function(){ qDel('requestsPublic', id, one); }); });
+        syncJobs.forEach(function(j){ qUpdate('donorsPublic', j.id, {donorNo:j.no}, function(){ fixed++; one(); }); });
       });
     });
   });
