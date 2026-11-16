@@ -1878,7 +1878,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v48';
+var APP_VERSION = 'v49';
 /* More menu: update check ke sath installed version dikhao — taake pata
    chale abhi konsa version install hai (APP_VERSION se, hardcode nahi). */
 var _iv = document.getElementById('installedVer'); if (_iv) _iv.textContent = '(' + APP_VERSION + ' installed)';
@@ -2499,7 +2499,12 @@ function loadRequests(){
    number used in the request — the request shows ONLY when the phone
    matches (normalized, same rule as the v23 requester-close). Wrong
    number or non-matching phone gets the same "not found" message and
-   reveals NOTHING about the request. */
+   reveals NOTHING about the request.
+   v49 fallback: older public cards made before v42 have NO
+   requesterPhoneNorm field — for those, the typed phone is compared
+   against the card's public phone (waNum on both sides). A typo'd
+   phone still cannot match; fix it with the Admin Panel's
+   "Correct request phone" tool. */
 function trackRequest(){
   var no = reqNoParse(val('tReqNo'));
   var ph = waNum(val('tReqPhone'));
@@ -2510,7 +2515,9 @@ function trackRequest(){
   qAll('requestsPublic', function(rs){
     var r = null;
     rs.forEach(function(x){ if (reqNoNum(x) === no) r = x; });
-    if (!r || !r.requesterPhoneNorm || normPhone(r.requesterPhoneNorm) !== normPhone(val('tReqPhone'))) {
+    var typedNorm = normPhone(val('tReqPhone'));
+    var phoneOk = r && ((r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === typedNorm) || (!r.requesterPhoneNorm && waNum(r.phone) === waNum(val('tReqPhone'))));
+    if (!phoneOk) {
       if (msg) msg.innerHTML = '<span class="err">Request not found. Check the Request No. and phone number.</span>';
       if (box) box.innerHTML = '';
       return;
@@ -2521,7 +2528,8 @@ function trackRequest(){
     var cls = closed ? 'st-done' : (st==='Donor Found' ? 'st-found' : (st==='Contacting Donors' ? 'st-contacting' : 'st-received'));
     var closeBtn = '';
     if (!closed) {
-      if (MY_PHONE_NORM && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM) {
+      var mine = MY_PHONE_NORM && ((r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM) || (!r.requesterPhoneNorm && waNum(r.phone) === MY_PHONE_NORM));
+      if (mine) {
         closeBtn = '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>';
       } else {
         closeBtn = '<br><span class="mut small">Close karne ke liye usi phone number se login karein jo request me diya tha, phir dobara Track karein.</span>';
@@ -2739,20 +2747,60 @@ function doCloseRequest(r, d){
    were saved before the phone went public, so donors see no Call/WhatsApp
    buttons on them. Copies the phone from the private record to the public
    card wherever it is missing. */
+/* v49: also backfills requesterPhoneNorm on public cards missing it —
+   copied from the matching private request record when present, else
+   computed from the card's public phone. Without it, Track Request
+   cannot match the typed phone (REQ-001 bug, 2026-11-16). */
 function fixRequestPhonesBtn(){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   var m = document.getElementById('phonesMsg');
   qAll('requests', function(full){
     qAll('requestsPublic', function(pub){
-      var map = {}; full.forEach(function(r){ map[r.id] = r.phone || ''; });
-      var todo = pub.filter(function(r){ return !r.phone && map[r.id]; });
-      if (!todo.length) { if (m) m.innerHTML = '<span class="ok">All public request cards already have a phone.</span>'; return; }
+      var map = {}; full.forEach(function(r){ map[r.id] = r; });
+      var todo = [];
+      pub.forEach(function(r){
+        var f = map[r.id];
+        var fields = {};
+        if (!r.phone && f && f.phone) fields.phone = f.phone;
+        if (!r.requesterPhoneNorm) {
+          if (f && f.requesterPhoneNorm) fields.requesterPhoneNorm = f.requesterPhoneNorm;
+          else if (r.phone) fields.requesterPhoneNorm = normPhone(r.phone);
+          else if (f && f.phone) fields.requesterPhoneNorm = normPhone(f.phone);
+        }
+        if (Object.keys(fields).length) todo.push({id: r.id, fields: fields});
+      });
+      if (!todo.length) { if (m) m.innerHTML = '<span class="ok">All public request cards already have a phone and requester phone.</span>'; return; }
       var done = 0;
-      todo.forEach(function(r){
-        qUpdate('requestsPublic', r.id, {phone: map[r.id]}, function(){
+      todo.forEach(function(t){
+        qUpdate('requestsPublic', t.id, t.fields, function(){
           done++;
           if (done >= todo.length) { if (m) m.innerHTML = '<span class="ok">Fixed ' + todo.length + ' request card(s).</span>'; logAudit('fix-request-phones', '', 'Fixed ' + todo.length + ' request card(s).'); renderAdmin(); loadRequests(); }
         });
+      });
+    });
+  });
+}
+/* v49 Correct request phone: admin fixes a wrong/typo phone on a
+   request — updates BOTH the private requests doc and the public
+   requestsPublic card (phone + requesterPhoneNorm), so Track Request
+   works with the corrected number. */
+function correctRequestPhoneBtn(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var m = document.getElementById('fixPhoneMsg');
+  var no = reqNoParse(val('fixReqNo'));
+  var ph = val('fixReqPhone');
+  if (!no || !ph) { if (m) m.innerHTML = '<span class="err">Enter the Request No. and the correct phone number.</span>'; return; }
+  if (m) m.innerHTML = '<span class="mut">Working…</span>';
+  qAll('requestsPublic', function(pub){
+    var r = null;
+    pub.forEach(function(x){ if (reqNoNum(x) === no) r = x; });
+    if (!r) { if (m) m.innerHTML = '<span class="err">Request not found. Check the Request No.</span>'; return; }
+    var fields = {phone: ph, requesterPhoneNorm: normPhone(ph)};
+    qUpdate('requests', r.id, fields, function(){
+      qUpdate('requestsPublic', r.id, fields, function(){
+        if (m) m.innerHTML = '<span class="ok">Phone corrected for ' + esc(reqNoFmt(no)) + '.</span>';
+        logAudit('correct-request-phone', r.id, 'Phone corrected for ' + reqNoFmt(no) + '.');
+        loadRequests();
       });
     });
   });
@@ -4278,7 +4326,7 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span></div>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, and fill the missing requester phone (Track Request) on older cards, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Correct request phone</b> <span class="mut small">Fix a wrong phone number on a request (e.g. a typo) — updates the private record and the public card, and fixes Track Request for it.</span><br><input id="fixReqNo" placeholder="Request No. (e.g. REQ-001)" style="width:150px"> <input id="fixReqPhone" type="tel" placeholder="Correct phone no." style="width:170px"> <button class="btn" onclick="correctRequestPhoneBtn()">Correct Phone</button> <span id="fixPhoneMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span></div>';
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
