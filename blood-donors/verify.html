@@ -54,6 +54,7 @@ function showMember(m){
   var today = new Date().toISOString().slice(0,10);
   var exp = m ? m.expiry : null;
   if (exp && typeof exp.toDate === 'function') { try { exp = exp.toDate().toISOString().slice(0,10); } catch(e) { exp = null; } }
+  if (m && m.hidden) { document.getElementById('out').innerHTML = '<div class="card"><p class="mut">\uD83D\uDD12 This member has chosen to keep their membership private.</p></div>'; return; }
   if (!m || !exp || exp < today) { notVerified('This membership is expired or invalid.'); return; }
   document.getElementById('out').innerHTML = '<div class="card">' +
     (m.photo ? '<img class="photo" src="'+m.photo+'" alt="Member photo"><br><br>' : '') +
