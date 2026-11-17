@@ -239,6 +239,14 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .gpill:hover{border-color:var(--teal);color:var(--teal-d)}
 .gpill.on{background:linear-gradient(135deg,#00F2FE,#4FACFE);border-color:transparent;color:#04263b}
 .badge{display:inline-block;background:var(--teal-soft);color:var(--teal-d);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+/* v57-C donor badges */
+.badge.bronze{background:linear-gradient(135deg,#cd7f32,#8c5a2b);color:#fff}
+.badge.silver{background:linear-gradient(135deg,#e5e7eb,#9ca3af);color:#1f2937}
+.badge.gold{background:linear-gradient(135deg,#fde68a,#d97706);color:#451a03;border:1px solid #b45309}
+.badge.verified{background:linear-gradient(135deg,#00F2FE,#4FACFE);color:#04263b}
+.compat-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.compat-table th,.compat-table td{border:1px solid rgba(255,255,255,.14);padding:6px 8px;text-align:left}
+html.light .compat-table th,html.light .compat-table td{border-color:rgba(15,42,74,.14)}
 .demo{background:rgba(255,255,255,.08);color:var(--ink2)}
 .vbadge{display:inline-flex;align-items:center;gap:4px;background:var(--teal-soft);color:var(--teal-d);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700}
 .rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
@@ -482,6 +490,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <button class="btn oline" onclick="show('request')">+ Request Blood</button>
 <button class="btn oline" onclick="show('request');setTimeout(function(){var e=document.getElementById('trackCard');if(e)e.scrollIntoView();},200)">🔍 Track Request</button>
 <button class="btn oline" onclick="show('donor')">Register as Donor</button>
+<button class="btn oline" onclick="show('request');setTimeout(function(){var e=document.getElementById('v57SosCard');if(e)e.scrollIntoView();},200)">🚨 Emergency SOS</button>
+<button class="btn oline" onclick="show('donor');setTimeout(function(){var e=document.getElementById('v57EligCard');if(e)e.scrollIntoView();},200)">✓ Can I Donate?</button>
 </div>
 <div class="hero-stats">
 <div class="hstat"><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
@@ -496,6 +506,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="hstat"><b id="statCerts" data-v="0">0</b><span>Certificates Issued</span></div>
 </div>
 <div id="groupCounts" style="margin-top:10px"></div>
+<p class="mut small">🩸 <a href="#" onclick="show('donateinfo');return false;">Who can donate to whom? See the blood group compatibility chart</a></p>
+<div id="stockDash" style="margin-top:10px"></div> <!-- v57-B live stock dashboard -->
 <div id="rem90Banner" style="display:none"></div>
 <p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
 <p id="demoNote" class="hero-demo">Offline — saved data works on this phone. New changes will sync when internet returns.</p>
@@ -527,6 +539,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
 </div>
 <div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
+<div class="card"><h2>🩸 Blood Donation Camps</h2><p class="mut">Upcoming donation camps announced by BDBS. Register in advance — the admin will confirm your slot.</p><div id="campList" class="mut">Loading…</div></div>
+<div class="card"><h2>🏥 Blood Banks &amp; Hospitals</h2><p class="mut">Live blood stock from registered blood banks. Stock is entered by the admin.</p><div id="homeBloodBanks" class="mut">Loading…</div></div> <!-- v57-B blood bank + hospital list -->
 <div class="card" id="contact"><h2>Contact Us</h2>
 <p class="mut">Reach out to Basti Dawa Blood Society for blood donation, membership or any question.</p>
 <p><b>Email:</b> <a href="mailto:bastidawabloodsociety@gmail.com">bastidawabloodsociety@gmail.com</a></p>
@@ -557,6 +571,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="fld static"><select id="fCity" onchange="searchDonors()"><option value="">All Areas</option></select><label for="fCity">Area / City</label></div>
 <label class="toggle"><input type="checkbox" id="fAvail" onchange="searchDonors()"> Available Only</label>
 </div>
+<div class="row"><button class="btn ghost" type="button" onclick="useMyLocationForSearch()">📍 Nearest First</button> <button class="btn ghost" type="button" onclick="clearMyLocation()">Clear</button> <span id="nearMsg" class="mut small"></span></div> <!-- v57-B nearest donor -->
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
 <p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
 <div id="findResults" style="margin-top:10px"></div>
@@ -567,13 +582,16 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <section class="sec" id="s-notif">
 <div class="card">
 <h2>🔔 Notifications</h2>
-<p class="mut">New blood requests for your blood group appear here. Login with your donor account to see only your group's requests.</p>
+<p class="mut">New blood requests for your blood group appear here. Login with your donor account to see only your group's requests. Admin announcements appear here too.</p>
+<div id="annList"></div>
+<div id="rem90NotifBox" style="margin-top:10px"></div>
 <div id="notifList" class="mut">Loading…</div>
 </div>
 </section>
 
 <!-- ================= REQUEST BLOOD ================= -->
 <section class="sec" id="s-request">
+<div class="card" id="v57SosCard" style="border:2px solid #ef4444"><h2>🚨 Emergency SOS</h2><p class="mut">One tap sends an emergency blood request to the admin and matching donors. Fill group, hospital and phone once — they are saved on this phone for next time.</p><div class="row"><div class="fld static"><select id="sosGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="sosGroup">Blood Group Needed *</label></div><div class="fld"><input id="sosHospital" placeholder=" "><label for="sosHospital">Hospital *</label></div></div><div class="fld"><input id="sosPhone" type="tel" placeholder=" "><label for="sosPhone">Phone No. *</label></div><button class="btn" style="background:#ef4444" onclick="sosRequest()">🚨 SOS — Send Emergency Request</button><div id="sosMsg" style="margin-top:10px"></div></div>
 <div class="card" id="wz-request" data-step="0">
 <h2>Blood Donation Request</h2>
 <p class="mut">Your request is sent to the BDBS admin. The public list shows the patient's first name, blood group needed, units needed, hospital, city, request date, phone number and current progress — so donors can contact you directly. CNIC is never shown.</p>
@@ -602,6 +620,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="fld"><input id="rUnits" type="number" min="1" placeholder=" "><label for="rUnits">Units Needed *</label></div>
 </div>
 <div style="margin:6px 0"><label><input type="checkbox" id="rEmergency"> 🚨 Emergency / Urgent</label></div>
+<div style="margin:6px 0"><label><input type="checkbox" id="rRecurring"> 🔁 Monthly — thalassemia / regular patient (needs blood every month)</label></div>
 <div class="wbtns"><button class="btn ghost" onclick="wizBack('request')">← Back</button><button class="btn" onclick="wizNext('request',['rGroup','rHospital','rDisease','rUnits'])">Next →</button></div>
 </div>
 <div class="wstep">
@@ -614,12 +633,14 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </div>
 <div class="card" id="trackCard"><h2>Track Request</h2><p class="mut">Apni request ka number (REQ-001…) aur wohi phone number likhein jo request me diya tha — status aur progress dekh sakte hain.</p><div class="row"><div class="fld"><input id="tReqNo" placeholder=" "><label for="tReqNo">Request No. (e.g. REQ-001)</label></div><div class="fld"><input id="tReqPhone" type="tel" placeholder=" "><label for="tReqPhone">Phone No.</label></div></div><button class="btn" onclick="trackRequest()">Track Request</button> <span id="trackMsg"></span><div id="trackResult" style="margin-top:10px"></div></div>
 <div class="card"><h2>Filter Requests</h2><div class="row"><div class="fld static"><select id="fHospital" onchange="loadRequests()"><option value="">All hospitals</option></select><label for="fHospital">Hospital</label></div><div class="fld"><input id="fHospitalQ" type="search" placeholder=" " oninput="loadRequests()"><label for="fHospitalQ">Search hospital</label></div></div></div>
+<div class="card" id="hospitalPortalCard"><h2>🏥 Hospital Portal</h2><p class="mut">Hospitals register here. After admin approval, an approved hospital can submit blood requests directly.</p><div id="hospitalPortalBody" class="mut">Loading…</div></div> <!-- v57-B hospital portal -->
 <div class="card"><h2>Open Blood Requests</h2><div id="requestList" class="mut">Loading…</div></div>
 <div class="card"><h2>Closed Requests</h2><div id="closedRequestList" class="mut">Loading…</div></div>
 </section>
 
 <!-- ================= BECOME DONOR ================= -->
 <section class="sec" id="s-donor">
+<div class="card" id="v57EligCard"><h2>Can I Donate Blood?</h2><p class="mut">Answer 4 quick questions. This is general information only — not a medical decision. The final decision is always the doctor's.</p><div class="row"><div class="fld"><input id="eAge" type="number" min="10" max="100" placeholder=" "><label for="eAge">Your age (years)</label></div><div class="fld"><input id="eWeight" type="number" min="20" max="250" placeholder=" "><label for="eWeight">Your weight (kg)</label></div></div><div class="row"><div class="fld"><input id="eLast" type="date" placeholder=" "><label for="eLast">Last donation date (leave empty if never donated)</label></div><div class="fld static"><label><input type="checkbox" id="eIll"> I have fever / illness / am on antibiotics right now</label></div></div><button class="btn" onclick="v57RunEligibility()">Check Eligibility</button><div id="eResult" style="margin-top:10px"></div></div>
 <div class="card" id="wz-donor" data-step="0">
 <h2>Donor Registration</h2>
 <p class="mut">Register as a blood donor. Your name, phone, address and blood group will be shown publicly so patients can contact you directly. Your CNIC, age and disease are <b>private</b> — only the BDBS admin can see them.</p>
@@ -662,6 +683,9 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
 </div>
 <div class="fld"><input id="dUnits" type="number" min="0" placeholder=" "><label for="dUnits">Total Units of Blood Donated (optional — 0 if never donated)</label></div>
+<div class="row"><div class="fld"><input id="dLat" type="number" step="any" placeholder=" "><label for="dLat">Latitude (optional — for nearest-donor search)</label></div><div class="fld"><input id="dLng" type="number" step="any" placeholder=" "><label for="dLng">Longitude (optional)</label></div></div>
+<button class="btn ghost" type="button" onclick="fillDonorLocation()">📍 Use My Location</button>
+<p class="mut small">Optional. Leave blank if you prefer — you will still appear in Find Donor by area/city.</p> <!-- v57-B optional donor location -->
 <div class="consent"><label><input type="checkbox" id="dConsent"> <span><b>Permission (Ijazat Nama) *</b> — I agree that my name, phone number, address and blood group will be shown publicly so patients can contact me directly. Anyone can see them.<br><span dir="rtl" class="consent-ur">میں راضی ہوں کہ میرا نام، فون نمبر، پتہ اور بلڈ گروپ سب کو دکھایا جائے گا تاکہ مریض مجھ سے براہ راست رابطہ کر سکیں۔ کوئی بھی اسے دیکھ سکتا ہے۔</span></span></label></div>
 <div class="wbtns"><button class="btn ghost" onclick="wizBack('donor')">← Back</button><button class="btn" id="dSubmitBtn" onclick="submitDonor()">Register as Donor</button></div>
 </div>
@@ -892,6 +916,30 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="mut">Current month: new donors, requests created, requests completed, donations given — broken down by blood group.</p>
 <button class="btn" onclick="showMonthlyReport()">Show Monthly Report</button>
 <div id="monthlyReport" style="margin-top:10px"></div>
+</div>
+<div class="card" id="campAdminCard">
+<h3>🩸 Blood Camps</h3>
+<p class="mut">Create a donation camp (admin only). Donors see it on Home and can register in advance.</p>
+<div class="row">
+<div class="fld"><input id="cTitle" placeholder=" "><label for="cTitle">Camp Title *</label></div>
+<div class="fld"><input id="cPlace" placeholder=" "><label for="cPlace">Place / Venue *</label></div>
+</div>
+<div class="row">
+<div class="fld static"><input id="cDate" type="date"><label for="cDate">Camp Date *</label></div>
+<div class="fld"><input id="cTime" placeholder=" "><label for="cTime">Time (e.g. 9 AM – 1 PM)</label></div>
+</div>
+<div class="fld"><input id="cNotes" placeholder=" "><label for="cNotes">Notes (optional)</label></div>
+<button class="btn" onclick="submitCamp()">Create Camp</button> <span id="campMsg"></span>
+<div id="adminCampList" style="margin-top:10px"></div>
+</div>
+<div class="card" id="analyticsCard">
+<h3>📈 Admin Analytics</h3>
+<p class="mut">This month's donations and the cities with the most requests.</p>
+<button class="btn" onclick="renderAdminAnalytics()">Refresh Analytics</button>
+<div id="adminAnalytics" style="margin-top:10px"></div>
+<h3 style="margin-top:16px">🔁 Monthly Renewals</h3>
+<p class="mut">Thalassemia / monthly requests older than 25 days — tap Renew to fill next month's request form. Nothing is created automatically; the admin confirms by submitting the form.</p>
+<div id="recurringBox" style="margin-top:10px"></div>
 </div>
 <div id="adminTables"></div>
 </div>
@@ -1192,6 +1240,18 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h3>How Often Can Blood Be Donated?</h3>
 <p>Generally a gap of about 3 months is kept between Whole Blood Donations; however, the final interval depends on the blood bank&rsquo;s medical standards and the donor&rsquo;s health.</p>
 <p><b>Our message:</b> Blood donation takes only a few minutes, but it can become a whole life for someone. Your donated blood can give life to a mother, bring a smile to a child&rsquo;s face, bring a father back to his family, and save a family from falling apart. Come! Donate blood, save lives, and fulfil the duty of humanity.</p>
+<div class="card" id="compatChart" style="margin-top:12px"><h3 style="margin-top:0">Who Can Donate to Whom? — Blood Group Compatibility</h3>
+<p class="mut small">O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.</p>
+<table class="compat-table"><tr><th>Your group</th><th>You can donate to</th><th>You can receive from</th></tr>
+<tr><td><b>O-</b></td><td>Everyone (O-, O+, A-, A+, B-, B+, AB-, AB+)</td><td>O-</td></tr>
+<tr><td><b>O+</b></td><td>O+, A+, B+, AB+</td><td>O-, O+</td></tr>
+<tr><td><b>A-</b></td><td>A-, A+, AB-, AB+</td><td>O-, A-</td></tr>
+<tr><td><b>A+</b></td><td>A+, AB+</td><td>O-, O+, A-, A+</td></tr>
+<tr><td><b>B-</b></td><td>B-, B+, AB-, AB+</td><td>O-, B-</td></tr>
+<tr><td><b>B+</b></td><td>B+, AB+</td><td>O-, O+, B-, B+</td></tr>
+<tr><td><b>AB-</b></td><td>AB-, AB+</td><td>O-, A-, B-, AB-</td></tr>
+<tr><td><b>AB+</b></td><td>AB+</td><td>Everyone (O-, O+, A-, A+, B-, B+, AB-, AB+)</td></tr>
+</table></div>
 <p>🩸 BASTI DAWA BLOOD SOCIETY &bull; Our Mission – Saving Lives Through Voluntary Blood Donation. &bull; Chief Executive: Muhammad Asif Javaid</p>
 <hr>
 </div>
@@ -1715,7 +1775,22 @@ ur: {
 "Scan to verify": "تصدیق کے لیے اسکین کریں",
 "🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.": "🩸 یہ ایپ بالکل فری ہے۔ یہاں خون اللہ کی رضا کے لیے دیا جاتا ہے اور اللہ کی رضا کے لیے ہی ملتا ہے۔ خون کے کوئی چارجز نہیں لیے جاتے۔",
 "🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.": "🎁 یہ ایپ ہماری طرف سے تحفہ ہے — ڈاکٹر آصف، اونر جیلان ایپس آفیشل۔",
-"English": "انگریزی"
+"English": "انگریزی",
+"🩸 Blood Donation Camps": "🩸 خون عطیہ کیمپ",
+"🩸 Blood Camps": "🩸 خون کیمپ",
+"📈 Admin Analytics": "📈 ایڈمن تجزیات",
+"🔁 Monthly Renewals": "🔁 ماہانہ تجدید",
+"Create Camp": "کیمپ بنائیں",
+"No camps announced yet.": "ابھی کوئی کیمپ اعلان نہیں ہوا۔",
+"No camps yet.": "ابھی کوئی کیمپ نہیں۔",
+"🖼️ Share as Poster": "🖼️ پوسٹر کے طور پر شیئر کریں",
+"Register": "رجسٹر کریں",
+"Donations this month:": "اس ماہ عطیات:",
+"Top Cities": "بڑے شہر",
+"Refresh Analytics": "تجزیات تازہ کریں",
+"No monthly renewals due.": "کوئی ماہانہ تجدید واجب نہیں۔",
+"🔁 Monthly": "🔁 ماہانہ",
+"Renew — fill request form": "تجدید کریں — درخواست فارم بھریں"
 }
 };
 I18N.ar = {
@@ -2045,7 +2120,22 @@ I18N.ar = {
 "Scan to verify": "امسح للتحقق",
 "🩸 This app is completely FREE. Blood is donated for the sake of Allah and received for the sake of Allah. No charges are ever taken for blood.": "🩸 هذا التطبيق مجاني تمامًا. يُتبرَّع بالدم هنا لوجه الله، ويُستلم لوجه الله. ولا تُؤخذ أي رسوم مقابل الدم أبدًا.",
 "🎁 This app is a gift from us — Dr. Asif, owner of Jilan Apps Official.": "🎁 هذا التطبيق هدية منا — الدكتور آصف، مالك Jilan Apps Official.",
-"English": "الإنجليزية"
+"English": "الإنجليزية",
+"🩸 Blood Donation Camps": "🩸 مخيمات التبرع بالدم",
+"🩸 Blood Camps": "🩸 مخيمات الدم",
+"📈 Admin Analytics": "📈 تحليلات المسؤول",
+"🔁 Monthly Renewals": "🔁 التجديدات الشهرية",
+"Create Camp": "إنشاء مخيم",
+"No camps announced yet.": "لم يتم الإعلان عن أي مخيم بعد.",
+"No camps yet.": "لا توجد مخيمات بعد.",
+"🖼️ Share as Poster": "🖼️ مشاركة كملصق",
+"Register": "سجّل",
+"Donations this month:": "تبرعات هذا الشهر:",
+"Top Cities": "أهم المدن",
+"Refresh Analytics": "تحديث التحليلات",
+"No monthly renewals due.": "لا توجد تجديدات شهرية مستحقة.",
+"🔁 Monthly": "🔁 شهري",
+"Renew — fill request form": "تجديد — املأ نموذج الطلب"
 };
 
 /* ---------- engine ---------- */
@@ -2137,7 +2227,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v56';
+var APP_VERSION = 'v57';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -2273,7 +2363,7 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', auditLog:'bdbs_auditLog', queue:'bdbs_syncQueue' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', auditLog:'bdbs_auditLog', camps:'bdbs_camps', campRegs:'bdbs_campRegs', queue:'bdbs_syncQueue', bloodBanks:'bdbs_bloodBanks', hospitals:'bdbs_hospitals', announcements:'bdbs_announcements' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 /* v51 female privacy: a female donor who has NOT opted in is mirrored as
@@ -2285,9 +2375,18 @@ function isFemalePrivate(rec){
 }
 function donorPub(d){
   if (isFemalePrivate(d)) {
-    return {id:d.id, donorNo:d.donorNo||'', phoneHash:donorKeyId('phone', d.phone||''), hidden:true, createdAt:d.createdAt||Date.now(), demo:!!d.demo};
+    var stub = {id:d.id, donorNo:d.donorNo||'', phoneHash:donorKeyId('phone', d.phone||''), hidden:true, createdAt:d.createdAt||Date.now(), demo:!!d.demo};
+    if (d.referredBy) stub.referredBy = d.referredBy; /* v57-C referral count only — a Donor No., no private data; stub still carries nothing else */
+    return stub;
   }
-  return {id:d.id,name:d.name,donorNo:d.donorNo||'',group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,gender:d.gender||'',publicOptIn:(d.publicOptIn===false?false:true),available:(d.available===false?false:true),createdAt:d.createdAt||Date.now(),demo:!!d.demo};
+  var _pub = {id:d.id,name:d.name,donorNo:d.donorNo||'',group:d.group,area:d.area||'',city:d.area||(d.address||'').split(',').pop().trim()||d.city||'',phone:d.phone||'',address:d.address||'',lastDonation:d.lastDonation||'',units:parseInt(d.units||0,10)||0,gender:d.gender||'',publicOptIn:(d.publicOptIn===false?false:true),available:(d.available===false?false:true),createdAt:d.createdAt||Date.now(),demo:!!d.demo};
+  /* v57-B: coarse location only (2 decimals, about 1 km) in the public mirror — never exact coordinates. The private record keeps full precision for the admin. Donors without location still appear (city/area fallback). */
+  var _la = roundCoord2(d.lat), _lo = roundCoord2(d.lng);
+  if (_la !== null) _pub.lat = _la;
+  if (_lo !== null) _pub.lng = _lo;
+  if (d.verifiedDonor === true) _pub.verifiedDonor = true; /* v57-C admin-confirmed donation only; only set when true so old rules still accept a plain create */
+  if (d.referredBy) _pub.referredBy = d.referredBy; /* v57-C referral count only */
+  return _pub;
 }
 /* Public member record: ONLY name, phone number, photo, designation and
    ID No. are public (designation + ID are on the card front and shown on
@@ -2302,14 +2401,16 @@ function memberPub(m){
   }
   return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',expiry:m.expiry,gender:m.gender||'',publicOptIn:(m.publicOptIn===false?false:true),createdAt:m.createdAt||Date.now(),demo:!!m.demo};
 }
-function reqPub(r){return {id:r.id,reqNo:r.reqNo||'',name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',requesterPhoneNorm:r.requesterPhoneNorm||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',emergency:!!r.emergency,donatedByPrivate:!!r.donatedByPrivate,createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
+/* v57-D: recurring flag travels to the public card so the list can show
+   the Monthly badge and the admin can suggest next month's request. */
+function reqPub(r){return {id:r.id,reqNo:r.reqNo||'',name:r.name||'',firstName:firstName(r.name),group:r.group,units:parseInt(r.units||0,10)||0,hospital:r.hospital,address:r.address||'',city:(r.address||'').split(',').pop().trim()||'',phone:r.phone||'',requesterPhoneNorm:r.requesterPhoneNorm||'',status:r.status||'Received',donatedBy:r.donatedBy||'',donatedById:r.donatedById||'',emergency:!!r.emergency,donatedByPrivate:!!r.donatedByPrivate,source:r.source||'public',hospitalId:r.hospitalId||'',hospitalName:r.hospitalName||r.hospital||'',recurring:!!r.recurring,recurringKind:r.recurringKind||'',createdAt:r.createdAt||Date.now(),demo:!!r.demo};}
 
 /* ---------- data access: Firestore when online, local cache when offline ----------
    Every successful online read/write is mirrored into the phone's local
    cache, so the app keeps working with REAL data when the internet drops.
    Writes made offline are queued and pushed to Firestore when net returns.
    (The old demo seeding is gone — offline now shows real saved data.) */
-function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews, auditLog:LS.auditLog}; return map[coll]||LS.activities; }
+function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,announcements:LS.announcements,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews, auditLog:LS.auditLog, bloodBanks:LS.bloodBanks, hospitals:LS.hospitals, camps:LS.camps, campRegs:LS.campRegs}; return map[coll]||LS.activities; }
 function cacheUpsert(coll, obj){ var k=lsKey(coll), arr=lsGet(k), found=false; arr.forEach(function(x){ if(x.id===obj.id){ for(var p in obj) x[p]=obj[p]; found=true; } }); if(!found) arr.unshift(obj); lsSet(k,arr); }
 function cacheRemove(coll, id){ var k=lsKey(coll); lsSet(k, lsGet(k).filter(function(x){return x.id!==id;})); }
 function queueOp(op){ var q=lsGet(LS.queue); q.push(op); lsSet(LS.queue,q); setOfflineBanner(); }
@@ -2457,7 +2558,7 @@ function loadHome(){
       });
     });
   });
-  updateBell(); showRem90Home();
+  updateBell(); showRem90Home(); loadCamps(); /* v57-D */ loadStockDashboard(); loadHomeBloodBanks(); /* v57-B live stock + bank list on home */ v57RefreshAnnCache(); // v57-A
 }
 /* ---------- smart donor search: pills + instant city filter + availability ----------
    Public cards show name, blood group, address, phone and last donation
@@ -2475,6 +2576,128 @@ function resetFilters(){
   var a = document.getElementById('fAvail'); if (a) a.checked = false;
   document.querySelectorAll('#groupPills .gpill').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-g') === ''); });
   searchDonors();
+}
+/* ---------- v57-C donor experience: badges, dashboard, PDF, referral ----------
+   Badge levels come from total units donated (1 = Bronze, 3 = Silver,
+   5 = Gold). Verified means an admin confirmed a real donation — the
+   flag is set by confirmClaim / generateCert / request completion, never
+   by the donor themself. Referral stores only the referrer's Donor No.
+   (a public number); the count shown is a count only — no referred
+   donor's name or phone is ever shown. */
+var COMPAT_CHART = { // v57-C standard ABO/Rh compatibility
+  'O-':{to:['O-','O+','A-','A+','B-','B+','AB-','AB+'],from:['O-']},
+  'O+':{to:['O+','A+','B+','AB+'],from:['O-','O+']},
+  'A-':{to:['A-','A+','AB-','AB+'],from:['O-','A-']},
+  'A+':{to:['A+','AB+'],from:['O-','O+','A-','A+']},
+  'B-':{to:['B-','B+','AB-','AB+'],from:['O-','B-']},
+  'B+':{to:['B+','AB+'],from:['O-','O+','B-','B+']},
+  'AB-':{to:['AB-','AB+'],from:['O-','A-','B-','AB-']},
+  'AB+':{to:['AB+'],from:['O-','O+','A-','A+','B-','B+','AB-','AB+']}
+};
+function donorBadge(units){ // v57-C
+  var u = parseInt(units||0,10)||0;
+  if (u >= 5) return {level:'Gold', cls:'gold', icon:'\uD83E\uDD47'};
+  if (u >= 3) return {level:'Silver', cls:'silver', icon:'\uD83E\uDD48'};
+  if (u >= 1) return {level:'Bronze', cls:'bronze', icon:'\uD83E\uDD49'};
+  return null;
+}
+function isVerifiedDonor(d, certCount){ // v57-C admin flag, or a certificate exists (pre-v57 records)
+  return (d && d.verifiedDonor === true) || ((certCount||0) > 0);
+}
+function donorBadgesHtml(d, certCount){ // v57-C
+  var h = '';
+  var b = donorBadge(d.units);
+  if (b) h += ' <span class="badge '+b.cls+'">'+b.icon+' '+b.level+' Donor</span>';
+  if (isVerifiedDonor(d, certCount)) h += ' <span class="badge verified">\u2713 Verified Donor</span>';
+  return h;
+}
+function renderMyBadges(r, totalUnits, certCount){ // v57-C
+  var box = document.getElementById('myBadges'); if (!box) return;
+  box.innerHTML = donorBadgesHtml({units: totalUnits, verifiedDonor: (r && r.verifiedDonor === true)}, certCount||0);
+}
+function fmtDateLocal(dt){ // v57-C local YYYY-MM-DD (no UTC day shift)
+  var m = dt.getMonth()+1, d = dt.getDate();
+  return dt.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d;
+}
+function nextEligibleDate(last){ // v57-C last donation + 90 days
+  if (!last) return '';
+  var tm = new Date(String(last).slice(0,10)+'T00:00:00').getTime();
+  if (isNaN(tm)) return '';
+  return fmtDateLocal(new Date(tm + 90*86400000));
+}
+function renderDonorDashboard(r, totalUnits, certCount){ // v57-C
+  var box = document.getElementById('myDashBox'); if (!box || !r) return;
+  var next = nextEligibleDate(r.lastDonation);
+  var days = (r.lastDonation) ? rem90Days(r.lastDonation) : -1;
+  var left = (days >= 0 && days < 90) ? (90 - days) : 0;
+  var status = !r.lastDonation ? 'No donation recorded yet.' : (days >= 90 ? 'You can donate again now.' : 'Next donation: <b>'+esc(next)+'</b> (in '+left+' day(s)).');
+  box.innerHTML = '<div class="card" style="margin:0"><h3 style="margin-top:0">My Donor Dashboard</h3>'
+    + '<div class="mut">Total donations: <b>'+esc(certCount||0)+'</b> &nbsp;·&nbsp; Total units: <b>'+esc(totalUnits||0)+'</b><br>'
+    + 'Last donation: '+esc(fmtD(r.lastDonation))+'<br>'+status+'</div></div>';
+}
+function getReferralCode(){ // v57-C ?ref=<Donor No.> from the invite link
+  try { var q = new URLSearchParams(location.search).get('ref'); if (!q) return ''; return String(q).replace(/\D/g,''); } catch(e){ return ''; }
+}
+function referralLink(donorNo){ // v57-C download page link + referrer Donor No.
+  var base = (typeof SHARE_LINK !== 'undefined' && SHARE_LINK) ? SHARE_LINK : 'https://jilanapps.github.io/jilan-store/blood-donors/download.html';
+  return base + '?ref=' + encodeURIComponent(String(donorNo||''));
+}
+function renderMyReferral(r){ // v57-C count only — never names/phones of referred donors
+  var box = document.getElementById('myReferralBox'); if (!box || !r || !r.donorNo) return;
+  var link = referralLink(r.donorNo);
+  window._myReferralLink = link;
+  box.innerHTML = '<div class="card" style="margin:0"><h3 style="margin-top:0">Invite Friends</h3><span class="mut">Loading…</span></div>';
+  qAll('donorsPublic', function(ds){
+    var n = 0; ds.forEach(function(x){ if (String(x.referredBy||'') === String(r.donorNo)) n++; });
+    box.innerHTML = '<div class="card" style="margin:0"><h3 style="margin-top:0">Invite Friends</h3>'
+      + '<div class="mut small">Share your invite link — friends who register with it count here. Only the count is shown, never their details.</div>'
+      + '<p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">'+esc(link)+'</p>'
+      + '<button class="btn" onclick="copyReferralLink()">Copy Invite Link</button> <button class="btn green" onclick="shareReferralLink()">Share on WhatsApp</button>'
+      + '<p class="mut">Friends who joined with your link: <b>'+esc(n)+'</b></p></div>';
+  });
+}
+function copyReferralLink(){ // v57-C
+  var link = window._myReferralLink || ''; if (!link) return;
+  var done = function(){ showRefreshToast('Invite link copied'); };
+  var fallback = function(){ try { var ta = document.createElement('textarea'); ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } catch(e){} };
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(link).then(done, function(){ fallback(); done(); }); }
+  else { fallback(); done(); }
+}
+function shareReferralLink(){ // v57-C
+  var link = window._myReferralLink || ''; if (!link) return;
+  var txt = '\uD83E\uDE78 Join Basti Dawa Blood Society — donate blood, save lives. Download the app here: ' + link;
+  if (navigator.share) { navigator.share({text: txt}).catch(function(){}); return; }
+  try { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); } catch(e){}
+}
+function downloadMyHistoryPDF(){ // v57-C same html2canvas + cardImagePDF approach as certificates
+  var cs = window._myHistory || [];
+  var box = document.getElementById('myHistoryBox');
+  var card = box ? box.querySelector('.card') : null;
+  var who = (typeof MY_DONOR !== 'undefined' && MY_DONOR && MY_DONOR.name) ? MY_DONOR.name : 'Donor';
+  var fname = 'BDBS-Donation-History-' + String(who).replace(/[^A-Za-z0-9]+/g,'-') + '.pdf';
+  if (window.html2canvas && card) {
+    window.html2canvas(card, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
+      try {
+        var blob = cardImagePDF([{data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}], false);
+        var file = new File([blob], fname, {type:'application/pdf'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) { navigator.share({files:[file], title:'BDBS Donation History', text:'My donation history — ' + who}).catch(function(){ saveBlob(blob, fname); }); }
+        else { saveBlob(blob, fname); }
+      } catch(e){ downloadMyHistoryPDFText(cs, who, fname); }
+    }).catch(function(){ downloadMyHistoryPDFText(cs, who, fname); });
+    return;
+  }
+  downloadMyHistoryPDFText(cs, who, fname);
+}
+function downloadMyHistoryPDFText(cs, who, fname){ // v57-C text fallback (same simplePDF as member-card fallback)
+  try {
+    var lines = ['MY DONATION HISTORY', '', 'Basti Dawa Blood Society', 'Donor: ' + (who||''), ''];
+    (cs||[]).forEach(function(c){ lines.push(fmtD(c.date) + ' — ' + (c.units||0) + ' unit(s) ' + (c.group||'') + ' (' + (c.ref||'') + ')' + (c.reqNo ? ' Req: ' + c.reqNo : '')); });
+    if (!cs || !cs.length) lines.push('No donations recorded yet.');
+    var blob = simplePDF([{title:'', lines:lines}]);
+    var file = new File([blob], fname, {type:'application/pdf'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) { navigator.share({files:[file], title:'BDBS Donation History', text:'My donation history — ' + (who||'')}).catch(function(){ saveBlob(blob, fname); }); }
+    else { saveBlob(blob, fname); }
+  } catch(e){ window.print(); }
 }
 function donorStatus(last){
   if (!last) return {ok:true, label:'Available', daysLeft:0};
@@ -2826,6 +3049,19 @@ function fillAreaSelects(){
 /* v39: Find Donor list in Donor No. order (1, 2, 3…) — the raw list
    comes back newest-first, so the numbers looked jumbled. No Donor
    No. goes last, then newest first. */
+/* v57-B nearest donor: donor lat/lng is OPTIONAL. Donors WITH coordinates
+   sort by distance first; donors WITHOUT coordinates are never hidden —
+   they follow in Donor No. order (city/area fallback). The public mirror
+   carries only coarse (2-decimal) coordinates, never exact ones. */
+var _myLoc = null; /* {lat, lng} set by "Nearest First" on Find Donor */
+function roundCoord2(v){ var n = parseFloat(v); if (isNaN(n)) return null; return Math.round(n * 100) / 100; }
+function parseCoord(v){ var n = parseFloat(String(v == null ? '' : v)); if (isNaN(n)) return null; return n; }
+function haversineKm(lat1, lng1, lat2, lng2){ var R = 6371; var dLa = (lat2 - lat1) * Math.PI / 180; var dLo = (lng2 - lng1) * Math.PI / 180; var a = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLo / 2) * Math.sin(dLo / 2); return 2 * R * Math.asin(Math.sqrt(a)); }
+function donorDistKm(d){ if (!_myLoc || d.lat == null || d.lng == null) return null; var la = parseFloat(d.lat), lo = parseFloat(d.lng); if (isNaN(la) || isNaN(lo)) return null; return haversineKm(_myLoc.lat, _myLoc.lng, la, lo); }
+function donorDistSort(a, b){ var da = donorDistKm(a), db = donorDistKm(b); if (da !== null && db !== null && da !== db) return da - db; if (da !== null && db === null) return -1; if (da === null && db !== null) return 1; return donorNoSort(a, b); }
+function fillDonorLocation(){ var m = document.getElementById('dMsg'); if (!navigator.geolocation) { if (m) m.innerHTML = '<span class="err">Location is not supported on this phone.</span>'; return; } navigator.geolocation.getCurrentPosition(function(p){ var la = document.getElementById('dLat'), lo = document.getElementById('dLng'); if (la) la.value = p.coords.latitude.toFixed(5); if (lo) lo.value = p.coords.longitude.toFixed(5); if (m) m.innerHTML = '<span class="ok">Location filled — optional, you can clear it.</span>'; }, function(){ if (m) m.innerHTML = '<span class="err">Location permission denied. You can type the coordinates or leave them blank.</span>'; }); }
+function useMyLocationForSearch(){ var m = document.getElementById('nearMsg'); if (!navigator.geolocation) { if (m) m.textContent = 'Location is not supported on this phone.'; return; } if (m) m.textContent = 'Finding your location…'; navigator.geolocation.getCurrentPosition(function(p){ _myLoc = {lat: p.coords.latitude, lng: p.coords.longitude}; if (m) m.textContent = 'Sorted by nearest first.'; searchDonors(); }, function(){ if (m) m.textContent = 'Location permission denied — showing Donor No. order.'; }); }
+function clearMyLocation(){ _myLoc = null; var m = document.getElementById('nearMsg'); if (m) m.textContent = ''; searchDonors(); }
 function donorNoSort(a, b){
   var na = parseInt(a.donorNo, 10), nb = parseInt(b.donorNo, 10);
   var ha = isNaN(na), hb = isNaN(nb);
@@ -2847,7 +3083,8 @@ function searchDonors(){
       if (availOnly && (!donorStatus(d.lastDonation).ok || d.available === false)) return false;
       return true;
     });
-    out.sort(donorNoSort);
+    out.forEach(function(d){ d._distKm = donorDistKm(d); }); /* v57-B distance for display */
+    out.sort(function(a,b){ return donorDistSort(a,b); }); /* v57-B nearest first when location is set, else Donor No. order */
     var box = document.getElementById('findResults');
     if (!out.length) {
       box.innerHTML = '<div class="empty"><b>No donors found</b><br><span class="mut">Try another blood group or city — or submit a blood request.</span><br><button class="btn" style="margin-top:12px" onclick="resetFilters()">Reset Filters</button></div>';
@@ -2858,9 +3095,10 @@ function searchDonors(){
       var st = donorStatus(d.lastDonation);
       var ph = d.phone || phoneById[d.id] || '';
       var card = '<div class="donor-card"><div class="dc-top"><span class="bgpill">' + esc(d.group) + '</span><span class="status-pill ' + ((d.available === false || !st.ok) ? 'cool' : 'ok') + '">● ' + (d.available === false ? 'Unavailable' : st.label) + '</span></div>' +
-        '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' +
+        '<div class="dc-name">' + esc(d.name) + (d.demo ? ' <span class="badge demo">DEMO</span>' : '') + '</div>' + donorBadgesHtml(d, 0) +
         (d.donorNo ? '<div class="mut small">Donor No.: ' + esc(d.donorNo) + '</div>' : '') +
         '<div class="mut small">📍 ' + esc(d.address || d.city || '') + '</div>' +
+        (d._distKm != null ? '<div class="mut small">📍 ' + d._distKm.toFixed(1) + ' km away</div>' : '') +
         '<div class="mut small">Last donated: ' + esc(fmtD(d.lastDonation)) + (st.ok ? '' : ' · available in ' + st.daysLeft + ' day(s)') + '</div>' +
         (d.available === false ? '<div class="mut small">\uD83D\uDCF5 Unavailable</div>' : '');
       var avail = d.available !== false;
@@ -2931,10 +3169,11 @@ function renderReqList(boxId, list, emptyMsg){
     var donated = (r.donatedBy && (st==='Donor Found' || st==='Completed' || st==='Closed')) ? (r.donatedByPrivate ? '<br><span class="mut small">🩸 Donor confirmed</span>' : '<br><span class="mut small">🩸 Donated by: <b>'+esc(r.donatedBy)+'</b></span>') : '';
     var claimBtn = (MY_DONOR && !closed && MY_DONOR.group === r.group) ? '<br><button class="btn green" onclick="claimDonation(\''+esc(r.id)+'\')">🩸 I Donated for this request</button>' : '';
     var shareBtn = '<br><button class="btn ghost" onclick="shareRequest(\''+esc(r.id)+'\')">📤 Share this request</button>';
+  var posterBtn = '<br><button class="btn ghost" onclick="shareRequestPoster(\''+esc(r.id)+'\')">🖼️ Share as Poster</button>'; /* v57-D */
     var myCloseBtn = (MY_PHONE_NORM && r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM && !closed) ? '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>' : '';
     var adminBtns = (isAdmin() && !closed) ? '<br><button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="toggleEmergency(\''+esc(r.id)+'\','+(r.emergency?'0':'1')+')">'+(r.emergency?'🚨 Remove Emergency':'🚨 Mark Emergency')+'</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : '';
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
-    return '<div class="dcard'+(closed ? ' closed' : '')+(r.emergency && !closed ? ' emergency' : '')+'"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span>'+(r.emergency?'<span class="rpill emergency">🚨 Emergency</span>':'')+'<div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(pill)+'</span><br>'+(r.reqNo ? '<span class="mut small">Request No.: <b>'+esc(r.reqNo)+'</b></span><br>' : '')+'<span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+shareBtn+contact+'</div></div></div>';
+    return '<div class="dcard'+(closed ? ' closed' : '')+(r.emergency && !closed ? ' emergency' : '')+'"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span>'+(r.emergency?'<span class="rpill emergency">🚨 Emergency</span>':'')+(r.recurring?'<span class="rpill">🔁 Monthly</span>':'')+'<div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(pill)+'</span><br>'+(r.reqNo ? '<span class="mut small">Request No.: <b>'+esc(r.reqNo)+'</b></span><br>' : '')+'<span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+shareBtn+posterBtn+contact+'</div></div></div>';
   }).join('');
 }
 /* ---------- notifications: new blood requests, same-group first ----------
@@ -2951,12 +3190,14 @@ function updateBell(){
   qAll('requestsPublic', function(rs){
     var g = myGroup(), seen = notifSeen();
     var n = rs.filter(function(r){ return (r.status||'Received') !== 'Completed' && (!g || r.group === g) && (r.createdAt||0) > seen; }).length;
+    n += v57BellExtra(); // v57-A
     b.textContent = n > 9 ? '9+' : String(n);
     b.style.display = n ? 'flex' : 'none';
   });
 }
 function loadNotifs(){
   var box = document.getElementById('notifList'); if (!box) return;
+  v57RenderAnnouncements(); v57RenderRem90Notif(); // v57-A
   var g = myGroup();
   qAll('requestsPublic', function(rs){
     var open = rs.filter(function(r){ return (r.status||'Received') !== 'Completed'; });
@@ -2979,7 +3220,30 @@ function loadNotifs(){
     var b = document.getElementById('bellCount'); if (b) b.style.display = 'none';
   });
 }
+/* ================= v57-B: blood banks, stock dashboard, hospital portal =================
+   Collections: bloodBanks {id,name,city,phone,stock:{A+:n,...},createdAt}
+   (admin-entered stock, public read, admin write) and hospitals
+   {id,name,city,phone,approved,createdAt} (public register, admin approves).
+   Hospital requests are normal requests with source:'hospital' — they go
+   through the same loadRequests()/renderReqList() flow as public requests.
+   FREE Spark plan only — no paid service, no new page (same views). */
+var B57_GROUPS = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
+function stockNum(v){ var n = parseInt(v, 10); return isNaN(n) || n < 0 ? 0 : n; }
+function aggregateStock(banks){ var tot = {}; B57_GROUPS.forEach(function(g){ tot[g] = 0; }); (banks || []).forEach(function(b){ var st = b.stock || {}; B57_GROUPS.forEach(function(g){ tot[g] += stockNum(st[g]); }); }); return tot; }
+function canHospitalRequest(h){ return !!h && h.approved === true; } /* v57-B approval gate: no approval, no request */
+function loadStockDashboard(){ qAll('bloodBanks', function(banks){ var el = document.getElementById('stockDash'); if (!el) return; var tot = aggregateStock(banks); var sum = 0; B57_GROUPS.forEach(function(g){ sum += tot[g]; }); el.innerHTML = '<p class="impact-title">Live Blood Stock — All Banks (' + sum + ' unit(s) total)</p><div class="hero-stats">' + B57_GROUPS.map(function(g){ return '<div class="hstat"><b>' + tot[g] + '</b><span>' + g + '</span></div>'; }).join('') + '</div>' + (banks.length ? '' : '<p class="mut small">No blood bank stock entered yet.</p>'); }); }
+function bankStockChips(b){ var st = b.stock || {}; return B57_GROUPS.map(function(g){ return '<span class="bgpill">' + g + ': ' + stockNum(st[g]) + '</span>'; }).join(' '); }
+function loadHomeBloodBanks(){ qAll('bloodBanks', function(banks){ qAll('hospitals', function(hosps){ var box = document.getElementById('homeBloodBanks'); if (!box) return; var h = ''; if (banks.length) { h += banks.map(function(b){ return '<div class="dcard"><b>' + esc(b.name || '') + '</b> <span class="mut small">' + esc(b.city || '') + '</span>' + (b.phone ? '<br><span class="mut small">📞 <a href="tel:' + esc(b.phone) + '">' + esc(b.phone) + '</a></span>' : '') + '<br>' + bankStockChips(b) + '</div>'; }).join(''); } else { h += '<span class="mut">No blood banks registered yet.</span>'; } var approved = (hosps || []).filter(function(x){ return x.approved === true; }); if (approved.length) { h += '<h3 style="margin-top:10px">Approved Hospitals</h3>' + approved.map(function(x){ return '<div class="mut small">🏥 ' + esc(x.name || '') + ' — ' + esc(x.city || '') + '</div>'; }).join(''); } box.innerHTML = h; }); }); }
+function loadHospitalPortal(){ var box = document.getElementById('hospitalPortalBody'); if (!box) return; qAll('hospitals', function(hs){ var myId = ''; try { myId = localStorage.getItem('bdbs_hospitalId') || ''; } catch(e){} var mine = null; (hs || []).forEach(function(x){ if (x.id === myId) mine = x; }); if (mine && canHospitalRequest(mine)) { box.innerHTML = '<p class="ok">Approved hospital: <b>' + esc(mine.name) + '</b> (' + esc(mine.city || '') + ')</p><div class="row"><div class="fld"><input id="hpName" placeholder=" "><label for="hpName">Patient Name *</label></div><div class="fld static"><select id="hpGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="hpGroup">Blood Group *</label></div></div><div class="row"><div class="fld"><input id="hpUnits" type="number" min="1" placeholder=" "><label for="hpUnits">Units Needed *</label></div><div class="fld"><input id="hpPhone" type="tel" placeholder=" "><label for="hpPhone">Contact Phone *</label></div></div><div class="fld"><input id="hpAddress" placeholder=" "><label for="hpAddress">Address / Ward *</label></div><button class="btn" onclick="submitHospitalRequest()">Submit Hospital Request</button> <span id="hpMsg"></span>'; } else if (mine) { box.innerHTML = '<p class="mut">Registration received for <b>' + esc(mine.name) + '</b> — waiting for admin approval. You can request blood after approval.</p>'; } else { box.innerHTML = '<div class="row"><div class="fld"><input id="hRegName" placeholder=" "><label for="hRegName">Hospital Name *</label></div><div class="fld"><input id="hRegCity" placeholder=" "><label for="hRegCity">City *</label></div></div><div class="fld"><input id="hRegPhone" type="tel" placeholder=" "><label for="hRegPhone">Hospital Phone *</label></div><button class="btn" onclick="registerHospital()">Register Hospital</button> <span id="hRegMsg"></span>'; } }); }
+function registerHospital(){ var name = val('hRegName'), city = val('hRegCity'), phone = val('hRegPhone'); var msg = document.getElementById('hRegMsg'); if (!name || !city || !phone) { if (msg) msg.innerHTML = '<span class="err">Please fill hospital name, city and phone.</span>'; return; } var rec = {id: uid('hosp'), name: name, city: city, phone: phone, approved: false, createdAt: Date.now()}; qAdd('hospitals', rec, function(){ try { localStorage.setItem('bdbs_hospitalId', rec.id); } catch(e){} if (msg) msg.innerHTML = '<span class="ok">Registered. The admin will approve it — then you can request blood here.</span>'; loadHospitalPortal(); }); }
+function submitHospitalRequest(){ var msg = document.getElementById('hpMsg'); qAll('hospitals', function(hs){ var myId = ''; try { myId = localStorage.getItem('bdbs_hospitalId') || ''; } catch(e){} var mine = null; (hs || []).forEach(function(x){ if (x.id === myId) mine = x; }); if (!canHospitalRequest(mine)) { if (msg) msg.innerHTML = '<span class="err">Admin approval is required before a hospital can request blood.</span>'; return; } var name = val('hpName'), group = val('hpGroup'), units = parseInt(val('hpUnits'), 10), phone = val('hpPhone'), address = val('hpAddress'); if (!name || !group || isNaN(units) || units < 1 || !phone || !address) { if (msg) msg.innerHTML = '<span class="err">Please fill all hospital request fields.</span>'; return; } qAll('requestsPublic', function(rs){ var dup = rs.some(function(r){ return (r.status || 'Received') !== 'Completed' && waNum(r.phone) === waNum(phone); }); if (dup) { if (msg) msg.innerHTML = '<span class="err">This phone already has an open request. Please close it first.</span>'; return; } var mx = 0; rs.forEach(function(r){ var n = reqNoNum(r); if (n > mx) mx = n; }); var rno = reqNoFmt(mx + 1); var id = uid('req'); var full = {id:id, reqNo:rno, name:name, father:'', cnic:'', age:'', group:group, units:units, hospital:mine.name, disease:'', phone:phone, address:address, requesterPhoneNorm:normPhone(phone), emergency:false, status:'Received', donatedBy:'', donatedById:'', source:'hospital', hospitalId:mine.id, hospitalName:mine.name, createdAt:Date.now()}; var pub = reqPub(full); qAdd('requests', full, function(){ qAdd('requestsPublic', pub, function(){ if (msg) msg.innerHTML = '<span class="ok">Hospital request submitted. Request No. <b>' + esc(rno) + '</b>.</span>'; ['hpName','hpUnits','hpPhone','hpAddress'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; }); var g = document.getElementById('hpGroup'); if (g) g.value = ''; loadRequests(); }); }); }); }); }
+function loadGroupBAdmin(){ var bb = document.getElementById('adminBanksBox'); if (bb) { qAll('bloodBanks', function(banks){ var h = '<b>Add Blood Bank</b> <span class="mut small">Stock per blood group (units). Public can see it; only the admin can change it.</span><br><input id="bbName" placeholder="Bank name" style="width:170px"> <input id="bbCity" placeholder="City" style="width:120px"> <input id="bbPhone" type="tel" placeholder="Phone" style="width:140px"><br>' + B57_GROUPS.map(function(g, i){ return '<label class="mut small">' + g + ' <input id="bbS' + i + '" type="number" min="0" value="0" style="width:58px"></label> '; }).join('') + '<br><button class="btn" onclick="saveBloodBank()">Save Blood Bank</button> <span id="bbMsg"></span><br><br>'; if (banks.length) { h += banks.map(function(b){ return '<div class="dcard"><b>' + esc(b.name || '') + '</b> <span class="mut small">' + esc(b.city || '') + '</span> ' + bankStockChips(b) + ' <button class="btn ghost" onclick="removeBloodBank(\'' + esc(b.id) + '\')">Remove</button></div>'; }).join(''); } else { h += '<span class="mut">No blood banks yet.</span>'; } bb.innerHTML = h; }); } var hb = document.getElementById('adminHospBox'); if (hb) { qAll('hospitals', function(hs){ if (!hs.length) { hb.innerHTML = '<b>Hospitals</b><br><span class="mut">No hospital registrations yet.</span>'; return; } hb.innerHTML = '<b>Hospitals (' + hs.length + ')</b><br>' + hs.map(function(x){ return '<div class="dcard"><b>' + esc(x.name || '') + '</b> <span class="mut small">' + esc(x.city || '') + ' • ' + esc(x.phone || '') + '</span> ' + (x.approved === true ? '<span class="ok">Approved</span>' : '<span class="err">Pending approval</span>') + ' ' + (x.approved === true ? '' : '<button class="btn green" onclick="approveHospital(\'' + esc(x.id) + '\')">Approve</button> ') + '<button class="btn ghost" onclick="removeHospital(\'' + esc(x.id) + '\')">Remove</button></div>'; }).join(''); }); } }
+function saveBloodBank(){ if (!isAdmin()) { alert('Admin login required.'); return; } var name = val('bbName'), city = val('bbCity'), phone = val('bbPhone'); var msg = document.getElementById('bbMsg'); if (!name || !city) { if (msg) msg.innerHTML = '<span class="err">Bank name and city are required.</span>'; return; } var stock = {}; B57_GROUPS.forEach(function(g, i){ var e = document.getElementById('bbS' + i); stock[g] = e ? stockNum(e.value) : 0; }); qAdd('bloodBanks', {id: uid('bank'), name: name, city: city, phone: phone, stock: stock, createdAt: Date.now()}, function(){ if (msg) msg.innerHTML = '<span class="ok">Blood bank saved.</span>'; loadGroupBAdmin(); loadStockDashboard(); loadHomeBloodBanks(); }); }
+function removeBloodBank(id){ if (!isAdmin()) { alert('Admin login required.'); return; } if (!confirm('Remove this blood bank?')) return; qDel('bloodBanks', id, function(){ loadGroupBAdmin(); loadStockDashboard(); loadHomeBloodBanks(); }); }
+function approveHospital(id){ if (!isAdmin()) { alert('Admin login required.'); return; } qUpdate('hospitals', id, {approved: true}, function(){ try { logAudit('approve-hospital', id, ''); } catch(e){} loadGroupBAdmin(); loadHomeBloodBanks(); }); }
+function removeHospital(id){ if (!isAdmin()) { alert('Admin login required.'); return; } if (!confirm('Remove this hospital registration?')) return; qDel('hospitals', id, function(){ loadGroupBAdmin(); loadHomeBloodBanks(); }); }
 function loadRequests(){
+  loadHospitalPortal(); /* v57-B */
   qAll('requestsPublic', function(rs){
     window._reqListAll = rs;
     /* v51: hospital dropdown from the hospitals actually in use. */
@@ -3120,6 +3384,8 @@ function confirmClaim(cid){
       qUpdate('requests', c.requestId, patch, function(){
         qUpdate('requestsPublic', c.requestId, patch, function(){
           advanceReqStatus(c.requestId, 'Donor Found');
+          /* v57-C: admin confirmed this donation — mark the donor verified (private + public mirror). */
+          qUpdate('donors', c.donorId, {verifiedDonor:true}, function(){ qUpdate('donorsPublic', c.donorId, {verifiedDonor:true}, function(){}); });
           qDel('donationClaims', cid, function(){ logAudit('confirm-donation', cid, (c.donorName||'') + ' donated for request ' + (c.requestId||'')); renderAdmin(); });
         });
       });
@@ -3181,7 +3447,7 @@ function advanceReqStatus(id, cur){
             var d = null; ds.forEach(function(x){ if (x.id === r.donatedById) d = x; });
             if (!d) return;
             var reqUnits = parseInt(r.units||0,10)||1;
-            var patch = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits};
+            var patch = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits, verifiedDonor:true}; /* v57-C: a completed donation verifies the donor */
             qUpdate('donors', d.id, patch, function(){
               qUpdate('donorsPublic', d.id, patch, function(){});
             });
@@ -3249,7 +3515,7 @@ function completeRequest(id){
           var d = null; ds.forEach(function(x){ if (x.id === r.donatedById) d = x; });
           if (!d) return;
           var reqUnits = parseInt(r.units||0,10)||1;
-          var patch = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits};
+          var patch = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits, verifiedDonor:true}; /* v57-C: a completed donation verifies the donor */
           qUpdate('donors', d.id, patch, function(){
             qUpdate('donorsPublic', d.id, patch, function(){});
           });
@@ -3588,7 +3854,7 @@ function submitRequestTx(ph, phNorm, nameNorm, group, un, btn){
       if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
       var rno = reqNoFmt(nextNo);
       var id = uid('req');
-      var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:phNorm, emergency:(document.getElementById('rEmergency')||{checked:false}).checked, status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+      var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:phNorm, emergency:(document.getElementById('rEmergency')||{checked:false}).checked, recurring:(document.getElementById('rRecurring')||{checked:false}).checked, recurringKind:'monthly', status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
       var pub = reqPub(full);
       tx.set(db.collection('requests').doc(id), full);
       tx.set(db.collection('requestsPublic').doc(id), pub);
@@ -3607,7 +3873,7 @@ function submitRequestTx(ph, phNorm, nameNorm, group, un, btn){
 function requestSubmitSuccess(rno, btn){
   document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. Your Request No. is <b>'+esc(rno)+'</b> — please save it. The admin will contact you. Track it any time in Track Request below.</span>';
   ['rName','rFather','rCnic','rAge','rHospital','rDisease','rUnits','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
-  document.getElementById('rGroup').value=''; var em=document.getElementById('rEmergency'); if (em) em.checked=false; if (btn) btn.disabled = false; loadRequests();
+  document.getElementById('rGroup').value=''; var em=document.getElementById('rEmergency'); if (em) em.checked=false; var rc=document.getElementById('rRecurring'); if (rc) rc.checked=false; if (btn) btn.disabled = false; loadRequests();
 }
 /* Legacy request submit (offline, or when the v42 transaction cannot
    run): same guard and numbering, but NOT atomic — kept so requests
@@ -3626,7 +3892,7 @@ function submitRequestLegacy(ph, nameNorm, group, un, btn){
     if (dupLabel) { document.getElementById('rMsg').innerHTML = '<span class="err">This phone already has an open request' + (dupLabel === 'OLD' ? ' (an older request without a number yet)' : ' (' + esc(dupLabel) + ')') + '. Please close it first, or track it in Track Request below.</span>'; if (btn) btn.disabled = false; return; }
     var rno = reqNoFmt(mx + 1);
     var id = uid('req');
-    var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:normPhone(val('rPhone')), emergency:(document.getElementById('rEmergency')||{checked:false}).checked, status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var full = {id:id, reqNo:rno, name:val('rName'), father:val('rFather'), cnic:val('rCnic'), age:val('rAge'), group:group, units:un, hospital:val('rHospital'), disease:val('rDisease'), phone:val('rPhone'), address:val('rAddress'), requesterPhoneNorm:normPhone(val('rPhone')), emergency:(document.getElementById('rEmergency')||{checked:false}).checked, recurring:(document.getElementById('rRecurring')||{checked:false}).checked, recurringKind:'monthly', status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
     var pub = reqPub(full);
     qAdd('requests', full, function(ok){
       if (!ok) { document.getElementById('rMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
@@ -3657,7 +3923,7 @@ function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) retu
    fallback alike). */
 function donorSubmitSuccess(full, btn){
   document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
-  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo();
+  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo(); /* v57-B */
   document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
 }
 /* ---------- v51 donor edit (admin only, mirrors editMember) ----------
@@ -3680,7 +3946,7 @@ function editDonor(id){
     set('dName', d.name); set('dFather', d.father); set('dGender', d.gender||'');
     set('dCnic', d.cnic); set('dGroup', d.group); set('dAge', d.age);
     set('dPhone', d.phone); set('dAddress', d.address); set('dArea', d.area||'');
-    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units);
+    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units); set('dLat', (d.lat == null ? '' : d.lat)); set('dLng', (d.lng == null ? '' : d.lng)); /* v57-B */
     var ph = document.getElementById('dPhoto'); if (ph) ph.value = '';
     var dc = document.getElementById('dConsent'); if (dc) dc.checked = true;
     var b = document.getElementById('dSubmitBtn'); if (b) b.textContent = 'Save Changes';
@@ -3696,6 +3962,7 @@ function donorEditSave(editId, btn){
     if (!old) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor not found.</span>'; if (btn) btn.disabled = false; exitDonorEdit(); return; }
     readPhoto(document.getElementById('dPhoto'), function(photo){
       var fields = {name:val('dName'), father:val('dFather'), gender:val('dGender'), cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0};
+      var _ela = parseCoord(val('dLat')), _elo = parseCoord(val('dLng')); if (_ela !== null) fields.lat = _ela; if (_elo !== null) fields.lng = _elo; /* v57-B keep old location when the fields are blank */
       if (photo) fields.photo = photo; else fields.photo = old.photo || '';
       var updated = {}; for (var k in old) updated[k] = old[k]; for (var k2 in fields) updated[k2] = fields[k2];
       qUpdate('donors', editId, fields, function(){
@@ -3705,7 +3972,7 @@ function donorEditSave(editId, btn){
           qAdd('donorsPublic', pub, function(){
             document.getElementById('dMsg').innerHTML = '<span class="ok">Donor updated. Donor No. '+esc(updated.donorNo||'')+'.</span>';
             exitDonorEdit();
-            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits'].forEach(function(i){document.getElementById(i).value='';});
+            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng'].forEach(function(i){document.getElementById(i).value='';}); /* v57-B */
             document.getElementById('dGroup').value=''; document.getElementById('dGender').value=''; document.getElementById('dPhoto').value=''; document.getElementById('dConsent').checked=false;
             if (btn) btn.disabled = false;
             loadHome();
@@ -3785,9 +4052,11 @@ function submitDonorTx(ph, cn, nameNorm, group, photo, btn){
       if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
       var dno = String(nextNo);
       var id = uid('donor');
-      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+      var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
+
       if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
-      var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); if (!pub.area) delete pub.area; } /* v37: Area optional */
+      var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); if (!pub.area) delete pub.area; } /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location — null never reaches Firestore */
       tx.set(db.collection('donors').doc(id), full);
       tx.set(db.collection('donorsPublic').doc(id), pub);
       tx.set(db.collection('donorLookup').doc(lookupKey(dno)), {id:lookupKey(dno), donorId:id});
@@ -3822,10 +4091,12 @@ function submitDonorLegacy(ph, cn, photo, btn){
     if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
     var id = uid('donor');
     var dno = nextDonorNo(ds);
-    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now()};
+    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+    var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
+
     if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
     var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); }
-    if (!pub.area) delete pub.area; /* v37: Area optional */
+    if (!pub.area) delete pub.area; /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location */
     qAdd('donors', full, function(ok){
       if (!ok) { document.getElementById('dMsg').innerHTML = '<span class="err">Could not save. Please try again.</span>'; if (btn) btn.disabled = false; return; }
       qAdd('donorsPublic', pub, function(){
@@ -4344,6 +4615,7 @@ function generateCert(donorId, presetDt, presetUnits, reqFields){
       });
       qAdd('certificates', cert, function(ok){
         if (!ok) { alert('Could not generate certificate.'); return; }
+        qUpdate('donors', d.id, {verifiedDonor:true}, function(){ qUpdate('donorsPublic', d.id, {verifiedDonor:true}, function(){}); }); /* v57-C: a certificate is a confirmed donation */
         logAudit('generate-certificate', cert.ref, (d.name||'') + ' — ' + cert.ref + ' (' + (cert.group||'') + ', ' + cert.units + ' unit(s))'); show('certificate'); renderCert(cert);
       });
     });
@@ -4653,9 +4925,9 @@ function loadMyRecord(u, donorId){
     MY_DONOR = {id: donorId, name: r.name||'', group: r.group||''};
     loadRequests();
     document.getElementById('myRecord').innerHTML =
-      '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
-      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b id="myTotalUnits">'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
-    renderMyPrivacyToggles(r); renderMyAvail(r); renderRem90(r);
+      '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div><div id="myBadges" style="margin-top:8px"></div>' +
+      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b id="myTotalUnits">'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myDashBox" style="margin-top:10px"></div><div id="myReferralBox" style="margin-top:10px"></div><div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
+    renderMyPrivacyToggles(r); renderMyAvail(r); renderRem90(r); renderMyBadges(r, parseInt(r.units||0,10)||0, 0); renderDonorDashboard(r, parseInt(r.units||0,10)||0, 0); renderMyReferral(r); /* v57-C */
     document.getElementById('pLast').value = r.lastDonation || '';
     document.getElementById('pUnits').value = (r.units==null?'':r.units);
     var pr = document.getElementById('pReqNo'); if (pr) pr.value = r.lastReqNo || '';
@@ -4680,7 +4952,7 @@ function loadMyRecord(u, donorId){
       document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
         return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')'+(c.reqNo ? ' \u2014 Req: '+esc(c.reqNo) : '')+'<br><button class="btn ghost" onclick="viewMyCert(\''+esc(c.ref)+'\')">View / Download</button></div>';
       }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
-      renderMyHistoryList(cs);
+      renderMyHistoryList(cs); renderMyBadges(r, totalUnits, cs.length); renderDonorDashboard(r, totalUnits, cs.length); /* v57-C */
     }).catch(function(){
       document.getElementById('myCerts').innerHTML = '<span class="mut">Certificates could not be loaded.</span>';
     });
@@ -4774,7 +5046,14 @@ function renderRem90(r){
   var days = r ? rem90Days(r.lastDonation) : -1;
   if (box) {
     if (days >= 90) {
-      box.innerHTML = '<div class="card" style="margin:0;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4)"><b>\uD83E\uDE78 Aap dobara khoon de sakte hain</b><br><span class="mut small">Aap ki aakhri donation ko 90 din se zyada ho gaye hain.</span></div>';
+      box.innerHTML = '<div class="card" style="margin:0;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4)"><b>\uD83E\uDE78 Aap dobara khoon de sakte hain</b><br><span class="mut small">Aap ki aakhri donation ko 90 din se zyada ho gaye hain.</span><br><button class="btn ghost" onclick="v57DismissRem90()">Remind me later</button></div>';
+    } else if (days >= 0) {
+      var left = 90 - days;
+      var next = new Date(new Date(String(r.lastDonation).slice(0,10) + 'T00:00:00').getTime() + 90*86400000);
+      box.innerHTML = '<div class="card" style="margin:0"><b>Next donation in ' + left + ' day(s)</b><br><span class="mut small">You can donate again on ' + esc(fmtD(next.toISOString().slice(0,10))) + ' (90 days after your last donation).</span></div>'; // v57-A
+    } else if (r && r.lastDonation) { /* v57-C show the next eligible date, not a blank box */
+      var nxt = nextEligibleDate(r.lastDonation);
+      box.innerHTML = '<div class="card" style="margin:0"><b>Next donation: '+esc(nxt)+'</b><br><span class="mut small">You can donate again after 90 days from your last donation ('+esc(fmtD(r.lastDonation))+'). '+(90-days)+' day(s) left.</span></div>';
     } else box.innerHTML = '';
   }
   try { if (r && r.lastDonation) localStorage.setItem('bdbs_myLastDonation', r.lastDonation); } catch(e){}
@@ -4784,6 +5063,7 @@ function showRem90Home(){
   var b = document.getElementById('rem90Banner');
   if (!b) return;
   if (window._rem90Shown) return;
+  if (v57Rem90DismissedToday()) { b.style.display = 'none'; b.innerHTML = ''; return; } // v57-A
   var last = null; try { last = localStorage.getItem('bdbs_myLastDonation') || ''; } catch(e){}
   if (rem90Days(last) >= 90) {
     window._rem90Shown = true;
@@ -4799,7 +5079,8 @@ function renderMyHistoryList(cs){
   var box = document.getElementById('myHistoryBox');
   if (!box) return;
   if (!cs || !cs.length) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="card" style="margin:0"><h3 style="margin-top:0">My Donation History</h3>' + cs.map(function(c){
+  window._myHistory = cs || []; /* v57-C history PDF export reads this */
+  box.innerHTML = '<div class="card" style="margin:0"><h3 style="margin-top:0">My Donation History</h3><button class="btn ghost" onclick="downloadMyHistoryPDF()">Download History as PDF</button>' + cs.map(function(c){
     return '<div class="mut" style="padding:4px 0;border-top:1px solid #eee">' + esc(fmtD(c.date)) + ' \u2014 <b>' + esc(c.units) + ' unit(s)</b> ' + esc(c.group||'') + ' <span class="mut small">(' + esc(c.ref||'') + ')</span>' + (c.reqNo ? ' <span class="mut small">Req: ' + esc(c.reqNo) + '</span>' : '') + '</div>';
   }).join('') + '</div>';
 }
@@ -5362,6 +5643,162 @@ function showMonthlyReport(){
     });
   });
 }
+/* ================= v57-D (Group D): camps, monthly renewals, analytics, poster share =================
+   Camps use Firestore collections 'camps' (public read) and 'campRegs'
+   (one row per donor per camp). A monthly request is a normal request with
+   recurring=true; nothing is auto-created — the admin sees the renewal
+   suggestion and confirms by submitting a fresh request from the form.
+   Analytics reads certificates + requestsPublic (already synced).
+   Poster share reuses the certificate approach: html2canvas -> PNG ->
+   Web Share files, with a download fallback. */
+function nextMonthSameDay(ts){ /* v57-D: pure date math (tested in test-v57-groupD.js) */
+  var d = new Date(ts); var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+  var last = new Date(y, m + 2, 0).getDate();
+  return new Date(y, m + 1, Math.min(day, last)).getTime();
+}
+function campIsUpcoming(c){ /* v57-D */
+  if (!c || !c.date) return false;
+  var today = new Date(); today.setHours(0,0,0,0);
+  return new Date(c.date + 'T00:00:00').getTime() >= today.getTime();
+}
+function loadCamps(){ /* v57-D: public list on Home + admin list with counts */
+  var homeBox = document.getElementById('campList');
+  var admBox = document.getElementById('adminCampList');
+  if (!homeBox && !admBox) return;
+  qAll('camps', function(cs){
+    var up = (cs||[]).filter(campIsUpcoming).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    if (homeBox) {
+      if (!up.length) { homeBox.innerHTML = '<span class="mut">No camps announced yet.</span>'; }
+      else {
+        homeBox.innerHTML = up.map(function(c){
+          return '<div class="dcard"><b>'+esc(c.title||'Blood Donation Camp')+'</b><br><span class="mut">'+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'</span>'+(c.notes?'<br><span class="mut small">'+esc(c.notes)+'</span>':'')+'<br><button class="btn green" onclick="registerForCamp(\''+esc(c.id)+'\')">Register</button> <span id="campRegMsg_'+esc(c.id)+'" class="mut small"></span></div>';
+        }).join('');
+      }
+    }
+    if (admBox) {
+      if (!isAdmin()) { admBox.innerHTML = ''; return; }
+      qAll('campRegs', function(regs){
+        var h = '<h3>All Camps ('+(cs||[]).length+')</h3>';
+        if (!(cs||[]).length) h += '<span class="mut">No camps yet.</span>';
+        (cs||[]).forEach(function(c){
+          var n = (regs||[]).filter(function(r){ return r.campId === c.id; }).length;
+          h += '<div class="dcard"><b>'+esc(c.title||'')+'</b> — '+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'<br><span class="mut small">'+n+' registered</span> <button class="btn ghost" onclick="removeCamp(\''+esc(c.id)+'\')">Remove</button></div>';
+        });
+        admBox.innerHTML = h;
+      });
+    }
+  });
+}
+function submitCamp(){ /* v57-D: admin creates a camp */
+  if (!isAdmin()) { var m0 = document.getElementById('campMsg'); if (m0) m0.innerHTML = '<span class="err">Admin login required.</span>'; return; }
+  var t = val('cTitle'), p = val('cPlace'), d = val('cDate');
+  var m = document.getElementById('campMsg');
+  if (!t || !p || !d) { if (m) m.innerHTML = '<span class="err">Please fill camp title, place and date.</span>'; return; }
+  var c = {id:uid('camp'), title:t, place:p, date:d, time:val('cTime'), notes:val('cNotes'), createdAt:Date.now()};
+  qAdd('camps', c, function(){
+    if (m) m.innerHTML = '<span class="ok">Camp created.</span>';
+    ['cTitle','cPlace','cDate','cTime','cNotes'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; });
+    try { logAudit('create-camp', c.id, t + ' — ' + d + ' at ' + p); } catch(e){}
+    loadCamps();
+  });
+}
+function registerForCamp(campId){ /* v57-D: donor registers from their linked record */
+  var msg = document.getElementById('campRegMsg_'+campId);
+  var say = function(t){ if (msg) msg.innerHTML = t; };
+  if (!MY_DONOR) { say('<span class="err">Please link your donor account first (Account tab), then register.</span>'); return; }
+  var ph = MY_PHONE_NORM;
+  if (!ph) { say('<span class="err">No phone on your login — please login with your phone number, then register.</span>'); return; }
+  qAll('campRegs', function(regs){
+    var dup = (regs||[]).some(function(r){ return r.campId === campId && normPhone(r.phone||'') === normPhone(ph); });
+    if (dup) { say('<span class="ok">Already registered for this camp.</span>'); return; }
+    var reg = {id:uid('campreg'), campId:campId, donorId:MY_DONOR.id||'', name:MY_DONOR.name||'', group:MY_DONOR.group||'', phone:ph, phoneNorm:normPhone(ph), createdAt:Date.now()};
+    qAdd('campRegs', reg, function(){ say('<span class="ok">Registered — the admin will confirm your slot.</span>'); loadCamps(); });
+  });
+}
+function removeCamp(id){ /* v57-D: admin removes a camp (registrations stay saved) */
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this camp? Registrations for it stay saved.')) return;
+  qDel('camps', id, function(){ try { logAudit('remove-camp', id, ''); } catch(e){} loadCamps(); });
+}
+function analyticsTopCities(rs, n){ /* v57-D: pure aggregation (tested in test-v57-groupD.js) */
+  var m = {};
+  (rs||[]).forEach(function(r){ var c = (r.city || (r.address||'').split(',').pop().trim() || 'Unknown') || 'Unknown'; m[c] = (m[c]||0) + 1; });
+  var arr = Object.keys(m).map(function(k){ return {city:k, count:m[k]}; });
+  arr.sort(function(a,b){ return b.count - a.count || (a.city < b.city ? -1 : (a.city > b.city ? 1 : 0)); });
+  return arr.slice(0, n || 5);
+}
+function renderAdminAnalytics(){ /* v57-D: this month's donations + top cities */
+  var box = document.getElementById('adminAnalytics'); if (!box) return;
+  box.innerHTML = '<span class="mut">Loading…</span>';
+  var now = new Date(); var start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  var monthName = now.toLocaleString('en', {month:'long', year:'numeric'});
+  qAll('certificates', function(cs){
+    qAll('requestsPublic', function(rs){
+      var certs = (cs||[]).filter(function(c){ return (c.createdAt||0) >= start; });
+      var units = 0; certs.forEach(function(c){ units += parseInt(c.units||0,10)||0; });
+      var top = analyticsTopCities(rs||[], 5);
+      box.innerHTML = '<h4>'+monthName+'</h4><p><b>Donations this month:</b> '+certs.length+' donation(s), '+units+' unit(s)</p>'
+        + (top.length ? '<p><b>Top Cities</b> (by requests):</p><ol>' + top.map(function(t){ return '<li>'+esc(t.city)+' — '+t.count+' request(s)</li>'; }).join('') + '</ol>' : '<p class="mut">No requests yet to rank cities.</p>');
+    });
+  });
+}
+function renderRecurringSuggestions(){ /* v57-D: monthly renewals due — suggestion only, never auto-create */
+  var box = document.getElementById('recurringBox'); if (!box) return;
+  qAll('requestsPublic', function(rs){
+    var now = Date.now(); var DAY = 86400000;
+    var due = (rs||[]).filter(function(r){ return r.recurring && (r.status||'Received') !== 'Completed' && (r.status||'Received') !== 'Closed' && (now - (r.createdAt||0)) >= 25*DAY; });
+    due.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
+    if (!due.length) { box.innerHTML = '<span class="mut">No monthly renewals due.</span>'; return; }
+    box.innerHTML = due.map(function(r){
+      var next = nextMonthSameDay(r.createdAt||now);
+      return '<div class="dcard"><b>'+esc(r.firstName||r.name||'Patient')+'</b> — '+esc(r.group||'')+' ('+esc(r.reqNo||'')+')<br><span class="mut small">Last request: '+esc(fmtD(r.createdAt))+' • Next due: '+esc(fmtD(next))+'</span><br><button class="btn" onclick="prefillRecurringRequest(\''+esc(r.id)+'\')">Renew — fill request form</button><br><span class="mut small">Close the old request first if it is still open — one phone can have only one open request.</span></div>';
+    }).join('');
+  });
+}
+function prefillRecurringRequest(id){ /* v57-D: fill the form; the admin still submits it */
+  var r = (window._reqById || {})[id];
+  if (!r) { qAll('requestsPublic', function(rs){ var f = null; (rs||[]).forEach(function(x){ if (x.id===id) f = x; }); if (f) prefillRecurringRequestFill(f); }); return; }
+  prefillRecurringRequestFill(r);
+}
+function prefillRecurringRequestFill(r){ /* v57-D */
+  var set = function(i,v){ var e = document.getElementById(i); if (e) e.value = v||''; };
+  set('rName', r.name); set('rGroup', r.group); set('rHospital', r.hospital); set('rDisease', r.disease); set('rUnits', r.units); set('rPhone', r.phone); set('rAddress', r.address);
+  var rc = document.getElementById('rRecurring'); if (rc) rc.checked = true;
+  show('request');
+  setTimeout(function(){ var e = document.getElementById('wz-request'); if (e) e.scrollIntoView(); }, 200);
+}
+function posterText(r){ /* v57-D: share text for a request poster — never includes CNIC */
+  return '🩸 Blood needed — ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.firstName||r.name||'Patient') + '\nPhone: ' + (r.phone||'') + '\nRequest No.: ' + (r.reqNo||'') + '\n— Basti Dawa Blood Society';
+}
+function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html2canvas approach as the certificate */
+  var r = (window._reqById || {})[id];
+  if (!r) return;
+  if (!window.html2canvas) { shareRequest(id); return; }
+  var old = document.getElementById('posterTmp');
+  if (old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'posterTmp';
+  d.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;background:#0B132B;color:#ffffff;padding:36px 32px;font-family:sans-serif;text-align:center;';
+  d.innerHTML = '<div style="font-size:15px;letter-spacing:2px;color:#F5C518">BASTI DAWA BLOOD SOCIETY</div>'
+    + '<div style="font-size:64px;line-height:1.1;margin:18px 0 4px">🩸</div>'
+    + '<div style="font-size:30px;font-weight:700">Blood Needed</div>'
+    + '<div style="font-size:52px;font-weight:800;color:#F5C518;margin:10px 0">' + esc(r.group||'') + '</div>'
+    + '<div style="font-size:20px">' + esc(r.units||1) + ' unit(s)</div>'
+    + '<div style="font-size:18px;margin-top:16px;line-height:1.6">Patient: ' + esc(r.firstName||r.name||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + '</div>'
+    + '<div style="font-size:14px;margin-top:22px;color:#9fb3d1">Donate Blood • Save Lives</div>';
+  document.body.appendChild(d);
+  window.html2canvas(d, {scale:2, backgroundColor:'#0B132B', useCORS:true}).then(function(canvas){
+    try { d.remove(); } catch(e){}
+    try {
+      var blob = new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'});
+      var fname = 'BDBS-Request-' + (r.reqNo||'poster') + '.png';
+      var file = new File([blob], fname, {type:'image/png'});
+      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+        navigator.share({files:[file], title:'BDBS Blood Request', text:posterText(r)}).catch(function(){ saveBlob(blob, fname); });
+      } else { saveBlob(blob, fname); showRefreshToast('Poster saved — attach it in WhatsApp / Facebook.'); }
+    } catch(e){ shareRequest(id); }
+  }).catch(function(){ try { d.remove(); } catch(e){} shareRequest(id); });
+}
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -5370,6 +5807,8 @@ function renderAdmin(){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Sync Public Donor List</b> <span class="mut small">Find Donor me ghayab donors (jinn ka public card nahi bana) aur bina number/record wale cards theek karein. Safe to run twice — kuch delete nahi hota, koi number nahi badalta.</span><br><button class="btn" onclick="syncPublicDonorListBtn()">Sync Public Donor List</button> <span id="syncPubMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, and fill the missing requester phone (Track Request) on older cards, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Correct request phone</b> <span class="mut small">Fix a wrong phone number on a request (e.g. a typo) — updates the private record and the public card, and fixes Track Request for it.</span><br><input id="fixReqNo" placeholder="Request No. (e.g. REQ-001)" style="width:150px"> <input id="fixReqPhone" type="tel" placeholder="Correct phone no." style="width:170px"> <button class="btn" onclick="correctRequestPhoneBtn()">Correct Phone</button> <span id="fixPhoneMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span><br><br><b>Donor login link</b> <span class="mut small">Agar kisi donor ka Account tab galat record dikhaye ya "Could not load your donor record" kahe to us ka login link poori tarah khatam karein (donor record + us ka Account tab, dono) — phir donor Donor No. aur record wala phone number likh kar dobara link kar sakega.</span><br><input id="unlinkDonorNo" placeholder="Donor No. (e.g. 1)" style="width:150px"> <button class="btn" onclick="unlinkDonorBtn()">Unlink Donor Login</button> <span id="unlinkMsg"></span></div>';
+          h += '<div class="card"><b>Announcements (all donors)</b> <span class="mut small">Posted to every donor\'s Notifications bell (in-app only, no SMS).</span><br><input id="aAnnTitle" placeholder="Title (e.g. Blood camp on Friday)" style="width:100%;padding:8px;margin:6px 0"><textarea id="aAnnText" placeholder="Announcement text" style="width:100%;padding:8px" rows="2"></textarea><br><button class="btn" onclick="sendAnnouncement()">Send Announcement</button> <span id="annMsg"></span><div id="annAdminList" style="margin-top:8px"></div></div>';
+          h += '<div class="card"><b>🏥 Blood Banks &amp; Hospitals</b> <span class="mut small">Admin-entered stock per blood group; hospital registrations need admin approval before they can request blood.</span><div id="adminBanksBox" class="mut">Loading…</div><div id="adminHospBox" class="mut" style="margin-top:10px">Loading…</div></div>'; /* v57-B */
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
@@ -5427,7 +5866,8 @@ function renderAdmin(){
             return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.donorName)+' ('+esc(c.group)+', '+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
           }).join('') : '<p class="mut">No certificates yet. Use the Certificate button on a donor row.</p>');
           box.innerHTML = h;
-          loadClaimsAdmin();
+          loadClaimsAdmin(); loadCamps(); renderAdminAnalytics(); renderRecurringSuggestions(); /* v57-D */
+          loadGroupBAdmin(); /* v57-B */
         });
       });
     });
@@ -5501,6 +5941,202 @@ function wizBack(form){
   wizGo(form, parseInt(root.getAttribute('data-step')||'0',10)-1);
 }
 
+/* ================= v57-A: Notifications, alerts, SOS, eligibility ================
+   A1: same-group request alerts — the bell already reads requestsPublic;
+       v57 adds a live Firestore listener (onSnapshot) so the bell updates
+       without reopening the app, plus announcements in the bell count.
+       NO FCM (not wired in v56) and NO SMS (paid) — in-app only.
+   A2: 90-day reminder — builds on renderRem90()/showRem90Home(): bell +1
+       when due, countdown + next eligible date before day 90, dismiss-today.
+   A3: admin announcements — new 'announcements' collection, in-app only.
+   A4: Emergency SOS — one tap creates an emergency request (same shape as
+       a normal request, emergency=true). Same one-open-request-per-phone
+       guard as the normal flow; uses the existing requests/requestsPublic
+       create rules, so no new rules are needed for SOS.
+   A5: eligibility check — general information only, never a medical
+       decision; soft wording, always ends with "ask your doctor". */
+function v57AnnSeen(){ try { return parseInt(localStorage.getItem('bdbs_ann_seen') || '0', 10) || 0; } catch(e){ return 0; } }
+function v57Rem90DismissedToday(){
+  try {
+    var today = new Date().toISOString().slice(0,10);
+    return localStorage.getItem('bdbs_rem90_dismiss') === today;
+  } catch(e){ return false; }
+}
+function v57DismissRem90(){
+  try { localStorage.setItem('bdbs_rem90_dismiss', new Date().toISOString().slice(0,10)); } catch(e){}
+  var b = document.getElementById('rem90Banner'); if (b) { b.style.display = 'none'; b.innerHTML = ''; }
+  var n = document.getElementById('rem90NotifBox'); if (n) n.innerHTML = '';
+  updateBell();
+}
+/* Bell extra (sync, from the local cache so updateBell stays race-free):
+   unread admin announcements + 1 when the 90-day reminder is due. */
+function v57BellExtra(){
+  var extra = 0;
+  try {
+    var seen = v57AnnSeen();
+    var anns = lsGet(LS.announcements);
+    anns.forEach(function(a){ if ((a.createdAt||0) > seen) extra++; });
+  } catch(e){}
+  try {
+    var last = localStorage.getItem('bdbs_myLastDonation') || '';
+    if (rem90Days(last) >= 90 && !v57Rem90DismissedToday()) extra++;
+  } catch(e){}
+  return extra;
+}
+/* Throttled announcements cache refresh (<= once a minute): qAll() caches
+   into localStorage, then the bell is recomputed with the fresh count. */
+function v57RefreshAnnCache(){
+  if (window._v57AnnFetchedAt && (Date.now() - window._v57AnnFetchedAt) < 60000) return;
+  window._v57AnnFetchedAt = Date.now();
+  try { qAll('announcements', function(){ updateBell(); }); } catch(e){}
+}
+function v57RenderAnnouncements(){
+  var box = document.getElementById('annList');
+  if (!box) return;
+  qAll('announcements', function(list){
+    list.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+    if (!list.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<h3 style="margin-top:0">📢 Announcements</h3>' + list.map(function(a){
+      var del = isAdmin() ? ' <button class="btn ghost" onclick="v57DeleteAnnouncement(\'' + esc(a.id) + '\')">Remove</button>' : '';
+      return '<div class="dcard"><div><b>' + esc(a.title||'Announcement') + '</b><br><span class="mut">' + esc(a.text||'') + '</span><br><span class="mut small">' + esc(fmtD(a.createdAt)) + '</span>' + del + '</div></div>';
+    }).join('');
+    /* Mark announcements seen only while the Notifications page is open,
+       so the bell is not cleared by a background refresh. */
+    var sec = document.getElementById('s-notif');
+    if (sec && sec.classList.contains('on')) {
+      try { localStorage.setItem('bdbs_ann_seen', String(Date.now())); } catch(e){}
+    }
+    updateBell();
+  });
+}
+function v57RenderRem90Notif(){
+  var box = document.getElementById('rem90NotifBox');
+  if (!box) return;
+  var last = null; try { last = localStorage.getItem('bdbs_myLastDonation') || ''; } catch(e){}
+  if (rem90Days(last) >= 90 && !v57Rem90DismissedToday()) {
+    box.innerHTML = '<div class="card" style="margin:0;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4)"><b>🩸 You can donate blood again</b><br><span class="mut small">It has been 90+ days since your last donation.</span><br><button class="btn" onclick="show(\'request\')">Find a Request</button> <button class="btn ghost" onclick="v57DismissRem90()">Remind me later</button></div>';
+  } else box.innerHTML = '';
+}
+/* A3 — admin broadcast. Announcements carry only title + text + date:
+   no donor phone, CNIC or private data ever goes in one. */
+function sendAnnouncement(){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var msg = document.getElementById('annMsg');
+  var title = val('aAnnTitle'), text = val('aAnnText');
+  if (!title || !text) { if (msg) msg.innerHTML = '<span class="err">Please write a title and text.</span>'; return; }
+  qAdd('announcements', {title: title, text: text, createdAt: Date.now()}, function(){
+    logAudit('announcement', '', title);
+    if (msg) msg.innerHTML = '<span class="ok">Announcement sent to all donors.</span>';
+    document.getElementById('aAnnTitle').value = '';
+    document.getElementById('aAnnText').value = '';
+    v57RenderAnnouncements(); updateBell();
+  });
+}
+function v57DeleteAnnouncement(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this announcement?')) return;
+  qDel('announcements', id, function(){ v57RenderAnnouncements(); updateBell(); });
+}
+/* A4 — Emergency SOS: one tap, emergency request. Prefilled group/phone
+   (saved on this phone) make it a single tap on repeat use. */
+function v57PrefillSos(){
+  try {
+    var g = document.getElementById('sosGroup'); if (g && myGroup()) g.value = myGroup();
+    var p = document.getElementById('sosPhone'); if (p) p.value = localStorage.getItem('bdbs_sos_phone') || '';
+  } catch(e){}
+}
+function sosRequest(){
+  var msg = document.getElementById('sosMsg');
+  var grp = val('sosGroup'), hosp = val('sosHospital'), ph = waNum(val('sosPhone'));
+  if (!grp || !hosp || !ph) {
+    if (msg) msg.innerHTML = '<span class="err">Please fill blood group, hospital and phone — then one tap sends the SOS.</span>';
+    return;
+  }
+  try {
+    localStorage.setItem('bdbs_myGroup', grp);
+    localStorage.setItem('bdbs_sos_phone', val('sosPhone'));
+  } catch(e){}
+  var btn = null;
+  qAll('requestsPublic', function(rs){
+    var mx = 0, dupLabel = '';
+    rs.forEach(function(r){
+      var n = reqNoNum(r); if (n > mx) mx = n;
+      if (!reqIsOpen(r)) return;
+      if (ph && waNum(r.phone) === ph && !dupLabel) dupLabel = r.reqNo || 'OLD';
+    });
+    if (dupLabel) {
+      if (msg) msg.innerHTML = '<span class="err">This phone already has an open emergency request' + (dupLabel === 'OLD' ? '' : ' (' + esc(dupLabel) + ')') + '. Please close it first, or track it in Track Request below.</span>';
+      return;
+    }
+    var rno = reqNoFmt(mx + 1);
+    var id = uid('req');
+    var full = {id:id, reqNo:rno, name:'Emergency Patient', father:'', cnic:'', age:'', group:grp, units:1, hospital:hosp, disease:'Emergency', phone:val('sosPhone'), address:hosp, requesterPhoneNorm:normPhone(val('sosPhone')), emergency:true, status:'Received', donatedBy:'', donatedById:'', createdAt:Date.now()};
+    var pub = reqPub(full);
+    qAdd('requests', full, function(){
+      qAdd('requestsPublic', pub, function(){
+        if (msg) msg.innerHTML = '<span class="ok">🚨 SOS sent! Emergency Request No. is <b>' + esc(rno) + '</b> — the admin and ' + esc(grp) + ' donors have been alerted in the app.</span>';
+        document.getElementById('sosHospital').value = '';
+        loadRequests(); updateBell();
+      });
+    });
+  });
+}
+/* A5 — eligibility check. General information only: standard donor
+   guidance (age 18–65, weight 50 kg+, 90 days since last donation,
+   no current fever/illness). Never a medical decision. */
+function v57CheckEligibility(a){
+  a = a || {};
+  var reasons = [];
+  var level = 'likely';
+  var age = parseInt(a.age, 10), weight = parseInt(a.weightKg, 10);
+  if (!isNaN(age) && (age < 18 || age > 65)) { level = 'check'; reasons.push('Age is usually 18–65 for blood donation.'); }
+  if (!isNaN(weight) && weight < 50) { level = 'check'; reasons.push('Weight is usually 50 kg or more.'); }
+  if (a.illNow) { level = 'check'; reasons.push('Fever, illness or antibiotics right now — wait until you feel fully well.'); }
+  var days = rem90Days(a.lastDonation);
+  if (days >= 0 && days < 90) {
+    if (level !== 'check') level = 'notyet';
+    reasons.push('Only ' + days + ' day(s) since your last donation — ' + (90 - days) + ' day(s) left until 90 days are complete.');
+  }
+  var title = level === 'likely' ? 'You look eligible to donate'
+    : level === 'notyet' ? 'Not yet — please wait a little longer'
+    : 'Please ask a doctor first';
+  return {level: level, title: title, reasons: reasons};
+}
+function v57RunEligibility(){
+  var box = document.getElementById('eResult');
+  if (!box) return;
+  var res = v57CheckEligibility({
+    age: val('eAge'), weightKg: val('eWeight'),
+    lastDonation: val('eLast'),
+    illNow: !!(document.getElementById('eIll') && document.getElementById('eIll').checked)
+  });
+  var cls = res.level === 'likely' ? 'ok' : 'err';
+  box.innerHTML = '<div class="card" style="margin:0"><b>' + esc(res.title) + '</b>'
+    + (res.reasons.length ? '<br><span class="mut small">' + res.reasons.map(esc).join('<br>') + '</span>' : '<br><span class="mut small">Based on your answers, nothing here rules donation out.</span>')
+    + '<br><span class="mut small">This is general information only, not a medical decision. The final decision is always the doctor\'s at the hospital.</span></div>';
+}
+/* A1 — live listener: bell + Notifications refresh the moment a new
+   request or announcement lands (in-app only; no FCM, no SMS). */
+function v57StartListeners(){
+  if (window._v57ListenersStarted) return;
+  window._v57ListenersStarted = true;
+  if (!FB_OK || !db) return;
+  try {
+    db.collection('requestsPublic').orderBy('createdAt', 'desc').limit(50).onSnapshot(function(){
+      updateBell();
+      var sec = document.getElementById('s-notif');
+      if (sec && sec.classList.contains('on')) loadNotifs();
+    });
+  } catch(e){}
+  try {
+    db.collection('announcements').orderBy('createdAt', 'desc').limit(50).onSnapshot(function(){
+      v57RefreshAnnCache(); updateBell();
+      var sec = document.getElementById('s-notif');
+      if (sec && sec.classList.contains('on')) v57RenderAnnouncements();
+    });
+  } catch(e){}
+}
+
 /* ---------- init ---------- */
 document.addEventListener('input', function(e){ if (e.target && e.target.classList) e.target.classList.remove('invalid'); });
 wizGo('donor', 0); wizGo('request', 0); wizGo('member', 0);
@@ -5508,6 +6144,7 @@ setOfflineBanner(); if (FB_OK) flushSync();
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) { try { navigator.serviceWorker.register('sw.js'); } catch(e){} }
 fillAreaSelects();
 loadHome();
+v57StartListeners(); v57PrefillSos(); // v57-A
 autofillDonorNo();
 renderLogin();
 applyThemeLabel();
