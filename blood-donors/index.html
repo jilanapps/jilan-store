@@ -816,8 +816,9 @@ html.light .gift-banner{background:linear-gradient(180deg,rgba(0,150,136,.08),rg
 <h2>My Profile <span id="donorEmail" class="mut"></span></h2>
 <button class="btn ghost" onclick="doLogout()">Logout</button>
 <div id="linkBox">
-<p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.</p>
+<p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor, and the phone number on your donor record.</p>
 <label>Donor No.</label><input id="pDonorNo" placeholder="e.g. 1">
+<label>Phone Number (on your donor record)</label><input id="pLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
 <button class="btn" onclick="linkDonorRecord()">Link My Donor Record</button>
 <div id="pLinkMsg"></div>
 </div>
@@ -2132,7 +2133,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v54';
+var APP_VERSION = 'v55';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -4608,12 +4609,23 @@ function loadMyRecord(u, donorId){
   db.collection('donors').doc(donorId).get().then(function(d){
     if (!d.exists) { document.getElementById('myRecord').innerHTML = '<p class="err">Your linked donor record was not found. Ask the admin to check it.</p>'; return; }
     var r = d.data(); r.id = d.id;
+    /* v55: guard — My Profile sirf us record ko dikhaye jo IS login se
+       linked hai. Stale link (unlink ke baad bacha hua users.linkedDonorId,
+       ya kisi aur account ka linkedUid) ho to users link khud saaf kar ke
+       dobara link karne ko kaho — galat donor kabhi na dikhe. */
+    if (!r.linkedUid || r.linkedUid !== u.uid) {
+      try { db.collection('users').doc(u.uid).update({linkedDonorId: firebase.firestore.FieldValue.delete(), linkedDonorNo: firebase.firestore.FieldValue.delete()}); } catch(e){}
+      document.getElementById('linkBox').style.display = 'block';
+      document.getElementById('profileBox').style.display = 'none';
+      document.getElementById('myRecord').innerHTML = '<p class="err">Aap ka donor link purana ho gaya hai — Donor No. aur record wala phone number likh kar dobara link karein.</p>';
+      return;
+    }
     try { if (r.group) { localStorage.setItem('bdbs_myGroup', r.group); updateBell(); } } catch(e){}
     MY_DONOR = {id: donorId, name: r.name||'', group: r.group||''};
     loadRequests();
     document.getElementById('myRecord').innerHTML =
       '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div>' +
-      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b>'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
+      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b id="myTotalUnits">'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
     renderMyPrivacyToggles(r); renderMyAvail(r); renderRem90(r);
     document.getElementById('pLast').value = r.lastDonation || '';
     document.getElementById('pUnits').value = (r.units==null?'':r.units);
@@ -4621,6 +4633,21 @@ function loadMyRecord(u, donorId){
     db.collection('certificates').where('donorId','==',donorId).limit(20).get().then(function(s){
       var cs = s.docs.map(function(x){var o=x.data(); o.id=x.id; return o;});
       cs.sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); }); /* v53: client-side sort — no composite index needed */
+      /* v55: total units = certificates ka sum ya record ka units field —
+         jo zyada ho. Certificate akela banne par (generateCert) units field
+         update nahi hota tha, is liye D-7 ke units 0 dikhte the jabke cert
+         me 1 unit tha. Requester-close se credit hue units ke baghair cert
+         bhi ho sakte hain, is liye max() — aur agar cert sum zyada ho to
+         field bhi theek kar do. */
+      var certUnits = 0; cs.forEach(function(c){ certUnits += parseInt(c.units||0,10)||0; });
+      var fieldUnits = parseInt(r.units||0,10)||0;
+      var totalUnits = Math.max(fieldUnits, certUnits);
+      var tu = document.getElementById('myTotalUnits'); if (tu) tu.textContent = totalUnits;
+      var pu = document.getElementById('pUnits'); if (pu) pu.value = totalUnits;
+      if (certUnits > fieldUnits) {
+        try { db.collection('donors').doc(donorId).update({units: certUnits}).catch(function(){}); } catch(e){}
+        try { db.collection('donorsPublic').doc(donorId).update({units: certUnits}).catch(function(){}); } catch(e){}
+      }
       document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
         return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')'+(c.reqNo ? ' \u2014 Req: '+esc(c.reqNo) : '')+'<br><button class="btn ghost" onclick="viewMyCert(\''+esc(c.ref)+'\')">View / Download</button></div>';
       }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
@@ -4754,24 +4781,46 @@ function showLinkBoxAgain(){
   var pb = document.getElementById('profileBox'); if (pb) pb.style.display = 'none';
   if (lb) lb.scrollIntoView({behavior:'smooth'});
 }
+/* v55: link a donor record ONLY after a phone check — the typed phone
+   must match the phone on the donor's record (public mirror; hidden
+   female records compare the phone hash). A Donor No. alone used to
+   claim ANY record (D-7 got linked to the D-1 login that way). If the
+   record has no public mirror, the typed phone must match the phone on
+   the signed-in login instead. */
 function linkDonorRecord(){
   if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('pLinkMsg').innerHTML = '<span class="err">Linking needs internet.</span>'; return; }
   var no = val('pDonorNo');
+  var ph = normPhone(val('pLinkPhone'));
   var msg = document.getElementById('pLinkMsg');
   if (!no) { msg.innerHTML = '<span class="err">Enter your Donor No.</span>'; return; }
+  if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your donor record.</span>'; return; }
   msg.innerHTML = '<span class="mut">Linking…</span>';
   var u = auth.currentUser;
-  db.collection('donorLookup').doc(lookupKey(no)).get().then(function(d){
-    if (!d.exists) { msg.innerHTML = '<span class="err">No donor found with this Donor No. Check the number and try again.</span>'; return; }
-    var donorId = d.data().donorId;
-    return db.collection('donors').doc(donorId).update({linkedUid: u.uid}).then(function(){
-      return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: no}, {merge:true});
-    }).then(function(){
-      msg.innerHTML = '<span class="ok">Donor record linked.</span>';
-      renderDonor(u);
+  db.collection('users').doc(u.uid).get().then(function(ud){
+    var myPhone = (ud.exists && ud.data().phoneNorm) ? normPhone(ud.data().phoneNorm) : ((ud.exists && ud.data().phone) ? normPhone(ud.data().phone) : '');
+    if (myPhone && myPhone !== ph) { msg.innerHTML = '<span class="err">Ye phone number aap ke login wale number se match nahi karta.</span>'; return; }
+    return db.collection('donorLookup').doc(lookupKey(no)).get().then(function(d){
+      if (!d.exists) { msg.innerHTML = '<span class="err">No donor found with this Donor No. Check the number and try again.</span>'; return; }
+      var donorId = d.data().donorId;
+      return db.collection('donorsPublic').doc(donorId).get().then(function(pub){
+        if (pub.exists) {
+          var pd = pub.data();
+          var cardPhone = (pd.phone) ? normPhone(pd.phone) : '';
+          if (!cardPhone && pd.hidden && pd.phoneHash) { cardPhone = (donorKeyId('phone', ph) === pd.phoneHash) ? ph : ''; }
+          if (!cardPhone || cardPhone !== ph) { msg.innerHTML = '<span class="err">Phone number does not match this Donor No. — apne record wala number likhein, ya admin se rabta karein.</span>'; return; }
+        } else if (!myPhone) {
+          msg.innerHTML = '<span class="err">Is record ka public card nahi mila — admin se rabta karein (Admin Panel: Sync Public Donor List).</span>'; return;
+        }
+        return db.collection('donors').doc(donorId).update({linkedUid: u.uid}).then(function(){
+          return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: no}, {merge:true});
+        }).then(function(){
+          msg.innerHTML = '<span class="ok">Donor record linked.</span>';
+          renderDonor(u);
+        });
+      });
     });
   }).catch(function(){
-    msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
+    if (msg.innerHTML.indexOf('Linking') !== -1) msg.innerHTML = '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
   });
 }
 /* ---------- member login (separate from donor login) ----------
@@ -4899,10 +4948,12 @@ function updateMyDonation(){
    Deletes the login account and the linked donor record (private +
    public listing + certificates). Asks for a fresh login first if
    Firebase requires recent authentication. */
-/* v53 admin: unlink a donor login from their donor record (fixes a
-   stale linkedUid — e.g. the donor\u2019s old account — so the donor can
-   link again from their own Account tab). Admin-only; the donor\u2019s
-   users-doc link stays, the claim re-runs on re-link. */
+/* v55 admin: unlink a donor login COMPLETELY (both sides). v53 sirf
+   donors.linkedUid delete karta tha — users.linkedDonorId reh jata tha
+   aur Account tab wahi galat record dobara load kar leta tha (D-7 case).
+   Ab dono saaf hote hain: donor record ka linkedUid + har users doc jis
+   ka linkedDonorId is donor ki taraf ho. Donor dobara Donor No. + record
+   wala phone number likh kar link kar sakta hai. */
 function unlinkDonorBtn(){
   if (!isAdmin()) { document.getElementById('unlinkMsg').innerHTML = '<span class="err">Sirf admin.</span>'; return; }
   var no = String(val('unlinkDonorNo')||'').trim();
@@ -4914,8 +4965,14 @@ function unlinkDonorBtn(){
     if (!d) { msg.innerHTML = '<span class="err">Is Donor No. ka record nahi mila.</span>'; return; }
     if (!confirm('Donor ' + (d.name||'') + ' (Donor No. ' + (d.donorNo||'') + ') ka login link khatam kar dun? Donor dobara apne Account tab se link kar sakega.')) return;
     db.collection('donors').doc(d.id).update({linkedUid: firebase.firestore.FieldValue.delete()}).then(function(){
+      return db.collection('users').where('linkedDonorId','==',d.id).get().then(function(s){
+        var jobs = [];
+        s.forEach(function(u){ jobs.push(db.collection('users').doc(u.id).update({linkedDonorId: firebase.firestore.FieldValue.delete(), linkedDonorNo: firebase.firestore.FieldValue.delete()})); });
+        return Promise.all(jobs);
+      });
+    }).then(function(){
       logAudit('unlink-donor', d.id, (d.name||'') + ' \u2014 login link removed (Donor No. ' + (d.donorNo||'') + ')');
-      msg.innerHTML = '<span class="ok">Link khatam ho gaya. Donor ab dobara link kar sakta hai.</span>';
+      msg.innerHTML = '<span class="ok">Link khatam ho gaya — donor ka Account tab bhi saaf ho gaya. Donor ab Donor No. aur record wala phone number likh kar dobara link kar sakta hai.</span>';
     }).catch(function(){ msg.innerHTML = '<span class="err">Could not unlink. Please try again.</span>'; });
   });
 }
@@ -5230,7 +5287,7 @@ function renderAdmin(){
     qAll('members', function(ms){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
-          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Sync Public Donor List</b> <span class="mut small">Find Donor me ghayab donors (jinn ka public card nahi bana) aur bina number/record wale cards theek karein. Safe to run twice — kuch delete nahi hota, koi number nahi badalta.</span><br><button class="btn" onclick="syncPublicDonorListBtn()">Sync Public Donor List</button> <span id="syncPubMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, and fill the missing requester phone (Track Request) on older cards, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Correct request phone</b> <span class="mut small">Fix a wrong phone number on a request (e.g. a typo) — updates the private record and the public card, and fixes Track Request for it.</span><br><input id="fixReqNo" placeholder="Request No. (e.g. REQ-001)" style="width:150px"> <input id="fixReqPhone" type="tel" placeholder="Correct phone no." style="width:170px"> <button class="btn" onclick="correctRequestPhoneBtn()">Correct Phone</button> <span id="fixPhoneMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span><br><br><b>Donor login link</b> <span class="mut small">Agar kisi donor ka Account tab "Could not load your donor record" dikhaye to us ka purana login link khatam karein \u2014 phir donor apne Account tab se dobara link kar sakega.</span><br><input id="unlinkDonorNo" placeholder="Donor No. (e.g. 1)" style="width:150px"> <button class="btn" onclick="unlinkDonorBtn()">Unlink Donor Login</button> <span id="unlinkMsg"></span></div>';
+          var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Sync Public Donor List</b> <span class="mut small">Find Donor me ghayab donors (jinn ka public card nahi bana) aur bina number/record wale cards theek karein. Safe to run twice — kuch delete nahi hota, koi number nahi badalta.</span><br><button class="btn" onclick="syncPublicDonorListBtn()">Sync Public Donor List</button> <span id="syncPubMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, and fill the missing requester phone (Track Request) on older cards, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Correct request phone</b> <span class="mut small">Fix a wrong phone number on a request (e.g. a typo) — updates the private record and the public card, and fixes Track Request for it.</span><br><input id="fixReqNo" placeholder="Request No. (e.g. REQ-001)" style="width:150px"> <input id="fixReqPhone" type="tel" placeholder="Correct phone no." style="width:170px"> <button class="btn" onclick="correctRequestPhoneBtn()">Correct Phone</button> <span id="fixPhoneMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span><br><br><b>Donor login link</b> <span class="mut small">Agar kisi donor ka Account tab galat record dikhaye ya "Could not load your donor record" kahe to us ka login link poori tarah khatam karein (donor record + us ka Account tab, dono) — phir donor Donor No. aur record wala phone number likh kar dobara link kar sakega.</span><br><input id="unlinkDonorNo" placeholder="Donor No. (e.g. 1)" style="width:150px"> <button class="btn" onclick="unlinkDonorBtn()">Unlink Donor Login</button> <span id="unlinkMsg"></span></div>';
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
           h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
