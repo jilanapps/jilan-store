@@ -649,6 +649,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="mut">New blood requests for your blood group appear here. Login with your donor account to see only your group's requests. Admin announcements appear here too.</p>
 <div id="annList"></div>
 <div id="rem90NotifBox" style="margin-top:10px"></div>
+<div id="thanksNotifBox" style="margin-top:10px"></div>
 <div id="notifList" class="mut">Loading…</div>
 </div>
 </section>
@@ -3300,7 +3301,7 @@ function updateBell(){
 }
 function loadNotifs(){
   var box = document.getElementById('notifList'); if (!box) return;
-  v57RenderAnnouncements(); v57RenderRem90Notif(); // v57-A
+  v57RenderAnnouncements(); v57RenderRem90Notif(); renderThanksNotif(); // v57-A + v61 thanks
   var g = myGroup();
   qAll('requestsPublic', function(rs){
     var open = rs.filter(function(r){ return (r.status||'Received') !== 'Completed'; });
@@ -3490,6 +3491,7 @@ function confirmClaim(cid){
         qUpdate('requestsPublic', c.requestId, patch, function(){
           advanceReqStatus(c.requestId, 'Donor Found');
           /* v57-C: admin confirmed this donation — mark the donor verified (private + public mirror). */
+          /* v61: the Shukriya Note is derived from this completion — the request becomes Completed with donatedById, and the donor record gets lastDonation + units (advanceReqStatus). No extra write here. */
           qUpdate('donors', c.donorId, {verifiedDonor:true}, function(){ qUpdate('donorsPublic', c.donorId, {verifiedDonor:true}, function(){}); });
           qDel('donationClaims', cid, function(){ logAudit('confirm-donation', cid, (c.donorName||'') + ' donated for request ' + (c.requestId||'')); renderAdmin(); });
         });
@@ -5071,8 +5073,8 @@ function loadMyRecord(u, donorId){
     loadRequests();
     document.getElementById('myRecord').innerHTML =
       '<div class="dcard"><div class="dcard-top"><span class="bgpill">'+esc(r.group||'')+'</span><div><b>'+esc(r.name||'')+'</b><br><span class="mut">Donor No.: '+esc(r.donorNo||'')+'</span></div></div><div id="myBadges" style="margin-top:8px"></div>' +
-      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b id="myTotalUnits">'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myDashBox" style="margin-top:10px"></div><div id="myReferralBox" style="margin-top:10px"></div><div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
-    renderMyPrivacyToggles(r); renderMyAvail(r); renderRem90(r); renderMyBadges(r, parseInt(r.units||0,10)||0, 0); renderDonorDashboard(r, parseInt(r.units||0,10)||0, 0); renderMyReferral(r); /* v57-C */
+      '<div class="mut dmeta">Last donation: '+esc(fmtD(r.lastDonation))+'<br>Total units donated: <b id="myTotalUnits">'+esc(r.units||0)+'</b>'+(r.lastReqNo ? '<br>Linked request: <b>'+esc(r.lastReqNo)+'</b>' : '')+'</div></div>' + '<div id="myDashBox" style="margin-top:10px"></div><div id="myThanksBox" style="margin-top:10px"></div><div id="myReferralBox" style="margin-top:10px"></div><div id="myPrivacyBox" style="margin-top:10px"></div><div id="myAvailBox" style="margin-top:10px"></div><div id="myHistoryBox" style="margin-top:10px"></div><div id="myRem90Box" style="margin-top:10px"></div>';
+    renderMyPrivacyToggles(r); renderMyAvail(r); renderRem90(r); renderMyBadges(r, parseInt(r.units||0,10)||0, 0); renderDonorDashboard(r, parseInt(r.units||0,10)||0, 0); renderThanksCard(r); renderMyReferral(r); /* v57-C + v61 */
     document.getElementById('pLast').value = r.lastDonation || '';
     document.getElementById('pUnits').value = (r.units==null?'':r.units);
     var pr = document.getElementById('pReqNo'); if (pr) pr.value = r.lastReqNo || '';
@@ -5097,7 +5099,7 @@ function loadMyRecord(u, donorId){
       document.getElementById('myCerts').innerHTML = cs.length ? cs.map(function(c){
         return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.group)+' ('+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')'+(c.reqNo ? ' \u2014 Req: '+esc(c.reqNo) : '')+'<br><button class="btn ghost" onclick="viewMyCert(\''+esc(c.ref)+'\')">View / Download</button></div>';
       }).join('') : '<span class="mut">No certificates yet. After your next donation the admin will generate one here.</span>';
-      renderMyHistoryList(cs); renderMyBadges(r, totalUnits, cs.length); renderDonorDashboard(r, totalUnits, cs.length); /* v57-C */
+      renderMyHistoryList(cs); renderMyBadges(r, totalUnits, cs.length); renderDonorDashboard(r, totalUnits, cs.length); renderThanksCard(r); /* v57-C + v61 */
     }).catch(function(){
       document.getElementById('myCerts').innerHTML = '<span class="mut">Certificates could not be loaded.</span>';
     });
@@ -6040,6 +6042,51 @@ function shareDailyPoster(){
   }).catch(function(){ if (msg) msg.innerHTML = '<span class="err">Poster ban nahi saka — dobara koshish karein.</span>'; });
 }
 
+/* ---------- v61: Shukriya poster share ----------
+   Same professional poster style as the v60 daily/request posters (gold
+   letter-spaced header, thin gold divider, SVG blood-drop red gradient +
+   white cross, NO emoji) and the same share path (html2canvas scale 2,
+   BDBS.saveImage 3-arg bridge, navigator.share / saveBlob fallback). */
+function thanksPosterShareText(){
+  var t = window._thanksLatest || {};
+  var s = 'Shukriya! ' + (t.name||'Donor');
+  if ((t.units||0) > 0) s += ' ne ' + t.units + ' unit khoon ka atiya diya';
+  else s += ' ne khoon ka atiya diya';
+  if (t.dateStr) s += ' (' + fmtD(t.dateStr) + ')';
+  s += '.\nBasti Dawa Blood Society aap ki shukrguzaar hai.\nDonate Blood • Receive Blood • Save Lives.\nApp: https://jilanapps.github.io/jilan-store/bdbs/';
+  return s;
+}
+function shareThanksPoster(){
+  var t = window._thanksLatest || {};
+  if (!window.html2canvas) { try { window.open('https://wa.me/?text=' + encodeURIComponent(thanksPosterShareText()), '_blank'); } catch(e){} return; }
+  var old = document.getElementById('posterTmp');
+  if (old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'posterTmp';
+  d.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;background:#0F172A;color:#ffffff;padding:40px 36px;font-family:sans-serif;text-align:center;border-radius:16px;';
+  d.innerHTML = '<div style="font-size:13px;letter-spacing:3px;color:#F5C518;font-weight:700">BASTI DAWA BLOOD SOCIETY</div>'
+    + '<div style="width:64px;height:2px;background:#C9A227;margin:14px auto 0"></div>'
+    + '<div style="margin-top:22px"><svg width="72" height="72" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="thDrop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="url(#thDrop)"/><path d="M32 30v14M25 37h14" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/></svg></div>'
+    + '<div style="font-size:30px;font-weight:800;margin-top:18px">Shukriya</div>'
+    + '<div style="font-size:22px;font-weight:700;margin-top:14px">' + esc(t.name||'') + '</div>'
+    + '<div style="font-size:19px;line-height:1.8;margin-top:10px;color:#D7DEEB">' + ((t.units||0) > 0 ? esc(t.units) + ' unit khoon ka atiya' : 'Khoon ka atiya') + '<br>' + esc(t.dateStr ? fmtD(t.dateStr) : '') + '</div>'
+    + '<div style="font-size:22px;font-weight:800;color:#F5C518;margin-top:22px">Donate Blood • Receive Blood • Save Lives</div>'
+    + '<div style="font-size:13px;margin-top:16px;color:#9FB3D1">App: jilanapps.github.io/jilan-store/bdbs</div>';
+  document.body.appendChild(d);
+  window.html2canvas(d, {scale:2, backgroundColor:'#0F172A', useCORS:true}).then(function(canvas){
+    try { d.remove(); } catch(e){}
+    try {
+      var blob = new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'});
+      var fname = 'BDBS-Shukriya-' + String(t.name||'donor').replace(/[^A-Za-z0-9]+/g,'-') + '.png';
+      if (window.BDBS && window.BDBS.saveImage) { try { window.BDBS.saveImage(canvas.toDataURL('image/png'), fname, thanksPosterShareText()); return; } catch(e){} }
+      var file = new File([blob], fname, {type:'image/png'});
+      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+        navigator.share({files:[file], title:'BDBS — Shukriya', text:thanksPosterShareText()}).catch(function(){ saveBlob(blob, fname); });
+      } else { saveBlob(blob, fname); showRefreshToast('Poster saved — attach it in WhatsApp / Facebook.'); }
+    } catch(e){}
+  }).catch(function(){ try { d.remove(); } catch(e){} });
+}
+
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -6242,6 +6289,12 @@ function v57BellExtra(){
     var last = localStorage.getItem('bdbs_myLastDonation') || '';
     if (rem90Days(last) >= 90 && !v57Rem90DismissedToday()) extra++;
   } catch(e){}
+  try {
+    if (typeof MY_DONOR !== 'undefined' && MY_DONOR && MY_DONOR.id) {
+      var lastTh = localStorage.getItem('bdbs_myLastDonation') || '';
+      if (lastTh && lastTh !== thanksSeen()) extra++;
+    }
+  } catch(e){}
   return extra;
 }
 /* Throttled announcements cache refresh (<= once a minute): qAll() caches
@@ -6277,6 +6330,74 @@ function v57RenderRem90Notif(){
   if (rem90Days(last) >= 90 && !v57Rem90DismissedToday()) {
     box.innerHTML = '<div class="card" style="margin:0;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4)"><b>🩸 You can donate blood again</b><br><span class="mut small">It has been 90+ days since your last donation.</span><br><button class="btn" onclick="show(\'request\')">Find a Request</button> <button class="btn ghost" onclick="v57DismissRem90()">Remind me later</button></div>';
   } else box.innerHTML = '';
+}
+/* ---------- v61: Shukriya Note — thank-you after a confirmed donation ----------
+   No new collection and no rules change: the note is DERIVED from records
+   the app already reads. confirmClaim() completes the request (status
+   'Completed', donatedById set) and the donor record gets lastDonation +
+   units (advanceReqStatus) — so the latest completed request with this
+   donor's id IS the confirmed donation, and lastDonation is its date.
+   Units/date/name come only from that request and the donor record;
+   a patient name or request number is never invented and never shown.
+   Bell: myLastDonation newer than the locally seen marker (same pattern
+   as bdbs_notif_seen). The note is shown once per confirmed donation. */
+function thanksSeen(){ try { return localStorage.getItem('bdbs_thanks_seen') || ''; } catch(e){ return ''; } }
+function thanksLatestFor(donorId, cb){
+  if (!donorId) { cb(null); return; }
+  qAll('requestsPublic', function(rs){
+    var best = null;
+    (rs||[]).forEach(function(r){
+      if (r.donatedById === donorId && (r.status||'') === 'Completed') {
+        var t = r.completedAt || r.createdAt || 0;
+        if (!best || t > (best.completedAt || best.createdAt || 0)) best = r;
+      }
+    });
+    cb(best);
+  });
+}
+function thanksText(units, dateStr){
+  var u = parseInt(units||0, 10) || 0;
+  var d = dateStr ? fmtD(dateStr) : '';
+  var s = 'Shukriya! Aap ne ';
+  if (u > 0) s += u + ' unit khoon ka atiya diya';
+  else s += 'khoon ka atiya diya';
+  if (d && d !== '—') s += ' (' + d + ')';
+  s += '. Basti Dawa Blood Society aap ki shukrguzaar hai.';
+  return s;
+}
+function gotoThanksCard(){ show('login'); }
+function renderThanksNotif(){
+  var box = document.getElementById('thanksNotifBox');
+  if (!box) return;
+  if (typeof MY_DONOR === 'undefined' || !MY_DONOR || !MY_DONOR.id) { box.innerHTML = ''; return; }
+  var last = null; try { last = localStorage.getItem('bdbs_myLastDonation') || ''; } catch(e){}
+  if (!last || last === thanksSeen()) { box.innerHTML = ''; return; }
+  thanksLatestFor(MY_DONOR.id, function(req){
+    var units = req ? (parseInt(req.units||0,10)||0) : 0;
+    var dateStr = (req && req.completedAt) ? req.completedAt : last;
+    box.innerHTML = '<div class="card" data-no-i18n style="margin:0;background:rgba(245,197,24,.10);border:1px solid rgba(201,162,39,.5)"><b>Shukriya!</b><br><span class="mut small">' + esc(thanksText(units, dateStr)) + '</span><br><button class="btn ghost" style="margin-top:8px" onclick="gotoThanksCard()">Apna Shukriya Card dekhein</button></div>';
+    var sec = document.getElementById('s-notif');
+    if (sec && sec.classList.contains('on')) {
+      try { localStorage.setItem('bdbs_thanks_seen', String(last)); } catch(e){}
+    }
+    updateBell();
+  });
+}
+function renderThanksCard(r){
+  var box = document.getElementById('myThanksBox');
+  if (!box) return;
+  if (!r || !r.lastDonation) { box.innerHTML = ''; return; }
+  thanksLatestFor(r.id, function(req){
+    var units = req ? (parseInt(req.units||0,10)||0) : 0;
+    var dateStr = (req && req.completedAt) ? req.completedAt : r.lastDonation;
+    window._thanksLatest = {name: r.name||'', units: units, dateStr: dateStr};
+    box.innerHTML = '<div class="card" data-no-i18n style="margin:0;background:rgba(245,197,24,.08);border:1px solid rgba(201,162,39,.45)"><h3 style="margin-top:0">Shukriya</h3>'
+      + '<div class="mut"><b>' + esc(r.name||'') + '</b><br>'
+      + (units > 0 ? esc(units) + ' unit khoon ka atiya<br>' : 'Khoon ka atiya<br>')
+      + 'Date: ' + esc(fmtD(dateStr)) + '<br>'
+      + 'Basti Dawa Blood Society aap ki shukrguzaar hai.</div>'
+      + '<div style="margin-top:10px"><button class="btn" onclick="shareThanksPoster()">Share Shukriya Poster</button></div></div>';
+  });
 }
 /* A3 — admin broadcast. Announcements carry only title + text + date:
    no donor phone, CNIC or private data ever goes in one. */
