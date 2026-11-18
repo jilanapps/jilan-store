@@ -107,3 +107,7 @@ centred when the section head is centred.
 - Keep the AdSense script and the schema.org JSON-LD in `index.html`.
 - No new external assets (logo.png and dr-asif.jpg only); no `muse` string
   anywhere.
+
+## Social accounts modal (2026-11-18)
+
+'Our Social Media Accounts' button in the Contact teaser (gold) + footer link on all 5 pages. Opens a modal listing all 30 social accounts A-Z by platform (Bilibili, Facebook, Instagram, Threads, TikTok, YouTube), each with a Visit link. 4 entries have no verified URL yet (FB personal profile, 2 old YouTube channels, Bilibili) and show 'Link coming soon' with no dead link. Inner pages link to index.html#social, which auto-opens the modal on load. Modal styles live at the end of style.css; JS in the index.html IIFE. JSON-LD sameAs carries all 26 verified social URLs.

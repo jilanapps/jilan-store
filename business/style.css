@@ -772,3 +772,27 @@ details.faq[open] summary::after { transform: rotate(45deg); background: rgba(23
   html { scroll-behavior: auto; }
   .btn:hover, .card:hover, .step:hover, .work-card:hover, .dev-card:hover { transform: none; }
 }
+
+/* ---- Social accounts modal ---- */
+.social-modal[hidden] { display: none; }
+.social-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 5vh 16px 16px; }
+.social-modal-backdrop { position: absolute; inset: 0; background: rgba(4, 8, 18, .8); backdrop-filter: blur(3px); }
+.social-modal-dialog { position: relative; width: 100%; max-width: 680px; max-height: 88vh; overflow: auto; background: var(--surface); border: 1px solid rgba(255, 255, 255, .09); border-radius: var(--radius-lg); box-shadow: 0 24px 60px rgba(0, 0, 0, .5); }
+.social-modal-head { position: sticky; top: 0; display: flex; justify-content: space-between; gap: 16px; padding: 20px 22px 14px; background: var(--surface); border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.social-modal-head h2 { font-size: 22px; margin: 0 0 4px; }
+.social-modal-head p { color: var(--muted); font-size: 14px; margin: 0; }
+.social-modal-close { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .14); background: transparent; color: var(--text); font-size: 22px; line-height: 1; cursor: pointer; }
+.social-modal-close:hover { border-color: var(--gold); color: var(--gold); }
+.social-modal-body { padding: 8px 22px 22px; }
+.social-modal-body h3 { color: var(--gold); font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase; margin: 18px 0 8px; }
+.social-list { list-style: none; margin: 0; padding: 0; }
+.social-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.social-list li:last-child { border-bottom: 0; }
+.social-list strong { display: block; font-size: 15.5px; }
+.social-list span.social-handle { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.social-visit { flex: 0 0 auto; color: var(--gold); font-weight: 700; font-size: 14px; text-decoration: none; border: 1px solid rgba(232, 185, 60, .55); border-radius: var(--radius-pill); padding: 7px 14px; }
+.social-visit:hover { background: rgba(232, 185, 60, .14); }
+.social-soon { flex: 0 0 auto; color: var(--muted); font-size: 13px; }
+.social-modal, .social-modal *, .social-modal-dialog { box-sizing: border-box; }
+.social-modal-dialog { max-width: 100%; }
+@media (max-width: 640px) { .social-modal { padding-top: 3vh; } .social-modal-head h2 { font-size: 19px; } }
