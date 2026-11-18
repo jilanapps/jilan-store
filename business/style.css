@@ -493,6 +493,61 @@ details.faq[open] summary::after { transform: rotate(45deg); background: rgba(23
 .cta-band { text-align: center; }
 .cta-band .btn { margin: 6px; }
 
+/* ---------- developer / contact card ---------- */
+.work-card + .work-card { margin-top: 22px; }
+.dev-card {
+  background: linear-gradient(165deg, #182444, var(--card) 60%);
+  border: 1px solid rgba(232, 185, 60, 0.5);
+  border-radius: var(--radius);
+  padding: 38px 28px 32px;
+  max-width: 680px; margin: 0 auto; text-align: center;
+  box-shadow: 0 0 44px rgba(232, 185, 60, 0.1), var(--shadow-card);
+}
+.dev-photo {
+  width: 132px; height: 132px; border-radius: 50%;
+  object-fit: cover; object-position: center 18%;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 8px rgba(232, 185, 60, 0.12), 0 0 40px rgba(232, 185, 60, 0.4);
+  margin-bottom: 20px;
+}
+.dev-card h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 4px; }
+.dev-role { color: var(--muted); font-size: 15.5px; margin-bottom: 20px; }
+.dev-socials { display: flex; gap: 14px; justify-content: center; margin-bottom: 14px; }
+.dev-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; text-decoration: none; flex: 0 0 auto;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.dev-icon:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45); }
+.dev-fb { background: #1877f2; }
+.dev-tiktok { background: #000; border: 1px solid rgba(255, 255, 255, 0.25); }
+.dev-wa { background: #25d366; }
+.dev-yt { background: #ff0000; }
+.dev-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.dev-threads { background: #000; border: 1px solid rgba(255, 255, 255, 0.25); }
+.dev-web { background: #0ea5e9; }
+.dev-at { font-size: 26px; font-weight: 800; line-height: 1; }
+.dev-email { color: #4da3ff; font-size: 16px; text-decoration: none; word-break: break-all; }
+.dev-email:hover { text-decoration: underline; }
+.dev-divider { height: 1px; background: rgba(255, 255, 255, 0.14); margin: 26px auto 20px; max-width: 480px; }
+.dev-tech-label {
+  color: #38bdf8; font-size: 13px; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 18px;
+}
+.dev-tech {
+  display: grid; gap: 14px 10px;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 480px; margin: 0 auto;
+}
+.dev-tech-link {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 600;
+  transition: color 0.18s ease;
+}
+.dev-tech-link:hover { color: var(--text); }
+.dev-tech-link .dev-icon { width: 50px; height: 50px; }
+
 /* ---------- small screens ---------- */
 @media (max-width: 640px) {
   .nav-inner { flex-wrap: wrap; gap: 10px; padding: 12px 0; }
