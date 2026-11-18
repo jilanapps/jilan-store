@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Basti Dawa Blood Society (BDBS) — Blood Donors</title>
-<meta name="description" content="Basti Dawa Blood Society (BDBS) — find blood donors, request blood, register as a donor. Blood donation in Multan and Basti Malook. Donate blood, save lives.">
-<meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, blood donors Multan, donate blood, Basti Dawa Blood Society">
+<meta name="description" content="Basti Dawa Blood Society (BDBS) — find blood donors, request blood, register as a donor. Blood donation in Multan and Basti Malook. Donate blood, receive blood, save lives.">
+<meta name="keywords" content="blood donors, Basti Dawa, BDBS, blood donation Multan, blood donors Multan, donate blood, receive blood, request blood, Basti Dawa Blood Society">
 <link rel="icon" href="logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -530,12 +530,12 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </style>
 </head>
 <body>
-<div id="splash"><span class="splash-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg0)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span><h1>Basti Dawa Blood Society</h1><p>Donate Blood &bull; Save Lives</p></div>
+<div id="splash"><span class="splash-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg0)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span><h1>Basti Dawa Blood Society</h1><p>Donate Blood &bull; Receive Blood &bull; Save Lives</p></div>
 <script>setTimeout(function(){var s=document.getElementById('splash'); if(s) s.remove();},2600);</script>
 <header>
 <div class="hwrap">
 <span class="mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg1)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span>
-<div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Assalam-o-Alaikum &bull; Donate Blood &bull; Save Lives</p></div>
+<div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Assalam-o-Alaikum &bull; Donate Blood &bull; Receive Blood &bull; Save Lives</p></div>
 <div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light hdr-register" onclick="show('donor')">+ Register as Donor</button><button class="btn light bellwrap" onclick="show('notif')">🔔 <span class="hbtn-txt">Notifications</span><span id="bellCount" class="bell-badge" style="display:none">0</span></button><button class="btn light hbtn" id="refreshBtn" onclick="refreshData()" aria-label="Refresh">🔄</button><button class="btn light hbtn" onclick="show('login')" aria-label="Profile"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1-3.4 3.8-5 7-5s6 1.6 7 5"/></svg></button></div>
 </div>
 <div class="langsw"><span>Language / زبان / اللغة:</span><button class="langbtn" data-lang-btn="en" onclick="setLang('en')">English</button><button class="langbtn" data-lang-btn="ur" onclick="setLang('ur')">اردو</button><button class="langbtn" data-lang-btn="ar" onclick="setLang('ar')">عربي</button></div>
@@ -549,8 +549,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="hero">
 <div class="hero-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg2)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></div>
 <h1>Find Verified Blood Donors Near You in Seconds</h1>
-<p class="hero-sub">Basti Dawa Blood Society &bull; Donate Blood &bull; Save Lives</p>
-<p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts.</p>
+<p class="hero-sub">Basti Dawa Blood Society &bull; Donate Blood &bull; Receive Blood &bull; Save Lives</p>
+<p class="hero-text">Connecting blood donors with patients in need across Multan &amp; Basti Malook. Every drop counts. Need blood? Request it here — and if you can donate, join as a donor.</p>
 <div class="hero-actions">
 <button class="btn light" onclick="show('find')">🩸 Find Donor</button>
 <button class="btn oline" onclick="show('request')">+ Request Blood</button>
@@ -1299,7 +1299,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </ul>
 <h3>How Often Can Blood Be Donated?</h3>
 <p>Generally a gap of about 3 months is kept between Whole Blood Donations; however, the final interval depends on the blood bank&rsquo;s medical standards and the donor&rsquo;s health.</p>
-<p><b>Our message:</b> Blood donation takes only a few minutes, but it can become a whole life for someone. Your donated blood can give life to a mother, bring a smile to a child&rsquo;s face, bring a father back to his family, and save a family from falling apart. Come! Donate blood, save lives, and fulfil the duty of humanity.</p>
+<p><b>Our message:</b> Blood donation takes only a few minutes, but it can become a whole life for someone. Your donated blood can give life to a mother, bring a smile to a child&rsquo;s face, bring a father back to his family, and save a family from falling apart. Come! Donate blood, save lives, and fulfil the duty of humanity. And if you or a loved one needs blood, request it here — donors near you are ready to help.</p>
 <div class="card" id="compatChart" style="margin-top:12px"><h3 style="margin-top:0">Who Can Donate to Whom? — Blood Group Compatibility</h3>
 <p class="mut small">O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.</p>
 <table class="compat-table"><tr><th>Your group</th><th>You can donate to</th><th>You can receive from</th></tr>
@@ -1486,10 +1486,10 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="modal-box">
 <button class="mclose" onclick="closeModal('shareModal')" aria-label="Close">&#10005;</button>
 <h3>📣 Share App</h3>
-<p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. App ka link doston aur groups me share karein.</p>
+<p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. Khoon chahiye to request karein, dena hai to donor banein. App ka link doston aur groups me share karein.</p>
 <p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">https://jilanapps.github.io/jilan-store/blood-donors/download.html</p>
 <p id="shareCopyMsg" class="mut small" style="min-height:16px"></p>
-<a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
+<a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Khoon%20chahiye%20to%20request%20karein%2C%20dena%20hai%20to%20donor%20banein.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
 <a class="btn block" style="margin:6px 0" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
 <button class="btn ghost block" style="margin:6px 0" onclick="copyShareLink()">Copy Link</button>
 </div>
@@ -1527,12 +1527,12 @@ ur: {
 "More": "مزید",
 "Total Registered Donors": "کل رجسٹرڈ ڈونرز",
 "+ Register as Donor": "+ ڈونر کے طور پر رجسٹر کریں",
-"Donate Blood • Save Lives": "خون عطیہ کریں • زندگیاں بچائیں",
-"Basti Dawa Blood Society • Donate Blood • Save Lives": "بستی دوا بلڈ سوسائٹی • خون عطیہ کریں • زندگیاں بچائیں",
+"Donate Blood • Receive Blood • Save Lives": "خون عطیہ کریں • خون حاصل کریں • زندگیاں بچائیں",
+"Basti Dawa Blood Society • Donate Blood • Receive Blood • Save Lives": "بستی دوا بلڈ سوسائٹی • خون عطیہ کریں • خون حاصل کریں • زندگیاں بچائیں",
 "Under Supervision — Basti Dawa Welfare Organization": "زیرِ نگرانی — بستی دوا ویلفیئر آرگنائزیشن",
 "BDBS • Under Supervision — Basti Dawa Welfare Organization": "BDBS • زیرِ نگرانی — بستی دوا ویلفیئر آرگنائزیشن",
 "Find Verified Blood Donors Near You in Seconds": "اپنے قریب تصدیق شدہ خون عطیہ کرنے والے سیکنڈوں میں تلاش کریں",
-"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts.": "ملتان اور بستی ملوک میں خون کے ضرورت مند مریضوں کو ڈونرز سے ملانا۔ ہر قطرہ قیمتی ہے۔",
+"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts. Need blood? Request it here — and if you can donate, join as a donor.": "ملتان اور بستی ملوک میں خون کے ضرورت مند مریضوں کو ڈونرز سے ملانا۔ ہر قطرہ قیمتی ہے۔ خون چاہیے؟ یہیں درخواست کریں — اور اگر دے سکتے ہیں تو ڈونر بنیں۔",
 "🩸 Find Donor": "🩸 ڈونر تلاش کریں",
 "+ Request Blood": "+ خون کی درخواست کریں",
 "Register as Donor": "ڈونر کے طور پر رجسٹر کریں",
@@ -1874,12 +1874,12 @@ I18N.ar = {
 "More": "المزيد",
 "Total Registered Donors": "إجمالي المتبرعين المسجلين",
 "+ Register as Donor": "+ سجّل كمتبرع",
-"Donate Blood • Save Lives": "تبرع بالدم • أنقذ الأرواح",
-"Basti Dawa Blood Society • Donate Blood • Save Lives": "جمعية بستي دوا للدم • تبرع بالدم • أنقذ الأرواح",
+"Donate Blood • Receive Blood • Save Lives": "تبرع بالدم • احصل على الدم • أنقذ الأرواح",
+"Basti Dawa Blood Society • Donate Blood • Receive Blood • Save Lives": "جمعية بستي دوا للدم • تبرع بالدم • احصل على الدم • أنقذ الأرواح",
 "Under Supervision — Basti Dawa Welfare Organization": "تحت إشراف — منظمة بستي دوا للرعاية الاجتماعية",
 "BDBS • Under Supervision — Basti Dawa Welfare Organization": "BDBS • تحت إشراف — منظمة بستي دوا للرعاية الاجتماعية",
 "Find Verified Blood Donors Near You in Seconds": "ابحث عن متبرعين موثوقين بالقرب منك في ثوانٍ",
-"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts.": "نصل المتبرعين بالدم بالمرضى المحتاجين في ملتان وبستي ملوك. كل قطرة مهمة.",
+"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts. Need blood? Request it here — and if you can donate, join as a donor.": "نصل المتبرعين بالدم بالمرضى المحتاجين في ملتان وبستي ملوك. كل قطرة مهمة. هل تحتاج إلى دم؟ اطلبه هنا — وإذا كنت تستطيع التبرع، سجّل كمتبرع.",
 "🩸 Find Donor": "🩸 ابحث عن متبرع",
 "+ Request Blood": "+ اطلب الدم",
 "Register as Donor": "سجّل كمتبرع",
@@ -2762,7 +2762,7 @@ function copyReferralLink(){ // v57-C
 }
 function shareReferralLink(){ // v57-C
   var link = window._myReferralLink || ''; if (!link) return;
-  var txt = '\uD83E\uDE78 Join Basti Dawa Blood Society — donate blood, save lives. Download the app here: ' + link;
+  var txt = '\uD83E\uDE78 Join Basti Dawa Blood Society — donate blood or request blood, save lives. Download the app here: ' + link;
   if (navigator.share) { navigator.share({text: txt}).catch(function(){}); return; }
   try { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); } catch(e){}
 }
@@ -5925,7 +5925,7 @@ function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html
     + '<div style="font-size:52px;font-weight:800;color:#F5C518;margin:10px 0">' + esc(r.group||'') + '</div>'
     + '<div style="font-size:20px">' + esc(r.units||1) + ' unit(s)</div>'
     + '<div style="font-size:18px;margin-top:16px;line-height:1.7">Patient: ' + esc(r.firstName||r.name||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + '</div>'
-    + '<div style="font-size:22px;font-weight:800;color:#F5C518;margin-top:22px">Donate Blood • Save Lives</div>'
+    + '<div style="font-size:22px;font-weight:800;color:#F5C518;margin-top:22px">Donate Blood • Receive Blood • Save Lives</div>'
     + '<div style="font-size:13px;margin-top:16px;color:#9FB3D1">App: jilanapps.github.io/jilan-store/bdbs</div>';
   document.body.appendChild(d);
   window.html2canvas(d, {scale:2, backgroundColor:'#0F172A', useCORS:true}).then(function(canvas){
