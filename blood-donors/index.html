@@ -512,6 +512,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
 <p id="demoNote" class="hero-demo">Offline — saved data works on this phone. New changes will sync when internet returns.</p>
 </div>
+<div class="card" id="dailyPosterCard"><h2>🩸 Aaj ka paigham</h2><div id="dailyPosterBox" class="mut">Loading…</div></div>
 <div class="card about">
 <img src="logo.png" class="org-emblem" alt="BDBS official logo">
 <h2>Welcome to Basti Dawa Blood Society</h2>
@@ -772,7 +773,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <label>Title *</label><input id="aTitle" placeholder="Activity title">
 <label>Details *</label><textarea id="aText" rows="3" placeholder="What happened today?"></textarea>
 <label>Photo (optional)</label><input id="aPhoto" type="file" accept="image/*">
-<button class="btn" onclick="publishActivity()">Publish</button>
+<button class="btn" id="activityPublishBtn" onclick="publishActivity()">Publish</button>
 <div id="aMsg"></div>
 </div>
 </section>
@@ -1450,6 +1451,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 var I18N = {
 ur: {
 "Home": "ہوم",
+"🩸 Aaj ka paigham": "🩸 آج کا پیغام",
+"📤 Share karein": "📤 شیئر کریں",
 "Find Donor": "ڈونر تلاش کریں",
 "Request": "درخواست",
 "Members": "ممبرز",
@@ -1795,6 +1798,8 @@ ur: {
 };
 I18N.ar = {
 "Home": "الرئيسية",
+"🩸 Aaj ka paigham": "🩸 رسالة اليوم",
+"📤 Share karein": "📤 شارك",
 "Find Donor": "ابحث عن متبرع",
 "Request": "طلب",
 "Members": "الأعضاء",
@@ -2227,7 +2232,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v58';
+var APP_VERSION = 'v59';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -2351,7 +2356,31 @@ function gateMemberForm(){
   var el = document.getElementById('wz-member');
   if (el) el.style.display = isAdmin() ? '' : 'none';
 }
+/* v59: step-by-step back — Android back pehle pichla section dikhaye,
+   Home par pehli dafa toast, dobara dabane par exit. Java onBackPressed
+   goBack() ko pukarta hai; goBack 'popped' | 'toast' | 'exit' deta hai. */
+var _navStack = [];
+var _navCurrent = 'home';
+var _navBackAt = 0;
+function goBack(){
+  if (_navStack.length) {
+    var prev = _navStack.pop();
+    window._navNoPush = true;
+    show(prev);
+    return 'popped';
+  }
+  var now = Date.now();
+  if (now - _navBackAt < 2500) { return 'exit'; }
+  _navBackAt = now;
+  try { showRefreshToast('Dobara dabayein to app band ho jayegi'); } catch(e){}
+  return 'toast';
+}
 function show(s){
+  /* v59 nav stack: pichla section push karo (goBack se aaye to nahi,
+     aur wohi section dobara khole to nahi). */
+  if (window._navNoPush) { window._navNoPush = false; }
+  else if (s !== _navCurrent) { _navStack.push(_navCurrent); }
+  _navCurrent = s;
   document.querySelectorAll('.sec').forEach(function(el){el.classList.remove('on');});
   var t = document.getElementById('s-'+s); if (t) t.classList.add('on');
   document.querySelectorAll('[data-s]').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-s')===s);});
@@ -2559,6 +2588,7 @@ function loadHome(){
     });
   });
   updateBell(); showRem90Home(); loadCamps(); /* v57-D */ loadStockDashboard(); loadHomeBloodBanks(); /* v57-B live stock + bank list on home */ v57RefreshAnnCache(); // v57-A
+  renderDailyPoster(); /* v59 daily poster */
 }
 /* ---------- smart donor search: pills + instant city filter + availability ----------
    Public cards show name, blood group, address, phone and last donation
@@ -3705,7 +3735,8 @@ function loadActivities(){
     var box = document.getElementById('activityList');
     if (!acts.length) { box.innerHTML = '<span class="mut">No activity yet.</span>'; return; }
     box.innerHTML = acts.map(function(a){
-      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>';
+      var ab = isAdmin() ? ' <button class="btn ghost" onclick="v59EditActivity(\''+esc(a.id)+'\')">Edit</button> <button class="btn ghost" onclick="v59DeleteActivity(\''+esc(a.id)+'\')">Remove</button>' : '';
+      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+ab+'</div>';
     }).join('');
   });
   document.getElementById('activityPublish').style.display = isAdmin() ? 'block' : 'none';
@@ -4523,11 +4554,50 @@ function publishActivity(){
   if (!isAdmin()) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
   if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
   readPhoto(document.getElementById('aPhoto'), function(photo){
+    /* v59: edit mode — purani photo tab rakho jab nayi photo na chuni ho */
+    if (window._editActId) {
+      var id = window._editActId;
+      var keepPhoto = photo || window._editActPhoto || '';
+      qUpdate('activities', id, {title:val('aTitle'), text:val('aText'), photo:keepPhoto}, function(ok){
+        document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity updated.</span>' : '<span class="err">Could not update.</span>';
+        if (ok) { logAudit('edit-activity', id, val('aTitle')); v59CancelActivityEdit(); loadActivities(); loadHome(); }
+      });
+      return;
+    }
     qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
       document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
       if (ok) { logAudit('publish-activity', '', val('aTitle')); document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
     });
   });
+}
+/* v59: Activity Edit + Delete (admin only). Upload ke baad ghalti theek
+   karne ke liye — pehle edit/delete ka koi rasta nahi tha. Rules v39
+   activities: allow write admin, is liye qUpdate/qDel seedha chalte hain. */
+function v59EditActivity(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  qAll('activities', function(acts){
+    var a = null; acts.forEach(function(x){ if (x.id===id) a=x; });
+    if (!a) return;
+    document.getElementById('aTitle').value = a.title||'';
+    document.getElementById('aText').value = a.text||'';
+    document.getElementById('aPhoto').value = '';
+    window._editActId = id;
+    window._editActPhoto = a.photo||'';
+    var b = document.getElementById('activityPublishBtn'); if (b) b.textContent = 'Save Changes';
+    document.getElementById('aMsg').innerHTML = '<span class="mut">Editing this activity — <a href="#" onclick="v59CancelActivityEdit();return false;">Cancel</a></span>';
+    var f = document.getElementById('activityPublish'); if (f) f.scrollIntoView();
+  });
+}
+function v59CancelActivityEdit(){
+  window._editActId = null; window._editActPhoto = '';
+  var b = document.getElementById('activityPublishBtn'); if (b) b.textContent = 'Publish';
+  document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value='';
+  document.getElementById('aMsg').innerHTML = '';
+}
+function v59DeleteActivity(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this activity? This cannot be undone.')) return;
+  qDel('activities', id, function(){ logAudit('remove-activity', id, ''); loadActivities(); loadHome(); });
 }
 
 /* ---------- certificates ---------- */
@@ -5802,6 +5872,93 @@ function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html
     } catch(e){ shareRequest(id); }
   }).catch(function(){ try { d.remove(); } catch(e){} shareRequest(id); });
 }
+/* ---------- v59: Daily awareness poster — rozana naya paigham ----------
+   Bank local hai (koi Firestore nahi): calendar date se rotate hota hai
+   (day-of-year mod bank size). Har poster: bemari + 1-2 line Urdu
+   awareness + khoon dene ki talqeen. Facts GENERIC hain — koi statistics,
+   koi numbers, koi treatment advice nahi. Share par tasveer + app ka
+   link (link poster image me likha hai; browser fallback text me bhi). */
+var DAILY_POSTER_BANK = [
+  {t:'Thalassemia', x:'Thalassemia ke mareez bachon ko zindagi bhar khoon ki zaroorat rehti hai. Aap ka aik atiya un ki zindagi ka sahara ban sakta hai.'},
+  {t:'Khoon ki kami (Anemia)', x:'Khoon ki kami se jism kamzor ho jata hai aur rozana kaam mushkil lagne lagta hai. Sehatmand shakhs ka atiya kisi ki taaqat wapas la sakta hai.'},
+  {t:'Hemophilia', x:'Hemophilia me khoon jamta nahi aur chhoti chot bhi khatarnak ho sakti hai. Aap ka atiya in mareezon ke liye hifazat hai.'},
+  {t:'Leukemia (Blood Cancer)', x:'Blood cancer ke mareezon ko ilaaj ke dauran baar baar khoon aur platelets ki zaroorat hoti hai. Aap ka atiya un ki umeed hai.'},
+  {t:'Sickle Cell', x:'Sickle cell bemari me khoon ke khaliye sahi shakal nahi rakhte aur dard ke daure parte hain. Aap ka atiya rahat ka zariya ban sakta hai.'},
+  {t:'Dengue — Platelets', x:'Dengue me platelets kam ho jate hain aur mareez ko fori platelets ki zaroorat par sakti hai. Waqt par atiya zindagi bacha sakta hai.'},
+  {t:'Hamal (Pregnancy)', x:'Bachay ki paidaish ke waqt khoon behne se maa ki jaan khatre me par sakti hai. Aap ka atiya maa aur bachay dono ki hifazat hai.'},
+  {t:'Hadsa (Accident)', x:'Hadson me zakhmi ko fori khoon ki zaroorat hoti hai — har lamha qeemti hota hai. Aap ka atiya kisi khandan ka sahara ban sakta hai.'},
+  {t:'Operation (Surgery)', x:'Bare operation se pehle khoon ka intezam zaroori hota hai. Aap ka atiya operation ko mumkin banata hai.'},
+  {t:'Dialysis', x:'Gurde ke mareezon ko dialysis ke sath kabhi khoon ki bhi zaroorat par jati hai. Aap ka atiya un ki rozana zindagi ka sahara hai.'},
+  {t:'Aplastic Anemia', x:'Is bemari me jism khoon banana kam kar deta hai aur mareez ko baar baar khoon chahiye hota hai. Aap ka atiya un ke liye zaroori hai.'},
+  {t:'Bone Marrow Transplant', x:'Bone marrow transplant ke mareez ko naye khaliye banne tak khoon aur platelets ki shadeed zaroorat hoti hai. Aap ka atiya un ka sahara hai.'},
+  {t:'Jalne ke mareez (Burns)', x:'Jalne ke mareezon ko khoon aur plasma ki zaroorat hoti hai. Aap ka atiya un ki sehatyabi me madad karta hai.'},
+  {t:'Dil ka operation', x:'Dil ke operation me khoon ka intezam pehle se karna parta hai. Aap ka atiya dil ke mareez ki zindagi bacha sakta hai.'},
+  {t:'Jigar ki peewandkari', x:'Jigar ki peewandkari me khoon ki bari miqdar darkar hoti hai. Aap ka atiya is mushkil safar me madad hai.'},
+  {t:'Bachon ki khoon ki bemariyan', x:'Bachon me khoon ki bemariyan walidain ke liye bari aazmaish hoti hain. Aap ka atiya in bachon ki muskurahat wapas la sakta hai.'},
+  {t:'Chemotherapy', x:'Cancer ke ilaaj se khoon ke khaliye kam ho jate hain aur mareez ko atiya ki zaroorat par sakti hai. Aap ka atiya ilaaj jari rakhne me madad karta hai.'},
+  {t:'O-Negative khoon', x:'O-negative khoon har mareez ko diya ja sakta hai — emergency me sab se pehle kaam ata hai. Agar aap ka group O-negative hai to aap ka atiya sab se qeemti hai.'},
+  {t:'Nadir khoon ke group', x:'Nadir khoon ke group walon ko waqt par khoon milna mushkil hota hai. Apna group register karwayein aur zaroorat parne par atiya dein.'},
+  {t:'Platelet atiya', x:'Platelets sirf chand din kaam ate hain, is liye in ki zaroorat hamesha rehti hai. Aap ka platelet atiya cancer aur dengue ke mareezon ke liye hai.'},
+  {t:'Plasma atiya', x:'Plasma jalne aur shadeed bemari ke mareezon ke liye istemal hota hai. Aap ka plasma atiya kisi ki zindagi bacha sakta hai.'},
+  {t:'Sadak hadsa — Emergency', x:'Sadak hadson me khoon ki fori zaroorat hoti hai. Aap ka aik atiya kisi khandan ka sahara ban sakta hai.'},
+  {t:'Paidaish ke baad khoon behna', x:'Bachay ki paidaish ke baad khoon behna maa ke liye khatarnak ho sakta hai. Pehle se tayyar atiya maa ki jaan bacha sakta hai.'},
+  {t:'Gurde ke mareez', x:'Gurde ki kharabi me khoon ki kami aam hai aur mareez ko atiya ki zaroorat par sakti hai. Aap ka atiya un ki taaqat hai.'},
+  {t:'Thalassemia Minor', x:'Thalassemia minor walon ko aksar pata nahi hota. Shadi se pehle test karwana zaroori hai taake aanay wali nasl mehfooz rahe.'},
+  {t:'Har roz khoon ki zaroorat', x:'Har roz hospitals me khoon ki zaroorat hoti hai — ye koi aik din ka kaam nahi. Mustaqil atiya dene wale hi asal hero hain.'},
+  {t:'Pehli dafa khoon dena', x:'Pehli dafa khoon dena soch se asan hai — chand minute ka kaam, aur kisi ki zindagi bhar ki umeed. Aaj pehla qadam uthayein.'},
+  {t:'Khoon ki kami', x:'Khoon ki kami har waqt rehti hai — is ka koi mutabadil nahi, sirf insani atiya. Aap ka atiya hi is kami ko poora karta hai.'},
+  {t:'Aik atiya, kai zindagiyan', x:'Aap ka aik atiya kai zindagiyan bacha sakta hai. Aaj atiya dein — kal kisi ko aap ki zaroorat par sakti hai.'},
+  {t:'Khoon atiya — naik kaam', x:'Khoon atiya karna aik naik kaam hai — is se kisi ki zindagi bachti hai aur dil ko sukoon milta hai. Aaj hi atiya dein.'}
+];
+var DAILY_APP_LINK = 'https://jilanapps.github.io/jilan-store/bdbs/';
+function dailyPosterToday(){
+  var now = new Date();
+  var start = new Date(now.getFullYear(), 0, 0);
+  var doy = Math.floor((now - start) / 86400000);
+  return DAILY_POSTER_BANK[doy % DAILY_POSTER_BANK.length];
+}
+function dailyPosterDateStr(){
+  var d = new Date();
+  return d.getDate() + ' ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()] + ' ' + d.getFullYear();
+}
+function renderDailyPoster(){
+  var box = document.getElementById('dailyPosterBox');
+  if (!box) return;
+  var p = dailyPosterToday();
+  box.innerHTML = '<div id="dailyPosterImg" data-no-i18n style="width:540px;max-width:100%;background:#0B132B;color:#ffffff;padding:36px 32px;font-family:sans-serif;text-align:center;border-radius:12px;margin:0 auto">'
+    + '<div style="font-size:15px;letter-spacing:2px;color:#F5C518">BASTI DAWA BLOOD SOCIETY</div>'
+    + '<div style="font-size:64px;line-height:1.1;margin:18px 0 4px">🩸</div>'
+    + '<div style="font-size:30px;font-weight:700">' + esc(p.t) + '</div>'
+    + '<div style="font-size:20px;line-height:1.7;margin-top:14px">' + esc(p.x) + '</div>'
+    + '<div style="font-size:22px;font-weight:700;color:#F5C518;margin-top:20px">Khoon atiya karein — zindagi bachayein</div>'
+    + '<div style="font-size:14px;margin-top:22px;color:#9fb3d1">' + esc(dailyPosterDateStr()) + ' • App: jilanapps.github.io/jilan-store/bdbs</div>'
+    + '</div>'
+    + '<div style="text-align:center;margin-top:12px"><button class="btn" onclick="shareDailyPoster()">📤 Share karein</button> <span id="dailyPosterMsg" class="mut small"></span></div>';
+}
+function dailyPosterShareText(){
+  var p = dailyPosterToday();
+  return '🩸 ' + p.t + '\n' + p.x + '\n\nKhoon atiya karein — zindagi bachayein.\nBasti Dawa Blood Society app: ' + DAILY_APP_LINK;
+}
+function shareDailyPoster(){
+  var el = document.getElementById('dailyPosterImg');
+  var msg = document.getElementById('dailyPosterMsg');
+  if (!el) return;
+  if (!window.html2canvas) { try { window.open('https://wa.me/?text=' + encodeURIComponent(dailyPosterShareText()), '_blank'); } catch(e){} return; }
+  var d = new Date();
+  var fname = 'BDBS-Daily-' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + '.png';
+  window.html2canvas(el, {scale:2, backgroundColor:'#0B132B', useCORS:true}).then(function(canvas){
+    try {
+      /* v58 pattern: app me native bridge, browser me navigator.share */
+      if (window.BDBS && window.BDBS.saveImage) { try { window.BDBS.saveImage(canvas.toDataURL('image/png'), fname); return; } catch(e){} }
+      var blob = new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'});
+      var file = new File([blob], fname, {type:'image/png'});
+      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+        navigator.share({files:[file], title:'BDBS — Aaj ka paigham', text:dailyPosterShareText()}).catch(function(){ saveBlob(blob, fname); });
+      } else { saveBlob(blob, fname); showRefreshToast('Poster saved — attach it in WhatsApp / Facebook.'); }
+    } catch(e){ try { saveBlob(new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'}), fname); } catch(e2){} }
+  }).catch(function(){ if (msg) msg.innerHTML = '<span class="err">Poster ban nahi saka — dobara koshish karein.</span>'; });
+}
+
 function renderAdmin(){
   var box = document.getElementById('adminTables');
   box.innerHTML = '<p class="mut">Loading admin data… (full personal details are visible here only, after login)</p>';
@@ -5810,7 +5967,7 @@ function renderAdmin(){
       qAll('requests', function(rs){
         qAll('certificates', function(cs){
           var h = '<div class="card"><b>Duplicates cleanup</b> <span class="mut small">Same donor or request saved twice shows twice. Keeps the oldest copy, removes the rest.</span><br><button class="btn" onclick="removeDuplicates()">Remove Duplicates</button> <span id="dupMsg"></span><br><br><b>Member IDs</b> <span class="mut small">Renumber all members 001, 002, 003… in join order (fixes gaps left by removed members).</span><br><button class="btn" onclick="renumberMemberIds()">Renumber Member IDs</button> <span id="renumMsg"></span><br><br><b>Donor Nos.</b> <span class="mut small">Renumber all donors 1, 2, 3… in registration order (fixes the double D-001).</span><br><button class="btn" onclick="renumberDonorNos()">Renumber Donor Nos.</button> <span id="renumDonorMsg"></span><br><br><b>Donor keys</b> <span class="mut small">Rebuild the duplicate-check keys for all donors (repairs keys missing from older versions).</span><br><button class="btn" onclick="rebuildDonorKeysBtn()">Rebuild Donor Keys</button> <span id="keysMsg"></span><br><br><b>Sync Public Donor List</b> <span class="mut small">Find Donor me ghayab donors (jinn ka public card nahi bana) aur bina number/record wale cards theek karein. Safe to run twice — kuch delete nahi hota, koi number nahi badalta.</span><br><button class="btn" onclick="syncPublicDonorListBtn()">Sync Public Donor List</button> <span id="syncPubMsg"></span><br><br><b>Request phones</b> <span class="mut small">Copy the requester phone from private request records to public cards missing it, and fill the missing requester phone (Track Request) on older cards, so donors can call or WhatsApp older requests too.</span><br><button class="btn" onclick="fixRequestPhonesBtn()">Fix Request Phones</button> <span id="phonesMsg"></span><br><br><b>Correct request phone</b> <span class="mut small">Fix a wrong phone number on a request (e.g. a typo) — updates the private record and the public card, and fixes Track Request for it.</span><br><input id="fixReqNo" placeholder="Request No. (e.g. REQ-001)" style="width:150px"> <input id="fixReqPhone" type="tel" placeholder="Correct phone no." style="width:170px"> <button class="btn" onclick="correctRequestPhoneBtn()">Correct Phone</button> <span id="fixPhoneMsg"></span><br><br><b>Request Nos.</b> <span class="mut small">Give a Request No. (REQ-001, REQ-002…) to older requests that have none, oldest first. Safe to run twice — numbered requests are skipped.</span><br><button class="btn" onclick="assignRequestNumbersBtn()">Assign Request Numbers</button> <span id="reqNoMsg"></span><br><br><b>Donor login link</b> <span class="mut small">Agar kisi donor ka Account tab galat record dikhaye ya "Could not load your donor record" kahe to us ka login link poori tarah khatam karein (donor record + us ka Account tab, dono) — phir donor Donor No. aur record wala phone number likh kar dobara link kar sakega.</span><br><input id="unlinkDonorNo" placeholder="Donor No. (e.g. 1)" style="width:150px"> <button class="btn" onclick="unlinkDonorBtn()">Unlink Donor Login</button> <span id="unlinkMsg"></span></div>';
-          h += '<div class="card"><b>Announcements (all donors)</b> <span class="mut small">Posted to every donor\'s Notifications bell (in-app only, no SMS).</span><br><input id="aAnnTitle" placeholder="Title (e.g. Blood camp on Friday)" style="width:100%;padding:8px;margin:6px 0"><textarea id="aAnnText" placeholder="Announcement text" style="width:100%;padding:8px" rows="2"></textarea><br><button class="btn" onclick="sendAnnouncement()">Send Announcement</button> <span id="annMsg"></span><div id="annAdminList" style="margin-top:8px"></div></div>';
+          h += '<div class="card"><b>Announcements (all donors)</b> <span class="mut small">Posted to every donor\'s Notifications bell (in-app only, no SMS).</span><br><input id="aAnnTitle" placeholder="Title (e.g. Blood camp on Friday)" style="width:100%;padding:8px;margin:6px 0"><textarea id="aAnnText" placeholder="Announcement text" style="width:100%;padding:8px" rows="2"></textarea><br><button class="btn" id="annSendBtn" onclick="sendAnnouncement()">Send Announcement</button> <span id="annMsg"></span><div id="annAdminList" style="margin-top:8px"></div></div>';
           h += '<div class="card"><b>🏥 Blood Banks &amp; Hospitals</b> <span class="mut small">Admin-entered stock per blood group; hospital registrations need admin approval before they can request blood.</span><div id="adminBanksBox" class="mut">Loading…</div><div id="adminHospBox" class="mut" style="margin-top:10px">Loading…</div></div>'; /* v57-B */
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
@@ -5869,7 +6026,7 @@ function renderAdmin(){
             return '<div class="card"><b>'+esc(c.ref)+'</b> — '+esc(c.donorName)+' ('+esc(c.group)+', '+esc(c.units)+' unit(s), '+esc(fmtD(c.date))+')</div>';
           }).join('') : '<p class="mut">No certificates yet. Use the Certificate button on a donor row.</p>');
           box.innerHTML = h;
-          loadClaimsAdmin(); loadCamps(); renderAdminAnalytics(); renderRecurringSuggestions(); /* v57-D */
+          loadClaimsAdmin(); loadCamps(); renderAdminAnalytics(); renderRecurringSuggestions(); v57RenderAnnAdminList(); /* v59 */ /* v57-D */
           loadGroupBAdmin(); /* v57-B */
         });
       });
@@ -6000,7 +6157,7 @@ function v57RenderAnnouncements(){
     list.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
     if (!list.length) { box.innerHTML = ''; return; }
     box.innerHTML = '<h3 style="margin-top:0">📢 Announcements</h3>' + list.map(function(a){
-      var del = isAdmin() ? ' <button class="btn ghost" onclick="v57DeleteAnnouncement(\'' + esc(a.id) + '\')">Remove</button>' : '';
+      var del = isAdmin() ? ' <button class="btn ghost" onclick="v59EditAnnouncement(\'' + esc(a.id) + '\')">Edit</button> <button class="btn ghost" onclick="v57DeleteAnnouncement(\'' + esc(a.id) + '\')">Remove</button>' : '';
       return '<div class="dcard"><div><b>' + esc(a.title||'Announcement') + '</b><br><span class="mut">' + esc(a.text||'') + '</span><br><span class="mut small">' + esc(fmtD(a.createdAt)) + '</span>' + del + '</div></div>';
     }).join('');
     /* Mark announcements seen only while the Notifications page is open,
@@ -6027,18 +6184,74 @@ function sendAnnouncement(){
   var msg = document.getElementById('annMsg');
   var title = val('aAnnTitle'), text = val('aAnnText');
   if (!title || !text) { if (msg) msg.innerHTML = '<span class="err">Please write a title and text.</span>'; return; }
+  /* v59: edit mode — Rules v39 me announcements par update:false hai,
+     is liye delete + dobara create (wohi id, wohi createdAt). Koi rules
+     change nahi, koi rules publish nahi. */
+  if (window._editAnnId) {
+    var id = window._editAnnId;
+    qAll('announcements', function(list){
+      var old = null; list.forEach(function(x){ if (x.id===id) old=x; });
+      var createdAt = (old && old.createdAt) ? old.createdAt : Date.now();
+      qDel('announcements', id, function(){
+        qAdd('announcements', {id:id, title:title, text:text, createdAt:createdAt}, function(){
+          logAudit('edit-announcement', id, title);
+          if (msg) msg.innerHTML = '<span class="ok">Announcement updated.</span>';
+          v59CancelAnnEdit();
+          v57RenderAnnouncements(); v57RenderAnnAdminList(); updateBell();
+        });
+      });
+    });
+    return;
+  }
   qAdd('announcements', {title: title, text: text, createdAt: Date.now()}, function(){
     logAudit('announcement', '', title);
     if (msg) msg.innerHTML = '<span class="ok">Announcement sent to all donors.</span>';
     document.getElementById('aAnnTitle').value = '';
     document.getElementById('aAnnText').value = '';
-    v57RenderAnnouncements(); updateBell();
+    v57RenderAnnouncements(); v57RenderAnnAdminList(); updateBell();
+  });
+}
+/* v59: Announcement Edit (admin only). Form admin panel me hai, is liye
+   edit dabane par wahan le jaya jata hai — form pehle se bhara hota hai. */
+function v59EditAnnouncement(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  qAll('announcements', function(list){
+    var a = null; list.forEach(function(x){ if (x.id===id) a=x; });
+    if (!a) return;
+    document.getElementById('aAnnTitle').value = a.title||'';
+    document.getElementById('aAnnText').value = a.text||'';
+    window._editAnnId = id;
+    var b = document.getElementById('annSendBtn'); if (b) b.textContent = 'Save Changes';
+    var msg = document.getElementById('annMsg');
+    if (msg) msg.innerHTML = '<span class="mut">Editing — <a href="#" onclick="v59CancelAnnEdit();return false;">Cancel</a></span>';
+    show('members');
+    setTimeout(function(){ var e=document.getElementById('aAnnTitle'); if(e) e.scrollIntoView(); }, 200);
+  });
+}
+function v59CancelAnnEdit(){
+  window._editAnnId = null;
+  var b = document.getElementById('annSendBtn'); if (b) b.textContent = 'Send Announcement';
+  document.getElementById('aAnnTitle').value = '';
+  document.getElementById('aAnnText').value = '';
+  var msg = document.getElementById('annMsg'); if (msg) msg.innerHTML = '';
+}
+/* v59: admin panel ki announcement list — annAdminList pehle khali rehti
+   thi (sirf div tha, kabhi bhari nahi gayi). Ab Edit + Remove ke sath. */
+function v57RenderAnnAdminList(){
+  var box = document.getElementById('annAdminList');
+  if (!box) return;
+  qAll('announcements', function(list){
+    list.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+    if (!list.length) { box.innerHTML = '<span class="mut small">No announcements yet.</span>'; return; }
+    box.innerHTML = list.map(function(a){
+      return '<div class="dcard"><div><b>' + esc(a.title||'Announcement') + '</b><br><span class="mut">' + esc(a.text||'') + '</span><br><span class="mut small">' + esc(fmtD(a.createdAt)) + '</span> <button class="btn ghost" onclick="v59EditAnnouncement(\'' + esc(a.id) + '\')">Edit</button> <button class="btn ghost" onclick="v57DeleteAnnouncement(\'' + esc(a.id) + '\')">Remove</button></div></div>';
+    }).join('');
   });
 }
 function v57DeleteAnnouncement(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Remove this announcement?')) return;
-  qDel('announcements', id, function(){ v57RenderAnnouncements(); updateBell(); });
+  qDel('announcements', id, function(){ v57RenderAnnouncements(); v57RenderAnnAdminList(); updateBell(); });
 }
 /* A4 — Emergency SOS: one tap, emergency request. Prefilled group/phone
    (saved on this phone) make it a single tap on repeat use. */
