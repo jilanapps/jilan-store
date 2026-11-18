@@ -2,6 +2,19 @@
 <html lang="en">
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7599547864631357" crossorigin="anonymous"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5MMXNYT2HN"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-5MMXNYT2HN');
+</script>
+<script>
+function gaApp(id){try{if(typeof APPS==="undefined")return null;return APPS.find(function(x){return x.id===id;})||null;}catch(e){return null;}}
+function gaDl(id){var a=gaApp(id);if(window.gtag&&a){gtag("event","app_download",{app_id:a.id,app_name:a.name});}}
+function gaView(id){var a=gaApp(id);if(window.gtag&&a){gtag("event","view_app",{app_id:a.id,app_name:a.name});}}
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Jilan App Store</title>
@@ -389,8 +402,8 @@ function btnInnerHTML(a,style){
   /* plain browser / old wrapper: direct APK download link (previous behaviour).
      The download attribute helps browsers/WebViews that only start a file
      download for links marked as downloads instead of page navigations. */
-  if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'" download>'+label+'</a>';
-  return '<a class="'+clsBase+'" href="'+esc(act.url)+'" download onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</a>';
+  if(style==="big")return '<a class="btn btn-big" href="'+esc(act.url)+'" download data-dl="'+esc(a.id)+'">'+label+'</a>';
+  return '<a class="'+clsBase+'" href="'+esc(act.url)+'" download data-dl="'+esc(a.id)+'" onclick="event.stopPropagation()"'+heroStyle+'>'+label+'</a>';
 }
 function paintApp(id){
   const a=APPS.find(x=>x.id===id);if(!a)return;
@@ -523,7 +536,7 @@ function route(){
   const m=(location.hash||"").match(/^#app\/(.+)$/);
   if(m){
     const a=APPS.find(x=>x.id===decodeURIComponent(m[1]));
-    if(a){renderDetail(a);return;}
+    if(a){gaView(a.id);renderDetail(a);return;}
   }
   if(Q)doSearch();else if(CAT!=="all")applyCat(CAT);else renderHome();
 }
@@ -531,7 +544,9 @@ function route(){
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
   const ci=e.target.closest("[data-install]");
-  if(ci){e.stopPropagation();startInstall(ci.dataset.install);return;}
+  if(ci){e.stopPropagation();gaDl(ci.dataset.install);startInstall(ci.dataset.install);return;}
+  const cd=e.target.closest("[data-dl]");
+  if(cd){gaDl(cd.dataset.dl);}
   const cc=e.target.closest("[data-cancel]");
   if(cc){e.stopPropagation();cancelInstall(cc.dataset.cancel);return;}
   const cp=e.target.closest("[data-prompt]");
