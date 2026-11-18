@@ -31,7 +31,10 @@
       <img src="logo.png" alt="Jilan Apps Official" class="brand-logo">
       <span class="brand-text">Jilan Apps <em>Official</em></span>
     </a>
-    <nav class="nav-links">
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="siteNav">
       <a href="index.html">Home</a>
       <a href="services.html" class="active">Services</a>
       <a href="portfolio.html">Portfolio</a>
@@ -160,8 +163,33 @@
 </main>
 
 <footer>
-  <div class="container">
-    <p>© 2026 Jilan Apps Official. All rights reserved.</p>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="brand">
+        <img src="logo.png" alt="Jilan Apps Official" class="brand-logo">
+        <span class="brand-text">Jilan Apps <em>Official</em></span>
+      </a>
+      <p>Affordable custom Android apps for small businesses — built in Multan, Pakistan, for clients worldwide.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="faq.html">FAQ</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="https://wa.me/923057867149?text=Assalam-o-Alaikum!%20I%20want%20a%20mobile%20app%20for%20my%20business." target="_blank" rel="noopener">WhatsApp: +92 305 7867149</a>
+      <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a>
+      <a href="https://www.fiverr.com/jilanapps" target="_blank" rel="noopener">Fiverr: fiverr.com/jilanapps</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <p>© 2026 Jilan Apps Official. All rights reserved.</p>
+    </div>
   </div>
 </footer>
 
@@ -176,6 +204,23 @@
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+
+  /* hamburger menu */
+  var toggle = document.querySelector(".nav-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    document.querySelectorAll(".nav-links a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Open menu");
+      });
+    });
+  }
 
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {

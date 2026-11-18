@@ -35,7 +35,10 @@
       <img src="logo.png" alt="Jilan Apps Official" class="brand-logo">
       <span class="brand-text">Jilan Apps <em>Official</em></span>
     </a>
-    <nav class="nav-links">
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="siteNav">
       <a href="index.html" class="active">Home</a>
       <a href="services.html">Services</a>
       <a href="portfolio.html">Portfolio</a>
@@ -52,17 +55,66 @@
   <section class="hero">
     <div class="orb orb-a" aria-hidden="true"></div>
     <div class="orb orb-b" aria-hidden="true"></div>
-    <div class="container">
-      <img src="logo.png" alt="Jilan Apps Official logo" class="hero-logo reveal">
-      <p class="hero-kicker reveal" style="--d:.08s">Jilan Apps Official</p>
-      <h1 class="reveal" style="--d:.16s">Apps for a <span class="gold">Better You</span></h1>
-      <p class="hero-sub reveal" style="--d:.24s">Custom mobile apps for small businesses — restaurants, shops, salons, clinics and more.</p>
-      <div class="hero-ctas reveal" style="--d:.32s">
-        <a class="btn btn-whatsapp" href="https://wa.me/923057867149?text=Assalam-o-Alaikum!%20I%20want%20a%20mobile%20app%20for%20my%20business." target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.2-.7.3-.9.9-1.1 2.2-.2 3.9a11.6 11.6 0 0 0 4.5 4.2c1.7.8 2.4.9 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3z"/></svg>
-          Chat on WhatsApp
-        </a>
-        <a class="btn btn-ghost" href="portfolio.html">View our work</a>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="hero-kicker reveal" style="--d:.05s">Jilan Apps Official — Multan, Pakistan</p>
+        <h1 class="reveal" style="--d:.12s">Apps for a <span class="gold">Better You</span></h1>
+        <p class="hero-sub reveal" style="--d:.2s">Custom Android apps for small businesses — restaurants, shops, salons, clinics and more. Built around how your business actually runs, delivered in 7–21 days.</p>
+        <div class="hero-ctas reveal" style="--d:.28s">
+          <a class="btn btn-whatsapp" href="https://wa.me/923057867149?text=Assalam-o-Alaikum!%20I%20want%20a%20mobile%20app%20for%20my%20business." target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.2-.7.3-.9.9-1.1 2.2-.2 3.9a11.6 11.6 0 0 0 4.5 4.2c1.7.8 2.4.9 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3z"/></svg>
+            Chat on WhatsApp
+          </a>
+          <a class="btn btn-ghost" href="portfolio.html">View our work</a>
+        </div>
+        <div class="hero-trust reveal" style="--d:.36s">
+          <span>Affordable pricing</span>
+          <span>Your branding throughout</span>
+          <span>No monthly server fee</span>
+        </div>
+      </div>
+      <div class="hero-visual reveal" style="--d:.2s" aria-hidden="true">
+        <div class="hero-badge hero-badge-1"><span class="hb-dot"></span> Live on Google Play</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+            <div class="phone-app">
+              <div class="phone-app-head">
+                <img src="logo.png" alt="" class="phone-app-logo">
+                <div>
+                  <div class="phone-app-name">Rah-e-Noor</div>
+                  <div class="phone-app-sub">Quran • Hadith • Duas</div>
+                </div>
+                <span class="phone-app-live">PLAY</span>
+              </div>
+              <div class="phone-card">
+                <div class="phone-card-title">Today</div>
+                <div class="phone-row">
+                  <span class="phone-chip">Q</span>
+                  <div class="phone-row-text">Quran<small>114 Surahs with Urdu translation</small></div>
+                </div>
+                <div class="phone-row">
+                  <span class="phone-chip">H</span>
+                  <div class="phone-row-text">Hadith Library<small>Authentic collections, easy search</small></div>
+                </div>
+                <div class="phone-row">
+                  <span class="phone-chip">T</span>
+                  <div class="phone-row-text">Tasbeeh Counter<small>Daily dhikr, saved offline</small></div>
+                </div>
+              </div>
+              <div class="phone-card">
+                <div class="phone-card-title">Prayer Times</div>
+                <div class="phone-row">
+                  <span class="phone-chip">🕌</span>
+                  <div class="phone-row-text">Fajr — 5:12 AM<small>Accurate daily timings</small></div>
+                </div>
+              </div>
+              <div class="phone-btn">Open App</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-badge hero-badge-2"><span class="hb-gold">200+</span> apps built</div>
       </div>
     </div>
   </section>
@@ -79,8 +131,11 @@
   <!-- SERVICES PREVIEW -->
   <section class="section">
     <div class="container">
-      <h2 class="reveal">What we <span class="gold">build</span></h2>
-      <p class="section-sub reveal" style="--d:.08s">Affordable, practical apps designed around how your business actually runs.</p>
+      <div class="section-head">
+        <span class="eyebrow reveal">Services</span>
+        <h2 class="reveal" style="--d:.06s">What we <span class="gold">build</span></h2>
+        <p class="section-sub reveal" style="--d:.12s">Affordable, practical apps designed around how your business actually runs.</p>
+      </div>
       <div class="cards">
         <div class="card reveal" style="--d:0s">
           <div class="card-icon">🏪</div>
@@ -104,12 +159,15 @@
     </div>
   </section>
 
-  <!-- INSTALLOCK -->
-  <section class="section">
+  <!-- FEATURED WORK -->
+  <section class="section section-alt">
     <div class="container">
-      <h2 class="reveal">Installock — <span class="gold">Mobile Qist Security</span></h2>
-      <p class="section-sub reveal" style="--d:.08s">Our paid solution for mobile shops selling phones on installments.</p>
-      <div class="work-card reveal" style="--d:.14s">
+      <div class="section-head">
+        <span class="eyebrow reveal">Featured work</span>
+        <h2 class="reveal" style="--d:.06s">Real apps, <span class="gold">built and shipped</span></h2>
+        <p class="section-sub reveal" style="--d:.12s">From a Play Store-published Islamic app to a paid security solution and a free welfare app.</p>
+      </div>
+      <div class="work-card work-card-wide reveal" style="--d:.14s">
         <div class="work-badge">Paid Solution</div>
         <h3>Installock</h3>
         <p>Installock helps mobile shops recover installments on time. The shop gets its own dashboard login, customer record and qist schedule, and the customer's Android phone connects to the system. When the qist is paid on time, the phone runs normally; when a qist is missed, the phone becomes limited — and it fully reopens as soon as the qist is received.</p>
@@ -119,32 +177,26 @@
           <a class="btn btn-whatsapp" href="https://wa.me/923007379385?text=Assalam-o-Alaikum!%20I%20want%20details%20about%20Installock." target="_blank" rel="noopener">Ask about Installock on WhatsApp</a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- FEATURED WORK TEASER -->
-  <section class="section section-alt">
-    <div class="container">
-      <h2 class="reveal">Featured <span class="gold">work</span></h2>
-      <p class="section-sub reveal" style="--d:.08s">Real apps, built and shipped.</p>
-      <div class="work-card reveal" style="--d:.14s">
-        <div class="work-badge">Live on Google Play</div>
-        <h3>Rah-e-Noor</h3>
-        <p>An Islamic app with offline Quran, Hadith library, tasbeeh counter and daily duas — published on the Google Play Store.</p>
-        <div class="work-links">
-          <a class="btn btn-gold" href="https://play.google.com/store/apps/details?id=com.jilanapps.rahenoor" target="_blank" rel="noopener">View on Google Play</a>
+      <div class="work-grid" style="margin-top: 20px;">
+        <div class="work-card reveal" style="--d:.18s">
+          <div class="work-badge">Live on Google Play</div>
+          <h3>Rah-e-Noor</h3>
+          <p>An Islamic app with offline Quran, Hadith library, tasbeeh counter and daily duas — published on the Google Play Store.</p>
+          <div class="work-links">
+            <a class="btn btn-gold" href="https://play.google.com/store/apps/details?id=com.jilanapps.rahenoor" target="_blank" rel="noopener">View on Google Play</a>
+          </div>
+        </div>
+        <div class="work-card reveal" style="--d:.22s">
+          <div class="work-badge">Free Welfare App</div>
+          <h3>Basti Dawa Blood Society</h3>
+          <p>A free welfare app that connects blood donors with patients — find donors by blood group and city, request blood, track the request, and download a verified donation certificate.</p>
+          <div class="work-links">
+            <a class="btn btn-gold" href="https://jilanapps.github.io/jilan-store/bdbs/" target="_blank" rel="noopener">Visit website</a>
+            <a class="btn btn-ghost" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v59.apk" target="_blank" rel="noopener">Download app</a>
+          </div>
         </div>
       </div>
-      <div class="work-card reveal" style="--d:.18s">
-        <div class="work-badge">Free Welfare App</div>
-        <h3>Basti Dawa Blood Society</h3>
-        <p>A free welfare app that connects blood donors with patients — find donors by blood group and city, request blood, track the request, and download a verified donation certificate.</p>
-        <div class="work-links">
-          <a class="btn btn-gold" href="https://jilanapps.github.io/jilan-store/bdbs/" target="_blank" rel="noopener">Visit website</a>
-          <a class="btn btn-ghost" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v59.apk" target="_blank" rel="noopener">Download app</a>
-        </div>
-      </div>
-      <div class="collection-cta reveal" style="--d:.2s">
+      <div class="collection-cta reveal" style="--d:.26s">
         <p>Plus 200+ business and utility apps — stores, clinics, games and tools.</p>
         <a class="btn btn-ghost" href="portfolio.html">Browse the portfolio</a>
       </div>
@@ -154,8 +206,11 @@
   <!-- PROCESS -->
   <section class="section">
     <div class="container">
-      <h2 class="reveal">How it <span class="gold">works</span></h2>
-      <p class="section-sub reveal" style="--d:.08s">Simple, honest and fast.</p>
+      <div class="section-head">
+        <span class="eyebrow reveal">How it works</span>
+        <h2 class="reveal" style="--d:.06s">Simple, honest <span class="gold">and fast</span></h2>
+        <p class="section-sub reveal" style="--d:.12s">Three steps from first message to your own app.</p>
+      </div>
       <div class="steps">
         <div class="step reveal" style="--d:0s">
           <div class="step-num">1</div>
@@ -179,6 +234,7 @@
   <!-- ABOUT -->
   <section class="section section-alt">
     <div class="container about reveal">
+      <span class="eyebrow">About us</span>
       <h2>About <span class="gold">us</span></h2>
       <p><strong>Asif — Founder, Jilan Apps.</strong></p>
       <p>I build affordable mobile apps for small businesses — restaurants, salons, grocery stores, clinics, schools and local shops. Every app is made to be simple: it works on Android phones, and you need no technical knowledge to run it.</p>
@@ -188,8 +244,10 @@
   <!-- CONTACT US / DEVELOPER CARD -->
   <section class="section">
     <div class="container">
-      <h2 class="reveal">Contact <span class="gold">Us</span></h2>
-      <p class="section-sub reveal" style="--d:.08s">Talk directly to the person who builds your app.</p>
+      <div class="section-head">
+        <span class="eyebrow reveal">Contact us</span>
+        <h2 class="reveal" style="--d:.06s">Talk directly to <span class="gold">the person</span> who builds your app</h2>
+      </div>
       <div class="dev-card reveal" style="--d:.14s">
         <img src="dr-asif.jpg" alt="Dr Muhammad Asif Ameen Attari" class="dev-photo">
         <h3>Dr Muhammad Asif Ameen Attari</h3>
@@ -215,7 +273,7 @@
   </section>
 
   <!-- CONTACT TEASER -->
-  <section class="section">
+  <section class="section section-alt">
     <div class="container contact reveal">
       <h2>Let's build <span class="gold">your app</span></h2>
       <p class="section-sub">Message us with your shop type — we'll reply with matching work samples.</p>
@@ -229,8 +287,33 @@
 </main>
 
 <footer>
-  <div class="container">
-    <p>© 2026 Jilan Apps Official. All rights reserved.</p>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="brand">
+        <img src="logo.png" alt="Jilan Apps Official" class="brand-logo">
+        <span class="brand-text">Jilan Apps <em>Official</em></span>
+      </a>
+      <p>Affordable custom Android apps for small businesses — built in Multan, Pakistan, for clients worldwide.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="faq.html">FAQ</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="https://wa.me/923057867149?text=Assalam-o-Alaikum!%20I%20want%20a%20mobile%20app%20for%20my%20business." target="_blank" rel="noopener">WhatsApp: +92 305 7867149</a>
+      <a href="mailto:jilanappsofficial@gmail.com">jilanappsofficial@gmail.com</a>
+      <a href="https://www.fiverr.com/jilanapps" target="_blank" rel="noopener">Fiverr: fiverr.com/jilanapps</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <p>© 2026 Jilan Apps Official. All rights reserved.</p>
+    </div>
   </div>
 </footer>
 
@@ -245,6 +328,23 @@
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+
+  /* hamburger menu */
+  var toggle = document.querySelector(".nav-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    document.querySelectorAll(".nav-links a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Open menu");
+      });
+    });
+  }
 
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {
