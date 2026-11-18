@@ -2227,7 +2227,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v57';
+var APP_VERSION = 'v58';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -5792,6 +5792,9 @@ function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html
     try {
       var blob = new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'});
       var fname = 'BDBS-Request-' + (r.reqNo||'poster') + '.png';
+      /* v58: app me native bridge se share karo — WebView me navigator.share
+         WhatsApp ko kharab file URI deta hai ("not a document" error). */
+      if (window.BDBS && window.BDBS.saveImage) { try { window.BDBS.saveImage(canvas.toDataURL('image/png'), fname); return; } catch(e){} }
       var file = new File([blob], fname, {type:'image/png'});
       if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
         navigator.share({files:[file], title:'BDBS Blood Request', text:posterText(r)}).catch(function(){ saveBlob(blob, fname); });
