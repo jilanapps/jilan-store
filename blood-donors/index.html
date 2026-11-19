@@ -4059,6 +4059,7 @@ function editDonor(id){
     var dc = document.getElementById('dConsent'); if (dc) dc.checked = true;
     var b = document.getElementById('dSubmitBtn'); if (b) b.textContent = 'Save Changes';
     document.getElementById('dMsg').innerHTML = '<span class="mut">Editing Donor No. ' + esc(d.donorNo || '') + ' — ' + esc(d.name || '') + '. Photo change karni ho to nayi photo chunein, warna purani photo hi rahe gi. Save Changes dabayein.</span>' + (d.gender === 'Female' ? '<br><span class="mut small">\uD83D\uDD12 Female donor — admin is record ko public nahi kar sakta. Sirf woh khud apne account se public kar sakti hain.</span>' : '');
+    show('donor');
     wizGo('donor', 0);
     var nm = document.getElementById('dName'); if (nm) nm.scrollIntoView();
   });
@@ -4235,6 +4236,7 @@ function editMember(id){
     var b = document.getElementById('mSubmitBtn'); if (b) b.textContent = 'Save Changes';
     document.getElementById('mMsg').innerHTML = '<span class="mut">Editing ID No. ' + esc(m.idNo || '') + ' — ' + esc(m.name || '') + '. Photo change karni ho to nayi photo chunein, warna purani photo hi rahe gi. Save Changes dabayein.</span>';
     if (m.gender === 'Female') { document.getElementById('mMsg').innerHTML += '<br><span class="mut small">\uD83D\uDD12 Female member — admin is record ko public nahi kar sakta. Sirf woh khud apne account se public kar sakti hain.</span>'; }
+    show('member');
     wizGo('member', 0);
     var nm = document.getElementById('mName'); if (nm) nm.scrollIntoView();
   });
