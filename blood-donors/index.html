@@ -5145,7 +5145,10 @@ function loadMyRecord(u, donorId){
    Shown ONLY in her own record view when SHE is signed in. Default OFF.
    Admin screens have NO control that can publish her data (see
    editMember / editDonor) — the toggle lives here and in My Member Card
-   only, and the rules (v37) enforce it server-side too. */
+   only, and the rules (v37) enforce it server-side too.
+   TASHEEH 2026-11-19: admin ALSO has a Hide/Public button in the admin member
+   table (toggleMemberPublic) — user order; use only with her permission.
+   Edit forms still never touch publicOptIn. */
 function renderMyPrivacyToggles(r){
   var box = document.getElementById('myPrivacyBox');
   if (!box) return;
@@ -5424,6 +5427,31 @@ function setMyMemberPublicOptIn(v){
       });
     }).catch(function(){ if (msg) msg.innerHTML = '<span class="err">Could not load record.</span>'; });
   }).catch(function(){ if (msg) msg.innerHTML = '<span class="err">Could not load record.</span>'; });
+}
+/* ---------- Admin Hide/Public toggle for members (2026-11-19, user order) ----------
+   Same control the member herself has in My Member Card, now also in the
+   admin member table. Rules v40 allow admin to change ONLY publicOptIn,
+   both directions. The public mirror also gets hidden=true/false so the
+   toggle hides male members too (the public list filters on hidden).
+   Female members: use only with her permission. */
+function toggleMemberPublic(id, v){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!FB_OK || !auth || !auth.currentUser) { alert('Internet chahiye.'); return; }
+  db.collection('members').doc(id).get().then(function(dd){
+    if (!dd.exists) { alert('Record not found.'); return; }
+    var m = dd.data(); m.id = dd.id;
+    if (v && m.gender === 'Female' && !confirm('Ye female member public ho jayegi. Kya un ki ijazat hai?')) return;
+    qUpdate('members', id, {publicOptIn: !!v}, function(){
+      var mirror = memberPub({id:m.id, photo:m.photo, name:m.name, phone:m.phone, designation:m.designation, idNo:m.idNo, expiry:m.expiry, gender:m.gender, publicOptIn:!!v, createdAt:m.createdAt, demo:!!m.demo});
+      mirror.hidden = !v;
+      qDel('membersPublic', id, function(){
+        qAdd('membersPublic', mirror, function(){
+          logAudit('member-public-' + (v ? 'on' : 'off'), id, (m.name||''));
+          renderAdmin(); loadMembers(); loadHome();
+        });
+      });
+    });
+  }).catch(function(){ alert('Could not load record.'); });
 }
 /* v53: validate an optional Completed Request No. — the request must
    exist AND be Completed, otherwise the save is blocked (fake entries).
@@ -6137,7 +6165,7 @@ function renderAdmin(){
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
           ms.forEach(function(m){
-            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="toggleMemberPublic(\''+esc(m.id)+'\','+(m.publicOptIn===true?'false':'true')+')">'+(m.publicOptIn===true?'Hide karo':'Public karo')+'</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Req No.</th><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Units</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
