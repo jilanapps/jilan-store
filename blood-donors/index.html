@@ -438,8 +438,8 @@ a.sheet-btn{text-decoration:none}
 .bad{background:rgba(255,107,107,.12);color:var(--red)}
 
 /* ---------- language (v17) ---------- */
-.langsw{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(11,19,43,.92);border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--mut);flex-wrap:wrap}
-.langbtn{border:1.5px solid var(--line);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);transition:all .15s}
+.langsw{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(11,19,43,.92);border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:#cbd5e1;flex-wrap:wrap} /* v73: label was var(--mut) — unreadable on the dark bar */
+.langbtn{border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;color:#e2e8f0;transition:all .15s} /* v73: was var(--line)/.07/var(--ink) — invisible on dark bar */
 .langbtn.on{background:linear-gradient(135deg,#00F2FE,#4FACFE);border-color:transparent;color:#04263b}
 .lang-ur{display:none}
 html[lang="ur"] .lang-en{display:none}
