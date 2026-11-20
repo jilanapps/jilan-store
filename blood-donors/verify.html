@@ -65,6 +65,19 @@ function showMember(m){
     '<p>Phone: <b>'+esc(m.phone||'—')+'</b></p>' +
     '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
 }
+/* v71: donor verification card — no expiry needed for donors. A hidden
+   (private) donor mirror shows the private message, never the record. */
+function showDonor(d){
+  if (!d) { notVerified(); return; }
+  if (d.hidden) { document.getElementById('out').innerHTML = '<div class="card"><p class="mut">🔒 This donor has chosen to keep their record private.</p></div>'; return; }
+  document.getElementById('out').innerHTML = '<div class="card">' +
+    (d.photo ? '<img class="photo" src="'+d.photo+'" alt="Donor photo"><br><br>' : '') +
+    '<p class="verified">✓ VERIFIED DONOR</p>' +
+    '<h2 style="margin:6px 0">'+esc(d.name)+'</h2>' +
+    '<p>Donor No.: <b>'+esc(d.donorNo)+'</b></p>' +
+    '<p>Blood Group: <span class="pill">'+esc(d.group)+'</span></p>' +
+    '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
+}
 function showCert(c){
   document.getElementById('out').innerHTML = '<div class="card">' +
     '<p class="verified">✓ VERIFIED CERTIFICATE</p>' +
@@ -80,6 +93,23 @@ function showCert(c){
   var id = q.get('id');
   var CFG = window.BDBS_FIREBASE_CONFIG || {};
   var configured = !!(CFG.apiKey && CFG.apiKey.indexOf('PASTE') !== 0);
+  /* v71: donor ID cards carry a donorsPublic doc id (or a Donor No.) —
+     membersPublic alone can never verify them. Doc id first, then
+     Donor No. (string, then number — mirrors store it as a string). */
+  function checkDonor(){
+    var dcol = firebase.firestore().collection('donorsPublic');
+    dcol.doc(id).get().then(function(d){
+      if (d.exists) { showDonor(d.data()); return; }
+      dcol.where('donorNo','==',id).limit(1).get().then(function(s){
+        if (!s.empty) { showDonor(s.docs[0].data()); return; }
+        var n = parseInt(id,10);
+        if (isNaN(n)) { notVerified(); return; }
+        dcol.where('donorNo','==',n).limit(1).get().then(function(s2){
+          if (!s2.empty) showDonor(s2.docs[0].data()); else notVerified();
+        }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
+      }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
+    }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
+  }
   if (certRef) {
     if (configured && typeof firebase !== 'undefined') {
       try {
@@ -103,8 +133,9 @@ function showCert(c){
         /* Doc-ID lookup missed (e.g. the public copy was saved under a
            different document ID). Fall back to the id field in the doc. */
         col.where('id','==',id).limit(1).get().then(function(s2){
-          if (!s2.empty) showMember(s2.docs[0].data()); else notVerified();
-        }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
+          if (!s2.empty) { showMember(s2.docs[0].data()); return; }
+          checkDonor();
+        }).catch(function(){ checkDonor(); });
       }).catch(function(){ notVerified('Could not reach the verification server. Please check internet and try again.'); });
       return;
     } catch(e) { /* fall through to local demo check */ }
