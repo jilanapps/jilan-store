@@ -2908,11 +2908,19 @@ function donorPub(d){
    it is never displayed anywhere public. Everything else (CNIC, age,
    education, email, address, father, blood group) is
    admin-only in the private 'members' collection. */
+/* v72: protected member card — protectedBy holds the owner admin's email.
+   Only that owner may edit, hide or remove the card; any other admin (or a
+   signed-in user who is not the owner) is blocked by isProtectedMember. */
+function isProtectedMember(m){
+  if (!m || !m.protectedBy) return false;
+  var me = (typeof auth !== 'undefined' && auth && auth.currentUser && auth.currentUser.email) ? String(auth.currentUser.email).toLowerCase() : '';
+  return String(m.protectedBy).toLowerCase() !== me;
+}
 function memberPub(m){
   if (isFemalePrivate(m)) {
     return {id:m.id, idNo:m.idNo||'', phoneHash:donorKeyId('phone', m.phone||''), hidden:true, createdAt:m.createdAt||Date.now(), demo:!!m.demo};
   }
-  return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',expiry:m.expiry,gender:m.gender||'',publicOptIn:(m.publicOptIn===false?false:true),createdAt:m.createdAt||Date.now(),demo:!!m.demo};
+  return {id:m.id,photo:m.photo||'',name:m.name,phone:m.phone||'',designation:m.designation||'',idNo:m.idNo||'',protectedBy:m.protectedBy||'',expiry:m.expiry,gender:m.gender||'',publicOptIn:(m.publicOptIn===false?false:true),createdAt:m.createdAt||Date.now(),demo:!!m.demo};
 }
 /* v57-D: recurring flag travels to the public card so the list can show
    the Monthly badge and the admin can suggest next month's request. */
@@ -4230,6 +4238,7 @@ function loadMembers(){
   qAll('membersPublic', function(ms){
     var box = document.getElementById('memberList');
     var vis = ms.filter(function(m){ return !m.hidden && !isFemalePrivate(m); });
+    vis.sort(function(a,b){ return String(a.idNo||'').localeCompare(String(b.idNo||'')); }); /* v72: members by ID number — 001, 002, 003 */
     if (!vis.length) { box.innerHTML = '<span class="mut">No members yet.</span>'; return; }
     var isAdm = isAdmin();
     box.innerHTML = vis.map(function(m){
@@ -4683,6 +4692,7 @@ function editMember(id){
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
     if (!m) { alert('Member not found.'); return; }
+    if (isProtectedMember(m)) { alert('Ye card sirf Dr Asif change kar sakte hain.'); return; } /* v72 */
     _editMemberId = id;
     var set = function(i, v){ var e = document.getElementById(i); if (e) e.value = v || ''; };
     set('mName', m.name); set('mFather', m.father); set('mDesig', m.designation); set('mGender', m.gender||'');
@@ -5038,9 +5048,10 @@ function shareMemberCardPDFText(){
    listing and the member lookup entry, then refreshes both views. */
 function removeMember(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
-  if (!confirm('Remove this member? The member record, public listing and card will be deleted. This cannot be undone.')) return;
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id === id) m = x; });
+    if (isProtectedMember(m)) { alert('Ye card sirf Dr Asif change kar sakte hain.'); return; } /* v72 */ /* v72: check before confirm */
+    if (!confirm('Remove this member? The member record, public listing and card will be deleted. This cannot be undone.')) return;
     var idNo = m ? (m.idNo||'') : '';
     var done = function(){ logAudit('remove-member', id, m ? ((m.name||'') + ' (ID No. ' + (idNo||'') + ')') : ''); renderAdmin(); loadMembers(); loadHome(); };
     qDel('members', id, function(){
@@ -6007,8 +6018,9 @@ function setMyMemberPublicOptIn(v){
     db.collection('members').doc(linkedId).get().then(function(dd){
       if (!dd.exists) { if (msg) msg.innerHTML = '<span class="err">Record not found.</span>'; return; }
       var m = dd.data(); m.id = dd.id;
+      if (isProtectedMember(m)) { if (msg) msg.innerHTML = '<span class="err">Ye card sirf Dr Asif change kar sakte hain.</span>'; return; } /* v72 */
       qUpdate('members', linkedId, {publicOptIn: !!v}, function(){
-        var mirror = memberPub({id:m.id, photo:m.photo, name:m.name, phone:m.phone, designation:m.designation, idNo:m.idNo, expiry:m.expiry, gender:m.gender, publicOptIn:!!v, createdAt:m.createdAt, demo:!!m.demo});
+        var mirror = memberPub({id:m.id, photo:m.photo, name:m.name, phone:m.phone, designation:m.designation, idNo:m.idNo, protectedBy:m.protectedBy, expiry:m.expiry, gender:m.gender, publicOptIn:!!v, createdAt:m.createdAt, demo:!!m.demo});
         qDel('membersPublic', linkedId, function(){
           qAdd('membersPublic', mirror, function(){
             if (msg) msg.innerHTML = '<span class="ok">' + (v ? 'Aap ka data ab public dikhe ga.' : 'Aap ka data ab public nahi dikhe ga.') + '</span>';
@@ -6031,9 +6043,10 @@ function toggleMemberPublic(id, v){
   db.collection('members').doc(id).get().then(function(dd){
     if (!dd.exists) { alert('Record not found.'); return; }
     var m = dd.data(); m.id = dd.id;
+    if (isProtectedMember(m)) { alert('Ye card sirf Dr Asif change kar sakte hain.'); return; } /* v72 */
     if (v && m.gender === 'Female' && !confirm('Ye female member public ho jayegi. Kya un ki ijazat hai?')) return;
     qUpdate('members', id, {publicOptIn: !!v}, function(){
-      var mirror = memberPub({id:m.id, photo:m.photo, name:m.name, phone:m.phone, designation:m.designation, idNo:m.idNo, expiry:m.expiry, gender:m.gender, publicOptIn:!!v, createdAt:m.createdAt, demo:!!m.demo});
+      var mirror = memberPub({id:m.id, photo:m.photo, name:m.name, phone:m.phone, designation:m.designation, idNo:m.idNo, protectedBy:m.protectedBy, expiry:m.expiry, gender:m.gender, publicOptIn:!!v, createdAt:m.createdAt, demo:!!m.demo});
       mirror.hidden = !v;
       qDel('membersPublic', id, function(){
         qAdd('membersPublic', mirror, function(){
