@@ -796,6 +796,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
 <div class="fld static"><select id="dArea"><option value="">Select Area</option></select><label for="dArea">Area / City (optional)</label></div>
 <div class="fld"><input id="dFamily" placeholder=" "><label for="dFamily">Family (optional — e.g. Javaid family)</label></div>
+<div class="fld"><input id="dSponsor" placeholder=" "><label for="dSponsor">Sponsor (optional — jis ne donor ko sponsor kiya)</label></div>
 <div class="row">
 <div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
@@ -4232,7 +4233,7 @@ function loadMembers(){
     box.innerHTML = vis.map(function(m){
       return '<div class="idcard">' +
         '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
-        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span>' +
+        '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.designation?'<br><span class="mut">'+esc(m.designation)+'</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span>' +
         (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
         '</div></div></div>';
     }).join('');
@@ -4481,7 +4482,7 @@ function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) retu
    fallback alike). */
 function donorSubmitSuccess(full, btn){
   document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
-  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo(); /* v57-B */
+  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily','dSponsor'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo(); /* v57-B */
   document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
 }
 /* ---------- v51 donor edit (admin only, mirrors editMember) ----------
@@ -4504,7 +4505,7 @@ function editDonor(id){
     set('dName', d.name); set('dFather', d.father); set('dGender', d.gender||'');
     set('dCnic', d.cnic); set('dGroup', d.group); set('dAge', d.age);
     set('dPhone', d.phone); set('dAddress', d.address); set('dArea', d.area||'');
-    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units); set('dFamily', d.family||''); set('dLat', (d.lat == null ? '' : d.lat)); set('dLng', (d.lng == null ? '' : d.lng)); /* v57-B */
+    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units); set('dFamily', d.family||''); set('dSponsor', d.sponsor||''); set('dLat', (d.lat == null ? '' : d.lat)); set('dLng', (d.lng == null ? '' : d.lng)); /* v57-B */
     var ph = document.getElementById('dPhoto'); if (ph) ph.value = '';
     var dc = document.getElementById('dConsent'); if (dc) dc.checked = true;
     var b = document.getElementById('dSubmitBtn'); if (b) b.textContent = 'Save Changes';
@@ -4520,7 +4521,7 @@ function donorEditSave(editId, btn){
     var old = null; ds.forEach(function(x){ if (x.id === editId) old = x; });
     if (!old) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor not found.</span>'; if (btn) btn.disabled = false; exitDonorEdit(); return; }
     readPhoto(document.getElementById('dPhoto'), function(photo){
-      var fields = {name:val('dName'), father:val('dFather'), gender:val('dGender'), cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0};
+      var fields = {name:val('dName'), father:val('dFather'), gender:val('dGender'), cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), sponsor:val('dSponsor'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0};
       var _ela = parseCoord(val('dLat')), _elo = parseCoord(val('dLng')); if (_ela !== null) fields.lat = _ela; if (_elo !== null) fields.lng = _elo; /* v57-B keep old location when the fields are blank */
       if (photo) fields.photo = photo; else fields.photo = old.photo || '';
       var updated = {}; for (var k in old) updated[k] = old[k]; for (var k2 in fields) updated[k2] = fields[k2];
@@ -4531,7 +4532,7 @@ function donorEditSave(editId, btn){
           qAdd('donorsPublic', pub, function(){
             document.getElementById('dMsg').innerHTML = '<span class="ok">Donor updated. Donor No. '+esc(updated.donorNo||'')+'.</span>';
             exitDonorEdit();
-            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily'].forEach(function(i){document.getElementById(i).value='';}); /* v57-B */
+            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily','dSponsor'].forEach(function(i){document.getElementById(i).value='';}); /* v57-B */
             document.getElementById('dGroup').value=''; document.getElementById('dGender').value=''; document.getElementById('dPhoto').value=''; document.getElementById('dConsent').checked=false;
             if (btn) btn.disabled = false;
             loadHome();
@@ -4611,11 +4612,12 @@ function submitDonorTx(ph, cn, nameNorm, group, photo, btn){
       if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
       var dno = String(nextNo);
       var id = uid('donor');
-      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), sponsor:val('dSponsor'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
       var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
 
       if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
       if (!full.family) delete full.family; /* v69: family optional */
+      if (!full.sponsor) delete full.sponsor; /* v71: sponsor optional */
       var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); if (!pub.area) delete pub.area; } /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location — null never reaches Firestore */
       tx.set(db.collection('donors').doc(id), full);
       tx.set(db.collection('donorsPublic').doc(id), pub);
@@ -4651,11 +4653,12 @@ function submitDonorLegacy(ph, cn, photo, btn){
     if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
     var id = uid('donor');
     var dno = nextDonorNo(ds);
-    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), sponsor:val('dSponsor'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
     var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
 
     if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
       if (!full.family) delete full.family; /* v69: family optional */
+      if (!full.sponsor) delete full.sponsor; /* v71: sponsor optional */
     var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); }
     if (!pub.area) delete pub.area; /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location */
     qAdd('donors', full, function(ok){
@@ -7287,8 +7290,9 @@ function renderThalassemiaPublic(){
   var box = document.getElementById('thalassemiaBox'); if (!box) return;
   qAll('thalassemiaPatientsPublic', function(ps){
     qAll('donorsPublic', function(ds){
-      if (!(ps||[]).length) { box.innerHTML = '<span class="mut">No thalassemia patients registered yet — the admin adds them.</span>'; return; }
-      box.innerHTML = (ps||[]).map(function(p){
+      var ps2 = (ps||[]).filter(function(p){ return p.status !== 'closed'; }); /* v71: closed patients hidden from the public list */
+      if (!ps2.length) { box.innerHTML = '<span class="mut">No thalassemia patients registered yet — the admin adds them.</span>'; return; }
+      box.innerHTML = ps2.map(function(p){
         var match = (ds||[]).filter(function(d){ return d.group === p.group && d.available !== false && !d.hidden && donorStatus(d.lastDonation).ok; });
         var names = match.slice(0,3).map(function(d){ return esc(d.name||''); }).join(', ');
         return '<div class="dcard"><b>' + esc(p.name||'Patient') + '</b> <span class="bgpill">' + esc(p.group||'') + '</span><br><span class="mut">' + esc(p.hospital||'') + ' • ' + esc(p.need||'Monthly blood needed') + '</span><br><span class="mut small">' + match.length + ' matching eligible donor(s)' + (names ? ': ' + names : '') + '</span><br><button class="btn ghost" onclick="show(\'find\')">Find Donor</button></div>';
@@ -7302,7 +7306,7 @@ function submitThalassemiaPatient(){
   var m = document.getElementById('tpMsg');
   if (!nm || !g || !h) { if (m) m.innerHTML = '<span class="err">Please fill patient name, blood group and hospital.</span>'; return; }
   var id = uid('thalassemia');
-  var p = {id:id, name:nm, group:g, hospital:h, need:val('tpNeed'), phone:val('tpPhone'), createdAt:Date.now()};
+  var p = {id:id, name:nm, group:g, hospital:h, need:val('tpNeed'), phone:val('tpPhone'), createdAt:Date.now()}; /* v71: NO status here — v42 rules keys().hasOnly() would deny the create; missing status = active. v43 adds 'status'. */
   var pub = {id:id, name:nm, group:g, hospital:h, need:val('tpNeed'), createdAt:Date.now()};
   qAdd('thalassemiaPatients', p, function(){
     qAdd('thalassemiaPatientsPublic', pub, function(){
@@ -7321,7 +7325,8 @@ function renderThalassemiaAdmin(){
       if (!(ps||[]).length) { box.innerHTML = '<span class="mut">No patients yet.</span>'; return; }
       box.innerHTML = '<h3>Patients (' + ps.length + ')</h3>' + ps.map(function(p){
         var match = (ds||[]).filter(function(d){ return d.group === p.group && d.available !== false && !d.hidden && donorStatus(d.lastDonation).ok; });
-        return '<div class="dcard"><b>' + esc(p.name||'') + '</b> <span class="bgpill">' + esc(p.group||'') + '</span><br><span class="mut">' + esc(p.hospital||'') + ' • ' + esc(p.need||'') + '</span><br><span class="mut small">Phone (admin only): ' + esc(p.phone||'-') + ' • ' + match.length + ' matching eligible donor(s)</span><br><button class="btn ghost" onclick="removeThalassemiaPatient(\'' + esc(p.id) + '\')">Remove</button></div>';
+        var closed = p.status === 'closed'; /* v71 */
+        return '<div class="dcard"><b>' + esc(p.name||'') + '</b> <span class="bgpill">' + esc(p.group||'') + '</span>' + (closed ? ' <span class="badge">Closed</span>' : '') + '<br><span class="mut">' + esc(p.hospital||'') + ' • ' + esc(p.need||'') + '</span><br><span class="mut small">Phone (admin only): ' + esc(p.phone||'-') + ' • ' + match.length + ' matching eligible donor(s)</span><br>' + (closed ? '<button class="btn ghost" onclick="setThalassemiaStatus(\'' + esc(p.id) + '\',false)">Reopen</button>' : '<button class="btn ghost" onclick="setThalassemiaStatus(\'' + esc(p.id) + '\',true)">Close</button>') + ' <button class="btn ghost" onclick="removeThalassemiaPatient(\'' + esc(p.id) + '\')">Remove</button></div>';
       }).join('');
     });
   });
@@ -7330,6 +7335,23 @@ function removeThalassemiaPatient(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Remove this patient?')) return;
   qDel('thalassemiaPatients', id, function(){ qDel('thalassemiaPatientsPublic', id, function(){ renderThalassemiaAdmin(); renderThalassemiaPublic(); }); });
+}
+/* v71: Close / Reopen a thalassemia patient. status='closed' hides the
+   patient from the public list; the admin still sees them with a Closed
+   badge and can Reopen (status back to 'active'). Remove stays permanent.
+   NOTE: v42 rules do NOT list 'status' in the update allowlist, so the
+   server write fails with permission-denied until rules v43 is published
+   (firestore-rules-v43.rules — prepared, NOT published). qUpdate shows
+   the denial via qErrToast; the local cache flips optimistically. */
+function setThalassemiaStatus(id, closed){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm(closed ? 'Close this patient? They will no longer appear on the public list.' : 'Reopen this patient? They will appear on the public list again.')) return;
+  var st = closed ? 'closed' : 'active';
+  qUpdate('thalassemiaPatients', id, {status:st}, function(){
+    qUpdate('thalassemiaPatientsPublic', id, {status:st}, function(){
+      renderThalassemiaAdmin(); renderThalassemiaPublic();
+    });
+  });
 }
 function renderEligibleList(){
   var box = document.getElementById('eligibleList'); if (!box) return;
