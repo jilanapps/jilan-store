@@ -2772,6 +2772,20 @@
       "version": "1.5",
       "md5": "e9c9858e60387f80c3500a31d0d4207f",
       "description": "Facebook, Instagram, TikTok aur YouTube videos download karein — Status Saver bhi"
+    },
+    {
+      "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/ittiba-e-rasool.apk",
+      "category": "islamic",
+      "color": "#0b5d3b",
+      "desc": "Tehreek Ittiba-e-Rasool Pakistan — Quran (Kanzul Iman), Duas, Namaz Timings, Tasbeeh",
+      "icon": "icons/ittibaerasool.png",
+      "id": "ittiba-e-rasool",
+      "name": "Tehreek Ittiba-e-Rasool Pakistan",
+      "package": "com.jilanapps.ittibaerasool",
+      "size": 1286758,
+      "versionCode": 1,
+      "versionName": "1.0",
+      "web": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/"
     }
   ],
   "store": {
