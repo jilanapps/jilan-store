@@ -971,6 +971,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="card" id="adminCard" style="display:none">
 <h2>Admin Panel <span id="adminEmail" class="mut"></span></h2>
 <button class="btn ghost" onclick="doLogout()">Logout</button>
+<button class="btn ghost" id="tmpTokenBtn" onclick="showAdminToken()">Show admin token (temporary)</button>
+<pre id="admintoken" style="display:none;word-break:break-all;white-space:pre-wrap"></pre>
 <button class="btn ghost" onclick="show('activity')">Publish Activity</button>
 
 <div class="adm-dash" id="adminDash">
@@ -4911,6 +4913,8 @@ function isAdminUser(u){ if (!u || !u.email) return false; var e = String(u.emai
    marker stays on this phone, so admin buttons keep working without net.
    The server still enforces admin-only writes when the queue syncs. */
 function isAdmin(){ return (FB_OK && auth && auth.currentUser && isAdminUser(auth.currentUser)) || (localStorage.getItem('bdbs_admin')==='1'); }
+/* TEMPORARY (remove after 2026-11-20 token use): show the signed-in admin's Firebase ID token so the fix scripts can run. Admin-only. */
+function showAdminToken(){ if(!isAdmin()) return; var u = auth && auth.currentUser; if(!u) return; u.getIdToken().then(function(t){ var el=document.getElementById('admintoken'); el.textContent=t; el.style.display='block'; }); }
 function showSignupForm(){
   document.getElementById('loginCard').style.display='none';
   document.getElementById('signupCard').style.display='block';
