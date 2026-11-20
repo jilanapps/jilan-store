@@ -2755,6 +2755,20 @@
    "versionCode": 1,
    "versionName": "1.0",
    "web": "https://jilanapps.github.io/jilan-store/timelock/"
+  },
+  {
+   "apk": "https://jilanapps.github.io/jilan-store/jilan-all-video-downloader.apk",
+   "category": "tools",
+   "color": "#1565c0",
+   "desc": "Facebook, Instagram, TikTok aur YouTube videos download karein — Status Saver bhi",
+   "icon": "icons/allvideodownloader.png",
+   "id": "allvideodownloader",
+   "name": "Jilan All Video Downloader",
+   "package": "com.jilanapps.allvideodownloader",
+   "size": 827949,
+   "versionCode": 5,
+   "versionName": "1.4",
+   "web": ""
   }
  ],
  "store": {
