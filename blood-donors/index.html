@@ -304,6 +304,19 @@ label{font-size:13px;font-weight:600;color:var(--ink2)}
 .compat-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
 .compat-table th,.compat-table td{border:1px solid rgba(255,255,255,.14);padding:6px 8px;text-align:left}
 html.light .compat-table th,html.light .compat-table td{border-color:rgba(15,42,74,.14)}
+/* v69: Saraiki shows the Urdu static blocks (same script) */
+html[lang="sr"] .lang-en{display:none}
+html[lang="sr"] .lang-ur{display:block}
+/* v69: donor id card, donor of month, thalassemia, emergency, family */
+.v69-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;margin:4px 4px 0 0;border:1px solid #ddd}
+.v69-dom{display:flex;gap:12px;align-items:center}
+.v69-avatar{width:64px;height:64px;border-radius:50%;background:#DC2626;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex:none}
+.v69-emerg a{display:block;padding:8px 0;border-bottom:1px solid #eee;text-decoration:none;color:inherit}
+.v69-emerg a b{color:#DC2626}
+.idcard-donor{border:2px solid #DC2626;border-radius:14px;padding:16px;background:#fff;color:#111;max-width:420px;margin:0 auto}
+.idcard-donor .idc-head{display:flex;gap:12px;align-items:center}
+.idcard-donor img.idc-photo{width:84px;height:104px;object-fit:cover;border-radius:8px;border:1px solid #ccc}
+.fam-group{border:1px solid #ddd;border-radius:10px;padding:10px;margin-top:8px}
 .demo{background:rgba(255,255,255,.08);color:var(--ink2)}
 .vbadge{display:inline-flex;align-items:center;gap:4px;background:var(--teal-soft);color:var(--teal-d);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700}
 .rpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
@@ -429,6 +442,10 @@ html[lang="ur"] .lang-ur{display:block}
 .lang-ar{display:none}
 html[lang="ar"] .lang-en{display:none}
 html[lang="ar"] .lang-ar{display:block}
+/* v69 Donation: hadees translation follows the active language (EN/UR/AR/SR). */
+.donation-hadees .lang-sr{display:none}
+html[lang="sr"] .donation-hadees .lang-ur{display:none}
+html[lang="sr"] .donation-hadees .lang-sr{display:block}
 html[lang="ur"] .consent-ur,html[lang="ar"] .consent-ur{display:none}
 [dir="rtl"] .fld>label{left:auto;right:12px}
 [dir="rtl"] .card h2:after{left:auto;right:0}
@@ -563,7 +580,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div><h1>Basti Dawa Blood Society</h1><p>BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</p><p class="tagline">Assalam-o-Alaikum &bull; Donate Blood &bull; Receive Blood &bull; Save Lives</p></div>
 <div class="hside"><span class="hdr-badge">🩸 <b id="hdrDonors" data-v="0">0</b> Total Registered Donors</span><button class="btn light hdr-register" onclick="show('donor')">+ Register as Donor</button><button class="btn light bellwrap" onclick="show('notif')">🔔 <span class="hbtn-txt">Notifications</span><span id="bellCount" class="bell-badge" style="display:none">0</span></button><button class="btn light hbtn" id="refreshBtn" onclick="refreshData()" aria-label="Refresh">🔄</button><button class="btn light hbtn" onclick="show('login')" aria-label="Profile"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1-3.4 3.8-5 7-5s6 1.6 7 5"/></svg></button></div>
 </div>
-<div class="langsw"><span>Language / زبان / اللغة:</span><button class="langbtn" data-lang-btn="en" onclick="setLang('en')">English</button><button class="langbtn" data-lang-btn="ur" onclick="setLang('ur')">اردو</button><button class="langbtn" data-lang-btn="ar" onclick="setLang('ar')">عربي</button></div>
+<div class="langsw"><span>Language / زبان / اللغة:</span><button class="langbtn" data-lang-btn="en" onclick="setLang('en')">English</button><button class="langbtn" data-lang-btn="ur" onclick="setLang('ur')">اردو</button><button class="langbtn" data-lang-btn="ar" onclick="setLang('ar')">عربي</button><button class="langbtn" data-lang-btn="sr" onclick="setLang('sr')">سرائیکی</button></div>
 </header>
 <div id="updateBanner" style="display:none;background:rgba(255,107,107,.14);border-bottom:2px solid #ff6b6b;padding:10px 14px;text-align:center"><b>🆕 Nayi version <span class="upd-ver"></span> aa gayi hai.</b> <button class="btn upd-btn" style="margin-left:8px">Update karein</button> <button class="btn ghost" onclick="document.getElementById('updateBanner').style.display='none'">Baad me</button></div>
 <div id="refreshToast" class="refresh-toast" style="display:none"></div>
@@ -583,6 +600,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <button class="btn oline" onclick="show('donor')">Register as Donor</button>
 <button class="btn oline" onclick="show('request');setTimeout(function(){var e=document.getElementById('v57SosCard');if(e)e.scrollIntoView();},200)">🚨 Emergency SOS</button>
 <button class="btn oline" onclick="show('donor');setTimeout(function(){var e=document.getElementById('v57EligCard');if(e)e.scrollIntoView();},200)">✓ Can I Donate?</button>
+<button class="btn oline" onclick="show('help')">💬 Madad Box</button>
+<button class="btn oline" onclick="show('donateinfo')">📖 Donate Guide</button>
 </div>
 <div class="stat-grid">
 <div class="stat-card"><span class="stat-ic">🩸</span><b id="statDonors" data-v="0">0</b><span>Total Donors</span></div>
@@ -604,6 +623,11 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="hero-note">Each unit of donated blood can save up to 3 lives.</p>
 <p id="demoNote" class="hero-demo">Offline — saved data works on this phone. New changes will sync when internet returns.</p>
 </div>
+<div class="card" id="monthlySummaryCard"><h2>📊 Monthly Summary</h2><div id="monthlySummaryBox" class="mut">Loading…</div></div>
+<div class="card" id="openReqHomeCard"><h2>🩸 Open Blood Requests</h2><p class="mut">Khuli requests — donors yahan se seedha rabta kar sakte hain.</p><div id="homeOpenReqList" class="mut">Loading…</div></div>
+<div class="card" id="donorOfMonthCard"><h2>🏆 Donor of the Month</h2><div id="donorOfMonthBox" class="mut">Loading…</div></div>
+<div class="card" id="thalassemiaCard"><h2>🩸 Thalassemia Patients</h2><p class="mut">Regular patients jin ko har mahine khoon chahiye — matching donors ke sath. Patient ke phone number sirf admin dekh sakta hai.</p><div id="thalassemiaBox" class="mut">Loading…</div></div>
+<div class="card v69-emerg" id="emergencyCard"><h2>🚨 Emergency Numbers</h2><p class="mut">Emergency me seedha call karein.</p><div id="emergencyBox"><a href="tel:1122"><b>1122</b> — Rescue 1122 (Ambulance / Fire / Rescue)</a><a href="tel:115"><b>115</b> — Edhi Ambulance</a><a href="tel:15"><b>15</b> — Police</a><a href="tel:16"><b>16</b> — Fire Brigade</a><a href="tel:0619200231"><b>061-9200231</b> — Nishtar Hospital, Multan</a><a href="tel:0616510367"><b>061-6510367</b> — City Hospital, Multan (24/7 Emergency)</a><a href="tel:03069140867"><b>0306-9140867</b> — BDBS Founder Muhammad Asif Javaid</a><a href="tel:03015626609"><b>0301-5626609</b> — BDBS Patron Dr Muhammad Naeem Asghar</a></div></div>
 <div class="card" id="dailyPosterCard"><div class="dp-head"><h2>🩸 Aaj ka paigham</h2><span class="dp-date" id="dailyPosterDate"></span></div><div id="dailyPosterBox" class="mut">Loading…</div></div>
 <div class="card about">
 <img src="logo.png" class="org-emblem" alt="BDBS official logo">
@@ -660,6 +684,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <button class="btn ghost" onclick="show('request')">Request Blood</button>
 <p class="mut" style="margin-top:10px">Want to donate? <a href="#" onclick="show('donor');return false;">Register as a Donor</a></p>
 <div id="findResults" style="margin-top:10px"></div>
+<div class="card" style="margin-top:12px"><h2>👨‍👩‍👧 Families</h2><p class="mut">Family-wise donors — aik hi family ke donors aik jagah.</p><div id="familyList" class="mut">Loading…</div></div>
 </div>
 </section>
 
@@ -764,6 +789,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h3>3 &bull; Address &amp; Donation</h3>
 <div class="fld"><input id="dAddress" placeholder=" "><label for="dAddress">Address *</label></div>
 <div class="fld static"><select id="dArea"><option value="">Select Area</option></select><label for="dArea">Area / City (optional)</label></div>
+<div class="fld"><input id="dFamily" placeholder=" "><label for="dFamily">Family (optional — e.g. Javaid family)</label></div>
 <div class="row">
 <div class="fld"><input id="dDisease" placeholder=" "><label for="dDisease">Disease *</label></div>
 <div class="fld static"><input id="dLast" type="date"><label for="dLast">Last Blood Donation (optional — only if donated before)</label></div>
@@ -892,7 +918,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h2>Donor Appreciation Certificate</h2>
 <p class="mut">After a blood donation, the admin generates an auto-generated appreciation certificate with a verified reference number. Enter a reference number to check a certificate.</p>
 <div class="row">
-<div><label>Certificate Reference No.</label><input id="cRef" placeholder="e.g. BDBS-CERT-2026-0001"></div>
+<div><label>Certificate Reference No.</label><input id="cRef" placeholder="e.g. BDBS-CERT-2026-1"></div>
 </div>
 <button class="btn" onclick="lookupCert()">Check Certificate</button>
 <div id="certView" style="margin-top:10px"></div>
@@ -942,6 +968,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </div>
 <div id="profileBox" style="display:none">
 <div id="myRecord"></div>
+<button class="btn" onclick="showMyDonorIdCard()" style="margin-top:10px">🪪 My Donor ID Card</button>
 <h3>Update My Last Donation</h3>
 <div class="row">
 <div class="fld static"><input id="pLast" type="date"><label for="pLast">Last Blood Donation</label></div>
@@ -1019,6 +1046,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div class="fld"><input id="cTime" placeholder=" "><label for="cTime">Time (e.g. 9 AM – 1 PM)</label></div>
 </div>
 <div class="fld"><input id="cNotes" placeholder=" "><label for="cNotes">Notes (optional)</label></div>
+<div class="fld"><input id="cPhotos" type="file" accept="image/*" multiple><label for="cPhotos">Camp Photos (optional, max 3)</label></div>
 <button class="btn" onclick="submitCamp()">Create Camp</button> <span id="campMsg"></span>
 <div id="adminCampList" style="margin-top:10px"></div>
 </div>
@@ -1030,6 +1058,27 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h3 style="margin-top:16px">🔁 Monthly Renewals</h3>
 <p class="mut">Thalassemia / monthly requests older than 25 days — tap Renew to fill next month's request form. Nothing is created automatically; the admin confirms by submitting the form.</p>
 <div id="recurringBox" style="margin-top:10px"></div>
+</div>
+<div class="card" id="eligibleCard">
+<h3>✅ Eligible Donors — Is hafte eligible</h3>
+<p class="mut">Wo donors jin ke aakhri donation ko 90 din ho gaye (ya kabhi khoon nahi diya) — admin call list. Sirf admin dekh sakta hai.</p>
+<button class="btn" onclick="renderEligibleList()">Show Eligible Donors</button>
+<div id="eligibleList" style="margin-top:10px"></div>
+</div>
+<div class="card" id="thalassemiaAdminCard">
+<h3>🩸 Thalassemia Patients (Admin)</h3>
+<p class="mut">Regular patient add karein — naam, blood group, hospital, har mahine ki zaroorat. Phone sirf admin ko nazar aayega.</p>
+<div class="row">
+<div class="fld"><input id="tpName" placeholder=" "><label for="tpName">Patient Name *</label></div>
+<div class="fld static"><select id="tpGroup"><option value="">Blood Group *</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="tpGroup">Blood Group *</label></div>
+</div>
+<div class="row">
+<div class="fld"><input id="tpHospital" placeholder=" "><label for="tpHospital">Hospital *</label></div>
+<div class="fld"><input id="tpNeed" placeholder=" "><label for="tpNeed">Monthly Need (e.g. 2 units / month)</label></div>
+</div>
+<div class="fld"><input id="tpPhone" type="tel" placeholder=" "><label for="tpPhone">Phone (admin only)</label></div>
+<button class="btn" onclick="submitThalassemiaPatient()">Add Patient</button> <span id="tpMsg"></span>
+<div id="adminThalassemiaList" style="margin-top:10px"></div>
 </div>
 <div id="adminTables"></div>
 </div>
@@ -1386,6 +1435,43 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </section>
 
 <!-- ================= DONATION INFO (v51) ================= -->
+<section class="sec" id="s-donation">
+<div class="card" id="donation">
+<h2>💰 Donation — عطیہ / صدقہ</h2>
+<p class="mut">Your donation helps Basti Dawa Blood Society save lives — blood camps, patient support and society work.</p>
+<h3>🏢 Head Office</h3>
+<p><b>Kamal Din Sroya of Health Sciences, Basti Malook, Multan</b></p>
+<h3>💳 JazzCash</h3>
+<p><b>03069140867</b><br>Muhammad Asif Javaid</p>
+<h3>🏦 UBL Bank</h3>
+<p><b>Muhammad Asif Javaid</b><br>Account No: <b>0680387313946</b><br>IBAN: <b>PK10UNIL0109000387313946</b></p>
+<div class="donation-hadees">
+<div class="lang-en">
+<h3>📖 Hadith about Sadaqah</h3>
+<p dir="rtl" lang="ar" style="text-align:right;line-height:1.9;font-size:18px">مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا، وَمَا تَوَاضَعَ أَحَدٌ لِلَّهِ إِلَّا رَفَعَهُ اللَّهُ</p>
+<p>"Charity does not decrease wealth, no one forgives another except that Allah increases his honor, and no one humbles himself for the sake of Allah except that Allah raises his status."</p>
+<p class="mut small">— Sahih Muslim 2588 (narrated by Abu Hurairah رضی اللہ عنہ)</p>
+</div>
+<div class="lang-ur" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>📖 صدقے کے بارے میں حدیث</h3>
+<p style="font-size:18px">مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا، وَمَا تَوَاضَعَ أَحَدٌ لِلَّهِ إِلَّا رَفَعَهُ اللَّهُ</p>
+<p>"صدقہ مال کو کم نہیں کرتا، جو کسی کو معاف کرتا ہے اللہ اس کی عزت بڑھاتا ہے، اور جو اللہ کے لیے عاجزی اختیار کرتا ہے اللہ اس کا مرتبہ بلند کرتا ہے۔"</p>
+<p class="mut small">— صحیح مسلم 2588 (حضرت ابو ہریرہ رضی اللہ عنہ سے روایت)</p>
+</div>
+<div class="lang-ar" dir="rtl" lang="ar" style="text-align:right;line-height:1.9">
+<h3>📖 حديث عن الصدقة</h3>
+<p style="font-size:18px">مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا، وَمَا تَوَاضَعَ أَحَدٌ لِلَّهِ إِلَّا رَفَعَهُ اللَّهُ</p>
+<p class="mut small">— صحيح مسلم 2588 (عن أبي هريرة رضي الله عنه)</p>
+</div>
+<div class="lang-sr" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h3>📖 صدقے دے بارے حدیث</h3>
+<p style="font-size:18px">مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا، وَمَا تَوَاضَعَ أَحَدٌ لِلَّهِ إِلَّا رَفَعَهُ اللَّهُ</p>
+<p>"صدقہ مال کوں گھٹ نی کریندا، جیہڑا کہیں کوں معاف کریندے اللہ اوندی عزت ودھیندے، تے جیہڑا اللہ واسطے عاجزی کریندے اللہ اوندا مرتبہ بلند کریندے۔"</p>
+<p class="mut small">— صحیح مسلم 2588 (حضرت ابو ہریرہ رضی اللہ عنہ توں روایت)</p>
+</div>
+</div>
+</div>
+</section>
 <section class="sec" id="s-donateinfo">
 <div class="card" id="donateinfo">
 <h2>Khoon Dene Ke Fayde / Who Can Donate Blood</h2>
@@ -1412,6 +1498,37 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <li>Anyone who had a major operation or a tattoo recently.</li>
 <li>Anyone taking medicines that stop blood donation — ask the blood bank staff first.</li>
 </ul>
+
+<h3>Before You Donate — Preparation</h3>
+<ul>
+<li>Eat a good meal within 4 hours before donating — do not donate on an empty stomach.</li>
+<li>Drink plenty of water before and after donating.</li>
+<li>Sleep well the night before.</li>
+<li>Bring your CNIC or ID card.</li>
+<li>Tell the staff about any medicine you take or any illness you had recently.</li>
+<li>Do not smoke for at least 1 hour before donating.</li>
+</ul>
+<h3>After You Donate — Care</h3>
+<ul>
+<li>Rest for 10–15 minutes at the blood bank before leaving.</li>
+<li>Drink water or juice and eat something light.</li>
+<li>Keep the bandage on for at least 4 hours.</li>
+<li>No heavy lifting or hard exercise for the rest of the day.</li>
+<li>If you feel dizzy, sit or lie down and tell the staff.</li>
+<li>Eat iron-rich food (meat, lentils, spinach) in the next few days.</li>
+</ul>
+<div class="card" id="compatChartGuide" style="margin-top:12px"><h3 style="margin-top:0">Who Can Donate to Whom? — Blood Group Compatibility</h3>
+<p class="mut small">O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.</p>
+<table class="compat-table"><tr><th>Your group</th><th>You can donate to</th><th>You can receive from</th></tr>
+<tr><td><b>O-</b></td><td>Everyone (O-, O+, A-, A+, B-, B+, AB-, AB+)</td><td>O-</td></tr>
+<tr><td><b>O+</b></td><td>O+, A+, B+, AB+</td><td>O-, O+</td></tr>
+<tr><td><b>A-</b></td><td>A-, A+, AB-, AB+</td><td>O-, A-</td></tr>
+<tr><td><b>A+</b></td><td>A+, AB+</td><td>O-, O+, A-, A+</td></tr>
+<tr><td><b>B-</b></td><td>B-, B+, AB-, AB+</td><td>O-, B-</td></tr>
+<tr><td><b>B+</b></td><td>B+, AB+</td><td>O-, O+, B-, B+</td></tr>
+<tr><td><b>AB-</b></td><td>AB-, AB+</td><td>O-, A-, B-, AB-</td></tr>
+<tr><td><b>AB+</b></td><td>AB+</td><td>Everyone (O-, O+, A-, A+, B-, B+, AB-, AB+)</td></tr>
+</table></div>
 <p class="mut">This page is general information only. It is not personal medical advice. The blood bank staff make the final decision before every donation.</p>
 </div>
 <div class="lang-ur">
@@ -1436,6 +1553,25 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <li>حاملہ یا دودھ پلانے والی خواتین۔</li>
 <li>جس کا حال ہی میں بڑا آپریشن ہوا ہو یا ٹیٹو بنوایا ہو۔</li>
 <li>جو ایسی دوا لے رہا ہو جس سے خون کا عطیہ رک جاتا ہے — پہلے بلڈ بینک کے عملے سے پوچھیں۔</li>
+</ul>
+
+<h3>خون دینے سے پہلے — تیاری</h3>
+<ul>
+<li>خون دینے سے 4 گھنٹے پہلے اچھا کھانا کھائیں — خالی پیٹ خون نہ دیں۔</li>
+<li>خون دینے سے پہلے اور بعد میں خوب پانی پئیں۔</li>
+<li>رات کو اچھی نیند لیں۔</li>
+<li>اپنا شناختی کارڈ ساتھ لائیں۔</li>
+<li>جو دوا لیتے ہیں یا حال میں کوئی بیماری ہوئی ہو تو عملے کو بتائیں۔</li>
+<li>خون دینے سے کم از کم 1 گھنٹہ پہلے سگریٹ نہ پئیں۔</li>
+</ul>
+<h3>خون دینے کے بعد — احتیاط</h3>
+<ul>
+<li>جانے سے پہلے بلڈ بینک میں 10 سے 15 منٹ آرام کریں۔</li>
+<li>پانی یا جوس پئیں اور ہلکا کھانا کھائیں۔</li>
+<li>پٹی کم از کم 4 گھنٹے تک لگی رہنے دیں۔</li>
+<li>اس دن بھاری وزن نہ اٹھائیں اور سخت ورزش نہ کریں۔</li>
+<li>چکر آئے تو بیٹھ یا لیٹ جائیں اور عملے کو بتائیں۔</li>
+<li>اگلے چند دن آئرن والی غذا کھائیں (گوشت، دال، پالک)۔</li>
 </ul>
 <p class="mut">یہ صفحہ صرف عام معلومات ہے۔ یہ ذاتی طبی مشورہ نہیں ہے۔ ہر عطیہ سے پہلے بلڈ بینک کا عملہ حتمی فیصلہ کرتا ہے۔</p>
 </div>
@@ -1462,6 +1598,25 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <li>من أجرى عملية جراحية كبرى أو وشمًا مؤخرًا.</li>
 <li>من يتناول أدوية تمنع التبرع بالدم — اسأل موظفي بنك الدم أولًا.</li>
 </ul>
+
+<h3>قبل التبرع بالدم — الاستعداد</h3>
+<ul>
+<li>تناول وجبة جيدة خلال 4 ساعات قبل التبرع — لا تتبرع على معدة فارغة.</li>
+<li>اشرب الكثير من الماء قبل التبرع وبعده.</li>
+<li>نم جيداً في الليلة السابقة.</li>
+<li>أحضر بطاقة الهوية الخاصة بك.</li>
+<li>أخبر الموظفين عن أي دواء تتناوله أو مرض أصابك مؤخراً.</li>
+<li>لا تدخن لمدة ساعة على الأقل قبل التبرع.</li>
+</ul>
+<h3>بعد التبرع بالدم — العناية</h3>
+<ul>
+<li>استرح من 10 إلى 15 دقيقة في بنك الدم قبل المغادرة.</li>
+<li>اشرب الماء أو العصير وتناول طعاماً خفيفاً.</li>
+<li>اترك الضمادة لمدة 4 ساعات على الأقل.</li>
+<li>لا تحمل أوزاناً ثقيلة ولا تمارس تمارين شاقة بقية اليوم.</li>
+<li>إذا شعرت بالدوار اجلس أو استلقِ وأخبر الموظفين.</li>
+<li>تناول أطعمة غنية بالحديد (اللحم، العدس، السبانخ) في الأيام التالية.</li>
+</ul>
 <p class="mut">هذه الصفحة معلومات عامة فقط. ليست نصيحة طبية شخصية. يتخذ موظفو بنك الدم القرار النهائي قبل كل تبرع.</p>
 </div>
 <button class="btn ghost" onclick="show('home')">← Back to Home</button>
@@ -1478,6 +1633,12 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <button data-s="login" onclick="show('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Profile</span></button>
 <button onclick="openModal('moreSheet')"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
 </nav>
+<div class="modal" id="donorIdModal" onclick="if(event.target===this)closeModal('donorIdModal')">
+<div class="modal-box"><button class="mclose" onclick="closeModal('donorIdModal')" aria-label="Close">&#10005;</button><div id="donorIdCardBody"></div></div>
+</div>
+<div class="modal" id="donorHistoryModal" onclick="if(event.target===this)closeModal('donorHistoryModal')">
+<div class="modal-box"><button class="mclose" onclick="closeModal('donorHistoryModal')" aria-label="Close">&#10005;</button><div id="donorHistoryBody" class="mut">Loading…</div></div>
+</div>
 <div class="modal" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
 <div class="modal-box"><button class="mclose" onclick="closeModal('memberModal')" aria-label="Close">&#10005;</button><div id="memberCardBody"></div></div>
 </div>
@@ -1489,6 +1650,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <button class="sheet-btn" onclick="show('certificate')">🏅 &nbsp;Donor Appreciation Certificate</button>
 <button class="sheet-btn" onclick="show('reviews')">⭐ &nbsp;Reviews</button>
 <button class="sheet-btn" onclick="show('help')">💬 &nbsp;Madad Box</button>
+<button class="sheet-btn" onclick="show('donation')">💰 &nbsp;Donation</button>
 <button class="sheet-btn" onclick="openShare()">📣 &nbsp;Share App</button>
 <a class="sheet-btn" href="https://jilanapps.github.io/jilan-store/bdbs/" target="_blank" rel="noopener">🌐 &nbsp;Website</a>
 <button class="sheet-btn" onclick="openOtherApps()">📱 &nbsp;Our Other Apps</button>
@@ -1519,7 +1681,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. Khoon chahiye to request karein, dena hai to donor banein. App ka link doston aur groups me share karein.</p>
 <p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">https://jilanapps.github.io/jilan-store/blood-donors/download.html</p>
 <p id="shareCopyMsg" class="mut small" style="min-height:16px"></p>
-<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v68.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 68 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
+<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v69.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 69 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
 <div class="dp-divider">ya doston ko share karein</div>
 <a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Khoon%20chahiye%20to%20request%20karein%2C%20dena%20hai%20to%20donor%20banein.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
 <a class="btn block" style="margin:6px 0;background:#1877F2;color:#fff" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
@@ -1892,7 +2054,26 @@ ur: {
 "Refresh Analytics": "تجزیات تازہ کریں",
 "No monthly renewals due.": "کوئی ماہانہ تجدید واجب نہیں۔",
 "🔁 Monthly": "🔁 ماہانہ",
-"Renew — fill request form": "تجدید کریں — درخواست فارم بھریں"
+"Renew — fill request form": "تجدید کریں — درخواست فارم بھریں",
+"📊 Monthly Summary": "📊 ماہانہ خلاصہ",
+"🩸 Open Blood Requests": "🩸 کھلی خون کی درخواستیں",
+"🏆 Donor of the Month": "🏆 مہینے کا ڈونر",
+"🩸 Thalassemia Patients": "🩸 تھیلیسیمیا کے مریض",
+"🚨 Emergency Numbers": "🚨 ایمرجنسی نمبر",
+"👨‍👩‍👧 Families": "👨‍👩‍👧 خاندان",
+"✅ Eligible Donors — Is hafte eligible": "✅ اہل ڈونر — اس ہفتے اہل",
+"🩸 Thalassemia Patients (Admin)": "🩸 تھیلیسیمیا کے مریض (ایڈمن)",
+"🪪 Donor ID Card": "🪪 ڈونر شناختی کارڈ",
+"🪪 My Donor ID Card": "🪪 میرا ڈونر شناختی کارڈ",
+"📜 Donation History": "📜 عطیہ کی تاریخ",
+"📖 Donate Guide": "📖 خون دینے کی رہنمائی",
+"Before You Donate — Preparation": "خون دینے سے پہلے — تیاری",
+"After You Donate — Care": "خون دینے کے بعد — احتیاط",
+"Who Can Donate to Whom? — Blood Group Compatibility": "کون کس کو خون دے سکتا ہے؟ — بلڈ گروپ کی مطابقت",
+"Your group": "آپ کا گروپ",
+"You can donate to": "آپ دے سکتے ہیں",
+"You can receive from": "آپ لے سکتے ہیں",
+"O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.": "او نیگیٹو سب کو خون دے سکتا ہے۔ اے بی پازیٹو سب سے خون لے سکتا ہے۔"
 }
 };
 I18N.ar = {
@@ -2239,7 +2420,193 @@ I18N.ar = {
 "Refresh Analytics": "تحديث التحليلات",
 "No monthly renewals due.": "لا توجد تجديدات شهرية مستحقة.",
 "🔁 Monthly": "🔁 شهري",
-"Renew — fill request form": "تجديد — املأ نموذج الطلب"
+"Renew — fill request form": "تجديد — املأ نموذج الطلب",
+"📊 Monthly Summary": "📊 ملخص شهري",
+"🩸 Open Blood Requests": "🩸 طلبات الدم المفتوحة",
+"🏆 Donor of the Month": "🏆 متبرع الشهر",
+"🩸 Thalassemia Patients": "🩸 مرضى الثلاسيميا",
+"🚨 Emergency Numbers": "🚨 أرقام الطوارئ",
+"👨‍👩‍👧 Families": "👨‍👩‍👧 العائلات",
+"✅ Eligible Donors — Is hafte eligible": "✅ المتبرعون المؤهلون — مؤهلون هذا الأسبوع",
+"🩸 Thalassemia Patients (Admin)": "🩸 مرضى الثلاسيميا (المسؤول)",
+"🪪 Donor ID Card": "🪪 بطاقة هوية المتبرع",
+"🪪 My Donor ID Card": "🪪 بطاقة هوية المتبرع الخاصة بي",
+"📜 Donation History": "📜 سجل التبرعات",
+"📖 Donate Guide": "📖 دليل التبرع",
+"Before You Donate — Preparation": "قبل التبرع بالدم — الاستعداد",
+"After You Donate — Care": "بعد التبرع بالدم — العناية",
+"Who Can Donate to Whom? — Blood Group Compatibility": "من يمكنه التبرع لمن؟ — توافق فصائل الدم",
+"Your group": "فصيلتك",
+"You can donate to": "يمكنك التبرع لـ",
+"You can receive from": "يمكنك أن تتلقى من",
+"O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.": "الفصيلة O السالبة متبرع عام — يمكن إعطاؤها لكل الفصائل. والفصيلة AB الموجبة متلقٍ عام — يمكنها أن تتلقى من كل الفصائل."
+};
+
+I18N.sr = {
+"Home": "گھر",
+"Find Donor": "ڈونر ڳولو",
+"Request": "درخواست",
+"Members": "ممبر",
+"Account": "اکاؤنٹ",
+"More": "ٻیا",
+"Total Registered Donors": "کل رجسٹرڈ ڈونر",
+"+ Register as Donor": "+ ڈونر بݨو",
+"Donate Blood • Receive Blood • Save Lives": "خون ݙیو • خون گھنو • جاناں بچاؤ",
+"Basti Dawa Blood Society • Donate Blood • Receive Blood • Save Lives": "بستی دوا بلڈ سوسائٹی • خون ݙیو • خون گھنو • جاناں بچاؤ",
+"Find Verified Blood Donors Near You in Seconds": "اپݨے نیڑے تصدیق شدہ خون دے ڈونر سیکنڈاں وچ ڳولو",
+"Connecting blood donors with patients in need across Multan & Basti Malook. Every drop counts. Need blood? Request it here — and if you can donate, join as a donor.": "ملتان تے بستی ملوک وچ خون دے ڈونراں کوں مریضاں نال ملاوݨ۔ ہر قطرہ قیمتی ہے۔ خون چاہیدا ہے؟ اتھاں درخواست ݙیو — تے جے تسیں ݙے سکدے او تاں ڈونر بݨو۔",
+"🩸 Find Donor": "🩸 ڈونر ڳولو",
+"+ Request Blood": "+ خون دی درخواست",
+"Register as Donor": "ڈونر بݨو",
+"Total Donors": "کل ڈونر",
+"Active Requests": "کھلیاں درخواستاں",
+"Lives Saved": "بچیاں ہوئیاں جاناں",
+"Blood Donated": "ݙتا ڳیا خون",
+"Blood Received": "گھدا ڳیا خون",
+"Certificates Issued": "جاری سرٹیفکیٹ",
+"Our Impact": "ساݙا اثر",
+"Each unit of donated blood can save up to 3 lives.": "خون دا ہر یونٹ 3 جاناں تائیں بچا سکدا ہے۔",
+"Our Leadership": "ساݙی قیادت",
+"Patron In Chief": "سرپرست اعلیٰ",
+"Founder & Chief Executive": "بانی تے چیف ایگزیکٹو",
+"Latest activity": "تازہ سرگرمیاں",
+"Contact Us": "ساݙے نال رابطہ کرو",
+"Daily Activity & Gallery": "روزانہ سرگرمیاں تے گیلری",
+"Reviews": "تبصرے",
+"💬 Madad Box": "💬 مدد باکس",
+"📣 Share App": "📣 ایپ شیئر کرو",
+"🔄 Refresh": "🔄 تازہ کرو",
+"Female": "زنانی",
+"Male": "مرد",
+"🩸 Khoon Dene Ke Fayde": "🩸 خون ݙیوݨ دے فائدے",
+"Khoon Dene Ke Fayde / Who Can Donate Blood": "خون ݙیوݨ دے فائدے / کون خون ݙے سکدا ہے",
+"All hospitals": "سارے ہسپتال",
+"Hospital": "ہسپتال",
+"Search hospital": "ہسپتال ڳولو",
+"Filter Requests": "درخواستاں چھانٹو",
+"Camps & Activities": "کیمپ تے سرگرمیاں",
+"Find a Blood Donor": "خون دا ڈونر ڳولو",
+"City / Area": "شہر / علاقہ",
+"Blood Group": "خون دا گروپ",
+"Available Only": "صرف دستیاب",
+"All": "سارے",
+"Blood Donation Request": "خون دی درخواست",
+"Submit Request": "درخواست جمع کرو",
+"Donor Registration": "ڈونر رجسٹریشن",
+"Full Name": "پورا ناں",
+"Father Name (optional)": "پیو دا ناں (اختیاری)",
+"Donor Profile Photo (optional)": "ڈونر دی تصویر (اختیاری)",
+"Blood Group *": "خون دا گروپ *",
+"Age *": "عمر *",
+"Phone *": "فون *",
+"Address *": "پتہ *",
+"Disease *": "بیماری *",
+"Last Blood Donation": "آخری وار خون کݙاں ݙتا",
+"← Back": "← پچھاں",
+"Next →": "اڳاں →",
+"Reset Form": "فارم صاف کرو",
+"Login": "لاگ ان",
+"Member Login": "ممبر لاگ ان",
+"Sign up": "کھاتہ بݨاؤ",
+"Password": "پاس ورڈ",
+"My Profile": "میݙی پروفائل",
+"My Certificates": "میݙے سرٹیفکیٹ",
+"Update My Last Donation": "میݙی آخری عطیہ دی تاریخ بدلو",
+"Delete My Account": "میݙا کھاتہ مٹاؤ",
+"Logout": "لاگ آؤٹ",
+"Admin Panel": "ایڈمن پینل",
+"Donor No.": "ڈونر نمبر",
+"Close": "بند کرو",
+"Update": "اپڈیٹ",
+"Call": "کال",
+"Certificate": "سرٹیفکیٹ",
+"Available": "دستیاب",
+"Cooldown": "انتظار",
+"Call Now": "ہݨے کال کرو",
+"Remove": "ہٹاؤ",
+"Save Changes": "تبدیلیاں محفوظ کرو",
+"Completed": "مکمل",
+"Donor Found": "ڈونر مل ڳیا",
+"Contacting Donors": "ڈونراں نال رابطہ",
+"Received": "موصول",
+"Notifications": "اطلاعاں",
+"No open blood requests": "کوئی کھلی خون دی درخواست نہیں",
+"🩸 Blood Donation Camps": "🩸 خون عطیہ کیمپ",
+"🩸 Blood Camps": "🩸 خون دے کیمپ",
+"📈 Admin Analytics": "📈 ایڈمن تجزیہ",
+"🔁 Monthly Renewals": "🔁 ماہانہ تجدید",
+"Create Camp": "کیمپ بݨاؤ",
+"No camps announced yet.": "ہݨ تائیں کوئی کیمپ اعلان نہیں تھیا۔",
+"Register": "رجسٹر کرو",
+"Donations this month:": "ایں مہینے عطیات:",
+"Top Cities": "وݙے شہر",
+"Refresh Analytics": "تجزیہ تازہ کرو",
+"No monthly renewals due.": "کوئی ماہانہ تجدید واجب نہیں۔",
+"🔁 Monthly": "🔁 ماہانہ",
+"Renew — fill request form": "تجدید — درخواست فارم بھرو",
+"Open Blood Requests": "کھلیاں خون دیاں درخواستاں",
+"Closed Requests": "بند درخواستاں",
+"Send": "بھیجو",
+"Write a Review": "تبصرہ لکھو",
+"Submit Review": "تبصرہ جمع کرو",
+"Loading…": "لوڈ تھیندا پئے…",
+"Donor": "ڈونر",
+"Phone:": "فون:",
+"Email:": "ای میل:",
+"Name:": "ناں:",
+"Father Name:": "پیو دا ناں:",
+"Blood Group:": "خون دا گروپ:",
+"Age:": "عمر:",
+"Address:": "پتہ:",
+"Share Certificate": "سرٹیفکیٹ شیئر کرو",
+"Print Certificate": "سرٹیفکیٹ چھاپو",
+"Share Card": "کارڈ شیئر کرو",
+"Emergency Helpline:": "ایمرجنسی ہیلپ لائن:",
+"Area / City": "علاقہ / شہر",
+"Select Area": "علاقہ چݨو",
+"All Areas": "سارے علاقے",
+"No donors found": "کوئی ڈونر نہیں ملیا",
+"Check Certificate": "سرٹیفکیٹ چیک کرو",
+"Certificate Reference No.": "سرٹیفکیٹ حوالہ نمبر",
+"I Donated for this request": "میں ایں درخواست کیتے خون ݙتا ہے",
+"Donations to Confirm": "تصدیق کیتے عطیات",
+"Confirm — close request": "تصدیق — درخواست بند کرو",
+"Reject": "رد کرو",
+"Complete": "مکمل کرو",
+"Scan to verify": "تصدیق کیتے سکین کرو",
+"How to get blood": "خون کیویں گھنو",
+"How Often Can Blood Be Donated?": "خون کتنی وار ݙے سکدے او؟",
+"Precautions Before Donating Blood": "خون ݙیوݨ توں پہلے احتیاطاں",
+"15 Important Benefits of Blood Donation": "خون عطیہ کرݨ دے 15 اہم فائدے",
+"Standard Operating Procedures (SOPs) for Blood Donors": "خون دے ڈونراں کیتے معیاری طریقہ کار",
+"🩸 Salute to All Blood Donors!": "🩸 سارے خون دے ڈونراں کوں سلام!",
+"🩸 Benefits of Blood Donation": "🩸 خون عطیہ کرݨ دے فائدے",
+"Want to donate?": "خون ݙیوݨ چاہندے او؟",
+"Go to Volunteer Registration.": "رضاکار رجسٹریشن تے ونجو۔",
+"Donor Guidelines (SOPs)": "ڈونر رہنما اصول",
+"PSCA Blood Bank": "پی ایس سی اے بلڈ بینک",
+"Check for Update": "اپڈیٹ چیک کرو",
+"Privacy Policy": "پرائیویسی پالیسی",
+"Publish Activity": "سرگرمی شائع کرو",
+"📊 Monthly Summary": "📊 مہینے دا حساب",
+"🩸 Open Blood Requests": "🩸 کھلیاں خون دیاں درخواستاں",
+"🏆 Donor of the Month": "🏆 مہینے دا ڈونر",
+"🩸 Thalassemia Patients": "🩸 تھیلیسیمیا دے مریض",
+"🚨 Emergency Numbers": "🚨 ایمرجنسی نمبر",
+"👨‍👩‍👧 Families": "👨‍👩‍👧 خاندان",
+"✅ Eligible Donors — Is hafte eligible": "✅ اہل ڈونر — ایں ہفتے اہل",
+"🩸 Thalassemia Patients (Admin)": "🩸 تھیلیسیمیا دے مریض (ایڈمن)",
+"🪪 Donor ID Card": "🪪 ڈونر شناختی کارڈ",
+"🪪 My Donor ID Card": "🪪 میݙا ڈونر شناختی کارڈ",
+"📜 Donation History": "📜 عطیہ دی تاریخ",
+"📖 Donate Guide": "📖 خون ݙیوݨ دی رہنمائی",
+"Before You Donate — Preparation": "خون ݙیوݨ توں پہلے — تیاری",
+"After You Donate — Care": "خون ݙیوݨ دے بعد — خیال",
+"Who Can Donate to Whom? — Blood Group Compatibility": "کون کیکوں خون ݙے سکدا ہے؟ — خون دے گروپ دی مطابقت",
+"Your group": "تہاݙا گروپ",
+"You can donate to": "تسیں ݙے سکدے او",
+"You can receive from": "تسیں گھن سکدے او",
+"O Negative is the universal donor — it can be given to every blood group. AB Positive is the universal recipient — it can receive from every blood group.": "او نیگیٹو ہر ہک کوں خون ݙے سکدا ہے۔ اے بی پازیٹو ہر ہک توں خون گھن سکدا ہے۔"
 };
 
 /* ---------- engine ---------- */
@@ -2292,7 +2659,7 @@ function applyLang(){
     if (el.getAttribute("placeholder") !== r) el.setAttribute("placeholder", r);
   }
   document.documentElement.lang = LANG;
-  document.documentElement.dir = (LANG === "ur" || LANG === "ar") ? "rtl" : "ltr";
+  document.documentElement.dir = (LANG === "ur" || LANG === "ar" || LANG === "sr") ? "rtl" : "ltr";
   var btns = document.querySelectorAll("[data-lang-btn]");
   for (var k = 0; k < btns.length; k++) btns[k].classList.toggle("on", btns[k].getAttribute("data-lang-btn") === LANG);
   try { localStorage.setItem("bdbs_lang", LANG); } catch (e) {}
@@ -2491,7 +2858,7 @@ function show(s){
 
 /* ---------- local store (used when Firebase is not configured) ---------- */
 var LS = { donors:'bdbs_donors', donorsPub:'bdbs_donorsPub', members:'bdbs_members', membersPub:'bdbs_membersPub',
-  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', auditLog:'bdbs_auditLog', camps:'bdbs_camps', campRegs:'bdbs_campRegs', queue:'bdbs_syncQueue', bloodBanks:'bdbs_bloodBanks', hospitals:'bdbs_hospitals', announcements:'bdbs_announcements' };
+  requests:'bdbs_requests', requestsPub:'bdbs_requestsPub', activities:'bdbs_activities', certs:'bdbs_certs', donorLookup:'bdbs_donorLookup', memberLookup:'bdbs_memberLookup', reviews:'bdbs_reviews', auditLog:'bdbs_auditLog', camps:'bdbs_camps', campRegs:'bdbs_campRegs', thalassemia:'bdbs_thalassemia', thalassemiaPub:'bdbs_thalassemiaPub', queue:'bdbs_syncQueue', bloodBanks:'bdbs_bloodBanks', hospitals:'bdbs_hospitals', announcements:'bdbs_announcements' };
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 /* v51 female privacy: a female donor who has NOT opted in is mirrored as
@@ -2514,6 +2881,7 @@ function donorPub(d){
   if (_lo !== null) _pub.lng = _lo;
   if (d.verifiedDonor === true) _pub.verifiedDonor = true; /* v57-C admin-confirmed donation only; only set when true so old rules still accept a plain create */
   if (d.referredBy) _pub.referredBy = d.referredBy; /* v57-C referral count only */
+  if (d.family) _pub.family = d.family; /* v69: family grouping label */
   return _pub;
 }
 /* Public member record: ONLY name, phone number, photo, designation and
@@ -2538,7 +2906,7 @@ function reqPub(r){return {id:r.id,reqNo:r.reqNo||'',name:r.name||'',firstName:f
    cache, so the app keeps working with REAL data when the internet drops.
    Writes made offline are queued and pushed to Firestore when net returns.
    (The old demo seeding is gone — offline now shows real saved data.) */
-function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,announcements:LS.announcements,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews, auditLog:LS.auditLog, bloodBanks:LS.bloodBanks, hospitals:LS.hospitals, camps:LS.camps, campRegs:LS.campRegs}; return map[coll]||LS.activities; }
+function lsKey(coll){ var map={donorsPublic:LS.donorsPub,membersPublic:LS.membersPub,requestsPublic:LS.requestsPub,announcements:LS.announcements,activities:LS.activities,certificates:LS.certs,donors:LS.donors,members:LS.members,requests:LS.requests,donorLookup:LS.donorLookup,memberLookup:LS.memberLookup,reviews:LS.reviews, auditLog:LS.auditLog, bloodBanks:LS.bloodBanks, hospitals:LS.hospitals, camps:LS.camps, campRegs:LS.campRegs, thalassemiaPatients:LS.thalassemia, thalassemiaPatientsPublic:LS.thalassemiaPub}; return map[coll]||LS.activities; }
 function cacheUpsert(coll, obj){ var k=lsKey(coll), arr=lsGet(k), found=false; arr.forEach(function(x){ if(x.id===obj.id){ for(var p in obj) x[p]=obj[p]; found=true; } }); if(!found) arr.unshift(obj); lsSet(k,arr); }
 function cacheRemove(coll, id){ var k=lsKey(coll); lsSet(k, lsGet(k).filter(function(x){return x.id!==id;})); }
 function queueOp(op){ var q=lsGet(LS.queue); q.push(op); lsSet(LS.queue,q); setOfflineBanner(); }
@@ -2590,6 +2958,30 @@ function qUpdate(coll, id, fields, cb){
     lsSet(lsKey(coll), arr2); queueOp({kind:'update', coll:coll, id:id, fields:fields}); cb(found); }
 }
 
+/* v69: read up to maxCount photos, max 800px, JPEG 0.78 (camp gallery) */
+function readPhotosMax(input, maxCount, done){
+  var files = (input && input.files) ? Array.prototype.slice.call(input.files, 0, maxCount||3) : [];
+  if (!files.length) return done([]);
+  var out = [], n = 0;
+  files.forEach(function(f, idx){
+    var r = new FileReader();
+    r.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var s = Math.min(1, 800 / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        out[idx] = c.toDataURL('image/jpeg', 0.78);
+        n++; if (n === files.length) done(out.filter(function(x){ return !!x; }));
+      };
+      img.onerror = function(){ n++; if (n === files.length) done(out.filter(function(x){ return !!x; })); };
+      img.src = r.result;
+    };
+    r.onerror = function(){ n++; if (n === files.length) done(out.filter(function(x){ return !!x; })); };
+    r.readAsDataURL(f);
+  });
+}
 /* ---------- photo helper (resize to max 300px, JPEG) ---------- */
 function readPhoto(input, done){
   var f = input && input.files && input.files[0];
@@ -2668,7 +3060,11 @@ function loadHome(){
           qAll('certificates', function(cs){
             if (!FB_OK && !cs.length) { var cel = document.getElementById('statCerts'); if (cel) cel.textContent = '—'; }
             else setStat('statCerts', cs.length);
+            renderMonthlySummary(src, rs, cs); /* v69 */
+            renderDonorOfMonth(visDs, cs); /* v69 */
           });
+          renderHomeOpenRequests(rs); /* v69 */
+          renderThalassemiaPublic(); /* v69 */
           /* v51: available donors per blood group (aggregate only —
              private female records are already excluded from visDs). */
           var GROUPS = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
@@ -3253,6 +3649,7 @@ function searchDonors(){
       });
     } else render(ds, {});
   });
+  renderFamilies(); /* v69: family grouping, loads its own public list */
 }
 /* Request progress line: the 4 stages with ✓ for done, ● for the
    current stage — so the requester and donors see where it stands. */
@@ -3269,7 +3666,7 @@ function reqProgress(st){
 function shareRequest(id){
   var r = (window._reqById || {})[id];
   if (!r) return;
-  var txt = '\uD83E\uDE78 Blood ki zaroorat hai \u2014 ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.name||r.firstName||'Patient') + '\nPhone: ' + (r.phone||'') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n\u2014 Basti Dawa Blood Society';
+  var txt = '\uD83E\uDE78 Blood ki zaroorat hai \u2014 ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.name||r.firstName||'Patient') + '\nPhone: ' + (r.phone||'') + (v69ReqDate(r) ? '\nDate: ' + v69ReqDate(r) : '') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n\u2014 Basti Dawa Blood Society';
   if (navigator.share) { navigator.share({text: txt}).catch(function(){}); return; }
   try { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); }
   catch(e) {
@@ -4059,7 +4456,7 @@ function autofillDonorNo(){ var e = document.getElementById('dNo'); if (!e) retu
    fallback alike). */
 function donorSubmitSuccess(full, btn){
   document.getElementById('dMsg').innerHTML = '<span class="ok">Thank you, '+esc(full.name)+'! You are registered as a '+esc(full.group)+' donor. Your Donor No. is <b>'+esc(full.donorNo)+'</b> — please save it, you will need it to link your account. Your CNIC, age and disease stay private — your name, phone, address and blood group are shown publicly so patients can contact you directly.</span>';
-  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo(); /* v57-B */
+  ['dName','dFather','dGender','dNo','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily'].forEach(function(i){document.getElementById(i).value='';}); document.getElementById('dConsent').checked=false; autofillDonorNo(); /* v57-B */
   document.getElementById('dGroup').value=''; document.getElementById('dPhoto').value=''; if (btn) btn.disabled = false;
 }
 /* ---------- v51 donor edit (admin only, mirrors editMember) ----------
@@ -4082,7 +4479,7 @@ function editDonor(id){
     set('dName', d.name); set('dFather', d.father); set('dGender', d.gender||'');
     set('dCnic', d.cnic); set('dGroup', d.group); set('dAge', d.age);
     set('dPhone', d.phone); set('dAddress', d.address); set('dArea', d.area||'');
-    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units); set('dLat', (d.lat == null ? '' : d.lat)); set('dLng', (d.lng == null ? '' : d.lng)); /* v57-B */
+    set('dDisease', d.disease); set('dLast', d.lastDonation||''); set('dUnits', d.units); set('dFamily', d.family||''); set('dLat', (d.lat == null ? '' : d.lat)); set('dLng', (d.lng == null ? '' : d.lng)); /* v57-B */
     var ph = document.getElementById('dPhoto'); if (ph) ph.value = '';
     var dc = document.getElementById('dConsent'); if (dc) dc.checked = true;
     var b = document.getElementById('dSubmitBtn'); if (b) b.textContent = 'Save Changes';
@@ -4098,7 +4495,7 @@ function donorEditSave(editId, btn){
     var old = null; ds.forEach(function(x){ if (x.id === editId) old = x; });
     if (!old) { document.getElementById('dMsg').innerHTML = '<span class="err">Donor not found.</span>'; if (btn) btn.disabled = false; exitDonorEdit(); return; }
     readPhoto(document.getElementById('dPhoto'), function(photo){
-      var fields = {name:val('dName'), father:val('dFather'), gender:val('dGender'), cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0};
+      var fields = {name:val('dName'), father:val('dFather'), gender:val('dGender'), cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0};
       var _ela = parseCoord(val('dLat')), _elo = parseCoord(val('dLng')); if (_ela !== null) fields.lat = _ela; if (_elo !== null) fields.lng = _elo; /* v57-B keep old location when the fields are blank */
       if (photo) fields.photo = photo; else fields.photo = old.photo || '';
       var updated = {}; for (var k in old) updated[k] = old[k]; for (var k2 in fields) updated[k2] = fields[k2];
@@ -4109,7 +4506,7 @@ function donorEditSave(editId, btn){
           qAdd('donorsPublic', pub, function(){
             document.getElementById('dMsg').innerHTML = '<span class="ok">Donor updated. Donor No. '+esc(updated.donorNo||'')+'.</span>';
             exitDonorEdit();
-            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng'].forEach(function(i){document.getElementById(i).value='';}); /* v57-B */
+            ['dName','dFather','dCnic','dAge','dPhone','dAddress','dArea','dDisease','dLast','dUnits','dLat','dLng','dFamily'].forEach(function(i){document.getElementById(i).value='';}); /* v57-B */
             document.getElementById('dGroup').value=''; document.getElementById('dGender').value=''; document.getElementById('dPhoto').value=''; document.getElementById('dConsent').checked=false;
             if (btn) btn.disabled = false;
             loadHome();
@@ -4189,10 +4586,11 @@ function submitDonorTx(ph, cn, nameNorm, group, photo, btn){
       if (counterSnap.exists) { var cnum = parseInt((counterSnap.data()||{}).n || 0, 10) || 0; if (cnum + 1 > nextNo) nextNo = cnum + 1; }
       var dno = String(nextNo);
       var id = uid('donor');
-      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+      var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:group, age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
       var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
 
       if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
+      if (!full.family) delete full.family; /* v69: family optional */
       var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); if (!pub.area) delete pub.area; } /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location — null never reaches Firestore */
       tx.set(db.collection('donors').doc(id), full);
       tx.set(db.collection('donorsPublic').doc(id), pub);
@@ -4228,10 +4626,11 @@ function submitDonorLegacy(ph, cn, photo, btn){
     if (dup) { document.getElementById('dMsg').innerHTML = '<span class="err">This donor is already registered (same phone or CNIC).</span>'; if (btn) btn.disabled = false; return; }
     var id = uid('donor');
     var dno = nextDonorNo(ds);
-    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
+    var full = {id:id, name:val('dName'), father:val('dFather'), gender:val('dGender'), publicOptIn:(val('dGender')==='Female'?false:true), available:true, donorNo:dno, photo:photo, cnic:val('dCnic'), group:val('dGroup'), age:val('dAge'), address:val('dAddress'), area:val('dArea'), family:val('dFamily'), phone:val('dPhone'), disease:val('dDisease'), lastDonation:val('dLast'), units:parseInt(val('dUnits'),10)||0, consent:true, consentAt:Date.now(), createdAt:Date.now(), lat:parseCoord(val('dLat')), lng:parseCoord(val('dLng'))}; /* v57-B optional location */
     var _ref57 = getReferralCode(); if (_ref57 && _ref57 !== String(dno)) full.referredBy = _ref57; /* v57-C */
 
     if (!full.area) delete full.area; /* v37: Area optional — never send an empty area value */
+      if (!full.family) delete full.family; /* v69: family optional */
     var pub = donorPub(full); if (!pub.hidden) { pub.city = full.area || full.address.split(',').pop().trim(); }
     if (!pub.area) delete pub.area; /* v37: Area optional */ if (full.lat == null) delete full.lat; if (full.lng == null) delete full.lng; /* v57-B optional location */
     qAdd('donors', full, function(ok){
@@ -4713,7 +5112,7 @@ function nextCertRef(cb){
   if (!FB_OK) {
     var k = 'bdbs_certCounter_' + y, n = parseInt(localStorage.getItem(k)||'0',10) + 1;
     localStorage.setItem(k, String(n));
-    cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); return;
+    cb('BDBS-CERT-' + y + '-' + String(n)); return;
   }
   var ref = db.collection('counters').doc('cert-' + y);
   db.runTransaction(function(tx){
@@ -4721,7 +5120,7 @@ function nextCertRef(cb){
       var n = (d.exists ? (d.data().n||0) : 0) + 1;
       tx.set(ref, {n:n}); return n;
     });
-  }).then(function(n){ cb('BDBS-CERT-' + y + '-' + String(n).padStart(4,'0')); })
+  }).then(function(n){ cb('BDBS-CERT-' + y + '-' + String(n)); })
     .catch(function(){ cb('BDBS-CERT-' + y + '-ERR' + Date.now().toString().slice(-4)); });
 }
 /* Add Donation (v29): first-time donors have no lastDonation, so no
@@ -4828,6 +5227,8 @@ function renderCert(c){
     '<p class="dline">for donating <b>'+esc(c.units)+'</b> unit(s) of <b>'+esc(c.group)+'</b> blood on <b>'+esc(fmtD(c.date))+'</b>.<br><span class="thanks">Your gift saved a life.</span></p>' +
     '<div class="sealrow"><div class="certqr-wrap"><div id="certQrBox" class="certqr"></div><div class="qr-cap">Scan to verify</div></div><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
     '<p class="sup">Under Supervision — Basti Dawa Welfare Organization</p>' +
+    '<p class="sup">bastidawabloodsociety@gmail.com</p>' +
+    '<p class="sup">Kamal Din Sroya of Health Sciences, Basti Malook, Multan</p>' +
     '<div class="sigrow"><div><div class="scr">Naeem Asghar</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Dr Muhammad Naeem Asghar<span>Patron In Chief</span></div></div><div><div class="scr">Asif Javaid</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Muhammad Asif Javaid<span>Founder &amp; Chief Executive</span></div></div></div>' +
     '<p class="credit">Developed by Dr Asif — Jilan Apps Official</p></div></div></div>' +
     '<button class="btn" onclick="printPageJS(\'landscape\')">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
@@ -4865,7 +5266,7 @@ function shareCertPDF(){
 function shareCertPDFText(){
   var c = window._lastCert; if (!c) return;
   try {
-    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization'];
+    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Kamal Din Sroya of Health Sciences, Basti Malook, Multan'];
     var blob = simplePDF([{title:'', lines:lines}]);
     var fname = 'BDBS-Certificate-' + (c.ref||c.donorName||'') + '.pdf';
     var file = new File([blob], fname, {type:'application/pdf'});
@@ -5894,11 +6295,13 @@ function showMonthlyReport(){
         var newDonors = ds.filter(function(d){ return (d.createdAt||0) >= start; });
         var reqCreated = rs.filter(function(r){ return (r.createdAt||0) >= start; });
         var reqDone = rs.filter(function(r){ return (r.status||'') === 'Completed' && (r.completedAt||0) >= start; });
+        var reqOpen = rs.filter(function(r){ return (r.status||'') !== 'Completed' && (r.status||'') !== 'Closed'; }); /* v69 */
         var certs = cs.filter(function(c){ return (c.createdAt||0) >= start; });
         var units = 0; certs.forEach(function(c){ units += parseInt(c.units||0,10)||0; });
         box.innerHTML = '<h4>' + monthName + '</h4><div style="overflow-x:auto"><table><tr><th></th><th>Total</th>' + GROUPS.map(function(g){ return '<th>' + g + '</th>'; }).join('') + '<th></th></tr>'
           + row('New donors', newDonors.length, byGroup(newDonors, function(d){ return d.group; }))
           + row('Requests created', reqCreated.length, byGroup(reqCreated, function(r){ return r.group; }))
+          + row('Requests still open', reqOpen.length, byGroup(reqOpen, function(r){ return r.group; })) /* v69 */
           + row('Requests completed', reqDone.length, byGroup(reqDone, function(r){ return r.group; }), 'completedAt stamped')
           + row('Donations given', certs.length, byGroup(certs, function(c){ return c.group; }), units + ' unit(s)')
           + '</table></div><p class="mut small">Requests completed counts only requests completed this month (older completions without a completion date are not counted).</p>';
@@ -5934,7 +6337,7 @@ function loadCamps(){ /* v57-D: public list on Home + admin list with counts */
       if (!up.length) { homeBox.innerHTML = '<span class="mut">No camps announced yet.</span>'; }
       else {
         homeBox.innerHTML = up.map(function(c){
-          return '<div class="dcard"><b>'+esc(c.title||'Blood Donation Camp')+'</b><br><span class="mut">'+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'</span>'+(c.notes?'<br><span class="mut small">'+esc(c.notes)+'</span>':'')+'<br><button class="btn green" onclick="registerForCamp(\''+esc(c.id)+'\')">Register</button> <span id="campRegMsg_'+esc(c.id)+'" class="mut small"></span></div>';
+          return '<div class="dcard"><b>'+esc(c.title||'Blood Donation Camp')+'</b><br><span class="mut">'+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'</span>'+(c.notes?'<br><span class="mut small">'+esc(c.notes)+'</span>':'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br><button class="btn green" onclick="registerForCamp(\''+esc(c.id)+'\')">Register</button> <span id="campRegMsg_'+esc(c.id)+'" class="mut small"></span></div>';
         }).join('');
       }
     }
@@ -5945,7 +6348,7 @@ function loadCamps(){ /* v57-D: public list on Home + admin list with counts */
         if (!(cs||[]).length) h += '<span class="mut">No camps yet.</span>';
         (cs||[]).forEach(function(c){
           var n = (regs||[]).filter(function(r){ return r.campId === c.id; }).length;
-          h += '<div class="dcard"><b>'+esc(c.title||'')+'</b> — '+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'<br><span class="mut small">'+n+' registered</span> <button class="btn ghost" onclick="removeCamp(\''+esc(c.id)+'\')">Remove</button></div>';
+          h += '<div class="dcard"><b>'+esc(c.title||'')+'</b> — '+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br><span class="mut small">'+n+' registered</span> <button class="btn ghost" onclick="removeCamp(\''+esc(c.id)+'\')">Remove</button></div>';
         });
         admBox.innerHTML = h;
       });
@@ -5957,12 +6360,15 @@ function submitCamp(){ /* v57-D: admin creates a camp */
   var t = val('cTitle'), p = val('cPlace'), d = val('cDate');
   var m = document.getElementById('campMsg');
   if (!t || !p || !d) { if (m) m.innerHTML = '<span class="err">Please fill camp title, place and date.</span>'; return; }
-  var c = {id:uid('camp'), title:t, place:p, date:d, time:val('cTime'), notes:val('cNotes'), createdAt:Date.now()};
+  readPhotosMax(document.getElementById('cPhotos'), 3, function(photos){
+  var c = {id:uid('camp'), title:t, place:p, date:d, time:val('cTime'), notes:val('cNotes'), photos:photos, createdAt:Date.now()};
   qAdd('camps', c, function(){
     if (m) m.innerHTML = '<span class="ok">Camp created.</span>';
     ['cTitle','cPlace','cDate','cTime','cNotes'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; });
+    var ph = document.getElementById('cPhotos'); if (ph) ph.value = '';
     try { logAudit('create-camp', c.id, t + ' — ' + d + ' at ' + p); } catch(e){}
     loadCamps();
+  });
   });
 }
 function registerForCamp(campId){ /* v57-D: donor registers from their linked record */
@@ -6031,7 +6437,16 @@ function prefillRecurringRequestFill(r){ /* v57-D */
   setTimeout(function(){ var e = document.getElementById('wz-request'); if (e) e.scrollIntoView(); }, 200);
 }
 function posterText(r){ /* v57-D: share text for a request poster — never includes CNIC */
-  return '🩸 Blood needed — ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.firstName||r.name||'Patient') + '\nPhone: ' + (r.phone||'') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n— Basti Dawa Blood Society';
+  return '🩸 Blood needed — ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.firstName||r.name||'Patient') + '\nPhone: ' + (r.phone||'') + (v69ReqDate(r) ? '\nDate: ' + v69ReqDate(r) : '') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n— Basti Dawa Blood Society';
+}
+function v69ReqDate(r){ /* v69: request date for poster/share — '20 Nov 2026'; createdAt, else date/created field, else '' (never guess) */
+  if (!r) return '';
+  var t = r.createdAt || r.date || r.created || 0;
+  if (!t) return '';
+  var d = new Date(t);
+  if (isNaN(d.getTime())) return '';
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
 }
 function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html2canvas approach as the certificate */
   var r = (window._reqById || {})[id];
@@ -6048,7 +6463,7 @@ function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html
     + '<div style="font-size:30px;font-weight:800;margin-top:18px">Blood Needed</div>'
     + '<div style="font-size:52px;font-weight:800;color:#F5C518;margin:10px 0">' + esc(r.group||'') + '</div>'
     + '<div style="font-size:20px">' + esc(r.units||1) + ' unit(s)</div>'
-    + '<div style="font-size:18px;margin-top:16px;line-height:1.7">Patient: ' + esc(r.firstName||r.name||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + '</div>'
+    + '<div style="font-size:18px;margin-top:16px;line-height:1.7">Patient: ' + esc(r.firstName||r.name||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + (v69ReqDate(r) ? '<br>Date: ' + esc(v69ReqDate(r)) : '') + '</div>'
     + '<div style="font-size:22px;font-weight:800;color:#F5C518;margin-top:22px">Donate Blood • Receive Blood • Save Lives</div>'
     + '<div style="font-size:13px;margin-top:16px;color:#9FB3D1">App: jilanapps.github.io/jilan-store/bdbs</div>';
   document.body.appendChild(d);
@@ -6223,7 +6638,7 @@ function renderAdmin(){
                new number over an existing certificate. */
             var hasCert = cs.some(function(c){ return c.donorId === d.id; });
             var certBtn = d.lastDonation ? (hasCert ? '<button class="btn green" onclick="viewOldCert(\''+esc(d.id)+'\')">Old Certificate</button> <button class="btn" onclick="generateCert(\''+esc(d.id)+'\')">New Certificate</button>' : '<button class="btn green" onclick="generateCert(\''+esc(d.id)+'\')">Certificate</button>') : '<button class="btn green" onclick="addDonation(\''+esc(d.id)+'\')">Add Donation</button>';
-            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(d)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td>'+certBtn+' <button class="btn ghost" onclick="editDonor(\''+esc(d.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td>'+esc(d.name)+(d.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(d)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(d.father)+'</td><td>'+esc(d.donorNo)+'</td><td>'+esc(d.cnic)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.age)+'</td><td>'+esc(d.phone)+'</td><td>'+esc(d.address)+'</td><td>'+esc(d.disease)+'</td><td>'+esc(fmtD(d.lastDonation))+'</td><td>'+esc(d.units)+'</td><td>'+certBtn+' <button class="btn ghost" onclick="editDonor(\''+esc(d.id)+'\')">Edit</button> <button class="btn ghost" onclick="showDonorIdCard(\''+esc(d.id)+'\'")">ID Card</button> <button class="btn ghost" onclick="showDonorHistory(\''+esc(d.id)+'\'",\''+esc(d.name||'')+'\'")">History</button> <button class="btn ghost" onclick="removeDonor(\''+esc(d.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
@@ -6272,6 +6687,7 @@ function renderAdmin(){
           box.innerHTML = h;
           loadClaimsAdmin(); loadCamps(); renderAdminAnalytics(); renderRecurringSuggestions(); v57RenderAnnAdminList(); /* v59 */ /* v57-D */
           loadGroupBAdmin(); /* v57-B */
+          renderThalassemiaAdmin(); /* v69 */
         });
       });
     });
@@ -6689,6 +7105,199 @@ function v57StartListeners(){
       if (sec && sec.classList.contains('on')) v57RenderAnnouncements();
     });
   } catch(e){}
+}
+
+
+/* ================= v69: monthly summary, open requests, donor of month, thalassemia, eligible, families, donor id card, donation history ================= */
+var V69_GROUPS = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
+function v69MonthStart(){ var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); }
+function v69ReqOpen(r){ var st = r.status || 'Received'; return st !== 'Completed' && st !== 'Closed'; }
+function renderMonthlySummary(ds, rs, cs){
+  var box = document.getElementById('monthlySummaryBox'); if (!box) return;
+  var start = v69MonthStart();
+  var nd = (ds||[]).filter(function(d){ return (d.createdAt||0) >= start; });
+  var rc = (rs||[]).filter(function(r){ return (r.createdAt||0) >= start; });
+  var ro = (rs||[]).filter(v69ReqOpen);
+  var rd = (rs||[]).filter(function(r){ return (r.status||'') === 'Completed' && (r.completedAt||0) >= start; });
+  var cc = (cs||[]).filter(function(c){ return (c.createdAt||0) >= start; });
+  var units = 0; cc.forEach(function(c){ units += parseInt(c.units||0,10)||0; });
+  var byG = {}; V69_GROUPS.forEach(function(g){ byG[g] = 0; });
+  nd.forEach(function(d){ if (byG[d.group] !== undefined) byG[d.group]++; });
+  box.innerHTML = '<div class="stat-grid stat-grid-3"><div class="stat-card"><b>' + nd.length + '</b><span>New Donors</span></div><div class="stat-card"><b>' + rc.length + '</b><span>Requests</span></div><div class="stat-card"><b>' + cc.length + '</b><span>Donations (' + units + ' units)</span></div></div><p class="mut small">Open requests: <b>' + ro.length + '</b> • Completed this month: <b>' + rd.length + '</b></p><p class="mut small">New donors by group: ' + V69_GROUPS.map(function(g){ return g + ' ' + byG[g]; }).join(' • ') + '</p>';
+}
+function renderHomeOpenRequests(rs){
+  var box = document.getElementById('homeOpenReqList'); if (!box) return;
+  var open = (rs||[]).filter(v69ReqOpen).sort(function(a,b){ var ea = a.emergency?1:0, eb = b.emergency?1:0; if (eb !== ea) return eb - ea; return (b.createdAt||0) - (a.createdAt||0); }).slice(0, 5);
+  renderReqList('homeOpenReqList', open, 'No open blood requests right now.');
+}
+function renderDonorOfMonth(ds, cs){
+  var box = document.getElementById('donorOfMonthBox'); if (!box) return;
+  var start = v69MonthStart();
+  var byId = {};
+  var add = function(c){ var k = c.donorId || ''; if (!k) return; if (!byId[k]) byId[k] = {units:0, n:0, name:c.donorName||'', group:c.group||''}; byId[k].units += parseInt(c.units||0,10)||0; byId[k].n++; };
+  (cs||[]).forEach(function(c){ if ((c.createdAt||0) >= start) add(c); });
+  var scope = 'this month';
+  if (!Object.keys(byId).length) { (cs||[]).forEach(add); scope = 'all time'; }
+  var best = null, bestId = '';
+  for (var k in byId) { if (!best || byId[k].units > best.units || (byId[k].units === best.units && byId[k].n > best.n)) { best = byId[k]; bestId = k; } }
+  if (!best) { box.innerHTML = '<span class="mut">No donations recorded yet.</span>'; return; }
+  var d = null; (ds||[]).forEach(function(x){ if (x.id === bestId) d = x; });
+  var name = (d && d.name) || best.name || 'Donor';
+  var group = (d && d.group) || best.group || '';
+  var no = (d && d.donorNo) || '';
+  var ini = name.trim().split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0,2).join('').toUpperCase() || '🩸';
+  box.innerHTML = '<div class="v69-dom"><div class="v69-avatar">' + esc(ini) + '</div><div><b style="font-size:18px">' + esc(name) + '</b> <span class="bgpill">' + esc(group) + '</span><br><span class="mut">' + (scope === 'this month' ? 'This month: ' : 'Total: ') + '<b>' + best.units + ' unit(s)</b> in ' + best.n + ' donation(s)' + (no ? ' • Donor No. ' + esc(no) : '') + '</span></div></div>';
+}
+function renderThalassemiaPublic(){
+  var box = document.getElementById('thalassemiaBox'); if (!box) return;
+  qAll('thalassemiaPatientsPublic', function(ps){
+    qAll('donorsPublic', function(ds){
+      if (!(ps||[]).length) { box.innerHTML = '<span class="mut">No thalassemia patients registered yet — the admin adds them.</span>'; return; }
+      box.innerHTML = (ps||[]).map(function(p){
+        var match = (ds||[]).filter(function(d){ return d.group === p.group && d.available !== false && !d.hidden && donorStatus(d.lastDonation).ok; });
+        var names = match.slice(0,3).map(function(d){ return esc(d.name||''); }).join(', ');
+        return '<div class="dcard"><b>' + esc(p.name||'Patient') + '</b> <span class="bgpill">' + esc(p.group||'') + '</span><br><span class="mut">' + esc(p.hospital||'') + ' • ' + esc(p.need||'Monthly blood needed') + '</span><br><span class="mut small">' + match.length + ' matching eligible donor(s)' + (names ? ': ' + names : '') + '</span><br><button class="btn ghost" onclick="show(\'find\')">Find Donor</button></div>';
+      }).join('');
+    });
+  });
+}
+function submitThalassemiaPatient(){
+  if (!isAdmin()) { var m0 = document.getElementById('tpMsg'); if (m0) m0.innerHTML = '<span class="err">Admin login required.</span>'; return; }
+  var nm = val('tpName'), g = val('tpGroup'), h = val('tpHospital');
+  var m = document.getElementById('tpMsg');
+  if (!nm || !g || !h) { if (m) m.innerHTML = '<span class="err">Please fill patient name, blood group and hospital.</span>'; return; }
+  var id = uid('thalassemia');
+  var p = {id:id, name:nm, group:g, hospital:h, need:val('tpNeed'), phone:val('tpPhone'), createdAt:Date.now()};
+  var pub = {id:id, name:nm, group:g, hospital:h, need:val('tpNeed'), createdAt:Date.now()};
+  qAdd('thalassemiaPatients', p, function(){
+    qAdd('thalassemiaPatientsPublic', pub, function(){
+      if (m) m.innerHTML = '<span class="ok">Patient added.</span>';
+      ['tpName','tpHospital','tpNeed','tpPhone'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; });
+      var gg = document.getElementById('tpGroup'); if (gg) gg.value = '';
+      renderThalassemiaAdmin(); renderThalassemiaPublic();
+    });
+  });
+}
+function renderThalassemiaAdmin(){
+  var box = document.getElementById('adminThalassemiaList'); if (!box) return;
+  if (!isAdmin()) { box.innerHTML = ''; return; }
+  qAll('thalassemiaPatients', function(ps){
+    qAll('donorsPublic', function(ds){
+      if (!(ps||[]).length) { box.innerHTML = '<span class="mut">No patients yet.</span>'; return; }
+      box.innerHTML = '<h3>Patients (' + ps.length + ')</h3>' + ps.map(function(p){
+        var match = (ds||[]).filter(function(d){ return d.group === p.group && d.available !== false && !d.hidden && donorStatus(d.lastDonation).ok; });
+        return '<div class="dcard"><b>' + esc(p.name||'') + '</b> <span class="bgpill">' + esc(p.group||'') + '</span><br><span class="mut">' + esc(p.hospital||'') + ' • ' + esc(p.need||'') + '</span><br><span class="mut small">Phone (admin only): ' + esc(p.phone||'-') + ' • ' + match.length + ' matching eligible donor(s)</span><br><button class="btn ghost" onclick="removeThalassemiaPatient(\'' + esc(p.id) + '\')">Remove</button></div>';
+      }).join('');
+    });
+  });
+}
+function removeThalassemiaPatient(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  if (!confirm('Remove this patient?')) return;
+  qDel('thalassemiaPatients', id, function(){ qDel('thalassemiaPatientsPublic', id, function(){ renderThalassemiaAdmin(); renderThalassemiaPublic(); }); });
+}
+function renderEligibleList(){
+  var box = document.getElementById('eligibleList'); if (!box) return;
+  if (!isAdmin()) { box.innerHTML = '<span class="err">Admin login required.</span>'; return; }
+  box.innerHTML = '<span class="mut">Loading…</span>';
+  qAll('donors', function(ds){
+    var list = (ds||[]).filter(function(d){ return d.available !== false && !isFemalePrivate(d) && donorStatus(d.lastDonation).ok; });
+    list.sort(function(a,b){ var g = String(a.group||'').localeCompare(String(b.group||'')); return g || String(a.name||'').localeCompare(String(b.name||'')); });
+    if (!list.length) { box.innerHTML = '<span class="mut">No eligible donors right now.</span>'; return; }
+    box.innerHTML = '<p class="mut"><b>' + list.length + ' eligible donor(s)</b> — last donation 90+ days ago, or never donated.</p>' + list.map(function(d){
+      var ph = d.phone || '';
+      var num = String(ph).replace(/\D/g,''); if (num.charAt(0) === '0') num = '92' + num.slice(1);
+      return '<div class="dcard"><b>' + esc(d.name||'') + '</b> <span class="bgpill">' + esc(d.group||'') + '</span> <span class="mut small">Donor No. ' + esc(d.donorNo||'') + '</span><br><span class="mut small">Last donation: ' + esc(d.lastDonation ? fmtD(d.lastDonation) : 'Never donated') + '</span><br><a class="btn green" href="tel:' + esc(ph) + '">Call ' + esc(ph) + '</a> <a class="btn" target="_blank" rel="noopener" href="https://wa.me/' + num + '">WhatsApp</a></div>';
+    }).join('');
+  });
+}
+function renderFamilies(){
+  var box = document.getElementById('familyList'); if (!box) return;
+  qAll('donorsPublic', function(ds){
+    var fams = {};
+    (ds||[]).forEach(function(d){ var f = (d.family||'').trim(); if (!f || d.hidden) return; if (!fams[f]) fams[f] = []; fams[f].push(d); });
+    var names = Object.keys(fams).sort();
+    if (!names.length) { box.innerHTML = '<span class="mut">No family names added yet — add a Family name when registering a donor.</span>'; return; }
+    box.innerHTML = names.map(function(f){
+      var list = fams[f].slice().sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
+      return '<div class="fam-group"><b>' + esc(f) + '</b> <span class="mut small">(' + list.length + ' donor(s))</span><br>' + list.map(function(d){ return '<span class="mut small">' + esc(d.name||'') + ' — <b>' + esc(d.group||'') + '</b> (No. ' + esc(d.donorNo||'') + ')</span>'; }).join('<br>') + '</div>';
+    }).join('');
+  });
+}
+function showDonorIdCard(id){
+  qAll('donors', function(ds){
+    var d = null; ds.forEach(function(x){ if (x.id === id) d = x; });
+    if (!d) { alert('Donor not found.'); return; }
+    renderDonorIdCardHTML(d);
+    openModal('donorIdModal');
+  });
+}
+function showMyDonorIdCard(){
+  if (!MY_DONOR) { alert('Please link your donor account first (Account tab).'); return; }
+  renderDonorIdCardHTML(MY_DONOR);
+  openModal('donorIdModal');
+}
+function renderDonorIdCardHTML(d){
+  window._lastDonorIdCard = d;
+  var body = document.getElementById('donorIdCardBody'); if (!body) return;
+  var photo = d.photo ? '<img class="idc-photo" src="' + esc(d.photo) + '" alt="Donor photo">' : '<div class="idc-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;background:#fee">🩸</div>';
+  body.innerHTML = '<div class="idcard-donor"><div class="idc-head">' + photo + '<div><b style="font-size:18px">' + esc(d.name||'') + '</b><br><span class="bgpill">' + esc(d.group||'') + '</span><br><span class="mut small">Donor No.: <b>' + esc(d.donorNo||'') + '</b></span><br><span class="mut small">Basti Dawa Blood Society</span></div></div><div id="donorQrBox" style="margin-top:12px;text-align:center"></div><p class="mut small" style="text-align:center">Scan to verify: ' + esc(SITE_BASE) + '?verify=' + esc(d.id) + '</p><button class="btn" onclick="shareDonorIdCardPDF()">Share Card as PDF</button> <button class="btn ghost" onclick="window.print()">Print</button></div>';
+  var qb = document.getElementById('donorQrBox');
+  if (qb && typeof QRCode !== 'undefined') { try { new QRCode(qb, {text: SITE_BASE + '?verify=' + encodeURIComponent(d.id), width:140, height:140, correctLevel: QRCode.CorrectLevel.M}); } catch(e){} }
+}
+function shareDonorIdCardPDF(){
+  var d = window._lastDonorIdCard; if (!d) return;
+  var cards = document.querySelectorAll('#donorIdCardBody .idcard-donor');
+  var cardBody = document.getElementById('donorIdCardBody');
+  if (window.html2canvas && cards.length) {
+    var qrBox = document.getElementById('donorQrBox');
+    if (qrBox && !qrBox.querySelector('canvas,img') && typeof QRCode !== 'undefined') { try { new QRCode(qrBox, {text: SITE_BASE + '?verify=' + encodeURIComponent(d.id), width:140, height:140, correctLevel: QRCode.CorrectLevel.M}); } catch(e){} }
+    if (qrBox) { var qc = qrBox.querySelector('canvas'); if (qc) { try { var qimg = document.createElement('img'); qimg.src = qc.toDataURL('image/png'); qimg.width = 140; qimg.height = 140; qimg.style.display = 'block'; qimg.style.margin = '0 auto'; qrBox.innerHTML = ''; qrBox.appendChild(qimg); } catch(e){} } }
+    if (cardBody) cardBody.classList.add('pdf-capture');
+    var done = 0, imgs = [];
+    var finish = function(){
+      if (cardBody) cardBody.classList.remove('pdf-capture');
+      imgs = imgs.filter(function(x){ return !!x; });
+      if (imgs.length !== cards.length) { shareDonorIdCardPDFText(); return; }
+      try {
+        var blob = cardImagePDF(imgs);
+        var fname = 'BDBS-Donor-ID-Card-' + (d.donorNo||d.id) + '.pdf';
+        var file = new File([blob], fname, {type:'application/pdf'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) { navigator.share({files:[file], title:'BDBS Donor ID Card', text:'Donor ID Card - ' + (d.name||'')}).catch(function(){ saveBlob(blob, fname); }); }
+        else { saveBlob(blob, fname); }
+      } catch(e){ shareDonorIdCardPDFText(); }
+    };
+    cards.forEach(function(card, idx){
+      window.html2canvas(card, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
+        try { imgs[idx] = {data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}; } catch(e){}
+        done++; if (done === cards.length) finish();
+      }).catch(function(){ done++; if (done === cards.length) finish(); });
+    });
+    return;
+  }
+  shareDonorIdCardPDFText();
+}
+function shareDonorIdCardPDFText(){
+  var d = window._lastDonorIdCard; if (!d) return;
+  try {
+    var lines = ['Basti Dawa Blood Society — Donor ID Card', '', 'Name: ' + (d.name||''), 'Donor No.: ' + (d.donorNo||''), 'Blood Group: ' + (d.group||''), 'Verify: ' + SITE_BASE + '?verify=' + d.id, '', 'Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization'];
+    var fname = 'BDBS-Donor-ID-Card-' + (d.donorNo||d.id) + '.pdf';
+    var blob = simplePDF([{title:'', lines:lines}]);
+    var file = new File([blob], fname, {type:'application/pdf'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) { navigator.share({files:[file], title:'BDBS Donor ID Card', text:'Donor ID Card - ' + (d.name||'')}).catch(function(){ saveBlob(blob, fname); }); }
+    else { saveBlob(blob, fname); }
+  } catch(e){ window.print(); }
+}
+function showDonorHistory(id, name){
+  var body = document.getElementById('donorHistoryBody'); if (!body) return;
+  body.innerHTML = '<span class="mut">Loading…</span>';
+  openModal('donorHistoryModal');
+  qAll('certificates', function(cs){
+    var list = (cs||[]).filter(function(c){ return c.donorId === id; }).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
+    var units = 0; list.forEach(function(c){ units += parseInt(c.units||0,10)||0; });
+    if (!list.length) { body.innerHTML = '<b>' + esc(name||'') + '</b><br><span class="mut">No donations recorded yet for this donor.</span>'; return; }
+    body.innerHTML = '<b>' + esc(name||'') + '</b> — <span class="mut">' + list.length + ' donation(s), ' + units + ' unit(s) total</span><br>' + list.map(function(c){ return '<div class="dcard"><b>' + esc(fmtD(c.date)) + '</b> — ' + esc(c.units) + ' unit(s) ' + esc(c.group||'') + ' <span class="mut small">(' + esc(c.ref||'') + (c.reqNo ? ' • Req: ' + esc(c.reqNo) : '') + ')</span></div>'; }).join('');
+  });
 }
 
 /* ---------- init ---------- */
