@@ -884,6 +884,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <label>Title *</label><input id="aTitle" placeholder="Activity title">
 <label>Details *</label><textarea id="aText" rows="3" placeholder="What happened today?"></textarea>
 <label>Photo (optional)</label><input id="aPhoto" type="file" accept="image/*">
+<label>Video link (optional)</label><input id="aVideoLink" type="url" placeholder="YouTube ya Facebook video ka link">
 <button class="btn" id="activityPublishBtn" onclick="publishActivity()">Publish</button>
 <div id="aMsg"></div>
 </div>
@@ -960,8 +961,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h2>My Profile <span id="donorEmail" class="mut"></span></h2>
 <button class="btn ghost" onclick="doLogout()">Logout</button>
 <div id="linkBox">
-<p class="mut">Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor, and the phone number on your donor record.</p>
-<label>Donor No.</label><input id="pDonorNo" placeholder="e.g. 1">
+<p class="mut">Link your donor record to see your own donation details and certificates. Just enter the phone number on your donor record — your Donor No. is not needed.</p>
+<label>Donor No. (optional)</label><input id="pDonorNo" placeholder="e.g. 1">
 <label>Phone Number (on your donor record)</label><input id="pLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
 <button class="btn" onclick="linkDonorRecord()">Link My Donor Record</button>
 <div id="pLinkMsg"></div>
@@ -1681,7 +1682,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. Khoon chahiye to request karein, dena hai to donor banein. App ka link doston aur groups me share karein.</p>
 <p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">https://jilanapps.github.io/jilan-store/blood-donors/download.html</p>
 <p id="shareCopyMsg" class="mut small" style="min-height:16px"></p>
-<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v69.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 69 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
+<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v70.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 70 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
 <div class="dp-divider">ya doston ko share karein</div>
 <a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Khoon%20chahiye%20to%20request%20karein%2C%20dena%20hai%20to%20donor%20banein.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
 <a class="btn block" style="margin:6px 0;background:#1877F2;color:#fff" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
@@ -1864,7 +1865,7 @@ ur: {
 "Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.": "آپ کا اکاؤنٹ ڈونر اکاؤنٹ ہے۔ اپنی ای میل یا فون نمبر + پاس ورڈ سے لاگ ان کریں۔ آپ کا CNIC، عمر اور بیماری نجی رہتے ہیں — صرف BDBS ایڈمن مکمل ریکارڈ دیکھ سکتا ہے۔ آپ کا نام، فون، پتہ اور بلڈ گروپ عوامی ہیں۔",
 "Link My Donor Record": "میرا ڈونر ریکارڈ لنک کریں",
 "Link My Member Card": "میرا ممبر کارڈ لنک کریں",
-"Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.": "اپنے عطیہ کی تفصیلات اور سرٹیفکیٹ دیکھنے کے لیے اپنا ڈونر ریکارڈ لنک کریں۔ وہ ڈونر نمبر درج کریں جو ڈونر کے طور پر رجسٹر کرتے وقت آپ کو دیا گیا تھا۔",
+"Link your donor record to see your own donation details and certificates. Just enter the phone number on your donor record — your Donor No. is not needed.": "اپنے عطیہ کی تفصیلات اور سرٹیفکیٹ دیکھنے کے لیے اپنا ڈونر ریکارڈ لنک کریں۔ بس اپنے ڈونر ریکارڈ والا فون نمبر درج کریں — ڈونر نمبر کی ضرورت نہیں۔",
 "My Profile": "میری پروفائل",
 "My Certificates": "میرے سرٹیفکیٹ",
 "Update My Last Donation": "میرا آخری عطیہ اپڈیٹ کریں",
@@ -1874,6 +1875,8 @@ ur: {
 "Logout": "لاگ آؤٹ",
 "Admin Panel": "ایڈمن پینل",
 "Donor No.": "ڈونر نمبر",
+"Donor No. (optional)": "ڈونر نمبر (اختیاری)",
+"Video link (optional)": "ویڈیو لنک (اختیاری)",
 "Check for Update": "اپڈیٹ چیک کریں",
 "Privacy Policy": "پرائیویسی پالیسی",
 "Publish Activity": "سرگرمی شائع کریں",
@@ -2230,7 +2233,7 @@ I18N.ar = {
 "Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.": "حسابك حساب متبرع. سجّل الدخول ببريدك الإلكتروني أو رقم هاتفك + كلمة المرور. تبقى هويتك وعمرك ومرضك خاصة — يمكن لمسؤول الجمعية فقط رؤية السجلات الكاملة. اسمك وهاتفك وعنوانك وفصيلة دمك عامة.",
 "Link My Donor Record": "اربط سجل تبرعي",
 "Link My Member Card": "اربط بطاقة عضويتي",
-"Link your donor record to see your own donation details and certificates. Enter the Donor No. given to you when you registered as a donor.": "اربط سجل تبرعك لعرض تفاصيل تبرعاتك وشهاداتك. أدخل رقم المتبرع الذي حصلت عليه عند تسجيلك كمتبرع.",
+"Link your donor record to see your own donation details and certificates. Just enter the phone number on your donor record — your Donor No. is not needed.": "اربط سجل تبرعك لعرض تفاصيل تبرعاتك وشهاداتك. أدخل فقط رقم الهاتف المسجل في سجلك — رقم المتبرع غير مطلوب.",
 "My Profile": "ملفي الشخصي",
 "My Certificates": "شهاداتي",
 "Update My Last Donation": "حدّث آخر تبرع لي",
@@ -2240,6 +2243,8 @@ I18N.ar = {
 "Logout": "تسجيل الخروج",
 "Admin Panel": "لوحة المسؤول",
 "Donor No.": "رقم المتبرع",
+"Donor No. (optional)": "رقم المتبرع (اختياري)",
+"Video link (optional)": "رابط الفيديو (اختياري)",
 "Check for Update": "تحقق من التحديث",
 "Privacy Policy": "سياسة الخصوصية",
 "Publish Activity": "انشر نشاطاً",
@@ -2510,12 +2515,15 @@ I18N.sr = {
 "Sign up": "کھاتہ بݨاؤ",
 "Password": "پاس ورڈ",
 "My Profile": "میݙی پروفائل",
+"Link your donor record to see your own donation details and certificates. Just enter the phone number on your donor record — your Donor No. is not needed.": "اپݨے عطیہ دی تفصیل تے سرٹیفکیٹ ݙیکھݨ کیتے اپݨا ڈونر ریکارڈ لنک کرو۔ بس اپݨے ڈونر ریکارڈ آلا فون نمبر لکھو — ڈونر نمبر دی لوڑ نئیں۔",
 "My Certificates": "میݙے سرٹیفکیٹ",
 "Update My Last Donation": "میݙی آخری عطیہ دی تاریخ بدلو",
 "Delete My Account": "میݙا کھاتہ مٹاؤ",
 "Logout": "لاگ آؤٹ",
 "Admin Panel": "ایڈمن پینل",
 "Donor No.": "ڈونر نمبر",
+"Donor No. (optional)": "ڈونر نمبر (اختیاری)",
+"Video link (optional)": "ویڈیو لنک (اختیاری)",
 "Close": "بند کرو",
 "Update": "اپڈیٹ",
 "Call": "کال",
@@ -4224,6 +4232,17 @@ function loadMembers(){
     }).join('');
   });
 }
+/* v70 (link route): Activity video is a LINK (YouTube/Facebook/mp4) — no
+   Storage upload (Spark plan has no Storage). YouTube -> iframe embed,
+   direct .mp4 -> <video>, anything else -> Watch Video button. */
+function activityVideoHtml(url){
+  var u = String(url||'').trim();
+  if (!u) return '';
+  var m = u.match(/(?:youtube\.com\/watch\?[^#]*v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
+  if (m) return '<br><iframe src="https://www.youtube.com/embed/'+m[1]+'" style="width:100%;aspect-ratio:16/9;border:0;border-radius:12px;margin-top:6px" allowfullscreen></iframe>';
+  if (/\.mp4(\?|#|$)/i.test(u)) return '<br><video controls preload="metadata" playsinline style="max-width:100%;border-radius:12px;margin-top:6px" src="'+esc(u)+'"></video>';
+  return '<br><a class="btn" href="'+esc(u)+'" target="_blank" rel="noopener">▶ Watch Video</a>';
+}
 function loadActivities(){
   /* Gallery stats: total donors, total donation units, total members, camps & activities — public counts only */
   qAll('donorsPublic', function(ds){
@@ -4238,7 +4257,7 @@ function loadActivities(){
     if (!acts.length) { box.innerHTML = '<span class="mut">No activity yet.</span>'; return; }
     box.innerHTML = acts.map(function(a){
       var ab = isAdmin() ? ' <button class="btn ghost" onclick="v59EditActivity(\''+esc(a.id)+'\')">Edit</button> <button class="btn ghost" onclick="v59DeleteActivity(\''+esc(a.id)+'\')">Remove</button>' : '';
-      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+ab+'</div>';
+      return '<div class="card"><b>'+esc(a.title)+'</b>'+(a.demo?' <span class="badge demo">DEMO</span>':'')+'<br><span class="mut small">'+esc(fmtD(a.createdAt))+'</span><br>'+esc(a.text)+(a.photo?'<br><img src="'+a.photo+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+(a.video?activityVideoHtml(a.video):'')+ab+'</div>';
     }).join('');
   });
   document.getElementById('activityPublish').style.display = isAdmin() ? 'block' : 'none';
@@ -5056,24 +5075,34 @@ function viewMemberCard(id){
     renderMemberCard(m);
   });
 }
+/* v70: Activity video — camp motivational clips. Video goes to Firebase
+   Storage (NOT base64 in Firestore — a 791KB clip is ~1.05MB base64,
+   over the 1MB Firestore doc limit). The doc stores only the download URL.
+   NOTE: Storage needs the Blaze plan — on Spark the upload fails. */
 function publishActivity(){
   if (!isAdmin()) { document.getElementById('aMsg').innerHTML = '<span class="err">Login required (admin).</span>'; return; }
   if (!val('aTitle') || !val('aText')) { document.getElementById('aMsg').innerHTML = '<span class="err">Title and details are required.</span>'; return; }
+  var msg = document.getElementById('aMsg');
+  var videoLink = val('aVideoLink');
   readPhoto(document.getElementById('aPhoto'), function(photo){
-    /* v59: edit mode — purani photo tab rakho jab nayi photo na chuni ho */
-    if (window._editActId) {
-      var id = window._editActId;
-      var keepPhoto = photo || window._editActPhoto || '';
-      qUpdate('activities', id, {title:val('aTitle'), text:val('aText'), photo:keepPhoto}, function(ok){
-        document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity updated.</span>' : '<span class="err">Could not update.</span>';
-        if (ok) { logAudit('edit-activity', id, val('aTitle')); v59CancelActivityEdit(); loadActivities(); loadHome(); }
+    function finish(videoUrl){
+      /* v59: edit mode — purani photo/video tab rakho jab nayi na chuni ho */
+      if (window._editActId) {
+        var id = window._editActId;
+        var keepPhoto = photo || window._editActPhoto || '';
+        var keepVideo = videoUrl || window._editActVideo || '';
+        qUpdate('activities', id, {title:val('aTitle'), text:val('aText'), photo:keepPhoto, video:keepVideo}, function(ok){
+          msg.innerHTML = ok ? '<span class="ok">Activity updated.</span>' : '<span class="err">Could not update.</span>';
+          if (ok) { logAudit('edit-activity', id, val('aTitle')); v59CancelActivityEdit(); loadActivities(); loadHome(); }
+        });
+        return;
+      }
+      qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, video:videoUrl, createdAt:Date.now()}, function(ok){
+        msg.innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
+        if (ok) { logAudit('publish-activity', '', val('aTitle')); document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; document.getElementById('aVideoLink').value=''; loadActivities(); loadHome(); }
       });
-      return;
     }
-    qAdd('activities', {title:val('aTitle'), text:val('aText'), photo:photo, createdAt:Date.now()}, function(ok){
-      document.getElementById('aMsg').innerHTML = ok ? '<span class="ok">Activity published.</span>' : '<span class="err">Could not publish.</span>';
-      if (ok) { logAudit('publish-activity', '', val('aTitle')); document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; loadActivities(); loadHome(); }
-    });
+    finish(videoLink);
   });
 }
 /* v59: Activity Edit + Delete (admin only). Upload ke baad ghalti theek
@@ -5087,18 +5116,19 @@ function v59EditActivity(id){
     document.getElementById('aTitle').value = a.title||'';
     document.getElementById('aText').value = a.text||'';
     document.getElementById('aPhoto').value = '';
+    document.getElementById('aVideoLink').value = a.video||'';
     window._editActId = id;
     window._editActPhoto = a.photo||'';
+    window._editActVideo = a.video||'';
     var b = document.getElementById('activityPublishBtn'); if (b) b.textContent = 'Save Changes';
     document.getElementById('aMsg').innerHTML = '<span class="mut">Editing this activity — <a href="#" onclick="v59CancelActivityEdit();return false;">Cancel</a></span>';
     var f = document.getElementById('activityPublish'); if (f) f.scrollIntoView();
   });
 }
 function v59CancelActivityEdit(){
-  window._editActId = null; window._editActPhoto = '';
+  window._editActId = null; window._editActPhoto = ''; window._editActVideo = '';
   var b = document.getElementById('activityPublishBtn'); if (b) b.textContent = 'Publish';
-  document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value='';
-  document.getElementById('aMsg').innerHTML = '';
+  document.getElementById('aTitle').value=''; document.getElementById('aText').value=''; document.getElementById('aPhoto').value=''; document.getElementById('aVideoLink').value=''; document.getElementById('aMsg').innerHTML = '';
 }
 function v59DeleteActivity(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
@@ -5528,6 +5558,7 @@ function renderDonor(u){
     var pn = data.phoneNorm || (data.phone ? normPhone(data.phone) : '');
     if (pn) { MY_PHONE_NORM = pn; try { localStorage.setItem('bdbs_myPhoneNorm', pn); } catch(e){} if (!data.phoneNorm && data.phone) { db.collection('users').doc(u.uid).update({phoneNorm: pn}).catch(function(){}); } }
     var linkedId = data.linkedDonorId || '';
+    if (!linkedId && pn) { tryAutoLinkByPhone(u, pn); }
     document.getElementById('linkBox').style.display = linkedId ? 'none' : 'block';
     document.getElementById('profileBox').style.display = linkedId ? 'block' : 'none';
     if (!linkedId) document.getElementById('pLinkMsg').innerHTML = '';
@@ -5736,19 +5767,52 @@ function showLinkBoxAgain(){
    claim ANY record (D-7 got linked to the D-1 login that way). If the
    record has no public mirror, the typed phone must match the phone on
    the signed-in login instead. */
+/* v70: auto-link by phone — bulk-added donors never learned their Donor No.
+   After login, if the login phone matches exactly one donor record, link
+   it without asking. 0 matches = not registered yet; 2+ = needs Donor No.
+   (manual box). Already linked to another login -> the rules deny the
+   update and the donor is told to contact the admin. Runs once per login. */
+var _autoLinkKey = '';
+function tryAutoLinkByPhone(u, pn){
+  var ph = normPhone(pn);
+  if (!ph || !u) return;
+  var key = u.uid + '|' + ph;
+  if (_autoLinkKey === key) return;
+  _autoLinkKey = key;
+  findDonorsByPhone(ph, function(hits){
+    if (hits.length !== 1) return;
+    var hit = hits[0];
+    db.collection('donorsPublic').doc(hit.id).get().then(function(p){
+      if (!p.exists) return;
+      var pd = p.data();
+      var cardPhone = pd.phone ? normPhone(pd.phone) : '';
+      if (!cardPhone && pd.hidden && pd.phoneHash) { cardPhone = (donorKeyId('phone', ph) === pd.phoneHash) ? ph : ''; }
+      if (!cardPhone || cardPhone !== ph) return;
+      db.collection('donors').doc(hit.id).update({linkedUid: u.uid}).then(function(){
+        return db.collection('users').doc(u.uid).set({linkedDonorId: hit.id, linkedDonorNo: hit.donorNo || ''}, {merge:true});
+      }).then(function(){
+        var m = document.getElementById('pLinkMsg'); if (m) m.innerHTML = '<span class="ok">Aap ka donor record aap ke number se link ho gaya.</span>';
+        renderDonor(u);
+        var pm = document.getElementById('pUpdateMsg'); if (pm) pm.innerHTML = '<span class="ok">Aap ka donor record aap ke number se link ho gaya.</span>';
+      }).catch(function(){
+        var m = document.getElementById('pLinkMsg'); if (m) m.innerHTML = '<span class="err">Ye record pehle se kisi aur ID se link hai — admin se rabta karein.</span>';
+      });
+    }).catch(function(){});
+  });
+}
 function linkDonorRecord(){
   if (!FB_OK || !auth || !auth.currentUser) { document.getElementById('pLinkMsg').innerHTML = '<span class="err">Linking needs internet.</span>'; return; }
   var no = val('pDonorNo');
   var ph = normPhone(val('pLinkPhone'));
   var msg = document.getElementById('pLinkMsg');
-  if (!no) { msg.innerHTML = '<span class="err">Enter your Donor No.</span>'; return; }
   if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your donor record.</span>'; return; }
   msg.innerHTML = '<span class="mut">Linking…</span>';
   var u = auth.currentUser;
   var wantNo = parseInt(String(no).replace(/\D/g,''),10) || 0;
-  var finishLink = function(donorId){
+  var finishLink = function(donorId, donorNo){
+    var ln = (donorNo === undefined ? no : donorNo);
     return db.collection('donors').doc(donorId).update({linkedUid: u.uid}).then(function(){
-      return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: no}, {merge:true});
+      return db.collection('users').doc(u.uid).set({linkedDonorId: donorId, linkedDonorNo: ln}, {merge:true});
     }).then(function(){
       msg.innerHTML = '<span class="ok">Donor record linked.</span>';
       renderDonor(u);
@@ -5786,9 +5850,32 @@ function linkDonorRecord(){
     }
     return linkWithMirrorChecked(donorId, pub);
   };
+
+  /* v70: link by phone only — no Donor No. needed (bulk-added donors never
+     learned their number). Exactly 1 match links; 0 or 2+ ask the donor
+     to register or add their Donor No. */
+  var linkByPhoneOnly = function(){
+    msg.innerHTML = '<span class="mut">Linking…</span>';
+    findDonorsByPhone(ph, function(hits){
+      if (!hits.length) { msg.innerHTML = '<span class="err">Is number par koi record nahi mila — admin se rabta karein ya Register karein.</span>'; return; }
+      if (hits.length > 1) { msg.innerHTML = '<span class="err">Is number par aik se zyada records mile — apna Donor No. bhi likhein.</span>'; return; }
+      var hit = hits[0];
+      db.collection('donorsPublic').doc(hit.id).get().then(function(p){
+        if (!p.exists) { msg.innerHTML = '<span class="err">Is record ka public card nahi mila — admin se rabta karein (Admin Panel: Sync Public Donor List).</span>'; return; }
+        var pd = p.data();
+        var cardPhone = pd.phone ? normPhone(pd.phone) : '';
+        if (!cardPhone && pd.hidden && pd.phoneHash) { cardPhone = (donorKeyId('phone', ph) === pd.phoneHash) ? ph : ''; }
+        if (!cardPhone || cardPhone !== ph) { msg.innerHTML = '<span class="err">Phone number does not match this record — apne record wala number likhein, ya admin se rabta karein.</span>'; return; }
+        return finishLink(hit.id, hit.donorNo || '');
+      }).catch(function(){
+        if (msg.innerHTML.indexOf('Linking') !== -1) msg.innerHTML = '<span class="err">Ye record pehle se kisi aur ID se link hai — admin se rabta karein.</span>';
+      });
+    });
+  };
   db.collection('users').doc(u.uid).get().then(function(ud){
     var myPhone = (ud.exists && ud.data().phoneNorm) ? normPhone(ud.data().phoneNorm) : ((ud.exists && ud.data().phone) ? normPhone(ud.data().phone) : '');
     if (myPhone && myPhone !== ph) { msg.innerHTML = '<span class="err">Ye phone number aap ke login wale number se match nahi karta.</span>'; return; }
+    if (!wantNo) { return linkByPhoneOnly(); }
     return db.collection('donorLookup').doc(lookupKey(no)).get().then(function(d){
       var lookupId = (d.exists && d.data().donorId) ? d.data().donorId : '';
       if (!lookupId) {
@@ -5809,8 +5896,23 @@ function linkDonorRecord(){
     if (msg.innerHTML.indexOf('Linking') !== -1) {
       msg.innerHTML = (typeof navigator !== 'undefined' && navigator.onLine === false)
         ? '<span class="err">Internet nahi hai — connection check kar ke dobara koshish karein.</span>'
-        : '<span class="err">Could not link — this Donor No. may already be linked to another account. Ask the admin for help.</span>';
+        : '<span class="err">Ye record pehle se kisi aur ID se link hai — admin se rabta karein.</span>';
     }
+  });
+}
+/* v70: find public donor mirrors by phone (client-side over donorsPublic:
+   stored phone formats vary, so a server == query cannot match — compare
+   normPhone() on both sides; a hidden record has no phone, match its
+   phoneHash instead). Public read: Find Donor already reads donorsPublic. */
+function findDonorsByPhone(ph, cb){
+  qAll('donorsPublic', function(list){
+    var hits = [];
+    (list || []).forEach(function(d){
+      var cp = d.phone ? normPhone(d.phone) : '';
+      if (!cp && d.hidden && d.phoneHash) { if (donorKeyId('phone', ph) === d.phoneHash) cp = ph; }
+      if (cp && cp === ph) hits.push(d);
+    });
+    cb(hits);
   });
 }
 /* v56: find a public donor mirror by Donor No. (string form, then number
@@ -6233,11 +6335,26 @@ function removeDuplicates(){
 /* Admin donor search (v29): filter the Donors table by Donor No.,
    Name or CNIC — the row text already holds all three. */
 function filterDonorRows(){
-  var q = (document.getElementById('donorSearch').value || '').toLowerCase().trim();
+  var raw = document.getElementById('donorSearch').value || '';
+  var q = raw.toLowerCase().trim();
+  /* v70: phone search — digits-normalized, so 0300-1234567, 03001234567
+     and 923001234567 all match the same stored phone. The query is
+     checked in both forms (local 0… and intl 92…); the row's digits are
+     a concatenation of every number in the row, so the row itself is
+     NOT normalized — only the query is. */
+  var qRaw = raw.replace(/\D/g, '');
+  var qNorm = normPhone(qRaw);
+  var qLocal = (qNorm.length === 12 && qNorm.indexOf('92') === 0) ? ('0' + qNorm.slice(2)) : qRaw;
   var rows = document.querySelectorAll('#donorTable tr');
   rows.forEach(function(tr, i){
     if (i === 0) return;
-    tr.style.display = (!q || tr.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+    var txt = tr.textContent.toLowerCase();
+    var rowDigits = txt.replace(/\D/g, '');
+    var hit = !q || txt.indexOf(q) !== -1
+      || (qRaw !== '' && rowDigits.indexOf(qRaw) !== -1)
+      || (qNorm !== '' && rowDigits.indexOf(qNorm) !== -1)
+      || (qLocal !== '' && rowDigits.indexOf(qLocal) !== -1);
+    tr.style.display = hit ? '' : 'none';
   });
 }
 /* ---------- v40 audit log ----------
@@ -6630,7 +6747,7 @@ function renderAdmin(){
           h += '<div class="card"><b>🏥 Blood Banks &amp; Hospitals</b> <span class="mut small">Admin-entered stock per blood group; hospital registrations need admin approval before they can request blood.</span><div id="adminBanksBox" class="mut">Loading…</div><div id="adminHospBox" class="mut" style="margin-top:10px">Loading…</div></div>'; /* v57-B */
           h += '<div class="card"><b>Audit Log</b> <span class="mut small">Every admin action, newest first (last 50).</span><br><button class="btn" onclick="loadAuditLog()">Load Audit Log</button><div id="auditLogBox" style="margin-top:8px"></div></div>';
           h += '<div id="claimsBox"><p class="mut">Loading donation claims…</p></div>';
-          h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name or CNIC…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
+          h += '<h3>Donors ('+ds.length+') — full records (admin only)</h3><input id="donorSearch" placeholder="Search by Donor No., Name, CNIC or Phone…" oninput="filterDonorRows()" style="width:100%;padding:8px;margin:6px 0"><div style="overflow-x:auto"><table id="donorTable"><tr><th>Name</th><th>Father</th><th>Donor No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Last Donation</th><th>Units</th><th></th></tr>';
           ds.forEach(function(d){
             /* Certificate: first time one button; once a certificate
                exists, Old (same number again) and New (fresh number)
