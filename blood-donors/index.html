@@ -176,6 +176,7 @@ header .tagline{font-size:10.5px;color:#F5C518;letter-spacing:2px;text-transform
 
 /* ---------- buttons ---------- */
 .btn{display:inline-block;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;border:0;border-radius:12px;padding:13px 20px;font-size:15px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0;box-shadow:0 4px 16px rgba(239,68,68,.35);letter-spacing:.2px;text-decoration:none;transition:transform .15s,box-shadow .15s,background .15s}
+.btn.google{background:#fff;color:#1f1f1f;border:1px solid #dadce0;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(239,68,68,.45);text-decoration:none}
 .btn:active{transform:translateY(0) scale(.96)}
 .btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.35);box-shadow:none}
@@ -906,6 +907,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <label>Email ya Phone Number</label><input id="lEmail" type="text" placeholder="Your email or phone number">
 <label>Password</label><input id="lPass" type="password" placeholder="Password">
 <button class="btn" onclick="doLogin()">Login</button>
+<div class="mut" style="text-align:center;margin:10px 0 4px">— or —</div>
+<button class="btn google" style="width:100%" onclick="doGoogleSignIn('lMsg')"><span style="font-weight:800;color:#4285F4">G</span>&nbsp; Sign in with Google</button>
 <button class="btn ghost" onclick="doForgot()">Forgot Password?</button>
 <div id="lMsg"></div>
 <p class="mut">New user? <a href="#" onclick="showSignupForm();return false;">Sign up</a></p>
@@ -921,6 +924,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <label>Password</label><input id="suPass" type="password" placeholder="At least 6 characters">
 <label>Confirm Password</label><input id="suPass2" type="password" placeholder="Repeat password">
 <button class="btn" onclick="doSignup()">Create Account</button>
+<div class="mut" style="text-align:center;margin:10px 0 4px">— or —</div>
+<button class="btn google" style="width:100%" onclick="doGoogleSignIn('suMsg')"><span style="font-weight:800;color:#4285F4">G</span>&nbsp; Sign up with Google</button>
 <div id="suMsg"></div>
 <p class="mut">Already have an account? <a href="#" onclick="showLoginForm();return false;">Login</a></p>
 <p class="mut small">Your account is a donor account. Login with your email or phone number + password. Your CNIC, age and disease stay private — only the BDBS admin can see full records. Your name, phone, address and blood group are public.</p>
@@ -1514,7 +1519,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <p class="mut">Basti Dawa Blood Society — Khoon ka atiya, zindagi ka tohfa. Khoon chahiye to request karein, dena hai to donor banein. App ka link doston aur groups me share karein.</p>
 <p style="word-break:break-all;background:var(--line2);border-radius:10px;padding:10px 12px;font-size:14px">https://jilanapps.github.io/jilan-store/blood-donors/download.html</p>
 <p id="shareCopyMsg" class="mut small" style="min-height:16px"></p>
-<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v67.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 67 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
+<a class="btn block" style="margin:6px 0;background:linear-gradient(135deg,#F5C542,#E8A90C);color:#1A1405" href="https://jilanapps.github.io/jilan-store/blood-donors/blood-donors-v68.apk">⬇ &nbsp;Download App<br><span style="font-size:11.5px;font-weight:500;opacity:.75">Version 68 &nbsp;•&nbsp; 3.3 MB &nbsp;•&nbsp; Android</span></a>
 <div class="dp-divider">ya doston ko share karein</div>
 <a class="btn green block" style="margin:6px 0" href="https://wa.me/?text=%F0%9F%A9%B8%20Basti%20Dawa%20Blood%20Society%20%E2%80%94%20Khoon%20ka%20atiya%2C%20zindagi%20ka%20tohfa.%20Khoon%20chahiye%20to%20request%20karein%2C%20dena%20hai%20to%20donor%20banein.%20Blood%20Donor%20App%20download%20karein%3A%20https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">WhatsApp par share karein</a>
 <a class="btn block" style="margin:6px 0;background:#1877F2;color:#fff" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjilanapps.github.io%2Fjilan-store%2Fblood-donors%2Fdownload.html" target="_blank" rel="noopener">Facebook par share karein</a>
@@ -2556,7 +2561,7 @@ function setOfflineBanner(){
 window.addEventListener('online', function(){ setOfflineBanner(); flushSync(); });
 window.addEventListener('offline', function(){ setOfflineBanner(); });
 function qAll(coll, cb){
-  if (FB_OK) { db.collection(coll).orderBy('createdAt','desc').limit(200).get()
+  if (FB_OK) { var _lim = (coll==='donors' || coll==='donorsPublic' || coll==='donorLookup') ? 1000 : 200; db.collection(coll).orderBy('createdAt','desc').limit(_lim).get()
     .then(function(s){ var list = s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;});
       var k = lsKey(coll);
       lsSet(k, lsGet(k).filter(function(x){ return !x.demo; }));
@@ -4961,6 +4966,12 @@ function renderLogin(){
       auth.onAuthStateChanged(function(u){ routeAuth(u); });
     }
     routeAuth(auth.currentUser);
+    if (!window._gRedirectChecked) {
+      window._gRedirectChecked = true;
+      auth.getRedirectResult().then(function(res){
+        if (res && res.user) { ensureUsersDoc(res.user); var gm = document.getElementById('lMsg'); if (gm) gm.innerHTML = '<span class="ok">Signed in with Google.</span>'; }
+      }).catch(function(e){ var gm2 = document.getElementById('lMsg'); if (gm2) googleSignInError(e, gm2); });
+    }
   }
 }
 /* ---------- phone-or-email login ----------
@@ -5003,6 +5014,58 @@ function doLogin(){
       });
     } else {
       msg.innerHTML = '<span class="err">Login failed — check email/phone number and password.</span>';
+    }
+  });
+}
+/* ---------- Google sign-in (v68) ----------
+   One-tap sign-in with a Google account — no app password needed.
+   The owner account (jilanappsofficial@gmail.com) is an admin by email,
+   so a Google token for it is admin (isAdminUser checks token.email).
+   Popup first; if the popup is blocked/closed, fall back to redirect.
+   NOTE: Google blocks OAuth inside plain Android WebViews
+   ("disallowed_useragent"), so inside the installed APK this button
+   fails — the error message tells the user to open the website in
+   Chrome instead. The website in a real browser works.
+   The Google provider must be ENABLED in Firebase Console
+   (Authentication -> Sign-in method -> Google); until then every
+   attempt fails with auth/operation-not-allowed (message below). */
+var _usersDocDone = {};
+function ensureUsersDoc(u){
+  if (!u || !db || _usersDocDone[u.uid]) return;
+  _usersDocDone[u.uid] = true;
+  db.collection('users').doc(u.uid).get().then(function(d){
+    if (d.exists) return;
+    var nm = u.displayName || (u.email ? u.email.split('@')[0] : 'User');
+    return db.collection('users').doc(u.uid).set({name: nm, email: u.email || '', role: 'donor', createdAt: Date.now()});
+  }).catch(function(){ /* non-fatal: the app works without a users doc */ });
+}
+function googleSignInError(e, msg){
+  if (!msg) return;
+  var code = (e && e.code) || '';
+  var emsg = (e && e.message) || '';
+  var t = 'Google sign-in failed. Please login with email and password.';
+  if (code === 'auth/operation-not-allowed') t = 'Google sign-in is not switched on for this app yet — please login with email and password for now.';
+  else if (code === 'auth/account-exists-with-different-credential') t = 'This Gmail already has an email/password account — login with your password instead.';
+  else if (code === 'auth/unauthorized-domain') t = 'This website is not allowed for Google sign-in yet — please login with email and password.';
+  else if (code === 'auth/cancelled-popup-request' || code === 'auth/popup-closed-by-user') { msg.innerHTML = ''; return; }
+  else if (/disallowed_useragent/i.test(emsg) || /disallowed_useragent/i.test(code)) t = 'Google sign-in does not work inside the app — please open the website in Chrome and sign in with Google there.';
+  msg.innerHTML = '<span class="err">' + t + '</span>';
+}
+function doGoogleSignIn(msgId){
+  if (!FB_OK || !auth) { var m0 = document.getElementById(msgId || 'lMsg'); if (m0) m0.innerHTML = '<span class="err">Google sign-in needs internet the first time.</span>'; return; }
+  var msg = document.getElementById(msgId || 'lMsg');
+  var provider = new firebase.auth.GoogleAuthProvider();
+  if (msg) msg.innerHTML = '<span class="mut">Opening Google sign-in\u2026</span>';
+  auth.signInWithPopup(provider).then(function(cred){
+    if (msg) msg.innerHTML = '<span class="ok">Signed in with Google.</span>';
+    if (cred && cred.user) ensureUsersDoc(cred.user);
+  }).catch(function(e){
+    var code = (e && e.code) || '';
+    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user') {
+      if (msg) msg.innerHTML = '<span class="mut">Opening Google sign-in\u2026</span>';
+      auth.signInWithRedirect(provider).catch(function(e2){ googleSignInError(e2, msg); });
+    } else {
+      googleSignInError(e, msg);
     }
   });
 }
