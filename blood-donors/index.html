@@ -660,7 +660,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <a class="btn ghost" href="https://www.facebook.com/profile.php?id=61568131213778" target="_blank" rel="noopener">Facebook</a>
 <a class="btn ghost" href="https://www.tiktok.com/@basti.dawa.bloodsociety" target="_blank" rel="noopener">TikTok</a></p>
 </div>
-<div class="card" id="headOfficeCard"><h2>🏢 Head Office</h2><p><b>Kamal Din Sroya of Health Sciences, Basti Malook, Multan</b></p></div>
+<div class="card" id="headOfficeCard"><h2>🏢 Head Office</h2><p><b>Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</b></p></div>
 <div class="card"><h2>Latest activity</h2><div id="homeActivity" class="mut">Loading…</div></div>
 <div class="card"><h2>🩸 Blood Donation Camps</h2><p class="mut">Upcoming donation camps announced by BDBS. Register in advance — the admin will confirm your slot.</p><div id="campList" class="mut">Loading…</div></div>
 <div class="card"><h2>🏥 Blood Banks &amp; Hospitals</h2><p class="mut">Live blood stock from registered blood banks. Stock is entered by the admin.</p><div id="homeBloodBanks" class="mut">Loading…</div></div> <!-- v57-B blood bank + hospital list -->
@@ -1448,7 +1448,7 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <h2>💰 Donation — عطیہ / صدقہ</h2>
 <p class="mut">Your donation helps Basti Dawa Blood Society save lives — blood camps, patient support and society work.</p>
 <h3>🏢 Head Office</h3>
-<p><b>Kamal Din Sroya of Health Sciences, Basti Malook, Multan</b></p>
+<p><b>Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</b></p>
 <h3>💳 JazzCash</h3>
 <p><b>03069140867</b><br>Muhammad Asif Javaid</p>
 <h3>🏦 UBL Bank</h3>
@@ -5278,7 +5278,7 @@ function renderCert(c){
     '<div class="sealrow"><div class="certqr-wrap"><div id="certQrBox" class="certqr"></div><div class="qr-cap">Scan to verify</div></div><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
     '<p class="sup">Under Supervision — Basti Dawa Welfare Organization</p>' +
     '<p class="sup">bastidawabloodsociety@gmail.com</p>' +
-    '<p class="sup">Kamal Din Sroya of Health Sciences, Basti Malook, Multan</p>' +
+    '<p class="sup">Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</p>' +
     '<div class="sigrow"><div><div class="scr">Naeem Asghar</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Dr Muhammad Naeem Asghar<span>Patron In Chief</span></div></div><div><div class="scr">Asif Javaid</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Muhammad Asif Javaid<span>Founder &amp; Chief Executive</span></div></div></div>' +
     '<p class="credit">Developed by Dr Asif — Jilan Apps Official</p></div></div></div>' +
     '<button class="btn" onclick="printPageJS(\'landscape\')">Print Certificate</button> <button class="btn" onclick="shareCertPDF()">Share Certificate as PDF</button>';
@@ -5316,7 +5316,7 @@ function shareCertPDF(){
 function shareCertPDFText(){
   var c = window._lastCert; if (!c) return;
   try {
-    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Kamal Din Sroya of Health Sciences, Basti Malook, Multan'];
+    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan'];
     var blob = simplePDF([{title:'', lines:lines}]);
     var fname = 'BDBS-Certificate-' + (c.ref||c.donorName||'') + '.pdf';
     var file = new File([blob], fname, {type:'application/pdf'});
@@ -7395,24 +7395,35 @@ function renderFamilies(){
     }).join('');
   });
 }
+/* v74: Donor No. fallback — a card once rendered blank when the record
+   reached it without donorNo (stale offline cache while reads were out).
+   donorsPublic is the display source of truth for Donor No., so fill it
+   from the mirror before rendering; the card never shows a blank No. */
+function ensureDonorCardNo(d, cb){
+  if (!d || d.donorNo) { cb(d); return; }
+  qAll('donorsPublic', function(ps){
+    var m = null; (ps||[]).forEach(function(x){ if (x.id === d.id) m = x; });
+    if (m && m.donorNo) d.donorNo = m.donorNo;
+    if (m && !d.group && m.group) d.group = m.group;
+    cb(d);
+  });
+}
 function showDonorIdCard(id){
   qAll('donors', function(ds){
     var d = null; ds.forEach(function(x){ if (x.id === id) d = x; });
     if (!d) { alert('Donor not found.'); return; }
-    renderDonorIdCardHTML(d);
-    openModal('donorIdModal');
+    ensureDonorCardNo(d, function(dd){ renderDonorIdCardHTML(dd); openModal('donorIdModal'); });
   });
 }
 function showMyDonorIdCard(){
   if (!MY_DONOR) { alert('Please link your donor account first (Account tab).'); return; }
-  renderDonorIdCardHTML(MY_DONOR);
-  openModal('donorIdModal');
+  ensureDonorCardNo(MY_DONOR, function(dd){ renderDonorIdCardHTML(dd); openModal('donorIdModal'); });
 }
 function renderDonorIdCardHTML(d){
   window._lastDonorIdCard = d;
   var body = document.getElementById('donorIdCardBody'); if (!body) return;
   var photo = d.photo ? '<img class="idc-photo" src="' + esc(d.photo) + '" alt="Donor photo">' : '<div class="idc-photo" style="display:flex;align-items:center;justify-content:center;font-size:36px;background:#fee">🩸</div>';
-  body.innerHTML = '<div class="idcard-donor"><div class="idc-head">' + photo + '<div><b style="font-size:18px">' + esc(d.name||'') + '</b><br><span class="bgpill">' + esc(d.group||'') + '</span><br><span class="mut small">Donor No.: <b>' + esc(d.donorNo||'') + '</b></span><br><span class="mut small">Basti Dawa Blood Society</span></div></div><div id="donorQrBox" style="margin-top:12px;text-align:center"></div><p class="mut small" style="text-align:center">Scan to verify: ' + esc(SITE_BASE) + '?verify=' + esc(d.id) + '</p><button class="btn" onclick="shareDonorIdCardPDF()">Share Card as PDF</button> <button class="btn ghost" onclick="window.print()">Print</button></div>';
+  body.innerHTML = '<div class="idcard-donor"><div class="idc-head">' + photo + '<div><div><b style="font-size:18px">' + esc(d.name||'') + '</b></div><div style="margin-top:6px"><span class="bgpill">' + esc(d.group||'') + '</span></div><div class="mut small" style="margin-top:6px">Donor No.: <b>' + esc(d.donorNo||'') + '</b></div><div class="mut small">Basti Dawa Blood Society</div></div></div><div id="donorQrBox" style="margin-top:12px;text-align:center"></div><p class="mut small" style="text-align:center">Scan to verify: ' + esc(SITE_BASE) + '?verify=' + esc(d.id) + '</p><button class="btn" onclick="shareDonorIdCardPDF()">Share Card as PDF</button> <button class="btn ghost" onclick="window.print()">Print</button></div>';
   var qb = document.getElementById('donorQrBox');
   if (qb && typeof QRCode !== 'undefined') { try { new QRCode(qb, {text: SITE_BASE + '?verify=' + encodeURIComponent(d.id), width:140, height:140, correctLevel: QRCode.CorrectLevel.M}); } catch(e){} }
 }
