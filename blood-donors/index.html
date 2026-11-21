@@ -50,14 +50,39 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 .pdf-capture .side-label,.pdf-capture .verify-url{display:none!important}
 .mcard .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px}
 .mcard .kv span{color:#5b6b7f}
-.wcard{border:3px solid var(--burgundy);outline:1.5px solid var(--gold);outline-offset:5px;border-radius:16px;padding:26px 22px;background:linear-gradient(180deg,#fff,#FFFDF5);max-width:540px;box-shadow:var(--shadow-lg);color:#12233a;text-align:center}
-.wcard .w-eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
-.wcard .w-title{font-size:42px;font-weight:800;color:var(--burgundy);margin:6px 0 4px}
-.wcard .w-sub{font-size:14px;color:#5b6b7f;margin:0 0 14px}
-.wcard .w-name{font-size:24px;font-weight:800;color:#0f1e33;border-top:2px solid var(--gold-soft);border-bottom:2px solid var(--gold-soft);padding:10px 0;margin-bottom:6px}
-.wcard .w-kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px;text-align:left}
+.wcard{position:relative;overflow:hidden;border:3px solid #c9a227;outline:1.5px solid #c9a227;outline-offset:5px;border-radius:16px;padding:26px 22px 0;background:#fffdf6;max-width:540px;box-shadow:var(--shadow-lg);color:#12233a;text-align:center}
+.wcard .w-corner{position:absolute;width:26px;height:26px;border:2px solid #c9a227;z-index:3}
+.wcard .w-corner.tl{top:12px;left:12px;border-right:none;border-bottom:none}
+.wcard .w-corner.tr{top:12px;right:12px;border-left:none;border-bottom:none}
+.wcard .w-corner.bl{bottom:12px;left:12px;border-right:none;border-top:none}
+.wcard .w-corner.br{bottom:12px;right:12px;border-left:none;border-top:none}
+.wcard .w-wm{position:absolute;top:150px;left:50%;transform:translateX(-50%);width:280px;height:280px;opacity:.05;z-index:0}
+.wcard .w-drop{position:relative;z-index:1}
+.wcard .w-drop svg{width:52px;height:52px;margin:0 auto 8px;display:block}
+.wcard .w-eyebrow{position:relative;z-index:1;font-size:12px;letter-spacing:3px;color:#b8860b;font-weight:700;text-transform:uppercase}
+.wcard .w-under{position:relative;z-index:1;font-size:11px;color:#5b6b7f;letter-spacing:1px;margin-top:5px}
+.wcard .w-divider{display:flex;align-items:center;gap:10px;margin:14px 4px 10px;position:relative;z-index:1}
+.wcard .w-divider .w-line{flex:1;height:1px;background:#c9a227}
+.wcard .w-divider svg{width:14px;height:14px}
+.wcard .w-title{position:relative;z-index:1;font-family:Georgia,'Times New Roman',serif;font-size:46px;font-weight:800;color:#0b3d2e;margin:2px 0 0;line-height:1.05}
+.wcard .w-flourish{display:flex;align-items:center;justify-content:center;gap:6px;margin:6px auto 0;position:relative;z-index:1}
+.wcard .w-flourish .w-line{width:60px;height:2px;background:#c9a227}
+.wcard .w-flourish .w-dia{width:7px;height:7px;background:#c9a227;transform:rotate(45deg)}
+.wcard .w-sub{position:relative;z-index:1;font-size:14px;color:#5b6b7f;margin:10px 0 0;line-height:1.5}
+.wcard .w-sub b{color:#0b3d2e}
+.wcard .w-photo{width:110px;height:110px;margin:14px auto 0;border-radius:50%;border:4px solid #c9a227;box-shadow:0 4px 14px rgba(11,61,46,.25);overflow:hidden;position:relative;z-index:1;background:linear-gradient(180deg,#fff8e1,#fdf0bd)}
+.wcard .w-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.wcard .w-photo.w-initials{display:flex;align-items:center;justify-content:center;color:#0b3d2e;font-size:40px;font-weight:800;font-family:Georgia,'Times New Roman',serif}
+.wcard .w-nameplate{margin:14px 6px 0;border:2px solid #c9a227;border-radius:12px;background:linear-gradient(180deg,#fff8e1,#fdf0bd);box-shadow:0 3px 10px rgba(201,162,39,.25);padding:14px 12px 12px;position:relative;z-index:1}
+.wcard .w-nlbl{color:#b8860b;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+.wcard .w-name{color:#0b3d2e;font-size:26px;font-weight:800;margin-top:4px;line-height:1.2;font-family:Georgia,'Times New Roman',serif}
+.wcard .w-kv{position:relative;z-index:1;display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px;text-align:left}
 .wcard .w-kv span{color:#5b6b7f}
-.wcard .w-foot{font-size:12px;color:#5b6b7f;margin:12px 0 0}
+.wcard .w-foot{position:relative;z-index:1;font-size:12px;color:#5b6b7f;margin:12px 0 0}
+.wcard .w-foot b{color:#0b3d2e}
+.wcard .w-mail{position:relative;z-index:1;font-size:13px;color:#0b3d2e;font-weight:700;margin:8px 0 0}
+.wcard .w-band{position:relative;z-index:1;margin:14px -22px 0;background:#0b3d2e;color:#f5d76e;text-align:center;padding:12px;font-size:12px;letter-spacing:3px;font-weight:700}
+.wcard .w-band .w-heart{color:#c8102e}
 .mcard .kv b{text-align:right}
 .mcard + .mcard{margin-top:16px}
 .cert{max-width:1060px;margin:12px auto;text-align:center;background-color:#0a1f44;padding:18px;border-radius:3px;box-shadow:0 16px 40px rgba(9,31,68,.35);position:relative;container-type:inline-size;color:#1e293b}
@@ -5114,16 +5139,30 @@ function viewMemberCard(id){
    added; also from My Member Card and the members list. */
 function renderWelcomeCard(m){
   window._lastWelcomeCard = m;
+  var nm=(m.name||'').replace(/^(Dr|Mr|Mrs|Miss|Ms|Haji|Maulana|Mufti|Qari)\.?\s+/i,'');
+  var pp=nm.split(/\s+/).filter(Boolean);
+  var ini=(((pp[0]||'?')[0]||'?')+((pp[1]||'')[0]||'')).toUpperCase();
+  var photoHtml = m.photo ? '<div class="w-photo"><img src="'+m.photo+'" alt=""></div>' : '<div class="w-photo w-initials">'+esc(ini)+'</div>';
+  var dropSvg = '<svg viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/><path d="M50 34 L50 78 M34 56 L66 56" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>';
+  var dropPlain = '<svg viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/></svg>';
   var html = '<div class="print-area">' +
     '<div class="wcard">' +
+    '<span class="w-corner tl"></span><span class="w-corner tr"></span><span class="w-corner bl"></span><span class="w-corner br"></span>' +
+    '<svg class="w-wm" viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/></svg>' +
+    '<div class="w-drop">'+dropSvg+'</div>' +
     '<div class="w-eyebrow">Basti Dawa Blood Society</div>' +
+    '<div class="w-under">BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</div>' +
+    '<div class="w-divider"><span class="w-line"></span>'+dropPlain+'<span class="w-line"></span></div>' +
     '<div class="w-title">Welcome</div>' +
-    '<p class="w-sub">Welcome to the Basti Dawa Blood Society family.<br>Thank you for joining us \u2014 together we save lives.</p>' +
-    '<div class="w-name">'+esc(m.name||'')+'</div>' +
+    '<div class="w-flourish"><span class="w-line"></span><span class="w-dia"></span><span class="w-line"></span></div>' +
+    '<p class="w-sub">Welcome to the Basti Dawa Blood Society family.<br>Thank you for joining us &mdash; <b>together we save lives.</b></p>' +
+    photoHtml +
+    '<div class="w-nameplate"><div class="w-nlbl">Our New Member</div><div class="w-name">'+esc(m.name||'')+'</div></div>' +
     '<div class="w-kv"><span>Member ID</span><b>'+esc(m.idNo||'')+'</b></div>' +
     '<div class="w-kv"><span>Designation</span><b>'+esc(m.designation||'')+'</b></div>' +
-    '<p class="w-foot">Under Supervision \u2014 Basti Dawa Welfare Organization<br>bastidawabloodsociety@gmail.com</p>' +
     '<p class="w-foot"><b>Head Office</b><br>Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</p>' +
+    '<p class="w-mail">bastidawabloodsociety@gmail.com</p>' +
+    '<div class="w-band"><span class="w-heart">&#10084;</span> DONATE BLOOD &bull; SAVE LIVES <span class="w-heart">&#10084;</span></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" onclick="shareWelcomeCardPDF()">Share Welcome Card as PDF</button><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View ID Card</button></div>' +
     '</div>';
@@ -5155,7 +5194,7 @@ function shareWelcomeCardPDF(){
 function shareWelcomeCardPDFText(){
   var m = window._lastWelcomeCard; if (!m) return;
   try {
-    var lines = ['Basti Dawa Blood Society', '', 'Welcome', '', 'Welcome to the Basti Dawa Blood Society family.', 'Thank you for joining us - together we save lives.', '', m.name||'', 'Member ID: ' + (m.idNo||''), 'Designation: ' + (m.designation||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan'];
+    var lines = ['Basti Dawa Blood Society', '', 'Welcome', '', 'Welcome to the Basti Dawa Blood Society family.', 'Thank you for joining us - together we save lives.', '', m.name||'', 'Member ID: ' + (m.idNo||''), 'Designation: ' + (m.designation||''), '', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan', 'bastidawabloodsociety@gmail.com'];
     var blob = simplePDF([{title:'', lines:lines}]);
     var fname = 'BDBS-Welcome-Card-' + (m.idNo||m.id) + '.pdf';
     var file = new File([blob], fname, {type:'application/pdf'});
@@ -5168,7 +5207,7 @@ function viewWelcomeCard(id){
   qAll('members', function(ms){
     var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
     if (!m) { qAll('membersPublic', function(ps){ var p=null; ps.forEach(function(x){if(x.id===id)p=x;});
-      if (p) renderWelcomeCard({id:p.id, name:p.name, designation:p.designation, idNo:p.idNo}); }); return; }
+      if (p) renderWelcomeCard({id:p.id, photo:p.photo, name:p.name, designation:p.designation, idNo:p.idNo}); }); return; }
     renderWelcomeCard(m);
   });
 }
