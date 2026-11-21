@@ -2774,18 +2774,18 @@
       "description": "Facebook, Instagram, TikTok aur YouTube videos download karein — Status Saver bhi"
     },
     {
-      "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/ittiba-e-rasool.apk",
+      "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/ittiba-e-sunnat.apk",
       "category": "islamic",
       "color": "#0b5d3b",
       "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein aur Bayanat",
       "icon": "icons/ittibaerasool.png",
-      "id": "ittiba-e-rasool",
+      "id": "ittiba-e-sunnat",
       "name": "Tehreek Ittiba-e-Sunnat Pakistan",
       "package": "com.jilanapps.ittibaerasool",
       "size": 809400,
       "versionCode": 13,
       "versionName": "2.2",
-      "web": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/"
+      "web": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/"
     }
   ],
   "store": {
