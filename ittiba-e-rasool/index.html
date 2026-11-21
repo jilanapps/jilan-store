@@ -3,139 +3,270 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tehreek Ittiba-e-Sunnat Pakistan — تحریک اتباعِ سنت پاکستان</title>
-<meta name="description" content="Tehreek Ittiba-e-Sunnat Pakistan — Quran (Kanzul Iman), Duas, Namaz Timings, Tasbeeh, Taaruf, Bayanat. Free Android app, no ads.">
+<meta name="theme-color" content="#064e3b">
+<title>تحریک اتباعِ سنت پاکستان — Tehreek Ittiba-e-Sunnat Pakistan</title>
+<meta name="description" content="تحریک اتباعِ سنت پاکستان — پورا قرآن پاک (ترجمہ کنزالایمان + آڈیو)، مسنون دعائیں، نماز کے اوقات، تسبیح، بیانات اور کتابیں۔ مفت اینڈرائیڈ ایپ، کوئی اشتہار نہیں۔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--green:#0b5d3b;--green-deep:#073d29;--green2:#0d7a4c;--gold:#c9a227;--gold-dark:#8a6d1a;--gold-soft:#f7ecd0;--bg:#f3f5f2;--card:#fff;--text:#1c2b22;--muted:#66766c;--border:#e2e8e3;--shadow:0 2px 10px rgba(7,61,41,.07)}
+:root{
+  --emerald:#065f46; --forest:#064e3b; --deep:#022c22; --deep2:#04382a;
+  --gold:#c9a227; --gold-deep:#9a7b14; --amber:#d97706;
+  --cream:#fdf9ef; --paper:#fffdf6; --card:#ffffff;
+  --ink:#1e2a23; --muted:#5d6f64; --line:#e7e0cd;
+  --shadow:0 2px 12px rgba(2,44,34,.08);
+  --shadow-lg:0 8px 28px rgba(2,44,34,.14);
+}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:system-ui,'Noto Naskh Arabic','Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.8}
-a{color:var(--green2)}
+body{
+  margin:0; background:var(--cream); color:var(--ink);
+  font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic',serif;
+  font-size:17px; line-height:2.15;
+}
+a{color:var(--emerald)}
+.lat{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate; letter-spacing:.04em}
+.num{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate; font-weight:800}
+
+/* ---------- Brand header ---------- */
+.brand{background:var(--paper); border-bottom:1px solid var(--line)}
+.brand-in{max-width:1020px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; gap:14px}
+.brand img{width:58px; height:58px; border-radius:50%; border:2px solid var(--gold); background:#fff; padding:2px; flex:none}
+.brand .bt{font-weight:700; font-size:1.15em; line-height:1.9; color:var(--forest)}
+.brand .bs{font-size:.72em; color:var(--muted); line-height:1.4}
+.brand .bs .lat{font-size:1.05em; letter-spacing:.08em; text-transform:uppercase}
+
+/* ---------- Sticky nav ---------- */
+nav{position:sticky; top:0; z-index:20; background:var(--forest); border-bottom:3px solid var(--gold); box-shadow:0 2px 10px rgba(0,0,0,.2)}
+nav .nav-in{max-width:1020px; margin:0 auto; padding:6px 10px; display:flex; gap:2px; overflow-x:auto; white-space:nowrap; scrollbar-width:none}
+nav .nav-in::-webkit-scrollbar{display:none}
+nav a{color:#f3e9c8; text-decoration:none; font-size:.95em; padding:6px 12px; border-radius:999px; line-height:1.9}
+nav a:hover, nav a:active{background:rgba(255,255,255,.12); color:#fff}
+
 /* ---------- Hero ---------- */
-.hero{background:radial-gradient(600px 300px at 50% -60px,rgba(201,162,39,.35),transparent 70%),linear-gradient(165deg,#073d29,#0b5d3b 55%,#0d7a4c);color:#fff;text-align:center;padding:44px 18px 34px;border-bottom:4px solid var(--gold)}
-.hero .logo{width:128px;height:128px;border-radius:50%;background:#fff;padding:6px;box-shadow:0 4px 18px rgba(0,0,0,.4);border:3px solid var(--gold)}
-.hero h1{margin:16px 0 2px;font-size:1.9em;line-height:1.45}
-.hero .sub{color:#f5e6c4;font-size:1em;letter-spacing:.06em}
-.hero .verse{color:#ffe9a8;font-size:1.1em;margin:14px auto 0;max-width:560px}
-.hero .verse small{display:block;color:#d8e8dc;font-size:.85em;margin-top:4px}
-.cta-row{margin-top:22px}
-.btn{display:inline-block;background:var(--gold);color:#3d2f00;text-decoration:none;font-weight:800;font-size:1.15em;padding:15px 36px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.hero{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cpath d='M38 10l6 22 22 6-22 6-6 22-6-22-22-6 22-6z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/%3E%3C/svg%3E"),
+    radial-gradient(700px 320px at 50% -80px, rgba(201,162,39,.35), transparent 70%),
+    linear-gradient(168deg, var(--deep), var(--forest) 55%, var(--emerald));
+  color:#fff; text-align:center; padding:52px 18px 40px;
+}
+.hero .logo{width:138px; height:138px; border-radius:50%; background:#fff; padding:7px; border:4px solid var(--gold); box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.hero h1{margin:18px 0 0; font-size:2em; line-height:1.9; font-weight:700}
+.hero .sub{color:#f0e2b6; font-size:.95em; margin-top:2px}
+.hero .sub .lat{letter-spacing:.14em; text-transform:uppercase; font-size:.92em}
+.verse-card{
+  max-width:640px; margin:26px auto 0; background:rgba(255,253,246,.97); color:var(--ink);
+  border:1px solid var(--gold); border-radius:18px; padding:20px 22px 16px; box-shadow:var(--shadow-lg);
+  border-top:5px solid var(--gold);
+}
+.verse-card .va{font-size:1.35em; line-height:2.1; color:var(--forest); font-weight:600}
+.verse-card .vt{font-size:1em; line-height:2.1; color:#3c4a41; margin-top:2px}
+.cta-row{margin-top:28px}
+.btn{
+  display:inline-block; background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; text-decoration:none;
+  font-weight:700; font-size:1.2em; line-height:2; padding:10px 34px; border-radius:16px;
+  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a8841c;
+}
+.btn:hover{filter:brightness(1.06)}
 .btn:active{transform:scale(.97)}
-.btn.green{background:var(--green2);color:#fff}
-.meta{color:#cfe3d6;font-size:.92em;margin-top:10px}
-.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
-.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:8px 18px}
-.stat b{display:block;font-size:1.25em;line-height:1.3}
-.stat span{font-size:.85em;color:#d8e8dc}
-/* ---------- Nav ---------- */
-nav{position:sticky;top:0;background:rgba(7,61,41,.97);border-bottom:2px solid var(--gold);padding:10px 8px;text-align:center;z-index:10;overflow-x:auto;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-nav a{color:#f5e6c4;text-decoration:none;font-size:.95em;margin:0 9px;padding:4px 2px}
-nav a:hover{color:#fff;text-decoration:underline}
+.btn.green{background:linear-gradient(180deg,#0d7a4c,#065f46); color:#fff; border-color:#04402f}
+.meta{color:#cfe3d6; font-size:.9em; margin-top:12px; line-height:1.9}
+.badges{display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:14px}
+.badge{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.35); color:#fdf6d8;
+  border-radius:999px; padding:2px 14px; font-size:.85em; line-height:2}
+.stats{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:24px}
+.stat{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28); border-radius:14px; padding:10px 22px 8px; min-width:96px}
+.stat b{display:block; font-size:1.5em; line-height:1.4; color:#ffe9a8}
+.stat span{font-size:.9em; color:#dceadf}
+
 /* ---------- Layout ---------- */
-main{max-width:760px;margin:0 auto;padding:22px 16px 48px}
-.eyebrow{color:var(--gold-dark);font-size:.82em;font-weight:700;letter-spacing:.12em;margin-bottom:2px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin:16px 0;box-shadow:var(--shadow)}
-h2{color:var(--green);margin:2px 0 10px;font-size:1.35em;line-height:1.5}
-h2 .rule{display:block;width:52px;height:3px;background:var(--gold);border-radius:2px;margin-top:6px}
-h3{color:var(--green);margin:16px 0 4px;font-size:1.12em}
+main{max-width:1020px; margin:0 auto; padding:26px 16px 56px}
+section{scroll-margin-top:76px}
+.sec-head{text-align:center; margin:34px 0 6px}
+.sec-head .eyebrow{color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em}
+.sec-head h2{color:var(--forest); margin:0; font-size:1.5em; line-height:1.9}
+.sec-head .rule{width:56px; height:3px; background:var(--gold); border-radius:2px; margin:4px auto 0}
+.sec-head p{color:var(--muted); font-size:.95em; margin:6px 0 0}
+.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; margin:16px 0; box-shadow:var(--shadow)}
+.card h2{color:var(--forest); margin:0 0 6px; font-size:1.35em; line-height:1.9}
+.card h2 .rule{display:block; width:52px; height:3px; background:var(--gold); border-radius:2px; margin-top:2px}
+.card h3{color:var(--forest); margin:18px 0 2px; font-size:1.12em; line-height:1.9}
+.card p{margin:6px 0}
+.muted{color:var(--muted); font-size:.92em}
 .center{text-align:center}
-.muted{color:var(--muted);font-size:.92em}
-.note{background:var(--gold-soft);border:1px solid #e6d194;border-radius:12px;padding:12px 16px;font-size:.96em;margin:14px 0}
+.note{background:#fbf3d9; border:1px solid #e8d5a0; border-radius:14px; padding:14px 18px; margin:14px 0}
 .note b{color:#6d5708}
-/* ---------- Features ---------- */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
-.feat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 14px;text-align:center;box-shadow:var(--shadow)}
-.feat .ic{font-size:32px}
-.feat .t{font-weight:800;margin-top:6px;font-size:1.05em}
-.feat .u{color:var(--muted);font-size:.9em;line-height:1.7}
+
+/* ---------- Quick cards ---------- */
+.grid{display:grid; grid-template-columns:1fr; gap:14px; margin:20px 0 8px}
+.feat{display:block; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 16px 18px; text-align:center; box-shadow:var(--shadow); text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s, transform .15s}
+.feat:hover, .feat:active{border-color:var(--gold); box-shadow:var(--shadow-lg); transform:translateY(-2px)}
+.feat .ic{font-size:34px; line-height:1.4}
+.feat .t{font-weight:700; margin-top:2px; font-size:1.08em; color:var(--forest)}
+.feat .u{color:var(--muted); font-size:.88em; line-height:2}
+.feat .go{color:var(--gold-deep); font-size:.85em; font-weight:700}
+
+/* ---------- Feature detail grid ---------- */
+.features{display:grid; grid-template-columns:1fr; gap:14px; margin:16px 0}
+.feature{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:var(--shadow)}
+.feature .eyebrow{color:var(--gold-deep); font-size:.78em; font-weight:700; letter-spacing:.16em}
+.feature h3{color:var(--forest); margin:0 0 4px; font-size:1.3em; line-height:1.9}
+.feature p{margin:6px 0}
+.feature.featured{border-top:5px solid var(--gold); background:linear-gradient(180deg,#fffdf4,#fff)}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+.chip{background:#eef5ef; border:1px solid #cfdfd2; color:var(--forest); border-radius:999px; padding:2px 13px; font-size:.86em; line-height:2}
+
 /* ---------- Bayanat ---------- */
-.bayan{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:10px 0;text-decoration:none;color:var(--text);box-shadow:var(--shadow)}
-.bayan:hover{border-color:var(--gold)}
+.bayan{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--shadow); transition:border-color .15s, box-shadow .15s}
+.bayan:hover, .bayan:active{border-color:var(--gold); box-shadow:var(--shadow-lg)}
 .bayan>div{min-width:0}
-.bayan .play{flex:none;width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
-.bayan .bt{font-weight:700;font-size:1.02em;line-height:1.7;overflow-wrap:break-word;word-break:break-word}
-.bayan .bm{color:var(--muted);font-size:.85em}
+.bayan .play{flex:none; width:44px; height:44px; border-radius:50%; background:var(--emerald); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px}
+.bayan .bt{font-weight:700; font-size:1em; line-height:1.9; overflow-wrap:break-word; word-break:break-word}
+.bayan .bm{color:var(--muted); font-size:.82em; line-height:1.8}
+
 /* ---------- Taaruf / dev ---------- */
-.baani{display:flex;gap:18px;align-items:flex-start}
-.baani img{width:150px;max-width:42%;border-radius:14px;border:3px solid var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.2);flex:none}
-.deg{color:var(--muted);font-size:.95em}
-.maqsad{text-align:center;font-size:1.2em;font-weight:800;color:var(--green);margin:12px 0 2px}
-.words{text-align:center;color:var(--muted);letter-spacing:1px}
-.dev{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
-.dev img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);flex:none}
-.dev .dn{font-weight:800;font-size:1.12em}
-.dev .dr{color:var(--muted);font-size:.92em}
-.dev a{color:var(--green2);overflow-wrap:anywhere}
-footer{margin-top:36px;text-align:center;color:var(--muted);font-size:.88em;border-top:1px solid var(--border);padding-top:18px}
-footer b{color:var(--green)}
-@media(max-width:520px){
-  .grid{grid-template-columns:1fr}
-  .hero h1{font-size:1.6em}
-  .dev{flex-direction:column;text-align:center}
-  .baani{flex-direction:column;align-items:center;text-align:center}
-  .baani img{max-width:70%}
-  .btn{padding:14px 26px;font-size:1.08em}
+.baani{display:flex; gap:20px; align-items:flex-start}
+.baani img{width:160px; max-width:42%; border-radius:16px; border:3px solid var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.18); flex:none}
+.deg{color:var(--muted); font-size:.92em}
+.maqsad{text-align:center; font-size:1.22em; font-weight:700; color:var(--forest); margin:10px 0 0; line-height:2}
+.words{text-align:center; color:var(--muted); letter-spacing:1px; line-height:2}
+.dev{display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; margin:14px 0; box-shadow:var(--shadow)}
+.dev img{width:92px; height:92px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); flex:none}
+.dev .dn{font-weight:700; font-size:1.12em; color:var(--forest)}
+.dev .dr{color:var(--muted); font-size:.9em}
+.dev a{color:var(--emerald); overflow-wrap:anywhere}
+
+/* ---------- Footer ---------- */
+footer{background:var(--deep); color:#cfe3d6; margin-top:44px; padding:34px 18px 26px; text-align:center}
+footer .ft{font-size:1.15em; font-weight:700; color:#ffe9a8; line-height:2}
+footer .fl{font-size:.88em; color:#9db8a8; line-height:2}
+footer nav2, footer .fnav{margin-top:10px}
+footer .fnav a{color:#cfe3d6; text-decoration:none; font-size:.88em; margin:0 8px}
+footer .fnav a:hover{color:#fff; text-decoration:underline}
+
+@media(min-width:600px){
+  .grid{grid-template-columns:1fr 1fr}
+  .features{grid-template-columns:1fr 1fr}
+  .feature.featured{grid-column:1 / -1}
+}
+@media(min-width:1024px){
+  body{font-size:18px}
+  .hero h1{font-size:2.3em}
+  .grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:560px){
+  .hero{padding:42px 14px 32px}
+  .hero h1{font-size:1.65em}
+  .hero .logo{width:118px; height:118px}
+  .dev{flex-direction:column; text-align:center}
+  .baani{flex-direction:column; align-items:center; text-align:center}
+  .baani img{max-width:72%}
+  .btn{padding:10px 26px; font-size:1.1em}
+  .card, .feature{padding:20px 16px}
+  .brand .bt{font-size:1.02em}
 }
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <img class="logo" src="logo.png" alt="Tehreek Ittiba-e-Sunnat logo">
-  <h1>تحریک اتباعِ سنت پاکستان</h1>
-  <div class="sub">Tehreek Ittiba-e-Sunnat Pakistan</div>
-  <div class="verse">فَاتَّبِعُونِي يُحْبِبْكُمُ اللَّهُ — (القرآن 3:31)
-    <small>رسول ﷺ کی اتباع ہی اللہ کی محبت کا راستہ ہے۔</small>
-  </div>
-  <div class="cta-row">
-    <a class="btn" href="ittiba-e-rasool.apk" download>⬇ ایپ ڈاؤن لوڈ کریں — v2.0</a>
-    <p class="meta">Android 7.0+ • مفت • کوئی اشتہار نہیں</p>
-  </div>
-  <div class="stats">
-    <div class="stat"><b>114</b><span>سورتیں</span></div>
-    <div class="stat"><b>6236</b><span>آیات</span></div>
-    <div class="stat"><b>10</b><span>بیانات</span></div>
+<header class="brand">
+  <div class="brand-in">
+    <img src="logo.png" alt="تحریک اتباعِ سنت پاکستان کا لوگو">
+    <div>
+      <div class="bt">تحریک اتباعِ سنت پاکستان</div>
+      <div class="bs"><span class="lat">Tehreek Ittiba-e-Sunnat Pakistan</span> — قرآن، سنت اور خدمتِ انسانیت</div>
+    </div>
   </div>
 </header>
 
 <nav>
-  <a href="#quran">قرآن</a><a href="#duas">دعائیں</a><a href="#namaz">نماز</a><a href="#tasbeeh">تسبیح</a><a href="#taaruf">تعارف</a><a href="#bayanat">بیانات</a><a href="#kitabein">کتابیں</a><a href="#more">مزید</a>
+  <div class="nav-in">
+    <a href="#quran">قرآن</a><a href="#mazameen">مضامین</a><a href="#namaz">نماز</a><a href="#tasbeeh">تسبیح</a><a href="#duas">دعائیں</a><a href="#bayanat">بیانات</a><a href="#kitabein">کتابیں</a><a href="#more">مزید</a>
+  </div>
 </nav>
 
-<main>
-  <div class="grid">
-    <div class="feat"><div class="ic">📖</div><div class="t">قرآن کریم</div><div class="u">114 سورتیں • 6236 آیات • ترجمہ کنزالایمان • آڈیو</div></div>
-    <div class="feat"><div class="ic">🤲</div><div class="t">دعائیں</div><div class="u">مستند دعائیں</div></div>
-    <div class="feat"><div class="ic">🕌</div><div class="t">نماز کے اوقات</div><div class="u">ملتان • حنفی عصر • آف لائن حساب بھی</div></div>
-    <div class="feat"><div class="ic">📿</div><div class="t">تسبیح</div><div class="u">تسبیح کاؤنٹر</div></div>
+<header class="hero">
+  <img class="logo" src="logo.png" alt="Tehreek Ittiba-e-Sunnat logo">
+  <h1>تحریک اتباعِ سنت پاکستان</h1>
+  <div class="sub"><span class="lat">Tehreek Ittiba-e-Sunnat Pakistan</span></div>
+
+  <div class="verse-card">
+    <div class="va">فَاِتَّبِعُونِیْ یُحْبِبْكُمُ اللّٰهُ</div>
+    <div class="vt">رسولِ اکرم ﷺ کی اتباع ہی اللہ کی محبت کی علامت ہے۔</div>
   </div>
 
-  <section class="card" id="quran">
-    <div class="eyebrow">QURAN</div>
-    <h2>📖 قرآن کریم<span class="rule"></span></h2>
-    <p>پورا قرآن پاک — <b>114 سورتیں، 6236 آیات</b> — عربی متن (عثمانی رسم الخط) کے ساتھ <b>ترجمہ کنزالایمان</b> (امام احمد رضا خان)۔ ہر آیت کی آڈیو تلاوت — قاری مشاری العفاسی۔ سورت تلاش کریں، آخری مطالعہ جاری رکھیں۔</p>
-  </section>
+  <div class="cta-row">
+    <a class="btn" href="ittiba-e-rasool.apk" download>⬇ ایپ ڈاؤن لوڈ کریں – v2.0</a>
+    <p class="meta"><span class="lat" dir="ltr">Android 7.0+</span> • مفت • کوئی اشتہار نہیں</p>
+  </div>
 
-  <section class="card" id="duas">
-    <div class="eyebrow">DUAS</div>
-    <h2>🤲 دعائیں<span class="rule"></span></h2>
-    <p>روزمرہ کی مستند دعائیں — عربی متن اور ترجمے کے ساتھ۔</p>
-  </section>
+  <div class="badges">
+    <span class="badge">✓ مفت</span>
+    <span class="badge">✓ کوئی اشتہار نہیں</span>
+    <span class="badge">✓ آف لائن قرآن</span>
+  </div>
 
-  <section class="card" id="namaz">
-    <div class="eyebrow">PRAYER TIMES</div>
-    <h2>🕌 نماز کے اوقات<span class="rule"></span></h2>
-    <p>نماز کے اوقات — ملتان، حنفی عصر۔ انٹرنیٹ نہ ہو تو آف لائن حساب سے بھی اوقات دیکھے جا سکتے ہیں۔</p>
-  </section>
+  <div class="stats">
+    <div class="stat"><b class="num">10</b><span>بیانات</span></div>
+    <div class="stat"><b class="num">6236</b><span>آیات</span></div>
+    <div class="stat"><b class="num">114</b><span>سورتیں</span></div>
+  </div>
+</header>
 
-  <section class="card" id="tasbeeh">
-    <div class="eyebrow">TASBEEH</div>
-    <h2>📿 تسبیح<span class="rule"></span></h2>
-    <p>تسبیح کاؤنٹر — اپنی تسبیحات گنیں اور محفوظ رکھیں۔</p>
-  </section>
+<main>
+  <div class="sec-head">
+    <div class="eyebrow"><span class="lat">QUICK ACCESS</span></div>
+    <h2>ایپ کی خصوصیات</h2>
+    <div class="rule"></div>
+    <p>کسی بھی خصوصیت پر دبائیں — تفصیل نیچے پڑھیں۔</p>
+  </div>
+
+  <div class="grid">
+    <a class="feat" href="#quran"><div class="ic">📖</div><div class="t">قرآن کریم</div><div class="u">114 سورتیں • 6236 آیات • ترجمہ کنزالایمان • آڈیو</div><div class="go">تفصیل دیکھیں ←</div></a>
+    <a class="feat" href="#duas"><div class="ic">🤲</div><div class="t">دعائیں</div><div class="u">روزمرہ کی مسنون دعائیں</div><div class="go">تفصیل دیکھیں ←</div></a>
+    <a class="feat" href="#namaz"><div class="ic">🕌</div><div class="t">نماز کے اوقات</div><div class="u">ملتان • حنفی عصر • آف لائن حساب بھی</div><div class="go">تفصیل دیکھیں ←</div></a>
+    <a class="feat" href="#tasbeeh"><div class="ic">📿</div><div class="t">تسبیح</div><div class="u">تسبیح کاؤنٹر — گنیں اور محفوظ رکھیں</div><div class="go">تفصیل دیکھیں ←</div></a>
+  </div>
+
+  <div class="features">
+    <section class="feature featured" id="quran">
+      <div class="eyebrow"><span class="lat">QURAN</span></div>
+      <h3>📖 قرآن کریم</h3>
+      <p>پورا قرآن پاک — <b>114 سورتیں، 6236 آیات</b> — عربی متن (انڈوپاک رسم الخط) کے ساتھ <b>ترجمہ کنزالایمان</b> (امام احمد رضا خان)، ہر آیت کی <b>آڈیو تلاوت — قاری مشاری العفاسی</b>۔</p>
+      <div class="chips">
+        <span class="chip">سورت</span><span class="chip">پارہ</span><span class="chip">رکوع</span><span class="chip">آیت</span><span class="chip">مطالعہ جاری رکھیں</span>
+      </div>
+    </section>
+
+    <section class="feature" id="duas">
+      <div class="eyebrow"><span class="lat">DUAS</span></div>
+      <h3>🤲 دعائیں</h3>
+      <p>روزمرہ کی مسنون دعائیں — عربی متن اور ترجمہ کے ساتھ۔</p>
+    </section>
+
+    <section class="feature" id="namaz">
+      <div class="eyebrow"><span class="lat">PRAYER TIMES</span></div>
+      <h3>🕌 نماز کے اوقات</h3>
+      <p>نماز کے اوقات — ممتاز، حنفی، عصر، انٹرنیٹ نہ ہو تو آف لائن حساب سے بھی اوقات دیکھے جا سکتے ہیں۔</p>
+    </section>
+
+    <section class="feature" id="tasbeeh">
+      <div class="eyebrow"><span class="lat">TASBEEH</span></div>
+      <h3>📿 تسبیح</h3>
+      <p>تسبیح کاؤنٹر — اپنی تسبیحات گنیں اور محفوظ رکھیں۔</p>
+    </section>
+
+    <section class="feature" id="mazameen">
+      <div class="eyebrow"><span class="lat">ARTICLES</span></div>
+      <h3>✍️ مضامین</h3>
+      <p>مضامین جلد آ رہے ہیں — ان شاء اللہ یہاں تحریک کے مضامین شامل کیے جائیں گے۔</p>
+    </section>
+  </div>
 
   <section class="card" id="taaruf">
-    <div class="eyebrow">ABOUT THE TEHREEK</div>
+    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">ABOUT THE TEHREEK</span></div>
     <h2>👤 تعارف — بانیِ تحریک<span class="rule"></span></h2>
     <div class="baani">
       <img src="peer-photo.jpg" alt="Peer Muhammad Karamat Ali">
@@ -153,7 +284,7 @@ footer b{color:var(--green)}
   </section>
 
   <section class="card" id="bayanat">
-    <div class="eyebrow">BAYANAT</div>
+    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">BAYANAT</span></div>
     <h2>🎙️ بیانات<span class="rule"></span></h2>
     <p class="muted">کسی بیان پر دبائیں — ویڈیو یوٹیوب پر چلے گی۔</p>
     <a class="bayan" href="https://youtu.be/jz61CID4Jxw" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Dil Ko Tarpa Dene Wali Awaz Or Manqabat Faiz e Saein Jari Rahy Ga Shoaib Aalam Naqshbandi Azeemi Sb</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
@@ -169,13 +300,13 @@ footer b{color:var(--green)}
   </section>
 
   <section class="card" id="kitabein">
-    <div class="eyebrow">BOOKS</div>
+    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">BOOKS</span></div>
     <h2>📚 کتابیں<span class="rule"></span></h2>
     <p>بانیِ تحریک کی کتابیں جلد شامل کی جائیں گی۔</p>
   </section>
 
   <section class="card" id="more">
-    <div class="eyebrow">MORE</div>
+    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">MORE</span></div>
     <h2>ℹ️ مزید<span class="rule"></span></h2>
     <div class="dev">
       <img src="developer-photo.jpg" alt="Dr Asif">
@@ -191,12 +322,19 @@ footer b{color:var(--green)}
       <a href="https://jilanapps.github.io/rah-e-noor/" target="_blank" rel="noopener">🌐 rah-e-noor کھولیں</a>
     </div>
     <div class="center">
-      <a class="btn green" href="ittiba-e-rasool.apk" download>⬇ ایپ ڈاؤن لوڈ کریں — v2.0</a>
-      <p class="muted">Android 7.0+ • مفت • کوئی اشتہار نہیں</p>
+      <a class="btn green" href="ittiba-e-rasool.apk" download>⬇ ایپ ڈاؤن لوڈ کریں – v2.0</a>
+      <p class="muted"><span class="lat" dir="ltr">Android 7.0+</span> • مفت • کوئی اشتہار نہیں</p>
     </div>
   </section>
-
-  <footer><b>تحریک اتباعِ سنت پاکستان</b><br><span class="muted">قرآن، ترجمہ کنزالایمان، دعائیں، نماز کے اوقات اور تسبیح — آف لائن</span><br><span class="muted">تیار کردہ — Jilan Apps Official</span></footer>
 </main>
+
+<footer>
+  <div class="ft">تحریک اتباعِ سنت پاکستان</div>
+  <div class="fl">قرآن، ترجمہ کنزالایمان، دعائیں، نماز کے اوقات اور تسبیح — آف لائن</div>
+  <div class="fnav">
+    <a href="#quran">قرآن</a><a href="#mazameen">مضامین</a><a href="#namaz">نماز</a><a href="#tasbeeh">تسبیح</a><a href="#duas">دعائیں</a><a href="#bayanat">بیانات</a><a href="#kitabein">کتابیں</a>
+  </div>
+  <div class="fl" style="margin-top:8px">تیار کردہ — Jilan Apps Official</div>
+</footer>
 </body>
 </html>
