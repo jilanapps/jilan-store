@@ -7011,7 +7011,7 @@ function prefillRecurringRequestFill(r){ /* v57-D */
   setTimeout(function(){ var e = document.getElementById('wz-request'); if (e) e.scrollIntoView(); }, 200);
 }
 function posterText(r){ /* v57-D: share text for a request poster — never includes CNIC */
-  return '🩸 Blood needed — ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.firstName||r.name||'Patient') + '\nPhone: ' + (r.phone||'') + (v69ReqDate(r) ? '\nDate: ' + v69ReqDate(r) : '') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n— Basti Dawa Blood Society';
+  return '🩸 Blood needed — ' + (r.group||'') + ' (' + (r.units||1) + ' unit(s))\nHospital: ' + (r.hospital||'') + '\nPatient: ' + (r.name||r.firstName||'Patient') + '\nPhone: ' + (r.phone||'') + (v69ReqDate(r) ? '\nDate: ' + v69ReqDate(r) : '') + '\nRequest No.: ' + (r.reqNo||'') + '\nApp: https://jilanapps.github.io/jilan-store/bdbs/' + '\n— Basti Dawa Blood Society';
 }
 function v69ReqDate(r){ /* v69: request date for poster/share — '20 Nov 2026'; createdAt, else date/created field, else '' (never guess) */
   if (!r) return '';
@@ -7037,7 +7037,7 @@ function shareRequestPoster(id){ /* v57-D: poster IMAGE (not text) — same html
     + '<div style="font-size:30px;font-weight:800;margin-top:18px">Blood Needed</div>'
     + '<div style="font-size:52px;font-weight:800;color:#F5C518;margin:10px 0">' + esc(r.group||'') + '</div>'
     + '<div style="font-size:20px">' + esc(r.units||1) + ' unit(s)</div>'
-    + '<div style="font-size:18px;margin-top:16px;line-height:1.7">Patient: ' + esc(r.firstName||r.name||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + (v69ReqDate(r) ? '<br>Date: ' + esc(v69ReqDate(r)) : '') + '</div>'
+    + '<div style="font-size:18px;margin-top:16px;line-height:1.7;overflow-wrap:anywhere">Patient: ' + esc(r.name||r.firstName||'Patient') + '<br>Hospital: ' + esc(r.hospital||'') + '<br>City: ' + esc(r.city||'') + '<br>Phone: ' + esc(r.phone||'') + '<br>Request No.: ' + esc(r.reqNo||'') + (v69ReqDate(r) ? '<br>Date: ' + esc(v69ReqDate(r)) : '') + '</div>'
     + '<div style="font-size:22px;font-weight:800;color:#F5C518;margin-top:22px">Donate Blood • Receive Blood • Save Lives</div>'
     + '<div style="font-size:13px;margin-top:16px;color:#9FB3D1">App: jilanapps.github.io/jilan-store/bdbs</div>';
   document.body.appendChild(d);
