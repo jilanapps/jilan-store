@@ -50,6 +50,14 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 .pdf-capture .side-label,.pdf-capture .verify-url{display:none!important}
 .mcard .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px}
 .mcard .kv span{color:#5b6b7f}
+.wcard{border:3px solid var(--burgundy);outline:1.5px solid var(--gold);outline-offset:5px;border-radius:16px;padding:26px 22px;background:linear-gradient(180deg,#fff,#FFFDF5);max-width:540px;box-shadow:var(--shadow-lg);color:#12233a;text-align:center}
+.wcard .w-eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase}
+.wcard .w-title{font-size:42px;font-weight:800;color:var(--burgundy);margin:6px 0 4px}
+.wcard .w-sub{font-size:14px;color:#5b6b7f;margin:0 0 14px}
+.wcard .w-name{font-size:24px;font-weight:800;color:#0f1e33;border-top:2px solid var(--gold-soft);border-bottom:2px solid var(--gold-soft);padding:10px 0;margin-bottom:6px}
+.wcard .w-kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px;text-align:left}
+.wcard .w-kv span{color:#5b6b7f}
+.wcard .w-foot{font-size:12px;color:#5b6b7f;margin:12px 0 0}
 .mcard .kv b{text-align:right}
 .mcard + .mcard{margin-top:16px}
 .cert{max-width:1060px;margin:12px auto;text-align:center;background-color:#0a1f44;padding:18px;border-radius:3px;box-shadow:0 16px 40px rgba(9,31,68,.35);position:relative;container-type:inline-size;color:#1e293b}
@@ -1649,6 +1657,9 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 </div>
 <div class="modal" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
 <div class="modal-box"><button class="mclose" onclick="closeModal('memberModal')" aria-label="Close">&#10005;</button><div id="memberCardBody"></div></div>
+</div>
+<div class="modal" id="welcomeModal" onclick="if(event.target===this)closeModal('welcomeModal')">
+<div class="modal-box"><button class="mclose" onclick="closeModal('welcomeModal')" aria-label="Close">&#10005;</button><div id="welcomeCardBody"></div></div>
 </div>
 <div class="modal" id="moreSheet" onclick="if(event.target===this)closeModal('moreSheet')">
 <div class="modal-box">
@@ -4243,7 +4254,7 @@ function loadMembers(){
       return '<div class="idcard">' +
         '<div class="idcard-body">' + (m.photo ? '<img class="idphoto" src="'+m.photo+'" alt="">' : '') +
         '<div><b>'+esc(m.name)+'</b>'+(m.demo?' <span class="badge demo">DEMO</span>':'')+(m.designation?'<br><span class="mut">'+esc(m.designation)+'</span>':'')+(m.phone?'<br><a href="tel:'+esc(m.phone)+'">'+esc(m.phone)+'</a>':'')+'<br><span class="mut small">Scan the member QR code to verify membership.</span>' +
-        (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
+        (isAdm ? '<br><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="viewWelcomeCard(\''+esc(m.id)+'\')">Welcome Card</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button>' : '') +
         '</div></div></div>';
     }).join('');
   });
@@ -4708,8 +4719,8 @@ function editMember(id){
 }
 /* v40 shared member-submit success UI (transaction path + legacy alike). */
 function memberSubmitSuccess(full, nextId, btn){
-  document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — card is ready below.</span>';
-  renderMemberCard(full); loadMembers();
+  document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — welcome card is ready.</span>';
+  renderWelcomeCard(full); loadMembers();
   ['mName','mFather','mDesig','mGender','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
   document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
   if (btn) btn.disabled = false;
@@ -5095,6 +5106,73 @@ function viewMemberCard(id){
     renderMemberCard(m);
   });
 }
+/* v75: Member Welcome Card — donors get a certificate when they donate;
+   members now get a welcome card when they join. Same share-as-PDF
+   pattern as the donor certificate / member card (visual capture first,
+   text PDF fallback). The card is pure CSS/text — no photo or logo img —
+   so html2canvas capture never taints. Shown right after a member is
+   added; also from My Member Card and the members list. */
+function renderWelcomeCard(m){
+  window._lastWelcomeCard = m;
+  var html = '<div class="print-area">' +
+    '<div class="wcard">' +
+    '<div class="w-eyebrow">Basti Dawa Blood Society</div>' +
+    '<div class="w-title">Welcome</div>' +
+    '<p class="w-sub">Welcome to the Basti Dawa Blood Society family.<br>Thank you for joining us \u2014 together we save lives.</p>' +
+    '<div class="w-name">'+esc(m.name||'')+'</div>' +
+    '<div class="w-kv"><span>Member ID</span><b>'+esc(m.idNo||'')+'</b></div>' +
+    '<div class="w-kv"><span>Designation</span><b>'+esc(m.designation||'')+'</b></div>' +
+    '<p class="w-foot">Under Supervision \u2014 Basti Dawa Welfare Organization<br>bastidawabloodsociety@gmail.com</p>' +
+    '<p class="w-foot"><b>Head Office</b><br>Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</p>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" onclick="shareWelcomeCardPDF()">Share Welcome Card as PDF</button><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View ID Card</button></div>' +
+    '</div>';
+  document.getElementById('welcomeCardBody').innerHTML = html;
+  openModal('welcomeModal');
+}
+function shareWelcomeCardPDF(){
+  var m = window._lastWelcomeCard; if (!m) return;
+  var cardEl = document.querySelector('#welcomeCardBody .wcard');
+  if (window.html2canvas && cardEl) {
+    var btn = null;
+    document.querySelectorAll('#welcomeCardBody button').forEach(function(b){ if (b.textContent.indexOf('Share Welcome Card') !== -1) btn = b; });
+    if (btn) { btn.disabled = true; btn.textContent = 'Preparing\u2026'; }
+    window.html2canvas(cardEl, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
+      if (btn) { btn.disabled = false; btn.textContent = 'Share Welcome Card as PDF'; }
+      try {
+        var blob = cardImagePDF([{data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}], false);
+        var fname = 'BDBS-Welcome-Card-' + (m.idNo||m.id) + '.pdf';
+        var file = new File([blob], fname, {type:'application/pdf'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+          navigator.share({files:[file], title:'BDBS Welcome Card', text:'Welcome to Basti Dawa Blood Society - ' + (m.name||'')}).catch(function(){ saveBlob(blob, fname); });
+        } else { saveBlob(blob, fname); }
+      } catch(e){ shareWelcomeCardPDFText(); }
+    }).catch(function(){ if (btn) { btn.disabled = false; btn.textContent = 'Share Welcome Card as PDF'; } shareWelcomeCardPDFText(); });
+    return;
+  }
+  shareWelcomeCardPDFText();
+}
+function shareWelcomeCardPDFText(){
+  var m = window._lastWelcomeCard; if (!m) return;
+  try {
+    var lines = ['Basti Dawa Blood Society', '', 'Welcome', '', 'Welcome to the Basti Dawa Blood Society family.', 'Thank you for joining us - together we save lives.', '', m.name||'', 'Member ID: ' + (m.idNo||''), 'Designation: ' + (m.designation||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan'];
+    var blob = simplePDF([{title:'', lines:lines}]);
+    var fname = 'BDBS-Welcome-Card-' + (m.idNo||m.id) + '.pdf';
+    var file = new File([blob], fname, {type:'application/pdf'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      navigator.share({files:[file], title:'BDBS Welcome Card', text:'Welcome to Basti Dawa Blood Society - ' + (m.name||'')}).catch(function(){ saveBlob(blob, fname); });
+    } else { saveBlob(blob, fname); }
+  } catch(e){ window.print(); }
+}
+function viewWelcomeCard(id){
+  qAll('members', function(ms){
+    var m = null; ms.forEach(function(x){ if (x.id===id) m=x; });
+    if (!m) { qAll('membersPublic', function(ps){ var p=null; ps.forEach(function(x){if(x.id===id)p=x;});
+      if (p) renderWelcomeCard({id:p.id, name:p.name, designation:p.designation, idNo:p.idNo}); }); return; }
+    renderWelcomeCard(m);
+  });
+}
+function showMyWelcomeCard(){ if (window._myMember) renderWelcomeCard(window._myMember); }
 /* v70: Activity video — camp motivational clips. Video goes to Firebase
    Storage (NOT base64 in Firestore — a 791KB clip is ~1.05MB base64,
    over the 1MB Firestore doc limit). The doc stores only the download URL.
@@ -5278,6 +5356,7 @@ function renderCert(c){
     '<div class="sealrow"><div class="certqr-wrap"><div id="certQrBox" class="certqr"></div><div class="qr-cap">Scan to verify</div></div><div class="badge"><div class="b1">Verified Reference No:</div><div class="b2">'+esc(c.ref)+'</div></div></div>' +
     '<p class="sup">Under Supervision — Basti Dawa Welfare Organization</p>' +
     '<p class="sup">bastidawabloodsociety@gmail.com</p>' +
+    '<p class="sup"><b>Head Office</b></p>' +
     '<p class="sup">Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</p>' +
     '<div class="sigrow"><div><div class="scr">Naeem Asghar</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Dr Muhammad Naeem Asghar<span>Patron In Chief</span></div></div><div><div class="scr">Asif Javaid</div><img class="flourish" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%2216%22%20viewBox%3D%220%200%20260%2016%22%3E%3Cpath%20d%3D%22M8%2C11%20Q130%2C15%20252%2C5%22%20stroke%3D%22%230f172a%22%20stroke-width%3D%221.6%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E"><div class="sline">Muhammad Asif Javaid<span>Founder &amp; Chief Executive</span></div></div></div>' +
     '<p class="credit">Developed by Dr Asif — Jilan Apps Official</p></div></div></div>' +
@@ -5316,7 +5395,7 @@ function shareCertPDF(){
 function shareCertPDFText(){
   var c = window._lastCert; if (!c) return;
   try {
-    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan'];
+    var lines = ['CERTIFICATE OF APPRECIATION', '', 'Basti Dawa Blood Society proudly appreciates', c.donorName || '', c.donorFather ? ('S/O ' + c.donorFather) : '', 'for donating ' + (c.units||0) + ' unit(s) of ' + (c.group||'') + ' blood on ' + fmtD(c.date) + '.', 'Your gift saved a life.', '', 'Verified Reference No: ' + (c.ref||''), '', 'Under Supervision - Basti Dawa Welfare Organization', 'bastidawabloodsociety@gmail.com', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan'];
     var blob = simplePDF([{title:'', lines:lines}]);
     var fname = 'BDBS-Certificate-' + (c.ref||c.donorName||'') + '.pdf';
     var file = new File([blob], fname, {type:'application/pdf'});
@@ -6000,7 +6079,7 @@ function loadMyMemberCard(memberId){
     var m = d.data(); m.id = d.id;
     window._myMember = m;
     box.style.display='block';
-    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button>' + (m.gender === 'Female' ? '<div style="margin-top:10px"><label><input type="checkbox" id="memberPubOptToggle" ' + (m.publicOptIn===true?'checked':'') + ' onchange="setMyMemberPublicOptIn(this.checked)"> Mera data public dikhao</label><div id="memberPubOptMsg" class="mut small"></div></div>' : '');
+    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button> <button class="btn ghost" onclick="showMyWelcomeCard()">Welcome Card</button>' + (m.gender === 'Female' ? '<div style="margin-top:10px"><label><input type="checkbox" id="memberPubOptToggle" ' + (m.publicOptIn===true?'checked':'') + ' onchange="setMyMemberPublicOptIn(this.checked)"> Mera data public dikhao</label><div id="memberPubOptMsg" class="mut small"></div></div>' : '');
   }).catch(function(){ box.style.display='none'; });
 }
 function openMyMemberCard(){ if (window._myMember) renderMemberCard(window._myMember); }
@@ -6795,7 +6874,7 @@ function renderAdmin(){
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
           ms.forEach(function(m){
-            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="toggleMemberPublic(\''+esc(m.id)+'\','+(m.publicOptIn===true?'false':'true')+')">'+(m.publicOptIn===true?'Hide karo':'Public karo')+'</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="viewWelcomeCard(\''+esc(m.id)+'\')">Welcome Card</button> <button class="btn ghost" onclick="toggleMemberPublic(\''+esc(m.id)+'\','+(m.publicOptIn===true?'false':'true')+')">'+(m.publicOptIn===true?'Hide karo':'Public karo')+'</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Req No.</th><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Units</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
