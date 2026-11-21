@@ -57,8 +57,9 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 .wcard .w-corner.bl{bottom:12px;left:12px;border-right:none;border-top:none}
 .wcard .w-corner.br{bottom:12px;right:12px;border-left:none;border-top:none}
 .wcard .w-wm{position:absolute;top:150px;left:50%;transform:translateX(-50%);width:280px;height:280px;opacity:.05;z-index:0}
-.wcard .w-drop{position:relative;z-index:1}
-.wcard .w-drop svg{width:52px;height:52px;margin:0 auto 8px;display:block}
+.wcard .w-logos{display:flex;justify-content:center;gap:14px;margin:0 auto 8px;position:relative;z-index:1}
+.wcard .w-logo{width:54px;height:54px;border-radius:50%;border:2px solid #c9a227;background:#fffdf6;padding:2px;box-shadow:0 3px 10px rgba(11,61,46,.18);overflow:hidden;flex:0 0 auto}
+.wcard .w-logo img{width:100%;height:100%;object-fit:contain;display:block}
 .wcard .w-eyebrow{position:relative;z-index:1;font-size:12px;letter-spacing:3px;color:#b8860b;font-weight:700;text-transform:uppercase}
 .wcard .w-under{position:relative;z-index:1;font-size:11px;color:#5b6b7f;letter-spacing:1px;margin-top:5px}
 .wcard .w-divider{display:flex;align-items:center;gap:10px;margin:14px 4px 10px;position:relative;z-index:1}
@@ -5143,13 +5144,12 @@ function renderWelcomeCard(m){
   var pp=nm.split(/\s+/).filter(Boolean);
   var ini=(((pp[0]||'?')[0]||'?')+((pp[1]||'')[0]||'')).toUpperCase();
   var photoHtml = m.photo ? '<div class="w-photo"><img src="'+m.photo+'" alt=""></div>' : '<div class="w-photo w-initials">'+esc(ini)+'</div>';
-  var dropSvg = '<svg viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/><path d="M50 34 L50 78 M34 56 L66 56" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>';
   var dropPlain = '<svg viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/></svg>';
   var html = '<div class="print-area">' +
     '<div class="wcard">' +
     '<span class="w-corner tl"></span><span class="w-corner tr"></span><span class="w-corner bl"></span><span class="w-corner br"></span>' +
     '<svg class="w-wm" viewBox="0 0 100 100"><path d="M50 4 C50 4 12 52 12 70 A38 38 0 0 0 88 70 C88 52 50 4 50 4 Z" fill="#c8102e"/></svg>' +
-    '<div class="w-drop">'+dropSvg+'</div>' +
+    '<div class="w-logos"><div class="w-logo"><img src="bdwo-logo.jpg" alt="Basti Dawa Welfare Organisation logo"></div><div class="w-logo"><img src="bdbs-logo.png" alt="BDBS logo"></div></div>' +
     '<div class="w-eyebrow">Basti Dawa Blood Society</div>' +
     '<div class="w-under">BDBS &bull; Under Supervision &mdash; Basti Dawa Welfare Organization</div>' +
     '<div class="w-divider"><span class="w-line"></span>'+dropPlain+'<span class="w-line"></span></div>' +
