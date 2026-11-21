@@ -3761,7 +3761,8 @@ function renderReqList(boxId, list, emptyMsg){
     var shareBtn = '<br><button class="btn ghost" onclick="shareRequest(\''+esc(r.id)+'\')">📤 Share this request</button>';
   var posterBtn = '<br><button class="btn ghost" onclick="shareRequestPoster(\''+esc(r.id)+'\')">🖼️ Share as Poster</button>'; /* v57-D */
     var myCloseBtn = (MY_PHONE_NORM && r.requesterPhoneNorm && normPhone(r.requesterPhoneNorm) === MY_PHONE_NORM && !closed) ? '<br><button class="btn green" onclick="closeMyRequest(\''+esc(r.id)+'\')">✅ Got donation — Close request</button>' : '';
-    var adminBtns = (isAdmin() && !closed) ? '<br><button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="toggleEmergency(\''+esc(r.id)+'\','+(r.emergency?'0':'1')+')">'+(r.emergency?'🚨 Remove Emergency':'🚨 Mark Emergency')+'</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : '';
+    /* v80: Complete WITH donor — admin types the Donor No. right here (donor without an ID login donated and left); empty = plain complete. Closed card with a donor: Certificate button right here. */
+    var adminBtns = (isAdmin() && !closed) ? '<br><input id="compDonorNoCard_'+esc(r.id)+'" placeholder="Donor No. (optional)" inputmode="numeric" style="width:130px;padding:6px"> <button class="btn green" onclick="completeRequestWithDonor(\''+esc(r.id)+'\',\'compDonorNoCard_'+esc(r.id)+'\')">Complete</button> <button class="btn ghost" onclick="toggleEmergency(\''+esc(r.id)+'\','+(r.emergency?'0':'1')+')">'+(r.emergency?'🚨 Remove Emergency':'🚨 Mark Emergency')+'</button> <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button>' : (isAdmin() && closed && r.donatedById ? '<br><button class="btn green" onclick="generateCert(\''+esc(r.donatedById)+'\')">📜 Certificate</button>' : '');
     var unitsTxt = r.units ? ' <b>'+esc(r.units)+' unit(s)</b> of' : '';
     return '<div class="dcard'+(closed ? ' closed' : '')+(r.emergency && !closed ? ' emergency' : '')+'"><div class="dcard-top"><span class="bgpill">'+esc(r.group)+'</span>'+(r.emergency?'<span class="rpill emergency">🚨 Emergency</span>':'')+(r.recurring?'<span class="rpill">🔁 Monthly</span>':'')+'<div><b>'+esc(nm)+'</b>'+(r.demo?' <span class="badge demo">DEMO</span>':'')+' needs'+unitsTxt+' blood <span class="rpill '+cls+'">'+esc(pill)+'</span><br>'+(r.reqNo ? '<span class="mut small">Request No.: <b>'+esc(r.reqNo)+'</b></span><br>' : '')+'<span class="mut">'+esc(r.hospital||'')+' • '+esc(where||'')+'</span><br><span class="mut small">Request date: '+esc(fmtD(r.createdAt))+'</span><br>'+reqProgress(st)+donated+claimBtn+myCloseBtn+adminBtns+shareBtn+posterBtn+contact+'</div></div></div>';
   }).join('');
@@ -4094,7 +4095,17 @@ function toggleEmergency(id, v){
     qUpdate('requestsPublic', id, {emergency: !!v}, function(){ loadRequests(); });
   });
 }
+/* v80: guard — never complete twice. A second tap on Complete used to
+   credit the donor's record a second time (double-count). */
 function completeRequest(id){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  qAll('requests', function(rs){
+    var _rr = null; rs.forEach(function(x){ if (x.id === id) _rr = x; });
+    if (_rr && ((_rr.status||'Received') === 'Completed' || (_rr.status||'') === 'Closed')) { alert('This request is already completed.'); renderAdmin(); loadRequests(); return; }
+    completeRequestInner(id);
+  });
+}
+function completeRequestInner(id){
   if (!isAdmin()) { alert('Admin login required.'); return; }
   if (!confirm('Mark this request Completed?')) return;
   qUpdate('requests', id, {status:'Completed', completedAt:Date.now()}, function(){
@@ -4119,6 +4130,86 @@ function completeRequest(id){
           });
         });
       });
+    });
+  });
+}
+/* v80: Complete WITH donor (admin, no donor login needed) — the donor
+   donated and left without an ID login (e.g. REQ-002, Donor No. 2,
+   2026-11-21). The admin types the Donor No. right where the request is
+   completed; the donor is looked up and shown for confirmation, then the
+   request closes WITH the donor attached and the donor's record is
+   credited once (lastDonation = today, units += request units,
+   verifiedDonor, lastClosedRequestId). The Certificate button then sits
+   on the request row / closed card, right there.
+   Rules: empty number = plain complete (as before); unknown number =
+   error, no completion; group mismatch = warning + second confirm;
+   already completed = no-op; a different donor than the one already
+   marked = error, no re-mark (no double-count). */
+function completeRequestWithDonor(id, inputId){
+  if (!isAdmin()) { alert('Admin login required.'); return; }
+  var inp = inputId ? document.getElementById(inputId) : null;
+  var no = inp ? String(inp.value||'').trim().toUpperCase().replace(/^D-?/, '') : '';
+  if (!no) { completeRequest(id); return; }
+  qAll('requests', function(rs){
+    var r = null; rs.forEach(function(x){ if (x.id === id) r = x; });
+    if (!r) { alert('Request not found.'); return; }
+    var st = r.status || 'Received';
+    if (st === 'Completed' || st === 'Closed') { alert('This request is already completed.'); renderAdmin(); loadRequests(); return; }
+    if (r.donatedById) {
+      qAll('donors', function(ds){
+        var old = null; ds.forEach(function(x){ if (x.id === r.donatedById) old = x; });
+        var oldNo = old ? String(old.donorNo||'') : '';
+        if (String(no) !== oldNo) { alert('Is request ke liye donor pehle se mark hai' + (old ? ': ' + old.name + ' (Donor No. ' + oldNo + ')' : '') + '.\nDoosra donor mark nahi ho sakta. Khali number ke saath Complete karein.'); return; }
+        if (!confirm('Mark this request Completed?\nDonated by: ' + (old ? old.name : r.donatedBy) + ' (Donor No. ' + oldNo + ')')) return;
+        doCompleteWithDonor(r, old, true);
+      });
+      return;
+    }
+    lookupDonorByNo(no, function(d){
+      if (!d) { alert('Donor No. ' + no + ' not found. Number check kar ke dobara likhein.'); return; }
+      if (d.group && r.group && d.group !== r.group) {
+        if (!confirm('⚠ Donor ka blood group ' + d.group + ' hai, request ' + r.group + ' ki hai.\nPhir bhi is donor ke saath complete karein?')) return;
+      } else if (!confirm('Mark this request Completed?\nDonated by: ' + (d.name||'') + ' (Donor No. ' + no + ', ' + (d.group||'') + ')')) return;
+      doCompleteWithDonor(r, d, true);
+    });
+  });
+}
+/* v80: donor by Donor No. — donorLookup first, donorsPublic by donorNo
+   as fallback (same two-step as donor login, v56). cb(donor|null). */
+function lookupDonorByNo(no, cb){
+  var key = lookupKey(String(no));
+  qAll('donorLookup', function(ls){
+    var donorId = '';
+    (ls||[]).forEach(function(l){ if (l.id === key) donorId = l.donorId; });
+    var finish = function(donorId){
+      if (!donorId) { cb(null); return; }
+      qAll('donors', function(ds){
+        var d = null; ds.forEach(function(x){ if (x.id === donorId) d = x; });
+        cb(d);
+      });
+    };
+    if (donorId) { finish(donorId); return; }
+    if (!FB_OK) { cb(null); return; }
+    findDonorByNo(no, function(foundId){ finish(foundId); });
+  });
+}
+/* v80: shared finish for Complete-with-donor — request Completed with
+   the donor attached, then the donor credited ONCE (same fields the
+   staged advance + requester-close already write). */
+function doCompleteWithDonor(r, d, creditDonor){
+  var patch = {status:'Completed', completedAt:Date.now(), donatedBy:d.name||'', donatedById:d.id, donatedByPrivate:isFemalePrivate(d)};
+  qUpdate('requests', r.id, patch, function(){
+    qUpdate('requestsPublic', r.id, patch, function(){
+      renderAdmin(); loadRequests();
+      logAudit('complete-request-donor', r.id, (r.reqNo||'') + ' completed — donated by ' + (d.name||'') + ' (Donor No. ' + (d.donorNo||'') + ')');
+      if (!creditDonor) return;
+      var today = new Date().toISOString().slice(0,10);
+      var reqUnits = parseInt(r.units||0,10)||1;
+      var credit = {lastDonation: today, units: (parseInt(d.units||0,10)||0) + reqUnits, verifiedDonor:true, lastClosedRequestId: r.id};
+      qUpdate('donors', d.id, credit, function(){
+        qUpdate('donorsPublic', d.id, credit, function(){});
+      });
+      alert('Request ' + (r.reqNo||'') + ' completed.\nDonated by ' + (d.name||'') + ' (Donor No. ' + (d.donorNo||'') + ') recorded.\nCertificate ke liye request row par 📜 Certificate button hai.');
     });
   });
 }
@@ -6943,7 +7034,7 @@ function renderAdmin(){
             } else {
               donorCell = '<span class="ok">✓ Done</span>';
             }
-            h += '<tr><td><b>'+esc(r.reqNo||'')+'</b></td><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.units||'')+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b>'+(r.donatedBy?'<br><span class="mut small">Donor: '+esc(r.donatedBy)+'</span>':'')+'</td><td>'+donorCell+(cur==='Completed'?'':' <button class="btn green" onclick="completeRequest(\''+esc(r.id)+'\')">Complete</button>')+' <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td><b>'+esc(r.reqNo||'')+'</b></td><td>'+esc(r.name)+(r.demo?' <span class="badge demo">DEMO</span>':'')+'</td><td>'+esc(r.father)+'</td><td>'+esc(r.cnic||'')+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.units||'')+'</td><td>'+esc(r.hospital)+'</td><td>'+esc(r.disease)+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.address)+'</td><td><b>'+esc(cur)+'</b>'+(r.donatedBy?'<br><span class="mut small">Donor: '+esc(r.donatedBy)+'</span>':'')+'</td><td>'+donorCell+(cur==='Completed'?(r.donatedById?' <button class="btn green" onclick="generateCert(\''+esc(r.donatedById)+'\')">📜 Certificate</button>':''):' <input id="compDonorNo_'+esc(r.id)+'" placeholder="Donor No." inputmode="numeric" style="width:80px;padding:6px"> <button class="btn green" onclick="completeRequestWithDonor(\''+esc(r.id)+'\',\'compDonorNo_'+esc(r.id)+'\')">Complete</button>')+' <button class="btn ghost" onclick="removeRequest(\''+esc(r.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           /* Request → donor contact: a request comes to the admin first, then
