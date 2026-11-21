@@ -102,8 +102,8 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
  color:#c8102e;font-size:17.5px;line-height:1.5;margin-top:1.8px;padding-bottom:4px}
 #memberCardBody .mc-f-idrow{display:flex;align-items:center;gap:9.1px;padding:0 24.2px;margin-top:8px}
 #memberCardBody .mc-f-idrow .mc-ln{flex:1;height:2.7px;background:#c8102e}
-#memberCardBody .mc-f-idrow .mc-pill{background:#d80027;color:#fff;font-weight:900;font-size:15.7px;
- border-radius:15.7px;padding:3.4px 18.1px;white-space:nowrap}
+#memberCardBody .mc-f-idrow .mc-pill{background:#d80027;color:#fff;font-weight:900;font-size:14px;line-height:1;
+ border-radius:14px;padding:0 18px;height:28px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
 #memberCardBody .mc-f-bottom{display:flex;align-items:center;justify-content:space-between;
  padding:0 9.1px;margin-top:3px;flex:1}
 #memberCardBody .mc-f-sigs{display:flex;align-items:flex-end;justify-content:space-between;width:187.5px}
@@ -129,18 +129,18 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody .mc-bar{background:#d3e5f2;border-radius:8.5px;margin-bottom:3.3px;padding:2.4px 12.1px;
  display:flex;justify-content:space-between;align-items:baseline;gap:12.1px;line-height:1.15}
 #memberCardBody .mc-bar .mc-k{font-weight:900;font-size:12.1px;color:#000;white-space:nowrap}
-#memberCardBody .mc-bar .mc-v{font-weight:900;font-size:12.1px;color:#000;text-align:right;min-width:0;overflow-wrap:anywhere}
+#memberCardBody .mc-bar .mc-v{font-weight:900;font-size:12.1px;color:#000;text-align:right;min-width:0;overflow-wrap:anywhere;word-break:break-word;white-space:normal}
 #memberCardBody .mc-bar.mc-addr{display:block;text-align:left}
 #memberCardBody .mc-bar.mc-addr .mc-v{text-align:left}
 #memberCardBody .mc-bar.mc-addr .mc-k{margin-right:12.1px}
 #memberCardBody .mc-b-barcode{display:block;width:39.3px;flex:0 0 39.3px;background:#fff;border:1.2px solid #ccc;padding:1.8px 0}
 #memberCardBody .mc-b-dates{display:flex;align-items:center;border:3px solid #0b5ed7;border-radius:12.1px;
- background:rgba(255,255,255,.75);margin:4.8px 15.1px 0 15.1px;padding:4.8px 9.1px}
+ background:rgba(255,255,255,.75);margin:4.8px 15.1px 0 15.1px;padding:5px 9.1px 8px}
 #memberCardBody .mc-b-dates .mc-half{flex:1;text-align:center}
 #memberCardBody .mc-b-dates .mc-half .mc-ic{width:24.2px;height:24.2px;margin:0 auto}
 #memberCardBody .mc-b-dates .mc-half .mc-ic svg{width:24.2px;height:24.2px}
 #memberCardBody .mc-b-dates .mc-half .mc-l1{color:#0b5ed7;font-weight:900;font-size:11.5px;margin-top:1.2px}
-#memberCardBody .mc-b-dates .mc-half .mc-d1{color:#d80027;font-weight:900;font-size:14.5px;margin-top:1.2px}
+#memberCardBody .mc-b-dates .mc-half .mc-d1{color:#d80027;font-weight:900;font-size:13.5px;line-height:1.1;margin-top:1px}
 #memberCardBody .mc-b-dates .mc-div{width:3.6px;align-self:stretch;background:#d80027;margin:0 9.1px}
 #memberCardBody .mc-b-note{color:#1a3fd6;font-style:italic;font-weight:700;text-align:center;font-size:9.7px;line-height:1.2;margin:3.6px 15.1px 0 15.1px}
 #memberCardBody .mc-b-bot{display:flex;align-items:center;justify-content:space-between;margin:3.6px 18.1px 0 18.1px}
@@ -156,7 +156,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody.mc-fit1 .mc-bar{padding-top:1.2px;padding-bottom:1.2px;margin-bottom:2.1px}
 #memberCardBody.mc-fit1 .mc-b-logo{width:34px;height:34px;margin-top:2px}
 #memberCardBody.mc-fit1 .mc-b-main{margin-top:4px}
-#memberCardBody.mc-fit1 .mc-b-dates{margin-top:2.4px;padding-top:3.6px;padding-bottom:3.6px}
+#memberCardBody.mc-fit1 .mc-b-dates{margin-top:2.4px;padding-top:4px;padding-bottom:6px}
 #memberCardBody.mc-fit1 .mc-b-note{margin-top:2px}
 #memberCardBody.mc-fit1 .mc-b-bot{margin-top:2px}
 #memberCardBody.mc-fit1 .mc-b-email{margin-top:2px}
@@ -164,7 +164,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody.mc-fit1 .mc-b-super{margin-top:1.2px}
 #memberCardBody.mc-fit1.mc-fit2 .mc-bar .mc-k,#memberCardBody.mc-fit1.mc-fit2 .mc-bar .mc-v{font-size:11px}
 #memberCardBody.mc-fit1.mc-fit2 .mc-b-logo{width:28px;height:28px}
-#memberCardBody.mc-fit1.mc-fit2 .mc-b-dates{padding-top:2.4px;padding-bottom:2.4px}
+#memberCardBody.mc-fit1.mc-fit2 .mc-b-dates{padding-top:3px;padding-bottom:5px}
 #memberCardBody.mc-fit1.mc-fit2 .mc-b-dates .mc-half .mc-ic,#memberCardBody.mc-fit1.mc-fit2 .mc-b-dates .mc-half .mc-ic svg{width:20px;height:20px}
 #memberCardBody.mc-fit1.mc-fit2 .mc-b-bdwo{width:44px;height:44px;flex-basis:44px}
 #memberCardBody.mc-fit1.mc-fit2 .mc-b-email{font-size:10.5px}
@@ -5128,6 +5128,53 @@ function mcFitBack(){
   }
 }
 
+
+/* v84: phone fonts render wider/taller than Linux headless Chrome, and the
+   phone's html2canvas pass can draw text a few px lower/wider than the DOM
+   lays it out. The pill had only ~1.4px slack, the Edu value ran under the
+   barcode, and the dates touched the box border. So, at render time:
+   (a) shrink any back value that does not fit its bar on one line with
+   12px slack, down to an 11px floor; if it still does not fit, hard-break
+   it at a space near the middle (a <br> is honoured by the DOM and by
+   html2canvas alike); (b) enforce >=6px clearance under the dates. */
+function mcFitBars(){
+  var back=document.getElementById('mc-back');
+  if(!back) return;
+  var vals=back.querySelectorAll('.mc-bar:not(.mc-addr) .mc-v');
+  for(var i=0;i<vals.length;i++){
+    var v=vals[i], bar=v.closest('.mc-bar'), k=bar?bar.querySelector('.mc-k'):null;
+    if(!bar||!k) continue;
+    var cs=getComputedStyle(bar);
+    var gap=parseFloat(cs.columnGap); if(isNaN(gap)) gap=12;
+    var avail=bar.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0)-k.getBoundingClientRect().width-gap-12;
+    v.style.whiteSpace='nowrap';
+    var nat=v.scrollWidth, fs=parseFloat(getComputedStyle(v).fontSize);
+    while(nat>avail && fs>11){ fs-=0.5; v.style.fontSize=fs+'px'; nat=v.scrollWidth; }
+    v.style.whiteSpace='';
+    if(nat>avail){
+      var txt=v.textContent, mid=Math.floor(txt.length/2), cut=txt.lastIndexOf(' ',mid);
+      if(cut<1) cut=txt.indexOf(' ',mid);
+      if(cut>0){
+        v.textContent='';
+        v.appendChild(document.createTextNode(txt.slice(0,cut)));
+        v.appendChild(document.createElement('br'));
+        v.appendChild(document.createTextNode(txt.slice(cut+1)));
+      }
+    }
+  }
+  var box=back.querySelector('.mc-b-dates');
+  if(box){
+    var ds=box.querySelectorAll('.mc-d1');
+    for(var j=0;j<ds.length;j++){
+      var guard=0;
+      while(box.getBoundingClientRect().bottom-ds[j].getBoundingClientRect().bottom<6 && guard<10){
+        guard++;
+        ds[j].style.fontSize=(parseFloat(getComputedStyle(ds[j]).fontSize)-0.5)+'px';
+      }
+    }
+  }
+}
+
 function renderMemberCard(m){
   var url = SITE_BASE + '?verify=' + encodeURIComponent(m.id);
   window._lastMemberCard = m;
@@ -5190,7 +5237,7 @@ function renderMemberCard(m){
   if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
   mcFitText(document.querySelector('#memberCardBody .mc-f-name'));
   mcFitText(document.querySelector('#memberCardBody .mc-f-title'));
-  mcFitBack();
+  mcFitBack(); mcFitBars(); mcFitBack();
 }
 /* Card as PDF (front page + back page) for printing/sharing. Built with a
    small built-in PDF writer — no CDN library, so it works even when the
