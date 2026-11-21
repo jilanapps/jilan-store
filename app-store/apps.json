@@ -2777,14 +2777,14 @@
       "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/ittiba-e-rasool.apk",
       "category": "islamic",
       "color": "#0b5d3b",
-      "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Quran (Kanzul Iman), Duas, Namaz Timings, Tasbeeh",
+      "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein aur Bayanat",
       "icon": "icons/ittibaerasool.png",
       "id": "ittiba-e-rasool",
       "name": "Tehreek Ittiba-e-Sunnat Pakistan",
       "package": "com.jilanapps.ittibaerasool",
-      "size": 2242204,
-      "versionCode": 12,
-      "versionName": "2.1",
+      "size": 809400,
+      "versionCode": 13,
+      "versionName": "2.2",
       "web": "https://jilanapps.github.io/jilan-store/ittiba-e-rasool/"
     }
   ],
