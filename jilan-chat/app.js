@@ -532,6 +532,7 @@
     if (pending && isOut) metaHtml += '<span class="ticks pending"><svg class="tick-clock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>';
     else metaHtml += tickHtml(m.status, isOut);
     div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
+    JC.tagPhotoBubble(div);
     JC.wireMediaBubble(div, m);
     if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, false);
     $("messages").appendChild(div);
@@ -1041,6 +1042,13 @@
   JC.ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
   JC.ICON_PAUSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
   var playingAudio = null;
+  // WhatsApp-style photo bubble: thin frame, time over the photo (v4.8).
+  JC.tagPhotoBubble = function (div) {
+    var img = div.querySelector(":scope > img.bubble-img");
+    div.classList.toggle("photo-msg", !!img);
+    var cap = img && img.nextElementSibling;
+    div.classList.toggle("has-cap", !!(cap && !cap.classList.contains("meta")));
+  };
   JC.wireMediaBubble = function (div, m) {
     var src = JC.mediaSrc(m);
     var img = div.querySelector("img.bubble-img");

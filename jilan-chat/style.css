@@ -629,3 +629,19 @@ html.dark .uname-banner { background: #1f2c34; color: #cfe3ff; }
 .ub-x { border: none; background: none; color: inherit; font-size: 22px; padding: 0 4px; }
 .uname-warn { color: #c62828; font-size: 13px; font-weight: 600; margin: 6px 0 0; }
 #btnSetUsername { width: auto; margin-left: 8px; }
+/* v4.8 WhatsApp-style photo bubbles */
+.msg.photo-msg { padding: 3px; max-width: min(70%, 280px); width: min(70%, 280px); }
+.msg.photo-msg > img.bubble-img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 6px; min-height: 80px; background: rgba(0,0,0,.08); }
+.msg.photo-msg:not(.has-cap) > .meta { position: absolute; right: 8px; bottom: 7px; margin: 0; padding: 1px 7px; border-radius: 10px; color: #fff; background: rgba(0,0,0,.42); text-shadow: 0 1px 1px rgba(0,0,0,.3); pointer-events: none; }
+.msg.photo-msg:not(.has-cap) > .meta .ticks:not(.read) { color: #fff; }
+.msg.photo-msg.has-cap > img.bubble-img + div { padding: 4px 6px 0; }
+.msg.photo-msg > .meta { padding: 0 5px 1px; }
+.msg.photo-msg > .sender-name { padding: 2px 6px 3px; }
+.msg.photo-msg > .reply-quote, .msg.photo-msg > .fwd-label { margin: 0 0 3px; }
+html.dark .msg.photo-msg:not(.has-cap) > .meta { color: #fff; }
+/* v4.8 profile cover */
+.profile-cover { margin: -24px -16px 0; height: 0; padding-bottom: 46%; max-height: 220px; background: linear-gradient(135deg, #1f7ae0, #1565c0); background-size: cover; background-position: center; cursor: pointer; position: relative; }
+.profile-cover.has-img { padding-bottom: 56.25%; }
+#contactCover { cursor: default; }
+.profile-cover + .avatar.large { margin-top: -48px; position: relative; border: 3px solid var(--bg, #fff); box-sizing: content-box; }
+html.dark .profile-cover + .avatar.large { border-color: #111b21; }

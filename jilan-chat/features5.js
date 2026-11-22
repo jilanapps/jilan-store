@@ -89,3 +89,82 @@
     }, 1000);
   });
 })();
+// ---------- v4.8 profile cover photo ----------
+(function () {
+  var JC = window.JC = window.JC || {};
+  function $(id) { return document.getElementById(id); }
+  function me() { return JC.currentUser && JC.currentUser.uid; }
+  function toast(t) { if (JC.toast) JC.toast(t); }
+  JC.COVER_W = 720; JC.COVER_H = 405; JC.COVER_MAX = 300000;
+  // File -> 16:9 centre-cropped JPEG data URL, shrinking until it fits.
+  JC.compressCover = function (file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type || "")) return reject(new Error("Please choose a photo."));
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        try {
+          var tries = [[720, 0.72], [720, 0.6], [640, 0.55], [560, 0.5], [480, 0.45]];
+          for (var i = 0; i < tries.length; i++) {
+            var w = tries[i][0], h = Math.round(w * 9 / 16), c = document.createElement("canvas");
+            c.width = w; c.height = h;
+            var ctx = c.getContext("2d"), iw = img.naturalWidth, ih = img.naturalHeight;
+            var sw = iw, sh = iw * 9 / 16; if (sh > ih) { sh = ih; sw = ih * 16 / 9; }
+            ctx.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, w, h);
+            var d = c.toDataURL("image/jpeg", tries[i][1]);
+            if (d.length <= JC.COVER_MAX) { URL.revokeObjectURL(url); return resolve(d); }
+          }
+          reject(new Error("This photo is too large. Try another one."));
+        } catch (e) { reject(e); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Couldn't read this photo.")); };
+      img.src = url;
+    });
+  };
+  JC.paintCover = function (el, data, ownEmpty) {
+    if (!el) return;
+    if (data && /^data:image\//.test(data)) { el.style.backgroundImage = 'url("' + data + '")'; el.classList.add("has-img"); el.classList.remove("hidden"); }
+    else { el.style.backgroundImage = ""; el.classList.remove("has-img"); el.classList.toggle("hidden", !ownEmpty); }
+  };
+  JC.renderOwnCover = function () {
+    var p = JC.userProfile || {};
+    JC.paintCover($("profileCover"), p.coverURL, true);
+    var rb = $("btnRemoveCover"); if (rb) rb.classList.toggle("hidden", !p.coverURL);
+  };
+  function saveCover(val) {
+    if (!JC.db || !me()) return Promise.reject(new Error("Please sign in first."));
+    var upd = { coverURL: val === null ? firebase.firestore.FieldValue.delete() : val };
+    return JC.db.collection("users").doc(me()).update(upd).then(function () {
+      if (JC.userProfile) { if (val === null) delete JC.userProfile.coverURL; else JC.userProfile.coverURL = val; }
+      JC.renderOwnCover();
+    }, function (e) {
+      if (e && /permission/i.test(String(e.code || e.message))) throw new Error("Cover photo needs the latest server update. Try again later.");
+      throw e;
+    });
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    var inp = $("coverInput"), pick = function () { if (inp) { inp.value = ""; inp.click(); } };
+    if ($("btnChangeCover")) $("btnChangeCover").addEventListener("click", pick);
+    if ($("profileCover")) $("profileCover").addEventListener("click", pick);
+    if (inp) inp.addEventListener("change", function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      toast("Saving cover...");
+      JC.compressCover(f).then(saveCover).then(function () { toast("Cover photo updated"); })
+        .catch(function (e) { toast((e && e.message) || "Couldn't save cover."); });
+    });
+    if ($("btnRemoveCover")) $("btnRemoveCover").addEventListener("click", function () {
+      if (!window.confirm("Remove your cover photo?")) return;
+      saveCover(null).then(function () { toast("Cover removed"); }).catch(function (e) { toast((e && e.message) || "Couldn't remove cover."); });
+    });
+    var lp = JC.loadProfileScreen;
+    if (lp) JC.loadProfileScreen = function () { var r = lp.apply(this, arguments); try { JC.renderOwnCover(); } catch (e) {} return r; };
+    var oc = JC.openContactProfile;
+    if (oc) JC.openContactProfile = function () {
+      var r = oc.apply(this, arguments), uid = JC.currentChatOtherUid, el = $("contactCover");
+      JC.paintCover(el, null, false);
+      if (uid && JC.db && !JC.currentChatIsGroup) JC.db.collection("users").doc(uid).get().then(function (s) {
+        if (JC.currentChatOtherUid === uid) JC.paintCover(el, s.exists ? (s.data() || {}).coverURL : null, false);
+      }).catch(function () {});
+      return r;
+    };
+  });
+})();

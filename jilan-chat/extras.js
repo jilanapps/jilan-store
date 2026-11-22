@@ -124,6 +124,7 @@
     // Deleted: wipe the body, keep sender name + time.
     if (m.deleted && !div.classList.contains("deleted")) {
       div.classList.add("deleted");
+      div.classList.remove("photo-msg", "has-cap");
       Array.prototype.slice.call(div.children).forEach(function (c) {
         if (!c.classList.contains("meta") && !c.classList.contains("sender-name")) div.removeChild(c);
       });

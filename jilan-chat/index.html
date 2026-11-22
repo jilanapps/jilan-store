@@ -323,6 +323,7 @@
     <h1>Contact</h1>
   </div>
   <div class="page-body profile-center">
+    <div class="profile-cover hidden" id="contactCover"></div>
     <div class="avatar large" id="contactAvatar">?</div>
     <h2 id="contactName" style="margin-top:6px;">...</h2>
     <div class="gmail" id="contactUsername">-</div>
@@ -423,12 +424,18 @@
   <div class="page-body profile-center">
     <!-- Tap the photo to change it (gallery or camera). Photo is shrunk
          to 256px and saved in your profile (no separate storage). -->
+    <div class="profile-cover" id="profileCover" title="Change cover"></div>
     <div class="avatar large profile-photo" id="profileAvatar" title="Tap to change photo">?</div>
     <p class="note" style="color:#667781;font-size:13px;margin-top:2px;">Tap photo to change</p>
     <input type="file" id="profilePhotoInput" class="hidden" accept="image/*">
     <div class="profile-row" style="text-align:center;">
       <button class="btn btn-ghost btn-small" id="btnChangePhoto">Change photo</button>
       <button class="btn btn-ghost btn-small" id="btnRemovePhoto">Remove photo</button>
+    </div>
+    <div class="profile-row" style="text-align:center;">
+      <button class="btn btn-ghost btn-small" id="btnChangeCover">Change cover</button>
+      <button class="btn btn-ghost btn-small hidden" id="btnRemoveCover">Remove cover</button>
+      <input type="file" id="coverInput" class="hidden" accept="image/*">
     </div>
     <div class="profile-row">
       <label>Your name</label>

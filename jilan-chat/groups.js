@@ -221,6 +221,7 @@
     // Only a single "sent" tick — no delivered/read ticks in groups.
     var nameHtml = isOut ? "" : '<div class="sender-name" data-uid="' + esc(m.senderId) + '">...</div>';
     div.innerHTML = nameHtml + body + '<div class="meta">' + fmtTime(m.createdAt) + (isOut ? ' <span class="ticks">&#10003;</span>' : "") + "</div>";
+    if (JC.tagPhotoBubble) JC.tagPhotoBubble(div);
     JC.wireMediaBubble(div, m);
     if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, true);
     $("messages").appendChild(div);
