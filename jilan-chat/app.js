@@ -531,6 +531,14 @@
             unreadCount: firebase.firestore.FieldValue.increment(1),
             lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
+      }).then(function () {
+        // FCM (v4.3): tell the receiver's phone — fire-and-forget, never
+        // breaks sending (queuePushEvent never rejects).
+        if (JC.queuePushEvent) JC.queuePushEvent({
+          type: "message", toUid: otherUid, chatId: chatId,
+          title: (JC.userProfile && JC.userProfile.displayName) || "",
+          body: preview
+        });
       });
     });
   };

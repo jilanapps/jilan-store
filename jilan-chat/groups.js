@@ -166,6 +166,20 @@
           }, { merge: true });
         });
       return Promise.all(jobs);
+    }).then(function () {
+      // FCM (v4.3): one push event per other member — fire-and-forget.
+      if (JC.queuePushEvent) {
+        var me = (JC.userProfile && JC.userProfile.displayName) || "";
+        var gName = (currentGroup && currentGroup.name) || "Group";
+        members.filter(function (uid) { return uid !== JC.currentUser.uid; })
+          .forEach(function (uid) {
+            JC.queuePushEvent({
+              type: "message", toUid: uid, chatId: groupId,
+              groupId: groupId, groupName: gName,
+              title: gName, body: me ? (me + ": " + preview) : preview
+            });
+          });
+      }
     });
   };
 
