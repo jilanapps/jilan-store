@@ -215,7 +215,7 @@
     localVideo().classList.toggle("hidden", kind !== "video");
     showCallScreen();
     setCallState("Starting camera and microphone…");
-    startRinging(); // caller hears ringback while the callee's phone rings
+    startRinging(true); // caller hears ringback only — caller phone never vibrates
 
     getLocalMedia(kind).then(function (stream) {
       localStream = stream;
@@ -578,7 +578,7 @@
     } catch (e) {}
     return "normal";
   }
-  function startRinging() {
+  function startRinging(asCaller) {
     try {
       if (ringing) return;
       var mode = getRingerMode();
@@ -599,7 +599,7 @@
         if (!ringing) return;
         // Vibrate on every ring until accept/decline/end (stopRinging
         // cancels it). One pattern alone only buzzes once.
-        if (navigator.vibrate) { try { navigator.vibrate([500, 200, 500]); } catch (e) {} }
+        if (!asCaller && navigator.vibrate) { try { navigator.vibrate([500, 200, 500]); } catch (e) {} }
         if (mode !== "normal" || !ctx || !master) return;
         [0, 0.45].forEach(function (delay) {
           try {
