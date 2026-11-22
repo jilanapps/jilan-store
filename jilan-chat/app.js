@@ -287,7 +287,7 @@
     var img = div.querySelector("img.bubble-img");
     if (img) {
       img.addEventListener("click", function () { JC.openViewer("image", m.mediaUrl); });
-      // Storage files auto-delete 30 days after upload (GCS lifecycle).
+      // Storage files auto-delete 3 days after upload (GCS lifecycle).
       // The message text stays, the mediaUrl then 404s — show a note,
       // never a broken image or a crash.
       img.addEventListener("error", function () { JC.mediaGone(img); });
@@ -559,7 +559,7 @@
     $("profileGmail").textContent = p.gmail || (JC.currentUser && JC.currentUser.email) || "";
   };
 
-  // Replaces a dead media element (Storage file deleted after 30 days)
+  // Replaces a dead media element (Storage file deleted after 3 days)
   // with a plain note. Chat TEXT is never deleted — only the media file.
   JC.mediaGone = function (el) {
     if (!el || !el.parentNode) return;
