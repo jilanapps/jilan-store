@@ -351,6 +351,9 @@
     muted = false; videoOff = false; speakerOn = false; callSeconds = 0;
     $("btnMute").classList.remove("off");
     $("btnVideoOff").classList.remove("off");
+    $("btnSpeaker").classList.remove("on");
+    remoteVideo().classList.remove("playing"); localVideo().classList.remove("playing");
+    $("screen-call").classList.remove("has-remote-video");
     resetCallUi();
     if (reason) JC.toast(reason);
     // Return to wherever the user was: the open chat if there is one.
@@ -500,7 +503,7 @@
     muted = !muted;
     localStream.getAudioTracks().forEach(function (t) { t.enabled = !muted; });
     $("btnMute").classList.toggle("off", muted);
-    $("btnMute").textContent = muted ? "Muted" : "🎤";
+    // Icon swap is CSS-only (.off shows the slashed-mic SVG).
   }
   function toggleVideo() {
     if (!localStream || callKind !== "video") return;
@@ -644,6 +647,25 @@
     $("btnMute").addEventListener("click", toggleMute);
     $("btnVideoOff").addEventListener("click", toggleVideo);
     $("btnCamFlipCall").addEventListener("click", flipCamera);
-    $("btnSpeaker").addEventListener("click", toggleSpeaker);
+    $("btnSpeaker").addEventListener("click", function () {
+      toggleSpeaker();
+      $("btnSpeaker").classList.toggle("on", !!speakerOn);
+    });
+    // Display only: keep the <video> boxes invisible until real frames play,
+    // so the WebView grey play-button placeholder never shows.
+    ["remoteVideo", "localVideo"].forEach(function (id) {
+      var v = $(id);
+      if (!v || !v.addEventListener) return;
+      v.addEventListener("playing", function () {
+        v.classList.add("playing");
+        if (id === "remoteVideo") $("screen-call").classList.add("has-remote-video");
+      });
+      ["emptied", "ended", "abort"].forEach(function (ev) {
+        v.addEventListener(ev, function () {
+          v.classList.remove("playing");
+          if (id === "remoteVideo") $("screen-call").classList.remove("has-remote-video");
+        });
+      });
+    });
   });
 })();

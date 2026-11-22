@@ -271,3 +271,62 @@ html.dark .reply-quote { background: rgba(100,181,246,.12); }
 html.dark .reply-quote .rq-name, html.dark .reply-bar .rb-name { color: #90caf9; }
 html.dark .reply-quote .rq-text, html.dark .reply-bar .rb-text, html.dark .deleted-text, html.dark .fwd-label { color: #9fb0bd; }
 html.dark .icon-btn.dark { color: #e6edf3; }
+
+/* ---------- v4.6: SVG icons (no emoji as UI icons) + WhatsApp-style composer/recording ---------- */
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; }
+.icon-btn svg, .round-btn svg, .call-btn svg, .in-btn svg, .fab svg, .tab-btn svg, .avatar svg { display: block; flex-shrink: 0; }
+.fab { display: flex; align-items: center; justify-content: center; }
+.tab-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 0 9px; }
+.cam-side { display: inline-flex; align-items: center; gap: 6px; }
+#viewerClose { display: flex; align-items: center; justify-content: center; }
+.call-btn { display: inline-flex; align-items: center; justify-content: center; }
+.call-btn .ic-off { display: none; }
+.call-btn.off .ic-on { display: none; }
+.call-btn.off .ic-off { display: inline-flex; }
+.call-btn.on { background: #fff; color: #1565c0; }
+.call-btn.accept { background: #1f7ae0; }
+/* composer: icons inside the rounded field, round blue mic/send on the right */
+.composer { align-items: center; gap: 6px; padding: 6px 8px; position: relative; }
+.composer .box { padding: 2px 4px; min-height: 46px; border-radius: 24px; gap: 0; }
+.composer .box input { padding: 10px 4px; }
+.in-btn { background: none; border: none; color: #54656f; width: 38px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; padding: 0; }
+.in-btn:active { background: rgba(0,0,0,.06); }
+.composer .round-btn { width: 46px; height: 46px; background: #1f7ae0; color: #fff; }
+.composer .round-btn:active { background: #1565c0; }
+@media (max-width: 380px) { .composer .round-btn { width: 44px; height: 44px; } .in-btn { width: 34px; } }
+/* recording row (replaces the input box) */
+#recBar.rec-bar { display: none; flex: 1; min-width: 0; min-height: 46px; align-items: center; gap: 10px; background: #fff; color: #111b21; border-radius: 24px; padding: 0 6px 0 16px; font-size: 15px; }
+#recBar.rec-bar.show { display: flex; }
+#recBar .dot { width: 10px; height: 10px; border-radius: 50%; background: #ea0038; animation: blink 1s infinite; flex-shrink: 0; }
+#recTime { font-variant-numeric: tabular-nums; min-width: 36px; }
+.rec-hint { flex: 1; min-width: 0; text-align: center; color: #667781; font-size: 14px; white-space: nowrap; overflow: hidden; transition: transform .05s linear; }
+.rec-hint .hold-only { display: none; }
+.composer.holding .rec-hint .hold-only { display: inline; }
+.composer.holding .rec-hint .tap-only { display: none; }
+.rec-trash { color: #ea0038; }
+.composer.holding .rec-trash { visibility: hidden; }
+#btnRecSend { display: none; }
+.composer.recording .box { display: none; }
+.composer.recording #btnSend { display: none !important; }
+.composer.recording:not(.holding) #btnMic { display: none; }
+.composer.recording:not(.holding) #btnRecSend { display: flex; }
+.composer.holding #btnMic { transform: scale(1.35); box-shadow: 0 0 0 8px rgba(31,122,224,.25); }
+.composer.holding.cancel-armed .rec-hint { color: #ea0038; }
+#btnMic { touch-action: none; transition: transform .12s ease; user-select: none; -webkit-user-select: none; }
+/* chat-list row icons (Requests / Nearby) */
+#requestsRow .avatar, #nearbyRow .avatar { background: #1f7ae0; color: #fff; }
+/* call screen: never show the WebView grey video placeholder */
+#remoteVideo, #localVideo { visibility: hidden; }
+#remoteVideo.playing, #localVideo.playing { visibility: visible; }
+#screen-call.has-remote-video .call-overlay > div:first-child .avatar { display: none; }
+/* dark */
+html.dark .in-btn { color: #9fb0bd; }
+html.dark #recBar.rec-bar { background: #22313d; color: #e6edf3; }
+html.dark .rec-hint { color: #9fb0bd; }
+html.dark .tab-bar { background: #111b21; border-top-color: #1e2a35; }
+.msg .meta .ticks svg { vertical-align: -2px; }
+.voice-bubble .vb-play svg { display: block; }
+.msg .file-chip .file-icon { color: #1565c0; display: inline-flex; }
+#screen-call { position: relative; overflow: hidden; }
+#screen-call .call-overlay { min-height: 100vh; }
+html.dark .rec-trash { color: #ff6b6b; }

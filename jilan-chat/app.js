@@ -456,7 +456,7 @@
     // dikhao, tick nahi — taake pata chale ke message abhi gaya nahi,
     // queue me hai. Net aate hi tick aa jayega.
     var metaHtml = fmtTime(m.createdAt);
-    if (pending && isOut) metaHtml += '<span class="ticks pending">&#128336;</span>';
+    if (pending && isOut) metaHtml += '<span class="ticks pending"><svg class="tick-clock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>';
     else metaHtml += tickHtml(m.status, isOut);
     div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
     JC.wireMediaBubble(div, m);
@@ -470,7 +470,7 @@
     var meta = el.querySelector(".meta");
     if (!meta) return;
     var isOut = m.senderId === JC.currentUser.uid;
-    if (pending && isOut) meta.innerHTML = fmtTime(m.createdAt) + '<span class="ticks pending">&#128336;</span>';
+    if (pending && isOut) meta.innerHTML = fmtTime(m.createdAt) + '<span class="ticks pending"><svg class="tick-clock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>';
     else meta.innerHTML = fmtTime(m.createdAt) + tickHtml(m.status, isOut);
   }
   function scrollMessagesToBottom() {
@@ -629,13 +629,23 @@
   };
   function fmtRec(sec) { return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
   JC.isRecording = function () { return !!(recorder && recorder.state === "recording"); };
+  var recStarting = false;
+  function setComposerRec(on) {
+    var c = document.getElementById("composer");
+    if (!c || !c.classList) return;
+    if (on) c.classList.add("recording");
+    else { c.classList.remove("recording"); c.classList.remove("holding"); c.classList.remove("cancel-armed"); }
+  }
+  JC.recElapsedMs = function () { return JC.isRecording() ? Date.now() - recStartedAt : 0; };
   JC.startVoiceRecord = function () {
-    if (JC.isRecording()) return;
+    if (JC.isRecording() || recStarting) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
       JC.toast("Is phone par voice recording nahi chalti.");
       return;
     }
+    recStarting = true;
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
+      recStarting = false;
       recStream = stream;
       var opts = { audioBitsPerSecond: 16000 };
       var mt = JC.pickVoiceMime();
@@ -651,15 +661,18 @@
       recorder.start(1000);
       recSeconds = 0;
       recStartedAt = Date.now();
-      $("recTime").textContent = "0:00 / 1:00";
+      $("recTime").textContent = "0:00";
       $("recBar").classList.add("show");
+      setComposerRec(true);
       recTimer = setInterval(function () {
         recSeconds = Math.min(JC.VOICE_MAX_SEC, Math.round((Date.now() - recStartedAt) / 1000));
-        $("recTime").textContent = fmtRec(recSeconds) + " / 1:00";
+        $("recTime").textContent = fmtRec(recSeconds);
         // 60 s limit: stop and send automatically.
         if (recSeconds >= JC.VOICE_MAX_SEC) JC.stopVoiceRecord(true);
       }, 250);
     }).catch(function () {
+      recStarting = false;
+      setComposerRec(false);
       JC.toast("Microphone ki ijazat nahi mili. Phone Settings me Jilan Chat ko Microphone allow karein.");
     });
   };
@@ -671,6 +684,7 @@
       try { recorder.stop(); } catch (e) {}
     }
     $("recBar").classList.remove("show");
+    setComposerRec(false);
     if (recStream) { recStream.getTracks().forEach(function (t) { t.stop(); }); recStream = null; }
   };
   JC.blobToDataUrl = function (blob, done) {
@@ -702,6 +716,66 @@
         .catch(function () { JC.showSending(""); JC.toast("Message nahi bheja ja saka."); });
     });
   }
+
+  // ---------- mic button: tap = record (then trash / send), hold = record,
+  // release = send, slide left = cancel (WhatsApp-style) ----------
+  JC.HOLD_MS = 280;          // press longer than this = hold-to-record
+  JC.SLIDE_CANCEL_PX = 90;   // slide this far left while holding = cancel
+  JC.wireMicButton = function () {
+    var mic = $("btnMic");
+    if (!mic) return;
+    var composer = document.getElementById("composer");
+    var hint = document.getElementById("recHint");
+    var holdTimer = null, holding = false, startX = 0;
+    function cls(add, c) { if (composer && composer.classList) composer.classList[add ? "add" : "remove"](c); }
+    function resetHint() { if (hint && hint.style) hint.style.transform = ""; cls(false, "cancel-armed"); }
+    function endHold() { holding = false; cls(false, "holding"); resetHint(); }
+    if (typeof window === "undefined" || !window.PointerEvent) {
+      mic.addEventListener("click", function () { JC.startVoiceRecord(); });
+      return;
+    }
+    mic.addEventListener("pointerdown", function (e) {
+      if (JC.isRecording()) return;
+      if (e.preventDefault) e.preventDefault();
+      startX = e.clientX || 0;
+      try { mic.setPointerCapture(e.pointerId); } catch (er) {}
+      holdTimer = setTimeout(function () {
+        holdTimer = null; holding = true;
+        cls(true, "holding");
+        JC.startVoiceRecord();
+      }, JC.HOLD_MS);
+    });
+    mic.addEventListener("pointermove", function (e) {
+      if (!holding) return;
+      var dx = Math.min(0, (e.clientX || 0) - startX);
+      if (hint && hint.style) hint.style.transform = "translateX(" + dx + "px)";
+      cls(dx < -JC.SLIDE_CANCEL_PX / 2, "cancel-armed");
+      if (dx <= -JC.SLIDE_CANCEL_PX) {
+        endHold();
+        JC.stopVoiceRecord(false);
+        JC.toast("Voice message cancelled");
+      }
+    });
+    mic.addEventListener("pointerup", function () {
+      if (holdTimer) {            // short tap: start in tap mode (trash / send)
+        clearTimeout(holdTimer); holdTimer = null;
+        JC.startVoiceRecord();
+        return;
+      }
+      if (!holding) return;
+      endHold();
+      if (!JC.isRecording()) return;   // mic permission still pending: stays in tap mode
+      if (JC.recElapsedMs() < 1000) { JC.stopVoiceRecord(false); JC.toast("Hold to record, release to send"); return; }
+      JC.stopVoiceRecord(true);
+    });
+    mic.addEventListener("pointercancel", function () {
+      // Finger left the button (scroll/system gesture): keep recording in
+      // tap mode so the user can still use trash or send.
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      if (holding) endHold();
+    });
+    mic.addEventListener("contextmenu", function (e) { if (e.preventDefault) e.preventDefault(); });
+  };
 
   // ---------- new chat: find a user by Gmail ----------
   JC.searchUserByGmail = function (gmail) {
@@ -879,15 +953,17 @@
     if (m.type === "text") return esc(m.text || "");
     if (m.type === "image") return src ? '<img class="bubble-img" src="' + attr(src) + '" alt="Photo">' + cap : '<div class="media-gone">Photo not available</div>' + cap;
     if (m.type === "voice") {
-      return '<div class="voice-bubble"><button type="button" class="vb-play" aria-label="Play">&#9654;</button>' +
+      return '<div class="voice-bubble"><button type="button" class="vb-play" aria-label="Play" data-state="play"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>' +
         '<div class="vb-track"><div class="vb-fill"></div></div>' +
         '<span class="vb-time">' + fmtDur(m.durationSec) + '</span>' +
         '<audio class="vb-audio" preload="metadata" src="' + attr(src) + '"></audio></div>';
     }
     if (m.type === "video") return '<video class="bubble-video" src="' + attr(src) + '" controls playsinline></video>' + cap;
-    if (m.type === "file") return '<div class="file-chip"><span class="file-icon">&#128196;</span><a href="' + attr(src) + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
+    if (m.type === "file") return '<div class="file-chip"><span class="file-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span><a href="' + attr(src) + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
     return esc(m.text || "");
   };
+  JC.ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+  JC.ICON_PAUSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
   var playingAudio = null;
   JC.wireMediaBubble = function (div, m) {
     var src = JC.mediaSrc(m);
@@ -908,7 +984,7 @@
       var fill = vb.querySelector(".vb-fill");
       var time = vb.querySelector(".vb-time");
       var total = m.durationSec || 0;
-      var setIcon = function (playing) { btn.innerHTML = playing ? "&#10074;&#10074;" : "&#9654;"; btn.setAttribute("aria-label", playing ? "Pause" : "Play"); };
+      var setIcon = function (playing) { btn.innerHTML = playing ? JC.ICON_PAUSE : JC.ICON_PLAY; btn.setAttribute("aria-label", playing ? "Pause" : "Play"); btn.setAttribute("data-state", playing ? "pause" : "play"); };
       btn.addEventListener("click", function (e) {
         e.stopPropagation();
         if (!audio.paused) { audio.pause(); return; }
@@ -1005,15 +1081,10 @@
     $("msgInput").addEventListener("input", updateComposer);
     $("msgInput").addEventListener("keydown", function (e) { if (e.key === "Enter") sendText(); });
     $("btnSend").addEventListener("click", sendText);
-    $("btnMic").addEventListener("click", function () { JC.startVoiceRecord(); });
+    JC.wireMicButton();
     $("btnRecCancel").addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(false); JC.toast("Voice message cancelled"); });
     var btnRecSend = $("btnRecSend");
     if (btnRecSend) btnRecSend.addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(true); });
-    // Tap the red recording bar to stop and send.
-    $("recBar").addEventListener("click", function (e) {
-      if (e.target.id === "btnRecCancel") return;
-      JC.stopVoiceRecord(true);
-    });
     $("btnAttach").addEventListener("click", function () { $("fileInput").click(); });
     $("fileInput").addEventListener("change", function () {
       var f = $("fileInput").files && $("fileInput").files[0];
