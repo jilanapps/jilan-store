@@ -1,7 +1,7 @@
 // Jilan Chat v4.5 — extras.js (FREE Spark only, no Storage, no Blaze)
 // Professional chat features, user order 2026-11-22 13:40:
 //  - long-press message -> labelled action sheet (Reply, React, Forward,
-//    Copy, Delete -> Delete for me / Delete for everyone); swipe right on a message -> Reply
+//    Copy, Delete for me, Delete for everyone); swipe right on a message -> Reply
 //  - reply / quote, forward to existing chats, emoji reactions (6 quick)
 //  - delete for everyone (sender only -> "This message was deleted")
 //  - "typing..." in 1-to-1 chats (throttled: max 1 write / 4 s)
@@ -61,10 +61,58 @@
     JC.toast("Message deleted for you");
   };
 
+  // ---------- delete chat (this phone only, no Firestore write) ----------
+  // deletedChats: { chatId: hideAtMs } -> row hidden until a newer message.
+  // clearedChats: { chatId: cutoffMs } -> messages at/before cutoff stay hidden.
+  function tsMs(ts) {
+    if (!ts) return null;
+    if (typeof ts === "number") return ts;
+    if (ts.toMillis) return ts.toMillis();
+    if (ts.seconds != null) return ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1e6);
+    return null;
+  }
+  JC.tsMs = tsMs;
+  var chatLastAt = {};
+  JC.getDeletedChats = function () { return store("deletedChats") || {}; };
+  JC.getClearedChats = function () { return store("clearedChats") || {}; };
+  JC.isChatDeleted = function (id) { return Object.prototype.hasOwnProperty.call(JC.getDeletedChats(), id); };
+  JC.isClearedMessage = function (chatId, m) {
+    if (!chatId || !m) return false;
+    var cut = JC.getClearedChats()[chatId]; if (!cut) return false;
+    var t = tsMs(m.createdAt);
+    return t != null && t <= cut;   // pending (no server time yet) = new message
+  };
+  JC.deleteChat = function (id) {
+    if (!id) return false;
+    // Use the chat's own latest server time when known (avoids phone-clock skew).
+    var at = chatLastAt[id] || Date.now();
+    var d = JC.getDeletedChats(); d[id] = at; store("deletedChats", d);
+    var c = JC.getClearedChats(); c[id] = at; store("clearedChats", c);
+    var p = JC.getPins(), i = p.indexOf(id); if (i >= 0) { p.splice(i, 1); store("pins", p); }
+    applyListDecor();
+    JC.toast("Chat deleted from this phone");
+    return true;
+  };
+  JC.confirmDeleteChat = function (id) {
+    openSheet('<div class="sheet-title">Delete this chat? It will be removed from this phone only.</div>' + item("yes", "Delete chat", "danger"), function (act) {
+      if (act === "yes") JC.deleteChat(id);
+    });
+  };
+  // Called with the userChats snapshot: a newer message brings the row back.
+  JC.noteChatTimes = function (snap) {
+    var d = JC.getDeletedChats(), changed = false;
+    snap.forEach(function (doc) {
+      var e = doc.data() || {}, t = tsMs(e.lastMessageAt);
+      if (t != null) chatLastAt[doc.id] = t;
+      if (d[doc.id] != null && t != null && t > d[doc.id]) { delete d[doc.id]; changed = true; }
+    });
+    if (changed) store("deletedChats", d);
+  };
+
   JC.decorateMessage = function (div, msgId, m, isGroup) {
     msgData[msgId] = { m: m, isGroup: !!isGroup, el: div };
     div.setAttribute("data-msg-id", msgId);
-    if (JC.isHiddenMessage(JC.currentChatId, msgId)) div.style.display = "none";
+    if (JC.isHiddenMessage(JC.currentChatId, msgId) || JC.isClearedMessage(JC.currentChatId, m)) div.style.display = "none";
     applyDecor(div, m);
     wireGestures(div, msgId);
   };
@@ -178,8 +226,8 @@
     var m = d.m, mine = m.senderId === uid();
     if (m.deleted) {
       // Already deleted for everyone: only "Delete for me" is left.
-      openSheet(item("delete", "Delete for me", "danger"), function (act) {
-        if (act === "delete") JC.confirmDelete(msgId);
+      openSheet(item("forme", "Delete for me", "danger"), function (act) {
+        if (act === "forme") JC.deleteForMe(msgId);
       });
       return;
     }
@@ -190,14 +238,16 @@
     html += item("forward", "Forward");
     if (m.type === "text" && m.text) html += item("copy", "Copy");
     if ((m.reactions || {})[uid()]) html += item("unreact", "Remove my reaction");
-    html += item("delete", "Delete", "danger");
+    html += item("forme", "Delete for me", "danger");
+    if (mine) html += item("forall", "Delete for everyone", "danger");
     openSheet(html, function (act, val) {
       if (act === "react") JC.react(msgId, val);
       else if (act === "unreact") JC.react(msgId, null);
       else if (act === "reply") JC.startReply(msgId);
       else if (act === "forward") JC.openForward(msgId);
       else if (act === "copy") copyText(m.text);
-      else if (act === "delete") JC.confirmDelete(msgId);
+      else if (act === "forme") JC.deleteForMe(msgId);
+      else if (act === "forall") JC.confirmDeleteForAll(msgId);
     });
   };
   function item(act, label, cls) { return '<button type="button" class="sheet-item' + (cls ? " " + cls : "") + '" data-act="' + act + '">' + esc(label) + "</button>"; }
@@ -405,6 +455,7 @@
         var top = r.querySelector(".top") || r; top.appendChild(holder);
       }
       holder.innerHTML = (JC.isMuted(id) ? MUTE_SVG : "") + (JC.isPinned(id) ? PIN_SVG : "");
+      r.style.display = JC.isChatDeleted(id) ? "none" : "";
       if (!r._jcPress) { r._jcPress = true; wireRowPress(r, id); }
     });
     // Pinned rows first, in pin order; others keep their time order.
@@ -423,15 +474,17 @@
     row.addEventListener("contextmenu", function (e) { if (e.preventDefault) e.preventDefault(); JC.openChatRowSheet(id); });
   }
   JC.openChatRowSheet = function (id) {
-    openSheet(item("pin", JC.isPinned(id) ? "Unpin chat" : "Pin chat") + item("mute", JC.isMuted(id) ? "Unmute notifications" : "Mute notifications"), function (act) {
+    openSheet(item("pin", JC.isPinned(id) ? "Unpin chat" : "Pin chat") + item("mute", JC.isMuted(id) ? "Unmute notifications" : "Mute notifications") + item("delchat", "Delete chat", "danger"), function (act) {
       if (act === "pin") JC.togglePin(id);
       if (act === "mute") JC.toggleMute(id);
+      if (act === "delchat") JC.confirmDeleteChat(id);
     });
   };
 
   // ---------- in-app message tone (skipped for muted / open chat) ----------
   var lastUnread = null;
   JC.afterChatListRender = function (snap) {
+    JC.noteChatTimes(snap);
     applyListDecor();
     var now = {}, ring = false;
     snap.forEach(function (doc) {
