@@ -92,9 +92,9 @@ input, textarea { font-family: inherit; font-size: 15px; }
 .msg .file-chip { display: flex; align-items: center; gap: 8px; }
 .msg .file-chip .file-icon { font-size: 26px; }
 .msg .voice-line { display: flex; align-items: center; gap: 8px; }
-.composer { display: flex; gap: 6px; padding: 8px; align-items: flex-end; background: #f0f2f5; flex-shrink: 0; }
-.composer .box { flex: 1; background: #fff; border-radius: 20px; padding: 9px 12px; display: flex; align-items: center; }
-.composer input { flex: 1; border: none; outline: none; background: transparent; }
+.composer { display: flex; gap: 4px; padding: 8px 6px; max-width: 100%; box-sizing: border-box; align-items: flex-end; background: #f0f2f5; flex-shrink: 0; }
+.composer .box { flex: 1; min-width: 0; background: #fff; border-radius: 20px; padding: 9px 12px; display: flex; align-items: center; }
+.composer input { flex: 1; min-width: 0; width: 100%; border: none; outline: none; background: transparent; }
 .round-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: #1f7ae0; color: #fff; font-size: 19px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .round-btn.gray { background: transparent; color: #54656f; }
 
@@ -186,3 +186,20 @@ input, textarea { font-family: inherit; font-size: 15px; }
 #nearbyDevicesWrap h2 { font-size: 15px; }
 #nearbyMessages { flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
 #nearbyMessagesEmpty { flex-shrink: 0; }
+
+/* ---------- v4.4: composer fits narrow phones + voice bubble ---------- */
+@media (max-width: 380px) { .composer .round-btn { width: 38px; height: 38px; font-size: 18px; } }
+.voice-bubble { display: flex; align-items: center; gap: 8px; min-width: 190px; max-width: 240px; padding: 2px 0; }
+.voice-bubble .vb-play { width: 36px; height: 36px; border-radius: 50%; border: none; background: #1f7ae0; color: #fff; font-size: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.voice-bubble .vb-track { flex: 1; height: 4px; background: rgba(0,0,0,.15); border-radius: 2px; overflow: hidden; }
+.voice-bubble .vb-fill { width: 0%; height: 100%; background: #1f7ae0; }
+.voice-bubble .vb-time { font-size: 12px; color: #667781; min-width: 30px; text-align: right; }
+.voice-bubble audio { display: none; }
+#recBar #btnRecSend { margin-left: 6px; }
+
+/* ---------- v4.4: WhatsApp-style labelled main menu (Jilan blue) ---------- */
+#screen-list { position: relative; }
+.list-header .icon-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
+.main-menu { position: absolute; top: 50px; right: 8px; background: #fff; color: #111b21; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.3); z-index: 30; min-width: 190px; padding: 6px 0; }
+.main-menu button { display: block; width: 100%; text-align: left; padding: 13px 18px; border: none; background: none; font-size: 15.5px; color: #111b21; }
+.main-menu button:active { background: #e3eefc; }

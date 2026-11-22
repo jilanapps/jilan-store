@@ -443,18 +443,7 @@
     var isOut = m.senderId === JC.currentUser.uid;
     var div = document.createElement("div");
     div.className = "msg " + (isOut ? "out" : "in");
-    var body = "";
-    if (m.type === "text") {
-      body = esc(m.text || "");
-    } else if (m.type === "image") {
-      body = '<img class="bubble-img" src="' + esc(m.mediaUrl || "") + '" alt="Photo">' + (m.text ? "<div>" + esc(m.text) + "</div>" : "");
-    } else if (m.type === "video") {
-      body = '<video class="bubble-video" src="' + esc(m.mediaUrl || "") + '" controls playsinline></video>' + (m.text ? "<div>" + esc(m.text) + "</div>" : "");
-    } else if (m.type === "voice") {
-      body = '<div class="voice-line"><audio src="' + esc(m.mediaUrl || "") + '" controls preload="metadata"></audio><span>' + (m.durationSec || 0) + 's</span></div>';
-    } else if (m.type === "file") {
-      body = '<div class="file-chip"><span class="file-icon">&#128196;</span><a href="' + esc(m.mediaUrl || "") + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
-    }
+    var body = JC.mediaBodyHtml(m);
     // Pending (offline likha gaya, server tak nahi pahuncha): ghari
     // dikhao, tick nahi — taake pata chale ke message abhi gaya nahi,
     // queue me hai. Net aate hi tick aa jayega.
@@ -462,21 +451,7 @@
     if (pending && isOut) metaHtml += '<span class="ticks pending">&#128336;</span>';
     else metaHtml += tickHtml(m.status, isOut);
     div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
-    var img = div.querySelector("img.bubble-img");
-    if (img) {
-      img.addEventListener("click", function () { JC.openViewer("image", m.mediaUrl); });
-      // Storage files auto-delete 3 days after upload (GCS lifecycle).
-      // The message text stays, the mediaUrl then 404s — show a note,
-      // never a broken image or a crash.
-      img.addEventListener("error", function () { JC.mediaGone(img); });
-    }
-    var vid = div.querySelector("video.bubble-video");
-    if (vid) {
-      vid.addEventListener("click", function () { JC.openViewer("video", m.mediaUrl); });
-      vid.addEventListener("error", function () { JC.mediaGone(vid); });
-    }
-    var aud = div.querySelector("audio");
-    if (aud) aud.addEventListener("error", function () { JC.mediaGone(aud); });
+    JC.wireMediaBubble(div, m);
     $("messages").appendChild(div);
     msgEls[msgId] = div;
   }
@@ -508,10 +483,14 @@
       mediaUrl: data.mediaUrl || "",
       mediaName: data.mediaName || "",
       durationSec: data.durationSec || 0,
+      mediaData: data.mediaData || "",
+      mediaMime: data.mediaMime || "",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: "sent"
     };
     // Strip empty media fields so the document stays clean.
+    if (!msg.mediaData) delete msg.mediaData;
+    if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
     if (!msg.mediaName) delete msg.mediaName;
     if (!msg.durationSec) delete msg.durationSec;
@@ -558,146 +537,157 @@
     });
   }
 
-  // ---------- media upload (photo / video / file) ----------
-  // PHOTOS ARE SHRUNK BEFORE UPLOAD (storage saving): canvas resize to
-  // max side 1280px, JPEG quality 0.8. Video has no real compression in
-  // plain JS, so videos upload as-is but are capped at 50 MB.
-  JC.compressImage = function (file, done) {
+  // ---------- media (photo + voice) WITHOUT Storage — v4.4 ----------
+  // Firebase Storage needs the paid Blaze plan, which this app does NOT
+  // use (Spark free only). So photos and voice notes are shrunk on the
+  // phone and saved INSIDE the message document as a base64 data URL.
+  // Hard cap: JC.MEDIA_MAX_CHARS (~200 KB of data) so a message doc never
+  // nears Firestore's 1 MiB limit. Video and other files cannot fit this
+  // way — they get a clear message instead of a stuck "Uploading 0%".
+  JC.MEDIA_MAX_CHARS = 270000;      // ~200 KB binary as base64 (rules allow 300,000)
+  JC.VOICE_MAX_SEC = 60;
+  // Shrink steps: [max side px, JPEG quality]. First one that fits wins.
+  JC.IMAGE_STEPS = [[1024, 0.6], [900, 0.55], [800, 0.5], [640, 0.5], [512, 0.45], [400, 0.4]];
+  JC.NO_BIG_FILES_MSG = "Video aur badi files abhi nahi ja sakti. Sirf photo aur voice message ja sakte hain.";
+
+  // Draw any image source to JPEG data URLs, step by step smaller, until
+  // it fits under JC.MEDIA_MAX_CHARS. done(dataUrl) or done(null).
+  JC.sourceToDataUrl = function (src, w, h, done, filter, mirror) {
+    var steps = JC.IMAGE_STEPS;
+    for (var i = 0; i < steps.length; i++) {
+      var scale = Math.min(1, steps[i][0] / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      var ctx = canvas.getContext("2d");
+      if (filter) ctx.filter = filter;
+      if (mirror) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+      ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+      var url = "";
+      try { url = canvas.toDataURL("image/jpeg", steps[i][1]); } catch (e) { url = ""; }
+      if (url && url.indexOf("data:image/") === 0 && url.length <= JC.MEDIA_MAX_CHARS) { done(url); return; }
+    }
+    done(null);
+  };
+  JC.imageFileToDataUrl = function (file, done) {
     var img = new Image();
     var url = URL.createObjectURL(file);
     img.onload = function () {
       URL.revokeObjectURL(url);
-      var w = img.naturalWidth, h = img.naturalHeight;
-      var scale = Math.min(1, 1280 / Math.max(w, h));
-      var canvas = document.createElement("canvas");
-      canvas.width = Math.round(w * scale);
-      canvas.height = Math.round(h * scale);
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(function (blob) {
-        if (blob) done(blob);
-        else done(file); // fallback: send the original if resize failed
-      }, "image/jpeg", 0.8);
+      JC.sourceToDataUrl(img, img.naturalWidth, img.naturalHeight, done);
     };
-    img.onerror = function () { URL.revokeObjectURL(url); done(file); };
+    img.onerror = function () { URL.revokeObjectURL(url); done(null); };
     img.src = url;
+  };
+  // Kept for older callers: returns a Blob (not used for sending anymore).
+  JC.compressImage = function (file, done) { done(file); };
+
+  JC.showSending = function (text) {
+    var bar = $("uploadBar");
+    if (!bar) return;
+    if (text) { bar.textContent = text; bar.classList.add("show"); }
+    else bar.classList.remove("show");
+  };
+
+  JC.sendImageDataUrl = function (dataUrl, name) {
+    if (!dataUrl) { JC.showSending(""); JC.toast("Photo bohat bari hai, nahi bheji ja saki."); return Promise.resolve(false); }
+    JC.showSending("Sending photo…");
+    return JC.sendCurrentMessage({ type: "image", mediaData: dataUrl, mediaMime: "image/jpeg", mediaName: name || "photo.jpg" })
+      .then(function () { JC.showSending(""); JC.toast("Photo sent"); return true; })
+      .catch(function () { JC.showSending(""); JC.toast("Message nahi bheja ja saka."); return false; });
   };
 
   JC.sendFile = function (file) {
     if (!file || !JC.currentChatId) return;
-    var kind = file.type.indexOf("image/") === 0 ? "image"
-      : file.type.indexOf("video/") === 0 ? "video" : "file";
-    if (kind === "video" && file.size > 50 * 1024 * 1024) {
-      JC.toast("Video is too big — 50 MB se bara video nahi bheja ja sakta. Please send a shorter video.");
-      return;
-    }
-    if (kind === "image") {
-      JC.compressImage(file, function (small) { uploadMediaFile(small, "image", file.name); });
-    } else {
-      uploadMediaFile(file, kind, file.name);
-    }
+    var isImage = file.type && file.type.indexOf("image/") === 0;
+    if (!isImage) { JC.toast(JC.NO_BIG_FILES_MSG); return; }
+    JC.showSending("Preparing photo…");
+    JC.imageFileToDataUrl(file, function (dataUrl) { JC.sendImageDataUrl(dataUrl, file.name); });
   };
 
-  function uploadMediaFile(file, kind, originalName) {
-    var chatId = JC.currentChatId;
-    var safeName = Date.now() + "_" + originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    var ref = JC.storage.ref(JC.mediaPathForCurrentChat(safeName));
-    var task = ref.put(file, { contentType: file.type || "application/octet-stream" });
-    var bar = $("uploadBar");
-    task.on("state_changed", function (snap) {
-      var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-      bar.textContent = "Uploading " + originalName + " — " + pct + "%";
-      bar.classList.add("show");
-    }, function (err) {
-      bar.classList.remove("show");
-      JC.toast("Upload failed: " + err.message);
-    }, function () {
-      task.snapshot.ref.getDownloadURL().then(function (url) {
-        bar.classList.remove("show");
-        // Only now, after upload + write, is the message "sent".
-        return JC.sendCurrentMessage({ type: kind, mediaUrl: url, mediaName: originalName });
-      }).then(function () {
-        JC.toast("Sent");
-      }).catch(function (e) {
-        JC.toast("Message nahi bheja ja saka.");
-      });
-    });
-  };
-
-  // ---------- voice messages ----------
-  var recorder = null, recChunks = [], recTimer = null, recSeconds = 0, recStream = null;
-  function pickMimeType() {
-    // Probe order from recon: opus webm first. NEVER request audio/mp4 —
-    // Chrome's MediaRecorder on Android does not reliably produce it.
+  // ---------- voice messages (max 60 s, low bitrate, no Storage) ----------
+  var recorder = null, recChunks = [], recTimer = null, recSeconds = 0, recStream = null, recStartedAt = 0;
+  JC.pickVoiceMime = function () {
     if (typeof MediaRecorder === "undefined") return "";
-    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) return "audio/webm;codecs=opus";
-    if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
+    var list = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"];
+    for (var i = 0; i < list.length; i++) {
+      try { if (MediaRecorder.isTypeSupported(list[i])) return list[i]; } catch (e) {}
+    }
     return "";
-  }
+  };
+  function fmtRec(sec) { return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
+  JC.isRecording = function () { return !!(recorder && recorder.state === "recording"); };
   JC.startVoiceRecord = function () {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      JC.toast("Voice recording is not supported on this device.");
+    if (JC.isRecording()) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
+      JC.toast("Is phone par voice recording nahi chalti.");
       return;
     }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
       recStream = stream;
-      var opts = {};
-      var mt = pickMimeType();
+      var opts = { audioBitsPerSecond: 16000 };
+      var mt = JC.pickVoiceMime();
       if (mt) opts.mimeType = mt;
       try { recorder = new MediaRecorder(stream, opts); }
-      catch (e) { JC.toast("Recording failed to start: " + e.message); stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      catch (e) {
+        try { recorder = new MediaRecorder(stream); }
+        catch (e2) { JC.toast("Recording shuru nahi ho saki."); stream.getTracks().forEach(function (t) { t.stop(); }); recStream = null; return; }
+      }
       recChunks = [];
       recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
       recorder.onstop = function () { finishVoiceRecord(); };
-      recorder.start();
+      recorder.start(1000);
       recSeconds = 0;
-      $("recTime").textContent = "0:00";
+      recStartedAt = Date.now();
+      $("recTime").textContent = "0:00 / 1:00";
       $("recBar").classList.add("show");
       recTimer = setInterval(function () {
-        recSeconds++;
-        $("recTime").textContent = Math.floor(recSeconds / 60) + ":" + (recSeconds % 60 < 10 ? "0" : "") + (recSeconds % 60);
-      }, 1000);
-    }).catch(function (e) {
-      JC.toast("Microphone blocked: " + e.message + ". Allow microphone permission in the app settings.");
+        recSeconds = Math.min(JC.VOICE_MAX_SEC, Math.round((Date.now() - recStartedAt) / 1000));
+        $("recTime").textContent = fmtRec(recSeconds) + " / 1:00";
+        // 60 s limit: stop and send automatically.
+        if (recSeconds >= JC.VOICE_MAX_SEC) JC.stopVoiceRecord(true);
+      }, 250);
+    }).catch(function () {
+      JC.toast("Microphone ki ijazat nahi mili. Phone Settings me Jilan Chat ko Microphone allow karein.");
     });
   };
   JC.stopVoiceRecord = function (send) {
-    if (recorder && recorder.state !== "inactive") {
-      recorder._sendAfterStop = !!send;
-      recorder.stop();
-    }
     if (recTimer) { clearInterval(recTimer); recTimer = null; }
+    if (recorder && recorder.state !== "inactive") {
+      recSeconds = Math.max(1, Math.min(JC.VOICE_MAX_SEC, Math.round((Date.now() - recStartedAt) / 1000)));
+      recorder._sendAfterStop = !!send;
+      try { recorder.stop(); } catch (e) {}
+    }
     $("recBar").classList.remove("show");
     if (recStream) { recStream.getTracks().forEach(function (t) { t.stop(); }); recStream = null; }
   };
+  JC.blobToDataUrl = function (blob, done) {
+    var r = new FileReader();
+    r.onload = function () { done(String(r.result || "")); };
+    r.onerror = function () { done(""); };
+    r.readAsDataURL(blob);
+  };
   function finishVoiceRecord() {
     var send = recorder && recorder._sendAfterStop;
-    var type = (recorder && recorder.mimeType) || "audio/webm";
+    var type = ((recorder && recorder.mimeType) || "audio/webm").split(";")[0];
     var blob = new Blob(recChunks, { type: type });
     recChunks = [];
+    var dur = recSeconds;
     if (!send || !blob.size) return;
-    if (!JC.currentChatId) { JC.toast("Open a chat first."); return; }
-    var chatId = JC.currentChatId;
-    var name = Date.now() + ".webm";
-    // Voice in groups goes under group-media/ (see mediaPathForCurrentChat);
-    // 1-to-1 voice stays under voice/.
-    var ref = JC.currentChatIsGroup
-      ? JC.storage.ref(JC.mediaPathForCurrentChat("voice_" + name))
-      : JC.storage.ref("voice/" + chatId + "/" + name);
-    var bar = $("uploadBar");
-    var task = ref.put(blob, { contentType: type });
-    task.on("state_changed", function (snap) {
-      var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-      bar.textContent = "Uploading voice message — " + pct + "%";
-      bar.classList.add("show");
-    }, function (err) {
-      bar.classList.remove("show");
-      JC.toast("Voice upload failed: " + err.message);
-    }, function () {
-      task.snapshot.ref.getDownloadURL().then(function (url) {
-        bar.classList.remove("show");
-        return JC.sendCurrentMessage({ type: "voice", mediaUrl: url, mediaName: name, durationSec: recSeconds });
-      }).then(function () { JC.toast("Voice message sent"); })
-        .catch(function (e) { JC.toast("Message nahi bheja ja saka."); });
+    if (!JC.currentChatId) { JC.toast("Pehle chat kholein."); return; }
+    JC.showSending("Sending voice message…");
+    JC.blobToDataUrl(blob, function (dataUrl) {
+      if (!dataUrl || dataUrl.indexOf("data:") !== 0) { JC.showSending(""); JC.toast("Voice message nahi bheja ja saka."); return; }
+      // Firestore cannot store the codec suffix reliably — normalise.
+      dataUrl = dataUrl.replace(/^data:[^,]*?;base64,/, "data:" + type + ";base64,");
+      if (dataUrl.length > JC.MEDIA_MAX_CHARS) {
+        JC.showSending("");
+        JC.toast("Voice message bohat lamba hai. Chhota bol kar dobara bhejein.");
+        return;
+      }
+      JC.sendCurrentMessage({ type: "voice", mediaData: dataUrl, mediaMime: type, durationSec: dur })
+        .then(function () { JC.showSending(""); JC.toast("Voice message sent"); })
+        .catch(function () { JC.showSending(""); JC.toast("Message nahi bheja ja saka."); });
     });
   }
 
@@ -860,6 +850,73 @@
     el.parentNode.replaceChild(note, el);
   };
 
+  // ---------- shared bubble rendering (1-to-1 + groups) — v4.4 ----------
+  // Photo/voice can come from mediaData (v4.4, base64 inside the message)
+  // or mediaUrl (older Storage-era messages, normally none exist).
+  function attr(s) { return esc(s).replace(/"/g, "&quot;"); }
+  JC.mediaSrc = function (m) {
+    var d = m && m.mediaData;
+    if (typeof d === "string" && /^data:(image|audio)\//.test(d)) return d;
+    return (m && m.mediaUrl) || "";
+  };
+  function fmtDur(sec) { sec = Math.max(0, Math.round(sec || 0)); return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
+  JC.fmtDur = fmtDur;
+  JC.mediaBodyHtml = function (m) {
+    var src = JC.mediaSrc(m);
+    var cap = m.text ? "<div>" + esc(m.text) + "</div>" : "";
+    if (m.type === "text") return esc(m.text || "");
+    if (m.type === "image") return src ? '<img class="bubble-img" src="' + attr(src) + '" alt="Photo">' + cap : '<div class="media-gone">Photo not available</div>' + cap;
+    if (m.type === "voice") {
+      return '<div class="voice-bubble"><button type="button" class="vb-play" aria-label="Play">&#9654;</button>' +
+        '<div class="vb-track"><div class="vb-fill"></div></div>' +
+        '<span class="vb-time">' + fmtDur(m.durationSec) + '</span>' +
+        '<audio class="vb-audio" preload="metadata" src="' + attr(src) + '"></audio></div>';
+    }
+    if (m.type === "video") return '<video class="bubble-video" src="' + attr(src) + '" controls playsinline></video>' + cap;
+    if (m.type === "file") return '<div class="file-chip"><span class="file-icon">&#128196;</span><a href="' + attr(src) + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
+    return esc(m.text || "");
+  };
+  var playingAudio = null;
+  JC.wireMediaBubble = function (div, m) {
+    var src = JC.mediaSrc(m);
+    var img = div.querySelector("img.bubble-img");
+    if (img) {
+      img.addEventListener("click", function () { JC.openViewer("image", src); });
+      img.addEventListener("error", function () { JC.mediaGone(img); });
+    }
+    var vid = div.querySelector("video.bubble-video");
+    if (vid) {
+      vid.addEventListener("click", function () { JC.openViewer("video", src); });
+      vid.addEventListener("error", function () { JC.mediaGone(vid); });
+    }
+    var vb = div.querySelector(".voice-bubble");
+    if (vb) {
+      var audio = vb.querySelector("audio");
+      var btn = vb.querySelector(".vb-play");
+      var fill = vb.querySelector(".vb-fill");
+      var time = vb.querySelector(".vb-time");
+      var total = m.durationSec || 0;
+      var setIcon = function (playing) { btn.innerHTML = playing ? "&#10074;&#10074;" : "&#9654;"; btn.setAttribute("aria-label", playing ? "Pause" : "Play"); };
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (!audio.paused) { audio.pause(); return; }
+        if (playingAudio && playingAudio !== audio) { try { playingAudio.pause(); } catch (er) {} }
+        playingAudio = audio;
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () { JC.toast("Voice message chal nahi saka."); setIcon(false); });
+      });
+      audio.addEventListener("play", function () { setIcon(true); });
+      audio.addEventListener("pause", function () { setIcon(false); });
+      audio.addEventListener("ended", function () { setIcon(false); fill.style.width = "0%"; time.textContent = fmtDur(total); });
+      audio.addEventListener("timeupdate", function () {
+        var d = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : total;
+        if (d > 0) fill.style.width = Math.min(100, (audio.currentTime / d) * 100) + "%";
+        time.textContent = fmtDur(audio.currentTime);
+      });
+      audio.addEventListener("error", function () { JC.mediaGone(vb); });
+    }
+  };
+
   // ---------- media viewer ----------
   JC.openViewer = function (kind, url) {
     var v = $("viewer");
@@ -937,7 +994,9 @@
     $("msgInput").addEventListener("keydown", function (e) { if (e.key === "Enter") sendText(); });
     $("btnSend").addEventListener("click", sendText);
     $("btnMic").addEventListener("click", function () { JC.startVoiceRecord(); });
-    $("btnRecCancel").addEventListener("click", function () { JC.stopVoiceRecord(false); JC.toast("Voice message cancelled"); });
+    $("btnRecCancel").addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(false); JC.toast("Voice message cancelled"); });
+    var btnRecSend = $("btnRecSend");
+    if (btnRecSend) btnRecSend.addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(true); });
     // Tap the red recording bar to stop and send.
     $("recBar").addEventListener("click", function (e) {
       if (e.target.id === "btnRecCancel") return;

@@ -59,11 +59,23 @@
 
 <!-- ============ CHAT LIST ============ -->
 <div class="screen" id="screen-list">
-  <div class="app-header">
+  <div class="app-header list-header">
     <h1>Jilan Chat</h1>
-    <button class="icon-btn" id="btnStatus" title="Status">&#9719;</button>
-    <button class="icon-btn" id="btnSettings" title="Settings">&#9881;</button>
-    <button class="icon-btn" id="btnProfile" title="Profile">&#9679;</button>
+    <button class="icon-btn" id="btnListCamera" title="Camera" aria-label="Camera"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button class="icon-btn" id="btnMainMenu" title="Menu" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+    <!-- Old unlabeled header icons: kept hidden so their existing handlers
+         still work; the labelled menu below triggers them. -->
+    <button class="hidden" id="btnStatus" title="Status"></button>
+    <button class="hidden" id="btnSettings" title="Settings"></button>
+    <button class="hidden" id="btnProfile" title="Profile"></button>
+  </div>
+  <div id="mainMenu" class="main-menu hidden" role="menu">
+    <button type="button" role="menuitem" data-action="newgroup">New group</button>
+    <button type="button" role="menuitem" data-action="profile">Profile</button>
+    <button type="button" role="menuitem" data-action="status">Status</button>
+    <button type="button" role="menuitem" data-action="nearby">Nearby chat</button>
+    <button type="button" role="menuitem" data-action="settings">Settings</button>
+    <button type="button" role="menuitem" data-action="about">About</button>
   </div>
   <div class="offline-bar hidden">You are offline — messages will send when internet returns.</div>
   <div class="search-bar"><input type="text" id="chatSearchInput" placeholder="Search chats..." autocomplete="off"></div>
@@ -163,7 +175,7 @@
   </div>
 
   <div id="uploadBar"></div>
-  <div id="recBar"><span class="dot"></span><span id="recTime">0:00</span><span style="flex:1">Recording&hellip;</span><button class="btn btn-small btn-danger" id="btnRecCancel">Cancel</button></div>
+  <div id="recBar"><span class="dot"></span><span id="recTime">0:00</span><span style="flex:1">Recording&hellip;</span><button class="btn btn-small btn-danger" id="btnRecCancel">Cancel</button><button class="btn btn-small" id="btnRecSend">Send</button></div>
 
   <!-- Private-chat notice (WhatsApp-style yellow box). Honest wording:
        private, NOT end-to-end encrypted — see style.css comment. -->
@@ -174,13 +186,13 @@
   <div id="emojiPanel" class="emoji-panel hidden"></div>
   <div class="composer">
     <button class="round-btn gray" id="btnEmoji" title="Emoji">&#128512;</button>
-    <button class="round-btn gray" id="btnAttach" title="Send photo, video or file">&#128206;</button>
+    <button class="round-btn gray" id="btnAttach" title="Send photo">&#128206;</button>
     <button class="round-btn gray" id="btnCamera" title="Filter camera">&#128247;</button>
     <div class="box"><input type="text" id="msgInput" placeholder="Message" autocomplete="off"></div>
     <button class="round-btn gray hidden" id="btnMic" title="Voice message">&#127908;</button>
     <button class="round-btn hidden" id="btnSend" title="Send">&#10148;</button>
   </div>
-  <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip">
+  <input type="file" id="fileInput" class="hidden" accept="image/*">
 </div>
 
 <!-- ============ STATUS ============ -->
@@ -217,7 +229,7 @@
   <div class="page-body">
     <h2>Jilan Chat v1.0</h2>
     <p style="line-height:1.7;color:#111b21;">Private chats with friends and family. No ads, no tracking, no price.</p>
-    <p style="line-height:1.7;margin-top:14px;">Tasveerein aur videos bhejne se pehle chhoti ki jati hain taake storage bache. Purana media 3 din baad khud ba khud delete ho jata hai, jabke aap ki chat ka text mehfooz rehta hai. Jo media aap gallery me save kar lein wo save rehta hai.</p>
+    <p style="line-height:1.7;margin-top:14px;">Photo aur voice message (1 minute tak) bheje ja sakte hain. Photo bhejne se pehle chhoti ki jati hai. Video aur badi files abhi nahi ja sakti. Purana media 3 din baad khud ba khud delete ho jata hai, jabke aap ki chat ka text mehfooz rehta hai. Jo media aap gallery me save kar lein wo save rehta hai.</p>
     <p style="line-height:1.7;margin-top:14px;">Status 24 ghante baad khud khatam ho jata hai. Voice calls aur video calls ke liye dono ka app khula hona zaroori hai.</p>
     <p style="line-height:1.7;margin-top:14px;">WhatsApp: <a href="https://wa.me/923007379385" target="_blank" rel="noopener">0300-7379385</a></p>
     <p style="line-height:1.7;margin-top:14px;color:#667781;font-size:13px;">Made by Dr Asif - Jilan Apps Official, Basti Malook (Multan).</p>
@@ -452,5 +464,6 @@
 <script src="requests.js"></script>
 <script src="nearby.js"></script>
 <script src="fcm.js"></script>
+<script src="menu.js"></script>
 </body>
 </html>

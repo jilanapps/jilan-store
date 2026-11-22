@@ -41,7 +41,7 @@
   // ---------- open the status screen ----------
   JC.openStatus = function () {
     if (!JC.db || !JC.currentUser) return;
-    JC.showScreen("screen-status");
+    JC.showScreen("screen-status", { push: true });
     loadMyStatus();
     loadFriendsStatus();
   };
@@ -124,34 +124,19 @@
 
   JC.postMediaStatus = function (file) {
     if (!file) return;
-    var kind = file.type.indexOf("image/") === 0 ? "photo"
-      : file.type.indexOf("video/") === 0 ? "video" : null;
-    if (!kind) { JC.toast("Only photos and videos can be posted as status."); return; }
-    if (kind === "video" && file.size > 50 * 1024 * 1024) {
-      JC.toast("Video is too big — 50 MB se bara video status me nahi lag sakta.");
-      return;
-    }
-    if (kind === "photo") {
-      JC.compressImage(file, function (small) { uploadStatusMedia(small, "photo", file.name); });
-    } else {
-      uploadStatusMedia(file, "video", file.name);
-    }
+    var isImage = file.type && file.type.indexOf("image/") === 0;
+    // v4.4: no Storage (Blaze nahi) — status photo is shrunk and saved in
+    // the status doc itself. Video status cannot fit, so say so clearly.
+    if (!isImage) { JC.toast("Video status abhi nahi lag sakta. Sirf photo ya text status lagayein."); return; }
+    JC.toast("Status tayyar ho raha hai…");
+    JC.imageFileToDataUrl(file, function (dataUrl) {
+      if (!dataUrl) { JC.toast("Photo bohat bari hai, status nahi lag saka."); return; }
+      addStatusDoc({ type: "photo", mediaData: dataUrl, mediaName: file.name || "status.jpg" }).then(function () {
+        JC.toast("Status posted — it disappears in 24 hours.");
+        loadMyStatus();
+      }).catch(function () { JC.toast("Status nahi lag saka."); });
+    });
   };
-
-  function uploadStatusMedia(file, kind, originalName) {
-    var uid = JC.currentUser.uid;
-    var safeName = Date.now() + "_" + originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    var ref = JC.storage.ref("statuses/" + uid + "/" + safeName);
-    JC.toast("Uploading status…");
-    ref.put(file, { contentType: file.type || "application/octet-stream" }).then(function (snap) {
-      return snap.ref.getDownloadURL();
-    }).then(function (url) {
-      return addStatusDoc({ type: kind, mediaUrl: url, mediaName: originalName });
-    }).then(function () {
-      JC.toast("Status posted — it disappears in 24 hours.");
-      loadMyStatus();
-    }).catch(function (e) { JC.toast("Status failed: " + e.message); });
-  }
 
   function addStatusDoc(data) {
     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
@@ -166,7 +151,7 @@
       .then(function () {
         // Storage file is removed by the 24h lifecycle rule anyway; try
         // to remove it now too, but a failure here is not fatal.
-        if (mediaUrl) {
+        if (mediaUrl && JC.storage) {
           try { JC.storage.refFromURL(mediaUrl).delete().catch(function () {}); } catch (e) {}
         }
         JC.toast("Status deleted");
@@ -201,7 +186,7 @@
     } else if (d.type === "photo") {
       var img = document.createElement("img");
       img.style.cssText = "max-width:100%;max-height:100%;";
-      img.src = d.mediaUrl || "";
+      img.src = (typeof d.mediaData === "string" && d.mediaData.indexOf("data:image/") === 0) ? d.mediaData : (d.mediaUrl || "");
       img.onerror = function () { statusGone(body); };
       body.appendChild(img);
       viewTimer = setTimeout(function () { nextItem(mine); }, 5000);

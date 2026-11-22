@@ -63,45 +63,14 @@
   JC.capturePhoto = function () {
     if (!video || !video.videoWidth) { JC.toast("Camera is not ready yet."); return; }
     var w = video.videoWidth, h = video.videoHeight;
-    // Same storage rule as gallery photos: shrink to max side 1280px.
-    var scale = Math.min(1, 1280 / Math.max(w, h));
-    var canvas = document.createElement("canvas");
-    canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale);
-    var ctx = canvas.getContext("2d");
-    // Same filter string as the preview, applied at draw time — the filter
-    // is baked into the saved photo.
-    ctx.filter = currentFilter;
-    if (facingMode === "user") {
-      // Mirror the front camera so the photo matches the preview.
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(function (blob) {
-      if (!blob) { JC.toast("Photo capture failed."); return; }
+    // v4.4: no Storage (Blaze nahi). Photo is shrunk step by step until it
+    // fits inside the message (~200 KB), with the filter baked in and the
+    // front camera mirrored like the preview.
+    JC.sourceToDataUrl(video, w, h, function (dataUrl) {
       stopStream();
       JC.showScreen("screen-chat");
-      // Send as an image message: upload first, message only after it lands.
-      var chatId = JC.currentChatId;
-      var name = Date.now() + "_camera.jpg";
-      var ref = JC.storage.ref(JC.mediaPathForCurrentChat(name));
-      var bar = document.getElementById("uploadBar");
-      var task = ref.put(blob, { contentType: "image/jpeg" });
-      task.on("state_changed", function (snap) {
-        var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-        bar.textContent = "Uploading photo — " + pct + "%";
-        bar.classList.add("show");
-      }, function (err) {
-        bar.classList.remove("show");
-        JC.toast("Photo upload failed: " + err.message);
-      }, function () {
-        task.snapshot.ref.getDownloadURL().then(function (url) {
-          bar.classList.remove("show");
-          return JC.sendCurrentMessage({ type: "image", mediaUrl: url, mediaName: name });
-        }).then(function () { JC.toast("Photo sent"); })
-          .catch(function (e) { JC.toast("Message nahi bheja ja saka."); });
-      });
-    }, "image/jpeg", 0.8);
+      JC.sendImageDataUrl(dataUrl, Date.now() + "_camera.jpg");
+    }, currentFilter, facingMode === "user");
   };
 
   document.addEventListener("DOMContentLoaded", function () {

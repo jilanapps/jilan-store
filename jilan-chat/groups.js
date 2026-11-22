@@ -138,9 +138,13 @@
       mediaUrl: data.mediaUrl || "",
       mediaName: data.mediaName || "",
       durationSec: data.durationSec || 0,
+      mediaData: data.mediaData || "",
+      mediaMime: data.mediaMime || "",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: "sent"   // group ticks never move past "sent" in v1.0
     };
+    if (!msg.mediaData) delete msg.mediaData;
+    if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
     if (!msg.mediaName) delete msg.mediaName;
     if (!msg.durationSec) delete msg.durationSec;
@@ -198,28 +202,12 @@
     var isOut = m.senderId === JC.currentUser.uid;
     var div = document.createElement("div");
     div.className = "msg " + (isOut ? "out" : "in");
-    var body = "";
-    if (m.type === "text") body = esc(m.text || "");
-    else if (m.type === "image") body = '<img class="bubble-img" src="' + esc(m.mediaUrl || "") + '" alt="Photo">' + (m.text ? "<div>" + esc(m.text) + "</div>" : "");
-    else if (m.type === "video") body = '<video class="bubble-video" src="' + esc(m.mediaUrl || "") + '" controls playsinline></video>' + (m.text ? "<div>" + esc(m.text) + "</div>" : "");
-    else if (m.type === "voice") body = '<div class="voice-line"><audio src="' + esc(m.mediaUrl || "") + '" controls preload="metadata"></audio><span>' + (m.durationSec || 0) + 's</span></div>';
-    else if (m.type === "file") body = '<div class="file-chip"><span class="file-icon">&#128196;</span><a href="' + esc(m.mediaUrl || "") + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
+    var body = JC.mediaBodyHtml(m);
     // Sender name above the message (every member sees who sent it).
     // Only a single "sent" tick — no delivered/read ticks in groups.
     var nameHtml = isOut ? "" : '<div class="sender-name" data-uid="' + esc(m.senderId) + '">...</div>';
     div.innerHTML = nameHtml + body + '<div class="meta">' + fmtTime(m.createdAt) + (isOut ? ' <span class="ticks">&#10003;</span>' : "") + "</div>";
-    var img = div.querySelector("img.bubble-img");
-    if (img) {
-      img.addEventListener("click", function () { JC.openViewer("image", m.mediaUrl); });
-      img.addEventListener("error", function () { JC.mediaGone(img); });
-    }
-    var vid = div.querySelector("video.bubble-video");
-    if (vid) {
-      vid.addEventListener("click", function () { JC.openViewer("video", m.mediaUrl); });
-      vid.addEventListener("error", function () { JC.mediaGone(vid); });
-    }
-    var aud = div.querySelector("audio");
-    if (aud) aud.addEventListener("error", function () { JC.mediaGone(aud); });
+    JC.wireMediaBubble(div, m);
     $("messages").appendChild(div);
     groupMsgEls[msgId] = div;
     // Fill in the sender's name.
