@@ -10,14 +10,22 @@
 // HONEST LIMITS (do not remove this comment):
 // 1. STUN-only calls fail on symmetric / carrier-grade NAT, which is common
 //    on Pakistani mobile data. A share of calls will never connect until a
-//    TURN server is added. The UI reports "Call failed to connect" when ICE
-//    fails — it never pretends a failed call is live.
+//    TURN server is added. There is NO free trustworthy public TURN server
+//    (Google offers STUN only; public free TURN relays would route private
+//    call media through an unknown third party — not acceptable for a
+//    private chat app; a self-hosted TURN needs a server, which we do not
+//    have). The UI reports "Call failed to connect" when ICE fails and
+//    "No media" if the call connects but no audio/video arrives — it never
+//    pretends a silent call is live.
 // 2. No FCM in the shell yet, so an incoming call only rings while the
 //    callee has the app OPEN in the foreground. If the app is closed or
 //    killed, the callee gets nothing and the call is marked "missed".
 // 3. No native call behaviour from JS: no earpiece/speakerphone switch
-//    (the Speaker button tries setSinkId and says so if it cannot),
-//    no audio focus, no incoming-call screen while the phone is locked.
+//    (the Speaker button tries the shell bridge first, then setSinkId,
+//    and says so if it cannot), no audio focus, no incoming-call screen
+//    while the phone is locked. The shell (vc4) sets AudioManager
+//    MODE_IN_COMMUNICATION via Android.callAudioStart — until then the
+//    remote audio may route to the earpiece quietly on some handsets.
 // 4. WebView mic/camera capture is reported to fail on some Infinix
 //    handsets ("Could not start audio source") even with permission.
 //    Calls MUST be phone-tested on Dr Asif's actual phone before anyone
@@ -44,6 +52,13 @@
   var facingMode = "user";
   var muted = false;
   var videoOff = false;
+  var remoteStream = null;     // persistent remote MediaStream built from ontrack tracks
+  var gotRemoteTrack = false;  // at least one remote track actually arrived
+  var mediaWatchdog = null;    // 15s: warn if no media yet
+  var mediaWatchdog2 = null;   // 30s: end if still no media
+  var iceDisconnectTimer = null; // grace period on transient ICE "disconnected"
+  var iceConnected = false;    // ICE pair actually up (timer must not lie)
+  var speakerOn = false;       // shell speakerphone state (video calls default on)
 
   function $(id) { return document.getElementById(id); }
   function remoteVideo() { return $("remoteVideo"); }
@@ -71,6 +86,17 @@
       }, function () { /* listener errors are non-fatal; calls just will not ring */ });
   };
 
+  // Caller name + avatar letter. "Incoming call" is a STATE, never a
+  // name — the old code showed it as the name when the profile was not
+  // cached, so the screen kept saying "Incoming call" even after the
+  // call was answered and the timer ran. Avatar is the first letter of
+  // the name (photo is a separate feature); "?" only if no name at all.
+  function setCallPeer(p) {
+    var name = (p && p.displayName) || "Unknown caller";
+    $("callName").textContent = name;
+    $("callAvatar").textContent = ((name[0] || "?").toUpperCase());
+  }
+
   function showIncoming(id, data) {
     callId = id;
     callDocRef = JC.db.collection("calls").doc(id);
@@ -79,8 +105,13 @@
     callOtherUid = data.callerUid;
     callState = "ringing";
     var p = (window.JC && JC.getCachedProfile) ? JC.getCachedProfile(callOtherUid) : null;
-    $("callName").textContent = (p && p.displayName) || "Incoming call";
-    $("callAvatar").textContent = "?";
+    setCallPeer(p);
+    if (!p && JC.db) {
+      // Profile not cached: fetch it so the real name shows.
+      JC.db.collection("users").doc(callOtherUid).get().then(function (snap) {
+        if (snap && snap.exists && callState === "ringing") setCallPeer(snap.data());
+      }).catch(function () {});
+    }
     setCallState(callKind === "video" ? "Incoming video call…" : "Incoming voice call…");
     $("callButtonsIncoming").classList.remove("hidden");
     $("callButtonsActive").classList.add("hidden");
@@ -88,6 +119,7 @@
     $("btnCamFlipCall").classList.toggle("hidden", callKind !== "video");
     localVideo().classList.toggle("hidden", callKind !== "video");
     showCallScreen();
+    startRinging();
     // If the callee never answers, the caller-side timeout marks it missed.
   }
 
@@ -174,9 +206,7 @@
     callRole = "caller";
     callOtherUid = JC.currentChatOtherUid;
     callState = "ringing";
-    var p = JC.currentChatOther || {};
-    $("callName").textContent = p.displayName || "Calling…";
-    $("callAvatar").textContent = "?";
+    setCallPeer(JC.currentChatOther || null);
     setCallState(kind === "video" ? "Video calling…" : "Calling…");
     $("callButtonsIncoming").classList.add("hidden");
     $("callButtonsActive").classList.remove("hidden");
@@ -185,6 +215,7 @@
     localVideo().classList.toggle("hidden", kind !== "video");
     showCallScreen();
     setCallState("Starting camera and microphone…");
+    startRinging(); // caller hears ringback while the callee's phone rings
 
     getLocalMedia(kind).then(function (stream) {
       localStream = stream;
@@ -247,6 +278,7 @@
   JC.acceptCall = function () {
     if (!callDocRef || callState !== "ringing") return;
     setCallState("Connecting…");
+    stopRinging();
     $("callButtonsIncoming").classList.add("hidden");
     $("callButtonsActive").classList.remove("hidden");
     getLocalMedia(callKind).then(function (stream) {
@@ -300,6 +332,11 @@
       callDocRef.update({ status: "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
     }
     if (callTimer) { clearTimeout(callTimer); callTimer = null; }
+    if (mediaWatchdog) { clearTimeout(mediaWatchdog); mediaWatchdog = null; }
+    if (mediaWatchdog2) { clearTimeout(mediaWatchdog2); mediaWatchdog2 = null; }
+    if (iceDisconnectTimer) { clearTimeout(iceDisconnectTimer); iceDisconnectTimer = null; }
+    stopRinging();
+    try { if (window.Android && Android.callAudioStop) Android.callAudioStop(); } catch (e) {}
     if (pc) { try { pc.close(); } catch (e) {} pc = null; }
     if (localStream) { localStream.getTracks().forEach(function (t) { t.stop(); }); localStream = null; }
     if (callUnsub) { callUnsub(); callUnsub = null; }
@@ -308,9 +345,10 @@
     remoteVideo().srcObject = null;
     localVideo().srcObject = null;
     remoteAudio().srcObject = null;
+    remoteStream = null; gotRemoteTrack = false; iceConnected = false;
     callState = "idle";
     callId = null; callDocRef = null; callRole = null; callOtherUid = null;
-    muted = false; videoOff = false; callSeconds = 0;
+    muted = false; videoOff = false; speakerOn = false; callSeconds = 0;
     $("btnMute").classList.remove("off");
     $("btnVideoOff").classList.remove("off");
     resetCallUi();
@@ -337,27 +375,104 @@
         sdpMLineIndex: e.candidate.sdpMLineIndex
       }).catch(function () {});
     };
+    // Remote track: attach via e.track (streams[0] may be empty in some
+    // WebView/Chromium builds — the old code returned early then and the
+    // remote audio/video NEVER played). Keep one persistent remote
+    // MediaStream, add each track once, and explicitly play() the element:
+    // autoplay alone is unreliable in WebView.
     conn.ontrack = function (e) {
-      var stream = e.streams && e.streams[0];
-      if (!stream) return;
-      if (callKind === "video") remoteVideo().srcObject = stream;
-      else remoteAudio().srcObject = stream;
+      if (e.track) attachRemoteTrack(e.track);
+      else if (e.streams && e.streams[0]) {
+        e.streams[0].getTracks().forEach(function (t) { attachRemoteTrack(t); });
+      }
     };
     conn.oniceconnectionstatechange = function () {
       var s = conn.iceConnectionState;
-      if (s === "connected" || s === "completed") onConnected();
-      if (s === "failed" || s === "disconnected") {
-        // STUN-only: this is the common mobile-NAT failure. Say so plainly.
+      if (s === "connected" || s === "completed") {
+        iceConnected = true;
+        if (iceDisconnectTimer) { clearTimeout(iceDisconnectTimer); iceDisconnectTimer = null; }
+        onConnected();
+      } else if (s === "disconnected") {
+        // Transient on mobile data — give it a few seconds to recover
+        // instead of killing the call at once (old code ended instantly).
+        setCallState("Reconnecting…");
+        if (!iceDisconnectTimer) {
+          iceDisconnectTimer = setTimeout(function () {
+            iceDisconnectTimer = null;
+            if (pc && (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed")) {
+              endCall("Call failed to connect — the network blocked the call. Try again on Wi-Fi.");
+            }
+          }, 8000);
+        }
+      } else if (s === "failed") {
+        // STUN-only: the common mobile-NAT failure. Say so plainly.
         endCall("Call failed to connect — the network blocked the call. Try again on Wi-Fi.");
       }
     };
     return conn;
   }
 
+  function attachRemoteTrack(track) {
+    try {
+      if (!remoteStream) {
+        if (typeof MediaStream !== "undefined") remoteStream = new MediaStream();
+        else return;
+      }
+      if (remoteStream.getTracks().indexOf(track) < 0) remoteStream.addTrack(track);
+      gotRemoteTrack = true;
+      if (mediaWatchdog2) { clearTimeout(mediaWatchdog2); mediaWatchdog2 = null; }
+      var el = callKind === "video" ? remoteVideo() : remoteAudio();
+      if (!el) return;
+      if (callKind !== "video") { el.muted = false; el.volume = 1; }
+      if (el.srcObject !== remoteStream) el.srcObject = remoteStream;
+      if (el.paused) { var p = el.play(); if (p && p.catch) p.catch(function () {}); }
+    } catch (e) {}
+  }
+
+  // Media watchdog: the call can LOOK connected (timer running) while ICE
+  // is still checking and no media flows — that silent call is exactly
+  // what the user reported ("awaz nahi aati"). Warn at 15s, end at 30s
+  // if still no remote track and ICE is not connected.
+  function armMediaWatchdog() {
+    if (mediaWatchdog) clearTimeout(mediaWatchdog);
+    if (mediaWatchdog2) clearTimeout(mediaWatchdog2);
+    mediaWatchdog = setTimeout(function () {
+      mediaWatchdog = null;
+      if (callState === "active" && !gotRemoteTrack) {
+        setCallState("No media — network issue?");
+        if (JC.toast) JC.toast("Awaz/video nahi aa raha — network ne call block ki ho sakti hai. Wi-Fi par dobara try karein.");
+      }
+    }, 15000);
+    mediaWatchdog2 = setTimeout(function () {
+      mediaWatchdog2 = null;
+      if (callState === "active" && !gotRemoteTrack && pc
+          && pc.iceConnectionState !== "connected" && pc.iceConnectionState !== "completed") {
+        endCall("Call connect nahi ho saki — network ne media block kar diya. Wi-Fi par dobara try karein.");
+      }
+    }, 30000);
+  }
+
   function onConnected() {
-    if (callState === "active") return;
+    // The timer must not lie: only start it once ICE is actually up.
+    // Before that the call shows "Connecting…" — a silent call with a
+    // running timer is what the user reported.
+    if (callState === "active") {
+      if (iceConnected && !callTimer) startCallTimer();
+      return;
+    }
     if (callTimer) { clearTimeout(callTimer); callTimer = null; }
     callState = "active";
+    stopRinging();
+    if (iceConnected) startCallTimer();
+    else setCallState("Connecting…");
+    armMediaWatchdog();
+    // Shell audio mode (vc4): earpiece/speaker routing. Guarded — the
+    // vc3 shell does not have these methods yet.
+    try { if (window.Android && Android.callAudioStart) Android.callAudioStart(callKind); } catch (e) {}
+    if (window.Android && Android.callAudioStart) { try { speakerOn = (callKind === "video"); } catch (e) {} }
+  }
+
+  function startCallTimer() {
     callSeconds = 0;
     setCallState("00:00");
     callTimer = setInterval(function () {
@@ -368,9 +483,14 @@
   }
 
   function getLocalMedia(kind) {
+    // Bare {audio:true} leaves echo cancellation / noise suppression /
+    // gain up to the device — that is the "ajib"/echo/robotic sound.
+    // These are "ideal" constraints: a device that cannot do them still
+    // returns a stream instead of rejecting.
+    var audioConstraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     var constraints = kind === "video"
-      ? { audio: true, video: { facingMode: facingMode } }
-      : { audio: true, video: false };
+      ? { audio: audioConstraints, video: { facingMode: facingMode } }
+      : { audio: audioConstraints, video: false };
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
@@ -403,6 +523,16 @@
     }).catch(function (e) { JC.toast("Could not flip camera: " + e.message); });
   }
   function toggleSpeaker() {
+    // Shell bridge first (vc4): real earpiece/speakerphone switch.
+    // Guarded — the vc3 shell does not have it yet.
+    if (window.Android && Android.setCallSpeaker) {
+      speakerOn = !speakerOn;
+      try {
+        Android.setCallSpeaker(speakerOn);
+        JC.toast(speakerOn ? "Speaker on" : "Speaker off");
+      } catch (e) { JC.toast("Speaker switch nahi ho saka."); }
+      return;
+    }
     // WebView has no earpiece/speakerphone API. Try the audio element's
     // output device; if the browser cannot, say so instead of pretending.
     var audio = remoteAudio();
@@ -414,8 +544,98 @@
     }
   }
 
+  // ---------- ringtone (WhatsApp jaisi bell) ----------
+  // No audio file needed: the tone is made with Web Audio. The callee
+  // hears it while the call rings; the caller hears it while waiting.
+  // Before this fix there was NO bell at all — the call screen just
+  // appeared silently. App band ho to bell nahi bajti (FCM nahi hai —
+  // alag track, abhi pending).
+  var ringCtx = null, ringTimer = null, audioUnlocked = false, ringing = false;
+  // WebView may block audio until the user has tapped once — unlock the
+  // ringtone AudioContext on the first tap anywhere in the app, so the
+  // bell can play when a call arrives later with no fresh gesture.
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!ringCtx) ringCtx = new AC();
+      if (ringCtx.state === "suspended" && ringCtx.resume) ringCtx.resume().catch(function () {});
+    } catch (e) {}
+  }
+  // Ringer mode (user rule, 2026-11-22): silent → bell NA baje, sirf
+  // screen dikhe; vibrate → sirf vibration; normal → bell + vibrate.
+  // Web JS phone ka ringer mode nahi parh sakta — shell (vc4) deta hai
+  // Android.getRingerMode(). Bridge na ho (browser / vc3) to default
+  // normal: bell + vibrate.
+  function getRingerMode() {
+    try {
+      if (window.Android && Android.getRingerMode) {
+        var m = String(Android.getRingerMode());
+        if (m === "silent" || m === "vibrate" || m === "normal") return m;
+      }
+    } catch (e) {}
+    return "normal";
+  }
+  function startRinging() {
+    try {
+      if (ringing) return;
+      var mode = getRingerMode();
+      if (mode === "silent") return; // show only — no bell, no vibrate
+      ringing = true;
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (mode !== "vibrate" && !AC) { ringing = false; return; }
+      if (mode === "normal" && !ringCtx && AC) ringCtx = new AC();
+      var ctx = ringCtx;
+      var master = null;
+      if (mode === "normal" && ctx) {
+        if (ctx.state === "suspended" && ctx.resume) ctx.resume().catch(function () {});
+        master = ctx.createGain();
+        master.gain.value = 0.2;
+        master.connect(ctx.destination);
+      }
+      var ringOnce = function () {
+        if (!ringing) return;
+        // Vibrate on every ring until accept/decline/end (stopRinging
+        // cancels it). One pattern alone only buzzes once.
+        if (navigator.vibrate) { try { navigator.vibrate([500, 200, 500]); } catch (e) {} }
+        if (mode !== "normal" || !ctx || !master) return;
+        [0, 0.45].forEach(function (delay) {
+          try {
+            var t0 = ctx.currentTime + delay;
+            var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+            o1.type = "sine"; o1.frequency.value = 950;
+            o2.type = "sine"; o2.frequency.value = 1180;
+            var g = ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(0.5, t0 + 0.05);
+            g.gain.setValueAtTime(0.5, t0 + 0.35);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.42);
+            o1.connect(g); o2.connect(g); g.connect(master);
+            o1.start(t0); o2.start(t0);
+            o1.stop(t0 + 0.45); o2.stop(t0 + 0.45);
+          } catch (e) {}
+        });
+      };
+      ringOnce();
+      ringTimer = setInterval(ringOnce, 1300);
+    } catch (e) {}
+  }
+  function stopRinging() {
+    try {
+      ringing = false;
+      if (ringTimer) { clearInterval(ringTimer); ringTimer = null; }
+      if (ringCtx) { var c = ringCtx; ringCtx = null; c.close().catch(function () {}); }
+      if (navigator.vibrate) { try { navigator.vibrate(0); } catch (e) {} }
+    } catch (e) {}
+  }
+
   // ---------- wire UI ----------
   document.addEventListener("DOMContentLoaded", function () {
+    // Unlock the ringtone AudioContext on the first tap, so the bell can
+    // play when a call arrives later with no fresh gesture (WebView rule).
+    document.addEventListener("pointerdown", unlockAudio);
     $("btnVoiceCall").addEventListener("click", function () { JC.startCall("voice"); });
     $("btnVideoCall").addEventListener("click", function () { JC.startCall("video"); });
     $("btnAccept").addEventListener("click", JC.acceptCall);
