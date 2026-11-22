@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jilan Chat</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="screen active" id="screen-login">
+  <div class="logo">JC</div>
+  <h1>Jilan Chat</h1>
+  <p class="sub">Private chats with friends and family.</p>
+
+  <div class="login-card">
+    <h2>Sign in</h2>
+
+    <!-- Google Sign-In: DISABLED on purpose. Google returns 403
+         disallowed_useragent for OAuth inside an Android WebView, so this
+         button stays disabled until the parent swaps in a working path
+         (Custom Tabs or native sign-in). See auth.js. -->
+    <button class="btn btn-google" id="btnGoogle" disabled>Sign in with Gmail</button>
+    <p class="note">Sign-in is being connected &mdash; please wait for the next update. Google sign-in does not work inside the app yet.</p>
+
+    <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
+
+    <h2>Sign in by email link</h2>
+    <p class="note">Type your Gmail. We will send you a sign-in link &mdash; tap it and you are in. No password needed.</p>
+    <input class="text-input" type="email" id="emailInput" placeholder="you@gmail.com" autocomplete="email">
+    <button class="btn btn-primary" id="btnEmailLink">Send sign-in link</button>
+    <p class="note" id="emailLinkNote"></p>
+  </div>
+
+  <div id="loginStatus"></div>
+</div>
+
+<!-- ============ CHAT LIST ============ -->
+<div class="screen" id="screen-list">
+  <div class="app-header">
+    <h1>Jilan Chat</h1>
+    <button class="icon-btn" id="btnStatus" title="Status">&#9719;</button>
+    <button class="icon-btn" id="btnSettings" title="Settings">&#9881;</button>
+    <button class="icon-btn" id="btnProfile" title="Profile">&#9679;</button>
+  </div>
+  <div id="chatList"></div>
+  <div class="empty-state hidden" id="listEmpty">No chats yet.<br>Tap + to start a chat with a friend.</div>
+  <button class="fab fab-secondary" id="btnNewGroup" title="New group">&#128101;</button>
+  <button class="fab" id="btnNewChat" title="New chat">+</button>
+</div>
+
+<!-- ============ CHAT ============ -->
+<div class="screen" id="screen-chat">
+  <div class="chat-header">
+    <button class="icon-btn" id="btnBack">&#8592;</button>
+    <div class="avatar" id="chatAvatar">?</div>
+    <div class="who" id="chatWho">
+      <div class="name" id="chatName">...</div>
+      <div class="status" id="chatStatus"></div>
+    </div>
+    <!-- Call buttons: voice first, then video. Both use WebRTC + Firestore
+         signalling (calls.js). Hidden in group chats — calls are 1-to-1 only. -->
+    <button class="icon-btn" id="btnVoiceCall" title="Voice call">&#9742;</button>
+    <button class="icon-btn" id="btnVideoCall" title="Video call">&#127909;</button>
+    <button class="icon-btn" id="btnChatMenu" title="Chat settings">&#8942;</button>
+  </div>
+  <div id="chatMenu" class="hidden" style="position:absolute;top:52px;right:10px;background:#fff;color:#111b21;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.3);z-index:20;min-width:180px;">
+    <button id="menuViewContact" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;">View contact</button>
+    <button id="menuBlock" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;color:#ea0038;">Block contact</button>
+  </div>
+
+  <div id="uploadBar"></div>
+  <div id="recBar"><span class="dot"></span><span id="recTime">0:00</span><span style="flex:1">Recording&hellip;</span><button class="btn btn-small btn-danger" id="btnRecCancel">Cancel</button></div>
+
+  <div id="messages"></div>
+
+  <div class="composer">
+    <button class="round-btn gray" id="btnAttach" title="Send photo, video or file">&#128206;</button>
+    <button class="round-btn gray" id="btnCamera" title="Filter camera">&#128247;</button>
+    <div class="box"><input type="text" id="msgInput" placeholder="Message" autocomplete="off"></div>
+    <button class="round-btn gray hidden" id="btnMic" title="Voice message">&#127908;</button>
+    <button class="round-btn hidden" id="btnSend" title="Send">&#10148;</button>
+  </div>
+  <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip">
+</div>
+
+<!-- ============ STATUS ============ -->
+<div class="screen" id="screen-status">
+  <div class="app-header">
+    <button class="icon-btn" id="btnStatusBack">&#8592;</button>
+    <h1>Status</h1>
+  </div>
+  <div class="page-body">
+    <div class="user-result" id="myStatusRow">
+      <div class="avatar" id="myStatusAvatar">?</div>
+      <div class="info"><div class="name">My status</div><div class="gmail" id="myStatusHint">Tap + to add a photo, video or text status.</div></div>
+      <button class="btn btn-primary btn-small" id="btnAddStatus">+</button>
+    </div>
+    <div id="statusAddBox" class="hidden" style="margin-top:14px;">
+      <input class="text-input" type="text" id="statusTextInput" placeholder="Write a text status..." maxlength="200">
+      <button class="btn btn-primary" id="btnPostTextStatus">Post text status</button>
+      <button class="btn btn-ghost" id="btnPostMediaStatus">Post photo / video status</button>
+      <input type="file" id="statusFileInput" class="hidden" accept="image/*,video/*">
+      <p class="note" style="color:#667781;font-size:13px;margin-top:10px;line-height:1.5;">Status disappears after 24 hours. Videos over 50 MB are not allowed.</p>
+    </div>
+    <h2 style="margin-top:22px;">Friends' status</h2>
+    <div id="statusList"></div>
+    <div class="empty-state hidden" id="statusEmpty">No status from friends yet.</div>
+  </div>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="screen" id="screen-about">
+  <div class="app-header">
+    <button class="icon-btn" id="btnAboutBack">&#8592;</button>
+    <h1>About Jilan Chat</h1>
+  </div>
+  <div class="page-body">
+    <h2>Jilan Chat v1.0</h2>
+    <p style="line-height:1.7;color:#111b21;">Private chats with friends and family. No ads, no tracking, no price.</p>
+    <p style="line-height:1.7;margin-top:14px;">Tasveerein aur videos bhejne se pehle chhoti ki jati hain taake storage bache. Purana media 30 din baad khud ba khud delete ho jata hai, jabke aap ki chat ka text mehfooz rehta hai.</p>
+    <p style="line-height:1.7;margin-top:14px;">Status 24 ghante baad khud khatam ho jata hai. Voice calls aur video calls ke liye dono ka app khula hona zaroori hai.</p>
+    <p style="line-height:1.7;margin-top:14px;color:#667781;font-size:13px;">Made by Jilan Apps Official, Basti Malook.</p>
+  </div>
+</div>
+
+<!-- ============ NEW GROUP ============ -->
+<div class="screen" id="screen-newgroup">
+  <div class="app-header">
+    <button class="icon-btn" id="btnNewGroupBack">&#8592;</button>
+    <h1>New group</h1>
+  </div>
+  <div class="page-body">
+    <h2>Group name</h2>
+    <input class="text-input" type="text" id="groupNameInput" placeholder="e.g. Family, School friends" maxlength="50">
+    <h2 style="margin-top:18px;">Group type</h2>
+    <label style="display:block;padding:8px 0;"><input type="radio" name="groupType" value="family" checked> Family</label>
+    <label style="display:block;padding:8px 0;"><input type="radio" name="groupType" value="friends"> Friends</label>
+    <button class="btn btn-primary" id="btnCreateGroup">Create group</button>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">No group search, no join link, no public list. Only you (the admin) can add members — from Group info after creating the group.</p>
+  </div>
+</div>
+
+<!-- ============ GROUP INFO ============ -->
+<div class="screen" id="screen-groupinfo">
+  <div class="app-header">
+    <button class="icon-btn" id="btnGroupInfoBack">&#8592;</button>
+    <h1>Group info</h1>
+  </div>
+  <div class="page-body">
+    <h2 id="groupInfoName">Group</h2>
+    <p style="color:#667781;" id="groupInfoType"></p>
+    <p style="margin-top:14px;line-height:1.6;background:#fff3cd;padding:10px 12px;border-radius:8px;">Secret chat sirf 1-to-1 me hoti hai — group ke sab members ek dusre ke messages dekh sakte hain.</p>
+    <h2 style="margin-top:20px;">Members</h2>
+    <div id="groupMembersList"></div>
+    <div class="admin-only" style="margin-top:18px;">
+      <h2>Add member</h2>
+      <input class="text-input" type="email" id="groupAddInput" placeholder="friend@gmail.com">
+      <button class="btn btn-primary" id="btnAddMemberSearch">Search</button>
+      <div id="groupAddResult"></div>
+    </div>
+    <div class="profile-row">
+      <button class="btn btn-ghost" id="btnLeaveGroup">Leave group</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTACT PROFILE ============ -->
+<div class="screen" id="screen-contact">
+  <div class="app-header">
+    <button class="icon-btn" id="btnContactBack">&#8592;</button>
+    <h1>Contact</h1>
+  </div>
+  <div class="page-body profile-center">
+    <div class="avatar large" id="contactAvatar">?</div>
+    <h2 id="contactName" style="margin-top:6px;">...</h2>
+    <div class="gmail" id="contactGmail">-</div>
+    <div class="gmail" id="contactStatus" style="margin-top:6px;">-</div>
+    <div class="profile-row">
+      <button class="btn btn-danger" id="btnBlockContact">Block contact</button>
+      <p class="note" style="color:#667781;font-size:13px;margin-top:10px;line-height:1.5;">Block sirf 1-to-1 chat aur call par lagta hai — group me aap dono ek dusre ke messages dekhte rahenge. Blocked contact ko ye nahi bataya jata ke block hai.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="screen" id="screen-settings">
+  <div class="app-header">
+    <button class="icon-btn" id="btnSettingsBack">&#8592;</button>
+    <h1>Settings</h1>
+  </div>
+  <div class="page-body">
+    <h2>Blocked contacts</h2>
+    <p style="color:#667781;font-size:13px;line-height:1.5;">Blocked contacts cannot send you 1-to-1 messages or call you. Block does not apply inside groups.</p>
+    <div id="blockedList" style="margin-top:12px;"></div>
+    <div class="empty-state hidden" id="blockedEmpty">No blocked contacts.</div>
+    <div class="profile-row">
+      <button class="btn btn-ghost" id="btnSettingsAbout">About Jilan Chat</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NEW CHAT ============ -->
+<div class="screen" id="screen-newchat">
+  <div class="app-header">
+    <button class="icon-btn" id="btnNewChatBack">&#8592;</button>
+    <h1>New chat</h1>
+  </div>
+  <div class="page-body">
+    <h2>Find a friend by Gmail</h2>
+    <input class="text-input" type="email" id="searchInput" placeholder="friend@gmail.com">
+    <button class="btn btn-primary" id="btnSearch">Search</button>
+    <div id="searchResult"></div>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here.</p>
+  </div>
+</div>
+
+<!-- ============ PROFILE ============ -->
+<div class="screen" id="screen-profile">
+  <div class="app-header">
+    <button class="icon-btn" id="btnProfileBack">&#8592;</button>
+    <h1>Profile</h1>
+  </div>
+  <div class="page-body profile-center">
+    <div class="avatar large" id="profileAvatar">?</div>
+    <div class="profile-row">
+      <label>Your name</label>
+      <input class="text-input" type="text" id="profileName" placeholder="Your name">
+      <button class="btn btn-primary" id="btnSaveName">Save name</button>
+    </div>
+    <div class="profile-row">
+      <label>Your Gmail</label>
+      <div class="gmail" id="profileGmail">-</div>
+    </div>
+    <div class="profile-row">
+      <button class="btn btn-ghost" id="btnAbout">About Jilan Chat</button>
+    </div>
+    <div class="profile-row">
+      <button class="btn btn-ghost" id="btnSignOut">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FILTER CAMERA ============ -->
+<div class="screen" id="screen-camera">
+  <video id="camVideo" autoplay playsinline muted></video>
+  <div class="cam-controls">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-pill active" data-filter="none">Normal</button>
+      <button class="filter-pill" data-filter="brightness(1.15) saturate(1.25) contrast(0.95)">Beauty</button>
+      <button class="filter-pill" data-filter="sepia(0.5) saturate(1.6) hue-rotate(-15deg)">Sunset</button>
+      <button class="filter-pill" data-filter="grayscale(1)">Mono</button>
+    </div>
+    <div class="cam-actions">
+      <button class="cam-side" id="btnCamClose">Close</button>
+      <button class="cam-shutter" id="btnCapture" title="Take photo"></button>
+      <button class="cam-side" id="btnFlip">&#8646; Flip</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CALL ============ -->
+<div class="screen" id="screen-call">
+  <video id="remoteVideo" autoplay playsinline></video>
+  <video id="localVideo" autoplay playsinline muted></video>
+  <audio id="remoteAudio" autoplay playsinline></audio>
+  <div class="call-overlay">
+    <div>
+      <div class="avatar large" id="callAvatar" style="margin:0 auto;">?</div>
+      <div class="call-name" id="callName">...</div>
+      <div class="call-state" id="callState">Calling&hellip;</div>
+    </div>
+    <div class="call-buttons" id="callButtonsIncoming">
+      <button class="call-btn decline" id="btnDecline" title="Decline">&#10005;</button>
+      <button class="call-btn accept" id="btnAccept" title="Accept">&#9742;</button>
+    </div>
+    <div class="call-buttons hidden" id="callButtonsActive">
+      <button class="call-btn" id="btnMute" title="Mute">&#127908;</button>
+      <button class="call-btn hidden" id="btnVideoOff" title="Video off">&#127909;</button>
+      <button class="call-btn hidden" id="btnCamFlipCall" title="Flip camera">&#8646;</button>
+      <button class="call-btn" id="btnSpeaker" title="Speaker">&#128266;</button>
+      <button class="call-btn end" id="btnEndCall" title="End call">&#10005;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STATUS VIEWER ============ -->
+<div id="statusViewer" class="hidden" style="position:fixed;inset:0;background:#111b21;color:#fff;z-index:60;display:flex;flex-direction:column;">
+  <div style="padding:12px 14px;display:flex;gap:10px;align-items:center;">
+    <div class="avatar" id="statusViewerAvatar">?</div>
+    <div style="flex:1;"><div id="statusViewerName" style="font-weight:600;">...</div><div id="statusViewerTime" style="font-size:12px;opacity:.8;"></div></div>
+    <button id="statusViewerClose" style="background:transparent;border:none;color:#fff;font-size:22px;">&#10005;</button>
+  </div>
+  <div id="statusViewerBody" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 10px 20px;"></div>
+</div>
+
+<!-- ============ MEDIA VIEWER ============ -->
+<div id="viewer">
+  <button id="viewerClose">&#10005;</button>
+  <img id="viewerImg" class="hidden" alt="Photo">
+  <video id="viewerVideo" class="hidden" controls playsinline></video>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase JS SDK — bundled locally in app/ (no CDN at runtime). -->
+<script src="firebase-app-compat.js"></script>
+<script src="firebase-auth-compat.js"></script>
+<script src="firebase-firestore-compat.js"></script>
+<script src="firebase-storage-compat.js"></script>
+<!-- App code — loaded with <script src> only. No fetch() of local files. -->
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="app.js"></script>
+<script src="camera.js"></script>
+<script src="calls.js"></script>
+<script src="status.js"></script>
+<script src="groups.js"></script>
+<script src="block.js"></script>
+</body>
+</html>
