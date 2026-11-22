@@ -73,6 +73,11 @@
     <div class="info"><div class="name">Chat requests</div><div class="preview">Tap to view</div></div>
     <span class="badge hidden" id="requestsBadge"></span>
   </div>
+  <!-- Nearby chat row — Bluetooth, bina net ke paas khare phones se chat. -->
+  <div id="nearbyRow" class="chat-row">
+    <div class="avatar">&#128225;</div>
+    <div class="info"><div class="name">Nearby chat</div><div class="preview">Chat without internet, over Bluetooth</div></div>
+  </div>
   <div id="chatList"></div>
   <div class="empty-state hidden" id="listEmpty">No chats yet.<br>Tap + to start a chat with a friend.</div>
   <button class="fab fab-secondary" id="btnNewGroup" title="New group">&#128101;</button>
@@ -93,6 +98,36 @@
     <h2 style="margin-top:22px;">Requests you sent</h2>
     <div id="sentRequests"></div>
     <div class="empty-state hidden" id="sentEmpty">No requests sent.</div>
+  </div>
+</div>
+
+<!-- ============ NEARBY CHAT (Bluetooth, no internet) ============ -->
+<div class="screen" id="screen-nearby">
+  <div class="app-header">
+    <button class="icon-btn" id="btnNearbyBack">&#8592;</button>
+    <h1>Nearby chat</h1>
+  </div>
+  <!-- Browser me bridge nahi hota — ye box sirf tab dikhta hai. -->
+  <div id="nearbyAppOnly" class="nearby-note hidden" style="margin:12px 14px 0;">Nearby chat sirf Jilan Chat app me chalta hai — ye screen browser me nahi chalti. App kholein aur dobara try karein.</div>
+  <div class="nearby-status" id="nearbyStatus">Nearby is off.</div>
+  <div class="nearby-note">No internet needed. Both phones must be nearby (about 10 meters) with Bluetooth on and this screen open. Text only — chats are not saved and do not go to the internet.</div>
+  <div class="nearby-actions" id="nearbyActions">
+    <button class="btn btn-primary" id="btnNearbyStart">Start Nearby</button>
+    <button class="btn btn-primary" id="btnNearbyScan">Find nearby</button>
+    <button class="btn btn-ghost hidden" id="btnNearbyStop">Stop</button>
+    <button class="btn btn-danger hidden" id="btnNearbyDisconnect">Disconnect</button>
+  </div>
+  <p class="note" style="padding:0 14px;color:#667781;font-size:13px;line-height:1.5;">Start dabane ke baad Allow dabayein taake dusra phone aap ko dhoond sake. Find nearby se dusre phone ko dhoond kar tap karein.</p>
+  <div id="nearbyDevicesWrap">
+    <h2 style="padding:10px 0 0;">Nearby phones</h2>
+    <div id="nearbyDevices"></div>
+    <div class="empty-state" id="nearbyDevicesEmpty" style="padding:16px;">No nearby phones found yet. Tap Find nearby.</div>
+  </div>
+  <div id="nearbyMessages"></div>
+  <div class="empty-state hidden" id="nearbyMessagesEmpty" style="padding:16px;">No messages yet in this session.</div>
+  <div class="composer" id="nearbyComposer">
+    <div class="box"><input type="text" id="nearbyInput" placeholder="Message" autocomplete="off"></div>
+    <button class="round-btn" id="btnNearbySend" title="Send">&#10148;</button>
   </div>
 </div>
 
@@ -393,5 +428,6 @@
 <script src="groups.js"></script>
 <script src="block.js"></script>
 <script src="requests.js"></script>
+<script src="nearby.js"></script>
 </body>
 </html>
