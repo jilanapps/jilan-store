@@ -1,7 +1,7 @@
 // Jilan Chat v4.5 — extras.js (FREE Spark only, no Storage, no Blaze)
 // Professional chat features, user order 2026-11-22 13:40:
 //  - long-press message -> labelled action sheet (Reply, React, Forward,
-//    Copy, Delete for everyone); swipe right on a message -> Reply
+//    Copy, Delete -> Delete for me / Delete for everyone); swipe right on a message -> Reply
 //  - reply / quote, forward to existing chats, emoji reactions (6 quick)
 //  - delete for everyone (sender only -> "This message was deleted")
 //  - "typing..." in 1-to-1 chats (throttled: max 1 write / 4 s)
@@ -41,9 +41,30 @@
     var col = isGroup ? "groups" : "chats";
     return JC.db.collection(col).doc(JC.currentChatId).collection("messages").doc(msgId);
   }
+  // ---------- delete for me (this phone only, no Firestore write) ----------
+  JC.HIDDEN_CAP = 2000;
+  function hiddenKey(chatId) { return "jilanchat-hidden-" + chatId; }
+  JC.getHiddenIds = function (chatId) {
+    try { var a = JSON.parse(localStorage.getItem(hiddenKey(chatId)) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+  };
+  JC.isHiddenMessage = function (chatId, msgId) {
+    return !!chatId && JC.getHiddenIds(chatId).indexOf(msgId) >= 0;
+  };
+  JC.deleteForMe = function (msgId) {
+    var chatId = JC.currentChatId; if (!chatId || !msgId) return;
+    var a = JC.getHiddenIds(chatId);
+    if (a.indexOf(msgId) < 0) a.push(msgId);
+    if (a.length > JC.HIDDEN_CAP) a = a.slice(a.length - JC.HIDDEN_CAP);
+    try { localStorage.setItem(hiddenKey(chatId), JSON.stringify(a)); } catch (e) {}
+    var d = msgData[msgId];
+    if (d && d.el) d.el.style.display = "none";
+    JC.toast("Message deleted for you");
+  };
+
   JC.decorateMessage = function (div, msgId, m, isGroup) {
     msgData[msgId] = { m: m, isGroup: !!isGroup, el: div };
     div.setAttribute("data-msg-id", msgId);
+    if (JC.isHiddenMessage(JC.currentChatId, msgId)) div.style.display = "none";
     applyDecor(div, m);
     wireGestures(div, msgId);
   };
@@ -155,7 +176,13 @@
   JC.openMessageSheet = function (msgId) {
     var d = msgData[msgId]; if (!d) return;
     var m = d.m, mine = m.senderId === uid();
-    if (m.deleted) return;
+    if (m.deleted) {
+      // Already deleted for everyone: only "Delete for me" is left.
+      openSheet(item("delete", "Delete for me", "danger"), function (act) {
+        if (act === "delete") JC.confirmDelete(msgId);
+      });
+      return;
+    }
     var html = '<div class="sheet-reacts">' + JC.QUICK_REACTIONS.map(function (e) {
       return '<button type="button" class="sheet-emoji" data-act="react" data-val="' + esc(e) + '">' + esc(e) + "</button>";
     }).join("") + "</div>";
@@ -163,14 +190,14 @@
     html += item("forward", "Forward");
     if (m.type === "text" && m.text) html += item("copy", "Copy");
     if ((m.reactions || {})[uid()]) html += item("unreact", "Remove my reaction");
-    if (mine) html += item("delete", "Delete for everyone", "danger");
+    html += item("delete", "Delete", "danger");
     openSheet(html, function (act, val) {
       if (act === "react") JC.react(msgId, val);
       else if (act === "unreact") JC.react(msgId, null);
       else if (act === "reply") JC.startReply(msgId);
       else if (act === "forward") JC.openForward(msgId);
       else if (act === "copy") copyText(m.text);
-      else if (act === "delete") JC.confirmDeleteForAll(msgId);
+      else if (act === "delete") JC.confirmDelete(msgId);
     });
   };
   function item(act, label, cls) { return '<button type="button" class="sheet-item' + (cls ? " " + cls : "") + '" data-act="' + act + '">' + esc(label) + "</button>"; }
@@ -186,6 +213,18 @@
     var upd = {};
     upd["reactions." + uid()] = emoji ? emoji : fv().delete();
     return msgRef(msgId, d.isGroup).update(upd).catch(function () { JC.toast("Reaction nahi lag saka."); });
+  };
+
+  // ---------- delete (WhatsApp-style choice) ----------
+  JC.confirmDelete = function (msgId) {
+    var d = msgData[msgId]; if (!d) return;
+    var mine = d.m.senderId === uid() && !d.m.deleted;
+    var html = '<div class="sheet-title">Delete message?</div>' + item("forme", "Delete for me", "danger");
+    if (mine) html += item("forall", "Delete for everyone", "danger");
+    openSheet(html, function (act) {
+      if (act === "forme") JC.deleteForMe(msgId);
+      else if (act === "forall") JC.deleteForAll(msgId);
+    });
   };
 
   // ---------- delete for everyone ----------
