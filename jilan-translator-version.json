@@ -1,7 +1,8 @@
 {
- "versionCode": 4,
- "versionName": "1.2",
+ "versionCode": 5,
+ "versionName": "2.0",
  "apkUrl": "https://jilanapps.github.io/jilan-store/jilan-translator.apk",
- "notes": "v1.2: one-tap auto-update \u2014 the app now downloads updates in the background; tap the banner to install.",
- "size": 94745
+ "notes": "v2.0: brand-new professional design, full English interface, reliable sentence translation, share and paste buttons, improved scanner and updater.",
+ "size": 107097,
+ "md5": "facfaa334d0429951e262c19ee693e2c"
 }

@@ -186,14 +186,14 @@
       "apk": "https://jilanapps.github.io/jilan-store/jilan-translator.apk",
       "category": "tools",
       "color": "#0369a1",
-      "desc": "Urdu-English tarjuma",
+      "desc": "Translate 40+ languages, scan text, offline dictionary",
       "icon": "icons/translator.png",
       "id": "translator",
       "name": "Jilan Translator",
       "package": "com.jilanapps.translator",
-      "size": 94745,
-      "versionCode": 4,
-      "versionName": "1.2",
+      "size": 107097,
+      "versionCode": 5,
+      "versionName": "2.0",
       "web": ""
     },
     {
