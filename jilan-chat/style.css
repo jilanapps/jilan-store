@@ -645,3 +645,58 @@ html.dark .msg.photo-msg:not(.has-cap) > .meta { color: #fff; }
 #contactCover { cursor: default; }
 .profile-cover + .avatar.large { margin-top: -48px; position: relative; border: 3px solid var(--bg, #fff); box-sizing: content-box; }
 html.dark .profile-cover + .avatar.large { border-color: #111b21; }
+/* ===== v4.9 WhatsApp-style profile + contact info + about ===== */
+.pf-body { padding: 0 0 28px; text-align: left; }
+.pf-head { position: relative; }
+.pf-head .profile-cover { margin: 0; cursor: pointer; }
+.pf-head .profile-cover.hidden + .pf-photo-wrap, .pf-head-contact .profile-cover.hidden + .pf-photo-wrap { margin-top: 24px; }
+.pf-photo-wrap { position: relative; width: 132px; height: 132px; margin: -66px auto 0; }
+.pf-photo-wrap .avatar.large { width: 132px; height: 132px; font-size: 52px; margin: 0; border: 4px solid var(--jc-bg); box-sizing: border-box; cursor: pointer; }
+.pf-head-contact .pf-photo-wrap .avatar.large { cursor: default; }
+.profile-photo::after { content: none !important; display: none !important; }
+.pf-badge { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--jc-bg); background: #1f7ae0; color: #fff; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.pf-photo-badge { right: 2px; bottom: 4px; }
+.pf-cover-badge { right: 12px; top: 12px; width: 36px; height: 36px; border: none; background: rgba(0,0,0,.45); }
+.pf-list { margin-top: 18px; }
+.pf-row { display: flex; align-items: center; gap: 18px; width: 100%; box-sizing: border-box; padding: 14px 18px; background: none; border: none; text-align: left; color: var(--jc-text); font: inherit; cursor: pointer; }
+.pf-row.pf-static { cursor: default; }
+button.pf-row:active { background: var(--jc-soft); }
+.pf-ic { color: var(--jc-muted); flex: 0 0 auto; display: flex; }
+.pf-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pf-label { font-size: 13px; color: var(--jc-muted); }
+.pf-val { font-size: 16px; color: var(--jc-text); overflow-wrap: anywhere; line-height: 1.35; }
+.pf-val-strong { font-size: 16px; }
+.pf-act { color: #1f7ae0; flex: 0 0 auto; display: flex; }
+html.dark .pf-act { color: #53a6ff; }
+.pf-act-btn { background: none; border: none; padding: 6px; border-radius: 50%; cursor: pointer; }
+.pf-act-btn:active { background: var(--jc-soft); }
+.pf-row .btn-small { flex: 0 0 auto; }
+.pf-hint { margin: -8px 0 4px 58px; padding-right: 18px; font-size: 13px; color: var(--jc-muted); line-height: 1.4; }
+.pf-row + .pf-row, .pf-hint + .pf-row { border-top: 1px solid var(--jc-div); }
+.pf-sheet-item { display: flex; align-items: center; gap: 16px; }
+.pf-sheet-ic { display: flex; color: #1f7ae0; }
+html.dark .pf-sheet-ic { color: #53a6ff; }
+.pf-sheet-item.danger .pf-sheet-ic { color: inherit; }
+.pf-edit-wrap { position: relative; }
+.pf-edit-wrap .pf-edit-input { padding-right: 44px; font-size: 16px; }
+.pf-count { position: absolute; right: 12px; bottom: 14px; font-size: 12px; color: var(--jc-muted); }
+.pf-cam { background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 1 / 1; margin-top: 6px; }
+.pf-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pf-cam-actions { justify-content: space-between; }
+.pf-cam-actions .btn { min-width: 0; flex: 1; }
+.pf-contact-name { text-align: center; margin: 12px 16px 2px; font-size: 22px; color: var(--jc-text); overflow-wrap: anywhere; }
+.pf-contact-status { text-align: center; color: var(--jc-muted); font-size: 14px; }
+#screen-contact .profile-row { padding: 0 16px; }
+/* About */
+.ab-body { padding: 20px 18px 28px; }
+.ab-top { text-align: center; margin-bottom: 8px; }
+.ab-logo { width: 84px; height: 84px; border-radius: 20px; display: block; margin: 4px auto 10px; }
+.ab-name { margin: 0; font-size: 22px; color: var(--jc-text); }
+.ab-ver { color: var(--jc-muted); font-size: 14px; margin-top: 2px; }
+.ab-tag { margin: 12px 0 0; line-height: 1.6; color: var(--jc-text); }
+.ab-h { margin: 22px 0 6px; font-size: 14px; color: #1f7ae0; text-transform: uppercase; letter-spacing: .04em; }
+html.dark .ab-h { color: #53a6ff; }
+.ab-list { margin: 0; padding-left: 20px; line-height: 1.6; color: var(--jc-text); }
+.ab-list li { margin: 4px 0; }
+.ab-contact { margin-top: 20px; line-height: 1.7; color: var(--jc-text); }
+.ab-credit { margin-top: 8px; color: var(--jc-muted); font-size: 13px; line-height: 1.6; }

@@ -256,19 +256,38 @@
   </div>
 </div>
 
-<!-- ============ ABOUT ============ -->
+<!-- ============ ABOUT (v4.9) ============ -->
 <div class="screen" id="screen-about">
   <div class="app-header">
     <button class="icon-btn" id="btnAboutBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
     <h1>About Jilan Chat</h1>
   </div>
-  <div class="page-body">
-    <h2>Jilan Chat v1.0</h2>
-    <p style="line-height:1.7;color:#111b21;">Private chats with friends and family. No ads, no tracking, no price.</p>
-    <p style="line-height:1.7;margin-top:14px;">You can send photos and voice messages (up to 1 minute). Photos are compressed before sending. Videos and large files can't be sent yet. Your chat text stays saved.</p>
-    <p style="line-height:1.7;margin-top:14px;">A status disappears after 24 hours. For voice and video calls, both people need the app open.</p>
-    <p style="line-height:1.7;margin-top:14px;">WhatsApp: <a href="https://wa.me/923007379385" target="_blank" rel="noopener">0300-7379385</a></p>
-    <p style="line-height:1.7;margin-top:14px;color:#667781;font-size:13px;">Made by Dr Asif - Jilan Apps Official, Basti Malook (Multan).</p>
+  <div class="page-body ab-body">
+    <div class="ab-top">
+      <img src="icon-192.png" alt="" class="ab-logo">
+      <h2 class="ab-name">Jilan Chat</h2>
+      <div class="ab-ver" id="aboutVersion">Version 4.9</div>
+      <p class="ab-tag">Private chats with friends and family. No ads, no tracking, no price.</p>
+    </div>
+    <h3 class="ab-h">What you can do</h3>
+    <ul class="ab-list">
+      <li>Messages, replies, reactions and voice notes (up to 1 minute)</li>
+      <li>Voice and video calls</li>
+      <li>Photos and small documents (up to 200 KB)</li>
+      <li>Status updates: photo, text or voice, gone after 24 hours</li>
+      <li>Groups with private invite links, and polls</li>
+      <li>Channels you can follow by link</li>
+      <li>Location sharing, including live location</li>
+      <li>Nearby chat over Bluetooth, without internet</li>
+    </ul>
+    <h3 class="ab-h">Good to know</h3>
+    <ul class="ab-list">
+      <li>Large videos and big files are not supported yet. Photos are compressed before sending.</li>
+      <li>Your chats are private between you and the other person. They are not end-to-end encrypted.</li>
+      <li>For calls, both people need the app open.</li>
+    </ul>
+    <p class="ab-contact">WhatsApp: <a href="https://wa.me/923007379385" target="_blank" rel="noopener">0300-7379385</a></p>
+    <p class="ab-credit">Made by Dr Asif - Jilan Apps Official, Basti Malook (Multan).</p>
   </div>
 </div>
 
@@ -316,20 +335,33 @@
   </div>
 </div>
 
-<!-- ============ CONTACT PROFILE ============ -->
+<!-- ============ CONTACT PROFILE (v4.9 rows, read-only) ============ -->
 <div class="screen" id="screen-contact">
   <div class="app-header">
     <button class="icon-btn" id="btnContactBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <h1>Contact</h1>
+    <h1>Contact info</h1>
   </div>
-  <div class="page-body profile-center">
-    <div class="profile-cover hidden" id="contactCover"></div>
-    <div class="avatar large" id="contactAvatar">?</div>
-    <h2 id="contactName" style="margin-top:6px;">...</h2>
-    <div class="gmail" id="contactUsername">-</div>
-    <div class="gmail" id="contactGmail">-</div>
-    <div class="gmail" id="contactAbout" style="margin-top:8px;font-style:italic;">-</div>
-    <div class="gmail" id="contactStatus" style="margin-top:6px;">-</div>
+  <div class="page-body pf-body">
+    <div class="pf-head pf-head-contact">
+      <div class="profile-cover hidden" id="contactCover"></div>
+      <div class="pf-photo-wrap"><div class="avatar large" id="contactAvatar">?</div></div>
+    </div>
+    <h2 class="pf-contact-name" id="contactName">...</h2>
+    <div class="pf-contact-status" id="contactStatus">-</div>
+    <div class="pf-list">
+      <div class="pf-row pf-static" id="pfcRowAbout">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">About</span><span class="pf-val" id="contactAbout">-</span></span>
+      </div>
+      <div class="pf-row pf-static" id="pfcRowUsername">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.34 0-8-3.66-8-8s3.66-8 8-8 8 3.66 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c1.38 0 2.64-.56 3.54-1.47.65.89 1.77 1.47 2.96 1.47 1.97 0 3.5-1.6 3.5-3.57V12c0-5.52-4.48-10-10-10zm0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">Username</span><span class="pf-val" id="contactUsername">-</span></span>
+      </div>
+      <div class="pf-row pf-static" id="pfcRowGmail">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">Gmail</span><span class="pf-val" id="contactGmail">-</span></span>
+      </div>
+    </div>
     <div class="profile-row">
       <button class="btn btn-danger" id="btnBlockContact">Block contact</button>
       <p class="note" style="color:#667781;font-size:13px;margin-top:10px;line-height:1.5;">Blocking works on 1-to-1 chats and calls only. In shared groups you will still see each other's messages. A blocked contact is not told they are blocked.</p>
@@ -415,54 +447,73 @@
   </div>
 </div>
 
-<!-- ============ PROFILE ============ -->
+<!-- ============ PROFILE (v4.9 WhatsApp-style) ============ -->
 <div class="screen" id="screen-profile">
   <div class="app-header">
     <button class="icon-btn" id="btnProfileBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
     <h1>Profile</h1>
   </div>
-  <div class="page-body profile-center">
-    <!-- Tap the photo to change it (gallery or camera). Photo is shrunk
-         to 256px and saved in your profile (no separate storage). -->
-    <div class="profile-cover" id="profileCover" title="Change cover"></div>
-    <div class="avatar large profile-photo" id="profileAvatar" title="Tap to change photo">?</div>
-    <p class="note" style="color:#667781;font-size:13px;margin-top:2px;">Tap photo to change</p>
-    <input type="file" id="profilePhotoInput" class="hidden" accept="image/*">
-    <div class="profile-row" style="text-align:center;">
-      <button class="btn btn-ghost btn-small" id="btnChangePhoto">Change photo</button>
-      <button class="btn btn-ghost btn-small" id="btnRemovePhoto">Remove photo</button>
+  <div class="page-body pf-body">
+    <!-- Cover banner + round photo. Tap the photo or a camera badge for a
+         bottom sheet. Photo/cover are shrunk and saved in the profile doc. -->
+    <div class="pf-head">
+      <div class="profile-cover" id="profileCover"></div>
+      <button type="button" class="pf-badge pf-cover-badge" id="pfCoverBadge" aria-label="Change cover"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>
+      <div class="pf-photo-wrap">
+        <div class="avatar large profile-photo" id="profileAvatar" role="button" aria-label="Profile photo">?</div>
+        <button type="button" class="pf-badge pf-photo-badge" id="pfPhotoBadge" aria-label="Change photo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>
+      </div>
     </div>
-    <div class="profile-row" style="text-align:center;">
-      <button class="btn btn-ghost btn-small" id="btnChangeCover">Change cover</button>
-      <button class="btn btn-ghost btn-small hidden" id="btnRemoveCover">Remove cover</button>
-      <input type="file" id="coverInput" class="hidden" accept="image/*">
+    <div class="pf-list">
+      <button type="button" class="pf-row" id="pfRowName">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">Name</span><span class="pf-val" id="pfNameVal"></span></span>
+        <span class="pf-act"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+      </button>
+      <p class="pf-hint">This is the name your friends will see.</p>
+      <button type="button" class="pf-row" id="pfRowAbout">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">About</span><span class="pf-val" id="pfAboutVal"></span></span>
+        <span class="pf-act"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+      </button>
+      <div class="pf-row pf-static" id="pfRowUsername">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.34 0-8-3.66-8-8s3.66-8 8-8 8 3.66 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c1.38 0 2.64-.56 3.54-1.47.65.89 1.77 1.47 2.96 1.47 1.97 0 3.5-1.6 3.5-3.57V12c0-5.52-4.48-10-10-10zm0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">Username</span><span class="pf-val" id="profileUsername">-</span></span>
+        <button type="button" class="pf-act pf-act-btn hidden" id="btnCopyUsername" aria-label="Copy username"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+        <button type="button" class="btn btn-primary btn-small hidden" id="btnSetUsername">Set username</button>
+      </div>
+      <p class="pf-hint" id="pfUsernameHint">Username can't be changed.</p>
+      <div class="pf-row pf-static" id="pfRowGmail">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-label">Gmail</span><span class="pf-val" id="profileGmail">-</span></span>
+      </div>
+      <button type="button" class="pf-row" id="btnMyQr">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-val pf-val-strong">My QR code</span></span>
+        <span class="pf-act"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></span>
+      </button>
+      <button type="button" class="pf-row" id="btnAbout">
+        <span class="pf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+        <span class="pf-txt"><span class="pf-val pf-val-strong">About Jilan Chat</span></span>
+        <span class="pf-act"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></span>
+      </button>
     </div>
-    <div class="profile-row">
-      <label>Your name</label>
-      <input class="text-input" type="text" id="profileName" placeholder="Your name" maxlength="60">
-      <button class="btn btn-primary" id="btnSaveName">Save name</button>
+    <!-- Hidden helpers: older code (app.js / features5.js) still wires these.
+         The new sheets just call them, so photo/cover logic is not duplicated. -->
+    <div class="hidden" aria-hidden="true">
+      <input type="file" id="profilePhotoInput" accept="image/*">
+      <input type="file" id="coverInput" accept="image/*">
+      <button type="button" id="btnChangePhoto"></button>
+      <button type="button" id="btnRemovePhoto"></button>
+      <button type="button" id="btnChangeCover"></button>
+      <button type="button" id="btnRemoveCover"></button>
+      <input type="text" id="profileName" maxlength="60">
+      <button type="button" id="btnSaveName"></button>
+      <textarea id="profileAbout" maxlength="139"></textarea>
+      <span id="aboutCount">0</span>
+      <button type="button" id="btnSaveAbout"></button>
     </div>
-    <div class="profile-row">
-      <label>Your username</label>
-      <div class="username-line"><span class="gmail" id="profileUsername">-</span>
-        <button class="btn btn-ghost btn-small hidden" id="btnCopyUsername">Copy</button></div>
-      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;line-height:1.5;">Your username can't be changed. It stays yours forever.</p>
-    </div>
-    <div class="profile-row">
-      <label>Your Gmail</label>
-      <div class="gmail" id="profileGmail">-</div>
-    </div>
-    <div class="profile-row">
-      <label>About</label>
-      <textarea class="text-input" id="profileAbout" rows="2" maxlength="139" placeholder="Available"></textarea>
-      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;"><span id="aboutCount">0</span>/139 — friends see this in your contact info.</p>
-      <button class="btn btn-primary" id="btnSaveAbout">Save about</button>
-    </div>
-    <div class="profile-row">
-      <button class="btn btn-ghost" id="btnAbout">About Jilan Chat</button>
-    </div>
-    <!-- NO sign-out in this app (v4.0, user ka sakht hukm): logout ka koi
-         button nahi — session hamesha rehta hai. -->
+    <!-- NO sign-out in this app (v4.0, user order): no logout button. -->
   </div>
 </div>
 
@@ -606,6 +657,7 @@
 <script src="features4.js"></script>
 <script src="features5.js"></script>
 <script src="qrcode-gen.js"></script>
+<script src="profile.js"></script>
 <!-- Long-press action sheet (messages + chat rows) -->
 </body>
 </html>

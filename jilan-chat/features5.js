@@ -144,7 +144,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     var inp = $("coverInput"), pick = function () { if (inp) { inp.value = ""; inp.click(); } };
     if ($("btnChangeCover")) $("btnChangeCover").addEventListener("click", pick);
-    if ($("profileCover")) $("profileCover").addEventListener("click", pick);
+    // v4.9: the cover camera badge opens a sheet (profile.js).
     if (inp) inp.addEventListener("change", function () {
       var f = inp.files && inp.files[0]; if (!f) return;
       toast("Saving cover...");

@@ -1228,7 +1228,7 @@
     });
     var photoInput = $("profilePhotoInput");
     $("btnChangePhoto").addEventListener("click", function () { if (photoInput) photoInput.click(); });
-    $("profileAvatar").addEventListener("click", function () { if (photoInput) photoInput.click(); });
+    // v4.9: tapping the photo opens a bottom sheet (profile.js).
     if (photoInput) photoInput.addEventListener("change", function () {
       var f = photoInput.files && photoInput.files[0];
       if (f) JC.saveProfilePhoto(f).catch(function (e) { JC.toast(e.message || "Photo update failed"); });
