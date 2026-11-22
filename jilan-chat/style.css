@@ -203,3 +203,71 @@ input, textarea { font-family: inherit; font-size: 15px; }
 .main-menu { position: absolute; top: 50px; right: 8px; background: #fff; color: #111b21; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.3); z-index: 30; min-width: 190px; padding: 6px 0; }
 .main-menu button { display: block; width: 100%; text-align: left; padding: 13px 18px; border: none; background: none; font-size: 15.5px; color: #111b21; }
 .main-menu button:active { background: #e3eefc; }
+
+/* ---------- v4.5: reply, reactions, deleted, action sheet ---------- */
+.msg { transition: transform .15s ease; }
+.msg.flash { box-shadow: 0 0 0 3px #64b5f6; }
+.msg.has-reacts { margin-bottom: 14px; }
+.reply-quote { border-left: 4px solid #1565c0; background: rgba(21,101,192,.08); border-radius: 6px; padding: 4px 8px; margin-bottom: 4px; cursor: pointer; }
+.reply-quote .rq-name { color: #1565c0; font-weight: 600; font-size: 13px; }
+.reply-quote .rq-text { color: #54656f; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.fwd-label { color: #667781; font-size: 12px; font-style: italic; margin-bottom: 2px; }
+.deleted-text { color: #667781; font-style: italic; }
+.reacts { position: absolute; bottom: -14px; right: 8px; display: flex; gap: 2px; background: #fff; border-radius: 12px; padding: 1px 6px; box-shadow: 0 1px 3px rgba(0,0,0,.25); font-size: 13px; }
+.msg.in .reacts { right: auto; left: 8px; }
+.reacts .rc.mine { font-weight: 700; }
+.reply-bar { display: flex; align-items: center; gap: 8px; background: #f0f2f5; padding: 6px 10px; border-left: 4px solid #1565c0; }
+.reply-bar .rb-body { flex: 1; min-width: 0; }
+.reply-bar .rb-name { color: #1565c0; font-weight: 600; font-size: 13px; }
+.reply-bar .rb-text { color: #54656f; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.action-sheet { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
+.action-sheet.hidden { display: none; }
+.sheet-card { background: #fff; color: #111b21; width: 100%; max-width: 520px; border-radius: 14px 14px 0 0; padding: 8px 0 10px; max-height: 75vh; overflow-y: auto; box-sizing: border-box; }
+.sheet-title { padding: 12px 18px 6px; font-weight: 600; color: #54656f; font-size: 14px; }
+.sheet-item { display: block; width: 100%; text-align: left; padding: 14px 18px; border: none; background: none; font-size: 16px; color: inherit; }
+.sheet-item:active { background: #e3eefc; }
+.sheet-item.danger { color: #d32f2f; }
+.sheet-cancel { text-align: center; color: #1565c0; font-weight: 600; border-top: 1px solid #e9edef; margin-top: 4px; }
+.sheet-reacts { display: flex; justify-content: space-around; padding: 8px 10px 10px; border-bottom: 1px solid #e9edef; }
+.sheet-emoji { font-size: 26px; background: none; border: none; padding: 6px; border-radius: 50%; }
+.sheet-emoji:active { background: #e3eefc; }
+.row-icons { display: inline-flex; gap: 4px; color: #8696a0; margin-left: 6px; align-items: center; }
+#chatStatus.typing { color: #b3e5fc; font-style: italic; }
+.opt-row { display: flex; gap: 8px; margin-top: 8px; }
+.opt-row.wrap { flex-wrap: wrap; }
+.opt-btn { flex: 1; min-width: 90px; padding: 10px 8px; border-radius: 8px; border: 2px solid #d1d7db; background: #fff; color: #111b21; font-size: 14px; }
+.opt-btn.on { border-color: #1565c0; color: #1565c0; font-weight: 600; }
+.settings-note { color: #667781; font-size: 13px; margin-top: 10px; line-height: 1.5; }
+/* wallpapers (chat background only) */
+.wp-mist #screen-chat, .opt-btn.wp-mist { background: #e3eefc; }
+.wp-mint #screen-chat, .opt-btn.wp-mint { background: #e0f2ef; }
+.wp-sand #screen-chat, .opt-btn.wp-sand { background: #f3eadb; }
+.wp-dots #screen-chat, .opt-btn.wp-dots { background-color: #eef1f6; background-image: radial-gradient(#c5cfdc 1.2px, transparent 1.2px); background-size: 16px 16px; }
+.wp-slate #screen-chat, .opt-btn.wp-slate { background: #263238; }
+.opt-btn.wp-slate { color: #fff; }
+/* ---------- dark mode ---------- */
+html.dark body, html.dark .screen { background: #0f1a24; color: #e6edf3; }
+html.dark .chat-row { border-bottom-color: #1e2a35; }
+html.dark .chat-row:active { background: #1a2632; }
+html.dark .chat-row .preview.unread, html.dark .name { color: #e6edf3; }
+html.dark .app-header, html.dark .chat-header { background: #0d47a1; }
+html.dark #screen-chat { background: #0b141a; }
+html.dark.wp-slate #screen-chat { background: #1c262d; }
+html.dark.wp-mist #screen-chat { background: #10233a; }
+html.dark.wp-mint #screen-chat { background: #0f2622; }
+html.dark.wp-sand #screen-chat { background: #2a2419; }
+html.dark.wp-dots #screen-chat { background-color: #0b141a; background-image: radial-gradient(#26343f 1.2px, transparent 1.2px); }
+html.dark .msg.in { background: #1f2c34; color: #e6edf3; }
+html.dark .msg.out { background: #0d47a1; color: #fff; }
+html.dark .composer, html.dark .reply-bar, html.dark .search-bar { background: #1a2632; }
+html.dark .composer .box, html.dark .search-bar input, html.dark .text-input { background: #22313d; color: #e6edf3; border-color: #2c3e4c; }
+html.dark .composer input { background: transparent; color: #e6edf3; }
+html.dark .main-menu, html.dark #chatMenu, html.dark .sheet-card, html.dark .reacts { background: #1f2c34 !important; color: #e6edf3 !important; }
+html.dark .main-menu button, html.dark #chatMenu button { color: #e6edf3 !important; }
+html.dark #chatMenu #menuBlock { color: #ff6b6b !important; }
+html.dark .opt-btn { background: #1f2c34; color: #e6edf3; border-color: #2c3e4c; }
+html.dark .opt-btn.on { border-color: #64b5f6; color: #90caf9; }
+html.dark .reply-quote { background: rgba(100,181,246,.12); }
+html.dark .reply-quote .rq-name, html.dark .reply-bar .rb-name { color: #90caf9; }
+html.dark .reply-quote .rq-text, html.dark .reply-bar .rb-text, html.dark .deleted-text, html.dark .fwd-label { color: #9fb0bd; }
+html.dark .icon-btn.dark { color: #e6edf3; }

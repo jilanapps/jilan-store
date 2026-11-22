@@ -106,6 +106,7 @@
       .onSnapshot(function (snap) {
         snap.docChanges().forEach(function (ch) {
           if (ch.type === "added") renderGroupMessage(ch.doc.id, ch.doc.data());
+          if (ch.type === "modified" && JC.refreshMessage) JC.refreshMessage(ch.doc.id, ch.doc.data(), true);
         });
         var box = $("messages");
         box.scrollTop = box.scrollHeight;
@@ -143,6 +144,9 @@
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: "sent"   // group ticks never move past "sent" in v1.0
     };
+    // v4.5: reply quote + forwarded label (extras.js).
+    if (data.replyTo) msg.replyTo = data.replyTo;
+    if (data.forwarded) msg.forwarded = true;
     if (!msg.mediaData) delete msg.mediaData;
     if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
@@ -208,6 +212,7 @@
     var nameHtml = isOut ? "" : '<div class="sender-name" data-uid="' + esc(m.senderId) + '">...</div>';
     div.innerHTML = nameHtml + body + '<div class="meta">' + fmtTime(m.createdAt) + (isOut ? ' <span class="ticks">&#10003;</span>' : "") + "</div>";
     JC.wireMediaBubble(div, m);
+    if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, true);
     $("messages").appendChild(div);
     groupMsgEls[msgId] = div;
     // Fill in the sender's name.

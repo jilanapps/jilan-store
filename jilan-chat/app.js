@@ -329,6 +329,8 @@
         });
         // If every chat was filtered out (all blocked), show the empty state.
         if (!list.children.length) empty.classList.remove("hidden");
+        // v4.5: pin order, mute icons, in-app message tone (extras.js).
+        if (JC.afterChatListRender) JC.afterChatListRender(snap);
       }, function (err) {
         JC.toast("Could not load chats: " + err.message);
       });
@@ -382,7 +384,10 @@
           // server tak nahi pahuncha (offline likha gaya) — ghari dikhao.
           var pending = ch.doc.metadata && ch.doc.metadata.hasPendingWrites;
           if (ch.type === "added") renderMessage(ch.doc.id, ch.doc.data(), true, pending);
-          if (ch.type === "modified") updateMessageTicks(ch.doc.id, ch.doc.data(), pending);
+          if (ch.type === "modified") {
+            updateMessageTicks(ch.doc.id, ch.doc.data(), pending);
+            if (JC.refreshMessage) JC.refreshMessage(ch.doc.id, ch.doc.data(), false);
+          }
         });
         scrollMessagesToBottom();
         markRead(chatId);
@@ -391,12 +396,14 @@
     JC.db.collection("userChats").doc(JC.currentUser.uid).collection("list").doc(chatId)
       .set({ unreadCount: 0 }, { merge: true }).catch(function () {});
     markDelivered(chatId);
+    if (JC.onChatOpened) JC.onChatOpened(chatId, otherUid, false);
   };
 
   function updateChatHeader() {
     var p = JC.currentChatOther;
     $("chatName").textContent = p ? (p.displayName || "Unknown") : "...";
     $("chatStatus").textContent = p ? fmtLastSeen(p) : "";
+    if (JC.onChatHeaderUpdated) JC.onChatHeaderUpdated();
     $("chatAvatar").innerHTML = avatarHtml(p);
     // Private-chat notice — naam aate hi update ho jata hai.
     var notice = $("e2eNotice");
@@ -406,6 +413,7 @@
   }
 
   function closeChat() {
+    if (JC.onChatClosed) JC.onChatClosed(JC.currentChatId);
     if (JC.currentChatIsGroup && JC.closeGroupChat) JC.closeGroupChat();
     JC.currentChatId = null;
     JC.currentChatIsGroup = false;
@@ -452,6 +460,7 @@
     else metaHtml += tickHtml(m.status, isOut);
     div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
     JC.wireMediaBubble(div, m);
+    if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, false);
     $("messages").appendChild(div);
     msgEls[msgId] = div;
   }
@@ -489,6 +498,9 @@
       status: "sent"
     };
     // Strip empty media fields so the document stays clean.
+    // v4.5: reply quote + forwarded label (extras.js).
+    if (data.replyTo) msg.replyTo = data.replyTo;
+    if (data.forwarded) msg.forwarded = true;
     if (!msg.mediaData) delete msg.mediaData;
     if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
