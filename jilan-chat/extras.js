@@ -240,7 +240,7 @@
     }
     var html = '<div class="sheet-reacts">' + JC.QUICK_REACTIONS.map(function (e) {
       return '<button type="button" class="sheet-emoji" data-act="react" data-val="' + esc(e) + '">' + esc(e) + "</button>";
-    }).join("") + "</div>";
+    }).join("") + '<button type="button" class="sheet-more" data-act="reactmore" title="More emoji" aria-label="More emoji"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + "</div>";
     html += item("reply", "Reply");
     html += item("forward", "Forward");
     if (m.type === "text" && m.text) html += item("copy", "Copy");
@@ -251,6 +251,7 @@
     openSheet(html, function (act, val) {
       if (JC.onExtraMessageAction && JC.onExtraMessageAction(act, msgId, m)) return;
       if (act === "react") JC.react(msgId, val);
+      else if (act === "reactmore") { if (JC.pickEmoji) JC.pickEmoji(function (e) { JC.react(msgId, e); }); }
       else if (act === "unreact") JC.react(msgId, null);
       else if (act === "reply") JC.startReply(msgId);
       else if (act === "forward") JC.openForward(msgId);

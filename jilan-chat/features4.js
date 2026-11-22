@@ -337,7 +337,7 @@
       var html = [];
       snap.forEach(function (d) {
         var p = d.data() || {}, t = tsMs(p.createdAt);
-        html.push('<div class="ch-post">' + (p.type === "image" && p.mediaData ? '<img class="bubble-img" src="' + esc(p.mediaData) + '" alt="Photo">' : "") + (p.text ? '<div class="ch-text">' + esc(p.text) + "</div>" : "") + '<div class="meta">' + (t ? esc(JC.fmtFull ? JC.fmtFull(t) : new Date(t).toLocaleString()) : "Sending...") + "</div></div>");
+        html.push('<div class="ch-post">' + (p.type === "image" && p.mediaData ? '<img class="bubble-img" src="' + esc(p.mediaData) + '" alt="Photo">' : "") + (p.text ? '<div class="ch-text">' + (JC.linkifyHtml ? JC.linkifyHtml(p.text) : esc(p.text)) + "</div>" : "") + '<div class="meta">' + (t ? esc(JC.fmtFull ? JC.fmtFull(t) : new Date(t).toLocaleString()) : "Sending...") + "</div></div>");
       });
       box.innerHTML = html.length ? html.reverse().join("") : '<p class="settings-note" style="text-align:center">No posts yet.</p>';
       box.scrollTop = box.scrollHeight;

@@ -33,6 +33,33 @@
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
+  // v4.10: visible-height tracker. The chat screen uses --app-h so its
+  // composer always sits at the bottom of what is actually on screen —
+  // keyboard open (smaller) or closed (full) — and never ends up below.
+  JC.fitAppHeight = function () {
+    var h = window.innerHeight || 0;
+    var vv = window.visualViewport;
+    if (vv && vv.height && vv.height < h) h = vv.height;
+    var box = document.getElementById("messages");
+    var nearBottom = box && (box.scrollHeight - box.scrollTop - box.clientHeight < 160);
+    if (h > 0) document.documentElement.style.setProperty("--app-h", Math.round(h) + "px");
+    if (box && nearBottom) box.scrollTop = box.scrollHeight;
+    // A WebView can leave the page scrolled after the keyboard hides;
+    // the chat screen never needs page scroll, so snap back to top.
+    var sc = document.getElementById("screen-chat");
+    if (sc && sc.classList.contains("active") && (window.scrollY || document.documentElement.scrollTop)) {
+      try { window.scrollTo(0, 0); } catch (e) {}
+    }
+    return h;
+  };
+  (function () {
+    var t = null;
+    function later() { JC.fitAppHeight(); clearTimeout(t); t = setTimeout(JC.fitAppHeight, 250); }
+    window.addEventListener("resize", later);
+    window.addEventListener("orientationchange", later);
+    if (window.visualViewport) { window.visualViewport.addEventListener("resize", later); window.visualViewport.addEventListener("scroll", later); }
+    document.addEventListener("focusout", function () { setTimeout(JC.fitAppHeight, 300); });
+  })();
   JC.toast = function (msg) {
     var t = $("toast");
     if (!t) return;
@@ -40,6 +67,106 @@
     t.classList.add("show");
     setTimeout(function () { t.classList.remove("show"); }, 3000);
   };
+  // ---------- clickable links in messages (v4.10) ----------
+  // User report 2026-11-22 23:31: a link in a message showed as plain text
+  // and tapping it did nothing. Text is ALWAYS escaped first; only http(s)
+  // URLs, www. links and bare domains with a common ending become links.
+  // javascript:, data:, file: etc. are never turned into links.
+  var LINK_RE = /((?:https?:\/\/|www\.)[^\s<>"'`]+|\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|pk|me|app|dev|co|info|edu|gov|biz|tv|in|uk|ai)(?:\/[^\s<>"'`]*)?)/gi;
+  function trimLink(u) {
+    var tail = "";
+    for (;;) {
+      var last = u.charAt(u.length - 1);
+      if (/[.,!?;:'"\]}>*]/.test(last)) { tail = last + tail; u = u.slice(0, -1); continue; }
+      if (last === ")" && (u.split("(").length < u.split(")").length)) { tail = last + tail; u = u.slice(0, -1); continue; }
+      break;
+    }
+    return { url: u, tail: tail };
+  }
+  JC.safeLinkHref = function (raw) {
+    var u = String(raw || "").trim();
+    if (!u) return "";
+    if (/^www\./i.test(u) || !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
+    if (!/^https?:\/\/[^\s\/?#]+/i.test(u)) return "";
+    return u;
+  };
+  // Splits plain text into [{text}|{link, href}] pieces.
+  JC.linkPieces = function (text) {
+    var s = String(text == null ? "" : text), out = [], last = 0, mt;
+    LINK_RE.lastIndex = 0;
+    while ((mt = LINK_RE.exec(s))) {
+      var start = mt.index, raw = mt[0];
+      var prev = start > 0 ? s.charAt(start - 1) : "";
+      // skip e-mail addresses (name@site.com) and parts of longer words
+      if (prev === "@" || /[a-z0-9_.\-\/]/i.test(prev)) continue;
+      var t = trimLink(raw);
+      var href = JC.safeLinkHref(t.url);
+      if (!href || t.url.length < 4) continue;
+      if (start > last) out.push({ text: s.slice(last, start) });
+      out.push({ link: t.url, href: href });
+      last = start + t.url.length;
+      LINK_RE.lastIndex = last;
+    }
+    if (last < s.length) out.push({ text: s.slice(last) });
+    return out;
+  };
+  function attrQ(s) { return esc(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+  JC.linkifyHtml = function (text) {
+    return JC.linkPieces(text).map(function (p) {
+      return p.link ? '<a class="msg-link" href="' + attrQ(p.href) + '" data-url="' + attrQ(p.href) + '" rel="noopener noreferrer">' + esc(p.link) + "</a>" : esc(p.text);
+    }).join("");
+  };
+  // DOM version: wraps links found in text nodes of a bubble. Skips the time
+  // row, reply quotes, existing links, buttons and mentions.
+  var LINK_SKIP = /(^|\s)(meta|reply-quote|msg-link|mention|poll-card|contact-card|loc-card|vo-bubble|edited-tag|fwd-label|sender-name)(\s|$)/;
+  JC.linkifyEl = function (root) {
+    if (!root || !root.childNodes) return 0;
+    var count = 0;
+    Array.prototype.slice.call(root.childNodes).forEach(function (n) {
+      if (n.nodeType === 1) {
+        var tag = (n.tagName || "").toUpperCase();
+        if (tag === "A" || tag === "BUTTON" || tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA" || tag === "INPUT") return;
+        var cls = typeof n.className === "string" ? n.className : ((n.getAttribute && n.getAttribute("class")) || "");
+        if (LINK_SKIP.test(cls)) return;
+        count += JC.linkifyEl(n);
+        return;
+      }
+      if (n.nodeType !== 3 || !n.nodeValue) return;
+      var pieces = JC.linkPieces(n.nodeValue);
+      if (!pieces.some(function (p) { return p.link; })) return;
+      var frag = document.createDocumentFragment();
+      pieces.forEach(function (p) {
+        if (p.link) {
+          var a = document.createElement("a");
+          a.className = "msg-link";
+          a.setAttribute("href", p.href);
+          a.setAttribute("data-url", p.href);
+          a.setAttribute("rel", "noopener noreferrer");
+          a.textContent = p.link;
+          frag.appendChild(a); count++;
+        } else frag.appendChild(document.createTextNode(p.text));
+      });
+      root.replaceChild(frag, n);
+    });
+    return count;
+  };
+  JC.openLink = function (url) {
+    var href = JC.safeLinkHref(url);
+    if (!href) return false;
+    if (JC.openExternal) JC.openExternal(href);
+    else { try { window.open(href, "_blank"); } catch (e) { location.href = href; } }
+    return true;
+  };
+  // One tap handler for every .msg-link (chats, groups, channels).
+  // Capture phase so bubble handlers (photo viewer, reply) don't also run.
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    while (t && t !== document && !(t.classList && t.classList.contains("msg-link"))) t = t.parentNode;
+    if (!t || t === document) return;
+    e.preventDefault();
+    e.stopPropagation();
+    JC.openLink(t.getAttribute("data-url"));
+  }, true);
   // ---------- navigation history (v4.2 — back bug fix) ----------
   // Masla (user report 2026-11-22 12:45): kisi screen se Back dabane par
   // poori app band ho jati thi. Wajah: showScreen sirf CSS class badalta
@@ -616,6 +743,8 @@
     if (!text) return;
     input.value = "";
     updateComposer();
+    // v4.10: keep the keyboard open after send (WhatsApp style).
+    try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (e2) {} }
     JC.sendCurrentMessage({ type: "text", text: text }).catch(function (e) {
       // Neutral on purpose: never say why a send failed, so a blocked
       // sender cannot tell they were blocked.
@@ -1154,6 +1283,8 @@
     }
     var btnEmoji = $("btnEmoji");
     if (btnEmoji) btnEmoji.addEventListener("click", function () {
+      // v4.10: full picker (emoji.js); the small list is only a fallback.
+      if (JC.toggleEmojiPicker) { JC.toggleEmojiPicker(); return; }
       if (emojiPanel) emojiPanel.classList.toggle("hidden");
     });
 
@@ -1165,6 +1296,18 @@
     $("msgInput").addEventListener("input", updateComposer);
     $("msgInput").addEventListener("keydown", function (e) { if (e.key === "Enter") sendText(); });
     $("btnSend").addEventListener("click", sendText);
+    // v4.10: tapping Send must not take focus from the input (that closed
+    // the keyboard). preventDefault on press keeps focus where it is.
+    ["mousedown", "pointerdown", "touchstart"].forEach(function (ev) {
+      $("btnSend").addEventListener(ev, function (e) { if (e.cancelable) e.preventDefault(); }, ev === "touchstart" ? { passive: false } : false);
+    });
+    $("btnSend").addEventListener("touchend", function (e) {
+      // touchstart was cancelled, so no click follows on some WebViews:
+      // send here and swallow the synthetic click.
+      if (e.cancelable) e.preventDefault();
+      sendText();
+    }, { passive: false });
+    JC.fitAppHeight();
     JC.wireMicButton();
     $("btnRecCancel").addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(false); JC.toast("Voice message cancelled"); });
     var btnRecSend = $("btnRecSend");

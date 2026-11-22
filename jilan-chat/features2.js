@@ -69,8 +69,8 @@
     if (!q || opts.length < 2 || opts.length > 10) return null;
     return { q: q, opts: opts, votes: {} };
   };
-  JC.STICKERS = ["s01", "s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09", "s10", "s11", "s12", "s13", "s14", "s15", "s16"];
-  JC.STICKER_LABELS = ["Hello!", "Thank you", "OK", "LOL", "Love it", "Good morning", "Good night", "Congrats!", "Salam", "JazakAllah", "Miss you", "Yes!", "No", "Wow", "On my way", "Happy Birthday"];
+  JC.STICKERS = ["s01", "s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09", "s10", "s11", "s12", "s13", "s14", "s15", "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23", "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31", "s32", "s33", "s34", "s35", "s36", "s37", "s38", "s39", "s40", "s41", "s42", "s43", "s44", "s45", "s46", "s47", "s48"];
+  JC.STICKER_LABELS = ["Hello!", "Thank you", "OK", "LOL", "Love it", "Good morning", "Good night", "Congrats!", "Salam", "JazakAllah", "Miss you", "Yes!", "No", "Wow", "On my way", "Happy Birthday", "Assalamu Alaikum", "JazakAllah Khair", "MashaAllah", "InshaAllah", "SubhanAllah", "Alhamdulillah", "Ameen", "Eid Mubarak", "Jumma Mubarak", "Ramadan Kareem", "Thank you!", "Sorry", "Love you", "Happy", "Sad", "Angry", "Sleepy", "Busy", "Call me", "Well done", "Good luck", "Get well soon", "Take care", "Bye bye", "Haha", "Please", "Wait", "Hurry up", "Welcome", "Cool", "Hungry", "Thinking"];
   JC.extractMentions = function (text, members) {
     var out = [], t = String(text || "");
     (members || []).forEach(function (mm) {
@@ -179,11 +179,12 @@
   JC.replaceMessageText = function (div, m) {
     if (!div) return;
     Array.prototype.slice.call(div.childNodes).forEach(function (n) {
-      if (n.nodeType === 3 || (n.classList && (n.classList.contains("mention") || n.classList.contains("search-mark")))) div.removeChild(n);
+      if (n.nodeType === 3 || (n.classList && (n.classList.contains("mention") || n.classList.contains("search-mark") || n.classList.contains("msg-link")))) div.removeChild(n);
     });
     var before = div.querySelector(".edited-tag") || div.querySelector(".meta") || null;
     div.insertBefore(document.createTextNode(m.text || ""), before);
     JC.highlightMentions(div, m);
+    if (JC.linkifyEl) JC.linkifyEl(div); // v4.10
   };
   function wrapDecorate() {
     var orig = JC.decorateMessage;
@@ -193,6 +194,7 @@
         if (m && m.sticker && !m.deleted) div.classList.add("sticker-msg");
         if (m && m.viewOnce) div.classList.add("vo-msg");
         JC.highlightMentions(div, m);
+        if (JC.linkifyEl && m && !m.deleted) JC.linkifyEl(div); // v4.10 clickable links
         setEditedTag(div, m);
       } catch (e) {}
       return r;

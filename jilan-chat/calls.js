@@ -227,7 +227,7 @@
 
     getLocalMedia(kind).then(function (stream) {
       localStream = stream;
-      localVideo().srcObject = kind === "video" ? stream : null;
+      localVideo().srcObject = kind === "video" ? stream : null; applyMirror();
       // Create the call document first, then the offer inside it.
       return JC.db.collection("calls").add({
         callerUid: JC.currentUser.uid,
@@ -291,7 +291,7 @@
     $("callButtonsActive").classList.remove("hidden");
     getLocalMedia(callKind).then(function (stream) {
       localStream = stream;
-      localVideo().srcObject = callKind === "video" ? stream : null;
+      localVideo().srcObject = callKind === "video" ? stream : null; applyMirror();
       return callDocRef.get();
     }).then(function (snap) {
       var data = snap.data();
@@ -355,6 +355,7 @@
     remoteVideo().srcObject = null;
     localVideo().srcObject = null;
     remoteAudio().srcObject = null;
+    facingMode = "user"; flipping = false; try { resetPip(); } catch (e) {}
     remoteStream = null; gotRemoteTrack = false; iceConnected = false;
     connectedAtWritten = false; finalStatus = null;
     callState = "idle";
@@ -531,20 +532,148 @@
     localStream.getVideoTracks().forEach(function (t) { t.enabled = !videoOff; });
     $("btnVideoOff").classList.toggle("off", videoOff);
   }
-  function flipCamera() {
-    if (!localStream || callKind !== "video" || !pc) return;
-    facingMode = facingMode === "user" ? "environment" : "user";
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } }).then(function (newStream) {
-      var newTrack = newStream.getVideoTracks()[0];
-      var sender = pc.getSenders().find(function (s) { return s.track && s.track.kind === "video"; });
-      if (sender) sender.replaceTrack(newTrack);
-      var oldTrack = localStream.getVideoTracks()[0];
-      if (oldTrack) oldTrack.stop();
-      localStream.removeTrack(oldTrack);
-      localStream.addTrack(newTrack);
-      localVideo().srcObject = localStream;
-    }).catch(function (e) { JC.toast("Could not flip camera: " + e.message); });
+  // v4.10 (user report 2026-11-22 23:32: "camera change ni hota").
+  // Old code asked for {facingMode} as a soft hint while the first camera
+  // was still open — many Android phones then return the SAME camera, or
+  // fail because two cameras can't be open at once. Now: stop the old
+  // track first, ask for the other camera with an EXACT facingMode, fall
+  // back to picking the other camera by deviceId, then replaceTrack() on
+  // the existing video sender (no renegotiation, audio untouched).
+  var flipping = false;
+  function pickOtherCameraId() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return Promise.resolve(null);
+    return navigator.mediaDevices.enumerateDevices().then(function (list) {
+      var cams = (list || []).filter(function (d) { return d.kind === "videoinput"; });
+      if (cams.length < 2) return null;
+      var cur = localStream && localStream.getVideoTracks()[0];
+      var curId = cur && cur.getSettings ? (cur.getSettings().deviceId || "") : "";
+      var want = facingMode === "environment" ? /back|rear|environment/i : /front|user|face/i;
+      var byLabel = cams.filter(function (d) { return want.test(d.label || "") && d.deviceId !== curId; })[0];
+      if (byLabel) return byLabel.deviceId;
+      var other = cams.filter(function (d) { return d.deviceId !== curId; })[0];
+      return other ? other.deviceId : null;
+    }).catch(function () { return null; });
   }
+  function applyMirror() {
+    var lv = localVideo();
+    if (lv && lv.classList) lv.classList.toggle("mirror", facingMode === "user");
+  }
+  JC._applyMirror = applyMirror;
+  function flipCamera() {
+    if (!localStream || callKind !== "video" || !pc || flipping) return Promise.resolve(false);
+    flipping = true;
+    var prevMode = facingMode;
+    var nextMode = facingMode === "user" ? "environment" : "user";
+    var oldTrack = localStream.getVideoTracks()[0] || null;
+    var oldId = oldTrack && oldTrack.getSettings ? (oldTrack.getSettings().deviceId || "") : "";
+    var sender = pc.getSenders().find(function (s) { return s.track && s.track.kind === "video"; }) ||
+                 pc.getSenders().find(function (s) { return !s.track && s.__jcVideo; });
+    // Release the current camera first (phones often allow only one open).
+    if (oldTrack) { try { oldTrack.stop(); } catch (e) {} }
+    facingMode = nextMode;
+    function tryExact() {
+      return navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: nextMode } }, audio: false });
+    }
+    function tryDevice() {
+      return pickOtherCameraId().then(function (id) {
+        if (!id || id === oldId) throw new Error("no other camera");
+        return navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: id } }, audio: false });
+      });
+    }
+    return tryExact().catch(tryDevice).then(function (newStream) {
+      var newTrack = newStream.getVideoTracks()[0];
+      if (!newTrack) throw new Error("no video track");
+      newTrack.enabled = !videoOff;
+      var p = sender ? sender.replaceTrack(newTrack) : null;
+      if (sender) sender.__jcVideo = true;
+      if (oldTrack) { try { localStream.removeTrack(oldTrack); } catch (e) {} }
+      localStream.addTrack(newTrack);
+      var lv = localVideo();
+      lv.srcObject = null; lv.srcObject = localStream;
+      try { var pp = lv.play && lv.play(); if (pp && pp.catch) pp.catch(function () {}); } catch (e) {}
+      applyMirror();
+      flipping = false;
+      return Promise.resolve(p).then(function () { return true; });
+    }).catch(function (e) {
+      // Couldn't open the other camera: bring the previous one back.
+      facingMode = prevMode;
+      flipping = false;
+      JC.toast("Couldn't switch camera on this phone.");
+      return navigator.mediaDevices.getUserMedia({ video: { facingMode: prevMode }, audio: false }).then(function (back) {
+        var t = back.getVideoTracks()[0];
+        if (!t) return false;
+        t.enabled = !videoOff;
+        if (sender) sender.replaceTrack(t);
+        if (oldTrack) { try { localStream.removeTrack(oldTrack); } catch (e2) {} }
+        localStream.addTrack(t);
+        localVideo().srcObject = localStream;
+        applyMirror();
+        return false;
+      }).catch(function () { return false; });
+    });
+  }
+  JC._flipCamera = flipCamera;
+
+  // v4.10 (user 23:32: "tasvir jiski aa rahi ho wohi rehti, choti bari nahi
+  // hoti"): tap the small self-view to swap it with the big view (WhatsApp
+  // style); tap the small one again to swap back. Drag it to any corner.
+  var swapped = false, pipDrag = null, pipMoved = false;
+  function setSwapped(on) {
+    swapped = !!on;
+    var sc = $("screen-call");
+    if (sc && sc.classList) sc.classList.toggle("pip-swapped", swapped);
+    return swapped;
+  }
+  JC._setCallSwap = setSwapped;
+  JC._toggleCallSwap = function () { return setSwapped(!swapped); };
+  JC._isCallSwapped = function () { return swapped; };
+  function smallVideo() { return swapped ? remoteVideo() : localVideo(); }
+  function wirePip() {
+    ["localVideo", "remoteVideo"].forEach(function (id) {
+      var v = $(id);
+      if (!v || !v.addEventListener) return;
+      v.addEventListener("click", function () {
+        if (callKind !== "video") return;
+        if (pipMoved) { pipMoved = false; return; }
+        if (v === smallVideo()) JC._toggleCallSwap();
+      });
+      v.addEventListener("touchstart", function (e) {
+        if (v !== smallVideo() || !e.touches || !e.touches[0]) return;
+        var r = v.getBoundingClientRect();
+        pipDrag = { x: e.touches[0].clientX, y: e.touches[0].clientY, l: r.left, t: r.top, w: r.width, h: r.height, el: v };
+        pipMoved = false;
+      }, { passive: true });
+      v.addEventListener("touchmove", function (e) {
+        if (!pipDrag || pipDrag.el !== v || !e.touches || !e.touches[0]) return;
+        var dx = e.touches[0].clientX - pipDrag.x, dy = e.touches[0].clientY - pipDrag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 8) pipMoved = true;
+        if (!pipMoved) return;
+        if (e.cancelable) e.preventDefault();
+        v.style.left = (pipDrag.l + dx) + "px"; v.style.top = (pipDrag.t + dy) + "px";
+        v.style.right = "auto"; v.style.bottom = "auto";
+      }, { passive: false });
+      v.addEventListener("touchend", function () {
+        if (!pipDrag || pipDrag.el !== v) return;
+        if (pipMoved) {
+          // snap to nearest corner
+          var r = v.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, m = 14;
+          var left = (r.left + r.width / 2) < W / 2, top = (r.top + r.height / 2) < H / 2;
+          v.style.left = left ? m + "px" : "auto"; v.style.right = left ? "auto" : m + "px";
+          v.style.top = top ? (m + 40) + "px" : "auto"; v.style.bottom = top ? "auto" : "150px";
+          setTimeout(function () { pipMoved = false; }, 350);
+        }
+        pipDrag = null;
+      });
+    });
+  }
+  function resetPip() {
+    setSwapped(false);
+    ["localVideo", "remoteVideo"].forEach(function (id) {
+      var v = $(id); if (!v || !v.style) return;
+      v.style.left = v.style.top = v.style.right = v.style.bottom = "";
+    });
+  }
+  JC._resetPip = resetPip;
   function toggleSpeaker() {
     // Shell bridge first (vc4): real earpiece/speakerphone switch.
     // Guarded — the vc3 shell does not have it yet.
@@ -669,6 +798,7 @@
     $("btnMute").addEventListener("click", toggleMute);
     $("btnVideoOff").addEventListener("click", toggleVideo);
     $("btnCamFlipCall").addEventListener("click", flipCamera);
+    wirePip();
     $("btnSpeaker").addEventListener("click", function () {
       toggleSpeaker();
       $("btnSpeaker").classList.toggle("on", !!speakerOn);
