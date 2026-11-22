@@ -60,14 +60,17 @@
     if (!JC.currentChatOtherUid || JC.currentChatIsGroup) return;
     var uid = JC.currentChatOtherUid;
     var p = JC.currentChatOther || (JC.getCachedProfile ? JC.getCachedProfile(uid) : null);
-    JC.showScreen("screen-contact");
+    JC.showScreen("screen-contact", { push: true });
     var fill = function (prof) {
       $("contactAvatar").innerHTML = prof.photoURL
         ? '<img src="' + esc(prof.photoURL) + '" alt="">'
         : esc((prof.displayName || "?")[0] || "?");
       $("contactName").textContent = prof.displayName || "Unknown";
       // @username hi asli pehchan hai — do "Asif" hon to bhi farq nazar aaye.
-      $("contactGmail").textContent = prof.username ? "@" + prof.username : (prof.gmail || "");
+      // Username aur Gmail dono alag lines par (v4.2).
+      $("contactUsername").textContent = prof.username ? "@" + prof.username : "";
+      $("contactGmail").textContent = prof.gmail || "";
+      $("contactAbout").textContent = JC.aboutOf ? JC.aboutOf(prof) : (prof.about || "Available");
       $("contactStatus").textContent = prof.online ? "online"
         : (prof.lastSeen ? "last seen" : "offline");
       refreshBlockButton(uid);
@@ -93,7 +96,7 @@
 
   // ---------- settings: blocked contacts list ----------
   JC.openSettings = function () {
-    JC.showScreen("screen-settings");
+    JC.showScreen("screen-settings", { push: true });
     renderBlockedList();
   };
 
@@ -152,7 +155,7 @@
       }
     });
     // Contact profile screen.
-    $("btnContactBack").addEventListener("click", function () { JC.showScreen("screen-chat"); });
+    $("btnContactBack").addEventListener("click", function () { JC.goBack(); });
     $("btnBlockContact").addEventListener("click", function () {
       var uid = JC.currentChatOtherUid;
       if (!uid) return;
@@ -164,7 +167,7 @@
     });
     // Settings screen.
     $("btnSettings").addEventListener("click", JC.openSettings);
-    $("btnSettingsBack").addEventListener("click", function () { JC.showScreen("screen-list"); });
-    $("btnSettingsAbout").addEventListener("click", function () { JC.showScreen("screen-about"); });
+    $("btnSettingsBack").addEventListener("click", function () { JC.goBack(); });
+    $("btnSettingsAbout").addEventListener("click", function () { JC.showScreen("screen-about", { push: true }); });
   });
 })();

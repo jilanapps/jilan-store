@@ -307,7 +307,7 @@
   };
 
   JC.openRequests = function () {
-    if (JC.showScreen) JC.showScreen("screen-requests");
+    if (JC.showScreen) JC.showScreen("screen-requests", { push: true });
   };
 
   // Sign-in par requests listener shuru karo (app.js ke onSignedIn ke sath).
@@ -327,7 +327,7 @@
     var row = $("requestsRow");
     if (row) row.addEventListener("click", function () { JC.openRequests(); });
     var back = $("btnRequestsBack");
-    if (back) back.addEventListener("click", function () { JC.showScreen("screen-list"); });
+    if (back) back.addEventListener("click", function () { JC.goBack(); });
     // Agar page load hote waqt pehle se signed in ho (listener wrapper
     // lagne se pehle auth resolve ho gaya ho) — tab bhi listener shuru karo.
     if (JC.currentUser) JC.startRequestsListener();

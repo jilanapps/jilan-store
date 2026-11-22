@@ -40,7 +40,18 @@
     t.classList.add("show");
     setTimeout(function () { t.classList.remove("show"); }, 3000);
   };
-  function showScreen(id) {
+  // ---------- navigation history (v4.2 — back bug fix) ----------
+  // Masla (user report 2026-11-22 12:45): kisi screen se Back dabane par
+  // poori app band ho jati thi. Wajah: showScreen sirf CSS class badalta
+  // tha — browser history me kabhi entry nahi banti thi, is liye shell ka
+  // onBackPressed (WebView.goBack() -> canGoBack() false -> finish())
+  // seedha app band kar deta tha. Fix: har drill-down screen history me
+  // push hoti hai; popstate (system Back) pichli screen dikhata hai; chat
+  // list par Back se app band hona theek hai (history khatam).
+  // opts: {push:true} drill-down ke liye, {replace:true} home-level ke liye.
+  var currentScreen = "screen-login";
+  function showScreen(id, opts) {
+    opts = opts || {};
     document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
     var el = $(id);
     if (el) el.classList.add("active");
@@ -55,7 +66,38 @@
         });
       }
     }
+    // Browser history: push = nayi entry (Back se wapas aaye ga),
+    // replace = wahi entry badlo (home-level screens: list/calls/status,
+    // login — in se Back seedha app band kare ya pichli drill-down par jaye).
+    try {
+      if (opts.push) window.history.pushState({ screen: id }, "");
+      else if (opts.replace) window.history.replaceState({ screen: id }, "");
+    } catch (e) { /* history na ho to bhi screen dikhni chahiye */ }
+    currentScreen = id;
   }
+  // Header back arrow (←) aur koi bhi in-app back: browser history se
+  // wapas jao — popstate handler screen badalta hai. History me entry na
+  // ho (purana flow) to seedha chat list dikhao.
+  JC.goBack = function () {
+    try {
+      if (window.history && window.history.length > 1) { window.history.back(); return; }
+    } catch (e) {}
+    if (currentScreen === "screen-chat") closeChat();
+    if (currentScreen === "screen-nearby" && JC.nearbyLeave) { JC.nearbyLeave(); return; }
+    showScreen("screen-list", { replace: true });
+  };
+  // System Back (Android): history entry ho to pichli screen; warna
+  // WebView khud app band kar deta hai (shell onBackPressed).
+  window.addEventListener("popstate", function (e) {
+    var id = (e.state && e.state.screen) || "screen-list";
+    // Chhori hui screen ki safai: chat listeners band, Nearby session khatam.
+    if (currentScreen === "screen-chat") closeChat();
+    if (currentScreen === "screen-nearby" && JC.nearbyLeave) {
+      // nearbyLeave khud list dikhata hai — popstate ka showScreen na chale.
+      JC.nearbyLeave(); return;
+    }
+    showScreen(id);
+  });
   // Tab bar mapping: screen id -> tab name.
   var TAB_SCREENS = { "screen-list": "chats", "screen-calls": "calls", "screen-status": "updates" };
   JC.showScreen = showScreen;
@@ -84,6 +126,99 @@
     if (profile && profile.photoURL) return '<img src="' + esc(profile.photoURL) + '" alt="">';
     return esc(initials(profile ? profile.displayName : "?"));
   }
+  // ---------- profile: About bio (v4.2, WhatsApp-like) ----------
+  // About max 139 characters (WhatsApp limit). Khaali ho to "Available".
+  JC.ABOUT_MAX = 139;
+  JC.DEFAULT_ABOUT = "Available";
+  JC.aboutOf = function (p) {
+    var a = p && p.about ? String(p.about).trim() : "";
+    return a || JC.DEFAULT_ABOUT;
+  };
+  // ---------- profile: photo (v4.2) ----------
+  // NO Firebase Storage (bucket nahi hai — Blaze nahi). Photo ko chhota
+  // kar ke (square crop, max 256px, JPEG) base64 data URL bana kar
+  // users/{uid}.photoURL me save karte hain — avatarHtml use har jagah
+  // dikhata hai (chat list, header, search, contact, status). Firestore
+  // doc 1 MB limit — data URL ~30 KB se neeche rehna lazmi hai.
+  JC.PHOTO_MAX_SIZE = 256;
+  JC.PHOTO_MAX_URL = 250000; // data URL characters (rules bhi 300k tak rokte hain)
+  // Pure helper (testable): image ko square-crop kar ke data URL banao.
+  JC.photoDataUrlFromImage = function (img, size, quality) {
+    var canvas = document.createElement("canvas");
+    canvas.width = size; canvas.height = size;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    var w = img.naturalWidth || img.width || size;
+    var h = img.naturalHeight || img.height || size;
+    var side = Math.min(w, h);
+    var sx = Math.max(0, (w - side) / 2), sy = Math.max(0, (h - side) / 2);
+    ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+    return canvas.toDataURL("image/jpeg", quality);
+  };
+  // File -> data URL. Pehle 256px/0.7, bara ho to 192px/0.5, phir bhi
+  // bara ho to reject (doc limit). Non-image file par reject.
+  JC.compressProfilePhoto = function (file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !file.type || file.type.indexOf("image/") !== 0) {
+        reject(new Error("Please choose a photo.")); return;
+      }
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error("Could not read the photo.")); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error("Could not open the photo.")); };
+        img.onload = function () {
+          var url = JC.photoDataUrlFromImage(img, JC.PHOTO_MAX_SIZE, 0.7);
+          if (url && url.length <= JC.PHOTO_MAX_URL) { resolve(url); return; }
+          url = JC.photoDataUrlFromImage(img, 192, 0.5);
+          if (url && url.length <= JC.PHOTO_MAX_URL) { resolve(url); return; }
+          reject(new Error("Photo is too big — choose a smaller one."));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  JC.saveProfilePhoto = function (file) {
+    if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
+    return JC.compressProfilePhoto(file).then(function (url) {
+      return JC.db.collection("users").doc(JC.currentUser.uid).update({ photoURL: url }).then(function () {
+        if (JC.userProfile) JC.userProfile.photoURL = url;
+        JC.loadProfileScreen();
+        JC.toast("Photo updated");
+        return url;
+      });
+    });
+  };
+  JC.removeProfilePhoto = function () {
+    if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
+    return JC.db.collection("users").doc(JC.currentUser.uid).update({ photoURL: "" }).then(function () {
+      if (JC.userProfile) JC.userProfile.photoURL = "";
+      JC.loadProfileScreen();
+      JC.toast("Photo removed");
+    });
+  };
+  // About save — 139 se zyada ho to kaat do, khaali ho to "Available" likho.
+  JC.saveAbout = function (text) {
+    if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
+    var a = String(text == null ? "" : text).trim().slice(0, JC.ABOUT_MAX);
+    if (!a) a = JC.DEFAULT_ABOUT;
+    return JC.db.collection("users").doc(JC.currentUser.uid).update({ about: a }).then(function () {
+      if (JC.userProfile) JC.userProfile.about = a;
+      JC.toast("About saved");
+      return a;
+    });
+  };
+  JC.saveDisplayName = function (name) {
+    if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
+    var n = String(name == null ? "" : name).trim();
+    if (!n) return Promise.reject(new Error("Type a name first."));
+    return JC.db.collection("users").doc(JC.currentUser.uid).update({ displayName: n }).then(function () {
+      if (JC.userProfile) JC.userProfile.displayName = n;
+      JC.toast("Name saved");
+      return n;
+    });
+  };
   function chatIdFor(a, b) { return [a, b].sort().join("_"); }
   JC.chatIdFor = chatIdFor; // calls.js (call history) bhi yehi istemal karta hai.
   JC.getCachedProfile = function (uid) { return otherProfiles[uid] || null; };
@@ -98,7 +233,7 @@
 
   // ---------- auth hooks (called from auth.js) ----------
   JC.onSignedIn = function (user, profile) {
-    showScreen("screen-list");
+    showScreen("screen-list", { replace: true });
     JC.loadProfileScreen();
     if (JC.loadBlockedList) JC.loadBlockedList();
     startChatListListener();
@@ -106,14 +241,21 @@
   };
   JC.onSignedOut = function () {
     if (listUnsub) { listUnsub(); listUnsub = null; }
+    if (typeof clearProfileUnsubs === "function") clearProfileUnsubs();
     closeChat();
     showScreen("screen-login");
   };
 
   // ---------- chat list ----------
+  var profileUnsubs = []; // partner profile live listeners (name/photo updates)
+  function clearProfileUnsubs() {
+    profileUnsubs.forEach(function (u) { try { u(); } catch (e) {} });
+    profileUnsubs = [];
+  }
   function startChatListListener() {
     if (!JC.db || !JC.currentUser) return;
     if (listUnsub) listUnsub();
+    clearProfileUnsubs();
     listUnsub = JC.db.collection("userChats").doc(JC.currentUser.uid).collection("list")
       .orderBy("lastMessageAt", "desc")
       .onSnapshot(function (snap) {
@@ -159,17 +301,20 @@
             return; // no delivered-marking in groups (ticks stop at "sent")
           }
           // Fill in the partner profile + last-message preview.
-          JC.db.collection("users").doc(otherUid).get().then(function (pSnap) {
+          // LIVE listener (v4.2): dusre bande ka naam/photo badle to chat
+          // list me khud update ho jaye — app dobara kholne ki zaroorat nahi.
+          profileUnsubs.push(JC.db.collection("users").doc(otherUid).onSnapshot(function (pSnap) {
             var p = pSnap.exists ? pSnap.data() : { displayName: "Unknown", photoURL: "" };
             otherProfiles[otherUid] = p;
             var av = row.querySelector(".avatar");
-            av.innerHTML = avatarHtml(p);
-            row.querySelector(".name").textContent = p.displayName || "Unknown";
+            if (av) av.innerHTML = avatarHtml(p);
+            var nm = row.querySelector(".name");
+            if (nm) nm.textContent = p.displayName || "Unknown";
             // @username hi asli pehchan hai — do "Asif" hon to bhi farq
             // nazar aaye. Gmail wale user ke paas username nahi hota.
             var handle = row.querySelector(".handle");
             if (handle) handle.textContent = p.username ? "@" + p.username : "";
-          });
+          }));
           JC.db.collection("chats").doc(entry.chatId).get().then(function (cSnap) {
             if (!cSnap.exists) return;
             var c = cSnap.data();
@@ -213,7 +358,7 @@
     JC.currentChatIsGroup = false;
     JC.currentChatOtherUid = otherUid;
     JC.currentChatOther = otherProfiles[otherUid] || null;
-    showScreen("screen-chat");
+    showScreen("screen-chat", { push: true });
     $("messages").innerHTML = "";
     msgEls = {};
     $("msgInput").value = "";
@@ -625,7 +770,8 @@
       box.innerHTML =
         '<div class="user-result"><div class="avatar">' + avatarHtml(found.data) + '</div>' +
         '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
-        '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div></div>' +
+        '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div>' +
+        '<div class="gmail" style="font-style:italic;">' + esc(JC.aboutOf(found.data)) + '</div></div>' +
         '<button class="btn btn-primary btn-small" id="btnStartChat"' + disabled + '>' + btnLabel + '</button></div>';
       if (action === "already-sent") return;
       $("btnStartChat").addEventListener("click", function () {
@@ -663,21 +809,37 @@
     return Promise.reject(new Error("requests-not-loaded"));
   };
 
-  // ---------- profile screen ----------
+  // ---------- profile screen (v4.2: username read-only + About + photo) ----------
+  // Username PERMANENT hai — kabhi edit nahi hota, sirf dikhta hai (+ Copy).
+  // Gmail wale user ka username nahi hota — us ka Gmail dikhta hai.
   JC.loadProfileScreen = function () {
     var p = JC.userProfile;
+    if (!p && JC.db && JC.currentUser) {
+      // Profile abhi load nahi hui (v4.0 fallback case) — aik dafa parho.
+      JC.db.collection("users").doc(JC.currentUser.uid).get().then(function (snap) {
+        if (snap.exists) { JC.userProfile = snap.data(); JC.loadProfileScreen(); }
+      }).catch(function () {});
+      return;
+    }
     if (!p) return;
     $("profileAvatar").innerHTML = avatarHtml(p, true);
     $("profileName").value = p.displayName || "";
-    // Username wale user ki Gmail nahi hoti — @username dikhao.
-    var gmailLabel = $("profileGmailLabel");
+    var uEl = $("profileUsername"), copyBtn = $("btnCopyUsername");
     if (p.username) {
-      if (gmailLabel) gmailLabel.textContent = "Your username";
-      $("profileGmail").textContent = "@" + p.username;
+      if (uEl) uEl.textContent = "@" + p.username;
+      if (copyBtn) copyBtn.classList.remove("hidden");
     } else {
-      if (gmailLabel) gmailLabel.textContent = "Your Gmail";
-      $("profileGmail").textContent = p.gmail || (JC.currentUser && JC.currentUser.email) || "";
+      if (uEl) uEl.textContent = "No username — this account uses Gmail.";
+      if (copyBtn) copyBtn.classList.add("hidden");
     }
+    $("profileGmail").textContent = p.gmail || (JC.currentUser && JC.currentUser.email) || "—";
+    var aboutEl = $("profileAbout");
+    if (aboutEl) aboutEl.value = (p.about || "").trim();
+    var cnt = $("aboutCount");
+    if (cnt) cnt.textContent = String((p.about || "").trim().length);
+    // Status screen ka apna avatar bhi yahin se fresh rakho.
+    var myAv = $("myStatusAvatar");
+    if (myAv) myAv.innerHTML = p.photoURL ? '<img src="' + esc(p.photoURL) + '" alt="">' : esc((p.displayName || "?")[0] || "?");
   };
 
   // Replaces a dead media element (Storage file deleted after 3 days)
@@ -721,7 +883,7 @@
       });
     });
     var btnCallsBack = $("btnCallsBack");
-    if (btnCallsBack) btnCallsBack.addEventListener("click", function () { showScreen("screen-list"); });
+    if (btnCallsBack) btnCallsBack.addEventListener("click", function () { JC.goBack(); });
 
     // ---------- chat list search (LOCAL filter only) ----------
     // Ye sirf apni pehle se khuli chats ko filter karta hai — server par
@@ -758,11 +920,11 @@
       if (emojiPanel) emojiPanel.classList.toggle("hidden");
     });
 
-    $("btnProfile").addEventListener("click", function () { JC.loadProfileScreen(); showScreen("screen-profile"); });
-    $("btnProfileBack").addEventListener("click", function () { showScreen("screen-list"); });
-    $("btnNewChat").addEventListener("click", function () { showScreen("screen-newchat"); });
-    $("btnNewChatBack").addEventListener("click", function () { showScreen("screen-list"); });
-    $("btnBack").addEventListener("click", function () { closeChat(); showScreen("screen-list"); });
+    $("btnProfile").addEventListener("click", function () { JC.loadProfileScreen(); showScreen("screen-profile", { push: true }); });
+    $("btnProfileBack").addEventListener("click", function () { JC.goBack(); });
+    $("btnNewChat").addEventListener("click", function () { showScreen("screen-newchat", { push: true }); });
+    $("btnNewChatBack").addEventListener("click", function () { JC.goBack(); });
+    $("btnBack").addEventListener("click", function () { JC.goBack(); });
     $("msgInput").addEventListener("input", updateComposer);
     $("msgInput").addEventListener("keydown", function (e) { if (e.key === "Enter") sendText(); });
     $("btnSend").addEventListener("click", sendText);
@@ -816,12 +978,35 @@
       });
     }
     $("btnSaveName").addEventListener("click", function () {
-      var name = ($("profileName").value || "").trim();
-      if (!name || !JC.db || !JC.currentUser) return;
-      JC.db.collection("users").doc(JC.currentUser.uid).update({ displayName: name }).then(function () {
-        JC.userProfile.displayName = name;
-        JC.toast("Name saved");
-      }).catch(function (e) { JC.toast("Save failed: " + e.message); });
+      JC.saveDisplayName($("profileName").value).catch(function (e) { JC.toast(e.message || "Save failed"); });
+    });
+    // ---------- profile v4.2: About + photo + username copy ----------
+    var aboutEl = $("profileAbout");
+    if (aboutEl) aboutEl.addEventListener("input", function () {
+      var cnt = $("aboutCount");
+      if (cnt) cnt.textContent = String((aboutEl.value || "").length);
+    });
+    $("btnSaveAbout").addEventListener("click", function () {
+      JC.saveAbout($("profileAbout").value).catch(function (e) { JC.toast(e.message || "Save failed"); });
+    });
+    var photoInput = $("profilePhotoInput");
+    $("btnChangePhoto").addEventListener("click", function () { if (photoInput) photoInput.click(); });
+    $("profileAvatar").addEventListener("click", function () { if (photoInput) photoInput.click(); });
+    if (photoInput) photoInput.addEventListener("change", function () {
+      var f = photoInput.files && photoInput.files[0];
+      if (f) JC.saveProfilePhoto(f).catch(function (e) { JC.toast(e.message || "Photo update failed"); });
+      photoInput.value = "";
+    });
+    $("btnRemovePhoto").addEventListener("click", function () {
+      JC.removeProfilePhoto().catch(function (e) { JC.toast(e.message || "Remove failed"); });
+    });
+    $("btnCopyUsername").addEventListener("click", function () {
+      var u = JC.userProfile && JC.userProfile.username ? "@" + JC.userProfile.username : "";
+      if (!u) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(u).then(function () { JC.toast("Username copied"); })
+          .catch(function () { JC.toast(u); });
+      } else JC.toast(u);
     });
     // NO logout button in this app (v4.0, user ka sakht hukm): logout
     // ka koi rasta nahi — is liye is button ka listener yahan maujood

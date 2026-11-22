@@ -274,7 +274,9 @@
   <div class="page-body profile-center">
     <div class="avatar large" id="contactAvatar">?</div>
     <h2 id="contactName" style="margin-top:6px;">...</h2>
+    <div class="gmail" id="contactUsername">-</div>
     <div class="gmail" id="contactGmail">-</div>
+    <div class="gmail" id="contactAbout" style="margin-top:8px;font-style:italic;">-</div>
     <div class="gmail" id="contactStatus" style="margin-top:6px;">-</div>
     <div class="profile-row">
       <button class="btn btn-danger" id="btnBlockContact">Block contact</button>
@@ -325,15 +327,35 @@
     <h1>Profile</h1>
   </div>
   <div class="page-body profile-center">
-    <div class="avatar large" id="profileAvatar">?</div>
+    <!-- Tap the photo to change it (gallery or camera). Photo is shrunk
+         to 256px and saved in your profile (no separate storage). -->
+    <div class="avatar large profile-photo" id="profileAvatar" title="Tap to change photo">?</div>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:2px;">Tap photo to change</p>
+    <input type="file" id="profilePhotoInput" class="hidden" accept="image/*">
+    <div class="profile-row" style="text-align:center;">
+      <button class="btn btn-ghost btn-small" id="btnChangePhoto">Change photo</button>
+      <button class="btn btn-ghost btn-small" id="btnRemovePhoto">Remove photo</button>
+    </div>
     <div class="profile-row">
       <label>Your name</label>
-      <input class="text-input" type="text" id="profileName" placeholder="Your name">
+      <input class="text-input" type="text" id="profileName" placeholder="Your name" maxlength="60">
       <button class="btn btn-primary" id="btnSaveName">Save name</button>
     </div>
     <div class="profile-row">
-      <label id="profileGmailLabel">Your Gmail</label>
+      <label>Your username</label>
+      <div class="username-line"><span class="gmail" id="profileUsername">-</span>
+        <button class="btn btn-ghost btn-small hidden" id="btnCopyUsername">Copy</button></div>
+      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;line-height:1.5;">Username change nahi hota — ye hamesha aap ka hi rahega.</p>
+    </div>
+    <div class="profile-row">
+      <label>Your Gmail</label>
       <div class="gmail" id="profileGmail">-</div>
+    </div>
+    <div class="profile-row">
+      <label>About</label>
+      <textarea class="text-input" id="profileAbout" rows="2" maxlength="139" placeholder="Available"></textarea>
+      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;"><span id="aboutCount">0</span>/139 — friends see this in your contact info.</p>
+      <button class="btn btn-primary" id="btnSaveAbout">Save about</button>
     </div>
     <div class="profile-row">
       <button class="btn btn-ghost" id="btnAbout">About Jilan Chat</button>

@@ -258,7 +258,7 @@
   // ---------- wire UI ----------
   document.addEventListener("DOMContentLoaded", function () {
     $("btnStatus").addEventListener("click", JC.openStatus);
-    $("btnStatusBack").addEventListener("click", function () { JC.showScreen("screen-list"); });
+    $("btnStatusBack").addEventListener("click", function () { JC.goBack(); });
     $("btnAddStatus").addEventListener("click", function () {
       $("statusAddBox").classList.toggle("hidden");
     });
@@ -271,8 +271,8 @@
     });
     $("statusViewerClose").addEventListener("click", closeViewer);
     var aboutBtn = $("btnAbout");
-    if (aboutBtn) aboutBtn.addEventListener("click", function () { JC.showScreen("screen-about"); });
+    if (aboutBtn) aboutBtn.addEventListener("click", function () { JC.showScreen("screen-about", { push: true }); });
     var aboutBack = $("btnAboutBack");
-    if (aboutBack) aboutBack.addEventListener("click", function () { JC.showScreen("screen-profile"); });
+    if (aboutBack) aboutBack.addEventListener("click", function () { JC.goBack(); });
   });
 })();

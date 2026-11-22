@@ -233,7 +233,7 @@
       } catch (e) { /* native state na mile to idle hi rahe */ }
     }
     renderNearby();
-    if (JC.showScreen) JC.showScreen("screen-nearby");
+    if (JC.showScreen) JC.showScreen("screen-nearby", { push: true });
   };
 
   function renderNearby() {
@@ -309,7 +309,7 @@
     var row = $("nearbyRow");
     if (row) row.addEventListener("click", function () { JC.openNearby(); });
     var back = $("btnNearbyBack");
-    if (back) back.addEventListener("click", function () { JC.nearbyLeave(); });
+    if (back) back.addEventListener("click", function () { JC.goBack(); });
     var start = $("btnNearbyStart");
     if (start) start.addEventListener("click", function () { JC.nearbyStart(); });
     var scan = $("btnNearbyScan");

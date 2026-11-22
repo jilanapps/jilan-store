@@ -76,7 +76,7 @@
     JC.currentChatIsGroup = true;
     JC.currentChatOtherUid = null;
     JC.currentChatOther = null;
-    JC.showScreen("screen-chat");
+    JC.showScreen("screen-chat", { push: true });
     $("messages").innerHTML = "";
     groupMsgEls = {};
     $("msgInput").value = "";
@@ -225,7 +225,7 @@
   // ---------- group info screen ----------
   JC.openGroupInfo = function () {
     if (!currentGroup || !JC.currentChatId) return;
-    JC.showScreen("screen-groupinfo");
+    JC.showScreen("screen-groupinfo", { push: true });
     renderGroupInfo();
   };
 
@@ -340,8 +340,8 @@
 
   // ---------- wire UI ----------
   document.addEventListener("DOMContentLoaded", function () {
-    $("btnNewGroup").addEventListener("click", function () { JC.showScreen("screen-newgroup"); });
-    $("btnNewGroupBack").addEventListener("click", function () { JC.showScreen("screen-list"); });
+    $("btnNewGroup").addEventListener("click", function () { JC.showScreen("screen-newgroup", { push: true }); });
+    $("btnNewGroupBack").addEventListener("click", function () { JC.goBack(); });
     $("btnCreateGroup").addEventListener("click", function () {
       var name = ($("groupNameInput").value || "").trim();
       var type = document.querySelector('input[name="groupType"]:checked');
@@ -356,7 +356,7 @@
     $("chatWho").addEventListener("click", function () {
       if (JC.currentChatIsGroup) JC.openGroupInfo();
     });
-    $("btnGroupInfoBack").addEventListener("click", function () { JC.showScreen("screen-chat"); });
+    $("btnGroupInfoBack").addEventListener("click", function () { JC.goBack(); });
     $("btnLeaveGroup").addEventListener("click", JC.leaveGroup);
     $("btnAddMemberSearch").addEventListener("click", function () {
       var gmail = ($("groupAddInput").value || "").trim().toLowerCase();

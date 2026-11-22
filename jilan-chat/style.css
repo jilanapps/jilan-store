@@ -136,6 +136,12 @@ input, textarea { font-family: inherit; font-size: 15px; }
 .profile-center .gmail { color: #667781; font-size: 14px; margin-top: 4px; }
 .profile-row { margin-top: 20px; text-align: left; }
 .profile-row label { font-size: 13px; color: #667781; display: block; margin-bottom: 6px; }
+/* ---------- profile photo + username (v4.2) ---------- */
+.profile-photo { cursor: pointer; position: relative; }
+.profile-photo::after { content: "\270E"; position: absolute; right: 0; bottom: 0; width: 28px; height: 28px; border-radius: 50%; background: #1f7ae0; color: #fff; font-size: 15px; line-height: 28px; text-align: center; }
+.username-line { display: flex; align-items: center; gap: 10px; }
+.username-line .gmail { flex: 1; }
+#profileAbout { resize: vertical; min-height: 44px; }
 
 /* ---------- camera ---------- */
 #screen-camera { background: #000; color: #fff; }
