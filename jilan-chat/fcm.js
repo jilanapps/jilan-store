@@ -1,4 +1,11 @@
-// Jilan Chat v4.3 — FCM push notifications (web side).
+// Jilan Chat v4.12 — FCM push notifications (web side).
+// v4.12 (2026-11-22, APK vc11): native FCM is back in the APK (BDBS v91
+// library-R fix). Token save now runs whenever the native shell hands a
+// token (independent of PUSH_ENABLED), retries until the user is signed in
+// and the write lands, and keeps a visible status (JC.pushStatus()).
+// Notification tap / call screen -> window.__jcPushOpen(json) opens the
+// chat. PUSH_ENABLED (event writes) stays false until the VM push
+// listener is running with its service-account key.
 //
 // The device token comes from NATIVE Firebase (MainActivity /
 // FcmService), NOT from the Firebase web Messaging SDK — the web SDK
@@ -52,12 +59,32 @@
   };
 
   // ---------- token save ----------
+  // Status shown by JC.pushStatus(): native shell status + token save.
+  var tokenState = { saved: false, error: "", tries: 0 };
+  var retryTimer = null;
+  JC.pushStatus = function () {
+    var nat = {};
+    try { if (window.Android && window.Android.pushStatus) nat = JSON.parse(window.Android.pushStatus() || "{}"); } catch (e) {}
+    return { native: nat, tokenSaved: tokenState.saved, error: tokenState.error,
+      tries: tokenState.tries, pushEnabled: !!JC.PUSH_ENABLED };
+  };
+  // Retry the save every 5 s (max 24 tries) until signed in + written.
+  function saveWithRetry(token) {
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    tokenState.tries++;
+    JC.saveFcmToken(token).then(function (r) {
+      if (r === "retry" && tokenState.tries < 24) {
+        retryTimer = setTimeout(function () { saveWithRetry(token); }, 5000);
+      }
+    });
+  }
   JC.saveFcmToken = function (token) {
     try {
-      if (!token || !JC.db || !JC.currentUser) return Promise.resolve(false);
+      if (!token) return Promise.resolve(false);
+      if (!JC.db || !JC.currentUser) return Promise.resolve("retry");
       var saved = null;
-      try { saved = window.localStorage.getItem(TOKEN_LS_KEY); } catch (e) {}
-      if (saved === token) return Promise.resolve(false);
+      try { saved = window.localStorage.getItem(TOKEN_LS_KEY + ":" + JC.currentUser.uid); } catch (e) {}
+      if (saved === token) { tokenState.saved = true; return Promise.resolve(false); }
       var ref = JC.db.collection("users").doc(JC.currentUser.uid);
       return ref.get().then(function (snap) {
         var toks = [];
@@ -66,16 +93,25 @@
           if (d.fcmTokens && d.fcmTokens.length) toks = d.fcmTokens.slice();
         }
         if (toks.indexOf(token) >= 0) {
-          try { window.localStorage.setItem(TOKEN_LS_KEY, token); } catch (e) {}
+          try { window.localStorage.setItem(TOKEN_LS_KEY + ":" + JC.currentUser.uid, token); } catch (e) {}
+          tokenState.saved = true; tokenState.error = "";
           return false;
         }
         toks.push(token);
+        toks = toks.filter(function (t, i) { return toks.indexOf(t) === i; });
         if (toks.length > MAX_TOKENS) toks = toks.slice(toks.length - MAX_TOKENS);
         return ref.update({ fcmTokens: toks }).then(function () {
-          try { window.localStorage.setItem(TOKEN_LS_KEY, token); } catch (e) {}
+          try { window.localStorage.setItem(TOKEN_LS_KEY + ":" + JC.currentUser.uid, token); } catch (e) {}
+          tokenState.saved = true; tokenState.error = "";
           return true;
         });
-      }).catch(function () { return false; });
+      }).catch(function (err) {
+        // never swallow silently: keep the reason visible + retry
+        tokenState.saved = false;
+        tokenState.error = String((err && (err.code || err.message)) || err).slice(0, 120);
+        try { console.warn("Jilan Chat push token save failed:", tokenState.error); } catch (e) {}
+        return "retry";
+      });
     } catch (e) {
       return Promise.resolve(false);
     }
@@ -87,9 +123,40 @@
     try {
       if (!token) return;
       pendingToken = token;
-      if (JC.currentUser) JC.saveFcmToken(token);
+      tokenState.tries = 0;
+      saveWithRetry(token);
     } catch (e) {}
   };
+  // Native token error (vc11 MainActivity.reportFcmError).
+  window.__jcFcmError = function (msg) {
+    tokenState.error = "native: " + String(msg || "").slice(0, 120);
+    try { console.warn("Jilan Chat push:", tokenState.error); } catch (e) {}
+  };
+
+  // ---------- notification tap / call screen (vc11) ----------
+  // Message -> open that chat (1-to-1 or group). Call -> nothing to do:
+  // calls.js already shows the incoming-call screen from Firestore.
+  function openFromPush(raw, tries) {
+    try {
+      var o = typeof raw === "string" ? JSON.parse(raw) : (raw || {});
+      if (o.type !== "message" || !o.chatId) return;
+      if (!JC.currentUser || !(JC.openChat || JC.openGroupChat)) {
+        if ((tries || 0) < 40) setTimeout(function () { openFromPush(o, (tries || 0) + 1); }, 500);
+        return;
+      }
+      if (o.groupId && JC.openGroupChat) JC.openGroupChat(o.groupId);
+      else if (JC.openChat) JC.openChat(o.chatId, o.fromUid || undefined);
+    } catch (e) {}
+  }
+  window.__jcPushOpen = function (raw) { openFromPush(raw, 0); };
+  if (window.__jcPendingPushOpen) {
+    var pend = window.__jcPendingPushOpen; window.__jcPendingPushOpen = null;
+    openFromPush(pend, 0);
+  }
+  if (window.__jcPendingFcmToken) {
+    var pt = window.__jcPendingFcmToken; window.__jcPendingFcmToken = null;
+    window.__jcFcmToken(pt);
+  }
 
   // ---------- push events ----------
   // Never throws, never rejects: a failed event write must never break
@@ -202,7 +269,7 @@
   // ---------- sign-in hook (own auth listener; auth.js has its own) ----------
   function onAuth(user) {
     if (user) {
-      if (pendingToken) JC.saveFcmToken(pendingToken);
+      if (pendingToken) { tokenState.tries = 0; saveWithRetry(pendingToken); }
       JC.startOutgoingCallListener();
     } else {
       pendingToken = null;
