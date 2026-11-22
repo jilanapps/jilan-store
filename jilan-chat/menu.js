@@ -5,6 +5,12 @@
 // screen logic is duplicated. Menu closes on outside tap and on Back.
 (function () {
   var JC = window.JC = window.JC || {};
+  // Play build flag (play/NOTE-FOR-WEB-AGENT.md). Any future update
+  // banner / APK link must be gated with !JC.isPlayBuild().
+  JC.isPlayBuild = function () {
+    try { if (window.Android && typeof window.Android.isPlayBuild === "function" && window.Android.isPlayBuild()) return true; } catch (e) {}
+    return window.JILAN_CHAT_PLAY === true || /JilanChatPlay\//.test((window.navigator && window.navigator.userAgent) || "");
+  };
   function $(id) { return document.getElementById(id); }
   var open = false, pushed = false;
 

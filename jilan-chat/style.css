@@ -16,7 +16,7 @@ input, textarea { font-family: inherit; font-size: 15px; }
 
 /* ---------- login ---------- */
 #screen-login { align-items: center; justify-content: center; padding: 24px; background: #1f7ae0; color: #fff; text-align: center; }
-#screen-login .logo { width: 96px; height: 96px; border-radius: 50%; background: #fff; color: #1f7ae0; font-size: 40px; font-weight: bold; line-height: 96px; margin-bottom: 16px; }
+#screen-login .logo { display: block; width: 96px; height: 96px; border-radius: 22px; object-fit: contain; margin: 0 auto 16px; }
 #screen-login h1 { font-size: 28px; margin-bottom: 6px; }
 #screen-login p.sub { opacity: .9; margin-bottom: 28px; }
 .login-card { background: #fff; color: #111b21; border-radius: 12px; padding: 20px; width: 100%; max-width: 360px; text-align: left; }
