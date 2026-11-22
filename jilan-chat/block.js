@@ -66,7 +66,8 @@
         ? '<img src="' + esc(prof.photoURL) + '" alt="">'
         : esc((prof.displayName || "?")[0] || "?");
       $("contactName").textContent = prof.displayName || "Unknown";
-      $("contactGmail").textContent = prof.gmail || "";
+      // @username hi asli pehchan hai — do "Asif" hon to bhi farq nazar aaye.
+      $("contactGmail").textContent = prof.username ? "@" + prof.username : (prof.gmail || "");
       $("contactStatus").textContent = prof.online ? "online"
         : (prof.lastSeen ? "last seen" : "offline");
       refreshBlockButton(uid);

@@ -1,4 +1,4 @@
-// Jilan Chat v1.0 — auth.js
+// Jilan Chat v3.0 — auth.js
 // ONE module owns all sign-in paths, so the parent can swap the primary
 // path later without touching chat code (app.js / calls.js never call
 // Firebase Auth directly — they use JC.auth and JC.currentUser).
@@ -20,6 +20,11 @@
 //   Console for the Web OAuth client before this works on a phone.
 // - WORKING FALLBACK: email-link sign-in (unchanged below). The user types
 //   their Gmail, taps the link Firebase emails them, and they are signed in.
+// - USERNAME LOGIN (v3, 2026-11-22): username + password via Firebase
+//   Email/Password auth on pseudo-email username@jilanchat.local (see
+//   JC.usernameLogin / JC.usernameSignup below). Gmail is NOT needed.
+//   Username is PERMANENT (never changes); display name is separate and
+//   can change any time. Reserved usernames live in JC.RESERVED_USERNAMES.
 
 (function () {
   var cfg = window.JILAN_CHAT_FIREBASE_CONFIG;
@@ -186,6 +191,105 @@
     });
   };
 
+  // ---------- Username + password sign-in (v3, 2026-11-22) ----------
+  // Dehati doston ko Gmail yaad nahi rehti, is liye username login bhi
+  // hai — Gmail wala rasta bhi rehta hai, dono options hain.
+  // Username Firebase Email/Password auth se chalta hai, pseudo-email
+  // username@jilanchat.local par. Asli Gmail kabhi nahi mangi jati.
+  // Username PERMANENT hai: aik dafa banne ke baad change nahi hota
+  // (display name alag hai — wo jab chahe badal sakta hai).
+  var USERNAME_DOMAIN = "@jilanchat.local";
+  // Reserved usernames — aik hi jagah (is list me) rakhe hain taake baad
+  // me naam add karna asaan ho. Ye naam koi user nahi le sakta, taake
+  // koi Dr Asif ya app ki naqal na kar sake. Rules me bhi yehi list hai.
+  JC.RESERVED_USERNAMES = ["drasif", "asif", "dr_asif", "mohammadasif", "jilan", "jilanchat", "jilanapps", "jilanappofficial", "admin", "support", "official", "system", "owner", "help"];
+
+  // Lowercase kar do — "Asif" aur "asif" do alag log na ban sakein.
+  JC.normalizeUsername = function (raw) {
+    return String(raw == null ? "" : raw).trim().toLowerCase();
+  };
+
+  JC.validateUsername = function (raw) {
+    var u = JC.normalizeUsername(raw);
+    if (!u) return { ok: false, error: "Username likhein." };
+    if (u.length < 3) return { ok: false, error: "Username kam se kam 3 haroof ka ho." };
+    if (u.length > 20) return { ok: false, error: "Username zyada se zyada 20 haroof ka ho." };
+    if (!/^[a-z0-9_]+$/.test(u)) return { ok: false, error: "Username me sirf chhote haroof (a-z), number aur _ chalenge." };
+    if (JC.RESERVED_USERNAMES.indexOf(u) >= 0) return { ok: false, error: "Ye username nahi le sakte — koi aur chunain." };
+    return { ok: true, username: u };
+  };
+
+  JC.usernameToEmail = function (username) {
+    return JC.normalizeUsername(username) + USERNAME_DOMAIN;
+  };
+  JC.isUsernameEmail = function (email) {
+    return String(email || "").toLowerCase().indexOf(USERNAME_DOMAIN) > 0;
+  };
+  JC.usernameFromEmail = function (email) {
+    var e = String(email || "").toLowerCase();
+    return JC.isUsernameEmail(e) ? e.split("@")[0] : "";
+  };
+
+  // Username available hai ya pehle se liya gaya? usernames/{username}
+  // claim doc public read hai (rules dekho) — signup se pehle bhi parha
+  // ja sakta hai, kyunke username khud public cheez hai.
+  JC.checkUsernameAvailable = function (username) {
+    if (!JC.db) return Promise.reject(new Error("firebase-not-configured"));
+    return JC.db.collection("usernames").doc(username).get().then(function (snap) {
+      return !snap.exists;
+    });
+  };
+
+  JC.usernameLogin = function (username, password) {
+    if (!JC.auth) return Promise.reject(new Error("firebase-not-configured"));
+    var v = JC.validateUsername(username);
+    if (!v.ok) return Promise.reject(new Error(v.error));
+    if (!password) return Promise.reject(new Error("Password likhein."));
+    return JC.auth.signInWithEmailAndPassword(JC.usernameToEmail(v.username), password)
+      .catch(function (e) {
+        if (e.code === "auth/user-not-found" || e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+          throw new Error("Username ya password ghalat hai.");
+        }
+        if (e.code === "auth/operation-not-allowed") {
+          throw new Error("Username login abhi on nahi hai — admin se rabta karein.");
+        }
+        throw e;
+      });
+  };
+
+  JC.usernameSignup = function (username, password, displayName) {
+    if (!JC.auth) return Promise.reject(new Error("firebase-not-configured"));
+    var v = JC.validateUsername(username);
+    if (!v.ok) return Promise.reject(new Error(v.error));
+    if (!password || password.length < 6) return Promise.reject(new Error("Password kam se kam 6 haroof ka ho."));
+    var name = String(displayName || "").trim() || v.username;
+    var email = JC.usernameToEmail(v.username);
+    return JC.checkUsernameAvailable(v.username).then(function (free) {
+      if (!free) throw new Error("Ye username pehle se liya gaya hai — koi aur chunain.");
+      return JC.auth.createUserWithEmailAndPassword(email, password);
+    }).then(function (cred) {
+      var user = cred.user;
+      return user.updateProfile({ displayName: name }).catch(function () {}).then(function () {
+        // Username claim likho — is se uniqueness pakki hoti hai (rules:
+        // claim sirf tab bane jab doc maujood na ho aur uid match kare).
+        // Agar claim likhna fail bhi ho jaye to account phir bhi chalta
+        // hai: pseudo-email khud unique hai, dobara wohi username lene
+        // par createUser "email already in use" dega.
+        return JC.db.collection("usernames").doc(v.username).set({
+          uid: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function () {});
+      }).then(function () {
+        return JC.ensureUserDoc(user);
+      });
+    }).catch(function (e) {
+      if (e.code === "auth/email-already-in-use") {
+        throw new Error("Ye username pehle se liya gaya hai — koi aur chunain.");
+      }
+      throw e;
+    });
+  };
+
   JC.signOut = function () {
     if (JC.currentUser) JC.setPresence(false);
     if (JC.auth) return JC.auth.signOut();
@@ -197,8 +301,12 @@
     if (!JC.db) return Promise.resolve(null);
     var ref = JC.db.collection("users").doc(user.uid);
     return ref.get().then(function (snap) {
-      var gmail = (user.email || "").toLowerCase();
-      var name = user.displayName || gmail.split("@")[0] || "Jilan Chat user";
+      var email = (user.email || "").toLowerCase();
+      // Username login wale user ki asli Gmail nahi hoti — pseudo-email
+      // se username nikalo, gmail khaali rakho. Username hi pehchan hai.
+      var username = JC.usernameFromEmail ? JC.usernameFromEmail(email) : "";
+      var gmail = username ? "" : email;
+      var name = user.displayName || username || gmail.split("@")[0] || "Jilan Chat user";
       if (!snap.exists) {
         var data = {
           gmail: gmail,
@@ -208,11 +316,14 @@
           lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+        if (username) data.username = username;
         return ref.set(data).then(function () { return data; });
       }
       var d = snap.data() || {};
       // Fill in a missing gmail (email-link sign-in always has one).
       if (!d.gmail && gmail) return ref.update({ gmail: gmail }).then(function () { d.gmail = gmail; return d; });
+      // Purane username account par username field bhar do (agar khaali ho).
+      if (username && !d.username) return ref.update({ username: username }).then(function () { d.username = username; return d; });
       return d;
     });
   };
@@ -264,6 +375,49 @@
         }).catch(function (e) {
           if (note) note.textContent = "Could not send the link: " + e.message;
           btnLink.disabled = false;
+        });
+      });
+    }
+
+    // ---------- Username + password login / signup (v3) ----------
+    var btnUserLogin = document.getElementById("btnUsernameLogin");
+    var userLoginNote = document.getElementById("usernameLoginNote");
+    if (btnUserLogin) {
+      btnUserLogin.addEventListener("click", function () {
+        var u = (document.getElementById("usernameInput").value || "");
+        var pw = (document.getElementById("usernamePasswordInput").value || "");
+        if (!JC.configReady) {
+          if (userLoginNote) userLoginNote.textContent = "Firebase is not connected yet.";
+          return;
+        }
+        btnUserLogin.disabled = true;
+        JC.usernameLogin(u, pw).then(function () {
+          // Success: onAuthStateChanged takes over.
+        }).catch(function (e) {
+          if (userLoginNote) userLoginNote.textContent = e.message;
+          btnUserLogin.disabled = false;
+        });
+      });
+    }
+
+    var btnSignup = document.getElementById("btnSignup");
+    var signupNote = document.getElementById("signupNote");
+    if (btnSignup) {
+      btnSignup.addEventListener("click", function () {
+        var name = (document.getElementById("signupNameInput").value || "");
+        var u = (document.getElementById("signupUsernameInput").value || "");
+        var pw = (document.getElementById("signupPasswordInput").value || "");
+        if (!JC.configReady) {
+          if (signupNote) signupNote.textContent = "Firebase is not connected yet.";
+          return;
+        }
+        btnSignup.disabled = true;
+        JC.usernameSignup(u, pw, name).then(function () {
+          if (signupNote) signupNote.textContent = "Account ban gaya — aap sign in ho gaye hain.";
+          // Success: onAuthStateChanged takes over.
+        }).catch(function (e) {
+          if (signupNote) signupNote.textContent = e.message;
+          btnSignup.disabled = false;
         });
       });
     }

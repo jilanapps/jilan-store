@@ -1,4 +1,4 @@
-// Jilan Chat v1.0 — app.js
+// Jilan Chat v3.0 — app.js
 // Chat list, 1-to-1 chat, text/media/voice messages, read ticks,
 // user search by Gmail, profile screen. No calls here — see calls.js.
 
@@ -44,7 +44,20 @@
     document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
     var el = $(id);
     if (el) el.classList.add("active");
+    // Bottom tabs sirf Chats / Calls / Updates screens par dikhte hain.
+    var bar = $("tabBar");
+    if (bar) {
+      var tab = TAB_SCREENS[id];
+      bar.classList.toggle("hidden", !tab);
+      if (tab) {
+        bar.querySelectorAll(".tab-btn").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-tab") === tab);
+        });
+      }
+    }
   }
+  // Tab bar mapping: screen id -> tab name.
+  var TAB_SCREENS = { "screen-list": "chats", "screen-calls": "calls", "screen-status": "updates" };
   JC.showScreen = showScreen;
   function fmtTime(ts) {
     if (!ts) return "";
@@ -72,6 +85,7 @@
     return esc(initials(profile ? profile.displayName : "?"));
   }
   function chatIdFor(a, b) { return [a, b].sort().join("_"); }
+  JC.chatIdFor = chatIdFor; // calls.js (call history) bhi yehi istemal karta hai.
   JC.getCachedProfile = function (uid) { return otherProfiles[uid] || null; };
   function lastMessagePreview(m) {
     if (!m) return "";
@@ -121,6 +135,7 @@
           row.innerHTML =
             '<div class="avatar">' + esc(initials("?")) + '</div>' +
             '<div class="info"><div class="top"><span class="name">...</span><span class="time"></span></div>' +
+            '<div class="handle"></div>' +
             '<div class="preview"></div></div>' +
             (entry.unreadCount > 0 ? '<span class="badge">' + entry.unreadCount + '</span>' : '');
           row.addEventListener("click", function () {
@@ -150,6 +165,10 @@
             var av = row.querySelector(".avatar");
             av.innerHTML = avatarHtml(p);
             row.querySelector(".name").textContent = p.displayName || "Unknown";
+            // @username hi asli pehchan hai — do "Asif" hon to bhi farq
+            // nazar aaye. Gmail wale user ke paas username nahi hota.
+            var handle = row.querySelector(".handle");
+            if (handle) handle.textContent = p.username ? "@" + p.username : "";
           });
           JC.db.collection("chats").doc(entry.chatId).get().then(function (cSnap) {
             if (!cSnap.exists) return;
@@ -231,6 +250,11 @@
     $("chatName").textContent = p ? (p.displayName || "Unknown") : "...";
     $("chatStatus").textContent = p ? fmtLastSeen(p) : "";
     $("chatAvatar").innerHTML = avatarHtml(p);
+    // Private-chat notice — naam aate hi update ho jata hai.
+    var notice = $("e2eNotice");
+    if (notice && !JC.currentChatIsGroup) {
+      notice.textContent = "Messages are private. Only you and " + (p && p.displayName ? p.displayName : "this person") + " can read this chat.";
+    }
   }
 
   function closeChat() {
@@ -522,6 +546,61 @@
         return { uid: doc.id, data: doc.data() };
       });
   };
+  // ---------- new chat: find a user by exact @username ----------
+  // Sirf POORA username — partial match ya naam se search NAHI hoti.
+  // usernames/{username} claim doc se uid nikalo, phir profile parho.
+  // Koi "Asif" likh kar logon ki list nahi nikal sakta.
+  JC.searchUserByUsername = function (username) {
+    if (!JC.db) return Promise.reject(new Error("firebase-not-configured"));
+    var raw = String(username || "").trim().replace(/^@/, "");
+    var v = null;
+    if (JC.validateUsername) v = JC.validateUsername(raw);
+    else v = /^[a-z0-9_]{3,20}$/.test(raw.toLowerCase()) ? { ok: true, username: raw.toLowerCase() } : { ok: false, error: "Username ghalat hai." };
+    if (!v.ok) return Promise.reject(new Error(v.error));
+    return JC.db.collection("usernames").doc(v.username).get().then(function (snap) {
+      if (!snap.exists) return null;
+      var uid = (snap.data() || {}).uid;
+      if (!uid) return null;
+      return JC.db.collection("users").doc(uid).get().then(function (pSnap) {
+        if (!pSnap.exists) return null;
+        return { uid: uid, data: pSnap.data() };
+      });
+    });
+  };
+
+  // Search result dikhao — Gmail aur @username dono ke liye aik hi jagah.
+  // Self-check (uid + Gmail) aur friendly "Ye aap khud hain" yahin hai.
+  // NOTE: naam se search yahan kabhi nahi aati — sirf exact @username
+  // ya exact Gmail (user ka hukm 2026-11-22).
+  function renderSearchResult(found, box, label) {
+    if (!found) {
+      box.innerHTML = "<p style='margin-top:12px;'>No Jilan Chat user found for <b>" + esc(label) + "</b>.</p>";
+      return;
+    }
+    // Khud se chat nahi — uid se bhi check, Gmail se bhi, taake koi
+    // bhi rasta khud tak na pahunche. Friendly message, koi error nahi.
+    if (found.uid === JC.currentUser.uid
+      || (found.data.gmail && JC.currentUser.email
+        && found.data.gmail.toLowerCase() === String(JC.currentUser.email).toLowerCase())) {
+      box.innerHTML = "<p style='margin-top:12px;'>Ye aap khud hain — apne aap se chat nahi kar sakte.</p>";
+      return;
+    }
+    box.innerHTML =
+      '<div class="user-result"><div class="avatar">' + avatarHtml(found.data) + '</div>' +
+      '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
+      '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div></div>' +
+      '<button class="btn btn-primary btn-small" id="btnStartChat">Chat</button></div>';
+    $("btnStartChat").addEventListener("click", function () {
+      JC.startChatWith(found.uid).catch(function (e) {
+        if (e && e.message === "cannot-chat-with-self") {
+          JC.toast("Ye aap khud hain — apne aap se chat nahi kar sakte.");
+        } else {
+          JC.toast("Could not start chat: " + e.message);
+        }
+      });
+    });
+  }
+
   JC.startChatWith = function (otherUid) {
     if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
     var me = JC.currentUser.uid;
@@ -556,7 +635,15 @@
     if (!p) return;
     $("profileAvatar").innerHTML = avatarHtml(p, true);
     $("profileName").value = p.displayName || "";
-    $("profileGmail").textContent = p.gmail || (JC.currentUser && JC.currentUser.email) || "";
+    // Username wale user ki Gmail nahi hoti — @username dikhao.
+    var gmailLabel = $("profileGmailLabel");
+    if (p.username) {
+      if (gmailLabel) gmailLabel.textContent = "Your username";
+      $("profileGmail").textContent = "@" + p.username;
+    } else {
+      if (gmailLabel) gmailLabel.textContent = "Your Gmail";
+      $("profileGmail").textContent = p.gmail || (JC.currentUser && JC.currentUser.email) || "";
+    }
   };
 
   // Replaces a dead media element (Storage file deleted after 3 days)
@@ -590,6 +677,53 @@
 
   // ---------- wire UI ----------
   document.addEventListener("DOMContentLoaded", function () {
+    // ---------- bottom tabs: Chats / Calls / Updates ----------
+    document.querySelectorAll("#tabBar .tab-btn").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var tab = b.getAttribute("data-tab");
+        if (tab === "chats") showScreen("screen-list");
+        else if (tab === "calls") { if (JC.loadCallHistory) JC.loadCallHistory(); showScreen("screen-calls"); }
+        else if (tab === "updates") showScreen("screen-status");
+      });
+    });
+    var btnCallsBack = $("btnCallsBack");
+    if (btnCallsBack) btnCallsBack.addEventListener("click", function () { showScreen("screen-list"); });
+
+    // ---------- chat list search (LOCAL filter only) ----------
+    // Ye sirf apni pehle se khuli chats ko filter karta hai — server par
+    // naam se search kabhi nahi hoti (user ka hukm 2026-11-22).
+    var chatSearchInput = $("chatSearchInput");
+    if (chatSearchInput) {
+      chatSearchInput.addEventListener("input", function () {
+        var q = (chatSearchInput.value || "").trim().toLowerCase();
+        document.querySelectorAll("#chatList .chat-row").forEach(function (row) {
+          var name = (row.querySelector(".name") || {}).textContent || "";
+          var handle = (row.querySelector(".handle") || {}).textContent || "";
+          row.style.display = (!q || (name + " " + handle).toLowerCase().indexOf(q) >= 0) ? "" : "none";
+        });
+      });
+    }
+
+    // ---------- emoji panel ----------
+    var EMOJIS = ["😀","😂","😊","😍","😘","😎","🤔","😢","😭","😡","👍","👎","🙏","👏","🎉","❤️","🔥","⭐","✅","❌","💐","🌹","🤲","🕌"];
+    var emojiPanel = $("emojiPanel");
+    if (emojiPanel) {
+      emojiPanel.innerHTML = EMOJIS.map(function (e) { return "<span>" + e + "</span>"; }).join("");
+      emojiPanel.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (t && t.tagName === "SPAN") {
+          var input = $("msgInput");
+          input.value = (input.value || "") + t.textContent;
+          input.focus();
+          updateComposer();
+        }
+      });
+    }
+    var btnEmoji = $("btnEmoji");
+    if (btnEmoji) btnEmoji.addEventListener("click", function () {
+      if (emojiPanel) emojiPanel.classList.toggle("hidden");
+    });
+
     $("btnProfile").addEventListener("click", function () { JC.loadProfileScreen(); showScreen("screen-profile"); });
     $("btnProfileBack").addEventListener("click", function () { showScreen("screen-list"); });
     $("btnNewChat").addEventListener("click", function () { showScreen("screen-newchat"); });
@@ -626,26 +760,27 @@
       if (!gmail || gmail.indexOf("@") < 0) { box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Type a valid Gmail address.</p>"; return; }
       box.innerHTML = "<p style='margin-top:12px;color:#667781;'>Searching&hellip;</p>";
       JC.searchUserByGmail(gmail).then(function (found) {
-        if (!found) {
-          box.innerHTML = "<p style='margin-top:12px;'>No Jilan Chat user found for <b>" + esc(gmail) + "</b>.</p>";
-          return;
-        }
-        if (found.uid === JC.currentUser.uid) {
-          box.innerHTML = "<p style='margin-top:12px;'>That is your own Gmail.</p>";
-          return;
-        }
-        box.innerHTML =
-          '<div class="user-result"><div class="avatar">' + avatarHtml(found.data) + '</div>' +
-          '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
-          '<div class="gmail">' + esc(found.data.gmail || "") + '</div></div>' +
-          '<button class="btn btn-primary btn-small" id="btnStartChat">Chat</button></div>';
-        $("btnStartChat").addEventListener("click", function () {
-          JC.startChatWith(found.uid).catch(function (e) { JC.toast("Could not start chat: " + e.message); });
-        });
+        renderSearchResult(found, box, gmail);
       }).catch(function (e) {
         box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Search failed: " + esc(e.message) + "</p>";
       });
     });
+    // Exact @username search — poora username likhna pare ga; naam se
+    // search nahi hoti (user ka hukm 2026-11-22).
+    var btnSearchUsername = $("btnSearchUsername");
+    if (btnSearchUsername) {
+      btnSearchUsername.addEventListener("click", function () {
+        var u = ($("searchUsernameInput").value || "").trim();
+        var box = $("searchResult");
+        if (!u) { box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Type a username first.</p>"; return; }
+        box.innerHTML = "<p style='margin-top:12px;color:#667781;'>Searching&hellip;</p>";
+        JC.searchUserByUsername(u).then(function (found) {
+          renderSearchResult(found, box, u.charAt(0) === "@" ? u : "@" + u);
+        }).catch(function (e) {
+          box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Search failed: " + esc(e.message) + "</p>";
+        });
+      });
+    }
     $("btnSaveName").addEventListener("click", function () {
       var name = ($("profileName").value || "").trim();
       if (!name || !JC.db || !JC.currentUser) return;

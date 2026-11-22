@@ -26,6 +26,26 @@
 
     <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
 
+    <h2>Sign in with username</h2>
+    <p class="note">No Gmail needed — just your username and password.</p>
+    <input class="text-input" type="text" id="usernameInput" placeholder="username" autocapitalize="off" autocomplete="username">
+    <input class="text-input" type="password" id="usernamePasswordInput" placeholder="Password" autocomplete="current-password" style="margin-top:8px;">
+    <button class="btn btn-primary" id="btnUsernameLogin">Sign in</button>
+    <p class="note" id="usernameLoginNote"></p>
+    <p class="note">Password bhool gaye? <a href="https://wa.me/923007379385" target="_blank" rel="noopener">Admin se rabta karein</a> — password sirf admin reset kar sakta hai.</p>
+
+    <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
+
+    <h2>Naya account banao</h2>
+    <p class="note">Username baad me change nahi hoga, soch kar chunain. Display name alag hai — wo aap jab chahein badal sakte hain.</p>
+    <input class="text-input" type="text" id="signupNameInput" placeholder="Your name" autocomplete="name">
+    <input class="text-input" type="text" id="signupUsernameInput" placeholder="username (a-z, 0-9, _)" autocapitalize="off" autocomplete="off" style="margin-top:8px;">
+    <input class="text-input" type="password" id="signupPasswordInput" placeholder="Password (kam se kam 6 haroof)" autocomplete="new-password" style="margin-top:8px;">
+    <button class="btn btn-primary" id="btnSignup">Create account</button>
+    <p class="note" id="signupNote"></p>
+
+    <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
+
     <h2>Sign in by email link</h2>
     <p class="note">Type your Gmail. We will send you a sign-in link &mdash; tap it and you are in. No password needed.</p>
     <input class="text-input" type="email" id="emailInput" placeholder="you@gmail.com" autocomplete="email">
@@ -44,10 +64,21 @@
     <button class="icon-btn" id="btnSettings" title="Settings">&#9881;</button>
     <button class="icon-btn" id="btnProfile" title="Profile">&#9679;</button>
   </div>
+  <div class="search-bar"><input type="text" id="chatSearchInput" placeholder="Search chats..." autocomplete="off"></div>
   <div id="chatList"></div>
   <div class="empty-state hidden" id="listEmpty">No chats yet.<br>Tap + to start a chat with a friend.</div>
   <button class="fab fab-secondary" id="btnNewGroup" title="New group">&#128101;</button>
   <button class="fab" id="btnNewChat" title="New chat">+</button>
+</div>
+
+<!-- ============ CALLS ============ -->
+<div class="screen" id="screen-calls">
+  <div class="app-header">
+    <button class="icon-btn" id="btnCallsBack">&#8592;</button>
+    <h1>Calls</h1>
+  </div>
+  <div id="callList"></div>
+  <div class="empty-state hidden" id="callsEmpty">No calls yet.</div>
 </div>
 
 <!-- ============ CHAT ============ -->
@@ -73,9 +104,15 @@
   <div id="uploadBar"></div>
   <div id="recBar"><span class="dot"></span><span id="recTime">0:00</span><span style="flex:1">Recording&hellip;</span><button class="btn btn-small btn-danger" id="btnRecCancel">Cancel</button></div>
 
+  <!-- Private-chat notice (WhatsApp-style yellow box). Honest wording:
+       private, NOT end-to-end encrypted — see style.css comment. -->
+  <div id="e2eNotice" class="e2e-notice">Messages are private. Only you and the people in this chat can read them.</div>
+
   <div id="messages"></div>
 
+  <div id="emojiPanel" class="emoji-panel hidden"></div>
   <div class="composer">
+    <button class="round-btn gray" id="btnEmoji" title="Emoji">&#128512;</button>
     <button class="round-btn gray" id="btnAttach" title="Send photo, video or file">&#128206;</button>
     <button class="round-btn gray" id="btnCamera" title="Filter camera">&#128247;</button>
     <div class="box"><input type="text" id="msgInput" placeholder="Message" autocomplete="off"></div>
@@ -211,8 +248,11 @@
     <h2>Find a friend by Gmail</h2>
     <input class="text-input" type="email" id="searchInput" placeholder="friend@gmail.com">
     <button class="btn btn-primary" id="btnSearch">Search</button>
+    <h2 style="margin-top:22px;">Find a friend by @username</h2>
+    <input class="text-input" type="text" id="searchUsernameInput" placeholder="@username" autocapitalize="off">
+    <button class="btn btn-primary" id="btnSearchUsername">Search</button>
     <div id="searchResult"></div>
-    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here.</p>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here. Search sirf poora @username ya poori Gmail se hoti hai — naam likh kar koi kisi ko search nahi kar sakta.</p>
   </div>
 </div>
 
@@ -230,7 +270,7 @@
       <button class="btn btn-primary" id="btnSaveName">Save name</button>
     </div>
     <div class="profile-row">
-      <label>Your Gmail</label>
+      <label id="profileGmailLabel">Your Gmail</label>
       <div class="gmail" id="profileGmail">-</div>
     </div>
     <div class="profile-row">
@@ -303,6 +343,14 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Bottom tabs (WhatsApp-like layout, own colours). Shown only on the
+     Chats / Calls / Updates screens — see showScreen in app.js. -->
+<nav class="tab-bar hidden" id="tabBar">
+  <button class="tab-btn active" data-tab="chats">&#128172; Chats</button>
+  <button class="tab-btn" data-tab="calls">&#9742; Calls</button>
+  <button class="tab-btn" data-tab="updates">&#9719; Updates</button>
+</nav>
 
 <!-- Firebase JS SDK — bundled locally in app/ (no CDN at runtime). -->
 <script src="firebase-app-compat.js"></script>

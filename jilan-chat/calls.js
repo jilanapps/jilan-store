@@ -1,4 +1,4 @@
-// Jilan Chat v1.0 — calls.js
+// Jilan Chat v3.0 — calls.js
 // Voice calls FIRST, video calls SECOND. Both use WebRTC with Firestore
 // signalling, exactly the calls/{callId} model in DATA-MODEL.md:
 //   calls/{callId}: callerUid, calleeUid, kind ("voice" | "video"),
@@ -90,6 +90,70 @@
     showCallScreen();
     // If the callee never answers, the caller-side timeout marks it missed.
   }
+
+  // ---------- call history (Calls tab) ----------
+  // Do queries: calls I made + calls I received. Each query has ONE
+  // equality filter only (no orderBy) so no composite index is needed;
+  // sorting happens here in the app. Rules allow read only for the
+  // caller/callee, so each query only returns my own calls. Tap a row
+  // to open that chat and call again (voice).
+  JC.loadCallHistory = function () {
+    var list = $("callList");
+    var empty = $("callsEmpty");
+    if (!JC.db || !JC.currentUser || !list) return;
+    var me = JC.currentUser.uid;
+    list.innerHTML = "<p style='padding:16px;color:#667781;'>Loading&hellip;</p>";
+    if (empty) empty.classList.add("hidden");
+    var qOut = JC.db.collection("calls").where("callerUid", "==", me).limit(20).get();
+    var qIn = JC.db.collection("calls").where("calleeUid", "==", me).limit(20).get();
+    Promise.all([qOut, qIn]).then(function (results) {
+      var seen = {};
+      var rows = [];
+      results.forEach(function (snap) {
+        snap.forEach(function (doc) {
+          if (seen[doc.id]) return;
+          seen[doc.id] = true;
+          rows.push({ id: doc.id, data: doc.data() });
+        });
+      });
+      rows.sort(function (a, b) {
+        var ta = a.data.createdAt && a.data.createdAt.toMillis ? a.data.createdAt.toMillis() : 0;
+        var tb = b.data.createdAt && b.data.createdAt.toMillis ? b.data.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+      list.innerHTML = "";
+      if (!rows.length) { if (empty) empty.classList.remove("hidden"); return; }
+      rows.slice(0, 30).forEach(function (row) {
+        var d = row.data;
+        var otherUid = d.callerUid === me ? d.calleeUid : d.callerUid;
+        var outgoing = d.callerUid === me;
+        var missed = d.status === "missed" && !outgoing;
+        var div = document.createElement("div");
+        div.className = "chat-row call-row";
+        div.innerHTML =
+          '<div class="avatar">?</div>' +
+          '<div class="info"><div class="top"><span class="name">...</span><span class="time"></span></div>' +
+          '<div class="detail' + (missed ? " missed" : "") + '">' + (missed ? "Missed " : (outgoing ? "Outgoing " : "Incoming ")) + (d.kind === "video" ? "video call" : "voice call") + '</div></div>';
+        list.appendChild(div);
+        JC.db.collection("users").doc(otherUid).get().then(function (pSnap) {
+          var p = pSnap.exists ? pSnap.data() : { displayName: "Unknown" };
+          div.querySelector(".name").textContent = p.displayName || "Unknown";
+          var av = div.querySelector(".avatar");
+          av.textContent = ((p.displayName || "?")[0] || "?").toUpperCase();
+          var t = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate() : null;
+          div.querySelector(".time").textContent = t ? (t.toDateString() === new Date().toDateString() ? t.getHours() + ":" + ("0" + t.getMinutes()).slice(-2) : t.toDateString()) : "";
+        });
+        div.addEventListener("click", function () {
+          if (JC.chatIdFor && JC.openChat) {
+            JC.openChat(JC.chatIdFor(me, otherUid), otherUid);
+            JC.startCall("voice");
+          }
+        });
+      });
+    }).catch(function () {
+      list.innerHTML = "<p style='padding:16px;color:#667781;'>Could not load calls.</p>";
+    });
+  };
 
   // ---------- start a call (voice first, video second — same path) ----------
   JC.startCall = function (kind) {

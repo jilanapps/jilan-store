@@ -80,6 +80,9 @@
     $("messages").innerHTML = "";
     groupMsgEls = {};
     $("msgInput").value = "";
+    // Private-chat notice — group me sirf members parh sakte hain.
+    var notice = document.getElementById("e2eNotice");
+    if (notice) notice.textContent = "Messages are private. Only members of this group can read this chat.";
     // Calls are 1-to-1 only — hide the call buttons in a group.
     $("btnVoiceCall").classList.add("hidden");
     $("btnVideoCall").classList.add("hidden");
