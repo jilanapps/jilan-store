@@ -286,7 +286,7 @@
 
   JC.validateUsername = function (raw) {
     var u = JC.normalizeUsername(raw);
-    if (!u) return { ok: false, error: "Username likhein." };
+    if (!u) return { ok: false, error: "Enter a username." };
     if (u.length < 3) return { ok: false, error: "Username must be at least 3 characters." };
     if (u.length > 20) return { ok: false, error: "Username can be at most 20 characters." };
     if (!/^[a-z0-9_]+$/.test(u)) return { ok: false, error: "Username can only use lowercase letters (a-z), numbers and _." };
@@ -319,7 +319,7 @@
     if (!JC.auth) return Promise.reject(new Error("firebase-not-configured"));
     var v = JC.validateUsername(username);
     if (!v.ok) return Promise.reject(new Error(v.error));
-    if (!password) return Promise.reject(new Error("Password likhein."));
+    if (!password) return Promise.reject(new Error("Enter your password."));
     // Device check (v4.0): claim doc se uid nikalo — dusre account ko
     // sign-in se PEHLE roko. Claim na mile to wohi purana "ghalat hai" error.
     return JC.db.collection("usernames").doc(v.username).get().then(function (snap) {

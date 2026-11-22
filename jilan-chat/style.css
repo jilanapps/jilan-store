@@ -622,3 +622,10 @@ html.dark .doc-btn { color: #8cc2ff; }
 .ch-composer.hidden { display: none; }
 .ch-composer input[type=text] { flex: 1; border: 1px solid var(--jc-div, #d1d7db); border-radius: 20px; padding: 10px 14px; background: var(--jc-soft, #f0f2f5); color: inherit; font-size: 15px; }
 .ch-composer .icon-btn { background: none; border: none; color: #1565c0; padding: 6px; }
+.uname-banner { display: flex; align-items: center; gap: 10px; margin: 8px 10px; padding: 10px 12px; border-radius: 12px; background: #e3eefc; color: #0d3c78; }
+html.dark .uname-banner { background: #1f2c34; color: #cfe3ff; }
+.uname-banner .ub-text { flex: 1; display: flex; flex-direction: column; font-size: 13.5px; }
+.uname-banner .btn-small { width: auto; margin: 0; }
+.ub-x { border: none; background: none; color: inherit; font-size: 22px; padding: 0 4px; }
+.uname-warn { color: #c62828; font-size: 13px; font-weight: 600; margin: 6px 0 0; }
+#btnSetUsername { width: auto; margin-left: 8px; }
