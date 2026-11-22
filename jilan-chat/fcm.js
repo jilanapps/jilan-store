@@ -125,12 +125,21 @@
   // calls.js is NOT edited: startCall returns nothing and its callId
   // lives in a closure, so this listener watches my own outgoing calls
   // instead. First snapshot is skipped (old calls must not re-ring).
+  // Pure helper: which final call status should stop the callee's bell.
+  JC.fcmShouldCancel = function (status) {
+    return status === "ended" || status === "declined" || status === "missed"
+      || status === "cancelled";
+  };
+
   JC.startOutgoingCallListener = function () {
     if (!JC.db || !JC.currentUser || outgoingCallUnsub) return;
     firstCallSnap = true;
     outgoingCallUnsub = JC.db.collection("calls")
+      // Equality filters only (served by single-field indexes, no
+      // composite index needed). Only ringing calls are in the result,
+      // so the snapshot stays tiny (Spark quota friendly).
       .where("callerUid", "==", JC.currentUser.uid)
-      .orderBy("createdAt", "desc").limit(20)
+      .where("status", "==", "ringing")
       .onSnapshot(function (snap) {
         if (firstCallSnap) {
           firstCallSnap = false;
@@ -150,17 +159,25 @@
               title: (JC.userProfile && JC.userProfile.displayName) || "Jilan Chat",
               body: (d.kind === "video") ? "Incoming video call…" : "Incoming voice call…"
             });
-          } else if (ch.type === "modified" && callAlerted[id]
-              && (d.status === "ended" || d.status === "declined" || d.status === "missed")) {
+          } else if (ch.type === "removed" && callAlerted[id]) {
+            // The call left the "ringing" state. Read its final status:
+            // accepted -> nothing (callee answered); ended/declined/missed
+            // -> call_cancel so the callee's bell stops.
             callAlerted[id] = false;
-            JC.queuePushEvent({
-              type: "call_cancel",
-              toUid: d.calleeUid,
-              callId: id,
-              kind: d.kind || "voice",
-              title: "",
-              body: ""
-            });
+            var callee = d.calleeUid, kind = d.kind || "voice";
+            ch.doc.ref.get().then(function (fresh) {
+              var st = (fresh && fresh.exists && (fresh.data() || {}).status) || "ended";
+              if (JC.fcmShouldCancel(st)) {
+                JC.queuePushEvent({
+                  type: "call_cancel",
+                  toUid: callee,
+                  callId: id,
+                  kind: kind,
+                  title: "",
+                  body: ""
+                });
+              }
+            }).catch(function () {});
           }
         });
       }, function () { /* listener errors are non-fatal; pushes just stop */ });
