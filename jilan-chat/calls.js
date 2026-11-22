@@ -56,6 +56,8 @@
   var gotRemoteTrack = false;  // at least one remote track actually arrived
   var mediaWatchdog = null;    // 15s: warn if no media yet
   var mediaWatchdog2 = null;   // 30s: end if still no media
+  var connectedAtWritten = false; // v4.7 call log
+  var finalStatus = null; // v4.7: keep "missed"/"declined" instead of overwriting with "ended"
   var iceDisconnectTimer = null; // grace period on transient ICE "disconnected"
   var iceConnected = false;    // ICE pair actually up (timer must not lie)
   var speakerOn = false;       // shell speakerphone state (video calls default on)
@@ -258,7 +260,7 @@
             onConnected();
           }).catch(function (e) { endCall("Connection failed: " + e.message); });
         }
-        if (d.status === "declined") endCall("Call declined");
+        if (d.status === "declined") { finalStatus = "declined"; endCall("Call declined"); }
         if (d.status === "ended") endCall("Call ended");
       });
       // Watch for the callee's ICE candidates.
@@ -270,7 +272,7 @@
       // If nobody answers in 45 seconds, mark it missed and hang up.
       callTimer = setTimeout(function () {
         if (callState === "ringing") {
-          callDocRef.update({ status: "missed" }).catch(function () {});
+          finalStatus = "missed";
           endCall("No answer");
         }
       }, 45000);
@@ -327,7 +329,7 @@
   // ---------- decline / end ----------
   JC.declineCall = function () {
     if (!callDocRef) { resetCallUi(); return; }
-    callDocRef.update({ status: "declined" }).catch(function () {});
+    finalStatus = "declined";
     endCall("Call declined");
   };
 
@@ -336,7 +338,7 @@
   function endCall(reason) {
     setSecure(false);
     if (callDocRef && callState !== "idle") {
-      callDocRef.update({ status: "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
+      callDocRef.update({ status: finalStatus || "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
     }
     if (callTimer) { clearTimeout(callTimer); callTimer = null; }
     if (mediaWatchdog) { clearTimeout(mediaWatchdog); mediaWatchdog = null; }
@@ -353,6 +355,7 @@
     localVideo().srcObject = null;
     remoteAudio().srcObject = null;
     remoteStream = null; gotRemoteTrack = false; iceConnected = false;
+    connectedAtWritten = false; finalStatus = null;
     callState = "idle";
     callId = null; callDocRef = null; callRole = null; callOtherUid = null;
     muted = false; videoOff = false; speakerOn = false; callSeconds = 0;
@@ -399,6 +402,11 @@
     conn.oniceconnectionstatechange = function () {
       var s = conn.iceConnectionState;
       if (s === "connected" || s === "completed") {
+        if (!iceConnected && callDocRef && !connectedAtWritten) {
+          // v4.7 call log: real talk time starts here (display/history only).
+          connectedAtWritten = true;
+          callDocRef.update({ connectedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
+        }
         iceConnected = true;
         if (iceDisconnectTimer) { clearTimeout(iceDisconnectTimer); iceDisconnectTimer = null; }
         onConnected();

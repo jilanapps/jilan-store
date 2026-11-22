@@ -1,7 +1,8 @@
 // Jilan Chat v4.6 — status.js
 // WhatsApp-like daily status (24 hours only).
 // Data model: statuses/{uid}/items/{statusId}
-//   type: "photo" | "video" | "text"
+//   type: "photo" | "video" | "text" | "voice" (v4.7: voice status, max 60s,
+//   16 kbps, base64 audio in mediaData + mediaMime + durationSec)
 //   mediaData (photo, base64 — no Storage on Spark) | mediaUrl (legacy) | text
 //   createdAt, expiresAt = createdAt + 24h
 // v4.6 seen-by: statuses/{ownerUid}/items/{statusId}/views/{viewerUid}
@@ -253,7 +254,7 @@
   // text <= 200, id <= 64) — no rules change needed for replies.
   JC.statusReplyQuote = function (item) {
     var d = item.data || {};
-    var what = d.type === "text" ? String(d.text || "").slice(0, 120) : (d.type === "photo" ? "Photo" : "Video");
+    var what = d.type === "text" ? String(d.text || "").slice(0, 120) : (d.type === "photo" ? "Photo" : (d.type === "voice" ? "Voice status" : "Video"));
     return { id: ("status_" + item.id).slice(0, 64), senderId: item.ownerUid, type: "status", text: ("Status: " + what).slice(0, 200) };
   };
   JC.sendStatusReply = function (item, text) {
@@ -272,6 +273,154 @@
   };
 
   // ---------- viewer ----------
+  // ---------- v4.7 voice status ----------
+  JC.VOICE_STATUS_COLORS = ["#1565c0", "#6a1b9a", "#00838f", "#c62828", "#ef6c00", "#283593"];
+  JC.voiceStatusColor = function (id) {
+    var h = 0, str = String(id || "");
+    for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return JC.VOICE_STATUS_COLORS[h % JC.VOICE_STATUS_COLORS.length];
+  };
+  function fmtSec(sec) { sec = Math.max(0, Math.round(sec || 0)); return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
+  JC.fmtVoiceSec = fmtSec;
+  var SVG_PLAY = '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+  var SVG_PAUSE = '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+  var SVG_MIC_BIG = '<svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';
+  // Deterministic "waveform" bars (real waveform would need decoding —
+  // not worth it; bars fill in as the audio plays).
+  JC.voiceWaveHeights = function (id, n) {
+    var out = [], h = 7, str = String(id || "x");
+    for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) >>> 0;
+    for (var j = 0; j < n; j++) { h = (h * 1103515245 + 12345) >>> 0; out.push(25 + (h % 75)); }
+    return out;
+  };
+  var voiceAudio = null;
+  function stopVoiceAudio() {
+    if (voiceAudio) { try { voiceAudio.pause(); } catch (e) {} voiceAudio.onended = null; voiceAudio.ontimeupdate = null; voiceAudio = null; }
+  }
+  JC.voiceStatusCard = function (d, item) {
+    var card = document.createElement("div");
+    card.className = "vs-card";
+    card.style.background = JC.voiceStatusColor(item && item.id);
+    var bars = JC.voiceWaveHeights(item && item.id, 32).map(function (h, i) {
+      return '<span class="vs-bar" data-i="' + i + '" style="height:' + h + '%"></span>';
+    }).join("");
+    card.innerHTML = '<div class="vs-mic">' + SVG_MIC_BIG + '</div>' +
+      '<div class="vs-wave">' + bars + '</div>' +
+      '<div class="vs-ctrl"><button type="button" class="vs-play" aria-label="Play">' + SVG_PAUSE + '</button>' +
+      '<span class="vs-len">' + esc(fmtSec(d.durationSec || 0)) + '</span></div>';
+    var src = (typeof d.mediaData === "string" && d.mediaData.indexOf("data:audio/") === 0) ? d.mediaData : "";
+    var audio = document.createElement("audio");
+    audio.preload = "auto";
+    if (src) audio.src = src;
+    card.appendChild(audio);
+    var btn = card.querySelector(".vs-play");
+    function setBtn() { btn.innerHTML = audio.paused ? SVG_PLAY : SVG_PAUSE; btn.setAttribute("aria-label", audio.paused ? "Play" : "Pause"); }
+    btn.addEventListener("click", function (e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (audio.paused) { JC.statusPause(false); } else { JC.statusPause(true); }
+      setBtn();
+    });
+    ["pointerdown", "pointerup", "touchstart", "touchend", "mousedown", "mouseup"].forEach(function (ev) {
+      btn.addEventListener(ev, function (e) { if (e && e.stopPropagation) e.stopPropagation(); });
+    });
+    audio.addEventListener("play", setBtn);
+    audio.addEventListener("pause", setBtn);
+    card._audio = audio;
+    return card;
+  };
+  // Progress bar follows the audio; next item only after it ends.
+  function startVoiceProgress(body) {
+    stopProgress();
+    var card = body.querySelector && body.querySelector(".vs-card");
+    var audio = card && card._audio;
+    paused = false; elapsed = 0; duration = 1;
+    var sv = $("statusViewer"); if (sv && sv.classList) sv.classList.remove("paused");
+    updateBars();
+    if (!audio || !audio.src) { statusGone(body); return; }
+    voiceAudio = audio;
+    var total = (viewQueue[viewIndex] && viewQueue[viewIndex].data.durationSec) || 0;
+    var waves = card.querySelectorAll ? card.querySelectorAll(".vs-bar") : [];
+    audio.ontimeupdate = function () {
+      var dur = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : (total || 60);
+      duration = dur * 1000; elapsed = Math.min(duration, audio.currentTime * 1000);
+      updateBars();
+      var on = Math.round(elapsed / duration * waves.length);
+      for (var i = 0; i < waves.length; i++) waves[i].classList.toggle("on", i < on);
+      var len = card.querySelector(".vs-len");
+      if (len) len.textContent = fmtSec(audio.currentTime) + " / " + fmtSec(dur);
+    };
+    audio.onended = function () { elapsed = duration; updateBars(); nextItem(); };
+    try { var pr = audio.play(); if (pr && pr.catch) pr.catch(function () { /* autoplay blocked: user taps play */ }); } catch (e) {}
+  }
+  JC._startVoiceProgress = startVoiceProgress;
+
+  // Recorder for a voice status (separate from the chat composer's).
+  var vsRecorder = null, vsChunks = [], vsTimer = null, vsStream = null, vsStarted = 0, vsSend = false;
+  JC.isVoiceStatusRecording = function () { return !!(vsRecorder && vsRecorder.state === "recording"); };
+  JC.startVoiceStatus = function () {
+    if (JC.isVoiceStatusRecording()) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
+      JC.toast("Voice recording isn't supported on this phone.");
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
+      vsStream = stream;
+      var opts = { audioBitsPerSecond: 16000 };
+      var mt = JC.pickVoiceMime ? JC.pickVoiceMime() : "";
+      if (mt) opts.mimeType = mt;
+      try { vsRecorder = new MediaRecorder(stream, opts); }
+      catch (e) { try { vsRecorder = new MediaRecorder(stream); } catch (e2) { JC.toast("Couldn't start recording."); stopVsStream(); return; } }
+      vsChunks = []; vsSend = false;
+      vsRecorder.ondataavailable = function (e) { if (e.data && e.data.size) vsChunks.push(e.data); };
+      vsRecorder.onstop = finishVoiceStatus;
+      vsRecorder.start(1000);
+      vsStarted = Date.now();
+      $("vsTime").textContent = "0:00";
+      $("vsRec").classList.remove("hidden");
+      $("btnVoiceStatus").classList.add("hidden");
+      vsTimer = setInterval(function () {
+        var sec = Math.min(JC.VOICE_MAX_SEC || 60, Math.round((Date.now() - vsStarted) / 1000));
+        $("vsTime").textContent = fmtSec(sec);
+        if (sec >= (JC.VOICE_MAX_SEC || 60)) JC.stopVoiceStatus(true); // 60 s: auto-post
+      }, 250);
+    }).catch(function () {
+      JC.toast("Microphone permission denied. Allow Microphone for Jilan Chat in your phone Settings.");
+    });
+  };
+  function stopVsStream() { if (vsStream) { vsStream.getTracks().forEach(function (t) { t.stop(); }); vsStream = null; } }
+  JC.stopVoiceStatus = function (send) {
+    if (vsTimer) { clearInterval(vsTimer); vsTimer = null; }
+    vsSend = !!send;
+    var dur = Math.max(1, Math.min(JC.VOICE_MAX_SEC || 60, Math.round((Date.now() - vsStarted) / 1000)));
+    if (vsRecorder) vsRecorder._dur = dur;
+    if (vsRecorder && vsRecorder.state !== "inactive") { try { vsRecorder.stop(); } catch (e) {} }
+    $("vsRec").classList.add("hidden");
+    $("btnVoiceStatus").classList.remove("hidden");
+    stopVsStream();
+  };
+  function finishVoiceStatus() {
+    var rec = vsRecorder;
+    var type = ((rec && rec.mimeType) || "audio/webm").split(";")[0];
+    var blob = new Blob(vsChunks, { type: type });
+    vsChunks = [];
+    var dur = (rec && rec._dur) || 1;
+    if (!vsSend || !blob.size) return;
+    JC.blobToDataUrl(blob, function (dataUrl) { JC.postVoiceStatus(dataUrl, type, dur); });
+  }
+  JC.postVoiceStatus = function (dataUrl, type, dur) {
+    if (!dataUrl || dataUrl.indexOf("data:") !== 0) { JC.toast("Couldn't post status."); return Promise.resolve(false); }
+    type = type || "audio/webm";
+    dataUrl = dataUrl.replace(/^data:[^,]*?;base64,/, "data:" + type + ";base64,");
+    if (dataUrl.length > (JC.MEDIA_MAX_CHARS || 270000)) { JC.toast("Voice status is too long. Record a shorter one."); return Promise.resolve(false); }
+    JC.toast("Posting voice status…");
+    return addStatusDoc({ type: "voice", mediaData: dataUrl, mediaMime: type, durationSec: Math.max(1, Math.min(60, Math.round(dur || 1))) }).then(function () {
+      JC.toast("Status posted");
+      $("statusAddBox").classList.add("hidden");
+      loadMyStatus();
+      return true;
+    }).catch(function () { JC.toast("Couldn't post status."); return false; });
+  };
+
   function openViewer(items, index, mine) {
     viewQueue = items;
     viewIndex = Math.max(0, Math.min(index, items.length - 1));
@@ -310,7 +459,7 @@
   function stopProgress() { if (progTimer) { clearInterval(progTimer); progTimer = null; } }
   JC.statusPause = function (on) {
     paused = !!on;
-    var v = document.querySelector && document.querySelector("#statusViewerBody video");
+    var v = document.querySelector && (document.querySelector("#statusViewerBody video") || document.querySelector("#statusViewerBody audio"));
     if (v) { try { if (paused) v.pause(); else v.play(); } catch (e) {} }
     var sv = $("statusViewer");
     if (sv && sv.classList) sv.classList.toggle("paused", paused);
@@ -328,6 +477,7 @@
     $("statusViewerTime").textContent = fmtAgo(d.createdAt);
     $("statusViewerAvatar").innerHTML = avatarHtml(item.ownerName, item.ownerPhoto);
     var body = $("statusViewerBody");
+    stopVoiceAudio();
     body.innerHTML = "";
     var ms = JC.STATUS_MS;
     if (d.type === "text") {
@@ -341,6 +491,9 @@
       img.src = (typeof d.mediaData === "string" && d.mediaData.indexOf("data:image/") === 0) ? d.mediaData : (d.mediaUrl || "");
       img.onerror = function () { statusGone(body); };
       body.appendChild(img);
+    } else if (d.type === "voice") {
+      ms = 0; // progress follows the audio; next only when it ends (or tap)
+      body.appendChild(JC.voiceStatusCard(d, item));
     } else if (d.type === "video") {
       var vid = document.createElement("video");
       vid.className = "sv-img";
@@ -352,7 +505,7 @@
       body.appendChild(vid);
       ms = JC.STATUS_VIDEO_MS;
     }
-    startProgress(ms);
+    if (ms) startProgress(ms); else startVoiceProgress(body);
     if (viewMine) watchViews(item);
     else { markSeen(item.id); JC.recordStatusView(item); }
   }
@@ -376,6 +529,7 @@
   JC.statusNext = nextItem;
   JC.statusPrev = prevItem;
   function closeViewer() {
+    stopVoiceAudio();
     var wasOpen = !$("statusViewer").classList.contains("hidden");
     stopProgress();
     stopViews();
@@ -467,6 +621,10 @@
       if (f) JC.postMediaStatus(f);
       $("statusFileInput").value = "";
     });
+    var vsBtn = $("btnVoiceStatus");
+    if (vsBtn) vsBtn.addEventListener("click", JC.startVoiceStatus);
+    var vsC = $("vsCancel"); if (vsC) vsC.addEventListener("click", function () { JC.stopVoiceStatus(false); });
+    var vsP = $("vsPost"); if (vsP) vsP.addEventListener("click", function () { JC.stopVoiceStatus(true); });
     $("statusViewerClose").addEventListener("click", closeViewer);
     wireGestures();
     $("svViews").addEventListener("click", JC.openStatusViews);

@@ -109,6 +109,57 @@
     h = h % 12 || 12;
     return h + ":" + (m < 10 ? "0" : "") + m + " " + ap;
   }
+  // v4.7: WhatsApp-style list time — today "4:14 PM", yesterday
+  // "Yesterday", older "22/11/2026". `now` is injectable for tests.
+  function fmtListTime(ts, now) {
+    if (!ts) return "";
+    var d = ts.toDate ? ts.toDate() : new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    now = now ? new Date(now) : new Date();
+    if (d.toDateString() === now.toDateString()) return fmtTime(d);
+    var y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return "Yesterday";
+    return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+  }
+  JC.fmtListTime = fmtListTime;
+  JC.fmtTime12 = fmtTime;
+  // v4.7: chat-list preview pieces. Chat docs store a ready-made
+  // `lastMessage` string (old code read .text/.type, which chat docs never
+  // have — that is why the list showed "You:" with nothing after it).
+  var SVG_TICK1 = '<svg class="lp-tick" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+  var SVG_TICK2 = '<svg class="lp-tick" width="18" height="16" viewBox="0 0 28 24" fill="currentColor" aria-hidden="true"><path d="M7 16.2 2.8 12l-1.4 1.4L7 19 19 7l-1.4-1.4zM13.4 17.6 12 19l1 1L25 8l-1.4-1.4z"/></svg>';
+  var SVG_PHOTO = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9z"/></svg>';
+  var SVG_MIC = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';
+  var SVG_BAN = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM4 12a8 8 0 0 1 12.9-6.32L5.68 16.9A7.96 7.96 0 0 1 4 12zm8 8a7.96 7.96 0 0 1-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z"/></svg>';
+  var SVG_FILE = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>';
+  function fmtDur(sec) { sec = Math.max(0, Math.round(sec || 0)); return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
+  // chat = chat doc data; last = newest message doc data (optional);
+  // me = my uid. Returns HTML (all user text escaped).
+  function chatPreviewHtml(chat, last, me) {
+    chat = chat || {};
+    var mine = !!(me && chat.lastSenderId === me);
+    var text = String(chat.lastMessage || "");
+    var type = last && last.type ? last.type : "";
+    var deleted = !!(last && last.deleted) || text === "This message was deleted";
+    if (!text && !last) return "";
+    var icon = "", label = "";
+    if (deleted) { icon = SVG_BAN; label = mine ? "You deleted this message" : "This message was deleted"; }
+    else if (type === "image" || (!type && text === "Photo")) { icon = SVG_PHOTO; label = "Photo"; }
+    else if (type === "voice" || (!type && text === "Voice message")) {
+      icon = SVG_MIC; label = "Voice message" + (last && last.durationSec ? " " + fmtDur(last.durationSec) : "");
+    }
+    else if (type === "file" || (!type && text.indexOf("File: ") === 0)) { icon = SVG_FILE; label = text || "File"; }
+    else label = text || (last && last.text) || "";
+    var tick = "";
+    if (mine && !deleted) {
+      var st = last && last.status;
+      if (st === "read") tick = '<span class="lp-ticks read">' + SVG_TICK2 + '</span>';
+      else if (st === "delivered") tick = '<span class="lp-ticks">' + SVG_TICK2 + '</span>';
+      else tick = '<span class="lp-ticks">' + SVG_TICK1 + '</span>';
+    }
+    return tick + icon + '<span class="lp-text' + (deleted ? " lp-deleted" : "") + '">' + esc(label) + '</span>';
+  }
+  JC.chatPreviewHtml = chatPreviewHtml;
   function fmtLastSeen(profile) {
     if (!profile) return "";
     if (profile.online) return "online";
@@ -294,9 +345,10 @@
               var g = gSnap.data();
               row.querySelector(".name").textContent = g.name || "Group";
               var prev = row.querySelector(".preview");
-              prev.textContent = (g.lastMessage || "") + " • " + (g.members || []).length + " members";
+              prev.textContent = g.lastMessage ? g.lastMessage : (g.members || []).length + " members";
               if (entry.unreadCount > 0) prev.classList.add("unread");
-              row.querySelector(".time").textContent = fmtTime(g.lastMessageAt);
+              row.querySelector(".time").textContent = fmtListTime(g.lastMessageAt);
+              if (entry.unreadCount > 0) row.classList.add("unread");
             });
             return; // no delivered-marking in groups (ticks stop at "sent")
           }
@@ -315,13 +367,23 @@
             var handle = row.querySelector(".handle");
             if (handle) handle.textContent = p.username ? "@" + p.username : "";
           }));
-          JC.db.collection("chats").doc(entry.chatId).get().then(function (cSnap) {
+          if (entry.unreadCount > 0) row.classList.add("unread");
+          var chatRef = JC.db.collection("chats").doc(entry.chatId);
+          chatRef.get().then(function (cSnap) {
             if (!cSnap.exists) return;
             var c = cSnap.data();
             var prev = row.querySelector(".preview");
-            prev.textContent = (c.lastSenderId === JC.currentUser.uid ? "You: " : "") + lastMessagePreview(c);
+            var me = JC.currentUser.uid;
+            prev.innerHTML = chatPreviewHtml(c, null, me);
             if (entry.unreadCount > 0) prev.classList.add("unread");
-            row.querySelector(".time").textContent = fmtTime(c.lastMessageAt);
+            row.querySelector(".time").textContent = fmtListTime(c.lastMessageAt || entry.lastMessageAt);
+            if (!c.lastMessage) return;
+            // One small read for ticks / voice length / deleted state.
+            chatRef.collection("messages").orderBy("createdAt", "desc").limit(1).get().then(function (mSnap) {
+              var last = null;
+              mSnap.forEach(function (d) { last = d.data(); });
+              if (last) prev.innerHTML = chatPreviewHtml(c, last, me);
+            }).catch(function () {});
           });
           // Mark this chat's incoming "sent" messages as delivered:
           // the app has now received them, even if the chat is not open.

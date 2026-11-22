@@ -392,3 +392,65 @@ html.dark .sv-sheet-head { border-bottom-color: #2a3942; }
 html.dark .sv-sheet .sv-icon { color: #aebac1; }
 html.dark .sv-view-row .preview, html.dark .sv-confirm-text, html.dark .sv-empty { color: #8696a0; }
 html.dark .sv-confirm-btns button { color: #53a6ff; }
+
+/* ---------- v4.7: theme-aware lists (fixes dark-mode white rows / faded names) ---------- */
+:root { --jc-bg: #ffffff; --jc-text: #111b21; --jc-muted: #667781; --jc-div: #e9edef; --jc-soft: #f0f2f5; --jc-accent: #1f7ae0; --jc-missed: #ea0038; --jc-tick-read: #53bdeb; }
+html.dark { --jc-bg: #111b21; --jc-text: #e9edef; --jc-muted: #8696a0; --jc-div: #222d34; --jc-soft: #202c33; --jc-accent: #53a6ff; --jc-missed: #ff5c7a; }
+.screen, #chatList, #callList, .page-body, #statusListRecent, #statusListViewed, #groupMembersList, #blockedList, #nearbyDevicesWrap, .search-bar { background: var(--jc-bg); color: var(--jc-text); }
+.chat-row { background: var(--jc-bg); color: var(--jc-text); border-bottom: 1px solid var(--jc-div); }
+.chat-row:active { background: var(--jc-soft); }
+.chat-row .name, .user-result .name, .sv-view-row .name { color: var(--jc-text); }
+.chat-row .time, .chat-row .preview, .chat-row .handle, .call-row .detail, .user-result, .empty-state { color: var(--jc-muted); }
+.search-bar input, .text-input { background: var(--jc-soft); color: var(--jc-text); }
+.chat-row.unread .time { color: var(--jc-accent); font-weight: 600; }
+.chat-row.unread .name { font-weight: 700; }
+.chat-row .preview.unread { color: var(--jc-text); }
+.chat-row .preview { display: flex; align-items: center; gap: 3px; }
+.chat-row .preview .lp-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.lp-ticks { display: inline-flex; color: var(--jc-muted); flex-shrink: 0; }
+.lp-ticks.read { color: var(--jc-tick-read); }
+.lp-ic { flex-shrink: 0; color: var(--jc-muted); }
+.lp-deleted { font-style: italic; }
+html.dark .btn-ghost { background: var(--jc-soft); color: var(--jc-text); }
+html.dark .login-card, html.dark .nearby-status, html.dark .emoji-panel { background: #1f2c34; color: var(--jc-text); }
+html.dark [style*="color:#111b21"] { color: var(--jc-text) !important; }
+html.dark [style*="color:#667781"] { color: var(--jc-muted) !important; }
+html.dark [style*="background:#fff3cd"] { background: #3a3320 !important; color: #f3e6b8 !important; }
+html.dark .status-head { color: var(--jc-muted); }
+/* tabs: no back arrow, title aligned like WhatsApp */
+.tab-back { display: none !important; }
+.app-header .tab-title { padding-left: 4px; }
+#screen-calls .app-header { position: relative; }
+#callsMenu { top: 52px; right: 8px; }
+/* ---------- v4.7: Calls tab (WhatsApp-style) ---------- */
+.call-row { align-items: center; }
+.call-row .cl-name.missed { color: var(--jc-missed); }
+.cl-count { font-weight: 500; color: inherit; }
+.call-row .cl-detail { display: flex; align-items: center; gap: 4px; color: var(--jc-muted); }
+.call-row .cl-detail.missed { color: var(--jc-missed); }
+.cl-arrow { flex-shrink: 0; color: var(--jc-accent); }
+.cl-detail.missed .cl-arrow { color: var(--jc-missed); }
+.cl-time { white-space: nowrap; }
+.cl-callback { color: var(--jc-accent); flex-shrink: 0; background: none; border: none; padding: 8px; }
+.cl-loading { padding: 16px; color: var(--jc-muted); }
+/* ---------- v4.7: voice status ---------- */
+.vs-btn { display: flex !important; align-items: center; justify-content: center; gap: 8px; }
+.vs-rec { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 24px; background: var(--jc-soft); color: var(--jc-text); }
+.vs-rec.hidden { display: none; }
+.vs-dot { width: 10px; height: 10px; border-radius: 50%; background: #ea0038; animation: vsblink 1s infinite; }
+@keyframes vsblink { 50% { opacity: .2; } }
+.vs-time { font-weight: 600; font-variant-numeric: tabular-nums; }
+.vs-max { color: var(--jc-muted); flex: 1; }
+.vs-cancel, .vs-post { border: none; border-radius: 18px; padding: 8px 14px; font-size: 14px; font-weight: 600; }
+.vs-cancel { background: none; color: var(--jc-missed); }
+.vs-post { background: #1f7ae0; color: #fff; }
+.vs-card { width: 92%; max-width: 420px; box-sizing: border-box; border-radius: 22px; padding: 30px 20px 24px; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 22px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.vs-mic { width: 84px; height: 84px; border-radius: 50%; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; }
+.vs-wave { display: flex; align-items: center; gap: 3px; height: 60px; width: 100%; justify-content: center; }
+.vs-bar { width: 4px; border-radius: 2px; background: rgba(255,255,255,.4); transition: background .15s; }
+.vs-bar.on { background: #fff; }
+.vs-ctrl { display: flex; align-items: center; gap: 14px; }
+.vs-play { width: 60px; height: 60px; border-radius: 50%; border: none; background: rgba(255,255,255,.22); color: #fff; display: flex; align-items: center; justify-content: center; }
+.vs-len { font-size: 16px; font-variant-numeric: tabular-nums; }
+html.dark body, html.dark .screen:not(#screen-chat):not(#screen-call):not(#screen-camera) { background: var(--jc-bg); }
+.vs-btn.hidden { display: none !important; }
