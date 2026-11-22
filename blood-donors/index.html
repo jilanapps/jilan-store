@@ -839,6 +839,8 @@ html.light .donor-card{border-color:rgba(15,42,74,.14)}
 <div id="annList"></div>
 <div id="rem90NotifBox" style="margin-top:10px"></div>
 <div id="thanksNotifBox" style="margin-top:10px"></div>
+<div id="pushEventList" style="margin-top:10px"></div>
+<div id="pushStatusBox" style="margin-top:10px"></div>
 <div id="notifList" class="mut">Loading…</div>
 </div>
 </section>
@@ -3884,6 +3886,7 @@ function updateBell(){
     var g = myGroup(), seen = notifSeen();
     var n = rs.filter(function(r){ return (r.status||'Received') !== 'Completed' && (!g || r.group === g) && (r.createdAt||0) > seen; }).length;
     n += v57BellExtra(); // v57-A
+    try { n += pushUnreadCount(); } catch(e){}
     b.textContent = n > 9 ? '9+' : String(n);
     b.style.display = n ? 'flex' : 'none';
   });
@@ -3891,6 +3894,7 @@ function updateBell(){
 function loadNotifs(){
   var box = document.getElementById('notifList'); if (!box) return;
   v57RenderAnnouncements(); v57RenderRem90Notif(); renderThanksNotif(); // v57-A + v61 thanks
+  renderPushEvents(); renderPushStatus();
   var g = myGroup();
   qAll('requestsPublic', function(rs){
     var open = rs.filter(function(r){ return (r.status||'Received') !== 'Completed'; });
@@ -3913,6 +3917,98 @@ function loadNotifs(){
     var b = document.getElementById('bellCount'); if (b) b.style.display = 'none';
   });
 }
+
+/* ================= v86: push notifications (FCM-ready) =================
+   The 6 push events (user-approved 2026-11-22) are written here as
+   pushEvents docs, best-effort and silent: the write never blocks the
+   main flow and never shows an error toast. The in-app bell renders
+   the ones addressed to this phone right away (live listener below);
+   the future FCM trigger (Cloud Function or VM cron — see
+   apkbuild-blooddonors/fcm/FCM-INTEGRATION.md) reads the same docs
+   and sends a real background push to the stored device tokens.
+   Bodies NEVER contain CNIC, full address or disease info — only blood
+   group, hospital/city and first name (public policy).
+   Native FCM (token minting + background delivery) is NOT in this
+   build yet: it needs the Android app registered in the Firebase
+   console (google-services.json) + the Firebase Messaging AARs in the
+   wrapper — staged under apkbuild-blooddonors/fcm/. Until then the
+   bell below is the delivery channel. */
+var PUSH_TYPES = ['new_request','donor_found','donation_confirmed','cooldown_ready','new_member','broadcast'];
+function pushMyUid(){ try { return (FB_OK && auth && auth.currentUser) ? auth.currentUser.uid : ''; } catch(e){ return ''; } }
+function pushTargeted(ev){
+  try {
+    var uid = pushMyUid();
+    if (ev.targetUid && ev.targetUid === uid) return true;
+    if (ev.targetRole === 'all') return true;
+    if (isAdmin() && ev.targetRole === 'admin') return true;
+    if (ev.targetGroup && ev.targetGroup === myGroup()) return true;
+    if (ev.targetPhoneNorm && MY_PHONE_NORM && normPhone(ev.targetPhoneNorm) === MY_PHONE_NORM) return true;
+  } catch(e){}
+  return false;
+}
+function writePushEvent(ev){
+  try {
+    if (!FB_OK || !db) return;
+    var t = String(ev.title||'').slice(0,120), b = String(ev.body||'').slice(0,300);
+    if (!t || !b) return;
+    if (PUSH_TYPES.indexOf(ev.type) < 0) return;
+    var doc = {id: uid('pev'), type: ev.type, title: t, body: b,
+      targetUid: ev.targetUid||'', targetGroup: ev.targetGroup||'',
+      targetPhoneNorm: ev.targetPhoneNorm||'', targetRole: ev.targetRole||'',
+      reqNo: ev.reqNo||'', createdAt: Date.now()};
+    db.collection('pushEvents').doc(doc.id).set(doc).catch(function(){});
+  } catch(e){}
+}
+function pushUnreadCount(){
+  var n = 0, seen = notifSeen();
+  try {
+    (window._pushEv||[]).forEach(function(ev){
+      if (!ev || (ev.createdAt||0) <= seen) return;
+      if (ev.type === 'new_request' || ev.type === 'broadcast') return; /* counted via requests / announcements */
+      if (pushTargeted(ev)) n++;
+    });
+  } catch(e){}
+  return n;
+}
+function renderPushEvents(){
+  var box = document.getElementById('pushEventList'); if (!box) return;
+  var draw = function(){
+    var list = (window._pushEv||[]).filter(function(ev){
+      return ev && pushTargeted(ev) && ev.type !== 'new_request' && ev.type !== 'broadcast';
+    });
+    list.sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+    list = list.slice(0,20);
+    if (!list.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<h3 style="margin-top:0">🔔 Push notifications</h3>' + list.map(function(ev){
+      return '<div class="dcard"><div><b>'+esc(ev.title||'')+'</b><br><span class="mut">'+esc(ev.body||'')+'</span><br><span class="mut small">'+esc(fmtD(ev.createdAt))+'</span></div></div>';
+    }).join('');
+  };
+  if (!window._pushEvStarted) {
+    window._pushEvStarted = true;
+    try { qAll('pushEvents', function(list){ window._pushEv = list||[]; draw(); }); } catch(e){ draw(); }
+  } else draw();
+}
+function renderPushStatus(){
+  var box = document.getElementById('pushStatusBox'); if (!box) return;
+  var t = ''; try { t = localStorage.getItem('bdbs_fcm_token') || ''; } catch(e){}
+  box.innerHTML = t ? '<div class="card" style="margin:0"><b>🔔 Push notifications: ON</b><br><span class="mut small">Background notifications are enabled on this device.</span></div>' : '';
+}
+/* FCM device-token bridge (native wrapper calls this — v86 stages the
+   JS side; the native FCM code lands with the console step). */
+function registerFcmToken(t){
+  try {
+    if (!t) return;
+    try { localStorage.setItem('bdbs_fcm_token', t); } catch(e){}
+    var uid = pushMyUid(); if (!uid || !FB_OK || !db) return;
+    var g = ''; try { g = (typeof MY_DONOR !== 'undefined' && MY_DONOR && MY_DONOR.group) ? MY_DONOR.group : myGroup(); } catch(e){}
+    var data = {uid: uid, group: g||'', role: isAdmin() ? 'admin' : 'donor', platform: 'android', updatedAt: Date.now()};
+    try { data.tokens = firebase.firestore.FieldValue.arrayUnion(t); } catch(e){ data.tokens = [t]; }
+    db.collection('fcmTokens').doc(uid).set(data, {merge:true}).catch(function(){});
+    renderPushStatus();
+  } catch(e){}
+}
+window.BDBS_onFcmToken = function(t){ try { registerFcmToken(t); } catch(e){} };
+
 /* ================= v57-B: blood banks, stock dashboard, hospital portal =================
    Collections: bloodBanks {id,name,city,phone,stock:{A+:n,...},createdAt}
    (admin-entered stock, public read, admin write) and hospitals
@@ -3931,7 +4027,7 @@ function bankStockChips(b){ var st = b.stock || {}; return B57_GROUPS.map(functi
 function loadHomeBloodBanks(){ qAll('bloodBanks', function(banks){ qAll('hospitals', function(hosps){ var box = document.getElementById('homeBloodBanks'); if (!box) return; var h = ''; if (banks.length) { h += banks.map(function(b){ return '<div class="dcard"><b>' + esc(b.name || '') + '</b> <span class="mut small">' + esc(b.city || '') + '</span>' + (b.phone ? '<br><span class="mut small">📞 <a href="tel:' + esc(b.phone) + '">' + esc(b.phone) + '</a></span>' : '') + '<br>' + bankStockChips(b) + '</div>'; }).join(''); } else { h += '<span class="mut">No blood banks registered yet.</span>'; } var approved = (hosps || []).filter(function(x){ return x.approved === true; }); if (approved.length) { h += '<h3 style="margin-top:10px">Approved Hospitals</h3>' + approved.map(function(x){ return '<div class="mut small">🏥 ' + esc(x.name || '') + ' — ' + esc(x.city || '') + '</div>'; }).join(''); } box.innerHTML = h; }); }); }
 function loadHospitalPortal(){ var box = document.getElementById('hospitalPortalBody'); if (!box) return; qAll('hospitals', function(hs){ var myId = ''; try { myId = localStorage.getItem('bdbs_hospitalId') || ''; } catch(e){} var mine = null; (hs || []).forEach(function(x){ if (x.id === myId) mine = x; }); if (mine && canHospitalRequest(mine)) { box.innerHTML = '<p class="ok">Approved hospital: <b>' + esc(mine.name) + '</b> (' + esc(mine.city || '') + ')</p><div class="row"><div class="fld"><input id="hpName" placeholder=" "><label for="hpName">Patient Name *</label></div><div class="fld static"><select id="hpGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="hpGroup">Blood Group *</label></div></div><div class="row"><div class="fld"><input id="hpUnits" type="number" min="1" placeholder=" "><label for="hpUnits">Units Needed *</label></div><div class="fld"><input id="hpPhone" type="tel" placeholder=" "><label for="hpPhone">Contact Phone *</label></div></div><div class="fld"><input id="hpAddress" placeholder=" "><label for="hpAddress">Address / Ward *</label></div><button class="btn" onclick="submitHospitalRequest()">Submit Hospital Request</button> <span id="hpMsg"></span>'; } else if (mine) { box.innerHTML = '<p class="mut">Registration received for <b>' + esc(mine.name) + '</b> — waiting for admin approval. You can request blood after approval.</p>'; } else { box.innerHTML = '<div class="row"><div class="fld"><input id="hRegName" placeholder=" "><label for="hRegName">Hospital Name *</label></div><div class="fld"><input id="hRegCity" placeholder=" "><label for="hRegCity">City *</label></div></div><div class="fld"><input id="hRegPhone" type="tel" placeholder=" "><label for="hRegPhone">Hospital Phone *</label></div><button class="btn" onclick="registerHospital()">Register Hospital</button> <span id="hRegMsg"></span>'; } }); }
 function registerHospital(){ var name = val('hRegName'), city = val('hRegCity'), phone = val('hRegPhone'); var msg = document.getElementById('hRegMsg'); if (!name || !city || !phone) { if (msg) msg.innerHTML = '<span class="err">Please fill hospital name, city and phone.</span>'; return; } var rec = {id: uid('hosp'), name: name, city: city, phone: phone, approved: false, createdAt: Date.now()}; qAdd('hospitals', rec, function(){ try { localStorage.setItem('bdbs_hospitalId', rec.id); } catch(e){} if (msg) msg.innerHTML = '<span class="ok">Registered. The admin will approve it — then you can request blood here.</span>'; loadHospitalPortal(); }); }
-function submitHospitalRequest(){ var msg = document.getElementById('hpMsg'); qAll('hospitals', function(hs){ var myId = ''; try { myId = localStorage.getItem('bdbs_hospitalId') || ''; } catch(e){} var mine = null; (hs || []).forEach(function(x){ if (x.id === myId) mine = x; }); if (!canHospitalRequest(mine)) { if (msg) msg.innerHTML = '<span class="err">Admin approval is required before a hospital can request blood.</span>'; return; } var name = val('hpName'), group = val('hpGroup'), units = parseInt(val('hpUnits'), 10), phone = val('hpPhone'), address = val('hpAddress'); if (!name || !group || isNaN(units) || units < 1 || !phone || !address) { if (msg) msg.innerHTML = '<span class="err">Please fill all hospital request fields.</span>'; return; } qAll('requestsPublic', function(rs){ var dup = rs.some(function(r){ return (r.status || 'Received') !== 'Completed' && waNum(r.phone) === waNum(phone); }); if (dup) { if (msg) msg.innerHTML = '<span class="err">This phone already has an open request. Please close it first.</span>'; return; } var mx = 0; rs.forEach(function(r){ var n = reqNoNum(r); if (n > mx) mx = n; }); var rno = reqNoFmt(mx + 1); var id = uid('req'); var full = {id:id, reqNo:rno, name:name, father:'', cnic:'', age:'', group:group, units:units, hospital:mine.name, disease:'', phone:phone, address:address, requesterPhoneNorm:normPhone(phone), emergency:false, status:'Received', donatedBy:'', donatedById:'', source:'hospital', hospitalId:mine.id, hospitalName:mine.name, createdAt:Date.now()}; var pub = reqPub(full); qAdd('requests', full, function(){ qAdd('requestsPublic', pub, function(){ if (msg) msg.innerHTML = '<span class="ok">Hospital request submitted. Request No. <b>' + esc(rno) + '</b>.</span>'; ['hpName','hpUnits','hpPhone','hpAddress'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; }); var g = document.getElementById('hpGroup'); if (g) g.value = ''; loadRequests(); }); }); }); }); }
+function submitHospitalRequest(){ var msg = document.getElementById('hpMsg'); qAll('hospitals', function(hs){ var myId = ''; try { myId = localStorage.getItem('bdbs_hospitalId') || ''; } catch(e){} var mine = null; (hs || []).forEach(function(x){ if (x.id === myId) mine = x; }); if (!canHospitalRequest(mine)) { if (msg) msg.innerHTML = '<span class="err">Admin approval is required before a hospital can request blood.</span>'; return; } var name = val('hpName'), group = val('hpGroup'), units = parseInt(val('hpUnits'), 10), phone = val('hpPhone'), address = val('hpAddress'); if (!name || !group || isNaN(units) || units < 1 || !phone || !address) { if (msg) msg.innerHTML = '<span class="err">Please fill all hospital request fields.</span>'; return; } qAll('requestsPublic', function(rs){ var dup = rs.some(function(r){ return (r.status || 'Received') !== 'Completed' && waNum(r.phone) === waNum(phone); }); if (dup) { if (msg) msg.innerHTML = '<span class="err">This phone already has an open request. Please close it first.</span>'; return; } var mx = 0; rs.forEach(function(r){ var n = reqNoNum(r); if (n > mx) mx = n; }); var rno = reqNoFmt(mx + 1); var id = uid('req'); var full = {id:id, reqNo:rno, name:name, father:'', cnic:'', age:'', group:group, units:units, hospital:mine.name, disease:'', phone:phone, address:address, requesterPhoneNorm:normPhone(phone), emergency:false, status:'Received', donatedBy:'', donatedById:'', source:'hospital', hospitalId:mine.id, hospitalName:mine.name, createdAt:Date.now()}; var pub = reqPub(full); qAdd('requests', full, function(){ qAdd('requestsPublic', pub, function(){ if (msg) msg.innerHTML = '<span class="ok">Hospital request submitted. Request No. <b>' + esc(rno) + '</b>.</span>'; try { writePushEvent({type:'new_request', targetGroup: group, title:'New blood request: '+group, body:(firstName(name)||'Patient')+' needs '+units+' unit(s) — '+(mine.name||''), reqNo: rno}); } catch(e){} ['hpName','hpUnits','hpPhone','hpAddress'].forEach(function(i){ var e = document.getElementById(i); if (e) e.value = ''; }); var g = document.getElementById('hpGroup'); if (g) g.value = ''; loadRequests(); }); }); }); }); }
 function loadGroupBAdmin(){ var bb = document.getElementById('adminBanksBox'); if (bb) { qAll('bloodBanks', function(banks){ var h = '<b>Add Blood Bank</b> <span class="mut small">Stock per blood group (units). Public can see it; only the admin can change it.</span><br><input id="bbName" placeholder="Bank name" style="width:170px"> <input id="bbCity" placeholder="City" style="width:120px"> <input id="bbPhone" type="tel" placeholder="Phone" style="width:140px"><br>' + B57_GROUPS.map(function(g, i){ return '<label class="mut small">' + g + ' <input id="bbS' + i + '" type="number" min="0" value="0" style="width:58px"></label> '; }).join('') + '<br><button class="btn" onclick="saveBloodBank()">Save Blood Bank</button> <span id="bbMsg"></span><br><br>'; if (banks.length) { h += banks.map(function(b){ return '<div class="dcard"><b>' + esc(b.name || '') + '</b> <span class="mut small">' + esc(b.city || '') + '</span> ' + bankStockChips(b) + ' <button class="btn ghost" onclick="removeBloodBank(\'' + esc(b.id) + '\')">Remove</button></div>'; }).join(''); } else { h += '<span class="mut">No blood banks yet.</span>'; } bb.innerHTML = h; }); } var hb = document.getElementById('adminHospBox'); if (hb) { qAll('hospitals', function(hs){ if (!hs.length) { hb.innerHTML = '<b>Hospitals</b><br><span class="mut">No hospital registrations yet.</span>'; return; } hb.innerHTML = '<b>Hospitals (' + hs.length + ')</b><br>' + hs.map(function(x){ return '<div class="dcard"><b>' + esc(x.name || '') + '</b> <span class="mut small">' + esc(x.city || '') + ' • ' + esc(x.phone || '') + '</span> ' + (x.approved === true ? '<span class="ok">Approved</span>' : '<span class="err">Pending approval</span>') + ' ' + (x.approved === true ? '' : '<button class="btn green" onclick="approveHospital(\'' + esc(x.id) + '\')">Approve</button> ') + '<button class="btn ghost" onclick="removeHospital(\'' + esc(x.id) + '\')">Remove</button></div>'; }).join(''); }); } }
 function saveBloodBank(){ if (!isAdmin()) { alert('Admin login required.'); return; } var name = val('bbName'), city = val('bbCity'), phone = val('bbPhone'); var msg = document.getElementById('bbMsg'); if (!name || !city) { if (msg) msg.innerHTML = '<span class="err">Bank name and city are required.</span>'; return; } var stock = {}; B57_GROUPS.forEach(function(g, i){ var e = document.getElementById('bbS' + i); stock[g] = e ? stockNum(e.value) : 0; }); qAdd('bloodBanks', {id: uid('bank'), name: name, city: city, phone: phone, stock: stock, createdAt: Date.now()}, function(){ if (msg) msg.innerHTML = '<span class="ok">Blood bank saved.</span>'; loadGroupBAdmin(); loadStockDashboard(); loadHomeBloodBanks(); }); }
 function removeBloodBank(id){ if (!isAdmin()) { alert('Admin login required.'); return; } if (!confirm('Remove this blood bank?')) return; qDel('bloodBanks', id, function(){ loadGroupBAdmin(); loadStockDashboard(); loadHomeBloodBanks(); }); }
@@ -4079,6 +4175,7 @@ function confirmClaim(cid){
       qUpdate('requests', c.requestId, patch, function(){
         qUpdate('requestsPublic', c.requestId, patch, function(){
           advanceReqStatus(c.requestId, 'Donor Found');
+          try { qAll('requests', function(rs){ var rq=null; rs.forEach(function(x){ if (x.id===c.requestId) rq=x; }); if (rq) writePushEvent({type:'donor_found', targetPhoneNorm: rq.requesterPhoneNorm||'', title:'Donor found — '+(rq.reqNo||''), body:'A donor was found for this request. '+(rq.hospital||''), reqNo: rq.reqNo||''}); }); } catch(e){}
           /* v57-C: admin confirmed this donation — mark the donor verified (private + public mirror). */
           /* v61: the Shukriya Note is derived from this completion — the request becomes Completed with donatedById, and the donor record gets lastDonation + units (advanceReqStatus). No extra write here. */
           qUpdate('donors', c.donorId, {verifiedDonor:true}, function(){ qUpdate('donorsPublic', c.donorId, {verifiedDonor:true}, function(){}); });
@@ -4147,6 +4244,7 @@ function advanceReqStatus(id, cur){
             qUpdate('donors', d.id, patch, function(){
               qUpdate('donorsPublic', d.id, patch, function(){});
             });
+            try { writePushEvent({type:'donation_confirmed', targetUid: (d.linkedUid||''), targetPhoneNorm: normPhone(d.phone||''), title:'Shukriya! Donation confirmed', body:'Your ' + reqUnits + ' unit(s) donation is confirmed — your certificate is ready.', reqNo: (r.reqNo||'')}); } catch(e){}
             qUpdate('requests', id, {donatedByPrivate: isFemalePrivate(d)}, function(){
               qUpdate('requestsPublic', id, {donatedByPrivate: isFemalePrivate(d)}, function(){});
             });
@@ -4174,7 +4272,9 @@ function markDonorFound(id, cur){
   var patch = {status:'Donor Found', donatedBy:nm, donatedById:(v === 'other' ? '' : v)};
   var applyPatch = function(p){
     qUpdate('requests', id, p, function(){
-      qUpdate('requestsPublic', id, p, function(){ renderAdmin(); loadRequests(); });
+      qUpdate('requestsPublic', id, p, function(){ renderAdmin(); loadRequests();
+        try { qAll('requestsPublic', function(rs){ var rq=null; rs.forEach(function(x){ if (x.id===id) rq=x; }); if (rq) writePushEvent({type:'donor_found', targetPhoneNorm: rq.requesterPhoneNorm||'', title:'Donor found — '+(rq.reqNo||''), body:'A donor was found for this request. '+(rq.hospital||''), reqNo: rq.reqNo||''}); }); } catch(e){}
+      });
     });
   };
   if (v === 'other') { applyPatch(patch); return; }
@@ -4670,6 +4770,7 @@ function submitRequestTx(ph, phNorm, nameNorm, group, un, btn){
 /* v42 shared request-submit success UI (transaction path and legacy
    fallback alike). */
 function requestSubmitSuccess(rno, btn){
+  try { var _g = val('rGroup'), _n = val('rName'), _h = val('rHospital'), _u = parseInt(val('rUnits'),10)||1; if (_g) writePushEvent({type:'new_request', targetGroup:_g, title:'New blood request: '+_g, body:(firstName(_n)||'Patient')+' needs '+_u+' unit(s) — '+(_h||''), reqNo:rno}); } catch(e){}
   document.getElementById('rMsg').innerHTML = '<span class="ok">Request submitted. Your Request No. is <b>'+esc(rno)+'</b> — please save it. The admin will contact you. Track it any time in Track Request below.</span>';
   ['rName','rFather','rCnic','rAge','rHospital','rDisease','rUnits','rPhone','rAddress'].forEach(function(i){document.getElementById(i).value='';});
   document.getElementById('rGroup').value=''; var em=document.getElementById('rEmergency'); if (em) em.checked=false; var rc=document.getElementById('rRecurring'); if (rc) rc.checked=false; if (btn) btn.disabled = false; loadRequests();
@@ -4939,6 +5040,7 @@ function editMember(id){
 }
 /* v40 shared member-submit success UI (transaction path + legacy alike). */
 function memberSubmitSuccess(full, nextId, btn){
+  try { writePushEvent({type:'new_member', targetRole:'admin', title:'New member added', body:(full.name||'A new member')+' joined the society.', reqNo:''}); } catch(e){}
   document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — welcome card is ready.</span>';
   renderWelcomeCard(full); loadMembers();
   ['mName','mFather','mDesig','mGender','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
@@ -7440,6 +7542,7 @@ function v57RenderRem90Notif(){
   if (!box) return;
   var last = null; try { last = localStorage.getItem('bdbs_myLastDonation') || ''; } catch(e){}
   if (rem90Days(last) >= 90 && !v57Rem90DismissedToday()) {
+    try { var _k='bdbs_rem90_ev_'+new Date().toISOString().slice(0,10); if (!localStorage.getItem(_k)) { localStorage.setItem(_k,'1'); writePushEvent({type:'cooldown_ready', targetUid: pushMyUid(), targetPhoneNorm: MY_PHONE_NORM||'', title:'You can donate blood again', body:'It has been 90+ days since your last donation.'}); } } catch(e){}
     box.innerHTML = '<div class="card" style="margin:0;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4)"><b>🩸 You can donate blood again</b><br><span class="mut small">It has been 90+ days since your last donation.</span><br><button class="btn" onclick="show(\'request\')">Find a Request</button> <button class="btn ghost" onclick="v57DismissRem90()">Remind me later</button></div>';
   } else box.innerHTML = '';
 }
@@ -7539,6 +7642,7 @@ function sendAnnouncement(){
   }
   qAdd('announcements', {title: title, text: text, createdAt: Date.now()}, function(){
     logAudit('announcement', '', title);
+    try { writePushEvent({type:'broadcast', targetRole:'all', title: title, body: text}); } catch(e){}
     if (msg) msg.innerHTML = '<span class="ok">Announcement sent to all donors.</span>';
     document.getElementById('aAnnTitle').value = '';
     document.getElementById('aAnnText').value = '';
@@ -7683,6 +7787,14 @@ function v57StartListeners(){
       v57RefreshAnnCache(); updateBell();
       var sec = document.getElementById('s-notif');
       if (sec && sec.classList.contains('on')) v57RenderAnnouncements();
+    });
+  } catch(e){}
+  try {
+    db.collection('pushEvents').orderBy('createdAt', 'desc').limit(50).onSnapshot(function(snap){
+      var list = []; try { snap.forEach(function(d){ var o = d.data()||{}; o.id = d.id; list.push(o); }); } catch(e){}
+      window._pushEv = list; updateBell();
+      var sec2 = document.getElementById('s-notif');
+      if (sec2 && sec2.classList.contains('on')) renderPushEvents();
     });
   } catch(e){}
 }

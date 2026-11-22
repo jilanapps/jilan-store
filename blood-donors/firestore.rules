@@ -1,5 +1,18 @@
 rules_version = '2';
-// BDBS Firestore rules v36 (2026-11-16): .exists on a get() result ERRORS
+// BDBS Firestore rules v45 (2026-11-22): v44 + push notification
+// collections — /pushEvents (v86) and /fcmTokens (v86). NOTHING else
+// changed. NOT PUBLISHED by the agent — parent publishes via Console.
+// a member doc with a non-empty protectedBy (owner admin email) may be
+// updated, deleted or (re)created ONLY by that owner. Applies to /members
+// and /membersPublic (create/update/delete). When protectedBy is absent or
+// empty, the v43 admin/linked-member rules apply unchanged. NOTHING else
+// changed. NOT PUBLISHED by the agent — parent publishes via Console.
+// /donors + /donorsPublic create allowlists gain 'referredBy' (C),
+// 'lat'/'lng' (B, with range checks); new collections /announcements (A),
+// /bloodBanks + /hospitals (B), /camps + /campRegs (D). /requests +
+// /requestsPublic create is already `if true`, so recurring fields (D3)
+// and SOS (A4) need no rule change. NOT PUBLISHED by the agent —
+// publish together with the v57 APK. .exists on a get() result ERRORS
 // in evaluation and denies the request (linked member-card read denied).
 // All such uses replaced with the exists() function (see helpers below).
 service cloud.firestore {
@@ -37,6 +50,15 @@ service cloud.firestore {
       return exists(p) ? get(p).data.get('phoneNorm', '') : '';
     }
 
+    // The signed-in user's linked donor's blood group (v45, for push
+    // targeting). Returns '' when the user has no linked donor.
+    function myGroupFromLink() {
+      let u = /databases/$(database)/documents/users/$(request.auth.uid);
+      let did = exists(u) ? get(u).data.get('linkedDonorId', '') : '';
+      let d = /databases/$(database)/documents/donors/$(did);
+      return (did != '' && exists(d)) ? get(d).data.get('group', '') : '';
+    }
+
     // User accounts created by Sign Up: role is always 'donor'.
     // Admin status comes from the email allowlist above, never from role.
     match /users/{userId} {
@@ -60,11 +82,23 @@ service cloud.firestore {
     match /donors/{id} {
       allow read: if isAdmin() || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid);
-      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','donorNo','photo','cnic','group','age','address','area','phone','disease','lastDonation','units','consent','consentAt','createdAt','demo'])
-        && !('linkedUid' in request.resource.data));
-      allow update: if isAdmin() || (request.auth != null
+      allow create: if isAdmin() || (request.resource.data.keys().hasOnly(['id','name','father','gender','publicOptIn','available','donorNo','photo','cnic','group','age','address','area','phone','disease','lastDonation','units','consent','consentAt','createdAt','demo','referredBy','lat','lng','sponsor','family'])
+        && !('linkedUid' in request.resource.data)
+        && (!('lat' in request.resource.data) || (request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90))
+        && (!('lng' in request.resource.data) || (request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180)));
+      // v37: admin may update anything EXCEPT publicOptIn (a female
+      // record goes public only by her own choice — see the owner rule).
+      allow update: if (isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['publicOptIn']))
+        || (request.auth != null
         && resource.data.get('linkedUid', null) == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'publicOptIn', 'available', 'lastReqNo', 'lastReqId']));
+      // v40: admin privacy toggle — admin may change ONLY publicOptIn
+      // (both directions: Private when hiding, Public when the donor
+      // gives permission). Changing publicOptIn together with any other
+      // field is still denied.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['publicOptIn']);
       allow update: if request.auth != null
         && resource.data.get('linkedUid', null) == null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedUid'])
@@ -89,9 +123,19 @@ service cloud.firestore {
     // The linked donor may update only their own lastDonation/units here too.
     match /donorsPublic/{id} {
       allow read: if true;
-      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','donorNo','group','city','area','phone','address','lastDonation','units','createdAt','demo']);
-      allow update: if isAdmin() || (request.auth != null && linkedDonorId() == id
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units']));
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['id','name','donorNo','group','city','area','phone','address','lastDonation','units','gender','publicOptIn','available','phoneHash','hidden','createdAt','demo','lat','lng','referredBy','verifiedDonor','sponsor','family'])
+        && (!('lat' in request.resource.data) || (request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90))
+        && (!('lng' in request.resource.data) || (request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180));
+      allow update: if (isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['publicOptIn']))
+        || (request.auth != null && linkedDonorId() == id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'available', 'publicOptIn']));
+      // v40: admin privacy toggle — admin may change ONLY publicOptIn
+      // (both directions: Private when hiding, Public when the donor
+      // gives permission). Changing publicOptIn together with any other
+      // field is still denied.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['publicOptIn']);
       // Same requester-anchored credit as /donors above (v23).
       allow update: if request.auth != null && myPhoneNorm() != ''
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastDonation', 'units', 'lastClosedRequestId'])
@@ -100,7 +144,9 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('donatedById', '') == id
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('status', '') == 'Completed'
         && get(/databases/$(database)/documents/requests/$(request.resource.data.lastClosedRequestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm();
-      allow delete: if isAdmin();
+      // v37: the linked donor may delete her OWN public mirror, so the
+      // app can swap it for a private stub when she opts out.
+      allow delete: if isAdmin() || (request.auth != null && linkedDonorId() == id);
     }
 
     // Donor No. -> donor doc lookup, so a signed-up donor can link their
@@ -128,7 +174,27 @@ service cloud.firestore {
     // member may READ their own record (via linkedMemberId in users doc).
     match /members/{memberId} {
       allow read: if isAdmin() || (request.auth != null && linkedMemberId() == memberId);
-      allow write: if isAdmin();
+      // v44: a protected card (non-empty protectedBy) may be created only
+      // by its owner, so nobody can lock a card to someone else's email;
+      // unprotected creates work as before for any admin.
+      allow create: if isAdmin()
+        && (request.resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == request.resource.data.get('protectedBy', ''));
+      // v44: a protected card may be deleted only by its owner.
+      allow delete: if isAdmin()
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', ''));
+      // v37: admin may update anything EXCEPT publicOptIn; the linked
+      // member may update ONLY publicOptIn (her own privacy choice).
+      // v44: on a protected card, BOTH branches require the owner.
+      allow update: if (isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['publicOptIn'])
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', '')))
+        || (request.auth != null && linkedMemberId() == memberId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['publicOptIn'])
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', '')));
     }
     // Member ID -> member doc lookup, so a signed-in member can link
     // their own card. Maps a Member ID (001, 002…) to a doc id only.
@@ -140,7 +206,26 @@ service cloud.firestore {
     // designation, ID No., blood group, valid till only.
     match /membersPublic/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      // v37: admin writes as before; the linked member may replace her
+      // OWN mirror (delete + create) when she toggles her privacy, and
+      // may update ONLY publicOptIn on it.
+      // v44: on a protected card, create/update/delete require the owner —
+      // otherwise another admin (or a wrongly linked user) could hide the
+      // card by deleting its mirror or recreating it as hidden.
+      allow create: if (isAdmin() || (request.auth != null && linkedMemberId() == request.resource.data.id))
+        && (request.resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == request.resource.data.get('protectedBy', ''));
+      allow update: if (isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['publicOptIn'])
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', '')))
+        || (request.auth != null && linkedMemberId() == id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['publicOptIn'])
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', '')));
+      allow delete: if (isAdmin() || (request.auth != null && linkedMemberId() == id))
+        && (resource.data.get('protectedBy', '') == ''
+          || request.auth.token.email == resource.data.get('protectedBy', ''));
     }
 
     // Blood requests: anyone may SUBMIT a request (public create).
@@ -153,7 +238,7 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
       allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
         && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById', 'donatedByPrivate', 'completedAt'])
         && request.resource.data.status == 'Completed');
     }
     // Public-safe request mirror: patient first name, blood group needed,
@@ -165,7 +250,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
       allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
         && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'donatedBy', 'donatedById', 'donatedByPrivate', 'completedAt'])
         && request.resource.data.status == 'Completed');
     }
 
@@ -234,6 +319,126 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['id','requestId','donorId','donorName','group','status','createdAt'])
         && request.resource.data.status == 'Pending';
       allow update, delete: if isAdmin();
+    }
+
+    // Admin announcements (v57-A): public to read, admin only to publish.
+    // Title/text only — no donor phone, CNIC or private data ever goes in one.
+    match /announcements/{id} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'title', 'text', 'createdAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1 && request.resource.data.title.size() <= 120
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 1000;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Blood banks (v57-B): admin-entered stock per blood group.
+    // Public read (home list + live stock dashboard); admin only to write.
+    match /bloodBanks/{id} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id','name','city','phone','stock','createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 1
+        && request.resource.data.stock is map
+        && request.resource.data.stock.keys().hasOnly(['A+','A-','B+','B-','O+','O-','AB+','AB-']);
+      allow update, delete: if isAdmin();
+    }
+
+    // Hospitals (v57-B): anyone may REGISTER, but born UNAPPROVED
+    // (approved == false) and the public may never flip that flag —
+    // only the admin approves. The app gates requests on approved === true.
+    match /hospitals/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['id','name','city','phone','approved','createdAt'])
+        && request.resource.data.approved == false
+        && request.resource.data.name is string && request.resource.data.name.size() >= 1
+        && request.resource.data.city is string && request.resource.data.city.size() >= 1
+        && request.resource.data.phone is string && request.resource.data.phone.size() >= 7;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Blood donation camps (v57-D): public list, admin-managed.
+    match /camps/{campId} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'title', 'place', 'date', 'time', 'notes', 'createdAt', 'photos']);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'place', 'date', 'time', 'notes', 'photos']);
+      allow delete: if isAdmin();
+    }
+
+    // Thalassemia patients (v69; v43 adds 'status' for Close/Reopen): full record is admin-only (patient
+    // phone is private); the public mirror has no phone and is readable
+    // by everyone, so the Home list can show patients + matching donors.
+    match /thalassemiaPatients/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'name', 'group', 'hospital', 'need', 'phone', 'createdAt', 'status']);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'group', 'hospital', 'need', 'phone', 'status']);
+      allow delete: if isAdmin();
+    }
+    match /thalassemiaPatientsPublic/{id} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'name', 'group', 'hospital', 'need', 'createdAt', 'status']);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'group', 'hospital', 'need', 'status']);
+      allow delete: if isAdmin();
+    }
+
+    // Camp registrations (v57-D): a SIGNED-IN donor creates exactly one
+    // row per camp for THEMSELVES — donorId must equal their linked donor
+    // record and phoneNorm must match their users doc, so nobody can
+    // register someone else. Admin only reads the full list / deletes.
+    match /campRegs/{regId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.donorId == linkedDonorId()
+        && request.resource.data.phoneNorm == myPhoneNorm()
+        && request.resource.data.keys().hasOnly(['id', 'campId', 'donorId', 'name', 'group', 'phone', 'phoneNorm', 'createdAt']);
+      allow update, delete: if isAdmin();
+    }
+
+    // Push notification events (v45, BDBS v86): one doc per event —
+    // {id, type, title, body, targetUid, targetGroup, targetPhoneNorm,
+    // targetRole, reqNo, createdAt}. Any signed-in user may CREATE
+    // (best-effort from the app: the write must never block the main
+    // flow); title/body are length-capped and the type allowlist keeps
+    // the collection abuse-proof. READ is targeted: admin reads all;
+    // a user reads an event only when it is addressed to them (their
+    // uid, their phone, their blood group, or a broadcast). No update
+    // or delete from the client — events are a write-once log.
+    // Bodies never contain CNIC, full address or disease info — only
+    // blood group, hospital/city and first name (public policy).
+    match /pushEvents/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['id', 'type', 'title', 'body', 'targetUid', 'targetGroup', 'targetPhoneNorm', 'targetRole', 'reqNo', 'createdAt'])
+        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast']
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.body.size() <= 300;
+      allow read: if isAdmin() || (request.auth != null
+        && (resource.data.get('targetUid', '') == request.auth.uid
+          || resource.data.get('targetPhoneNorm', '') == myPhoneNorm()
+          || (resource.data.get('targetGroup', '') != '' && resource.data.get('targetGroup', '') == myGroupFromLink())
+          || resource.data.get('targetRole', '') == 'all'));
+    }
+
+    // FCM device tokens (v45, BDBS v86): one doc per user —
+    // {uid, group, role, platform, tokens[], updatedAt}. Only the owner
+    // may write their own tokens (and only their own uid); admin may
+    // read for targeting, the owner may read their own. No delete from
+    // the client. Tokens are capped at 5 per user.
+    match /fcmTokens/{userId} {
+      allow create, update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.keys().hasOnly(['uid', 'group', 'role', 'platform', 'tokens', 'updatedAt'])
+        && request.resource.data.tokens.size() <= 5;
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
     }
 
     // Audit log (v40): one doc per admin action — {id, adminEmail,
