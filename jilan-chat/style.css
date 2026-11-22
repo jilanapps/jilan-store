@@ -1,4 +1,4 @@
-/* Jilan Chat v3.0 — WhatsApp-like layout, own identity: Jilan Chat name
+/* Jilan Chat v4.0 — WhatsApp-like layout, own identity: Jilan Chat name
    + Jilan blue (#1f7ae0). NO WhatsApp name, logo or green. UI English. */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -113,6 +113,16 @@ input, textarea { font-family: inherit; font-size: 15px; }
 #recBar.show { display: flex; }
 #recBar .dot { width: 10px; height: 10px; border-radius: 50%; background: #ea0038; animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: .2; } }
+
+/* ---------- chat requests (v4.0) ---------- */
+.req-btns { display: flex; gap: 8px; margin-top: 10px; }
+.req-btns .btn { flex: 1; margin-top: 0; }
+
+/* ---------- offline bar + pending tick (v4.0) ---------- */
+/* Offline likha gaya message abhi queue me hai — ghari dikhti hai, tick
+   nahi. Net aate hi Firestore khud bhej deta hai aur tick aa jata hai. */
+.offline-bar { background: #fff3cd; color: #664d03; font-size: 13px; padding: 8px 12px; text-align: center; flex-shrink: 0; }
+.msg .meta .ticks.pending { color: #8696a0; }
 
 /* ---------- new chat / profile ---------- */
 .page-body { flex: 1; overflow-y: auto; padding: 16px; }

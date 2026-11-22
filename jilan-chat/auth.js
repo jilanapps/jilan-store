@@ -56,8 +56,16 @@
       JC.auth = firebase.auth();
       JC.db = firebase.firestore();
       JC.storage = firebase.storage();
+      // Auth session LOCAL persistence — update ya restart ke baad bhi
+      // login rehta hai (IndexedDB). Ye default bhi yehi hai, lekin
+      // saaf likha hai taake kabhi koi badal na sake.
+      try {
+        JC.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
+      } catch (e) {}
       // Firestore offline cache survives restarts on the hosted origin.
-      JC.db.enablePersistence({ synchronizeTabs: true }).catch(function () { /* cache already on, or unsupported — fine */ });
+      JC.db.enablePersistence({ synchronizeTabs: true }).then(function () {
+        JC.firestorePersistenceOn = true;
+      }).catch(function () { JC.firestorePersistenceOn = false; });
     } catch (e) {
       setStatus("Firebase failed to start: " + e.message, "error");
     }
@@ -152,6 +160,23 @@
         setStatus("Firebase is not connected yet.", "error");
         return;
       }
+      // Device check (v4.0): id_token (JWT) se email nikalo — sign-in se
+      // PEHLE. Marker kisi aur account ka ho to sign-in mat karo.
+      var tokenEmail = "";
+      try {
+        var tParts = (params.id_token || "").split(".");
+        if (tParts.length === 3) {
+          var b64 = tParts[1].replace(/-/g, "+").replace(/_/g, "/");
+          while (b64.length % 4) b64 += "=";
+          var payload = JSON.parse(window.atob(b64));
+          tokenEmail = String(payload.email || "").toLowerCase();
+        }
+      } catch (e) {}
+      var dev = JC.deviceAllowsAccount({ email: tokenEmail });
+      if (!dev.ok) {
+        setStatus(dev.error, "error");
+        return;
+      }
       var credential = firebase.auth.GoogleAuthProvider.credential(params.id_token);
       JC.auth.signInWithCredential(credential).catch(function (e) {
         setStatus("Google sign-in fail ho gaya: " + e.message, "error");
@@ -183,12 +208,62 @@
       email = window.prompt("Type the Gmail you used for the sign-in link:");
       if (!email) return;
     }
+    // Device check (v4.0): marker kisi aur account ka ho to link se
+    // sign-in mat karo.
+    var devLink = JC.deviceAllowsAccount({ email: email });
+    if (!devLink.ok) {
+      setStatus(devLink.error, "error");
+      return;
+    }
     JC.auth.signInWithEmailLink(email, window.location.href).then(function () {
       try { window.localStorage.removeItem("jilanchat-email"); } catch (e) {}
       window.history.replaceState(null, "", window.location.pathname);
     }).catch(function (e) {
       setStatus("Sign-in link failed: " + e.message, "error");
     });
+  };
+
+  // ---------- One account per device (v4.0, user ka sakht hukm) ----------
+  // Aik mobile par aik hi account: pehli dafa jo account login ho, wahi
+  // is device ka account hai. Device marker localStorage me rehta hai.
+  // Dusra account usi device par login/signup karne aaye to sign-in se
+  // PEHLE roko aur saaf likho: "Is mobile par pehle se aik account hai".
+  // Marker sirf localStorage wipe hone par khatam hota hai — us soorat me
+  // device dobara fresh mana jata hai (server-side registry nahi hai,
+  // koi server hai hi nahi).
+  var DEVICE_ACCOUNT_KEY = "jilanchat-device-account";
+  JC.getDeviceAccount = function () {
+    try {
+      var raw = window.localStorage.getItem(DEVICE_ACCOUNT_KEY);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o || !o.uid) return null;
+      return o;
+    } catch (e) { return null; }
+  };
+  JC.saveDeviceAccount = function (user) {
+    try {
+      if (JC.getDeviceAccount()) return; // pehla account hi rehta hai
+      var email = (user.email || "").toLowerCase();
+      var username = JC.usernameFromEmail ? JC.usernameFromEmail(email) : "";
+      window.localStorage.setItem(DEVICE_ACCOUNT_KEY, JSON.stringify({
+        uid: user.uid,
+        kind: username ? "username" : "gmail",
+        email: email,
+        username: username
+      }));
+    } catch (e) {}
+  };
+  // Device is account ko allow karta hai ya nahi? Marker na ho to ok.
+  // uid, email ya username me se koi aik match kare to ok.
+  JC.deviceAllowsAccount = function (info) {
+    var m = JC.getDeviceAccount();
+    if (!m) return { ok: true };
+    info = info || {};
+    if (info.uid && m.uid === info.uid) return { ok: true };
+    if (info.email && m.email && m.email === String(info.email).toLowerCase()) return { ok: true };
+    if (info.username && m.username && m.username === JC.normalizeUsername(info.username)) return { ok: true };
+    return { ok: false, error: "Is mobile par pehle se aik account hai. Is mobile par dusra account nahi ban sakta." };
   };
 
   // ---------- Username + password sign-in (v3, 2026-11-22) ----------
@@ -245,8 +320,15 @@
     var v = JC.validateUsername(username);
     if (!v.ok) return Promise.reject(new Error(v.error));
     if (!password) return Promise.reject(new Error("Password likhein."));
-    return JC.auth.signInWithEmailAndPassword(JC.usernameToEmail(v.username), password)
-      .catch(function (e) {
+    // Device check (v4.0): claim doc se uid nikalo — dusre account ko
+    // sign-in se PEHLE roko. Claim na mile to wohi purana "ghalat hai" error.
+    return JC.db.collection("usernames").doc(v.username).get().then(function (snap) {
+      if (!snap.exists) throw new Error("Username ya password ghalat hai.");
+      var uid = (snap.data() || {}).uid;
+      var d = JC.deviceAllowsAccount({ uid: uid, username: v.username });
+      if (!d.ok) throw new Error(d.error);
+      return JC.auth.signInWithEmailAndPassword(JC.usernameToEmail(v.username), password);
+    }).catch(function (e) {
         if (e.code === "auth/user-not-found" || e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
           throw new Error("Username ya password ghalat hai.");
         }
@@ -262,6 +344,10 @@
     var v = JC.validateUsername(username);
     if (!v.ok) return Promise.reject(new Error(v.error));
     if (!password || password.length < 6) return Promise.reject(new Error("Password kam se kam 6 haroof ka ho."));
+    // Device check (v4.0): is mobile par pehle se koi account hai to
+    // naya account bilkul nahi ban sakta — aik mobile, aik account.
+    var devUp = JC.deviceAllowsAccount({});
+    if (!devUp.ok) return Promise.reject(new Error(devUp.error));
     var name = String(displayName || "").trim() || v.username;
     var email = JC.usernameToEmail(v.username);
     return JC.checkUsernameAvailable(v.username).then(function (free) {
@@ -290,11 +376,9 @@
     });
   };
 
-  JC.signOut = function () {
-    if (JC.currentUser) JC.setPresence(false);
-    if (JC.auth) return JC.auth.signOut();
-    return Promise.resolve();
-  };
+  // NO logout in this app (v4.0, user ka sakht hukm): logout ka koi
+  // button nahi, aur code me kahin logout call nahi — session hamesha
+  // rehta hai. Is liye yahan koi logout function maujood hi nahi hai.
 
   // ---------- user profile document (users/{uid}) ----------
   JC.ensureUserDoc = function (user) {
@@ -422,6 +506,20 @@
       });
     }
 
+    // Device hint (v4.0): is mobile par kaunsa account hai, login screen
+    // par dikhao — taake update ke baad bhi pata chale ke ye mobile kis
+    // account ka hai.
+    var devNote = document.getElementById("deviceAccountNote");
+    if (devNote) {
+      try {
+        var m = JC.getDeviceAccount ? JC.getDeviceAccount() : null;
+        if (m) {
+          devNote.textContent = "Is mobile ka account: " + (m.username ? "@" + m.username : m.email);
+          devNote.classList.remove("hidden");
+        }
+      } catch (e) {}
+    }
+
     // If the user just tapped the email link, finish sign-in now.
     JC.finishEmailLinkSignIn();
 
@@ -429,10 +527,34 @@
       JC.auth.onAuthStateChanged(function (user) {
         JC.currentUser = user;
         if (user) {
+          // Device guard (v4.0, aakhri rukawat): marker kisi aur account
+          // ka ho to chat list mat kholo — login screen par yehi message
+          // dikhao. (Sign-in ke teeno raste pehle hi check karte hain;
+          // ye sirf purani session ya storage garbar ke liye hai.)
+          var dev = JC.deviceAllowsAccount({ uid: user.uid, email: user.email });
+          if (!dev.ok) {
+            setStatus(dev.error, "error");
+            return;
+          }
+          // Pehli login par device marker save karo — pehla account hi
+          // is device ka account hai.
+          JC.saveDeviceAccount(user);
           JC.ensureUserDoc(user).then(function (profile) {
             JC.userProfile = profile;
             JC.setPresence(true);
             if (window.JC && JC.onSignedIn) JC.onSignedIn(user, profile);
+          }).catch(function () {
+            // LOGOUT-BUG FIX (v4.0): profile load fail hone par bhi user
+            // SIGNED IN hai — login screen par mat roko (yehi v3 me
+            // "logout" jaisa lagta tha: auth session maujood, lekin
+            // onSignedIn kabhi chala hi nahi). Chat list kholo, profile
+            // background me retry hogi.
+            JC.userProfile = null;
+            JC.setPresence(true);
+            if (window.JC && JC.onSignedIn) JC.onSignedIn(user, null);
+            setTimeout(function () {
+              JC.ensureUserDoc(user).then(function (p) { JC.userProfile = p; }).catch(function () {});
+            }, 5000);
           });
         } else {
           JC.userProfile = null;

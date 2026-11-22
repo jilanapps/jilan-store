@@ -15,6 +15,7 @@
   <p class="sub">Private chats with friends and family.</p>
 
   <div class="login-card">
+    <p class="note hidden" id="deviceAccountNote" style="color:#1f7ae0;font-weight:600;"></p>
     <h2>Sign in</h2>
 
     <!-- Google Sign-In (v2): manual OAuth in the system browser.
@@ -64,11 +65,35 @@
     <button class="icon-btn" id="btnSettings" title="Settings">&#9881;</button>
     <button class="icon-btn" id="btnProfile" title="Profile">&#9679;</button>
   </div>
+  <div class="offline-bar hidden">You are offline — messages will send when internet returns.</div>
   <div class="search-bar"><input type="text" id="chatSearchInput" placeholder="Search chats..." autocomplete="off"></div>
+  <!-- Chat requests row — sirf tab nazar aati hai jab koi pending request ho (incoming ya sent). -->
+  <div id="requestsRow" class="chat-row hidden">
+    <div class="avatar">&#128172;</div>
+    <div class="info"><div class="name">Chat requests</div><div class="preview">Tap to view</div></div>
+    <span class="badge hidden" id="requestsBadge"></span>
+  </div>
   <div id="chatList"></div>
   <div class="empty-state hidden" id="listEmpty">No chats yet.<br>Tap + to start a chat with a friend.</div>
   <button class="fab fab-secondary" id="btnNewGroup" title="New group">&#128101;</button>
   <button class="fab" id="btnNewChat" title="New chat">+</button>
+</div>
+
+<!-- ============ CHAT REQUESTS ============ -->
+<div class="screen" id="screen-requests">
+  <div class="app-header">
+    <button class="icon-btn" id="btnRequestsBack">&#8592;</button>
+    <h1>Chat requests</h1>
+  </div>
+  <div class="page-body">
+    <p style="color:#667781;font-size:13px;line-height:1.5;">Ajnabi seedha message nahi bhej sakta — pehle request aati hai. Accept karein to hi chat khulti hai, Decline par request khatam ho jati hai.</p>
+    <h2 style="margin-top:16px;">Requests for you</h2>
+    <div id="incomingRequests"></div>
+    <div class="empty-state hidden" id="incomingEmpty">No pending requests.</div>
+    <h2 style="margin-top:22px;">Requests you sent</h2>
+    <div id="sentRequests"></div>
+    <div class="empty-state hidden" id="sentEmpty">No requests sent.</div>
+  </div>
 </div>
 
 <!-- ============ CALLS ============ -->
@@ -96,6 +121,7 @@
     <button class="icon-btn" id="btnVideoCall" title="Video call">&#127909;</button>
     <button class="icon-btn" id="btnChatMenu" title="Chat settings">&#8942;</button>
   </div>
+  <div class="offline-bar hidden">You are offline — messages will send when internet returns.</div>
   <div id="chatMenu" class="hidden" style="position:absolute;top:52px;right:10px;background:#fff;color:#111b21;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.3);z-index:20;min-width:180px;">
     <button id="menuViewContact" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;">View contact</button>
     <button id="menuBlock" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;color:#ea0038;">Block contact</button>
@@ -158,6 +184,7 @@
     <p style="line-height:1.7;color:#111b21;">Private chats with friends and family. No ads, no tracking, no price.</p>
     <p style="line-height:1.7;margin-top:14px;">Tasveerein aur videos bhejne se pehle chhoti ki jati hain taake storage bache. Purana media 3 din baad khud ba khud delete ho jata hai, jabke aap ki chat ka text mehfooz rehta hai. Jo media aap gallery me save kar lein wo save rehta hai.</p>
     <p style="line-height:1.7;margin-top:14px;">Status 24 ghante baad khud khatam ho jata hai. Voice calls aur video calls ke liye dono ka app khula hona zaroori hai.</p>
+    <p style="line-height:1.7;margin-top:14px;">WhatsApp: <a href="https://wa.me/923007379385" target="_blank" rel="noopener">0300-7379385</a></p>
     <p style="line-height:1.7;margin-top:14px;color:#667781;font-size:13px;">Made by Dr Asif - Jilan Apps Official, Basti Malook (Multan).</p>
   </div>
 </div>
@@ -252,7 +279,7 @@
     <input class="text-input" type="text" id="searchUsernameInput" placeholder="@username" autocapitalize="off">
     <button class="btn btn-primary" id="btnSearchUsername">Search</button>
     <div id="searchResult"></div>
-    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here. Search sirf poora @username ya poori Gmail se hoti hai — naam likh kar koi kisi ko search nahi kar sakta.</p>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here. Search sirf poora @username ya poori Gmail se hoti hai — naam likh kar koi kisi ko search nahi kar sakta. Chat dabane par pehle request jati hai — dusra banda Accept kare to hi chat khulti hai.</p>
   </div>
 </div>
 
@@ -276,9 +303,8 @@
     <div class="profile-row">
       <button class="btn btn-ghost" id="btnAbout">About Jilan Chat</button>
     </div>
-    <div class="profile-row">
-      <button class="btn btn-ghost" id="btnSignOut">Sign out</button>
-    </div>
+    <!-- NO sign-out in this app (v4.0, user ka sakht hukm): logout ka koi
+         button nahi — session hamesha rehta hai. -->
   </div>
 </div>
 
@@ -366,5 +392,6 @@
 <script src="status.js"></script>
 <script src="groups.js"></script>
 <script src="block.js"></script>
+<script src="requests.js"></script>
 </body>
 </html>

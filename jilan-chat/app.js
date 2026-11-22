@@ -1,4 +1,4 @@
-// Jilan Chat v3.0 — app.js
+// Jilan Chat v4.0 — app.js
 // Chat list, 1-to-1 chat, text/media/voice messages, read ticks,
 // user search by Gmail, profile screen. No calls here — see calls.js.
 
@@ -233,8 +233,11 @@
       .orderBy("createdAt", "asc")
       .onSnapshot(function (snap) {
         snap.docChanges().forEach(function (ch) {
-          if (ch.type === "added") renderMessage(ch.doc.id, ch.doc.data(), true);
-          if (ch.type === "modified") updateMessageTicks(ch.doc.id, ch.doc.data());
+          // hasPendingWrites: ye message abhi sirf is phone par hai,
+          // server tak nahi pahuncha (offline likha gaya) — ghari dikhao.
+          var pending = ch.doc.metadata && ch.doc.metadata.hasPendingWrites;
+          if (ch.type === "added") renderMessage(ch.doc.id, ch.doc.data(), true, pending);
+          if (ch.type === "modified") updateMessageTicks(ch.doc.id, ch.doc.data(), pending);
         });
         scrollMessagesToBottom();
         markRead(chatId);
@@ -290,7 +293,7 @@
     if (status === "delivered") return '<span class="ticks">&#10003;&#10003;</span>';
     return '<span class="ticks">&#10003;</span>';
   }
-  function renderMessage(msgId, m, scroll) {
+  function renderMessage(msgId, m, scroll, pending) {
     if (msgEls[msgId]) return;
     var isOut = m.senderId === JC.currentUser.uid;
     var div = document.createElement("div");
@@ -307,7 +310,13 @@
     } else if (m.type === "file") {
       body = '<div class="file-chip"><span class="file-icon">&#128196;</span><a href="' + esc(m.mediaUrl || "") + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
     }
-    div.innerHTML = body + '<div class="meta">' + fmtTime(m.createdAt) + tickHtml(m.status, isOut) + "</div>";
+    // Pending (offline likha gaya, server tak nahi pahuncha): ghari
+    // dikhao, tick nahi — taake pata chale ke message abhi gaya nahi,
+    // queue me hai. Net aate hi tick aa jayega.
+    var metaHtml = fmtTime(m.createdAt);
+    if (pending && isOut) metaHtml += '<span class="ticks pending">&#128336;</span>';
+    else metaHtml += tickHtml(m.status, isOut);
+    div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
     var img = div.querySelector("img.bubble-img");
     if (img) {
       img.addEventListener("click", function () { JC.openViewer("image", m.mediaUrl); });
@@ -326,11 +335,14 @@
     $("messages").appendChild(div);
     msgEls[msgId] = div;
   }
-  function updateMessageTicks(msgId, m) {
+  function updateMessageTicks(msgId, m, pending) {
     var el = msgEls[msgId];
     if (!el) return;
     var meta = el.querySelector(".meta");
-    if (meta) meta.innerHTML = fmtTime(m.createdAt) + tickHtml(m.status, m.senderId === JC.currentUser.uid);
+    if (!meta) return;
+    var isOut = m.senderId === JC.currentUser.uid;
+    if (pending && isOut) meta.innerHTML = fmtTime(m.createdAt) + '<span class="ticks pending">&#128336;</span>';
+    else meta.innerHTML = fmtTime(m.createdAt) + tickHtml(m.status, isOut);
   }
   function scrollMessagesToBottom() {
     var box = $("messages");
@@ -572,6 +584,9 @@
   // Self-check (uid + Gmail) aur friendly "Ye aap khud hain" yahin hai.
   // NOTE: naam se search yahan kabhi nahi aati — sirf exact @username
   // ya exact Gmail (user ka hukm 2026-11-22).
+  // v4.0: button ka label state par depend karta hai — chat maujood ho to
+  // "Chat", warna "Send request" (request jati hai, seedha chat nahi banta);
+  // pending request ho to "Request sent" (disabled) ya "View request".
   function renderSearchResult(found, box, label) {
     if (!found) {
       box.innerHTML = "<p style='margin-top:12px;'>No Jilan Chat user found for <b>" + esc(label) + "</b>.</p>";
@@ -585,48 +600,67 @@
       box.innerHTML = "<p style='margin-top:12px;'>Ye aap khud hain — apne aap se chat nahi kar sakte.</p>";
       return;
     }
-    box.innerHTML =
-      '<div class="user-result"><div class="avatar">' + avatarHtml(found.data) + '</div>' +
-      '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
-      '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div></div>' +
-      '<button class="btn btn-primary btn-small" id="btnStartChat">Chat</button></div>';
-    $("btnStartChat").addEventListener("click", function () {
-      JC.startChatWith(found.uid).catch(function (e) {
-        if (e && e.message === "cannot-chat-with-self") {
-          JC.toast("Ye aap khud hain — apne aap se chat nahi kar sakte.");
-        } else {
-          JC.toast("Could not start chat: " + e.message);
-        }
+    // Maine is ko block kiya hai to request nahi — pehle unblock karna pare ga.
+    if (JC.isBlocked && JC.isBlocked(found.uid)) {
+      box.innerHTML = "<p style='margin-top:12px;'>You blocked this contact — unblock from Settings to send a request.</p>";
+      return;
+    }
+    box.innerHTML = "<p style='margin-top:12px;color:#667781;'>Checking&hellip;</p>";
+    var chatId = chatIdFor(JC.currentUser.uid, found.uid);
+    Promise.all([
+      JC.db.collection("chats").doc(chatId).get(),
+      JC.db.collection("chatRequests").doc(chatId).get()
+    ]).then(function (results) {
+      var state = {
+        chatExists: results[0].exists,
+        request: results[1].exists ? results[1].data() : null,
+        me: JC.currentUser.uid
+      };
+      var action = JC.decideChatAction
+        ? JC.decideChatAction(state)
+        : (state.chatExists ? "open" : "send");
+      var labelMap = { "open": "Chat", "send": "Send request", "already-sent": "Request sent", "incoming": "View request", "resend": "Send request", "create": "Chat" };
+      var btnLabel = labelMap[action] || "Send request";
+      var disabled = action === "already-sent" ? " disabled" : "";
+      box.innerHTML =
+        '<div class="user-result"><div class="avatar">' + avatarHtml(found.data) + '</div>' +
+        '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
+        '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div></div>' +
+        '<button class="btn btn-primary btn-small" id="btnStartChat"' + disabled + '>' + btnLabel + '</button></div>';
+      if (action === "already-sent") return;
+      $("btnStartChat").addEventListener("click", function () {
+        if (action === "incoming") { JC.openRequests(); return; }
+        JC.requestOrOpenChat(found.uid).then(function (res) {
+          if (!res) return;
+          if (res.action === "sent") JC.toast("Request sent");
+          else if (res.action === "already-sent") JC.toast("Request already sent");
+          else if (res.action === "incoming") JC.toast("You already have a request from this person — check Requests.");
+        }).catch(function (e) {
+          if (e && e.message === "cannot-chat-with-self") {
+            JC.toast("Ye aap khud hain — apne aap se chat nahi kar sakte.");
+          } else if (e && e.message === "you-blocked-them") {
+            JC.toast("You blocked this contact. Unblock to send a request.");
+          } else if (e && e.message === "request-already-sent") {
+            JC.toast("Request already sent");
+          } else if (e && e.message === "incoming-request-pending") {
+            JC.openRequests();
+          } else {
+            // Neutral on purpose: kabhi block ka pata na chale.
+            JC.toast("Request nahi bheji ja saki.");
+          }
+        });
       });
+    }).catch(function (e) {
+      box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Could not check: " + esc(e.message) + "</p>";
     });
   }
 
+  // v4.0: Chat dabane se seedha chat NAHI banta — request jati hai.
+  // (requestOrOpenChat requests.js me hai; chat tab banti hai jab dusra
+  // banda Accept kare. Rules bhi yehi enforce karti hain.)
   JC.startChatWith = function (otherUid) {
-    if (!JC.db || !JC.currentUser) return Promise.reject(new Error("not-signed-in"));
-    var me = JC.currentUser.uid;
-    if (otherUid === me) return Promise.reject(new Error("cannot-chat-with-self"));
-    var chatId = chatIdFor(me, otherUid);
-    var chatRef = JC.db.collection("chats").doc(chatId);
-    return chatRef.get().then(function (snap) {
-      if (!snap.exists) {
-        return chatRef.set({
-          participants: [me, otherUid].sort(),
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastMessage: "",
-          lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastSenderId: me
-        });
-      }
-    }).then(function () {
-      var now = firebase.firestore.FieldValue.serverTimestamp();
-      var mine = JC.db.collection("userChats").doc(me).collection("list").doc(chatId)
-        .set({ chatId: chatId, otherUid: otherUid, unreadCount: 0, lastMessageAt: now }, { merge: true });
-      var theirs = JC.db.collection("userChats").doc(otherUid).collection("list").doc(chatId)
-        .set({ chatId: chatId, otherUid: me, unreadCount: 0, lastMessageAt: now }, { merge: true });
-      return Promise.all([mine, theirs]);
-    }).then(function () {
-      JC.openChat(chatId, otherUid);
-    });
+    if (JC.requestOrOpenChat) return JC.requestOrOpenChat(otherUid);
+    return Promise.reject(new Error("requests-not-loaded"));
   };
 
   // ---------- profile screen ----------
@@ -789,9 +823,21 @@
         JC.toast("Name saved");
       }).catch(function (e) { JC.toast("Save failed: " + e.message); });
     });
-    $("btnSignOut").addEventListener("click", function () {
-      JC.signOut().then(function () { JC.toast("Signed out"); });
-    });
+    // NO logout button in this app (v4.0, user ka sakht hukm): logout
+    // ka koi rasta nahi — is liye is button ka listener yahan maujood
+    // hi nahi hai.
     updateComposer();
+
+    // Offline banner (v4.0): net na ho to batado — message likhe ja
+    // sakte hain, net aate hi khud chale jayenge (Firestore queue).
+    function updateOfflineBar() {
+      var off = !navigator.onLine;
+      document.querySelectorAll(".offline-bar").forEach(function (b) {
+        b.classList.toggle("hidden", !off);
+      });
+    }
+    window.addEventListener("online", updateOfflineBar);
+    window.addEventListener("offline", updateOfflineBar);
+    updateOfflineBar();
   });
 })();
