@@ -37,6 +37,11 @@
   var outgoingCallUnsub = null;
   var callAlerted = {};   // callId -> true (call pushEvent already queued)
   var firstCallSnap = true;
+  // vc5 (2026-11-22): native FCM is OFF in the APK (vc4 crashed on
+  // launch). No device tokens exist, so push events would go nowhere —
+  // skip the writes/listener to save Spark quota. Turn back on (true)
+  // only together with a launch-tested native FCM shell.
+  JC.PUSH_ENABLED = false;
 
   // ---------- ringer-mode rule (pure mirror of FcmService, for tests) ----------
   // Returns what an incoming call should do for a ringer mode.
@@ -91,6 +96,7 @@
   // sending the message or starting the call.
   JC.queuePushEvent = function (ev) {
     try {
+      if (!JC.PUSH_ENABLED) return Promise.resolve(null);
       if (!JC.db || !JC.currentUser || !ev) return Promise.resolve(null);
       if (["message", "call", "call_cancel"].indexOf(ev.type) < 0) {
         return Promise.resolve(null);
@@ -132,6 +138,7 @@
   };
 
   JC.startOutgoingCallListener = function () {
+    if (!JC.PUSH_ENABLED) return;
     if (!JC.db || !JC.currentUser || outgoingCallUnsub) return;
     firstCallSnap = true;
     outgoingCallUnsub = JC.db.collection("calls")
