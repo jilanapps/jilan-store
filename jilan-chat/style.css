@@ -330,3 +330,65 @@ html.dark .tab-bar { background: #111b21; border-top-color: #1e2a35; }
 #screen-call { position: relative; overflow: hidden; }
 #screen-call .call-overlay { min-height: 100vh; }
 html.dark .rec-trash { color: #ff6b6b; }
+
+/* ---------- v4.6: WhatsApp-style status (Updates) ---------- */
+.status-row { cursor: pointer; }
+.status-ring { position: relative; width: 56px; height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #1f7ae0; }
+.status-ring .ring-svg { position: absolute; inset: 0; width: 56px; height: 56px; }
+.status-ring .avatar { width: 46px; height: 46px; margin: 0; }
+.status-ring.seen { color: #b0bec5; }
+.status-ring.none .avatar { width: 52px; height: 52px; }
+.status-row .info { margin-left: 12px; }
+.status-add { position: absolute; right: -2px; bottom: -2px; width: 22px; height: 22px; border-radius: 50%; background: #1f7ae0; color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; padding: 0; }
+.status-head { font-size: 14px; color: #667781; font-weight: 600; margin: 20px 0 6px; text-transform: none; }
+html.dark .status-add { border-color: #111b21; }
+html.dark .status-ring.seen { color: #3b4a54; }
+#statusViewer { position: fixed; inset: 0; background: #0b141a; color: #fff; z-index: 60; display: flex; flex-direction: column; }
+#statusViewer.hidden { display: none; }
+.sv-bars { display: flex; gap: 4px; padding: 8px 8px 0; position: relative; z-index: 3; }
+.sv-bar { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.35); overflow: hidden; }
+.sv-fill { height: 100%; width: 0; background: #fff; }
+.sv-top { display: flex; gap: 10px; align-items: center; padding: 10px 8px 8px 12px; position: relative; z-index: 3; }
+.sv-top .avatar { width: 40px; height: 40px; margin: 0; }
+.sv-who { flex: 1; min-width: 0; }
+#statusViewerName { font-weight: 600; font-size: 16px; }
+#statusViewerTime { font-size: 13px; opacity: .8; }
+.sv-icon { background: transparent; border: none; color: #fff; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; }
+.sv-icon:active { background: rgba(255,255,255,.12); }
+#statusViewerBody { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 10px 12px; }
+.sv-text { font-size: 26px; line-height: 1.5; text-align: center; padding: 20px; word-wrap: break-word; max-width: 100%; }
+.sv-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.sv-gone { color: #8696a0; font-size: 18px; text-align: center; padding: 20px; }
+#svTapArea { position: absolute; left: 0; right: 0; top: 70px; bottom: 76px; z-index: 2; touch-action: none; user-select: none; -webkit-user-select: none; }
+.sv-foot { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, rgba(0,0,0,.45)); }
+.sv-foot.hidden { display: none; }
+.sv-views { background: transparent; border: none; color: #fff; display: flex; align-items: center; gap: 6px; font-size: 16px; padding: 8px 10px; border-radius: 20px; }
+.sv-views:active { background: rgba(255,255,255,.12); }
+.sv-reply { gap: 8px; }
+.sv-reply input { flex: 1; min-width: 0; height: 46px; border-radius: 24px; border: none; padding: 0 18px; font-size: 16px; background: rgba(255,255,255,.16); color: #fff; outline: none; }
+.sv-reply input::placeholder { color: rgba(255,255,255,.75); }
+.sv-reply .round-btn { width: 46px; height: 46px; background: #1f7ae0; color: #fff; flex-shrink: 0; }
+#statusViewer.paused .sv-bars, #statusViewer.paused .sv-top { opacity: .55; }
+.sv-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 60%; z-index: 5; background: #fff; color: #111b21; border-radius: 16px 16px 0 0; display: flex; flex-direction: column; box-shadow: 0 -4px 18px rgba(0,0,0,.3); }
+.sv-sheet.hidden { display: none; }
+.sv-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 6px 6px 18px; font-weight: 600; font-size: 16px; border-bottom: 1px solid #e9edef; }
+.sv-sheet .sv-icon { color: #54656f; }
+#svViewsList { overflow-y: auto; padding: 4px 0 12px; }
+.sv-view-row { display: flex; align-items: center; gap: 12px; padding: 8px 18px; }
+.sv-view-row .avatar { width: 42px; height: 42px; margin: 0; }
+.sv-view-row .name { font-weight: 500; }
+.sv-view-row .preview { font-size: 13px; color: #667781; }
+.sv-empty { padding: 22px 18px; color: #667781; text-align: center; }
+.sv-confirm { position: absolute; inset: 0; z-index: 6; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.sv-confirm.hidden { display: none; }
+.sv-confirm-box { background: #fff; color: #111b21; border-radius: 14px; padding: 20px 20px 10px; width: 100%; max-width: 320px; }
+.sv-confirm-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
+.sv-confirm-text { color: #667781; font-size: 14px; line-height: 1.45; }
+.sv-confirm-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 14px; }
+.sv-confirm-btns button { background: none; border: none; font-size: 15px; font-weight: 600; padding: 10px 14px; border-radius: 18px; color: #1565c0; }
+#svConfirmDelete { color: #ea0038; }
+html.dark .sv-sheet, html.dark .sv-confirm-box { background: #1f2c34; color: #e9edef; }
+html.dark .sv-sheet-head { border-bottom-color: #2a3942; }
+html.dark .sv-sheet .sv-icon { color: #aebac1; }
+html.dark .sv-view-row .preview, html.dark .sv-confirm-text, html.dark .sv-empty { color: #8696a0; }
+html.dark .sv-confirm-btns button { color: #53a6ff; }

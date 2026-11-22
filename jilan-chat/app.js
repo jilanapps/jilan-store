@@ -1032,7 +1032,7 @@
         var tab = b.getAttribute("data-tab");
         if (tab === "chats") showScreen("screen-list");
         else if (tab === "calls") { if (JC.loadCallHistory) JC.loadCallHistory(); showScreen("screen-calls"); }
-        else if (tab === "updates") showScreen("screen-status");
+        else if (tab === "updates") { showScreen("screen-status"); if (JC.loadStatusLists) JC.loadStatusLists(); }
       });
     });
     var btnCallsBack = $("btnCallsBack");
