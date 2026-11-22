@@ -66,7 +66,13 @@
   function remoteAudio() { return $("remoteAudio"); }
 
   function setCallState(text) { $("callState").textContent = text; }
-  function showCallScreen() { JC.showScreen("screen-call"); }
+  // v4.6: no screenshot / screen recording while a call is on screen
+  // (FLAG_SECURE via the shell, vc7+). Guarded: older shells lack it.
+  function setSecure(on) {
+    try { if (window.Android && Android.setSecure) Android.setSecure(!!on); } catch (e) {}
+  }
+  JC._setCallSecure = setSecure;
+  function showCallScreen() { setSecure(true); JC.showScreen("screen-call"); }
 
   // ---------- incoming-call listener (only rings while the app is open) ----------
   JC.startIncomingCallListener = function () {
@@ -328,6 +334,7 @@
   JC.endCall = function () { endCall("Call ended"); };
 
   function endCall(reason) {
+    setSecure(false);
     if (callDocRef && callState !== "idle") {
       callDocRef.update({ status: "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
     }
