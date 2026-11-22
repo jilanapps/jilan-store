@@ -222,15 +222,15 @@
     var isImage = file.type && file.type.indexOf("image/") === 0;
     // v4.4: no Storage (Blaze nahi) — status photo is shrunk and saved in
     // the status doc itself. Video status cannot fit, so say so clearly.
-    if (!isImage) { JC.toast("Video status abhi nahi lag sakta. Sirf photo ya text status lagayein."); return; }
-    JC.toast("Status tayyar ho raha hai…");
+    if (!isImage) { JC.toast("Video status isn't supported yet. Post a photo or text status."); return; }
+    JC.toast("Preparing status…");
     JC.imageFileToDataUrl(file, function (dataUrl) {
-      if (!dataUrl) { JC.toast("Photo bohat bari hai, status nahi lag saka."); return; }
+      if (!dataUrl) { JC.toast("Photo is too large for a status."); return; }
       addStatusDoc({ type: "photo", mediaData: dataUrl, mediaName: file.name || "status.jpg" }).then(function () {
         $("statusAddBox").classList.add("hidden");
         JC.toast("Status posted — it disappears in 24 hours.");
         loadMyStatus();
-      }).catch(function () { JC.toast("Status nahi lag saka."); });
+      }).catch(function () { JC.toast("Couldn't post status."); });
     });
   };
 
@@ -268,7 +268,7 @@
     catch (e) { p = Promise.reject(e); }
     finally { JC.currentChatId = keep[0]; JC.currentChatOtherUid = keep[1]; JC.currentChatIsGroup = keep[2]; }
     return Promise.resolve(p).then(function () { JC.toast("Reply sent"); return true; })
-      .catch(function () { JC.toast("Reply nahi bheja ja saka."); return false; });
+      .catch(function () { JC.toast("Reply not sent."); return false; });
   };
 
   // ---------- viewer ----------
@@ -360,7 +360,7 @@
     body.innerHTML = "";
     var note = document.createElement("div");
     note.className = "sv-gone";
-    note.textContent = "Status khatam ho gaya";
+    note.textContent = "Status expired";
     body.appendChild(note);
     startProgress(2500);
   }

@@ -201,7 +201,7 @@
     }
     if (callState !== "idle") { JC.toast("You are already in a call."); return; }
     if (JC.isBlocked && JC.isBlocked(JC.currentChatOtherUid)) {
-      JC.toast("Call nahi lag saki.");
+      JC.toast("Call failed.");
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -276,7 +276,7 @@
       }, 45000);
     }).catch(function (e) {
       // Neutral on purpose: a blocked caller must not learn they are blocked.
-      endCall("Call nahi lag saki.");
+      endCall("Call failed.");
     });
   };
 
@@ -450,14 +450,14 @@
       mediaWatchdog = null;
       if (callState === "active" && !gotRemoteTrack) {
         setCallState("No media — network issue?");
-        if (JC.toast) JC.toast("Awaz/video nahi aa raha — network ne call block ki ho sakti hai. Wi-Fi par dobara try karein.");
+        if (JC.toast) JC.toast("No audio or video. Your network may be blocking the call. Try again on Wi-Fi.");
       }
     }, 15000);
     mediaWatchdog2 = setTimeout(function () {
       mediaWatchdog2 = null;
       if (callState === "active" && !gotRemoteTrack && pc
           && pc.iceConnectionState !== "connected" && pc.iceConnectionState !== "completed") {
-        endCall("Call connect nahi ho saki — network ne media block kar diya. Wi-Fi par dobara try karein.");
+        endCall("Call couldn't connect. Your network blocked the media. Try again on Wi-Fi.");
       }
     }, 30000);
   }
@@ -540,7 +540,7 @@
       try {
         Android.setCallSpeaker(speakerOn);
         JC.toast(speakerOn ? "Speaker on" : "Speaker off");
-      } catch (e) { JC.toast("Speaker switch nahi ho saka."); }
+      } catch (e) { JC.toast("Couldn't switch speaker."); }
       return;
     }
     // WebView has no earpiece/speakerphone API. Try the audio element's

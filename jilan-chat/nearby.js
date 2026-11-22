@@ -145,7 +145,7 @@
   function bridgeOrWarn() {
     var b = JC.nearbyBridge();
     if (!b) {
-      if (JC.toast) JC.toast("Nearby chat sirf Jilan Chat app me chalta hai.");
+      if (JC.toast) JC.toast("Nearby chat works only in the Jilan Chat app.");
       return null;
     }
     return b;
@@ -154,7 +154,7 @@
     var b = bridgeOrWarn();
     if (!b) return;
     try { b.nearbyStart(JC.nearbyDisplayName()); } catch (e) {}
-    if (JC.toast) JC.toast("Allow dabayein — discoverable dialog aayega, taake dusra phone aap ko dhoond sake.");
+    if (JC.toast) JC.toast("Tap Allow on the next dialog so the other phone can find you.");
   };
   JC.nearbyScan = function () {
     var b = bridgeOrWarn();
@@ -170,7 +170,7 @@
     var t = String(text == null ? "" : text).trim();
     if (!t) return false;
     if (!JC.nearbyCanSend(JC.nearbyState)) {
-      if (JC.toast) JC.toast("Pehle kisi nearby phone se connect karein.");
+      if (JC.toast) JC.toast("Connect to a nearby phone first.");
       return false;
     }
     var b = bridgeOrWarn();

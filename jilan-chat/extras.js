@@ -254,7 +254,7 @@
 
   function copyText(t) {
     try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t); JC.toast("Copied"); return; } } catch (e) {}
-    JC.toast("Copy nahi ho saka");
+    JC.toast("Couldn't copy");
   }
 
   // ---------- reactions ----------
@@ -262,7 +262,7 @@
     var d = msgData[msgId]; if (!d || !JC.db) return Promise.resolve();
     var upd = {};
     upd["reactions." + uid()] = emoji ? emoji : fv().delete();
-    return msgRef(msgId, d.isGroup).update(upd).catch(function () { JC.toast("Reaction nahi lag saka."); });
+    return msgRef(msgId, d.isGroup).update(upd).catch(function () { JC.toast("Couldn't add reaction."); });
   };
 
   // ---------- delete (WhatsApp-style choice) ----------
@@ -290,7 +290,7 @@
     return msgRef(msgId, d.isGroup).update({
       deleted: true, text: "", mediaData: del, mediaMime: del, mediaName: del,
       durationSec: del, replyTo: del, reactions: del, forwarded: del
-    }).catch(function () { JC.toast("Message delete nahi ho saka."); });
+    }).catch(function () { JC.toast("Couldn't delete message."); });
   };
 
   // ---------- reply ----------
@@ -325,7 +325,7 @@
   JC.openForward = function (msgId) {
     var d = msgData[msgId]; if (!d || !JC.db) return;
     var m = d.m;
-    if (m.type === "video" || m.type === "file") { JC.toast(JC.NO_BIG_FILES_MSG || "Ye forward nahi ho sakta."); return; }
+    if (m.type === "video" || m.type === "file") { JC.toast(JC.NO_BIG_FILES_MSG || "This can't be forwarded."); return; }
     JC.db.collection("userChats").doc(uid()).collection("list").orderBy("lastMessageAt", "desc").get().then(function (snap) {
       var entries = [];
       snap.forEach(function (doc) {
@@ -333,7 +333,7 @@
         if (e.type !== "group" && JC.isBlocked && JC.isBlocked(e.otherUid)) return;
         entries.push(e);
       });
-      if (!entries.length) { JC.toast("Koi chat nahi mili."); return; }
+      if (!entries.length) { JC.toast("No chats found."); return; }
       var html = '<div class="sheet-title">Forward to</div><div class="fwd-list">' + entries.map(function (e, i) {
         return '<button type="button" class="sheet-item" data-act="fwd" data-val="' + i + '"><span class="fwd-name" data-i="' + i + '">' + (e.type === "group" ? "Group" : "Chat") + "</span></button>";
       }).join("") + "</div>";
@@ -346,7 +346,7 @@
           if (el && s.exists) el.textContent = (s.data().name || s.data().displayName || "Chat");
         }).catch(function () {});
       });
-    }).catch(function () { JC.toast("Chats load nahi huin."); });
+    }).catch(function () { JC.toast("Couldn't load chats."); });
   };
   JC.forwardTo = function (entry, m) {
     if (!entry || !m || !JC.db) return Promise.resolve();
@@ -367,7 +367,7 @@
           .set({ chatId: id, otherUid: uid(), unreadCount: fv().increment(1), lastMessageAt: now }, { merge: true });
       });
     }).then(function () { JC.toast("Forwarded"); })
-      .catch(function () { JC.toast("Forward nahi ho saka."); });
+      .catch(function () { JC.toast("Couldn't forward."); });
   };
 
   // ---------- typing indicator (1-to-1 only) ----------
@@ -433,7 +433,7 @@
   JC.togglePin = function (id) {
     var p = JC.getPins(), i = p.indexOf(id);
     if (i >= 0) p.splice(i, 1);
-    else { if (p.length >= JC.MAX_PINS) { JC.toast("Sirf " + JC.MAX_PINS + " chats pin ho sakti hain."); return false; } p.unshift(id); }
+    else { if (p.length >= JC.MAX_PINS) { JC.toast("You can pin up to " + JC.MAX_PINS + " chats."); return false; } p.unshift(id); }
     store("pins", p); applyListDecor(); return true;
   };
   JC.toggleMute = function (id) {

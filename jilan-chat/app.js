@@ -543,7 +543,7 @@
     JC.sendCurrentMessage({ type: "text", text: text }).catch(function (e) {
       // Neutral on purpose: never say why a send failed, so a blocked
       // sender cannot tell they were blocked.
-      JC.toast("Message nahi bheja ja saka.");
+      JC.toast("Message not sent.");
       input.value = text;
       updateComposer();
     });
@@ -560,7 +560,7 @@
   JC.VOICE_MAX_SEC = 60;
   // Shrink steps: [max side px, JPEG quality]. First one that fits wins.
   JC.IMAGE_STEPS = [[1024, 0.6], [900, 0.55], [800, 0.5], [640, 0.5], [512, 0.45], [400, 0.4]];
-  JC.NO_BIG_FILES_MSG = "Video aur badi files abhi nahi ja sakti. Sirf photo aur voice message ja sakte hain.";
+  JC.NO_BIG_FILES_MSG = "Videos and large files can't be sent yet. Only photos and voice messages are supported.";
 
   // Draw any image source to JPEG data URLs, step by step smaller, until
   // it fits under JC.MEDIA_MAX_CHARS. done(dataUrl) or done(null).
@@ -602,11 +602,11 @@
   };
 
   JC.sendImageDataUrl = function (dataUrl, name) {
-    if (!dataUrl) { JC.showSending(""); JC.toast("Photo bohat bari hai, nahi bheji ja saki."); return Promise.resolve(false); }
+    if (!dataUrl) { JC.showSending(""); JC.toast("Photo is too large to send."); return Promise.resolve(false); }
     JC.showSending("Sending photo…");
     return JC.sendCurrentMessage({ type: "image", mediaData: dataUrl, mediaMime: "image/jpeg", mediaName: name || "photo.jpg" })
       .then(function () { JC.showSending(""); JC.toast("Photo sent"); return true; })
-      .catch(function () { JC.showSending(""); JC.toast("Message nahi bheja ja saka."); return false; });
+      .catch(function () { JC.showSending(""); JC.toast("Message not sent."); return false; });
   };
 
   JC.sendFile = function (file) {
@@ -640,7 +640,7 @@
   JC.startVoiceRecord = function () {
     if (JC.isRecording() || recStarting) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
-      JC.toast("Is phone par voice recording nahi chalti.");
+      JC.toast("Voice recording isn't supported on this phone.");
       return;
     }
     recStarting = true;
@@ -653,7 +653,7 @@
       try { recorder = new MediaRecorder(stream, opts); }
       catch (e) {
         try { recorder = new MediaRecorder(stream); }
-        catch (e2) { JC.toast("Recording shuru nahi ho saki."); stream.getTracks().forEach(function (t) { t.stop(); }); recStream = null; return; }
+        catch (e2) { JC.toast("Couldn't start recording."); stream.getTracks().forEach(function (t) { t.stop(); }); recStream = null; return; }
       }
       recChunks = [];
       recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
@@ -673,7 +673,7 @@
     }).catch(function () {
       recStarting = false;
       setComposerRec(false);
-      JC.toast("Microphone ki ijazat nahi mili. Phone Settings me Jilan Chat ko Microphone allow karein.");
+      JC.toast("Microphone permission denied. Allow Microphone for Jilan Chat in your phone Settings.");
     });
   };
   JC.stopVoiceRecord = function (send) {
@@ -700,20 +700,20 @@
     recChunks = [];
     var dur = recSeconds;
     if (!send || !blob.size) return;
-    if (!JC.currentChatId) { JC.toast("Pehle chat kholein."); return; }
+    if (!JC.currentChatId) { JC.toast("Open a chat first."); return; }
     JC.showSending("Sending voice message…");
     JC.blobToDataUrl(blob, function (dataUrl) {
-      if (!dataUrl || dataUrl.indexOf("data:") !== 0) { JC.showSending(""); JC.toast("Voice message nahi bheja ja saka."); return; }
+      if (!dataUrl || dataUrl.indexOf("data:") !== 0) { JC.showSending(""); JC.toast("Voice message not sent."); return; }
       // Firestore cannot store the codec suffix reliably — normalise.
       dataUrl = dataUrl.replace(/^data:[^,]*?;base64,/, "data:" + type + ";base64,");
       if (dataUrl.length > JC.MEDIA_MAX_CHARS) {
         JC.showSending("");
-        JC.toast("Voice message bohat lamba hai. Chhota bol kar dobara bhejein.");
+        JC.toast("Voice message is too long. Record a shorter one.");
         return;
       }
       JC.sendCurrentMessage({ type: "voice", mediaData: dataUrl, mediaMime: type, durationSec: dur })
         .then(function () { JC.showSending(""); JC.toast("Voice message sent"); })
-        .catch(function () { JC.showSending(""); JC.toast("Message nahi bheja ja saka."); });
+        .catch(function () { JC.showSending(""); JC.toast("Message not sent."); });
     });
   }
 
@@ -796,7 +796,7 @@
     var raw = String(username || "").trim().replace(/^@/, "");
     var v = null;
     if (JC.validateUsername) v = JC.validateUsername(raw);
-    else v = /^[a-z0-9_]{3,20}$/.test(raw.toLowerCase()) ? { ok: true, username: raw.toLowerCase() } : { ok: false, error: "Username ghalat hai." };
+    else v = /^[a-z0-9_]{3,20}$/.test(raw.toLowerCase()) ? { ok: true, username: raw.toLowerCase() } : { ok: false, error: "Invalid username." };
     if (!v.ok) return Promise.reject(new Error(v.error));
     return JC.db.collection("usernames").doc(v.username).get().then(function (snap) {
       if (!snap.exists) return null;
@@ -826,7 +826,7 @@
     if (found.uid === JC.currentUser.uid
       || (found.data.gmail && JC.currentUser.email
         && found.data.gmail.toLowerCase() === String(JC.currentUser.email).toLowerCase())) {
-      box.innerHTML = "<p style='margin-top:12px;'>Ye aap khud hain — apne aap se chat nahi kar sakte.</p>";
+      box.innerHTML = "<p style='margin-top:12px;'>This is you. You can't chat with yourself.</p>";
       return;
     }
     // Maine is ko block kiya hai to request nahi — pehle unblock karna pare ga.
@@ -867,7 +867,7 @@
           else if (res.action === "incoming") JC.toast("You already have a request from this person — check Requests.");
         }).catch(function (e) {
           if (e && e.message === "cannot-chat-with-self") {
-            JC.toast("Ye aap khud hain — apne aap se chat nahi kar sakte.");
+            JC.toast("This is you. You can't chat with yourself.");
           } else if (e && e.message === "you-blocked-them") {
             JC.toast("You blocked this contact. Unblock to send a request.");
           } else if (e && e.message === "request-already-sent") {
@@ -876,7 +876,7 @@
             JC.openRequests();
           } else {
             // Neutral on purpose: kabhi block ka pata na chale.
-            JC.toast("Request nahi bheji ja saki.");
+            JC.toast("Couldn't send request.");
           }
         });
       });
@@ -932,7 +932,7 @@
     if (!el || !el.parentNode) return;
     var note = document.createElement("div");
     note.style.cssText = "color:#667781;font-style:italic;font-size:13px;padding:6px 2px;";
-    note.textContent = "Media delete ho gaya";
+    note.textContent = "Media deleted";
     el.parentNode.replaceChild(note, el);
   };
 
@@ -991,7 +991,7 @@
         if (playingAudio && playingAudio !== audio) { try { playingAudio.pause(); } catch (er) {} }
         playingAudio = audio;
         var p = audio.play();
-        if (p && p.catch) p.catch(function () { JC.toast("Voice message chal nahi saka."); setIcon(false); });
+        if (p && p.catch) p.catch(function () { JC.toast("Couldn't play voice message."); setIcon(false); });
       });
       audio.addEventListener("play", function () { setIcon(true); });
       audio.addEventListener("pause", function () { setIcon(false); });

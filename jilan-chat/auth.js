@@ -142,18 +142,18 @@
 
       if (params.error) {
         if (params.error === "access_denied") {
-          setStatus("Sign-in cancel ho gaya — dobara try karein ya email link use karein.", "error");
+          setStatus("Sign-in cancelled. Try again or use an email link.", "error");
         } else {
-          setStatus("Google sign-in fail ho gaya (" + params.error + ") — dobara try karein ya email link use karein.", "error");
+          setStatus("Google sign-in failed (" + params.error + "). Try again or use an email link.", "error");
         }
         return;
       }
       if (!params.id_token) {
-        setStatus("Google se sign-in token nahi mila — dobara try karein ya email link use karein.", "error");
+        setStatus("No sign-in token from Google. Try again or use an email link.", "error");
         return;
       }
       if (!storedState || !params.state || params.state !== storedState) {
-        setStatus("Sign-in verify nahi hua (state mismatch) — dobara try karein.", "error");
+        setStatus("Sign-in couldn't be verified. Please try again.", "error");
         return;
       }
       if (!JC.auth) {
@@ -179,11 +179,11 @@
       }
       var credential = firebase.auth.GoogleAuthProvider.credential(params.id_token);
       JC.auth.signInWithCredential(credential).catch(function (e) {
-        setStatus("Google sign-in fail ho gaya: " + e.message, "error");
+        setStatus("Google sign-in failed: " + e.message, "error");
       });
       // On success the onAuthStateChanged listener below takes over.
     } catch (e) {
-      setStatus("Google sign-in me masla aa gaya — dobara try karein ya email link use karein.", "error");
+      setStatus("Google sign-in had a problem. Try again or use an email link.", "error");
     }
   };
 
@@ -263,7 +263,7 @@
     if (info.uid && m.uid === info.uid) return { ok: true };
     if (info.email && m.email && m.email === String(info.email).toLowerCase()) return { ok: true };
     if (info.username && m.username && m.username === JC.normalizeUsername(info.username)) return { ok: true };
-    return { ok: false, error: "Is mobile par pehle se aik account hai. Is mobile par dusra account nahi ban sakta." };
+    return { ok: false, error: "This phone already has an account. Only one account is allowed per phone." };
   };
 
   // ---------- Username + password sign-in (v3, 2026-11-22) ----------
@@ -287,10 +287,10 @@
   JC.validateUsername = function (raw) {
     var u = JC.normalizeUsername(raw);
     if (!u) return { ok: false, error: "Username likhein." };
-    if (u.length < 3) return { ok: false, error: "Username kam se kam 3 haroof ka ho." };
-    if (u.length > 20) return { ok: false, error: "Username zyada se zyada 20 haroof ka ho." };
-    if (!/^[a-z0-9_]+$/.test(u)) return { ok: false, error: "Username me sirf chhote haroof (a-z), number aur _ chalenge." };
-    if (JC.RESERVED_USERNAMES.indexOf(u) >= 0) return { ok: false, error: "Ye username nahi le sakte — koi aur chunain." };
+    if (u.length < 3) return { ok: false, error: "Username must be at least 3 characters." };
+    if (u.length > 20) return { ok: false, error: "Username can be at most 20 characters." };
+    if (!/^[a-z0-9_]+$/.test(u)) return { ok: false, error: "Username can only use lowercase letters (a-z), numbers and _." };
+    if (JC.RESERVED_USERNAMES.indexOf(u) >= 0) return { ok: false, error: "This username isn't available. Choose another." };
     return { ok: true, username: u };
   };
 
@@ -323,17 +323,17 @@
     // Device check (v4.0): claim doc se uid nikalo — dusre account ko
     // sign-in se PEHLE roko. Claim na mile to wohi purana "ghalat hai" error.
     return JC.db.collection("usernames").doc(v.username).get().then(function (snap) {
-      if (!snap.exists) throw new Error("Username ya password ghalat hai.");
+      if (!snap.exists) throw new Error("Wrong username or password.");
       var uid = (snap.data() || {}).uid;
       var d = JC.deviceAllowsAccount({ uid: uid, username: v.username });
       if (!d.ok) throw new Error(d.error);
       return JC.auth.signInWithEmailAndPassword(JC.usernameToEmail(v.username), password);
     }).catch(function (e) {
         if (e.code === "auth/user-not-found" || e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-          throw new Error("Username ya password ghalat hai.");
+          throw new Error("Wrong username or password.");
         }
         if (e.code === "auth/operation-not-allowed") {
-          throw new Error("Username login abhi on nahi hai — admin se rabta karein.");
+          throw new Error("Username sign-in isn't available right now. Contact support.");
         }
         throw e;
       });
@@ -343,7 +343,7 @@
     if (!JC.auth) return Promise.reject(new Error("firebase-not-configured"));
     var v = JC.validateUsername(username);
     if (!v.ok) return Promise.reject(new Error(v.error));
-    if (!password || password.length < 6) return Promise.reject(new Error("Password kam se kam 6 haroof ka ho."));
+    if (!password || password.length < 6) return Promise.reject(new Error("Password must be at least 6 characters."));
     // Device check (v4.0): is mobile par pehle se koi account hai to
     // naya account bilkul nahi ban sakta — aik mobile, aik account.
     var devUp = JC.deviceAllowsAccount({});
@@ -351,7 +351,7 @@
     var name = String(displayName || "").trim() || v.username;
     var email = JC.usernameToEmail(v.username);
     return JC.checkUsernameAvailable(v.username).then(function (free) {
-      if (!free) throw new Error("Ye username pehle se liya gaya hai — koi aur chunain.");
+      if (!free) throw new Error("This username is already taken. Choose another.");
       return JC.auth.createUserWithEmailAndPassword(email, password);
     }).then(function (cred) {
       var user = cred.user;
@@ -370,7 +370,7 @@
       });
     }).catch(function (e) {
       if (e.code === "auth/email-already-in-use") {
-        throw new Error("Ye username pehle se liya gaya hai — koi aur chunain.");
+        throw new Error("This username is already taken. Choose another.");
       }
       throw e;
     });
@@ -497,7 +497,7 @@
         }
         btnSignup.disabled = true;
         JC.usernameSignup(u, pw, name).then(function () {
-          if (signupNote) signupNote.textContent = "Account ban gaya — aap sign in ho gaye hain.";
+          if (signupNote) signupNote.textContent = "Account created. You're signed in.";
           // Success: onAuthStateChanged takes over.
         }).catch(function (e) {
           if (signupNote) signupNote.textContent = e.message;
@@ -514,7 +514,7 @@
       try {
         var m = JC.getDeviceAccount ? JC.getDeviceAccount() : null;
         if (m) {
-          devNote.textContent = "Is mobile ka account: " + (m.username ? "@" + m.username : m.email);
+          devNote.textContent = "Account on this phone: " + (m.username ? "@" + m.username : m.email);
           devNote.classList.remove("hidden");
         }
       } catch (e) {}

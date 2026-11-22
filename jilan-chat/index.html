@@ -24,7 +24,7 @@
          the WebView, so Google shows the Gmail account chooser. The
          return comes back via jilanchat://auth — see auth.js. -->
     <button class="btn btn-google" id="btnGoogle">Sign in with Gmail</button>
-    <p class="note">Tap karein — aap ke phone par Gmail accounts ki list khulegi, aik select karein aur aap seedha sign in ho jayenge.</p>
+    <p class="note">Tap to see the Gmail accounts on your phone. Pick one and you're signed in.</p>
 
     <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
 
@@ -34,15 +34,15 @@
     <input class="text-input" type="password" id="usernamePasswordInput" placeholder="Password" autocomplete="current-password" style="margin-top:8px;">
     <button class="btn btn-primary" id="btnUsernameLogin">Sign in</button>
     <p class="note" id="usernameLoginNote"></p>
-    <p class="note">Password bhool gaye? <a href="https://wa.me/923007379385" target="_blank" rel="noopener">Admin se rabta karein</a> — password sirf admin reset kar sakta hai.</p>
+    <p class="note">Forgot password? <a href="https://wa.me/923007379385" target="_blank" rel="noopener">Contact support</a>. Only support can reset a password.</p>
 
     <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
 
-    <h2>Naya account banao</h2>
-    <p class="note">Username baad me change nahi hoga, soch kar chunain. Display name alag hai — wo aap jab chahein badal sakte hain.</p>
+    <h2>Create new account</h2>
+    <p class="note">Your username can't be changed later. Choose carefully. Your display name is separate and can be changed anytime.</p>
     <input class="text-input" type="text" id="signupNameInput" placeholder="Your name" autocomplete="name">
     <input class="text-input" type="text" id="signupUsernameInput" placeholder="username (a-z, 0-9, _)" autocapitalize="off" autocomplete="off" style="margin-top:8px;">
-    <input class="text-input" type="password" id="signupPasswordInput" placeholder="Password (kam se kam 6 haroof)" autocomplete="new-password" style="margin-top:8px;">
+    <input class="text-input" type="password" id="signupPasswordInput" placeholder="Password (at least 6 characters)" autocomplete="new-password" style="margin-top:8px;">
     <button class="btn btn-primary" id="btnSignup">Create account</button>
     <p class="note" id="signupNote"></p>
 
@@ -104,7 +104,7 @@
     <h1>Chat requests</h1>
   </div>
   <div class="page-body">
-    <p style="color:#667781;font-size:13px;line-height:1.5;">Ajnabi seedha message nahi bhej sakta — pehle request aati hai. Accept karein to hi chat khulti hai, Decline par request khatam ho jati hai.</p>
+    <p style="color:#667781;font-size:13px;line-height:1.5;">Strangers can't message you directly. They send a request first. The chat opens only if you Accept. Decline ends the request.</p>
     <h2 style="margin-top:16px;">Requests for you</h2>
     <div id="incomingRequests"></div>
     <div class="empty-state hidden" id="incomingEmpty">No pending requests.</div>
@@ -121,7 +121,7 @@
     <h1>Nearby chat</h1>
   </div>
   <!-- Browser me bridge nahi hota — ye box sirf tab dikhta hai. -->
-  <div id="nearbyAppOnly" class="nearby-note hidden" style="margin:12px 14px 0;">Nearby chat sirf Jilan Chat app me chalta hai — ye screen browser me nahi chalti. App kholein aur dobara try karein.</div>
+  <div id="nearbyAppOnly" class="nearby-note hidden" style="margin:12px 14px 0;">Nearby chat works only in the Jilan Chat app, not in a browser. Open the app and try again.</div>
   <div class="nearby-status" id="nearbyStatus">Nearby is off.</div>
   <div class="nearby-note">No internet needed. Both phones must be nearby (about 10 meters) with Bluetooth on and this screen open. Text only — chats are not saved and do not go to the internet.</div>
   <div class="nearby-actions" id="nearbyActions">
@@ -130,7 +130,7 @@
     <button class="btn btn-ghost hidden" id="btnNearbyStop">Stop</button>
     <button class="btn btn-danger hidden" id="btnNearbyDisconnect">Disconnect</button>
   </div>
-  <p class="note" style="padding:0 14px;color:#667781;font-size:13px;line-height:1.5;">Start dabane ke baad Allow dabayein taake dusra phone aap ko dhoond sake. Find nearby se dusre phone ko dhoond kar tap karein.</p>
+  <p class="note" style="padding:0 14px;color:#667781;font-size:13px;line-height:1.5;">Tap Start, then Allow, so the other phone can find you. Use Find nearby to find the other phone and tap it.</p>
   <div id="nearbyDevicesWrap">
     <h2 style="padding:10px 0 0;">Nearby phones</h2>
     <div id="nearbyDevices"></div>
@@ -244,8 +244,8 @@
   <div class="page-body">
     <h2>Jilan Chat v1.0</h2>
     <p style="line-height:1.7;color:#111b21;">Private chats with friends and family. No ads, no tracking, no price.</p>
-    <p style="line-height:1.7;margin-top:14px;">Photo aur voice message (1 minute tak) bheje ja sakte hain. Photo bhejne se pehle chhoti ki jati hai. Video aur badi files abhi nahi ja sakti. Purana media 3 din baad khud ba khud delete ho jata hai, jabke aap ki chat ka text mehfooz rehta hai. Jo media aap gallery me save kar lein wo save rehta hai.</p>
-    <p style="line-height:1.7;margin-top:14px;">Status 24 ghante baad khud khatam ho jata hai. Voice calls aur video calls ke liye dono ka app khula hona zaroori hai.</p>
+    <p style="line-height:1.7;margin-top:14px;">You can send photos and voice messages (up to 1 minute). Photos are compressed before sending. Videos and large files can't be sent yet. Your chat text stays saved.</p>
+    <p style="line-height:1.7;margin-top:14px;">A status disappears after 24 hours. For voice and video calls, both people need the app open.</p>
     <p style="line-height:1.7;margin-top:14px;">WhatsApp: <a href="https://wa.me/923007379385" target="_blank" rel="noopener">0300-7379385</a></p>
     <p style="line-height:1.7;margin-top:14px;color:#667781;font-size:13px;">Made by Dr Asif - Jilan Apps Official, Basti Malook (Multan).</p>
   </div>
@@ -277,7 +277,7 @@
   <div class="page-body">
     <h2 id="groupInfoName">Group</h2>
     <p style="color:#667781;" id="groupInfoType"></p>
-    <p style="margin-top:14px;line-height:1.6;background:#fff3cd;padding:10px 12px;border-radius:8px;">Secret chat sirf 1-to-1 me hoti hai — group ke sab members ek dusre ke messages dekh sakte hain.</p>
+    <p style="margin-top:14px;line-height:1.6;background:#fff3cd;padding:10px 12px;border-radius:8px;">Private chat is only 1-to-1. In a group, all members can see each other's messages.</p>
     <h2 style="margin-top:20px;">Members</h2>
     <div id="groupMembersList"></div>
     <div class="admin-only" style="margin-top:18px;">
@@ -307,7 +307,7 @@
     <div class="gmail" id="contactStatus" style="margin-top:6px;">-</div>
     <div class="profile-row">
       <button class="btn btn-danger" id="btnBlockContact">Block contact</button>
-      <p class="note" style="color:#667781;font-size:13px;margin-top:10px;line-height:1.5;">Block sirf 1-to-1 chat aur call par lagta hai — group me aap dono ek dusre ke messages dekhte rahenge. Blocked contact ko ye nahi bataya jata ke block hai.</p>
+      <p class="note" style="color:#667781;font-size:13px;margin-top:10px;line-height:1.5;">Blocking works on 1-to-1 chats and calls only. In shared groups you will still see each other's messages. A blocked contact is not told they are blocked.</p>
     </div>
   </div>
 </div>
@@ -361,7 +361,7 @@
     <input class="text-input" type="text" id="searchUsernameInput" placeholder="@username" autocapitalize="off">
     <button class="btn btn-primary" id="btnSearchUsername">Search</button>
     <div id="searchResult"></div>
-    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here. Search sirf poora @username ya poori Gmail se hoti hai — naam likh kar koi kisi ko search nahi kar sakta. Chat dabane par pehle request jati hai — dusra banda Accept kare to hi chat khulti hai.</p>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">Only people who already signed in to Jilan Chat can be found. Ask your friend to sign in first, then search their Gmail here. Search works only with a full @username or full Gmail address. Nobody can search by name. Tapping Chat sends a request first. The chat opens only after the other person accepts.</p>
   </div>
 </div>
 
@@ -390,7 +390,7 @@
       <label>Your username</label>
       <div class="username-line"><span class="gmail" id="profileUsername">-</span>
         <button class="btn btn-ghost btn-small hidden" id="btnCopyUsername">Copy</button></div>
-      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;line-height:1.5;">Username change nahi hota — ye hamesha aap ka hi rahega.</p>
+      <p class="note" style="color:#667781;font-size:13px;margin-top:6px;line-height:1.5;">Your username can't be changed. It stays yours forever.</p>
     </div>
     <div class="profile-row">
       <label>Your Gmail</label>

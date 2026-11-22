@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jilan Chat — wapas ja rahe hain...</title>
+<title>Jilan Chat — returning to the app...</title>
 <style>
   body { font-family: sans-serif; background: #f0f2f5; color: #111b21; margin: 0; padding: 40px 20px; text-align: center; }
   a.btn { display: inline-block; margin-top: 20px; padding: 14px 24px; background: #00a884; color: #fff; text-decoration: none; border-radius: 8px; font-size: 18px; }
@@ -17,8 +17,8 @@
      returns here. This page immediately forwards the URL fragment
      (id_token or error=) to the app via the custom scheme jilanchat://auth.
      If the browser blocks the automatic forward, the button below does it. -->
-<p id="msg">Sign-in mukammal ho raha hai — Jilan Chat me wapas ja rahe hain...</p>
-<a class="btn" id="backBtn" href="#">Jilan Chat me wapas jayein</a>
+<p id="msg">Finishing sign-in. Returning to Jilan Chat...</p>
+<a class="btn" id="backBtn" href="#">Back to Jilan Chat</a>
 <script>
 (function () {
   var frag = window.location.hash ? window.location.hash.substring(1) : "";
@@ -29,7 +29,7 @@
   try { window.location.replace(target); } catch (e) {}
   setTimeout(function () {
     document.getElementById("msg").textContent =
-      "Agar app khud nahi khula to neeche wale button par tap karein.";
+      "If the app didn't open, tap the button below.";
   }, 1500);
 })();
 </script>
