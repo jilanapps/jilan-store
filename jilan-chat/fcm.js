@@ -48,7 +48,7 @@
   // launch). No device tokens exist, so push events would go nowhere —
   // skip the writes/listener to save Spark quota. Turn back on (true)
   // only together with a launch-tested native FCM shell.
-  JC.PUSH_ENABLED = false;
+  JC.PUSH_ENABLED = true;
 
   // ---------- ringer-mode rule (pure mirror of FcmService, for tests) ----------
   // Returns what an incoming call should do for a ringer mode.
