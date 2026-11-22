@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Jilan Chat</title>
 <link rel="stylesheet" href="style.css">
+<style>video{background:#000}</style>
 </head>
 <body>
 
@@ -401,7 +402,7 @@
 
 <!-- ============ FILTER CAMERA ============ -->
 <div class="screen" id="screen-camera">
-  <video id="camVideo" autoplay playsinline muted></video>
+  <video id="camVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" autoplay playsinline muted></video>
   <div class="cam-controls">
     <div class="filter-row" id="filterRow">
       <button class="filter-pill active" data-filter="none">Normal</button>
@@ -419,8 +420,8 @@
 
 <!-- ============ CALL ============ -->
 <div class="screen" id="screen-call">
-  <video id="remoteVideo" autoplay playsinline></video>
-  <video id="localVideo" autoplay playsinline muted></video>
+  <video id="remoteVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" autoplay playsinline></video>
+  <video id="localVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" autoplay playsinline muted></video>
   <audio id="remoteAudio" autoplay playsinline></audio>
   <div class="call-overlay">
     <div>
@@ -456,7 +457,7 @@
 <div id="viewer">
   <button id="viewerClose">&#10005;</button>
   <img id="viewerImg" class="hidden" alt="Photo">
-  <video id="viewerVideo" class="hidden" controls playsinline></video>
+  <video id="viewerVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="hidden" controls playsinline></video>
 </div>
 
 <div class="toast" id="toast"></div>
