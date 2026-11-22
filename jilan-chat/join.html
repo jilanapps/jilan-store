@@ -51,19 +51,19 @@
     $("title").textContent = "Follow a channel on Jilan Chat";
     $("lead").textContent = "Open this link in Jilan Chat to see the channel and follow it.";
     $("code").textContent = location.href;
-    $("openApp").href = "jilanchat://join?ch=" + encodeURIComponent(ch);
+    $("openApp").href = "intent://join?ch=" + encodeURIComponent(ch) + "#Intent;scheme=jilanchat;package=com.jilanapps.jilanchat;end";
     $("openWeb").href = "./?ch=" + encodeURIComponent(ch);
     $("steps").innerHTML = "If the button does not open the app: open Jilan Chat, tap the menu (three dots), choose <b>Channels</b>, then <b>Follow with link</b> and paste this link.";
   } else if (u && !c) {
     $("title").textContent = "Chat with @" + u + " on Jilan Chat";
     $("lead").textContent = "Scan or open this link to send a chat request.";
     $("code").textContent = "@" + u;
-    $("openApp").href = "jilanchat://user?u=" + encodeURIComponent(u);
+    $("openApp").href = "intent://user?u=" + encodeURIComponent(u) + "#Intent;scheme=jilanchat;package=com.jilanapps.jilanchat;end";
     $("openWeb").href = "./?user=" + encodeURIComponent(u);
     $("steps").innerHTML = "If the button does not open the app: open Jilan Chat, tap New chat and search <b>@" + u + "</b>.";
   } else if (c.length >= 12) {
     $("code").textContent = location.href;
-    $("openApp").href = "jilanchat://join?c=" + encodeURIComponent(c);
+    $("openApp").href = "intent://join?c=" + encodeURIComponent(c) + "#Intent;scheme=jilanchat;package=com.jilanapps.jilanchat;end";
     $("openWeb").href = "./?join=" + encodeURIComponent(c);
   } else {
     $("title").textContent = "This link is not valid";

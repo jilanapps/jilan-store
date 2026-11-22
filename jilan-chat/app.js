@@ -153,6 +153,10 @@
   JC.openLink = function (url) {
     var href = JC.safeLinkHref(url);
     if (!href) return false;
+    // v4.11: our own invite / profile / channel links open INSIDE the app.
+    if (/^https:\/\/jilanapps\.github\.io\/jilan-store\/jilan-chat\/join\.html\?/i.test(href) && window.__jcDeepLink) {
+      try { window.__jcDeepLink(href); return true; } catch (e) {}
+    }
     if (JC.openExternal) JC.openExternal(href);
     else { try { window.open(href, "_blank"); } catch (e) { location.href = href; } }
     return true;
