@@ -2800,6 +2800,20 @@
       "versionCode": 5,
       "versionName": "1.0",
       "web": "https://jilanapps.github.io/jilan-store/jilan-chat/"
+    },
+    {
+      "apk": "https://jilanapps.github.io/jilan-store/bus-jam/jilan-bus-jam.apk",
+      "category": "games",
+      "color": "#f59e0b",
+      "desc": "Bus parking puzzle — tap vehicles out, match passengers by colour. 40 levels, offline",
+      "icon": "icons/busjam.png",
+      "id": "busjam",
+      "name": "Jilan Bus Jam",
+      "package": "com.jilanapps.busjam",
+      "size": 238429,
+      "versionCode": 1,
+      "versionName": "1.0",
+      "web": "https://jilanapps.github.io/jilan-store/bus-jam/"
     }
   ],
   "store": {

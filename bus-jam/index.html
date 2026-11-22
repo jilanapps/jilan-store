@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<title>Jilan Bus Jam</title>
+<link rel="icon" href="icon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#0f1d4a;font-family:"Trebuchet MS","Segoe UI",Roboto,Arial,sans-serif;color:#fff;touch-action:manipulation}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+#stage{position:relative;flex:1;min-height:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#adBanner{flex:0 0 auto;width:100%;display:flex;justify-content:center;align-items:center;background:#0b1538}
+#adBanner:empty{display:none}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow-y:auto}
+.screen.on{display:flex}
+#home{background:radial-gradient(ellipse at 50% 20%,#3b82f6 0%,#1e40af 45%,#0f1d4a 100%);justify-content:center;gap:18px;padding:24px}
+.title{font-size:46px;font-weight:900;text-align:center;line-height:1;letter-spacing:1px;color:#ffd84d;text-shadow:0 4px 0 #c2410c,0 8px 14px rgba(0,0,0,.45)}
+.title small{display:block;font-size:22px;color:#fff;text-shadow:0 3px 0 #1e3a8a;margin-top:8px;letter-spacing:3px}
+#homeArt{width:260px;height:170px}
+.btn{border:0;border-radius:18px;padding:14px 26px;font-size:20px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;
+  background:linear-gradient(#4ade80,#16a34a);box-shadow:0 6px 0 #166534,0 10px 18px rgba(0,0,0,.35);min-width:220px}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #166534}
+.btn.big{font-size:28px;padding:18px 34px;min-width:260px}
+.btn.blue{background:linear-gradient(#60a5fa,#2563eb);box-shadow:0 6px 0 #1e3a8a,0 10px 18px rgba(0,0,0,.35)}
+.btn.orange{background:linear-gradient(#fdba74,#ea580c);box-shadow:0 6px 0 #9a3412,0 10px 18px rgba(0,0,0,.35)}
+.btn.gray{background:linear-gradient(#94a3b8,#475569);box-shadow:0 6px 0 #1e293b,0 10px 18px rgba(0,0,0,.35)}
+.btn small{display:block;font-size:14px;opacity:.9;font-weight:700}
+#hud{position:absolute;left:0;right:0;top:0;height:58px;display:none;align-items:center;justify-content:space-between;padding:8px 10px;
+  background:linear-gradient(#1e3a8a,rgba(30,58,138,.85));box-shadow:0 3px 10px rgba(0,0,0,.3);z-index:2}
+#hud.on{display:flex}
+.hb{width:44px;height:42px;border-radius:12px;border:0;background:linear-gradient(#60a5fa,#2563eb);color:#fff;font-size:20px;font-weight:900;
+  box-shadow:0 4px 0 #1e3a8a;display:flex;align-items:center;justify-content:center;position:relative;font-family:inherit}
+.hb:active{transform:translateY(3px);box-shadow:0 1px 0 #1e3a8a}
+.hb.used{filter:grayscale(1);opacity:.5}
+.hb .n{position:absolute;right:-5px;top:-5px;background:#ef4444;border-radius:9px;font-size:11px;min-width:18px;height:18px;line-height:18px;padding:0 4px}
+#lvl{font-size:22px;font-weight:900;text-shadow:0 2px 0 #0f1d4a}
+.hgroup{display:flex;gap:8px}
+#levels{background:linear-gradient(#1e40af,#0f1d4a);padding:16px 14px 30px}
+#levels h2,#settings h2{margin:6px 0 14px;font-size:30px;color:#ffd84d;text-shadow:0 3px 0 #c2410c}
+#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:420px}
+.lv{aspect-ratio:1;border-radius:14px;border:0;font-size:20px;font-weight:900;color:#fff;font-family:inherit;
+  background:linear-gradient(#fbbf24,#ea580c);box-shadow:0 4px 0 #9a3412}
+.lv.done{background:linear-gradient(#4ade80,#16a34a);box-shadow:0 4px 0 #166534}
+.lv.lock{background:linear-gradient(#64748b,#334155);box-shadow:0 4px 0 #1e293b;color:#cbd5e1;font-size:16px}
+#settings{background:linear-gradient(#1e40af,#0f1d4a);padding:22px;gap:16px}
+.card{background:rgba(255,255,255,.1);border-radius:16px;padding:16px;width:100%;max-width:420px;line-height:1.5;font-size:16px}
+.overlay{position:absolute;inset:0;background:rgba(5,10,30,.6);display:none;align-items:center;justify-content:center;z-index:5}
+.overlay.on{display:flex}
+.dlg{background:linear-gradient(#ffffff,#e0e7ff);color:#1e293b;border-radius:24px;padding:24px 22px;width:86%;max-width:360px;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px;align-items:center;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.dlg h3{margin:0;font-size:30px;font-weight:900;color:#1e3a8a}
+.dlg p{margin:0;font-size:17px;color:#334155}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+#toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:rgba(15,23,42,.9);padding:10px 18px;border-radius:14px;font-weight:800;
+  font-size:17px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:6;white-space:nowrap}
+#toast.on{opacity:1}
+.foot{font-size:13px;opacity:.8;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="hud">
+      <div class="hgroup"><button class="hb" id="bBack" aria-label="Menu">&#9776;</button><button class="hb" id="bRestart" aria-label="Restart">&#8635;</button></div>
+      <div id="lvl">Level 1</div>
+      <div class="hgroup"><button class="hb" id="bUndo" aria-label="Undo">&#8630;<span class="n" id="nUndo">1</span></button><button class="hb" id="bSpot" aria-label="Extra parking spot">P+<span class="n" id="nSpot">1</span></button></div>
+    </div>
+    <div class="screen on" id="home">
+      <div class="title">JILAN<br>BUS JAM<small>PARKING PUZZLE</small></div>
+      <canvas id="homeArt" width="520" height="340"></canvas>
+      <button class="btn big" id="bPlay">PLAY<small id="playLvl">Level 1</small></button>
+      <button class="btn orange" id="bLevels">Levels</button>
+      <button class="btn blue" id="bSettings">Settings</button>
+      <div class="foot">Made by Dr Asif - Jilan Apps Official</div>
+    </div>
+    <div class="screen" id="levels">
+      <h2>Levels</h2>
+      <div id="grid"></div>
+      <p></p>
+      <button class="btn gray" id="bLvBack">Back</button>
+    </div>
+    <div class="screen" id="settings">
+      <h2>Settings</h2>
+      <button class="btn blue" id="bSound">Sound: ON</button>
+      <button class="btn blue" id="bUpdate" style="display:none">Check for Update</button>
+      <div class="card"><b>How to play</b><br>Tap a vehicle to drive it out in its arrow direction. The way must be clear. It parks in a free spot and passengers of the same colour get on. A full vehicle leaves. Clear all passengers to win. If every parking spot is full and nobody can get on, you lose.</div>
+      <div class="card"><b>About</b><br>Jilan Bus Jam v<span id="ver">1.0</span><br>Made by Dr Asif - Jilan Apps Official<br>Works offline. No login. No data collected.</div>
+      <button class="btn orange" id="bReset">Reset Progress</button>
+      <button class="btn gray" id="bSetBack">Back</button>
+    </div>
+    <div class="overlay" id="ovWin"><div class="dlg"><h3>Level Complete!</h3><p id="winTxt">Great parking!</p><button class="btn" id="bNext">Next Level</button><button class="btn gray" id="bWinMenu">Menu</button></div></div>
+    <div class="overlay" id="ovLose"><div class="dlg"><h3>Out of Space!</h3><p>All parking spots are full and nobody can get on.</p>
+      <button class="btn orange" id="bLoseSpot">+1 Parking Spot</button><button class="btn blue" id="bLoseUndo">Undo Last Move</button><button class="btn" id="bRetry">Retry</button></div></div>
+    <div class="overlay" id="ovConfirm"><div class="dlg"><h3>Reset?</h3><p>All level progress will be cleared.</p><button class="btn orange" id="bResetYes">Yes, reset</button><button class="btn gray" id="bResetNo">Cancel</button></div></div>
+    <div id="toast"></div>
+  </div>
+  <div id="adBanner"></div>
+</div>
+<script src="engine.js"></script>
+<script src="levels.js"></script>
+<script src="ads.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
