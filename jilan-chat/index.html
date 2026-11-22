@@ -17,12 +17,12 @@
   <div class="login-card">
     <h2>Sign in</h2>
 
-    <!-- Google Sign-In: DISABLED on purpose. Google returns 403
-         disallowed_useragent for OAuth inside an Android WebView, so this
-         button stays disabled until the parent swaps in a working path
-         (Custom Tabs or native sign-in). See auth.js. -->
-    <button class="btn btn-google" id="btnGoogle" disabled>Sign in with Gmail</button>
-    <p class="note">Sign-in is being connected &mdash; please wait for the next update. Google sign-in does not work inside the app yet.</p>
+    <!-- Google Sign-In (v2): manual OAuth in the system browser.
+         The shell intercepts accounts.google.com and opens it outside
+         the WebView, so Google shows the Gmail account chooser. The
+         return comes back via jilanchat://auth — see auth.js. -->
+    <button class="btn btn-google" id="btnGoogle">Sign in with Gmail</button>
+    <p class="note">Tap karein — aap ke phone par Gmail accounts ki list khulegi, aik select karein aur aap seedha sign in ho jayenge.</p>
 
     <hr style="border:none;border-top:1px solid #e9edef;margin:14px 0;">
 
