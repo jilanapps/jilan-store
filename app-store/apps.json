@@ -2791,13 +2791,13 @@
       "apk": "https://jilanapps.github.io/jilan-store/jilan-chat/jilan-chat.apk",
       "category": "social",
       "color": "#1976d2",
-      "desc": "Private messaging for friends and family — chats, voice and video calls, status, groups",
+      "desc": "Private messaging for friends and family — chats, voice and video calls, status, groups, Bluetooth Nearby chat without internet",
       "icon": "icons/jilanchat.png",
       "id": "jilanchat",
       "name": "Jilan Chat",
       "package": "com.jilanapps.jilanchat",
-      "size": 185932,
-      "versionCode": 1,
+      "size": 194124,
+      "versionCode": 3,
       "versionName": "1.0",
       "web": "https://jilanapps.github.io/jilan-store/jilan-chat/"
     }
