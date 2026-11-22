@@ -220,6 +220,12 @@
     };
   }
   JC.actionSheetOpen = function () { return sheetOpen; };
+  // v4.8: shared with features.js (chat menu, attach sheet, starred).
+  JC.openSheet = openSheet;
+  JC.sheetItem = function (act, label, cls) { return item(act, label, cls); };
+  JC.getMsgData = function (msgId) { return msgData[msgId] || null; };
+  JC.allMsgData = function () { return msgData; };
+  JC.scrollToMsg = function (id) { scrollToMsg(id); };
 
   JC.openMessageSheet = function (msgId) {
     var d = msgData[msgId]; if (!d) return;
@@ -239,8 +245,10 @@
     if (m.type === "text" && m.text) html += item("copy", "Copy");
     if ((m.reactions || {})[uid()]) html += item("unreact", "Remove my reaction");
     html += item("forme", "Delete for me", "danger");
+    if (JC.extraMessageItems) html = html.replace(item("forme", "Delete for me", "danger"), JC.extraMessageItems(msgId, m, item) + item("forme", "Delete for me", "danger"));
     if (mine) html += item("forall", "Delete for everyone", "danger");
     openSheet(html, function (act, val) {
+      if (JC.onExtraMessageAction && JC.onExtraMessageAction(act, msgId, m)) return;
       if (act === "react") JC.react(msgId, val);
       else if (act === "unreact") JC.react(msgId, null);
       else if (act === "reply") JC.startReply(msgId);
@@ -287,10 +295,10 @@
     var d = msgData[msgId]; if (!d) return Promise.resolve();
     if (d.m.senderId !== uid()) return Promise.resolve();
     var del = fv().delete();
-    return msgRef(msgId, d.isGroup).update({
+    return msgRef(msgId, d.isGroup).update(Object.assign({
       deleted: true, text: "", mediaData: del, mediaMime: del, mediaName: del,
       durationSec: del, replyTo: del, reactions: del, forwarded: del
-    }).catch(function () { JC.toast("Couldn't delete message."); });
+    }, d.m.location ? { location: del } : {})).catch(function () { JC.toast("Couldn't delete message."); });
   };
 
   // ---------- reply ----------

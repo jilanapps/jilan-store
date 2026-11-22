@@ -337,6 +337,7 @@
 
   function endCall(reason) {
     setSecure(false);
+    try { if (JC.onCallEnded) JC.onCallEnded(); } catch (e) {}
     if (callDocRef && callState !== "idle") {
       callDocRef.update({ status: finalStatus || "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
     }
@@ -379,6 +380,10 @@
   // ---------- peer connection ----------
   function makePeerConnection() {
     var conn = new RTCPeerConnection({ iceServers: [{ urls: STUN_URL }] });
+    // v4.8 screen share: one pre-negotiated data channel (id 7) on BOTH
+    // sides, created before the offer/answer. Audio/video tracks are not
+    // touched; frames go phone-to-phone (no Firebase writes).
+    try { var dc = conn.createDataChannel("jcscreen", { negotiated: true, id: 7 }); if (JC.onCallDataChannel) JC.onCallDataChannel(dc); } catch (e) {}
     conn.onicecandidate = function (e) {
       if (!e.candidate || !callDocRef) return;
       var sub = callRole === "caller" ? "callerCandidates" : "calleeCandidates";
@@ -588,6 +593,8 @@
   // Android.getRingerMode(). Bridge na ho (browser / vc3) to default
   // normal: bell + vibrate.
   function getRingerMode() {
+    // v4.8 Do Not Disturb (features3.js): incoming calls still show, silently.
+    try { if (JC.dndActive && JC.dndActive()) return "silent"; } catch (e) {}
     try {
       if (window.Android && Android.getRingerMode) {
         var m = String(Android.getRingerMode());

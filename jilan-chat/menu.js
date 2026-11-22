@@ -36,7 +36,9 @@
     status: function () { var b = $("btnStatus"); if (b) b.click(); },
     nearby: function () { var r = $("nearbyRow"); if (r) r.click(); },
     settings: function () { var b = $("btnSettings"); if (b) b.click(); },
-    about: function () { if (JC.showScreen) JC.showScreen("screen-about", { push: true }); }
+    about: function () { if (JC.showScreen) JC.showScreen("screen-about", { push: true }); },
+    starred: function () { if (JC.openStarredScreen) JC.openStarredScreen(null); },
+    join: function () { if (JC.showScreen) { JC.showScreen("screen-join", { push: true }); var i = $("joinInput"); if (i) i.value = ""; } }
   };
   var pendingAction = null, pendingTimer = null;
   function runPending() {

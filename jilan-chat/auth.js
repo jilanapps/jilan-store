@@ -419,6 +419,8 @@
     var data = online
       ? { online: true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }
       : { online: false, lastSeen: firebase.firestore.FieldValue.serverTimestamp() };
+    // v4.8 privacy: last seen hidden — store nothing (no online, no time).
+    if (JC.hideLastSeenOn && JC.hideLastSeenOn()) data = { online: false, lastSeen: firebase.firestore.FieldValue.delete() };
     ref.update(data).catch(function () { /* profile may not exist yet */ });
   };
 

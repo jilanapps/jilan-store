@@ -75,6 +75,8 @@
     <button type="button" role="menuitem" data-action="profile">Profile</button>
     <button type="button" role="menuitem" data-action="status">Status</button>
     <button type="button" role="menuitem" data-action="nearby">Nearby chat</button>
+    <button type="button" role="menuitem" data-action="starred">Starred messages</button>
+    <button type="button" role="menuitem" data-action="join">Join group with link</button>
     <button type="button" role="menuitem" data-action="settings">Settings</button>
     <button type="button" role="menuitem" data-action="about">About</button>
   </div>
@@ -173,8 +175,16 @@
     <button class="icon-btn" id="btnVideoCall" title="Video call" aria-label="Video call"><svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></button>
     <button class="icon-btn" id="btnChatMenu" title="Chat settings" aria-label="Chat settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
   </div>
+  <!-- v4.8 in-chat search (⋮ → Search): highlight + jump between matches. -->
+  <div id="chatSearchBar" class="chat-search hidden">
+    <input type="text" id="chatSearchField" placeholder="Search messages..." autocomplete="off">
+    <span id="chatSearchCount" class="cs-count"></span>
+    <button type="button" class="icon-btn dark" id="btnSearchUp" title="Previous" aria-label="Previous match"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.4 15.4L12 10.8l4.6 4.6L18 14l-6-6-6 6z"/></svg></button>
+    <button type="button" class="icon-btn dark" id="btnSearchDown" title="Next" aria-label="Next match"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.4 8.6L12 13.2l4.6-4.6L18 10l-6 6-6-6z"/></svg></button>
+    <button type="button" class="icon-btn dark" id="btnSearchClose" title="Close search" aria-label="Close search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
   <div class="offline-bar hidden">You are offline — messages will send when internet returns.</div>
-  <div id="chatMenu" class="hidden" style="position:absolute;top:52px;right:10px;background:#fff;color:#111b21;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.3);z-index:20;min-width:180px;">
+  <div id="chatMenu" class="chat-menu hidden">
     <button id="menuViewContact" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;">View contact</button>
     <button id="menuBlock" style="display:block;width:100%;text-align:left;padding:12px 14px;border:none;background:none;font-size:15px;color:#ea0038;">Block contact</button>
   </div>
@@ -275,7 +285,7 @@
     <label style="display:block;padding:8px 0;"><input type="radio" name="groupType" value="family" checked> Family</label>
     <label style="display:block;padding:8px 0;"><input type="radio" name="groupType" value="friends"> Friends</label>
     <button class="btn btn-primary" id="btnCreateGroup">Create group</button>
-    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">No group search, no join link, no public list. Only you (the admin) can add members — from Group info after creating the group.</p>
+    <p class="note" style="color:#667781;font-size:13px;margin-top:16px;line-height:1.5;">No group search and no public list. You (the admin) add members by @username or Gmail, or share a private invite link — from Group info after creating the group.</p>
   </div>
 </div>
 
@@ -293,9 +303,12 @@
     <div id="groupMembersList"></div>
     <div class="admin-only" style="margin-top:18px;">
       <h2>Add member</h2>
-      <input class="text-input" type="email" id="groupAddInput" placeholder="friend@gmail.com">
+      <input class="text-input" type="text" id="groupAddInput" placeholder="@username or friend@gmail.com" autocapitalize="off" autocomplete="off">
       <button class="btn btn-primary" id="btnAddMemberSearch">Search</button>
       <div id="groupAddResult"></div>
+      <h2 style="margin-top:18px;">Invite link</h2>
+      <p class="settings-note">Share a private link. Anyone with the link can join. You can reset it any time.</p>
+      <button class="btn btn-ghost" id="btnGroupInvite">Invite via link</button>
     </div>
     <div class="profile-row">
       <button class="btn btn-ghost" id="btnLeaveGroup">Leave group</button>
@@ -348,6 +361,7 @@
       </div>
       <p class="note settings-note">Theme and wallpaper are saved on this phone only. Long-press a chat in the list to pin (max 3) or mute it.</p>
     </div>
+    <div id="settingsExtras" style="margin-top:20px;"></div>
     <h2 style="margin-top:20px;">Blocked contacts</h2>
     <p style="color:#667781;font-size:13px;line-height:1.5;">Blocked contacts cannot send you 1-to-1 messages or call you. Block does not apply inside groups.</p>
     <div id="blockedList" style="margin-top:12px;"></div>
@@ -355,6 +369,30 @@
     <div class="profile-row">
       <button class="btn btn-ghost" id="btnSettingsAbout">About Jilan Chat</button>
     </div>
+  </div>
+</div>
+
+<!-- ============ STARRED (v4.8) ============ -->
+<div class="screen" id="screen-starred">
+  <div class="app-header">
+    <button class="icon-btn" id="btnStarredBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <h1 id="starredTitle">Starred messages</h1>
+  </div>
+  <div id="starredList"></div>
+  <div class="empty-state hidden" id="starredEmpty">No starred messages. Long-press a message and tap Star.</div>
+</div>
+
+<!-- ============ JOIN GROUP (v4.8) ============ -->
+<div class="screen" id="screen-join">
+  <div class="app-header">
+    <button class="icon-btn" id="btnJoinBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <h1>Join group</h1>
+  </div>
+  <div class="page-body">
+    <h2>Paste the invite link</h2>
+    <input class="text-input" type="text" id="joinInput" placeholder="https://jilanapps.github.io/...join.html?c=..." autocapitalize="off" autocomplete="off">
+    <button class="btn btn-primary" id="btnJoinGo">Join</button>
+    <p class="settings-note">Ask a group admin for the link. Only people who have the link can join.</p>
   </div>
 </div>
 
@@ -441,6 +479,11 @@
 
 <!-- ============ CALL ============ -->
 <div class="screen" id="screen-call">
+  <div id="screenShareView" class="ss-view hidden">
+    <div class="ss-who" id="screenShareWho">Screen share</div>
+    <img id="screenShareImg" alt="Shared screen">
+  </div>
+  <div id="screenShareSelfBar" class="ss-self hidden"><span>You are sharing your screen</span><button type="button" id="btnScreenShareStop">Stop</button></div>
   <video id="remoteVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" autoplay playsinline></video>
   <video id="localVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" autoplay playsinline muted></video>
   <audio id="remoteAudio" autoplay playsinline></audio>
@@ -458,6 +501,7 @@
       <button class="call-btn" id="btnMute" title="Mute" aria-label="Mute"><span class="ic-on"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg></span><span class="ic-off"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/></svg></span></button>
       <button class="call-btn hidden" id="btnVideoOff" title="Video off" aria-label="Video off"><span class="ic-on"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></span><span class="ic-off"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 6.5l-4 4V7c0-.55-.45-1-1-1H9.82L21 17.18V6.5zM3.27 2L2 3.27 4.73 6H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.21 0 .39-.08.54-.18L19.73 21 21 19.73 3.27 2z"/></svg></span></button>
       <button class="call-btn hidden" id="btnCamFlipCall" title="Flip camera" aria-label="Flip camera"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
+      <button class="call-btn hidden" id="btnShareScreen" title="Share screen" aria-label="Share screen"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zm-7-3.53v-2.19c-2.78 0-4.61.85-6 2.72.56-2.67 2.11-5.33 6-5.87V7l4 3.73-4 3.74z"/></svg></button>
       <button class="call-btn" id="btnSpeaker" title="Speaker" aria-label="Speaker"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
       <button class="call-btn end" id="btnEndCall" title="End call" aria-label="End call"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button>
     </div>
@@ -470,6 +514,7 @@
   <div class="sv-top">
     <div class="avatar" id="statusViewerAvatar">?</div>
     <div class="sv-who"><div id="statusViewerName">...</div><div id="statusViewerTime"></div></div>
+    <button type="button" id="statusViewerSave" class="sv-icon" aria-label="Save to gallery" title="Save to gallery"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></button>
     <button type="button" id="statusViewerClose" class="sv-icon" aria-label="Close"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
   </div>
   <div id="statusViewerBody"></div>
@@ -499,6 +544,7 @@
 
 <!-- ============ MEDIA VIEWER ============ -->
 <div id="viewer">
+  <button id="viewerSave" type="button" aria-label="Save to gallery" title="Save to gallery"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></button>
   <button id="viewerClose" aria-label="Close"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
   <img id="viewerImg" class="hidden" alt="Photo">
   <video id="viewerVideo" poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="hidden" controls playsinline></video>
@@ -516,6 +562,17 @@
 
 <!-- Firebase JS SDK — bundled locally in app/ (no CDN at runtime). -->
 <div id="actionSheet" class="action-sheet hidden"></div>
+<!-- ============ APP LOCK (v4.8) ============ -->
+<div id="lockScreen" class="lock-screen hidden">
+  <img src="icon-192.png" alt="" class="lock-logo">
+  <div class="lock-title">Jilan Chat is locked</div>
+  <input type="password" inputmode="numeric" maxlength="6" id="lockPinInput" class="lock-pin" placeholder="Enter PIN" autocomplete="off">
+  <button type="button" class="btn btn-primary" id="btnLockUnlock">Unlock</button>
+  <button type="button" class="btn btn-ghost hidden" id="btnLockFinger">Use fingerprint</button>
+  <div class="lock-error" id="lockError"></div>
+  <p class="lock-help">Forgot PIN? Use fingerprint, or clear Jilan Chat's app data in phone Settings and sign in again.</p>
+</div>
+
 <script src="firebase-app-compat.js"></script>
 <script src="firebase-auth-compat.js"></script>
 <script src="firebase-firestore-compat.js"></script>
@@ -535,6 +592,12 @@
 <script src="fcm.js"></script>
 <script src="menu.js"></script>
 <script src="extras.js"></script>
+<script src="features.js"></script>
+<script src="screenshare.js"></script>
+<script src="features2.js"></script>
+<script src="features3.js"></script>
+<script src="features4.js"></script>
+<script src="qrcode-gen.js"></script>
 <!-- Long-press action sheet (messages + chat rows) -->
 </body>
 </html>

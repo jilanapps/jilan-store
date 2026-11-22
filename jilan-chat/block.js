@@ -130,6 +130,8 @@
     // Chat header menu (⋮): View contact + Block/Unblock.
     $("btnChatMenu").addEventListener("click", function (e) {
       e.stopPropagation();
+      // v4.8: features.js builds the full labelled menu (1-to-1 + groups).
+      if (JC.openChatMenu) { JC.openChatMenu(); return; }
       var menu = $("chatMenu");
       var isGroup = JC.currentChatIsGroup;
       $("menuViewContact").classList.toggle("hidden", isGroup);

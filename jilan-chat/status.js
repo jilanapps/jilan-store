@@ -82,6 +82,8 @@
   // ---------- seen-by record (viewer side, written once) ----------
   JC.recordStatusView = function (item) {
     if (!JC.db || !JC.currentUser || !item || item.ownerUid === JC.currentUser.uid) return Promise.resolve(false);
+    // v4.8 privacy: read receipts OFF — status views are not sent (WhatsApp rule).
+    if (JC.hideReadReceiptsOn && JC.hideReadReceiptsOn()) return Promise.resolve(false);
     var key = item.ownerUid + "/" + item.id;
     var wrote = readSet(WROTE_KEY);
     if (wrote[key]) return Promise.resolve(false);
@@ -210,7 +212,10 @@
     var text = ($("statusTextInput").value || "").trim();
     if (!text) { JC.toast("Write something first."); return; }
     if (!JC.db || !JC.currentUser) return;
-    addStatusDoc({ type: "text", text: text }).then(function () {
+    var st = JC.statusStyle || {}, doc = { type: "text", text: text };
+    if (JC.validStatusBg && JC.validStatusBg(st.bg)) doc.bg = st.bg;
+    if (JC.validStatusFont && JC.validStatusFont(st.font)) doc.font = st.font;
+    addStatusDoc(doc).then(function () {
       $("statusTextInput").value = "";
       $("statusAddBox").classList.add("hidden");
       JC.toast("Status posted — it disappears in 24 hours.");
@@ -484,6 +489,9 @@
       var div = document.createElement("div");
       div.className = "sv-text";
       div.textContent = d.text || "";
+      // v4.8: coloured background + font (whitelisted values only).
+      if (JC.validStatusBg && JC.validStatusBg(d.bg)) div.style.background = d.bg;
+      if (JC.validStatusFont && JC.validStatusFont(d.font)) div.className += " f-" + d.font;
       body.appendChild(div);
     } else if (d.type === "photo") {
       var img = document.createElement("img");

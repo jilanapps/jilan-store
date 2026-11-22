@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jilan Chat</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #f0f4fa; color: #111b21; }
+  .card { max-width: 420px; margin: 40px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(21,101,192,.15); padding: 28px 22px; text-align: center; }
+  img { width: 88px; height: 88px; border-radius: 22px; }
+  h1 { font-size: 21px; margin: 14px 0 6px; }
+  p { color: #54656f; line-height: 1.55; font-size: 15px; }
+  .code { font-family: monospace; font-size: 15px; background: #e3eefc; color: #1565c0; border-radius: 8px; padding: 8px 10px; word-break: break-all; margin: 10px 0 16px; }
+  a.btn { display: block; text-decoration: none; padding: 13px; border-radius: 10px; font-weight: 600; margin: 10px 0; font-size: 16px; }
+  .primary { background: #1f7ae0; color: #fff; }
+  .ghost { border: 2px solid #1f7ae0; color: #1565c0; }
+  .steps { text-align: left; font-size: 14px; color: #54656f; background: #f7f9fc; border-radius: 10px; padding: 12px 14px; }
+  .bad { color: #d32f2f; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0b141a; color: #e9edef; }
+    .card { background: #111b21; }
+    p, .steps { color: #aebac1; }
+    .steps { background: #1f2c34; }
+    .code { background: #1f2c34; color: #8cc2ff; }
+    .ghost { color: #8cc2ff; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="icon-192.png" alt="Jilan Chat">
+  <h1 id="title">Join a group on Jilan Chat</h1>
+  <p id="lead">You were invited to a private Jilan Chat group.</p>
+  <div class="code" id="code"></div>
+  <a class="btn primary" id="openApp" href="#">Open in Jilan Chat</a>
+  <a class="btn ghost" id="openWeb" href="./">Open in browser</a>
+  <a class="btn ghost" href="jilan-chat.apk">Download Jilan Chat</a>
+  <div class="steps" id="steps">If the button does not open the app: open Jilan Chat, tap the menu (three dots) and choose <b>Join group with link</b>, then paste this link.</div>
+</div>
+<script>
+(function () {
+  function q(k) { var m = new RegExp("[?&]" + k + "=([^&#]*)").exec(location.search); return m ? decodeURIComponent(m[1]) : ""; }
+  var c = q("c").replace(/[^A-Za-z0-9]/g, "").slice(0, 32);
+  var u = q("u").toLowerCase().replace(/[^a-z0-9_.]/g, "").slice(0, 30);
+  var $ = function (id) { return document.getElementById(id); };
+  var ch = q("ch").replace(/[^A-Za-z0-9]/g, "").slice(0, 20);
+  if (ch.length === 20) {
+    $("title").textContent = "Follow a channel on Jilan Chat";
+    $("lead").textContent = "Open this link in Jilan Chat to see the channel and follow it.";
+    $("code").textContent = location.href;
+    $("openApp").href = "jilanchat://join?ch=" + encodeURIComponent(ch);
+    $("openWeb").href = "./?ch=" + encodeURIComponent(ch);
+    $("steps").innerHTML = "If the button does not open the app: open Jilan Chat, tap the menu (three dots), choose <b>Channels</b>, then <b>Follow with link</b> and paste this link.";
+  } else if (u && !c) {
+    $("title").textContent = "Chat with @" + u + " on Jilan Chat";
+    $("lead").textContent = "Scan or open this link to send a chat request.";
+    $("code").textContent = "@" + u;
+    $("openApp").href = "jilanchat://user?u=" + encodeURIComponent(u);
+    $("openWeb").href = "./?user=" + encodeURIComponent(u);
+    $("steps").innerHTML = "If the button does not open the app: open Jilan Chat, tap New chat and search <b>@" + u + "</b>.";
+  } else if (c.length >= 12) {
+    $("code").textContent = location.href;
+    $("openApp").href = "jilanchat://join?c=" + encodeURIComponent(c);
+    $("openWeb").href = "./?join=" + encodeURIComponent(c);
+  } else {
+    $("title").textContent = "This link is not valid";
+    $("title").className = "bad";
+    $("lead").textContent = "Ask the group admin to send a new invite link.";
+    $("code").style.display = "none";
+    $("openApp").style.display = "none";
+  }
+})();
+</script>
+</body>
+</html>

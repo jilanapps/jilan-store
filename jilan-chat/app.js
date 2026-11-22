@@ -153,6 +153,7 @@
     var tick = "";
     if (mine && !deleted) {
       var st = last && last.status;
+      if (st === "read" && JC.hideReadReceiptsOn && JC.hideReadReceiptsOn()) st = "delivered";
       if (st === "read") tick = '<span class="lp-ticks read">' + SVG_TICK2 + '</span>';
       else if (st === "delivered") tick = '<span class="lp-ticks">' + SVG_TICK2 + '</span>';
       else tick = '<span class="lp-ticks">' + SVG_TICK1 + '</span>';
@@ -162,6 +163,9 @@
   JC.chatPreviewHtml = chatPreviewHtml;
   function fmtLastSeen(profile) {
     if (!profile) return "";
+    // v4.8 privacy: hide last seen (WhatsApp rule — if you hide yours,
+    // you don't see others' either).
+    if (JC.hideLastSeenOn && JC.hideLastSeenOn()) return "";
     if (profile.online) return "online";
     if (!profile.lastSeen) return "offline";
     var d = profile.lastSeen.toDate ? profile.lastSeen.toDate() : new Date(profile.lastSeen);
@@ -275,6 +279,7 @@
   JC.getCachedProfile = function (uid) { return otherProfiles[uid] || null; };
   function lastMessagePreview(m) {
     if (!m) return "";
+    if (m.location) return "Location";
     if (m.type === "image") return "Photo";
     if (m.type === "video") return "Video";
     if (m.type === "voice") return "Voice message";
@@ -344,6 +349,7 @@
               if (!gSnap.exists) return;
               var g = gSnap.data();
               row.querySelector(".name").textContent = g.name || "Group";
+              if (JC.groupAvatarHtml && g.photo) gav.innerHTML = JC.groupAvatarHtml(g);
               var prev = row.querySelector(".preview");
               prev.textContent = g.lastMessage ? g.lastMessage : (g.members || []).length + " members";
               if (entry.unreadCount > 0) prev.classList.add("unread");
@@ -408,7 +414,7 @@
         snap.forEach(function (doc) {
           var m = doc.data();
           if (m.senderId !== JC.currentUser.uid) {
-            doc.ref.update({ status: "delivered" }).catch(function () {});
+            doc.ref.update({ status: "delivered", deliveredAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () { return doc.ref.update({ status: "delivered" }); }).catch(function () {});
           }
         });
       }).catch(function () {});
@@ -489,13 +495,15 @@
   // Mark incoming messages "read" while the chat is open (receiver-only).
   function markRead(chatId) {
     if (!JC.db || !JC.currentUser) return;
+    // v4.8 privacy: read receipts OFF — never send blue ticks (delivered only).
+    if (JC.hideReadReceiptsOn && JC.hideReadReceiptsOn()) return;
     JC.db.collection("chats").doc(chatId).collection("messages")
       .where("status", "!=", "read")
       .get().then(function (snap) {
         snap.forEach(function (doc) {
           var m = doc.data();
           if (m.senderId !== JC.currentUser.uid) {
-            doc.ref.update({ status: "read" }).catch(function () {});
+            doc.ref.update({ status: "read", readAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () { return doc.ref.update({ status: "read" }); }).catch(function () {});
           }
         });
       }).catch(function () {});
@@ -504,12 +512,15 @@
   // ---------- render messages ----------
   function tickHtml(status, isOut) {
     if (!isOut) return "";
+    if (status === "read" && JC.hideReadReceiptsOn && JC.hideReadReceiptsOn()) status = "delivered";
     if (status === "read") return '<span class="ticks read">&#10003;&#10003;</span>';
     if (status === "delivered") return '<span class="ticks">&#10003;&#10003;</span>';
     return '<span class="ticks">&#10003;</span>';
   }
   function renderMessage(msgId, m, scroll, pending) {
     if (msgEls[msgId]) return;
+    // v4.8: system notes + disappearing (expired) messages — features.js.
+    if (JC.preRenderMessage && JC.preRenderMessage(msgId, m, false)) return;
     var isOut = m.senderId === JC.currentUser.uid;
     var div = document.createElement("div");
     div.className = "msg " + (isOut ? "out" : "in");
@@ -563,6 +574,8 @@
     // v4.5: reply quote + forwarded label (extras.js).
     if (data.replyTo) msg.replyTo = data.replyTo;
     if (data.forwarded) msg.forwarded = true;
+    // v4.8: location / disappearing timer / system note (features.js).
+    if (JC.applyMessageExtras) JC.applyMessageExtras(msg, data, false);
     if (!msg.mediaData) delete msg.mediaData;
     if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
@@ -1012,6 +1025,7 @@
   JC.mediaBodyHtml = function (m) {
     var src = JC.mediaSrc(m);
     var cap = m.text ? "<div>" + esc(m.text) + "</div>" : "";
+    if (m.location && JC.locationHtml) return JC.locationHtml(m);
     if (m.type === "text") return esc(m.text || "");
     if (m.type === "image") return src ? '<img class="bubble-img" src="' + attr(src) + '" alt="Photo">' + cap : '<div class="media-gone">Photo not available</div>' + cap;
     if (m.type === "voice") {
@@ -1147,7 +1161,10 @@
     $("btnRecCancel").addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(false); JC.toast("Voice message cancelled"); });
     var btnRecSend = $("btnRecSend");
     if (btnRecSend) btnRecSend.addEventListener("click", function (e) { e.stopPropagation(); JC.stopVoiceRecord(true); });
-    $("btnAttach").addEventListener("click", function () { $("fileInput").click(); });
+    // v4.8: attach opens a small sheet (Photo / Location) when features.js is loaded.
+    $("btnAttach").addEventListener("click", function () {
+      if (JC.openAttachSheet) JC.openAttachSheet(); else $("fileInput").click();
+    });
     $("fileInput").addEventListener("change", function () {
       var f = $("fileInput").files && $("fileInput").files[0];
       if (f) JC.sendFile(f);

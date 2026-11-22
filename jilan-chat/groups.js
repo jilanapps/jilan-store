@@ -1,6 +1,8 @@
 // Jilan Chat v1.0 — groups.js
 // GROUP CHAT (family / friends only). No public community: no group
-// search, no join link, no public group list. Only an admin adds members.
+// search, no public group list. Admins add members by @username or Gmail.
+// v4.8: admins can also share a private INVITE LINK (features.js) — only
+// people who get the link can join; the admin can reset it any time.
 //
 // Data model (DATA-MODEL.md): groups/{groupId}
 //   name, type ("family" | "friends"), createdBy (uid), admins [uids],
@@ -80,6 +82,7 @@
     $("messages").innerHTML = "";
     groupMsgEls = {};
     $("msgInput").value = "";
+    if (JC.onChatOpened) { try { JC.onChatOpened(groupId, null, true); } catch (e) {} }
     // Private-chat notice — group me sirf members parh sakte hain.
     var notice = document.getElementById("e2eNotice");
     if (notice) notice.textContent = "Messages are private. Only members of this group can read this chat.";
@@ -94,10 +97,13 @@
     groupInfoUnsub = JC.db.collection("groups").doc(groupId).onSnapshot(function (snap) {
       if (!snap.exists) { JC.toast("This group no longer exists."); JC.closeChat(); JC.showScreen("screen-list"); return; }
       currentGroup = snap.data();
+      JC.currentGroup = currentGroup;
       var count = (currentGroup.members || []).length;
       $("chatName").textContent = currentGroup.name || "Group";
       $("chatStatus").textContent = count + " member" + (count === 1 ? "" : "s") + " • " + (currentGroup.type === "family" ? "Family" : "Friends");
       $("chatAvatar").textContent = (currentGroup.name || "G")[0].toUpperCase();
+      // v4.8 hook runs AFTER the header is set (group photo, admins-only bar).
+      if (JC.onGroupDocUpdated) JC.onGroupDocUpdated(groupId, currentGroup);
     });
     // Live messages.
     if (groupUnsub) groupUnsub();
@@ -120,6 +126,7 @@
     if (groupUnsub) { groupUnsub(); groupUnsub = null; }
     if (groupInfoUnsub) { groupInfoUnsub(); groupInfoUnsub = null; }
     currentGroup = null;
+    JC.currentGroup = null;
     JC.currentChatIsGroup = false;
     // Call buttons belong to 1-to-1 chats — show them again.
     $("btnVoiceCall").classList.remove("hidden");
@@ -147,6 +154,7 @@
     // v4.5: reply quote + forwarded label (extras.js).
     if (data.replyTo) msg.replyTo = data.replyTo;
     if (data.forwarded) msg.forwarded = true;
+    if (JC.applyMessageExtras) JC.applyMessageExtras(msg, data, true);
     if (!msg.mediaData) delete msg.mediaData;
     if (!msg.mediaMime) delete msg.mediaMime;
     if (!msg.mediaUrl) delete msg.mediaUrl;
@@ -193,6 +201,7 @@
 
   function lastMessagePreview(m) {
     if (!m) return "";
+    if (m.location) return "Location";
     if (m.type === "image") return "Photo";
     if (m.type === "video") return "Video";
     if (m.type === "voice") return "Voice message";
@@ -203,6 +212,7 @@
   // ---------- render a group message (sender name on every message) ----------
   function renderGroupMessage(msgId, m) {
     if (groupMsgEls[msgId]) return;
+    if (JC.preRenderMessage && JC.preRenderMessage(msgId, m, true)) return;
     var isOut = m.senderId === JC.currentUser.uid;
     var div = document.createElement("div");
     div.className = "msg " + (isOut ? "out" : "in");
@@ -259,7 +269,7 @@
         row.innerHTML =
           '<div class="avatar">' + (m.data.photoURL ? '<img src="' + esc(m.data.photoURL) + '" alt="">' : esc((m.data.displayName || "?")[0] || "?")) + '</div>' +
           '<div class="info"><div class="name">' + esc(m.data.displayName || "Unknown") + (me ? " (you)" : "") + '</div>' +
-          '<div class="gmail">' + esc(m.data.gmail || "") + (admin ? " • Admin" : "") + '</div></div>';
+          '<div class="gmail">' + esc(m.data.username ? "@" + m.data.username : (m.data.gmail || "")) + (admin ? " • Admin" : "") + '</div></div>';
         if (isAdmin() && !me) {
           var btns = document.createElement("div");
           btns.style.cssText = "display:flex;flex-direction:column;gap:6px;";
@@ -366,17 +376,23 @@
     $("btnGroupInfoBack").addEventListener("click", function () { JC.goBack(); });
     $("btnLeaveGroup").addEventListener("click", JC.leaveGroup);
     $("btnAddMemberSearch").addEventListener("click", function () {
-      var gmail = ($("groupAddInput").value || "").trim().toLowerCase();
+      // v4.8: full @username OR full Gmail (exact match only — no name search).
+      var q = ($("groupAddInput").value || "").trim().toLowerCase();
       var box = $("groupAddResult");
-      if (!gmail || gmail.indexOf("@") < 0) { box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Type a valid Gmail address.</p>"; return; }
+      var isMail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(q);
+      var uname = q.replace(/^@/, "");
+      if (!q || (!isMail && !/^[a-z0-9_]{3,20}$/.test(uname))) { box.innerHTML = "<p style='color:#ea0038;margin-top:12px;'>Type a full @username or a full Gmail address.</p>"; return; }
       box.innerHTML = "<p style='margin-top:12px;color:#667781;'>Searching…</p>";
-      JC.searchUserByGmail(gmail).then(function (found) {
-        if (!found) { box.innerHTML = "<p style='margin-top:12px;'>No Jilan Chat user found for <b>" + esc(gmail) + "</b>.</p>"; return; }
-        if (found.uid === JC.currentUser.uid) { box.innerHTML = "<p style='margin-top:12px;'>That is your own Gmail.</p>"; return; }
+      var finder = isMail ? JC.searchUserByGmail(q) : JC.searchUserByUsername(uname);
+      var shown = isMail ? q : "@" + uname;
+      finder.then(function (found) {
+        if (!found) { box.innerHTML = "<p style='margin-top:12px;'>No Jilan Chat user found for <b>" + esc(shown) + "</b>.</p>"; return; }
+        if (found.uid === JC.currentUser.uid) { box.innerHTML = "<p style='margin-top:12px;'>This is you.</p>"; return; }
+        if ((currentGroup && currentGroup.members || []).indexOf(found.uid) >= 0) { box.innerHTML = "<p style='margin-top:12px;'>" + esc(found.data.displayName || "This person") + " is already in this group.</p>"; return; }
         box.innerHTML =
           '<div class="user-result"><div class="avatar">' + esc((found.data.displayName || "?")[0] || "?") + '</div>' +
           '<div class="info"><div class="name">' + esc(found.data.displayName || "Unknown") + '</div>' +
-          '<div class="gmail">' + esc(found.data.gmail || "") + '</div></div>' +
+          '<div class="gmail">' + esc(found.data.username ? "@" + found.data.username : (found.data.gmail || "")) + '</div></div>' +
           '<button class="btn btn-primary btn-small" id="btnConfirmAddMember">Add</button></div>';
         $("btnConfirmAddMember").addEventListener("click", function () {
           JC.addMemberToGroup(found.uid).then(function () {
