@@ -125,6 +125,7 @@
     $("callButtonsActive").classList.add("hidden");
     $("btnVideoOff").classList.toggle("hidden", callKind !== "video");
     $("btnCamFlipCall").classList.toggle("hidden", callKind !== "video");
+    if ($("btnFlashCall")) $("btnFlashCall").classList.toggle("hidden", callKind !== "video");
     localVideo().classList.toggle("hidden", callKind !== "video");
     showCallScreen();
     startRinging();
@@ -220,6 +221,7 @@
     $("callButtonsActive").classList.remove("hidden");
     $("btnVideoOff").classList.toggle("hidden", kind !== "video");
     $("btnCamFlipCall").classList.toggle("hidden", kind !== "video");
+    if ($("btnFlashCall")) $("btnFlashCall").classList.toggle("hidden", kind !== "video");
     localVideo().classList.toggle("hidden", kind !== "video");
     showCallScreen();
     setCallState("Starting camera and microphone…");
@@ -355,6 +357,7 @@
     remoteVideo().srcObject = null;
     localVideo().srcObject = null;
     remoteAudio().srcObject = null;
+    try { resetLight(); } catch (e) {}
     facingMode = "user"; flipping = false; try { resetPip(); } catch (e) {}
     remoteStream = null; gotRemoteTrack = false; iceConnected = false;
     connectedAtWritten = false; finalStatus = null;
@@ -569,6 +572,7 @@
     var sender = pc.getSenders().find(function (s) { return s.track && s.track.kind === "video"; }) ||
                  pc.getSenders().find(function (s) { return !s.track && s.__jcVideo; });
     // Release the current camera first (phones often allow only one open).
+    if (oldTrack && prevMode === "environment" && lightOn) { try { setTorch(oldTrack, false); } catch (e) {} }
     if (oldTrack) { try { oldTrack.stop(); } catch (e) {} }
     facingMode = nextMode;
     function tryExact() {
@@ -593,6 +597,7 @@
       try { var pp = lv.play && lv.play(); if (pp && pp.catch) pp.catch(function () {}); } catch (e) {}
       applyMirror();
       flipping = false;
+      try { reapplyLight(); } catch (e) {}
       return Promise.resolve(p).then(function () { return true; });
     }).catch(function (e) {
       // Couldn't open the other camera: bring the previous one back.
@@ -608,11 +613,67 @@
         localStream.addTrack(t);
         localVideo().srcObject = localStream;
         applyMirror();
+        try { reapplyLight(); } catch (e3) {}
         return false;
       }).catch(function () { return false; });
     });
   }
   JC._flipCamera = flipCamera;
+
+  // v4.14 (user 2026-11-23: "Is me flashlight honi chahiye WhatsApp ki
+  // tarha front or back me"): one Flashlight button in the video call.
+  // Back camera  -> real torch via applyConstraints({advanced:[{torch}]}).
+  // Front camera -> soft white glow round the screen edges that lights the
+  // face (remote video centre stays visible). Flip keeps the light on and
+  // moves it to the new camera; hang-up resets everything.
+  var lightOn = false;
+  function curVideoTrack() { return localStream ? (localStream.getVideoTracks()[0] || null) : null; }
+  function torchSupported(track) {
+    try { var c = track && track.getCapabilities ? track.getCapabilities() : null; return !!(c && c.torch); }
+    catch (e) { return false; }
+  }
+  function setTorch(track, on) {
+    if (!track || !track.applyConstraints) return Promise.resolve(false);
+    try {
+      return Promise.resolve(track.applyConstraints({ advanced: [{ torch: !!on }] }))
+        .then(function () { return true; }).catch(function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
+  }
+  function setFrontGlow(on) {
+    var s = $("screen-call"); if (s && s.classList) s.classList.toggle("front-light", !!on);
+  }
+  function paintLightBtn() {
+    var b = $("btnFlashCall"); if (b && b.classList) b.classList.toggle("on", !!lightOn);
+  }
+  function applyLight() {
+    if (facingMode === "environment") {
+      setFrontGlow(false);
+      var t = curVideoTrack();
+      if (!torchSupported(t)) {
+        if (lightOn) { lightOn = false; paintLightBtn(); JC.toast("Flashlight isn't supported on this phone."); }
+        return Promise.resolve(false);
+      }
+      return setTorch(t, lightOn).then(function (ok) {
+        if (!ok && lightOn) { lightOn = false; paintLightBtn(); JC.toast("Flashlight isn't supported on this phone."); }
+        return ok;
+      });
+    }
+    setFrontGlow(lightOn);
+    return Promise.resolve(true);
+  }
+  function toggleLight() {
+    if (!localStream || callKind !== "video") return Promise.resolve(false);
+    lightOn = !lightOn;
+    paintLightBtn();
+    return applyLight();
+  }
+  function reapplyLight() { if (lightOn) applyLight(); else setFrontGlow(false); }
+  function resetLight() {
+    if (lightOn && facingMode === "environment") { try { setTorch(curVideoTrack(), false); } catch (e) {} }
+    lightOn = false; setFrontGlow(false); paintLightBtn();
+  }
+  JC._toggleLight = toggleLight;
+  JC._lightState = function () { return { on: lightOn, mode: facingMode }; };
 
   // v4.10 (user 23:32: "tasvir jiski aa rahi ho wohi rehti, choti bari nahi
   // hoti"): tap the small self-view to swap it with the big view (WhatsApp
@@ -798,6 +859,7 @@
     $("btnMute").addEventListener("click", toggleMute);
     $("btnVideoOff").addEventListener("click", toggleVideo);
     $("btnCamFlipCall").addEventListener("click", flipCamera);
+    if ($("btnFlashCall")) $("btnFlashCall").addEventListener("click", toggleLight);
     wirePip();
     $("btnSpeaker").addEventListener("click", function () {
       toggleSpeaker();
