@@ -2814,6 +2814,20 @@
       "versionCode": 1,
       "versionName": "1.0",
       "web": "https://jilanapps.github.io/jilan-store/bus-jam/"
+    },
+    {
+      "apk": "https://jilanapps.github.io/jilan-store/jilan-reels/jilan-reels.apk",
+      "category": "social",
+      "color": "#1f7ae0",
+      "desc": "Short videos — watch, post up to 30 seconds, like, comment, follow, report and block",
+      "icon": "icons/jilanreels.png",
+      "id": "jilanreels",
+      "name": "Jilan Reels",
+      "package": "com.jilanapps.jilanreels",
+      "size": 66537,
+      "versionCode": 2,
+      "versionName": "1.0",
+      "web": "https://jilanapps.github.io/jilan-store/jilan-reels/"
     }
   ],
   "store": {
