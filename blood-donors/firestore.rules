@@ -1,4 +1,7 @@
 rules_version = '2';
+// BDBS Firestore rules v47 (2026-11-23): v46 + request approval (BDBS v95):
+// non-admin request create must be approval 'pending' (or absent); only the
+// admin changes approval; pushEvents types request_needs_approval/request_rejected.
 // BDBS Firestore rules v46 (2026-11-23): v45 + donor reviews (/donorReviews,
 // /donorReviewsPublic) + app feedback (/appFeedback) + pushEvents types
 // new_feedback/new_review. NOTHING else changed.
@@ -237,7 +240,7 @@ service cloud.firestore {
     // status to 'Completed' (+ donatedBy/donatedById), and only when the
     // signed-in user's phone matches the request's requesterPhoneNorm.
     match /requests/{id} {
-      allow create: if true;
+      allow create: if isAdmin() || request.resource.data.get('approval', 'pending') == 'pending';
       allow read, delete: if isAdmin();
       allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
         && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
@@ -249,7 +252,7 @@ service cloud.firestore {
     // Same requester-close allowance as /requests above (v23).
     match /requestsPublic/{id} {
       allow read: if true;
-      allow create: if true;
+      allow create: if isAdmin() || request.resource.data.get('approval', 'pending') == 'pending';
       allow delete: if isAdmin();
       allow update: if isAdmin() || (request.auth != null && myPhoneNorm() != ''
         && myPhoneNorm() == resource.data.get('requesterPhoneNorm', '')
@@ -421,7 +424,7 @@ service cloud.firestore {
     match /pushEvents/{id} {
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly(['id', 'type', 'title', 'body', 'targetUid', 'targetGroup', 'targetPhoneNorm', 'targetRole', 'reqNo', 'createdAt'])
-        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast', 'new_feedback', 'new_review']
+        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast', 'new_feedback', 'new_review', 'request_needs_approval', 'request_rejected']
         && request.resource.data.title.size() <= 120
         && request.resource.data.body.size() <= 300;
       allow read: if isAdmin() || (request.auth != null
