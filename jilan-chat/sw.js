@@ -3,14 +3,14 @@
 // revalidation, so never a stale file); the cache is used ONLY when the
 // network fails (offline cold start). Bump VERSION to drop old caches.
 // Never touches Firestore/Firebase traffic (cross-origin) or APK files.
-var VERSION = "jc-shell-v4.16";
+var VERSION = "jc-shell-v4.17";
 var SHELL = [
   "./", "index.html", "style.css", "polish.css", "icon-192.png",
   "firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js", "firebase-storage-compat.js",
   "firebase-config.js", "auth.js", "app.js", "camera.js", "calls.js", "calllog.js", "status.js", "groups.js",
   "block.js", "requests.js", "nearby.js", "fcm.js", "menu.js", "extras.js", "features.js", "screenshare.js",
   "features2.js", "features3.js", "features4.js", "features5.js", "qrcode-gen.js", "profile.js", "emoji.js",
-  "status2.js", "v413.js"
+  "status2.js", "v413.js", "v417.js"
 ];
 self.addEventListener("install", function (e) {
   self.skipWaiting();

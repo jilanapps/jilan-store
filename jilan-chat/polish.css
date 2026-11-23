@@ -333,3 +333,51 @@ html.dark .skel-bub.out .skel { --sk-a: #154a85; --sk-b: #1d5a9e; }
 #screen-call.call-video.controls-hidden .call-overlay > div:first-child { opacity: 0; }
 #screen-call.call-video.controls-hidden #callButtonsActive { opacity: 0; transform: translateY(16px); pointer-events: none; }
 #screen-call.call-video.controls-hidden #callButtonsActive .call-btn { pointer-events: none; }
+
+/* =====================================================================
+   v4.17 — WhatsApp-style chat header tap + Settings list (v417.js)
+   ===================================================================== */
+/* App chrome is not text: no long-press selection, no grey tap flash.
+   Message bubbles are NOT listed here — their text stays copyable. */
+.app-header, .chat-header, .ch-head, #tabBar, .tab-btn, .icon-btn, .btn, .opt-btn,
+.chat-row, .set-row, .set-card, .pf-row, .sheet-item, .tog-row, #mainMenu, .fab {
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.ch-tap { display: flex; align-items: center; flex: 1; min-width: 0; gap: 0; padding: 4px 8px 4px 2px; margin-right: 2px;
+  border-radius: 28px; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur) var(--ease); outline: none; }
+.ch-tap:active, .ch-tap:focus-visible { background: var(--s-press); }
+.ch-tap .who { flex: 1; min-width: 0; }
+
+/* Settings: main list + sub-pages of the same screen */
+#settingsBody [data-sgoff] { display: none !important; }
+#screen-settings[data-sg] #settingsBody { padding-top: 6px; }
+#screen-settings[data-sg="main"] #settingsBody { padding: 0; }
+.set-card, .set-row { display: flex; align-items: center; gap: 20px; width: 100%; box-sizing: border-box; background: none; border: none;
+  text-align: left; font: inherit; color: var(--t-1); cursor: pointer; transition: background var(--dur) var(--ease); }
+.set-card:active, .set-row:active { background: var(--s-press); }
+.set-card { padding: 16px 18px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.set-card-av { width: 62px !important; height: 62px !important; min-width: 62px; font-size: 24px !important; }
+.set-card-name { font-size: 19px; font-weight: 600; color: var(--t-1); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-row { padding: 14px 18px; min-height: 64px; }
+.set-static { display: flex; align-items: center; gap: 20px; padding: 14px 18px; }
+.set-ic { color: var(--t-3); flex: 0 0 auto; display: flex; width: 24px; justify-content: center; }
+.set-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.set-title { font-size: 16.5px; color: var(--t-1); line-height: 1.3; overflow-wrap: anywhere; }
+.set-sub { font-size: 13.5px; color: var(--t-3); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; }
+.set-card .set-sub { white-space: nowrap; }
+#setAccount .set-row, #setPrivBlocked .set-row, #setHelp .set-row { padding-left: 2px; padding-right: 2px; }
+#setAccount .set-static { padding-left: 2px; padding-right: 2px; }
+#setPrivBlocked { margin-top: 14px; border-top: 1px solid var(--line); }
+/* Privacy page: privacy toggles first, app lock after (WhatsApp order) */
+#settingsExtras { display: flex; flex-direction: column; }
+#settingsExtras > [data-sh="privacy"] { order: -1; }
+#settingsExtras > h2[data-sh="privacy"] { margin-top: 0 !important; }
+#settingsExtras > h2:first-child { margin-top: 24px; }
+/* sub-page already shows the section name as its title */
+#screen-settings[data-sg="blocked"] h2[data-sh="blocked contacts"],
+#screen-settings[data-sg="storage"] h2[data-sh="media"] { display: none; }
+#screen-settings[data-sg] #settingsExtras { margin-top: 0 !important; }
+#screen-settings #settingsBody .settings-note, #screen-settings #settingsBody p { color: var(--t-3); }
+#screen-settings #settingsBody h2 { color: var(--t-1); }
+#screen-settings[data-sg="help"] #setAboutRow { margin-top: 0; }

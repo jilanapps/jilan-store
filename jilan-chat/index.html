@@ -166,10 +166,14 @@
 <div class="screen" id="screen-chat">
   <div class="chat-header">
     <button class="icon-btn" id="btnBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <div class="avatar" id="chatAvatar">?</div>
-    <div class="who" id="chatWho">
-      <div class="name" id="chatName">...</div>
-      <div class="status" id="chatStatus"></div>
+    <!-- v4.17: avatar + name are ONE tap target (WhatsApp-style): tap opens
+         Contact info (1-to-1) or Group info (group). See v417.js. -->
+    <div class="ch-tap" id="chatHeadTap" role="button" tabindex="0" aria-label="Contact info">
+      <div class="avatar" id="chatAvatar">?</div>
+      <div class="who" id="chatWho">
+        <div class="name" id="chatName">...</div>
+        <div class="status" id="chatStatus"></div>
+      </div>
     </div>
     <!-- Call buttons: voice first, then video. Both use WebRTC + Firestore
          signalling (calls.js). Hidden in group chats — calls are 1-to-1 only. -->
@@ -259,7 +263,7 @@
     <div class="ab-top">
       <img src="icon-192.png" alt="" class="ab-logo">
       <h2 class="ab-name">Jilan Chat</h2>
-      <div class="ab-ver" id="aboutVersion">Version 4.16</div>
+      <div class="ab-ver" id="aboutVersion">Version 4.17</div>
       <p class="ab-tag">Private chats with friends and family. No ads, no tracking, no price.</p>
     </div>
     <h3 class="ab-h">What you can do</h3>
@@ -366,9 +370,15 @@
 <div class="screen" id="screen-settings">
   <div class="app-header">
     <button class="icon-btn" id="btnSettingsBack"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <h1>Settings</h1>
+    <h1 id="settingsTitle">Settings</h1>
   </div>
-  <div class="page-body">
+  <div class="page-body" id="settingsBody">
+    <!-- v4.17: WhatsApp-style main list. Each row opens a sub-page of this
+         same screen (history push, Android Back returns to the list).
+         Existing controls below are grouped by v417.js — their logic and
+         saved keys are unchanged. -->
+    <div id="setMain" data-sgi="main"></div>
+    <div id="setAccount" data-sgi="account"></div>
     <div id="appearanceBox">
       <h2>Theme</h2>
       <div class="opt-row">
@@ -392,9 +402,10 @@
     <p style="color:#667781;font-size:13px;line-height:1.5;">Blocked contacts cannot send you 1-to-1 messages or call you. Block does not apply inside groups.</p>
     <div id="blockedList" style="margin-top:12px;"></div>
     <div class="empty-state hidden" id="blockedEmpty">No blocked contacts.</div>
-    <div class="profile-row">
+    <div class="profile-row" id="setAboutRow">
       <button class="btn btn-ghost" id="btnSettingsAbout">About Jilan Chat</button>
     </div>
+    <div id="setHelp" data-sgi="help"></div>
   </div>
 </div>
 
@@ -688,6 +699,7 @@
 <script src="emoji.js"></script>
 <script src="status2.js"></script>
 <script src="v413.js"></script>
+<script src="v417.js"></script>
 <!-- Long-press action sheet (messages + chat rows) -->
 </body>
 </html>

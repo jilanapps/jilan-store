@@ -377,9 +377,8 @@
         JC.openGroupChat(groupId);
       }).catch(function (e) { JC.toast("Could not create group: " + e.message); });
     });
-    $("chatWho").addEventListener("click", function () {
-      if (JC.currentChatIsGroup) JC.openGroupInfo();
-    });
+    // v4.17: the chat-header tap (avatar + name) is handled in v417.js for
+    // both 1-to-1 (Contact info) and groups (Group info).
     $("btnGroupInfoBack").addEventListener("click", function () { JC.goBack(); });
     $("btnLeaveGroup").addEventListener("click", JC.leaveGroup);
     $("btnAddMemberSearch").addEventListener("click", function () {
