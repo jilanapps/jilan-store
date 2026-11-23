@@ -1,4 +1,7 @@
 rules_version = '2';
+// BDBS Firestore rules v46 (2026-11-23): v45 + donor reviews (/donorReviews,
+// /donorReviewsPublic) + app feedback (/appFeedback) + pushEvents types
+// new_feedback/new_review. NOTHING else changed.
 // BDBS Firestore rules v45 (2026-11-22): v44 + push notification
 // collections — /pushEvents (v86) and /fcmTokens (v86). NOTHING else
 // changed. NOT PUBLISHED by the agent — parent publishes via Console.
@@ -418,7 +421,7 @@ service cloud.firestore {
     match /pushEvents/{id} {
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly(['id', 'type', 'title', 'body', 'targetUid', 'targetGroup', 'targetPhoneNorm', 'targetRole', 'reqNo', 'createdAt'])
-        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast']
+        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast', 'new_feedback', 'new_review']
         && request.resource.data.title.size() <= 120
         && request.resource.data.body.size() <= 300;
       allow read: if isAdmin() || (request.auth != null
@@ -439,6 +442,74 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid', 'group', 'role', 'platform', 'tokens', 'updatedAt'])
         && request.resource.data.tokens.size() <= 5;
       allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+    }
+
+    // Donor reviews (v46, BDBS v94): the requester rates the donor who
+    // donated for their request — 1..5 stars + optional thanks (<=200).
+    // Doc id = requestId + '_' + donorId, so ONE review per donor per
+    // request (a second create is an update and is denied). The request
+    // must be the signed-in user's own (phoneNorm match, same check as the
+    // v23 requester close), its donatedById must be this donor, and it must
+    // be Donor Found / Completed / Closed. Saved as 'pending'; only the
+    // admin approves or rejects. Reviewer may read their own review (and
+    // check that it does not exist yet).
+    match /donorReviews/{id} {
+      allow create: if request.auth != null && myPhoneNorm() != ''
+        && request.resource.data.keys().hasOnly(['id', 'requestId', 'reqNo', 'donorId', 'donorName', 'reviewerUid', 'reviewerFirst', 'stars', 'text', 'status', 'createdAt'])
+        && request.resource.data.id == id
+        && request.resource.data.requestId is string && request.resource.data.donorId is string
+        && id == request.resource.data.requestId + '_' + request.resource.data.donorId
+        && request.resource.data.reviewerUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 1 && request.resource.data.stars <= 5
+        && request.resource.data.text is string && request.resource.data.text.size() <= 200
+        && request.resource.data.reviewerFirst is string
+        && request.resource.data.reviewerFirst.size() >= 1 && request.resource.data.reviewerFirst.size() <= 40
+        && request.resource.data.donorName is string && request.resource.data.donorName.size() <= 80
+        && request.resource.data.reqNo is string && request.resource.data.reqNo.size() <= 30
+        && request.resource.data.createdAt is int
+        && exists(/databases/$(database)/documents/requestsPublic/$(request.resource.data.requestId))
+        && get(/databases/$(database)/documents/requestsPublic/$(request.resource.data.requestId)).data.get('requesterPhoneNorm', '') == myPhoneNorm()
+        && get(/databases/$(database)/documents/requestsPublic/$(request.resource.data.requestId)).data.get('donatedById', '') == request.resource.data.donorId
+        && get(/databases/$(database)/documents/requestsPublic/$(request.resource.data.requestId)).data.get('status', '') in ['Donor Found', 'Completed', 'Closed'];
+      allow read: if isAdmin() || (request.auth != null
+        && (resource == null || resource.data.get('reviewerUid', '') == request.auth.uid));
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedAt'])
+        && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if isAdmin();
+    }
+    // Approved review mirror (v46): written ONLY by the admin on approval.
+    // Reviewer FIRST NAME only — never phone, CNIC, address or disease.
+    // Readable by signed-in users (donor list badge + thanks list).
+    match /donorReviewsPublic/{id} {
+      allow read: if request.auth != null;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['id', 'donorId', 'reviewerFirst', 'stars', 'text', 'createdAt'])
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 1 && request.resource.data.stars <= 5
+        && request.resource.data.text is string && request.resource.data.text.size() <= 200
+        && request.resource.data.reviewerFirst is string && request.resource.data.reviewerFirst.size() <= 40;
+      allow delete: if isAdmin();
+    }
+    // App feedback (v46): any signed-in member sends a Suggestion /
+    // Complaint / Praise to the admin. Private — admin reads, marks read,
+    // deletes. Never public.
+    match /appFeedback/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['id', 'type', 'text', 'name', 'uid', 'email', 'status', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.type in ['Suggestion', 'Complaint', 'Praise']
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
+        && request.resource.data.name is string && request.resource.data.name.size() <= 60
+        && request.resource.data.email is string && request.resource.data.email.size() <= 100
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt is int;
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'readAt']);
     }
 
     // Audit log (v40): one doc per admin action — {id, adminEmail,
