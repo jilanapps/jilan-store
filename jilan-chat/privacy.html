@@ -23,7 +23,7 @@ footer{text-align:center;color:#5b6675;font-size:.9rem;padding:24px 16px}
 <body>
 <header>
   <h1>Jilan Chat — Privacy Policy</h1>
-  <p>Developer: Jilan Apps Official · Effective date: 22 November 2026</p>
+  <p>Developer: Jilan Apps Official · Effective date: 23 November 2026</p>
 </header>
 <main>
 
@@ -37,13 +37,16 @@ footer{text-align:center;color:#5b6675;font-size:.9rem;padding:24px 16px}
 <h2>2. Information we collect</h2>
 <ul>
 <li><strong>Account information.</strong> If you sign in with Google, we receive your Gmail address, name and Google account ID through Firebase Authentication. If you create a username account, we store your chosen username, display name and a password that is handled by Firebase Authentication (we never see your password in plain text).</li>
-<li><strong>Profile.</strong> Your display name, optional "About" text and optional profile photo (a small compressed image).</li>
-<li><strong>Messages and media.</strong> Text messages, and photos and voice notes you choose to send, are stored in compressed form in Google Cloud Firestore so they can be delivered to the person you are chatting with.</li>
+<li><strong>Profile.</strong> Your display name, optional "About" text, optional profile photo and optional cover photo (small compressed images).</li>
+<li><strong>Messages and media.</strong> Text messages, and the photos, voice notes, short videos (up to 1 minute), small documents, stickers, polls and status updates you choose to send, are stored in compressed form in Google Cloud Firestore so they can be delivered to the people you are chatting with. Channel posts are stored the same way and can be read by anyone who follows the channel link.</li>
+<li><strong>Location (optional).</strong> Only when you choose to share your location or live location in a chat, the app reads your phone's location and stores it with that message so the other person can see it. Live location is updated about every 30 seconds while the app is open, for the time you choose (15 minutes, 1 hour or 8 hours), and you can stop it at any time. Location is never read in the background or when you are not sharing.</li>
+<li><strong>Notification token.</strong> To show new-message and incoming-call notifications when the app is closed, the app gets a push token from Firebase Cloud Messaging (Google) and saves it on your account. It is used only to deliver your notifications.</li>
 <li><strong>Chat information.</strong> Who you chat with, chat requests (accept/decline), groups you belong to, blocked users, message time, delivered/read status, and your online / last-seen time.</li>
 <li><strong>Call signalling.</strong> To start a voice or video call, the app exchanges connection information (call offer/answer and network candidates) through Firestore. Call history (who called, when, and whether it was answered) is shown in your Calls tab.</li>
-<li><strong>Device permissions.</strong> Camera and microphone are used only when you take a photo, record a voice note, or make a call. Bluetooth is used only for the optional Nearby chat feature.</li>
+<li><strong>Device permissions.</strong> Camera and microphone are used only when you take a photo or video, record a voice note, or make a call. Bluetooth is used only for the optional Nearby chat feature. Location is used only when you share it. Fingerprint is checked by your phone for the optional app lock; we never receive it. Screen capture is used only when you share your screen in a video call, after Android asks for your consent.</li>
+<li><strong>Translate (optional).</strong> When you tap Translate on a message, only that message text is sent to a free translation service (Google Translate, or MyMemory as a fallback) to get the translation. Nothing is sent unless you tap it.</li>
 </ul>
-<p>We do <strong>not</strong> collect your contacts, SMS, call logs, location history or advertising ID. The app has <strong>no ads</strong> and no third-party analytics.</p>
+<p>We do <strong>not</strong> collect your contacts, SMS, call logs, background location, location history or advertising ID. The app has <strong>no ads</strong> and no third-party analytics.</p>
 </section>
 
 <section>
@@ -98,7 +101,7 @@ footer{text-align:center;color:#5b6675;font-size:.9rem;padding:24px 16px}
 <ul>
 <li>You can change your display name, About text and profile photo at any time in Profile.</li>
 <li>You can block any user, and decline chat requests from people you do not know.</li>
-<li>You can deny camera, microphone or Bluetooth permission in your phone's settings; only the related feature will stop working.</li>
+<li>You can deny camera, microphone, Bluetooth, location or notification permission in your phone's settings; only the related feature will stop working.</li>
 </ul>
 </section>
 
