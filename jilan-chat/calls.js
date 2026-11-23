@@ -127,6 +127,7 @@
     $("btnCamFlipCall").classList.toggle("hidden", callKind !== "video");
     if ($("btnFlashCall")) $("btnFlashCall").classList.toggle("hidden", callKind !== "video");
     localVideo().classList.toggle("hidden", callKind !== "video");
+    setVideoMode(callKind === "video");
     showCallScreen();
     startRinging();
     // If the callee never answers, the caller-side timeout marks it missed.
@@ -223,6 +224,7 @@
     $("btnCamFlipCall").classList.toggle("hidden", kind !== "video");
     if ($("btnFlashCall")) $("btnFlashCall").classList.toggle("hidden", kind !== "video");
     localVideo().classList.toggle("hidden", kind !== "video");
+    setVideoMode(kind === "video");
     showCallScreen();
     setCallState("Starting camera and microphone…");
     startRinging(true); // caller hears ringback only — caller phone never vibrates
@@ -358,6 +360,7 @@
     localVideo().srcObject = null;
     remoteAudio().srcObject = null;
     try { resetLight(); } catch (e) {}
+    try { resetControls(); } catch (e) {}
     facingMode = "user"; flipping = false; try { resetPip(); } catch (e) {}
     remoteStream = null; gotRemoteTrack = false; iceConnected = false;
     connectedAtWritten = false; finalStatus = null;
@@ -423,6 +426,7 @@
         // Transient on mobile data — give it a few seconds to recover
         // instead of killing the call at once (old code ended instantly).
         setCallState("Reconnecting…");
+        try { showControls(); } catch (e) {}
         if (!iceDisconnectTimer) {
           iceDisconnectTimer = setTimeout(function () {
             iceDisconnectTimer = null;
@@ -500,6 +504,7 @@
   }
 
   function startCallTimer() {
+    try { scheduleHideControls(); } catch (e) {}
     callSeconds = 0;
     setCallState("00:00");
     callTimer = setInterval(function () {
@@ -678,6 +683,76 @@
   // v4.10 (user 23:32: "tasvir jiski aa rahi ho wohi rehti, choti bari nahi
   // hoti"): tap the small self-view to swap it with the big view (WhatsApp
   // style); tap the small one again to swap back. Drag it to any corner.
+  // v4.15 (user 2026-11-23: "Touch karne se button hat jayegay" + "Or
+  // button ka look bhi waisa hoga"): WhatsApp-style video-call controls.
+  // Tap the big video = hide/show the bottom panel + name/timer; after
+  // 4 s without a touch they hide on their own. Only in VIDEO calls,
+  // only once connected, never while a toast is showing. Buttons work
+  // normally and restart the 4 s timer; a tap on the small PiP keeps
+  // its swap/drag job and never toggles the controls.
+  var CONTROLS_HIDE_MS = 4000;
+  var ctrlHideTimer = null;
+  function callScreen() { return $("screen-call"); }
+  function setVideoMode(on) {
+    var sc = callScreen();
+    if (sc && sc.classList) { sc.classList.toggle("call-video", !!on); sc.classList.remove("controls-hidden"); }
+  }
+  function controlsCanHide() {
+    return callKind === "video" && callState === "active" && iceConnected;
+  }
+  function toastOpen() {
+    var t = $("toast");
+    return !!(t && t.classList && t.classList.contains("show"));
+  }
+  function clearHideTimer() { if (ctrlHideTimer) { clearTimeout(ctrlHideTimer); ctrlHideTimer = null; } }
+  function hideControls() {
+    ctrlHideTimer = null;
+    if (!controlsCanHide()) return false;
+    if (toastOpen()) { scheduleHideControls(); return false; }
+    var sc = callScreen(); if (sc && sc.classList) sc.classList.add("controls-hidden");
+    return true;
+  }
+  function scheduleHideControls() {
+    clearHideTimer();
+    if (callKind !== "video") return;
+    ctrlHideTimer = setTimeout(hideControls, CONTROLS_HIDE_MS);
+  }
+  function showControls() {
+    var sc = callScreen(); if (sc && sc.classList) sc.classList.remove("controls-hidden");
+    scheduleHideControls();
+  }
+  function controlsHidden() {
+    var sc = callScreen();
+    return !!(sc && sc.classList && sc.classList.contains("controls-hidden"));
+  }
+  function resetControls() {
+    clearHideTimer();
+    var sc = callScreen();
+    if (sc && sc.classList) { sc.classList.remove("controls-hidden"); sc.classList.remove("call-video"); }
+  }
+  function isInside(node, test) {
+    while (node && node !== document) { if (test(node)) return true; node = node.parentNode; }
+    return false;
+  }
+  // One handler on the call screen: decides what a tap means.
+  function onCallScreenTap(e) {
+    if (callKind !== "video") return;
+    var t = e && e.target;
+    var small = smallVideo();
+    if (t && t === small) return;                        // PiP: swap/drag only
+    var onButton = isInside(t, function (n) {
+      return (n.tagName === "BUTTON") || (n.classList && n.classList.contains && n.classList.contains("call-btn"));
+    });
+    if (onButton) { if (!controlsHidden()) scheduleHideControls(); return; }
+    if (isInside(t, function (n) { return n.id === "screenShareSelfBar"; })) return;
+    if (controlsHidden()) showControls();
+    else if (controlsCanHide()) { clearHideTimer(); hideControls(); }
+    else scheduleHideControls();
+  }
+  JC._callControls = { show: showControls, hide: hideControls, isHidden: controlsHidden,
+    schedule: scheduleHideControls, reset: resetControls, tap: onCallScreenTap,
+    setVideoMode: setVideoMode, HIDE_MS: CONTROLS_HIDE_MS };
+
   var swapped = false, pipDrag = null, pipMoved = false;
   function setSwapped(on) {
     swapped = !!on;
@@ -861,6 +936,7 @@
     $("btnCamFlipCall").addEventListener("click", flipCamera);
     if ($("btnFlashCall")) $("btnFlashCall").addEventListener("click", toggleLight);
     wirePip();
+    if ($("screen-call") && $("screen-call").addEventListener) $("screen-call").addEventListener("click", onCallScreenTap);
     $("btnSpeaker").addEventListener("click", function () {
       toggleSpeaker();
       $("btnSpeaker").classList.toggle("on", !!speakerOn);
