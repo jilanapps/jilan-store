@@ -1,7 +1,7 @@
 {
   "name": "Jilan Reels",
   "short_name": "Jilan Reels",
-  "description": "Short videos with friends (demo).",
+  "description": "Short videos with friends.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
