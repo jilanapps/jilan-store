@@ -1,4 +1,6 @@
 rules_version = '2';
+// BDBS Firestore rules v48 (2026-11-23): v47 + camp edit/cancel (status, cancelledAt, updatedAt)
+// and pushEvents types camp_updated/camp_cancelled (BDBS v96).
 // BDBS Firestore rules v47 (2026-11-23): v46 + request approval (BDBS v95):
 // non-admin request create must be approval 'pending' (or absent); only the
 // admin changes approval; pushEvents types request_needs_approval/request_rejected.
@@ -373,7 +375,7 @@ service cloud.firestore {
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['id', 'title', 'place', 'date', 'time', 'notes', 'createdAt', 'photos']);
       allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'place', 'date', 'time', 'notes', 'photos']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'place', 'date', 'time', 'notes', 'photos', 'status', 'cancelledAt', 'updatedAt']);
       allow delete: if isAdmin();
     }
 
@@ -424,7 +426,7 @@ service cloud.firestore {
     match /pushEvents/{id} {
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly(['id', 'type', 'title', 'body', 'targetUid', 'targetGroup', 'targetPhoneNorm', 'targetRole', 'reqNo', 'createdAt'])
-        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast', 'new_feedback', 'new_review', 'request_needs_approval', 'request_rejected']
+        && request.resource.data.type in ['new_request', 'donor_found', 'donation_confirmed', 'cooldown_ready', 'new_member', 'broadcast', 'new_feedback', 'new_review', 'request_needs_approval', 'request_rejected', 'camp_updated', 'camp_cancelled']
         && request.resource.data.title.size() <= 120
         && request.resource.data.body.size() <= 300;
       allow read: if isAdmin() || (request.auth != null
