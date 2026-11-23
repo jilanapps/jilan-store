@@ -74,6 +74,26 @@
     try { if (window.Android && Android.setSecure) Android.setSecure(!!on); } catch (e) {}
   }
   JC._setCallSecure = setSecure;
+  // v4.16: WhatsApp-style screen off at the ear during AUDIO calls
+  // (proximity wake lock, vc13+/Play vc14+ shell). Guarded: older shells
+  // and the web/iPhone route simply skip it. Never on for video calls or
+  // while the speaker is on.
+  var proximityOn = false;
+  function setProximity(on) {
+    on = !!on;
+    try {
+      if (!(window.Android && Android.setProximityLock)) return false;
+      if (on === proximityOn) return true;
+      var ok = Android.setProximityLock(on);
+      proximityOn = on && ok !== false;
+      return ok !== false;
+    } catch (e) { proximityOn = false; return false; }
+  }
+  function updateProximity() {
+    setProximity(callState === "active" && callKind === "voice" && !speakerOn);
+  }
+  JC._setProximity = setProximity;
+  JC._updateProximity = updateProximity;
   function showCallScreen() { setSecure(true); JC.showScreen("screen-call"); }
 
   // ---------- incoming-call listener (only rings while the app is open) ----------
@@ -341,6 +361,7 @@
 
   function endCall(reason) {
     setSecure(false);
+    try { setProximity(false); } catch (e) {}
     try { if (JC.onCallEnded) JC.onCallEnded(); } catch (e) {}
     if (callDocRef && callState !== "idle") {
       callDocRef.update({ status: finalStatus || "ended", endedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(function () {});
@@ -501,6 +522,7 @@
     // vc3 shell does not have these methods yet.
     try { if (window.Android && Android.callAudioStart) Android.callAudioStart(callKind); } catch (e) {}
     if (window.Android && Android.callAudioStart) { try { speakerOn = (callKind === "video"); } catch (e) {} }
+    try { updateProximity(); } catch (e) {}
   }
 
   function startCallTimer() {
@@ -819,6 +841,7 @@
         Android.setCallSpeaker(speakerOn);
         JC.toast(speakerOn ? "Speaker on" : "Speaker off");
       } catch (e) { JC.toast("Couldn't switch speaker."); }
+      try { updateProximity(); } catch (e) {}
       return;
     }
     // WebView has no earpiece/speakerphone API. Try the audio element's
