@@ -950,6 +950,8 @@
   JC.validStatusBg = function (bg) { return JC.STATUS_BGS.indexOf(bg) >= 0 ? bg : ""; };
   JC.validStatusFont = function (f) { return JC.STATUS_FONTS.indexOf(f) >= 0 ? f : ""; };
   function wireStatusStyle() {
+    // v4.12: the full-screen composer (status2.js) owns colours + fonts now.
+    if ($("statusComposer")) return;
     var inp = $("statusTextInput"); if (!inp || $("statusStyleRow")) return;
     var row = document.createElement("div"); row.id = "statusStyleRow"; row.className = "status-style-row";
     row.innerHTML = '<div class="ss-preview" id="statusPreview">Your text status</div><div class="ss-pick">' +

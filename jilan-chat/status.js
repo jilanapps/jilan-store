@@ -1,4 +1,4 @@
-// Jilan Chat v4.6 — status.js
+// Jilan Chat v4.6 — status.js (v4.12: composer/add sheet hooks + reactions)
 // WhatsApp-like daily status (24 hours only).
 // Data model: statuses/{uid}/items/{statusId}
 //   type: "photo" | "video" | "text" | "voice" (v4.7: voice status, max 60s,
@@ -134,7 +134,7 @@
         $("myStatusRow").onclick = function (e) {
           if (e && e.target && e.target.closest && e.target.closest("#btnAddStatus")) return;
           if (live.length) openViewer(live, 0, true);
-          else $("statusAddBox").classList.toggle("hidden");
+          else if (JC.openStatusAddSheet) JC.openStatusAddSheet();
         };
       }).catch(function () {});
   }
@@ -217,7 +217,7 @@
     if (JC.validStatusFont && JC.validStatusFont(st.font)) doc.font = st.font;
     addStatusDoc(doc).then(function () {
       $("statusTextInput").value = "";
-      $("statusAddBox").classList.add("hidden");
+      if (JC.closeStatusComposer) JC.closeStatusComposer();
       JC.toast("Status posted — it disappears in 24 hours.");
       loadMyStatus();
     }).catch(function (e) { JC.toast("Status failed: " + e.message); });
@@ -233,7 +233,7 @@
     JC.imageFileToDataUrl(file, function (dataUrl) {
       if (!dataUrl) { JC.toast("Photo is too large for a status."); return; }
       addStatusDoc({ type: "photo", mediaData: dataUrl, mediaName: file.name || "status.jpg" }).then(function () {
-        $("statusAddBox").classList.add("hidden");
+        if (JC.closeStatusComposer) JC.closeStatusComposer();
         JC.toast("Status posted — it disappears in 24 hours.");
         loadMyStatus();
       }).catch(function () { JC.toast("Couldn't post status."); });
@@ -262,7 +262,7 @@
     var what = d.type === "text" ? String(d.text || "").slice(0, 120) : (d.type === "photo" ? "Photo" : (d.type === "voice" ? "Voice status" : "Video"));
     return { id: ("status_" + item.id).slice(0, 64), senderId: item.ownerUid, type: "status", text: ("Status: " + what).slice(0, 200) };
   };
-  JC.sendStatusReply = function (item, text) {
+  JC.sendStatusReply = function (item, text, okToast) {
     text = String(text || "").trim();
     if (!text || !item || !item.chatId || !JC.sendMessage) return Promise.resolve(false);
     // Send into that person's 1-to-1 chat without opening it: sendMessage
@@ -273,9 +273,31 @@
     try { p = JC.sendMessage({ type: "text", text: text, replyTo: JC.statusReplyQuote(item) }); }
     catch (e) { p = Promise.reject(e); }
     finally { JC.currentChatId = keep[0]; JC.currentChatOtherUid = keep[1]; JC.currentChatIsGroup = keep[2]; }
-    return Promise.resolve(p).then(function () { JC.toast("Reply sent"); return true; })
-      .catch(function () { JC.toast("Reply not sent."); return false; });
+    return Promise.resolve(p).then(function () { JC.toast(okToast || "Reply sent"); return true; })
+      .catch(function () { JC.toast(okToast ? "Reaction not sent." : "Reply not sent."); return false; });
   };
+
+  // ---------- v4.12: react to someone's status ----------
+  // Sent as a normal 1-to-1 chat message ("❤️") quoting the status — the
+  // same path (and the same rules) as a status reply. No rules change.
+  // Which status this phone reacted to is remembered per phone only.
+  var REACT_KEY = "jilanchat-status-reacted";
+  JC.STATUS_QUICK_REACTS = ["\uD83D\uDE0D", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDE22", "\uD83D\uDC4F", "\uD83D\uDE4F", "\uD83D\uDD25", "\u2764\uFE0F"];
+  JC.STATUS_HEART = "\u2764\uFE0F";
+  JC.statusReactedWith = function (item) {
+    if (!item) return "";
+    return readSet(REACT_KEY)[item.ownerUid + "/" + item.id] || "";
+  };
+  JC.sendStatusReaction = function (item, emoji) {
+    emoji = String(emoji || "").slice(0, 16);
+    if (!emoji || !item || !item.chatId) return Promise.resolve(false);
+    if (JC.statusReactedWith(item) === emoji) return Promise.resolve(false); // already sent this one
+    return JC.sendStatusReply(item, emoji, "Reacted " + emoji).then(function (ok) {
+      if (ok) { var s = readSet(REACT_KEY); s[item.ownerUid + "/" + item.id] = emoji; writeSet(REACT_KEY, s); }
+      return ok;
+    });
+  };
+  JC.statusCurrentItem = function () { return viewQueue[viewIndex] || null; };
 
   // ---------- viewer ----------
   // ---------- v4.7 voice status ----------
@@ -420,7 +442,7 @@
     JC.toast("Posting voice status…");
     return addStatusDoc({ type: "voice", mediaData: dataUrl, mediaMime: type, durationSec: Math.max(1, Math.min(60, Math.round(dur || 1))) }).then(function () {
       JC.toast("Status posted");
-      $("statusAddBox").classList.add("hidden");
+      if (JC.closeStatusComposer) JC.closeStatusComposer();
       loadMyStatus();
       return true;
     }).catch(function () { JC.toast("Couldn't post status."); return false; });
@@ -516,6 +538,7 @@
     if (ms) startProgress(ms); else startVoiceProgress(body);
     if (viewMine) watchViews(item);
     else { markSeen(item.id); JC.recordStatusView(item); }
+    if (JC.onStatusItemShown) { try { JC.onStatusItemShown(item, viewMine); } catch (e) {} }
   }
   function statusGone(body) {
     body.innerHTML = "";
@@ -620,7 +643,7 @@
     $("btnStatusBack").addEventListener("click", function () { JC.goBack(); });
     $("btnAddStatus").addEventListener("click", function (e) {
       if (e && e.stopPropagation) e.stopPropagation();
-      $("statusAddBox").classList.toggle("hidden");
+      if (JC.openStatusAddSheet) JC.openStatusAddSheet();
     });
     $("btnPostTextStatus").addEventListener("click", JC.postTextStatus);
     $("btnPostMediaStatus").addEventListener("click", function () { $("statusFileInput").click(); });
