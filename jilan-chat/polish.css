@@ -109,6 +109,7 @@ html.dark .app-header, html.dark .chat-header {
 .tab-btn.active { color: var(--t-1); }
 .tab-btn.active svg { background: var(--acc-soft); color: var(--acc-text); }
 #chatList, #callList { padding-bottom: 76px; }
+#chatList { padding-bottom: 160px; } /* v4.13.2: last chat scrolls clear of the two floating buttons */
 
 /* ---------- floating buttons ---------- */
 .fab { border-radius: var(--r-lg); background: var(--acc); color: var(--acc-on); box-shadow: var(--elev-2); bottom: 84px; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }

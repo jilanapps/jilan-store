@@ -3,7 +3,7 @@
 // revalidation, so never a stale file); the cache is used ONLY when the
 // network fails (offline cold start). Bump VERSION to drop old caches.
 // Never touches Firestore/Firebase traffic (cross-origin) or APK files.
-var VERSION = "jc-shell-v4.13.1";
+var VERSION = "jc-shell-v4.13.2";
 var SHELL = [
   "./", "index.html", "style.css", "polish.css", "icon-192.png",
   "firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js", "firebase-storage-compat.js",
