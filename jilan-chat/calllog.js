@@ -117,7 +117,7 @@
     var empty = $("callsEmpty");
     if (!JC.db || !JC.currentUser || !list) return;
     var me = JC.currentUser.uid;
-    list.innerHTML = "<p class='cl-loading'>Loading&hellip;</p>";
+    list.innerHTML = JC.skeletonRows ? JC.skeletonRows(6, "call") : "<p class='cl-loading'>Loading&hellip;</p>";
     if (empty) empty.classList.add("hidden");
     var qOut = JC.db.collection("calls").where("callerUid", "==", me).limit(30).get();
     var qIn = JC.db.collection("calls").where("calleeUid", "==", me).limit(30).get();

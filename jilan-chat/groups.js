@@ -112,6 +112,10 @@
       .onSnapshot(function (snap) {
         snap.docChanges().forEach(function (ch) {
           if (ch.type === "added") renderGroupMessage(ch.doc.id, ch.doc.data());
+          if (ch.type === "removed" && groupMsgEls[ch.doc.id]) { // v4.13
+            var gone = groupMsgEls[ch.doc.id]; delete groupMsgEls[ch.doc.id];
+            if (gone.parentNode) gone.parentNode.removeChild(gone);
+          }
           if (ch.type === "modified" && JC.refreshMessage) JC.refreshMessage(ch.doc.id, ch.doc.data(), true);
         });
         var box = $("messages");
@@ -154,6 +158,7 @@
     // v4.5: reply quote + forwarded label (extras.js).
     if (data.replyTo) msg.replyTo = data.replyTo;
     if (data.forwarded) msg.forwarded = true;
+    if (data.type === "video" && data.video) msg.video = data.video; // v4.13 chunked video
     if (JC.applyMessageExtras) JC.applyMessageExtras(msg, data, true);
     if (!msg.mediaData) delete msg.mediaData;
     if (!msg.mediaMime) delete msg.mediaMime;
@@ -162,7 +167,8 @@
     if (!msg.durationSec) delete msg.durationSec;
     var preview = lastMessagePreview(msg);
     var members = (currentGroup.members || []).slice();
-    return JC.db.collection("groups").doc(groupId).collection("messages").add(msg).then(function () {
+    var gCol = JC.db.collection("groups").doc(groupId).collection("messages");
+    return (data._docId ? gCol.doc(data._docId).set(msg) : gCol.add(msg)).then(function () {
       return JC.db.collection("groups").doc(groupId).update({
         lastMessage: preview,
         lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -220,9 +226,9 @@
     // Sender name above the message (every member sees who sent it).
     // Only a single "sent" tick — no delivered/read ticks in groups.
     var nameHtml = isOut ? "" : '<div class="sender-name" data-uid="' + esc(m.senderId) + '">...</div>';
-    div.innerHTML = nameHtml + body + '<div class="meta">' + fmtTime(m.createdAt) + (isOut ? ' <span class="ticks">&#10003;</span>' : "") + "</div>";
+    div.innerHTML = nameHtml + body + '<div class="meta">' + fmtTime(m.createdAt) + (isOut ? ' <span class="ticks" data-tick="sent">' + (JC.SVG_TICK1 || "&#10003;") + '</span>' : "") + "</div>";
     if (JC.tagPhotoBubble) JC.tagPhotoBubble(div);
-    JC.wireMediaBubble(div, m);
+    JC.wireMediaBubble(div, m, msgId, true);
     if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, true);
     $("messages").appendChild(div);
     groupMsgEls[msgId] = div;
@@ -254,7 +260,7 @@
     var adminOnly = document.querySelectorAll(".admin-only");
     adminOnly.forEach(function (el) { el.classList.toggle("hidden", !isAdmin()); });
     var list = $("groupMembersList");
-    list.innerHTML = "<p style='color:#667781;'>Loading members…</p>";
+    list.innerHTML = JC.skeletonRows ? JC.skeletonRows(Math.min(6, (g.members || []).length || 3), "row") : "<p style='color:#667781;'>Loading members…</p>";
     var jobs = (g.members || []).map(function (uid) {
       return JC.db.collection("users").doc(uid).get().then(function (snap) {
         return { uid: uid, data: snap.exists ? snap.data() : { displayName: "Unknown", gmail: "" } };

@@ -263,6 +263,7 @@
   var SVG_MIC = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';
   var SVG_BAN = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM4 12a8 8 0 0 1 12.9-6.32L5.68 16.9A7.96 7.96 0 0 1 4 12zm8 8a7.96 7.96 0 0 1-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z"/></svg>';
   var SVG_FILE = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>';
+  var SVG_VIDEO = '<svg class="lp-ic" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>';
   function fmtDur(sec) { sec = Math.max(0, Math.round(sec || 0)); return Math.floor(sec / 60) + ":" + (sec % 60 < 10 ? "0" : "") + (sec % 60); }
   // chat = chat doc data; last = newest message doc data (optional);
   // me = my uid. Returns HTML (all user text escaped).
@@ -280,6 +281,7 @@
       icon = SVG_MIC; label = "Voice message" + (last && last.durationSec ? " " + fmtDur(last.durationSec) : "");
     }
     else if (type === "file" || (!type && text.indexOf("File: ") === 0)) { icon = SVG_FILE; label = text || "File"; }
+    else if (type === "video" || (!type && text === "Video")) { icon = SVG_VIDEO; label = "Video" + (last && last.durationSec ? " " + fmtDur(last.durationSec) : ""); }
     else label = text || (last && last.text) || "";
     var tick = "";
     if (mine && !deleted) {
@@ -292,6 +294,7 @@
     return tick + icon + '<span class="lp-text' + (deleted ? " lp-deleted" : "") + '">' + esc(label) + '</span>';
   }
   JC.chatPreviewHtml = chatPreviewHtml;
+  JC.SVG_TICK1 = SVG_TICK1; JC.SVG_TICK2 = SVG_TICK2;
   function fmtLastSeen(profile) {
     if (!profile) return "";
     // v4.8 privacy: hide last seen (WhatsApp rule — if you hide yours,
@@ -583,6 +586,12 @@
           // server tak nahi pahuncha (offline likha gaya) — ghari dikhao.
           var pending = ch.doc.metadata && ch.doc.metadata.hasPendingWrites;
           if (ch.type === "added") renderMessage(ch.doc.id, ch.doc.data(), true, pending);
+          // v4.13: a write the server rejected (or a deleted doc) leaves the
+          // query — drop its bubble so no stuck clock remains.
+          if (ch.type === "removed" && msgEls[ch.doc.id]) {
+            var gone = msgEls[ch.doc.id]; delete msgEls[ch.doc.id];
+            if (gone.parentNode) gone.parentNode.removeChild(gone);
+          }
           if (ch.type === "modified") {
             updateMessageTicks(ch.doc.id, ch.doc.data(), pending);
             if (JC.refreshMessage) JC.refreshMessage(ch.doc.id, ch.doc.data(), false);
@@ -644,9 +653,10 @@
   function tickHtml(status, isOut) {
     if (!isOut) return "";
     if (status === "read" && JC.hideReadReceiptsOn && JC.hideReadReceiptsOn()) status = "delivered";
-    if (status === "read") return '<span class="ticks read">&#10003;&#10003;</span>';
-    if (status === "delivered") return '<span class="ticks">&#10003;&#10003;</span>';
-    return '<span class="ticks">&#10003;</span>';
+    // v4.13: crisp SVG ticks (same shapes as the chat list).
+    if (status === "read") return '<span class="ticks read" data-tick="read">' + SVG_TICK2 + '</span>';
+    if (status === "delivered") return '<span class="ticks" data-tick="delivered">' + SVG_TICK2 + '</span>';
+    return '<span class="ticks" data-tick="sent">' + SVG_TICK1 + '</span>';
   }
   function renderMessage(msgId, m, scroll, pending) {
     if (msgEls[msgId]) return;
@@ -664,7 +674,7 @@
     else metaHtml += tickHtml(m.status, isOut);
     div.innerHTML = body + '<div class="meta">' + metaHtml + "</div>";
     JC.tagPhotoBubble(div);
-    JC.wireMediaBubble(div, m);
+    JC.wireMediaBubble(div, m, msgId, false);
     if (JC.decorateMessage) JC.decorateMessage(div, msgId, m, false);
     $("messages").appendChild(div);
     msgEls[msgId] = div;
@@ -706,6 +716,9 @@
     // v4.5: reply quote + forwarded label (extras.js).
     if (data.replyTo) msg.replyTo = data.replyTo;
     if (data.forwarded) msg.forwarded = true;
+    // v4.13: chunked video — the chunks are uploaded first under a known
+    // message id, then the message doc is written with that same id.
+    if (data.type === "video" && data.video) msg.video = data.video;
     // v4.8: location / disappearing timer / system note (features.js).
     if (JC.applyMessageExtras) JC.applyMessageExtras(msg, data, false);
     if (!msg.mediaData) delete msg.mediaData;
@@ -714,7 +727,9 @@
     if (!msg.mediaName) delete msg.mediaName;
     if (!msg.durationSec) delete msg.durationSec;
     var preview = lastMessagePreview(msg);
-    return JC.db.collection("chats").doc(chatId).collection("messages").add(msg).then(function () {
+    var msgCol = JC.db.collection("chats").doc(chatId).collection("messages");
+    var write = data._docId ? msgCol.doc(data._docId).set(msg) : msgCol.add(msg);
+    return write.then(function () {
       var chatRef = JC.db.collection("chats").doc(chatId);
       return chatRef.update({
         lastMessage: preview,
@@ -821,9 +836,18 @@
   JC.sendFile = function (file) {
     if (!file || !JC.currentChatId) return;
     var isImage = file.type && file.type.indexOf("image/") === 0;
+    var isVideo = file.type && file.type.indexOf("video/") === 0;
+    // v4.13: chunked video send (v413.js) — only when the flag is ON
+    // (needs the v4.13 Firestore rules). Off = the honest message below.
+    if (isVideo && JC.VIDEO_CHUNKS_ENABLED && JC.sendVideoFile) { JC.sendVideoFile(file); return; }
     if (!isImage) { JC.toast(JC.NO_BIG_FILES_MSG); return; }
     JC.showSending("Preparing photo…");
-    JC.imageFileToDataUrl(file, function (dataUrl) { JC.sendImageDataUrl(dataUrl, file.name); });
+    // v4.13: instant local preview bubble while the photo is shrunk.
+    var ghost = JC.optimisticPhoto ? JC.optimisticPhoto(file) : null;
+    JC.imageFileToDataUrl(file, function (dataUrl) {
+      var p = JC.sendImageDataUrl(dataUrl, file.name);
+      if (ghost) ghost.settle(p, dataUrl);
+    });
   };
 
   // ---------- voice messages (max 60 s, low bitrate, no Storage) ----------
@@ -1168,6 +1192,7 @@
         '<span class="vb-time">' + fmtDur(m.durationSec) + '</span>' +
         '<audio class="vb-audio" preload="metadata" src="' + attr(src) + '"></audio></div>';
     }
+    if (m.type === "video" && m.video && JC.videoBubbleHtml) return JC.videoBubbleHtml(m) + cap;
     if (m.type === "video") return '<video class="bubble-video" src="' + attr(src) + '" controls playsinline></video>' + cap;
     if (m.type === "file") return '<div class="file-chip"><span class="file-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span><a href="' + attr(src) + '" target="_blank" rel="noopener">' + esc(m.mediaName || "File") + "</a></div>";
     return esc(m.text || "");
@@ -1182,8 +1207,10 @@
     var cap = img && img.nextElementSibling;
     div.classList.toggle("has-cap", !!(cap && !cap.classList.contains("meta")));
   };
-  JC.wireMediaBubble = function (div, m) {
+  JC.wireMediaBubble = function (div, m, msgId, isGroup) {
     var src = JC.mediaSrc(m);
+    var vbub = div.querySelector(".vbub");
+    if (vbub && JC.wireVideoBubble) JC.wireVideoBubble(vbub, m, msgId, isGroup);
     var img = div.querySelector("img.bubble-img");
     if (img) {
       img.addEventListener("click", function () { JC.openViewer("image", src); });

@@ -300,7 +300,7 @@
     return msgRef(msgId, d.isGroup).update(Object.assign({
       deleted: true, text: "", mediaData: del, mediaMime: del, mediaName: del,
       durationSec: del, replyTo: del, reactions: del, forwarded: del
-    }, d.m.location ? { location: del } : {})).catch(function () { JC.toast("Couldn't delete message."); });
+    }, d.m.location ? { location: del } : {}, d.m.video ? { video: del } : {})).catch(function () { JC.toast("Couldn't delete message."); });
   };
 
   // ---------- reply ----------
