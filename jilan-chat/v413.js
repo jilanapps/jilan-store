@@ -16,7 +16,7 @@
 
   JC.V413 = true;
   // ---- video flags + limits (rules v4.13 enforce the same numbers) ----
-  JC.VIDEO_CHUNKS_ENABLED = false;      // flip to true ONLY after rules v4.13 are published
+  JC.VIDEO_CHUNKS_ENABLED = true;       // rules v4.13 published 2026-11-23 11:53 PKT
   JC.VIDEO_CHUNK_CHARS = 700000;        // base64 chars per chunk doc (rules: <= 720000)
   JC.VIDEO_MAX_CHUNKS = 6;              // rules: chunks 1..6, ids "0".."5"
   JC.VIDEO_MAX_BYTES = 3145728;         // 3 MB after compression (rules: size <= 3145728)
