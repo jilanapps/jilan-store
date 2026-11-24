@@ -944,6 +944,30 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--pv-ruby)}
 html:not(.light) a.btn:not(.ghost){color:#fff}
 html:not(.light) a.btn.ghost{color:var(--ink)}
 
+
+/* v99-pgstory: status-size (1080x1920) export of Aaj ka paigham + LTR Urdu ref numbers */
+.pg-num{display:inline-block;direction:ltr;unicode-bidi:isolate}
+.pg-ref span.pg-num{padding:0!important;margin:0!important;background:none!important;border:0!important;border-radius:0!important}
+.pg-story{position:fixed;left:-9999px;top:0;width:540px!important;height:960px!important;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;display:flex;flex-direction:column;background:#FFFBF7!important;color:#2A1A1C!important;overflow:hidden}
+.pg-story .pg-art{flex:0 0 auto}
+.pg-story .pg-art img{aspect-ratio:auto;width:100%;height:var(--ah,300px);object-fit:cover}
+.pg-story .pg-kind{top:18px;left:18px;font-size:calc(13px*var(--s,1));padding:5px 14px}
+.pg-story .pg-body{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-start;padding:6px 36px 26px}
+.pg-story .pg-top{font-size:calc(13px*var(--s,1))}
+.pg-story .pg-ar{font-size:calc(28px*var(--s,1));line-height:2;margin:calc(12px*var(--s,1)) 0 4px;text-wrap:balance}
+.pg-story .pg-ur{font-size:calc(23px*var(--s,1));line-height:2.25;margin:6px 0;text-wrap:balance}
+.pg-story .pg-en{font-size:calc(18px*var(--s,1));line-height:1.55;margin:6px 0 calc(12px*var(--s,1));text-wrap:balance}
+.pg-story .pg-ref{font-size:calc(15px*var(--s,1));gap:8px 12px}
+.pg-story .pg-ref span{padding:4px 14px}
+.pg-story .pg-blood{margin:calc(16px*var(--s,1)) 0 4px;padding:calc(12px*var(--s,1)) 16px;border-radius:16px;border-left-width:5px}
+.pg-story .pg-blabel{font-size:calc(13px*var(--s,1))}
+.pg-story .pg-blabel svg{width:calc(17px*var(--s,1));height:calc(17px*var(--s,1))}
+.pg-story .pg-ben{font-size:calc(17.5px*var(--s,1))}
+.pg-story .pg-bur{font-size:calc(18px*var(--s,1));line-height:1.95}
+.pg-story .pg-foot{margin-top:calc(16px*var(--s,1));font-size:calc(15px*var(--s,1));font-weight:700;color:#881337;letter-spacing:.4px;line-height:1.5}
+.pg-story .pg-foot b{display:block;font-size:calc(17px*var(--s,1));font-weight:800;color:#7A0C1F;letter-spacing:.5px}
+.pg-story .pg-foot i{display:block;width:72px;height:1px;margin:calc(7px*var(--s,1)) auto;background:linear-gradient(90deg,rgba(179,18,46,0),rgba(179,18,46,.55),rgba(179,18,46,0))}
+.pg-story .pg-foot small{display:block;font-size:calc(12.5px*var(--s,1));font-weight:500;font-style:italic;color:#9F4A5A;letter-spacing:.3px}
 /* pv-premium layer END */
 </style>
 </head>
@@ -3113,7 +3137,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v98';
+var APP_VERSION = 'v99';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -7884,7 +7908,7 @@ function renderDailyPoster(){
     + (p.ar ? '<p class="pg-ar" dir="rtl" lang="ar">' + esc(p.ar) + '</p>' : '')
     + '<p class="pg-ur" dir="rtl" lang="ur">' + esc(p.ur) + '</p>'
     + '<p class="pg-en" dir="ltr" lang="en">' + esc(p.en) + '</p>'
-    + '<div class="pg-ref"><span dir="ltr">' + esc(p.ref) + '</span><span class="pg-ref-ur" dir="rtl">' + esc(p.refUr) + '</span></div>'
+    + '<div class="pg-ref"><span dir="ltr">' + esc(p.ref) + '</span><span class="pg-ref-ur" dir="rtl">' + pgRefUrHtml(p.refUr) + '</span></div>'
     + '<div class="pg-blood"><div class="pg-blabel">' + drop + ' Blood donation \u00b7 <span class="pg-u">خون کا عطیہ</span></div>'
     + '<div class="pg-ben" dir="ltr">' + esc(bl.en) + '</div><div class="pg-bur" dir="rtl" lang="ur">' + esc(bl.ur) + '</div></div>'
     + '<div class="pg-foot">Basti Dawa Blood Society \u00b7 jilanapps.github.io/jilan-store/bdbs</div>'
@@ -7892,6 +7916,49 @@ function renderDailyPoster(){
     + '<div class="pg-actions"><button class="btn" onclick="shareDailyPoster()">Share</button><button class="btn ghost" onclick="shareDailyPoster(\'save\')">Save image</button></div>'
     + '<div id="dailyPosterMsg" class="mut small" style="text-align:center"></div>'
     + '<p class="pg-aware mut small"><b>Awareness \u00b7 ' + esc(aw.t) + ':</b> ' + esc(aw.x) + '</p>';
+}
+/* v99-pgstory */
+var PG_FOOT1 = 'Basti Dawa Blood Society';
+var PG_FOOT2 = 'Designed & Developed by Jilan Apps Official'; /* optional small 2nd footer line in the shared image ('' = none) */
+function pgRefUrHtml(s){ return esc(s).replace(/\d+(?::\d+(?:[-\u2013]\d+)?)?/g, function(m){ return '<span class="pg-num" dir="ltr">' + m + '</span>'; }); }
+function pgStoryHtml(p, bl){
+  var drop = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5z" fill="#B3122E"/></svg>';
+  return '<div class="pg-art"><img src="' + PG_IMG[p.img] + '" alt=""><span class="pg-kind">' + (p.k === 'q' ? 'QURAN \u00b7 <span class="pg-u">\u0642\u0631\u0622\u0646</span>' : 'HADITH \u00b7 <span class="pg-u">\u062d\u062f\u06cc\u062b</span>') + '</span></div>'
+    + '<div class="pg-body"><div class="pg-in">'
+    + '<div class="pg-top"><span>AAJ KA PAIGHAM</span><span>' + esc(dailyPosterDateStr()) + '</span></div>'
+    + (p.ar ? '<p class="pg-ar" dir="rtl" lang="ar">' + esc(p.ar) + '</p>' : '')
+    + '<p class="pg-ur" dir="rtl" lang="ur">' + esc(p.ur) + '</p>'
+    + '<p class="pg-en" dir="ltr" lang="en">' + esc(p.en) + '</p>'
+    + '<div class="pg-ref"><span dir="ltr">' + esc(p.ref) + '</span><span class="pg-ref-ur" dir="rtl">' + pgRefUrHtml(p.refUr) + '</span></div>'
+    + '<div class="pg-blood"><div class="pg-blabel">' + drop + ' Blood donation \u00b7 <span class="pg-u">\u062e\u0648\u0646 \u06a9\u0627 \u0639\u0637\u06cc\u06c1</span></div>'
+    + '<div class="pg-ben" dir="ltr">' + esc(bl.en) + '</div><div class="pg-bur" dir="rtl" lang="ur">' + esc(bl.ur) + '</div></div>'
+    + '<div class="pg-foot"><b>' + esc(PG_FOOT1) + '</b>' + (PG_FOOT2 ? '<i></i><small>' + esc(PG_FOOT2) + '</small>' : '') + '</div>'
+    + '</div></div>';
+}
+/* Builds the off-screen 540x960 story card (exported at scale 2 = 1080x1920) and
+   shrinks art + fonts until everything fits with generous slack (phone html2canvas
+   draws text a little lower/wider than the DOM). */
+function pgBuildStory(p, bl){
+  var old = document.getElementById('pgStoryTmp'); if (old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'pgStoryTmp'; d.className = 'pg-card pg-cap pg-story'; d.setAttribute('data-no-i18n', '');
+  d.setAttribute('dir', 'ltr');
+  d.innerHTML = pgStoryHtml(p, bl);
+  document.body.appendChild(d);
+  var inner = d.querySelector('.pg-in');
+  var SLACK = 44, H = 960, steps = [[300,1],[270,1],[250,.96],[230,.93],[215,.9],[200,.87],[190,.84],[180,.81],[170,.78],[160,.75],[150,.72],[140,.69],[130,.66],[120,.63],[110,.6]];
+  for (var i = 0; i < steps.length; i++) {
+    d.style.setProperty('--ah', steps[i][0] + 'px'); d.style.setProperty('--s', String(steps[i][1]));
+    var need = steps[i][0] + inner.scrollHeight + 6 + 26;
+    d.setAttribute('data-fit', steps[i][0] + '/' + steps[i][1] + '/' + Math.round(need));
+    if (need <= H - SLACK) break;
+  }
+  /* spare room goes to the illustration (no empty band under the art) */
+  var ah = steps[i < steps.length ? i : steps.length - 1][0];
+  var spare = (H - SLACK) - (ah + inner.scrollHeight + 32);
+  if (spare > 0) { ah = Math.min(440, ah + spare); d.style.setProperty('--ah', ah + 'px'); }
+  d.setAttribute('data-fit', d.getAttribute('data-fit') + '/ah' + ah);
+  return d;
 }
 function dailyPosterShareText(){
   var p = pgToday(), bl = pgBloodToday();
@@ -7904,10 +7971,11 @@ function shareDailyPoster(mode){
   if (!window.html2canvas) { try { window.open('https://wa.me/?text=' + encodeURIComponent(dailyPosterShareText()), '_blank'); } catch(e){} return; }
   var d = new Date();
   var fname = 'BDBS-Paigham-' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + '.png';
-  el.classList.add('pg-cap'); /* fixed light palette for the shared image, any theme */
+  var st = pgBuildStory(pgToday(), pgBloodToday()); /* v99-pgstory: 1080x1920 status image */
   if (msg) msg.textContent = '';
-  window.html2canvas(el, {scale:2, backgroundColor:'#FFFBF7', useCORS:true}).then(function(canvas){
-    el.classList.remove('pg-cap');
+  var pgDone = function(){ try { st.remove(); } catch(e){} };
+  window.html2canvas(st, {scale:2, width:540, height:960, backgroundColor:'#FFFBF7', useCORS:true}).then(function(canvas){
+    pgDone();
     try {
       var url = canvas.toDataURL('image/png');
       /* v58/v60 pattern: native bridge in the app (saves + share sheet), navigator.share / download in the browser */
@@ -7918,7 +7986,7 @@ function shareDailyPoster(mode){
         navigator.share({files:[file], title:'BDBS \u2014 Aaj ka paigham', text:dailyPosterShareText()}).catch(function(){ saveBlob(blob, fname); });
       } else { saveBlob(blob, fname); showRefreshToast('Image saved \u2014 attach it in WhatsApp / Facebook.'); }
     } catch(e){ try { saveBlob(new Blob([dataURLToBytes(canvas.toDataURL('image/png'))], {type:'image/png'}), fname); } catch(e2){} }
-  }).catch(function(){ el.classList.remove('pg-cap'); if (msg) msg.innerHTML = '<span class="err">Image could not be made \u2014 please try again.</span>'; });
+  }).catch(function(){ pgDone(); if (msg) msg.innerHTML = '<span class="err">Image could not be made \u2014 please try again.</span>'; });
 }
 
 /* ---------- v61: Shukriya poster share ----------
