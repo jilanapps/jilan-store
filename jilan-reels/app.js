@@ -624,6 +624,7 @@
     var shell = !!(window.Android && Android.checkUpdate);
     openSheet(head('Settings') + '<div class="sh-body">' +
       '<button class="opt" data-a="edit">' + ICON.edit + 'Edit profile</button>' +
+      (pwAcc() ? '<button class="opt" data-a="pass">' + ICON.edit + 'Change password</button>' : '') +
       '<button class="opt" data-a="blocked">' + ICON.block + 'Blocked accounts</button>' +
       (Api.isAdmin ? '<button class="opt" data-a="admin">' + ICON.shield + 'Admin panel</button>' : '') +
       (shell ? '<button class="opt" data-a="update">' + ICON.refresh + 'Check for updates' + (availableVersion ? ' (v' + esc(availableVersion) + ' ready)' : '') + '</button>' : '') +
@@ -635,6 +636,7 @@
       '<button class="opt red" data-a="delete">' + ICON.trash + 'Delete account</button></div>', function (sh) {
       var on = function (a, fn) { var b = $('[data-a=' + a + ']', sh); if (b) b.addEventListener('click', function () { closeSheet(fn); }); };
       on('edit', editProfile);
+      on('pass', openChangePassword);
       on('blocked', openBlockedList);
       on('admin', function () { if (window.JRAdmin) window.JRAdmin.open(); });
       on('update', function () { try { Android.checkUpdate(); } catch (e) {} });
@@ -646,6 +648,45 @@
       on('delete', openDeleteAccount);
     });
   }
+  function pwAcc() { var u = A.auth && A.auth.currentUser; return !!(u && L.isUsernameEmail(u.email)); }
+  function openChangePassword() {
+    var u = A.auth && A.auth.currentUser; if (!u) return;
+    openSheet(head('Change password') + '<div class="sh-body">' +
+      '<div class="field"><label>Current password</label><input id="cpOld" type="password" autocomplete="current-password"></div>' +
+      '<div class="field"><label>New password</label><input id="cpNew" type="password" autocomplete="new-password" placeholder="At least 6 characters"></div>' +
+      '<div class="field"><label>Confirm new password</label><input id="cpNew2" type="password" autocomplete="new-password"></div>' +
+      '<div class="err" id="cpErr"></div></div>' +
+      '<div class="sh-foot"><button class="bigbtn small" id="cpGo">Save password</button></div>', function (sh) {
+      $('#cpGo', sh).addEventListener('click', function () {
+        var btn = this, err = $('#cpErr', sh);
+        var o = $('#cpOld', sh).value, n = $('#cpNew', sh).value, n2 = $('#cpNew2', sh).value;
+        err.textContent = '';
+        if (!o) { err.textContent = 'Enter your current password.'; return; }
+        if (n.length < 6) { err.textContent = 'New password must be at least 6 characters.'; return; }
+        if (n !== n2) { err.textContent = 'New passwords do not match.'; return; }
+        btn.disabled = true;
+        u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email, o)).then(function () {
+          return u.updatePassword(n);
+        }).then(function () {
+          closeSheet(function () { toast('Password changed'); });
+        }).catch(function (e) {
+          btn.disabled = false;
+          err.textContent = e && e.code ? A.friendly(e) : errMsg(e);
+        });
+      });
+    });
+  }
+  function oldShellBanner() {
+    try {
+      if (!(window.Android && !Android.appVersion)) return;
+      var d = document.createElement('div');
+      d.id = 'oldShell';
+      d.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9999;background:#e0245e;color:#fff;padding:10px 14px;font:600 14px system-ui;display:flex;gap:10px;align-items:center';
+      d.innerHTML = '<span style="flex:1">You are using the old demo app. Install the new Jilan Reels app to upload photos and use Google sign-in.</span><a href="https://jilanapps.github.io/jilan-store/jilan-reels/jilan-reels.apk" style="color:#fff;background:rgba(0,0,0,.25);padding:6px 10px;border-radius:8px;text-decoration:none">Install</a>';
+      document.body.appendChild(d);
+    } catch (e) {}
+  }
+  setTimeout(oldShellBanner, 800);
   function openPage(p) {
     var url = HOME.split('#')[0].replace(/[^/]*$/, '') + p;
     if (location.protocol !== 'file:' && location.href.indexOf(HOME) !== 0) url = p;
