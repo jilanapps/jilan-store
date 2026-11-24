@@ -26,6 +26,32 @@
   L.REPORT_REASONS = ['Spam or misleading', 'Nudity or sexual content', 'Violence or dangerous acts',
     'Hate speech', 'Harassment or bullying', 'Child safety', 'False information', 'Copyright', 'Something else'];
 
+  /* ---------- blocked words (v1.4) ----------
+   * Nudity / sexual / immoral words in English, Roman Urdu and Urdu. Checked
+   * on captions, hashtags, sound names and shop-link titles — here (upload UI)
+   * and again in firestore.rules (same list, see BAD_RULES_RE). Game tags such
+   * as #gta / #gta6 are allowed (user, 2026-11-25). Lower-case substrings,
+   * except BAD_WORDS_EXACT which must stand alone (so "Essex" still passes). */
+  L.BAD_WORDS = ['porn', 'xxx', 'nude', 'nudity', 'naked', 'sexy', 'sextape', 'sex tape', 'sex video', 'sexvideo',
+    'blowjob', 'hentai', 'onlyfans', 'nsfw', 'boobs', 'pussy', 'fuck', 'milf', 'horny', 'xvideos', 'xnxx',
+    'brazzers', 'stripper', 'striptease', 'erotic', 'camgirl', 'adult video', 'adultvideo',
+    'nangi', 'chudai', 'phudi', 'gandi video', 'gandivideo', 'gandi film', 'blue film', 'bluefilm', 'mujra',
+    'kanjri', 'behenchod', 'bhenchod', 'madarchod', 'chutiya', 'bhosdi',
+    'سیکس', 'ننگی', 'فحش', 'چدائی', 'بلیو فلم', 'گندی ویڈیو', 'عریاں', 'عریانی', 'رنڈی', 'کنجری', 'مجرا'];
+  L.BAD_WORDS_EXACT = ['sex', '18plus', 'randi'];
+  L.badWord = function (s) {
+    s = String(s == null ? '' : s).toLowerCase();
+    for (var i = 0; i < L.BAD_WORDS.length; i++) if (s.indexOf(L.BAD_WORDS[i]) >= 0) return L.BAD_WORDS[i];
+    for (var j = 0; j < L.BAD_WORDS_EXACT.length; j++) {
+      if (new RegExp('(^|[^a-z])' + L.BAD_WORDS_EXACT[j] + '([^a-z]|$)').test(s)) return L.BAD_WORDS_EXACT[j];
+    }
+    return '';
+  };
+  // Same rule as one RE2 pattern for firestore.rules (full-string match, (?s) = across new lines).
+  L.BAD_RULES_RE = '(?s).*(' + L.BAD_WORDS.join('|') + '|' +
+    L.BAD_WORDS_EXACT.map(function (w) { return '(^|[^a-z])' + w + '([^a-z]|$)'; }).join('|') + ').*';
+  L.BAD_MSG = 'This contains words that are not allowed on Jilan Reels (nudity or sexual content). Please change it.';
+
   /* ---------- usernames ---------- */
   L.normalizeUsername = function (raw) { return String(raw == null ? '' : raw).trim().replace(/^@/, '').toLowerCase(); };
   L.validateUsername = function (raw) {

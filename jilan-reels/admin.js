@@ -74,7 +74,7 @@
           return '<div class="acard" data-i="' + i + '">' + (v ? '<button class="thumb" data-a="play" style="background-image:url(\'' + esc(v.video.thumb) + '\')"></button>' : '') +
             '<div class="abody"><b>' + esc(r.reason) + '</b>' +
             '<span>' + esc(r.type) + ' report · ' + L.ago(Api.ms(r.createdAt)) + '</span>' +
-            (v ? '<span>Video by @' + esc(v.ownerUsername) + (v.hidden ? ' (hidden)' : '') + ': ' + esc(v.caption || '') + '</span>' : (vid ? '<span>Video already deleted</span>' : '')) +
+            (v ? '<span>Video by @' + esc(v.ownerUsername) + (v.hidden ? (v.autoHidden ? ' (auto-hidden after ' + (v.reportCount || 3) + ' reports)' : ' (hidden)') : '') + ': ' + esc(v.caption || '') + '</span>' : (vid ? '<span>Video already deleted</span>' : '')) +
             (r.note ? '<span>Note: ' + esc(r.note) + '</span>' : '') +
             '<div class="acts">' +
             (v ? '<button data-a="play">Watch</button>' : '') +
@@ -114,7 +114,7 @@
     Api.hiddenVideos().then(function (list) {
       if (!list.length) return empty('No hidden videos');
       body().innerHTML = list.map(function (v, i) {
-        return '<div class="acard" data-i="' + i + '"><button class="thumb" data-a="play" style="background-image:url(\'' + esc(v.video.thumb) + '\')"></button><div class="abody"><b>@' + esc(v.ownerUsername) + '</b><span>' + esc(v.caption || '') + '</span><span>' + L.ago(Api.ms(v.createdAt)) + '</span>' +
+        return '<div class="acard" data-i="' + i + '"><button class="thumb" data-a="play" style="background-image:url(\'' + esc(v.video.thumb) + '\')"></button><div class="abody"><b>@' + esc(v.ownerUsername) + '</b>' + (v.autoHidden ? '<span style="color:#ff5a5f">Auto-hidden: reported by ' + (v.reportCount || 3) + ' different users</span>' : '') + '<span>' + esc(v.caption || '') + '</span><span>' + L.ago(Api.ms(v.createdAt)) + '</span>' +
           '<div class="acts"><button data-a="play">Watch</button><button class="blue" data-a="unhide">Unhide</button><button class="red" data-a="del">Delete</button></div></div></div>';
       }).join('');
       $$('.acard', body()).forEach(function (card) {
@@ -122,7 +122,7 @@
         card.addEventListener('click', function (e) {
           var b = e.target.closest('[data-a]'); if (!b) return;
           if (b.dataset.a === 'play') { JR().remember([v]); JR().openPlayer([v], 0); }
-          if (b.dataset.a === 'unhide') act(b, Api.setHidden(v.id, false), 'Video visible again', function () { card.remove(); });
+          if (b.dataset.a === 'unhide') act(b, Api.setHidden(v.id, false, !!(v.autoHidden || v.reportCount)), 'Video visible again', function () { card.remove(); });
           if (b.dataset.a === 'del') act(b, Api.deleteVideo(v), 'Video deleted', function () { card.remove(); });
         });
       });

@@ -252,6 +252,9 @@
   Api.createVideo = function (up, caption, extras) {
     needMe();
     caption = L.cleanText(caption, L.MAX_CAPTION);
+    var xx = extras || {};
+    if (L.badWord(caption) || (xx.soundName && L.badWord(xx.soundName)) || (xx.link && L.badWord(xx.link.title)))
+      return Promise.reject(new Error(L.BAD_MSG));
     var ref = vids().doc(), b = db().batch();
     var video = { publicId: up.publicId, url: up.url, thumb: up.thumb, duration: up.duration };
     if (up.w) video.w = up.w; if (up.h) video.h = up.h; if (up.bytes) video.bytes = up.bytes;
@@ -309,7 +312,24 @@
     if (r.targetOwner) data.targetOwner = String(r.targetOwner);
     if (r.videoId) data.videoId = String(r.videoId);
     if (r.note) data.note = L.cleanText(r.note, 300);
-    return db().collection('reports').add(data);
+    return db().collection('reports').add(data).then(function (ref) {
+      if (r.type !== 'video' || typeof db().runTransaction !== 'function') return ref;
+      // v1.4 auto-hide: count this user once on the video; the 3rd different
+      // user hides it until an admin reviews. Best effort — the report itself
+      // is already saved for the admin even if this step is refused.
+      var vref = vids().doc(String(r.videoId || r.targetId)), rref = vref.collection('reporters').doc(uid());
+      return db().runTransaction(function (t) {
+        return t.get(vref).then(function (d) {
+          if (!d.exists) return;
+          var v = d.data();
+          if (v.hidden || v.ownerUid === uid()) return;
+          var n = (v.reportCount || 0) + 1, upd = { reportCount: n };
+          if (n >= 3) { upd.hidden = true; upd.autoHidden = true; }
+          t.set(rref, { at: ST() });
+          t.update(vref, upd);
+        });
+      }).catch(function (e) { console.warn('report count', e && e.message); }).then(function () { return ref; });
+    });
   };
   Api.isBlocked = function (u) { return !!(Api.state.blocks || {})[u]; };
   Api.setBlock = function (other, on) {
@@ -332,7 +352,11 @@
   Api.closeReport = function (id) {
     return db().collection('reports').doc(id).update({ status: 'done', handledBy: uid(), handledAt: ST() });
   };
-  Api.setHidden = function (vid, hidden) { return vids().doc(vid).update({ hidden: !!hidden }); };
+  Api.setHidden = function (vid, hidden, resetReports) {
+    var u = { hidden: !!hidden };
+    if (!hidden && resetReports) { u.autoHidden = false; u.reportCount = 0; }
+    return vids().doc(vid).update(u);
+  };
   Api.hiddenVideos = function () {
     return vids().where('hidden', '==', true).orderBy('createdAt', 'desc').limit(50).get()
       .then(function (qs) { return qs.docs.map(docData); });

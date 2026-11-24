@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Jilan Reels v1.3 — Firestore Security Rules (2026-11-25)
+// Jilan Reels v1.4 — Firestore Security Rules (2026-11-25)
 // Public short-video app (Play Store, user-generated content).
 //
 // PUBLIC READ: user profiles, usernames claims, visible videos, comments,
@@ -69,24 +69,28 @@ service cloud.firestore {
         && (!('h' in v) || (v.h is int && v.h >= 0 && v.h <= 4096))
         && (!('bytes' in v) || (v.bytes is int && v.bytes >= 0 && v.bytes <= 104857600));
     }
+    // v1.4 blocked words (nudity / sexual / immoral) — same list as lib.js BAD_RULES_RE.
+    // Game tags like #gta are allowed.
+    function clean(s) { return !s.lower().matches('(?s).*(porn|xxx|nude|nudity|naked|sexy|sextape|sex tape|sex video|sexvideo|blowjob|hentai|onlyfans|nsfw|boobs|pussy|fuck|milf|horny|xvideos|xnxx|brazzers|stripper|striptease|erotic|camgirl|adult video|adultvideo|nangi|chudai|phudi|gandi video|gandivideo|gandi film|blue film|bluefilm|mujra|kanjri|behenchod|bhenchod|madarchod|chutiya|bhosdi|سیکس|ننگی|فحش|چدائی|بلیو فلم|گندی ویڈیو|عریاں|عریانی|رنڈی|کنجری|مجرا|(^|[^a-z])sex([^a-z]|$)|(^|[^a-z])18plus([^a-z]|$)|(^|[^a-z])randi([^a-z]|$)).*'); }
+    function tagOk(x) { return x is string && x.matches('^[a-z0-9_]{1,30}$') && clean(x); }
     function tagsOk(t) {
       return t is list && t.size() <= 10
-        && (t.size() < 1 || (t[0] is string && t[0].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 2 || (t[1] is string && t[1].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 3 || (t[2] is string && t[2].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 4 || (t[3] is string && t[3].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 5 || (t[4] is string && t[4].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 6 || (t[5] is string && t[5].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 7 || (t[6] is string && t[6].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 8 || (t[7] is string && t[7].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 9 || (t[8] is string && t[8].matches('^[a-z0-9_]{1,30}$')))
-        && (t.size() < 10 || (t[9] is string && t[9].matches('^[a-z0-9_]{1,30}$')));
+        && (t.size() < 1 || (tagOk(t[0])))
+        && (t.size() < 2 || (tagOk(t[1])))
+        && (t.size() < 3 || (tagOk(t[2])))
+        && (t.size() < 4 || (tagOk(t[3])))
+        && (t.size() < 5 || (tagOk(t[4])))
+        && (t.size() < 6 || (tagOk(t[5])))
+        && (t.size() < 7 || (tagOk(t[6])))
+        && (t.size() < 8 || (tagOk(t[7])))
+        && (t.size() < 9 || (tagOk(t[8])))
+        && (t.size() < 10 || (tagOk(t[9])));
     }
-    function captionOk(c) { return c is string && c.size() <= 150; }
+    function captionOk(c) { return c is string && c.size() <= 150 && clean(c); }
     // v1.3 optional video extras (all optional, so older clients still pass)
     function linkOk(l) {
       return l is map && l.keys().hasOnly(['title', 'url']) && l.keys().hasAll(['title', 'url'])
-        && l.title is string && l.title.size() >= 1 && l.title.size() <= 40
+        && l.title is string && l.title.size() >= 1 && l.title.size() <= 40 && clean(l.title)
         && l.url is string && l.url.size() <= 300 && l.url.matches('^https?://[^ ]{3,300}$');
     }
     function remixOk(r) {
@@ -96,7 +100,7 @@ service cloud.firestore {
     }
     function extrasOk(d) {
       return (!('soundId' in d) || (d.soundId is string && d.soundId.matches('^[A-Za-z0-9]{1,40}$')))
-        && (!('soundName' in d) || (d.soundName is string && d.soundName.size() <= 60))
+        && (!('soundName' in d) || (d.soundName is string && d.soundName.size() <= 60 && clean(d.soundName)))
         && (!('remix' in d) || remixOk(d.remix))
         && (!('link' in d) || linkOk(d.link))
         && (!('allowRemix' in d) || d.allowRemix is bool)
@@ -343,8 +347,28 @@ service cloud.firestore {
         && resource.data.hidden == false
         && request.resource.data.views == resource.data.get('views', 0) + 1;
 
-      // Admin: hide / unhide.
-      allow update: if isAdmin() && changed().hasOnly(['hidden']) && request.resource.data.hidden is bool;
+      // v1.4 auto-hide: each signed-in user (not the owner) may add exactly
+      // +1 to reportCount, once per video, together with their own
+      // reporters/{uid} doc. The 3rd report must set hidden + autoHidden, so
+      // the video leaves the feed until an admin reviews it.
+      allow update: if active()
+        && resource.data.ownerUid != me()
+        && resource.data.hidden == false
+        && changed().hasOnly(['reportCount', 'hidden', 'autoHidden'])
+        && request.resource.data.reportCount == resource.data.get('reportCount', 0) + 1
+        && !exists(docPath('videos/' + vid + '/reporters/' + me()))
+        && existsAfter(docPath('videos/' + vid + '/reporters/' + me()))
+        && ((request.resource.data.reportCount >= 3
+              && request.resource.data.hidden == true && request.resource.data.autoHidden == true)
+         || (request.resource.data.reportCount < 3
+              && request.resource.data.hidden == false
+              && request.resource.data.get('autoHidden', false) == resource.data.get('autoHidden', false)));
+
+      // Admin: hide / unhide (unhide may also reset the auto-hide counter).
+      allow update: if isAdmin() && changed().hasOnly(['hidden', 'autoHidden', 'reportCount'])
+        && request.resource.data.hidden is bool
+        && (!changed().hasAny(['autoHidden']) || request.resource.data.autoHidden == false)
+        && (!changed().hasAny(['reportCount']) || request.resource.data.reportCount == 0);
 
       allow delete: if signedIn() && (resource.data.ownerUid == me() || isAdmin());
 
@@ -363,6 +387,17 @@ service cloud.firestore {
       }
 
       // Likes: one per user per video; only the liker can read theirs.
+      // v1.4: one doc per user who reported this video (counts each user once).
+      match /reporters/{ruid} {
+        allow read: if isAdmin() || (signedIn() && me() == ruid);
+        allow create: if active() && me() == ruid
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time
+          && getAfter(docPath('videos/' + vid)).data.get('reportCount', 0) == get(docPath('videos/' + vid)).data.get('reportCount', 0) + 1;
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+
       match /likes/{uid} {
         allow read: if signedIn() && me() == uid;
         allow create: if active() && me() == uid

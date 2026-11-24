@@ -19,6 +19,8 @@
     music: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
     mute: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>',
     play: '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>',
+    sound: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
     flag: '<svg viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>',
     block: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>',
     trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
@@ -109,16 +111,22 @@
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
         maybeMore(en.target);
         var cv = cache[en.target.dataset.id]; if (cv) Api.markView(cv);
-      } else { v.pause(); }
+      } else {
+        v.pause();
+        if (!en.isIntersecting || en.intersectionRatio < 0.2) { try { if (v.currentTime) v.currentTime = 0; } catch (er) {} en.target.classList.remove('paused'); }
+      }
     });
-  }, { threshold: [0, 0.6, 1] });
+  }, { threshold: [0, 0.2, 0.6, 1] });
   function isVisibleScreen(el) { var s = el.closest('.screen'); return s && s.classList.contains('active'); }
   // Only the current reel and its neighbours get a video src (saves data).
   function loadAround(reel) {
     var list = $$('.reel', reel.parentNode), i = list.indexOf(reel);
     list.forEach(function (r, j) {
       var v = r.querySelector('video'); if (!v) return;
-      if (j >= i - 1 && j <= i + 2) { if (!v.getAttribute('src')) { v.setAttribute('src', v.dataset.src); v.load(); } }
+      if (j >= i - 1 && j <= i + 2) {
+        v.preload = (j === i || j === i + 1) ? 'auto' : 'metadata';
+        if (!v.getAttribute('src')) { v.setAttribute('src', v.dataset.src); v.load(); }
+      }
       else if (v.getAttribute('src')) { v.pause(); v.removeAttribute('src'); v.load(); }
     });
   }
@@ -126,7 +134,8 @@
     var mine = isMine(v), followed = Api.isFollowing(v.ownerUid), liked = Api.isLiked(v.id);
     return '<div class="reel" data-id="' + esc(v.id) + '">' +
       '<video data-src="' + esc(L.playUrl(v.video.url, window.JRX && JRX.saver())) + '" poster="' + esc(L.coverUrl(v.video.thumb, v.coverSec)) + '" playsinline webkit-playsinline loop muted preload="none"></video>' +
-      '<div class="shade"></div><div class="pause-ico">' + ICON.play + '</div>' +
+      '<div class="shade"></div><div class="pause-ico">' + ICON.play + '</div><div class="tapflash"></div>' +
+      '<button class="mute-btn" aria-label="Sound on or off">' + (soundOn ? ICON.sound : ICON.mute) + '</button>' +
       (soundOn ? '' : '<button class="sound-pill">' + ICON.mute + 'Tap for sound</button>') +
       '<div class="rail">' +
         '<div class="creator"><button class="open-creator" data-u="' + esc(v.ownerUid) + '">' + avatarHtml(v.ownerName, v.ownerPhoto, v.ownerUid) + '</button>' +
@@ -136,12 +145,13 @@
         '<button class="fav' + (Api.isFav(v.id) ? ' on' : '') + '" aria-label="Save">' + ICON.bookmark + '<span>Save</span></button>' +
         '<button class="share" aria-label="Share">' + ICON.share + '<span>Share</span></button>' +
         '<button class="more" aria-label="More">' + ICON.more + '</button>' +
+        '<button class="disc open-sound" aria-label="Sound" data-sid="' + esc(v.soundId || v.id) + '" data-sname="' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '">' + avatarHtml(v.ownerName, v.ownerPhoto, v.ownerUid) + '</button>' +
       '</div>' +
       '<div class="info"><button class="who open-creator" data-u="' + esc(v.ownerUid) + '">@' + esc(v.ownerUsername) + (Api.isVerified(v.ownerUid) ? ICON.verified : '') + (mine ? '<span class="mine-badge">You</span>' : '') + (L.isScheduled(v) ? '<span class="mine-badge">Scheduled</span>' : '') + '</button>' +
         (v.remix ? '<div class="remix">' + (v.remix.type === 'duet' ? 'Duet with' : 'Stitched from') + ' <button class="open-user" data-un="' + esc(v.remix.username) + '">@' + esc(v.remix.username) + '</button></div>' : '') +
         '<div class="cap">' + capHtml(v.caption || '') + '</div>' +
         (v.link && v.link.url ? '<button class="shop-chip" data-url="' + esc(v.link.url) + '">' + ICON.bag + '<span>' + esc(v.link.title || 'Shop') + '</span></button>' : '') +
-        '<div class="music"><button class="open-sound" data-sid="' + esc(v.soundId || v.id) + '" data-sname="' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '">' + ICON.music + '<span>' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '</span></button><span class="views">' + ICON.eye + fmt(v.views || 0) + '</span></div></div>' +
+        '<div class="music"><button class="open-sound" data-sid="' + esc(v.soundId || v.id) + '" data-sname="' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '">' + ICON.music + '<span class="mq"><span class="mq-in">' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '</span></span></button><span class="views">' + ICON.eye + fmt(v.views || 0) + '</span></div></div>' +
       '<div class="progress"><i></i></div>' +
       '</div>';
   }
@@ -266,10 +276,19 @@
       }).catch(function (e) { toast(errMsg(e)); }).then(function () { busy['f' + u] = false; });
     });
   }
-  function enableSound() {
-    soundOn = true;
-    $$('.sound-pill').forEach(function (e) { e.remove(); });
-    if (current) { var v = current.querySelector('video'); v.muted = false; v.play().catch(function () {}); }
+  var soundChosen = false;
+  function setSound(on) {
+    soundOn = !!on; soundChosen = true;
+    if (on) $$('.sound-pill').forEach(function (e) { e.remove(); });
+    $$('.mute-btn').forEach(function (b) { b.innerHTML = soundOn ? ICON.sound : ICON.mute; b.classList.toggle('on', soundOn); });
+    $$('.reel video').forEach(function (v) { v.muted = !soundOn; });
+    if (current && soundOn) { var v = current.querySelector('video'); v.play().catch(function () {}); }
+  }
+  function enableSound() { setSound(true); }
+  function tapFlash(reel, playing) {
+    var f = reel.querySelector('.tapflash'); if (!f) return;
+    f.innerHTML = playing ? ICON.play : ICON.pause;
+    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
   }
   function bigHeart(reel, x, y) {
     var r = reel.getBoundingClientRect(), h = document.createElement('div');
@@ -293,6 +312,7 @@
     if (t.closest('.share')) { shareVideo(id); return; }
     if (t.closest('.more')) { openMore(id); return; }
     if (t.closest('.sound-pill')) { enableSound(); return; }
+    if (t.closest('.mute-btn')) { setSound(!soundOn); return; }
     if (t.closest('.rail') || t.closest('.info')) return;
     var now = Date.now();
     if (now - lastTap < 300) {
@@ -304,12 +324,43 @@
     tapTimer = setTimeout(function () {
       tapTimer = null;
       var vid = reel.querySelector('video');
-      if (!soundOn) { enableSound(); return; }
-      if (vid.paused) { vid.play().catch(function () {}); reel.classList.remove('paused'); }
-      else { vid.pause(); reel.classList.add('paused'); }
+      // first tap ever (sound pill still showing) turns sound on; after that tap = play/pause, the mute button handles sound
+      if (!soundOn && !soundChosen) { enableSound(); return; }
+      if (vid.paused) { vid.play().catch(function () {}); reel.classList.remove('paused'); tapFlash(reel, true); }
+      else { vid.pause(); reel.classList.add('paused'); tapFlash(reel, false); }
     }, 300);
   }
   $('#feed').addEventListener('click', onFeedClick);
+  /* v1.4: desktop keyboard (ArrowUp/Down, J/K) + one-video-per-wheel-step */
+  function activeFeed() {
+    if ($('#screen-player').classList.contains('active')) return $('#playerFeed');
+    if ($('#screen-home').classList.contains('active')) return $('#feed');
+    return null;
+  }
+  function stepFeed(dir) {
+    var f = activeFeed(); if (!f) return;
+    var h = f.clientHeight || 1, i = Math.round(f.scrollTop / h) + dir;
+    i = Math.max(0, Math.min($$('.reel', f).length - 1, i));
+    f.scrollTo({ top: i * h, behavior: 'smooth' });
+  }
+  document.addEventListener('keydown', function (e) {
+    var tg = e.target, tn = (tg && tg.tagName) || '';
+    if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || (tg && tg.isContentEditable) || sheetOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowDown' || k === 'j' || k === 'J') { if (activeFeed()) { e.preventDefault(); stepFeed(1); } }
+    else if (k === 'ArrowUp' || k === 'k' || k === 'K') { if (activeFeed()) { e.preventDefault(); stepFeed(-1); } }
+    else if (k === 'm' || k === 'M') { if (activeFeed()) setSound(!soundOn); }
+  });
+  var wheelLock = 0;
+  function onWheel(e) {
+    if (e.ctrlKey || Math.abs(e.deltaY) < 4 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    var now = Date.now(); if (now < wheelLock) return;
+    wheelLock = now + 550;
+    stepFeed(e.deltaY > 0 ? 1 : -1);
+  }
+  $('#feed').addEventListener('wheel', onWheel, { passive: false });
+  $('#playerFeed').addEventListener('wheel', onWheel, { passive: false });
   $('#playerFeed').addEventListener('click', onFeedClick);
 
   /* ---------- comments ---------- */
@@ -574,6 +625,7 @@
     $('#profileGuest').classList.toggle('hidden', !guest);
     $('#profileBody').classList.toggle('hidden', guest);
     $('#profileBack').classList.toggle('hidden', !u || (loggedIn() && u === Api.me.uid));
+    $('#profileAllReels').classList.toggle('hidden', !u || (loggedIn() && u === Api.me.uid));
     $('#profileMenu').classList.toggle('hidden', guest);
     profileOf = u; profileList = []; profileCursor = null; profileDone = true;
     if (guest) { $('#profileTitle').textContent = 'Profile'; return; }
@@ -613,6 +665,12 @@
   }
   $('#profileMoreBtn').addEventListener('click', function () { loadProfileVideos(profileToken); });
   $('#profileBack').addEventListener('click', closeTop);
+  // v1.4 (#u=handle links): jump straight back to the full feed.
+  $('#profileAllReels').addEventListener('click', function () {
+    var n = stack.length; stack.length = 0; tabLayer = false;
+    if (n) { try { history.go(-n); } catch (e) {} }
+    show('home');
+  });
   $('#guestLogin').addEventListener('click', function () { requireLogin(function () { showProfile(Api.me.uid); }); });
   $('#profileAction').addEventListener('click', function () {
     if (loggedIn() && profileOf === Api.me.uid) { editProfile(); return; }
@@ -687,7 +745,8 @@
       (shell ? '<button class="opt" data-a="update">' + ICON.refresh + 'Check for updates' + (availableVersion ? ' (v' + esc(availableVersion) + ' ready)' : '') + '</button>' : '') +
       '<button class="opt" data-a="terms">' + ICON.doc + 'Terms of Use</button>' +
       '<button class="opt" data-a="privacy">' + ICON.doc + 'Privacy Policy</button>' +
-      '<button class="opt" data-a="safety">' + ICON.shield + 'Community & child safety</button>' +
+      '<button class="opt" data-a="guidelines">' + ICON.shield + 'Community Guidelines</button>' +
+      '<button class="opt" data-a="safety">' + ICON.shield + 'Child safety</button>' +
       '<button class="opt" data-a="about">' + ICON.info + 'About Jilan Reels</button>' +
       '<button class="opt" data-a="logout">' + ICON.out + 'Log out</button>' +
       '<button class="opt red" data-a="delete">' + ICON.trash + 'Delete account</button></div>', function (sh) {
@@ -701,6 +760,7 @@
       on('terms', function () { openPage('terms.html'); });
       on('privacy', function () { openPage('privacy.html'); });
       on('safety', function () { openPage('child-safety.html'); });
+      on('guidelines', function () { openPage('guidelines.html'); });
       on('about', openAbout);
       on('logout', function () { A.signOut().then(function () { toast('Logged out'); }); });
       on('delete', openDeleteAccount);
@@ -960,7 +1020,7 @@
   function resetCreate() {
     if (uploading) return;
     $('#createPick').classList.remove('hidden'); $('#createRec').classList.add('hidden'); $('#createPreview').classList.add('hidden');
-    $('#captionInput').value = ''; if (picked && picked.url) URL.revokeObjectURL(picked.url); picked = null;
+    $('#captionInput').value = ''; $('#safeCheck').checked = false; if (picked && picked.url) URL.revokeObjectURL(picked.url); picked = null;
     var pv = $('#previewVideo'); pv.pause(); pv.removeAttribute('src'); pv.load();
     $('#upBox').classList.add('hidden'); $('#btnPost').disabled = false; $('#btnPost').textContent = 'Post'; $('#btnRetake').disabled = false;
     if (window.JRS) JRS.reset();
@@ -1096,6 +1156,8 @@
     if (!picked || uploading) return;
     if (!Api.me) { requireLogin(function () {}); return; }
     var btn = this, cap = L.cleanText($('#captionInput').value, L.MAX_CAPTION);
+    if (!$('#safeCheck').checked) { toast('Please tick the box: this video has no nudity, sexual or violent content.'); $('#safeCheck').focus(); return; }
+    if (L.badWord(cap)) { toast(L.BAD_MSG); $('#captionInput').focus(); return; }
     uploading = true; btn.disabled = true; $('#btnRetake').disabled = true; btn.textContent = 'Posting...';
     $('#upBox').classList.remove('hidden'); upStatus('Checking video...', 0);
     $('#previewVideo').pause();

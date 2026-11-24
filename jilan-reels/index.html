@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=1.3.0">
+<link rel="stylesheet" href="style.css?v=1.4.0">
 </head>
 <body>
 <div id="app">
@@ -16,6 +16,7 @@
   <section id="screen-home" class="screen active">
     <div class="topbar">
       <div class="tabs"><button class="tab" data-feed="following">Following</button><button class="tab on" data-feed="foryou">For You</button></div>
+      <button class="iconbtn top-upload" data-go="create" aria-label="Upload"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M12 9v6M9 12h6"/></svg></button>
       <button class="iconbtn top-search" data-go="discover" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
     </div>
     <div id="feed" class="feed"></div>
@@ -39,7 +40,7 @@
       <button class="bigbtn" id="btnRecord"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>Record video</button>
       <button class="bigbtn alt" id="btnGallery"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>Upload from gallery</button>
       <input type="file" id="fileInput" accept="video/*" hidden>
-      <p class="note">Only post videos you made or have the right to share. No nudity, violence, hate or content about children. See the <a href="terms.html" target="_blank">Terms</a>.</p>
+      <p class="note">Only post videos you made or have the right to share. No nudity, sexual, violent or hateful content, and nothing about children. Read the <a href="guidelines.html" target="_blank">Community Guidelines</a> and <a href="terms.html" target="_blank">Terms</a>.</p>
     </div>
     <div id="createRec" class="create-rec hidden">
       <video id="camView" class="cam-src" playsinline muted autoplay></video>
@@ -57,6 +58,7 @@
     <div id="createPreview" class="create-preview hidden">
       <video id="previewVideo" playsinline loop controls></video>
       <textarea id="captionInput" maxlength="150" placeholder="Write a caption... add #hashtags"></textarea>
+      <label class="check safe-check"><input type="checkbox" id="safeCheck"> This video has no nudity, sexual or violent content. I follow the <a href="guidelines.html" target="_blank">Community Guidelines</a>.</label>
       <div class="row"><button class="bigbtn alt small" id="btnRetake">Retake</button><button class="bigbtn small" id="btnPost">Post</button></div>
       <div id="upBox" class="upbox hidden"><div class="upbar"><i id="upFill"></i></div><div id="upText" class="note">Preparing...</div></div>
     </div>
@@ -70,7 +72,7 @@
 
   <!-- PROFILE -->
   <section id="screen-profile" class="screen page">
-    <div class="pagebar"><button class="iconbtn hidden" id="profileBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 id="profileTitle">Profile</h2><span class="spacer"></span><button class="iconbtn" id="profileMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>
+    <div class="pagebar"><button class="iconbtn hidden" id="profileBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 id="profileTitle">Profile</h2><span class="spacer"></span><button class="textbtn all-reels hidden" id="profileAllReels">All Reels</button><button class="iconbtn" id="profileMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>
     <div id="profileGuest" class="empty hidden"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><b>Log in to Jilan Reels</b><span>Post videos, like, comment and follow creators.</span><button class="bigbtn small" id="guestLogin">Log in or sign up</button></div>
     <div id="profileBody">
       <div class="profile-head">
@@ -121,15 +123,15 @@
 <script src="firebase-auth-compat.js"></script>
 <script src="firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="lib.js?v=1.3.0"></script>
-<script src="i18n.js?v=1.3.0"></script>
-<script src="auth.js?v=1.3.0"></script>
-<script src="api.js?v=1.3.0"></script>
-<script src="media.js?v=1.3.0"></script>
-<script src="fx.js?v=1.3.0"></script>
-<script src="studio.js?v=1.3.0"></script>
-<script src="social.js?v=1.3.0"></script>
-<script src="app.js?v=1.3.0"></script>
-<script src="admin.js?v=1.3.0"></script>
+<script src="lib.js?v=1.4.0"></script>
+<script src="i18n.js?v=1.4.0"></script>
+<script src="auth.js?v=1.4.0"></script>
+<script src="api.js?v=1.4.0"></script>
+<script src="media.js?v=1.4.0"></script>
+<script src="fx.js?v=1.4.0"></script>
+<script src="studio.js?v=1.4.0"></script>
+<script src="social.js?v=1.4.0"></script>
+<script src="app.js?v=1.4.0"></script>
+<script src="admin.js?v=1.4.0"></script>
 </body>
 </html>

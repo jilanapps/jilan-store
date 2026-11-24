@@ -280,3 +280,38 @@ html.ur .reel,html.ur .create-rec,html.ur .pv-wrap,html.ur .rail,html.ur .grid,h
 html.ur .sheet .opt,html.ur .comment.notif,html.ur .comment.thread,html.ur .usercard{text-align:right}
 .remix-canvas{pointer-events:none}
 html[dir=rtl] .chips button,html[dir=rtl] .cap,html[dir=rtl] .usercard{direction:ltr;unicode-bidi:isolate}
+
+.safe-check{align-items:flex-start;font-size:13px;line-height:1.4;padding:6px 2px;color:inherit}.safe-check input{margin-top:2px;flex:none;width:18px;height:18px}.safe-check a{color:#4b9bff}
+
+/* ---------- v1.4 smooth feed ---------- */
+html,body{height:100%;height:100dvh}
+#app{height:100%;height:100dvh}
+.feed{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-behavior:auto}
+.reel{height:100%;contain:layout paint;transform:translateZ(0)}
+.reel video{will-change:auto}
+.progress{height:3px}
+.progress i{transition:width .25s linear}
+.mute-btn{position:absolute;top:58px;right:10px;z-index:4;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.mute-btn svg{width:22px;height:22px}
+.tapflash{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:2}
+.tapflash svg{width:40px;height:40px;fill:#fff;stroke:none}
+.tapflash.go{animation:jrTap .6s ease-out}
+@keyframes jrTap{0%{opacity:0;transform:scale(.6)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
+.reel.paused .tapflash.go{display:none}
+.bigheart{animation:jrHeart .85s ease-out forwards}
+@keyframes jrHeart{0%{transform:scale(.3) rotate(-12deg);opacity:0}20%{transform:scale(1.25) rotate(-8deg);opacity:1}45%{transform:scale(1) rotate(-8deg);opacity:1}100%{transform:translateY(-80px) scale(1.1) rotate(-8deg);opacity:0}}
+.rail .disc{width:46px;height:46px;border-radius:50%;padding:8px;background:radial-gradient(circle,#333 0 38%,#111 39% 100%);border:2px solid #2a2a2e;animation:jrSpin 5s linear infinite;margin-top:4px}
+.rail .disc .avatar{width:28px;height:28px;font-size:11px;border:0}
+.reel.paused .rail .disc{animation-play-state:paused}
+@keyframes jrSpin{to{transform:rotate(360deg)}}
+.info .music .mq{display:inline-block;overflow:hidden;white-space:nowrap;max-width:180px;vertical-align:middle;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.info .music .mq-in{display:inline-block;padding-left:100%;animation:jrMarquee 9s linear infinite}
+@keyframes jrMarquee{to{transform:translateX(-100%)}}
+.textbtn.all-reels{font-size:14px;font-weight:700;color:var(--accent2);padding:6px 10px;border:1px solid var(--line);border-radius:16px;margin-right:6px}
+@media (prefers-reduced-motion:reduce){.rail .disc,.info .music .mq-in{animation:none}.info .music .mq-in{padding-left:0}}
+/* desktop: centred 9:16 card on a dark side area */
+@media (min-width:700px) and (min-aspect-ratio:4/5){
+  html,body{background:#121212}
+  #app{width:calc(100dvh * 9 / 16);max-width:520px;background:#000;box-shadow:0 0 0 1px #1f1f22,0 10px 50px rgba(0,0,0,.6)}
+}
+.top-upload{position:absolute;left:12px;top:10px}
