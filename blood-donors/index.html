@@ -995,7 +995,7 @@ html:not(.light) .pg-d:not(.pg-cap) .pg-ref{color:#BBF7D0}
 .pg-story.pg-d .pg-ur{margin-top:calc(16px*var(--s,1))}
 /* pv-premium layer END */
 </style>
-</head>
+<style id="v104-campregs">.v104-rl{margin-top:8px;padding:8px;border:1px solid rgba(160,20,40,.18);border-radius:10px}.v104-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid rgba(0,0,0,.06)}.v104-row:first-of-type{border-top:0}.v104-grp{display:inline-block;padding:1px 7px;border-radius:9px;background:#b3122e;color:#fff;font-size:11px;font-weight:700}.v104-act .btn{padding:6px 12px;min-height:0}.v104-done{opacity:.75;cursor:default}</style></head>
 <body>
 <div id="splash"><span class="splash-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdbsg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EF4444"/><stop offset="1" stop-color="#991B1B"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bdbsg0)"/><path d="M32 13c0 0-13 15.5-13 25a13 13 0 0 0 26 0c0-9.5-13-25-13-25z" fill="#fff"/><path d="M32 30v14M25 37h14" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round"/></svg></span><h1>Basti Dawa Blood Society</h1><p>Donate Blood &bull; Receive Blood &bull; Save Lives</p></div>
 <script>setTimeout(function(){var s=document.getElementById('splash'); if(s) s.remove();},2600);</script>
@@ -3162,7 +3162,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v103';
+var APP_VERSION = 'v104';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -3474,8 +3474,11 @@ function qAll(coll, cb){
 function qAll0(coll, cb){
   if (FB_OK) { var _lim = (coll==='donors' || coll==='donorsPublic' || coll==='donorLookup') ? 1000 : 200; db.collection(coll).orderBy('createdAt','desc').limit(_lim).get()
     .then(function(s){ var list = s.docs.map(function(d){var o=d.data(); o.id=d.id; return o;});
-      var k = lsKey(coll);
-      lsSet(k, lsGet(k).filter(function(x){ return !x.demo; }));
+      var k = lsKey(coll); /* v104-prune */
+      var _ids = {}; list.forEach(function(o){ _ids[o.id] = 1; });
+      var _full = list.length < _lim; var _minC = Infinity; list.forEach(function(o){ var c = +o.createdAt || 0; if (c < _minC) _minC = c; });
+      var _qIds = {}; try { lsGet(LS.queue).forEach(function(op){ if (op && op.coll === coll) { if (op.obj && op.obj.id) _qIds[op.obj.id] = 1; if (op.id) _qIds[op.id] = 1; } }); } catch(e){}
+      lsSet(k, lsGet(k).filter(function(x){ if (!x || x.demo) return false; if (_ids[x.id] || _qIds[x.id]) return true; if (_full) return false; return (+x.createdAt || 0) < _minC; }));
       list.forEach(function(o){ cacheUpsert(coll, o); });
       cb(list, true); })
     .catch(function(err){ try { console.error('[BDBS] qAll ' + coll + ' failed: ' + ((err && err.code) || 'error'), err); } catch(e){} cb(lsGet(lsKey(coll))); }); }
@@ -3563,21 +3566,22 @@ function showRefreshToast(msg){
   clearTimeout(window._refreshToastTimer);
   window._refreshToastTimer = setTimeout(function(){ t.style.display = 'none'; }, 2600);
 }
-function refreshData(){
-  pvQReset();
-  var b = document.getElementById('refreshBtn');
-  if (b) { b.disabled = true; b.textContent = 'Refreshing\u2026'; }
-  var done = function(ok){
-    if (b) { b.disabled = false; b.textContent = '\uD83D\uDD04 Refresh'; }
-    showRefreshToast(ok ? 'Data taza ho gaya' : 'Internet nahi \u2014 purana data dikh raha hai');
-  };
-  try {
-    loadHome(); loadRequests(); loadMembers(); loadReviews(); loadActivities();
-    try { searchDonors(); } catch(e){}
-    var online = (typeof navigator === 'undefined' || navigator.onLine !== false) && (typeof FB_OK === 'undefined' || FB_OK);
-    setTimeout(function(){ done(online); }, 1200);
-  } catch(e) { done(false); }
+function refreshData(){ /* v104-refresh: real refresh — clear cached lists, reload app, reopen same tab */
+  var online = (typeof navigator === 'undefined' || navigator.onLine !== false);
+  if (!online) { showRefreshToast('Internet nahi \u2014 purana data dikh raha hai'); return; }
+  var b = document.getElementById('refreshBtn'); if (b) { b.disabled = true; }
+  try { sessionStorage.setItem('bdbs_v104_refresh', JSON.stringify({ tab: (typeof _navCurrent !== 'undefined' && _navCurrent) ? _navCurrent : 'home', t: Date.now() })); } catch(e){}
+  try { pvQReset(); } catch(e){}
+  try { ['requestsPub','requests','camps','campRegs','activities','announcements','reviews','membersPub','members','thalassemiaPub','thalassemia','bloodBanks','hospitals','certs','auditLog'].forEach(function(k){ if (LS[k] && k !== 'queue') localStorage.removeItem(LS[k]); }); } catch(e){}
+  setTimeout(function(){ try { location.reload(); } catch(e){ if (b) b.disabled = false; } }, 150);
 }
+(function v104AfterRefresh(){
+  var raw = null; try { raw = sessionStorage.getItem('bdbs_v104_refresh'); sessionStorage.removeItem('bdbs_v104_refresh'); } catch(e){}
+  if (!raw) return; var o = null; try { o = JSON.parse(raw); } catch(e){ return; }
+  if (!o || !o.t || Date.now() - o.t > 60000) return;
+  var go = function(){ setTimeout(function(){ try { if (o.tab && o.tab !== 'home' && document.getElementById('s-' + o.tab)) { window._navNoPush = true; show(o.tab); } } catch(e){} try { showRefreshToast('App taza ho gayi \u2014 naya data load ho gaya'); } catch(e){} }, 900); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
 function loadHome(){
   qAll('donorsPublic', function(ds){
     qAll('activities', function(acts){
@@ -7548,7 +7552,7 @@ function loadCamps(){ /* v57-D: public list on Home + admin list with counts */
       if (!up.length) { homeBox.innerHTML = '<span class="mut">No camps announced yet.</span>'; }
       else {
         homeBox.innerHTML = up.map(function(c){
-          return '<div class="dcard"><b>'+esc(c.title||'Blood Donation Camp')+'</b><br><span class="mut">'+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'</span>'+(c.notes?'<br><span class="mut small">'+esc(c.notes)+'</span>':'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br><button class="btn green" onclick="registerForCamp(\''+esc(c.id)+'\')">Register</button> <span id="campRegMsg_'+esc(c.id)+'" class="mut small"></span></div>';
+          return '<div class="dcard"><b>'+esc(c.title||'Blood Donation Camp')+'</b><br><span class="mut">'+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+'</span>'+(c.notes?'<br><span class="mut small">'+esc(c.notes)+'</span>':'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br>'+(v104IsMine(c.id)?'<button class="btn ghost v104-done" disabled>Registered ✓</button>':'<button class="btn green" onclick="registerForCamp(\''+esc(c.id)+'\')">Register</button>')+' <span id="campRegMsg_'+esc(c.id)+'" class="mut small"></span></div>';
         }).join('');
       }
     }
@@ -7558,9 +7562,10 @@ function loadCamps(){ /* v57-D: public list on Home + admin list with counts */
         var h = '<h3>All Camps ('+(cs||[]).length+')</h3>';
         if (!(cs||[]).length) h += '<span class="mut">No camps yet.</span>';
         (cs||[]).forEach(function(c){
-          var n = (regs||[]).filter(function(r){ return r.campId === c.id; }).length;
-          h += '<div class="dcard"><b>'+esc(c.title||'')+'</b> — '+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br>'+(c.status==='cancelled'?'<span class="v96-cx">Cancelled</span> ':'')+'<span class="mut small">'+n+' registered</span> <button class="btn ghost" onclick="v96EditCamp(\''+esc(c.id)+'\')">Edit</button> '+(c.status==='cancelled'?'':'<button class="btn ghost" onclick="v96CancelCamp(\''+esc(c.id)+'\')">Cancel Camp</button> ')+'<button class="btn ghost" onclick="removeCamp(\''+esc(c.id)+'\')">Remove</button><div id="v96ed_'+esc(c.id)+'"></div></div>';
+          var _sn = {}; var n = (regs||[]).filter(function(r){ if (r.campId !== c.id) return false; var k = r.phoneNorm || normPhone(r.phone||'') || r.id; if (_sn[k]) return false; _sn[k] = 1; return true; }).length;
+          h += '<div class="dcard"><b>'+esc(c.title||'')+'</b> — '+esc(fmtD(c.date))+(c.time?' • '+esc(c.time):'')+' • '+esc(c.place||'')+(c.photos&&c.photos.length?'<br>'+c.photos.slice(0,3).map(function(p){return '<img class="v69-thumb" src="'+esc(p)+'" alt="Camp photo">';}).join(''):'')+'<br>'+(c.status==='cancelled'?'<span class="v96-cx">Cancelled</span> ':'')+'<button class="btn ghost v104-regbtn" onclick="v104ShowRegs(\''+esc(c.id)+'\')">'+n+' registered — View</button> <button class="btn ghost" onclick="v96EditCamp(\''+esc(c.id)+'\')">Edit</button> '+(c.status==='cancelled'?'':'<button class="btn ghost" onclick="v96CancelCamp(\''+esc(c.id)+'\')">Cancel Camp</button> ')+'<button class="btn ghost" onclick="removeCamp(\''+esc(c.id)+'\')">Remove</button><div id="v104rg_'+esc(c.id)+'"></div><div id="v96ed_'+esc(c.id)+'"></div></div>';
         });
+        window._v104Regs = regs || []; /* v104-campregs */
         admBox.innerHTML = h;
       });
     }
@@ -7582,6 +7587,36 @@ function submitCamp(){ /* v57-D: admin creates a camp */
   });
   });
 }
+/* v104-campregs: admin sees WHO registered for each camp (name, phone, group, time)
+   with Call + WhatsApp. Admin-only: campRegs read is admin-only in Firestore rules,
+   and the list renders only when isAdmin(). Home button shows "Registered ✓". */
+function v104MyKey(){ return 'bdbs_myCampRegs_' + (typeof MY_PHONE_NORM !== 'undefined' && MY_PHONE_NORM ? MY_PHONE_NORM : 'x'); }
+function v104Mine(){ try { return JSON.parse(localStorage.getItem(v104MyKey()) || '[]') || []; } catch(e){ return []; } }
+function v104MarkMine(campId){ try { var a = v104Mine(); if (a.indexOf(campId) < 0) { a.push(campId); localStorage.setItem(v104MyKey(), JSON.stringify(a)); } } catch(e){} }
+function v104IsMine(campId){
+  if (typeof MY_PHONE_NORM === 'undefined' || !MY_PHONE_NORM) return false;
+  if (v104Mine().indexOf(campId) >= 0) return true;
+  try { var regs = lsGet(lsKey('campRegs')) || []; return regs.some(function(r){ return r && r.campId === campId && normPhone(r.phone||'') === normPhone(MY_PHONE_NORM); }); } catch(e){ return false; }
+}
+function v104Time(ts){ if (!ts) return ''; try { var d = new Date(ts); var hh = d.getHours(), mm = d.getMinutes(); var ap = hh >= 12 ? 'PM' : 'AM'; hh = hh % 12 || 12; return fmtDateLocal(d) + ' ' + hh + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap; } catch(e){ return ''; } }
+function v104ShowRegs(campId){
+  var box = document.getElementById('v104rg_' + campId); if (!box) return;
+  if (!isAdmin()) { box.innerHTML = ''; return; }
+  if (box.getAttribute('data-open') === '1') { box.innerHTML = ''; box.setAttribute('data-open', '0'); return; }
+  box.setAttribute('data-open', '1');
+  var regs = (window._v104Regs || []).filter(function(r){ return r && r.campId === campId; })
+    .sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); });
+  var seen = {}; regs = regs.filter(function(r){ var k = r.phoneNorm || normPhone(r.phone||'') || r.id; if (seen[k]) return false; seen[k] = 1; return true; });
+  if (!regs.length) { box.innerHTML = '<div class="v104-rl"><span class="mut small">No registrations yet.</span></div>'; return; }
+  var c = (window._v96Camps || {})[campId] || {};
+  box.innerHTML = '<div class="v104-rl"><b>Registered donors (' + regs.length + ')</b>' + regs.map(function(r, i){
+    var ph = r.phone || '';
+    var msg = 'Assalam-o-Alaikum ' + (r.name || '') + ', this is Basti Dawa Blood Society about your registration for the camp "' + (c.title || 'Blood Donation Camp') + '"' + (c.date ? ' on ' + fmtD(c.date) : '') + '.';
+    return '<div class="v104-row"><div><b>' + (i + 1) + '. ' + esc(r.name || 'Donor') + '</b>' + (r.group ? ' <span class="v104-grp">' + esc(r.group) + '</span>' : '') +
+      '<br><span class="mut small">📞 ' + esc(ph || '—') + (r.createdAt ? ' • ' + esc(v104Time(r.createdAt)) : '') + '</span></div>' +
+      (ph ? '<div class="v104-act"><a class="btn" href="tel:' + esc(ph) + '">Call</a> <a class="btn green" target="_blank" rel="noopener" href="https://wa.me/' + waNum(ph) + '?text=' + encodeURIComponent(msg) + '">WhatsApp</a></div>' : '') + '</div>';
+  }).join('') + '</div>';
+}
 function registerForCamp(campId){ /* v57-D: donor registers from their linked record */
   var msg = document.getElementById('campRegMsg_'+campId);
   var say = function(t){ if (msg) msg.innerHTML = t; };
@@ -7591,9 +7626,9 @@ function registerForCamp(campId){ /* v57-D: donor registers from their linked re
   if (!ph) { say('<span class="err">No phone on your login — please login with your phone number, then register.</span>'); return; }
   qAll('campRegs', function(regs){
     var dup = (regs||[]).some(function(r){ return r.campId === campId && normPhone(r.phone||'') === normPhone(ph); });
-    if (dup) { say('<span class="ok">Already registered for this camp.</span>'); return; }
+    if (dup) { v104MarkMine(campId); say('<span class="ok">Already registered for this camp.</span>'); loadCamps(); return; }
     var reg = {id:uid('campreg'), campId:campId, donorId:MY_DONOR.id||'', name:MY_DONOR.name||'', group:MY_DONOR.group||'', phone:ph, phoneNorm:normPhone(ph), createdAt:Date.now()};
-    qAdd('campRegs', reg, function(){ say('<span class="ok">Registered — the admin will confirm your slot.</span>'); loadCamps(); });
+    qAdd('campRegs', reg, function(){ v104MarkMine(campId); say('<span class="ok">Registered — the admin will confirm your slot.</span>'); loadCamps(); });
   });
 }
 /* v96-edit: admin Edit for Camps / Thalassemia patients / Blood Banks + Cancel Camp.
