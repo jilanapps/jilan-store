@@ -120,7 +120,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody #mc-front{display:flex;flex-direction:column;padding-bottom:80px}
 #memberCardBody .mc-f-logo{display:block;margin:2px auto 0 auto;width:78.6px;height:78.6px}
 #memberCardBody .mc-f-title{text-align:center;font-family:'Arial Black','Arial Narrow',Arial,sans-serif;font-weight:900;
- color:#000;font-size:23px;line-height:1.1;letter-spacing:0.4px;margin-top:1.2px;white-space:nowrap}
+ color:#000;font-size:17.5px;line-height:1.1;letter-spacing:0.4px;margin-top:1.2px;white-space:nowrap}/*v101b-title*/
 #memberCardBody .mc-f-swoosh{display:block;width:302.4px;height:6.7px;margin:0.6px auto 0 auto}
 #memberCardBody .mc-f-photo{display:block;width:106px;height:105px;object-fit:cover;object-position:center 20%;
  border:3px solid #0b2f8f;border-radius:10.9px;margin:16px auto 0 auto}
@@ -216,6 +216,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody .mc-f-photo-ph{display:flex;align-items:center;justify-content:center;background:#dbeafe;color:#0b2f8f;font-weight:900;font-size:30px;width:106px;height:105px;border:3px solid #0b2f8f;border-radius:10.9px;margin:16px auto 0 auto}
 #memberCardBody .side-label{font-size:11px;letter-spacing:2px;color:#c9a227;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:8px}
 #memberCardBody .mc-card{line-height:1.15}
+#memberCardBody .mc-card{border-radius:19.2px} /* v101: CR80 corner 3.18mm on 54mm */
 .cert{max-width:1060px;margin:12px auto;text-align:center;background-color:#0a1f44;padding:18px;border-radius:3px;box-shadow:0 16px 40px rgba(9,31,68,.35);position:relative;container-type:inline-size;color:#1e293b}
 .cert .cert-inner{background:#fbf3dd;border:2px solid #c9a227;border-radius:2px;padding:20px 24px 16px;position:relative}
 .cert .frame{border:1px solid #c9a227;border-radius:2px;padding:12px 18px 12px;position:relative}
@@ -3158,7 +3159,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v100';
+var APP_VERSION = 'v101';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -5729,7 +5730,7 @@ function renderMemberCard(m){
     ' <div class="mc-b-super">Under Supervision</div>' +
     ' <div class="mc-b-foot">BASTI DAWA WELFARE ORGANIZATION</div>' +
     '</div>' +
-    '</div><button class="btn" onclick="printPageJS()">Print Card</button> <button class="btn" onclick="shareMemberCardPDF()">Share Card as PDF</button>';
+    '</div><button class="btn" onclick="printPageJS()">Print Card</button> <button class="btn" onclick="shareMemberCardPDF()">Share Card as PDF</button> <button class="btn" onclick="saveMemberCardPNGs()">Save Card Images (PNG)</button>';
   document.getElementById('memberCardBody').innerHTML = html;
   openModal('memberModal');
   if (typeof QRCode !== 'undefined') { try { new QRCode(document.getElementById('qrBox'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
@@ -5803,7 +5804,7 @@ function dataURLToBytes(dataURL){ var bin = atob(dataURL.split(',')[1]); var byt
    membership card — front side on page 1, back side on page 2. Built with
    a small built-in writer (JPEG bytes go in raw, DCTDecode), so it needs
    no PDF library and works offline. */
-function cardImagePDF(imgs, landscape, fit){
+function cardImagePDF(imgs, landscape, fit, idcard){
   function enc(str){ var b = new Uint8Array(str.length); for (var i=0;i<str.length;i++) b[i] = str.charCodeAt(i) & 0xff; return b; }
   var objs = [];
   objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
@@ -5817,6 +5818,7 @@ function cardImagePDF(imgs, landscape, fit){
     var dw = im.w * scale, dh = im.h * scale;
     var x = (pw - dw) / 2, y = (ph - dh) / 2;
     if (fit && imgs.length === 1) { pw = 595; ph = Math.round(595 * im.h / im.w); dw = pw; dh = ph; x = 0; y = 0; } /* v78: page fits the card exactly */
+    if (idcard) { pw = 153.07; ph = 242.65; dw = pw; dh = ph; x = 0; y = 0; } /* v101: CR80 54 x 85.6 mm, print at 100% */
     var stream = 'q ' + dw.toFixed(2) + ' 0 0 ' + dh.toFixed(2) + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' cm /Im1 Do Q';
     objs[pageObj] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im1 ' + imgObj + ' 0 R >> >> /Contents ' + contentObj + ' 0 R >>';
     objs[imgObj] = {jpeg: im};
@@ -5855,6 +5857,59 @@ function cardImagePDF(imgs, landscape, fit){
   parts.push(enc(xref));
   return new Blob(parts, {type:'application/pdf'});
 }
+/* v101: CR80 ID card output. 54 x 85.6 mm at 300 DPI = 638 x 1011 px,
+   corner radius 3.18 mm = 37.6 px. bg = null -> transparent corners (PNG). */
+var MC_OUT_W = 638, MC_OUT_H = 1011, MC_OUT_R = 37.6;
+function mcRoundCard(src, bg){
+  var c = document.createElement('canvas'); c.width = MC_OUT_W; c.height = MC_OUT_H;
+  var g = c.getContext('2d');
+  if (bg) { g.fillStyle = bg; g.fillRect(0, 0, MC_OUT_W, MC_OUT_H); }
+  var r = MC_OUT_R, w = MC_OUT_W, h = MC_OUT_H;
+  g.save(); g.beginPath();
+  g.moveTo(r, 0); g.lineTo(w - r, 0); g.arcTo(w, 0, w, r, r); g.lineTo(w, h - r); g.arcTo(w, h, w - r, h, r);
+  g.lineTo(r, h); g.arcTo(0, h, 0, h - r, r); g.lineTo(0, r); g.arcTo(0, 0, r, 0, r); g.closePath(); g.clip();
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  g.drawImage(src, 0, 0, src.width, src.height, 0, 0, w, h);
+  g.restore();
+  return c;
+}
+/* add pHYs (300 DPI) to a PNG so print shops read the right physical size */
+function mcPngDpi(bytes, dpi){
+  var ppm = Math.round(dpi / 0.0254);
+  var crcT = window._mcCrcT; if (!crcT) { crcT = window._mcCrcT = []; for (var n=0;n<256;n++){ var cc=n; for (var k=0;k<8;k++) cc = (cc & 1) ? (0xEDB88320 ^ (cc >>> 1)) : (cc >>> 1); crcT[n] = cc >>> 0; } }
+  var chunk = new Uint8Array(21);
+  var dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9); chunk.set([0x70,0x48,0x59,0x73], 4); dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1;
+  var crc = 0xFFFFFFFF; for (var i=4;i<17;i++) crc = crcT[(crc ^ chunk[i]) & 0xff] ^ (crc >>> 8);
+  dv.setUint32(17, (crc ^ 0xFFFFFFFF) >>> 0);
+  var out = new Uint8Array(bytes.length + 21);
+  out.set(bytes.subarray(0, 33), 0); out.set(chunk, 33); out.set(bytes.subarray(33), 54);
+  return out;
+}
+function saveMemberCardPNGs(){
+  var m = window._lastMemberCard; if (!m || !window.html2canvas) return;
+  var cards = document.querySelectorAll('#memberCardBody .mc-card');
+  var cardBody = document.getElementById('memberCardBody');
+  var qrBox = document.getElementById('qrBox');
+  if (qrBox) { var qc = qrBox.querySelector('canvas'); if (qc) { try { var qimg = document.createElement('img'); qimg.src = qc.toDataURL('image/png'); qimg.width = 160; qimg.height = 160; qimg.style.display = 'block'; qrBox.innerHTML = ''; qrBox.appendChild(qimg); } catch(e){} } }
+  if (cardBody) cardBody.classList.add('pdf-capture');
+  var names = ['Front', 'Back'], left = cards.length;
+  cards.forEach(function(card, idx){
+    window.html2canvas(card, {scale:2, backgroundColor:null, useCORS:true}).then(function(canvas){
+      try {
+        var rc = mcRoundCard(canvas, null);
+        var bytes = mcPngDpi(dataURLToBytes(rc.toDataURL('image/png')), 300);
+        var fn = 'BDBS-Member-Card-' + (m.idNo||m.id) + '-' + (names[idx]||idx) + '.png';
+        var blob = new Blob([bytes], {type:'image/png'});
+        if (window.BDBS && window.BDBS.saveImage) {
+          var fr = new FileReader(); fr.onload = function(){ try { window.BDBS.saveImage(fr.result, fn); } catch(e){ saveBlobWeb(blob, fn); } }; fr.readAsDataURL(blob);
+        } else { saveBlobWeb(blob, fn); }
+        window._mcLastPng = window._mcLastPng || []; window._mcLastPng[idx] = bytes;
+      } catch(e){}
+      if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture');
+    }).catch(function(){ if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture'); });
+  });
+}
 function shareMemberCardPDF(){
   var m = window._lastMemberCard; if (!m) return;
   var cards = document.querySelectorAll('#memberCardBody .mc-card');
@@ -5885,7 +5940,7 @@ function shareMemberCardPDF(){
          text PDF always has both pages. */
       if (imgs.length !== cards.length) { shareMemberCardPDFText(); return; }
       try {
-        var blob = cardImagePDF(imgs);
+        var blob = cardImagePDF(imgs, false, false, true);
         var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
         var file = new File([blob], fname, {type:'application/pdf'});
         if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
@@ -5895,7 +5950,7 @@ function shareMemberCardPDF(){
     };
     cards.forEach(function(card, idx){
       window.html2canvas(card, {scale:2, backgroundColor:'#ffffff', useCORS:true}).then(function(canvas){
-        try { imgs[idx] = {data: dataURLToBytes(canvas.toDataURL('image/jpeg', 0.85)), w: canvas.width, h: canvas.height}; } catch(e){}
+        try { var rc = mcRoundCard(canvas, '#ffffff'); imgs[idx] = {data: dataURLToBytes(rc.toDataURL('image/jpeg', 0.92)), w: rc.width, h: rc.height}; } catch(e){}
         done++; if (done === cards.length) finish();
       }).catch(function(){ done++; if (done === cards.length) finish(); });
     });
