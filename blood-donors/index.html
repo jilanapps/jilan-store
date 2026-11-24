@@ -48,6 +48,9 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 .mcard .sig{font-size:12px;color:#5b6b7f;text-align:center;border-top:1px solid #e8edf1;padding-top:10px;margin-top:10px}
 .mcard .side-label{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:8px}
 .pdf-capture .side-label,.pdf-capture .verify-url{display:none!important}
+/*v103-drift*/#memberCardBody.pdf-capture.mc-drift .mc-f-idrow .mc-pill{box-sizing:border-box;height:38px;padding:0 20px 16px 20px}
+#memberCardBody.pdf-capture.mc-drift .mc-f-swoosh{margin-top:12.6px}
+#memberCardBody.pdf-capture.mc-drift .mc-f-photo,#memberCardBody.pdf-capture.mc-drift .mc-f-photo-ph{margin-top:4px}
 .mcard .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px}
 .mcard .kv span{color:#5b6b7f}
 .wcard{position:relative;overflow:hidden;border:3px solid #c9a227;outline:1.5px solid #c9a227;outline-offset:5px;border-radius:16px;padding:26px 22px 0;background:#fffdf6;max-width:540px;box-shadow:var(--shadow-lg);color:#12233a;text-align:center}
@@ -3159,7 +3162,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v102';
+var APP_VERSION = 'v103';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -5892,7 +5895,7 @@ function saveMemberCardPNGs(){
   var cardBody = document.getElementById('memberCardBody');
   var qrBox = document.getElementById('qrBox');
   if (qrBox) { var qc = qrBox.querySelector('canvas'); if (qc) { try { var qimg = document.createElement('img'); qimg.src = qc.toDataURL('image/png'); qimg.width = 160; qimg.height = 160; qimg.style.display = 'block'; qrBox.innerHTML = ''; qrBox.appendChild(qimg); } catch(e){} } }
-  if (cardBody) cardBody.classList.add('pdf-capture');
+  if (cardBody) cardBody.classList.add('pdf-capture'); if (cardBody && /Android/i.test(navigator.userAgent)) cardBody.classList.add('mc-drift');
   var names = ['Front', 'Back'], left = cards.length;
   cards.forEach(function(card, idx){
     window.html2canvas(card, {scale:2, backgroundColor:null, useCORS:true}).then(function(canvas){
@@ -5906,8 +5909,8 @@ function saveMemberCardPNGs(){
         } else { saveBlobWeb(blob, fn); }
         window._mcLastPng = window._mcLastPng || []; window._mcLastPng[idx] = bytes;
       } catch(e){}
-      if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture');
-    }).catch(function(){ if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture'); });
+      if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture','mc-drift');
+    }).catch(function(){ if (--left === 0 && cardBody) cardBody.classList.remove('pdf-capture','mc-drift'); });
   });
 }
 function shareMemberCardPDF(){
@@ -5928,11 +5931,11 @@ function shareMemberCardPDF(){
     var qrBox = document.getElementById('qrBox');
     if (qrBox && !qrBox.querySelector('canvas,img') && typeof QRCode !== 'undefined') { try { new QRCode(qrBox, {text:SITE_BASE + '?verify=' + encodeURIComponent(m.id), width:160, height:160, correctLevel:QRCode.CorrectLevel.M}); } catch(e){} }
     if (qrBox) { var qc = qrBox.querySelector('canvas'); if (qc) { try { var qimg = document.createElement('img'); qimg.src = qc.toDataURL('image/png'); qimg.width = 160; qimg.height = 160; qimg.style.display = 'block'; qrBox.innerHTML = ''; qrBox.appendChild(qimg); } catch(e){} } }
-    if (cardBody) cardBody.classList.add('pdf-capture');
+    if (cardBody) cardBody.classList.add('pdf-capture'); if (cardBody && /Android/i.test(navigator.userAgent)) cardBody.classList.add('mc-drift');
     var done = 0, imgs = [];
     var finish = function(){
       if (shareBtn) { shareBtn.disabled = false; shareBtn.textContent = 'Share Card as PDF'; }
-      if (cardBody) cardBody.classList.remove('pdf-capture');
+      if (cardBody) cardBody.classList.remove('pdf-capture','mc-drift');
       imgs = imgs.filter(function(x){ return !!x; });
       /* If ANY card failed to capture (front card in the app: a local
          image taints the canvas), fall back to the text PDF — a partial
