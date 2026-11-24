@@ -698,7 +698,7 @@
     try { if (window.Android && Android.appVersion) ver = Android.appVersion(); } catch (e) {}
     openSheet(head('About Jilan Reels') + '<div class="sh-body"><div class="field">' +
       '<label>Version ' + esc(ver) + '</label>' +
-      '<div class="c-text">Short videos with friends. Videos up to 30 seconds.</div>' +
+      '<div class="c-text">Short videos with friends. Videos up to 60 seconds.</div>' +
       '<label style="margin-top:10px">Made by Jilan Apps Official, Basti Malook (Multan), Pakistan.</label>' +
       '<label>Contact: jilanappsofficial@gmail.com</label></div></div>');
   }
@@ -908,7 +908,7 @@
     if (!/^video\//.test(f.type || 'video/')) { toast('Please choose a video.'); return; }
     if (f.size > 200 * 1024 * 1024) { toast('This video is too big. Please choose a shorter one.'); return; }
     M.probe(f).then(function (info) {
-      if (info.duration && info.duration > MAX_SEC + 0.5) { URL.revokeObjectURL(info.url); toast('Please choose a video of 30 seconds or less.'); return; }
+      if (info.duration && info.duration > MAX_SEC + 0.5) { URL.revokeObjectURL(info.url); toast('Please choose a video of 60 seconds or less.'); return; }
       showPreview(f, info.url, 0);
     }).catch(function (e) { toast(errMsg(e)); });
   });
@@ -973,7 +973,7 @@
   $('#btnRecord').addEventListener('click', function () {
     startCam().then(function () {
       $('#createPick').classList.add('hidden'); $('#createRec').classList.remove('hidden');
-      $('#recTimer').textContent = '0:00 / 0:30'; $('#recProgress').style.width = '0';
+      $('#recTimer').textContent = '0:00 / 1:00'; $('#recProgress').style.width = '0';
     }).catch(function () {});
   });
   $('#btnFlip').addEventListener('click', function () { if (recorder && recorder.state === 'recording') return; facing = facing === 'user' ? 'environment' : 'user'; startCam().catch(function () {}); });
@@ -1005,7 +1005,7 @@
     recorder.start(500); recStart = Date.now(); $('#btnShutter').classList.add('on');
     recTimer = setInterval(function () {
       var s = (Date.now() - recStart) / 1000;
-      $('#recTimer').textContent = '0:' + String(Math.min(MAX_SEC, Math.floor(s))).padStart(2, '0') + ' / 0:30';
+      var _t = Math.min(MAX_SEC, Math.floor(s)); $('#recTimer').textContent = Math.floor(_t / 60) + ':' + String(_t % 60).padStart(2, '0') + ' / 1:00';
       $('#recProgress').style.width = Math.min(100, s / MAX_SEC * 100) + '%';
       if (s >= MAX_SEC && recorder && recorder.state === 'recording') recorder.stop();
     }, 200);

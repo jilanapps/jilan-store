@@ -10,7 +10,7 @@
   'use strict';
   var L = {};
 
-  L.MAX_SEC = 30;                 // max video length (seconds)
+  L.MAX_SEC = 60;                 // max video length (seconds)
   L.MAX_CAPTION = 150;
   L.MAX_COMMENT = 150;
   L.MAX_BIO = 150;

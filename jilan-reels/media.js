@@ -98,7 +98,7 @@
   M.prepare = function (blob, knownDuration, onProgress) {
     return M.probe(blob).then(function (info) {
       if (knownDuration) info.duration = knownDuration;
-      if (info.duration && info.duration > L.MAX_SEC + 0.5) throw new Error('Please choose a video of 30 seconds or less.');
+      if (info.duration && info.duration > L.MAX_SEC + 0.5) throw new Error('Please choose a video of 60 seconds or less.');
       var plan = L.planCompression(blob.size, info.width, info.height, info.duration || L.MAX_SEC);
       if (!plan.compress) return { blob: blob, compressed: false, duration: info.duration };
       return M.compress(blob, info, onProgress).then(function (out) {
@@ -132,7 +132,7 @@
         if (x.status >= 200 && x.status < 300 && j) {
           try {
             var up = L.pickUpload(j, c.cloudName);
-            if (up.duration > L.MAX_SEC + 1) return rej(new Error('Video is longer than 30 seconds.'));
+            if (up.duration > L.MAX_SEC + 1) return rej(new Error('Video is longer than 60 seconds.'));
             if (!up.duration) up.duration = 1;
             res(up);
           } catch (e) { rej(e); }
