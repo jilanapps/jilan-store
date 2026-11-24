@@ -2777,14 +2777,14 @@
       "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/ittiba-e-sunnat.apk",
       "category": "islamic",
       "color": "#0b5d3b",
-      "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein aur Bayanat",
+      "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein, Bayanat, roz Durood-e-Pak aur 5 zubanein",
       "icon": "icons/ittibaerasool.png",
       "id": "ittiba-e-sunnat",
       "name": "Tehreek Ittiba-e-Sunnat Pakistan",
       "package": "com.jilanapps.ittibaerasool",
-      "size": 809400,
-      "versionCode": 13,
-      "versionName": "2.2",
+      "size": 842265,
+      "versionCode": 14,
+      "versionName": "2.3",
       "web": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/"
     },
     {
