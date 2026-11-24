@@ -803,6 +803,19 @@ header .hside .hdr-register{display:none}
 @media (min-width:700px){header .tagline{display:block}header .hside .hdr-register{display:inline-block}header .hside .bellwrap{width:auto;padding:0 12px}header .hside .bellwrap .hbtn-txt{display:inline}}
 .langsw{max-width:880px;margin:6px auto 0;padding:0;background:transparent!important;border:0!important;gap:6px;justify-content:flex-end;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;color:var(--mut)}
 .langsw::-webkit-scrollbar{display:none}
+/* v98-hdrfull: full header lines back (subtitle + tagline), shown as full-width rows under the top row; header sizes to content */
+header{height:auto!important;max-height:none!important;overflow:visible!important}
+header .hwrap{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;row-gap:0;align-items:center}
+header .hwrap>.mark{grid-column:1;grid-row:1;align-self:center}
+header .hwrap>.pv-htitle{display:contents}
+header .pv-htitle h1{grid-column:2;grid-row:1;align-self:center;min-width:0;overflow-wrap:anywhere}
+header .hwrap>.hside{grid-column:3;grid-row:1;align-self:center;margin-left:0}
+header .pv-htitle p{grid-column:1/-1;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35;overflow-wrap:anywhere;margin:0}
+header .pv-htitle p:not(.tagline){grid-row:2;margin-top:5px}
+header .pv-htitle .tagline{grid-row:3;display:block!important;margin-top:2px;font-size:9.5px!important;line-height:1.35;letter-spacing:.3px!important;text-transform:uppercase;font-weight:700;color:var(--pv-ruby)!important;opacity:1}
+html:not(.light) header .pv-htitle .tagline{color:#FDA4AF!important}
+html[lang="ur"] header .pv-htitle .tagline,html[lang="ar"] header .pv-htitle .tagline,html[lang="sr"] header .pv-htitle .tagline{letter-spacing:0!important;text-transform:none}
+.langsw{padding:2px 0!important}
 .pv-globe{display:inline-flex;align-items:center;color:var(--mut);margin-right:2px;flex:0 0 auto}
 .langbtn{flex:0 0 auto;padding:3px 11px!important;font-size:12px!important;line-height:1.5;border:1px solid var(--line)!important;background:transparent!important;color:var(--ink2)!important;border-radius:999px;font-weight:700}
 .langbtn.on{background:var(--pv-ruby)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 2px 8px var(--brand-ring)}
@@ -3100,7 +3113,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v97';
+var APP_VERSION = 'v98';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
