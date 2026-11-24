@@ -4,294 +4,277 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#064e3b">
-<title>تحریک اتباعِ سنت پاکستان — Tehreek Ittiba-e-Sunnat Pakistan</title>
-<meta name="description" content="تحریک اتباعِ سنت پاکستان — بیانات، کتابیں اور مضامین۔ مفت اینڈرائیڈ ایپ، کوئی اشتہار نہیں۔">
+<title>تحریکِ اتباعِ سنت پاکستان — Tehreek Ittiba-e-Sunnat Pakistan</title>
+<meta name="description" content="تحریکِ اتباعِ سنت پاکستان — عبادت، اطاعت، خدمت">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --emerald:#065f46; --forest:#064e3b; --deep:#022c22; --deep2:#04382a;
-  --gold:#c9a227; --gold-deep:#9a7b14; --amber:#d97706;
+  --emerald:#065f46; --forest:#064e3b; --deep:#022c22;
+  --gold:#c9a227; --gold-deep:#9a7b14;
   --cream:#fdf9ef; --paper:#fffdf6; --card:#ffffff;
   --ink:#1e2a23; --muted:#5d6f64; --line:#e7e0cd;
   --shadow:0 2px 12px rgba(2,44,34,.08);
-  --shadow-lg:0 8px 28px rgba(2,44,34,.14);
+  --shadow-lg:0 8px 28px rgba(2,44,34,.16);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--cream); color:var(--ink);
+body{margin:0; background:var(--cream); color:var(--ink);
   font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic',serif;
-  font-size:17px; line-height:2.15;
-}
+  font-size:17px; line-height:2.15; overflow-x:hidden}
 a{color:var(--emerald)}
-.lat{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate; letter-spacing:.04em}
-.num{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate; font-weight:800}
+.lat{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate}
 
-/* ---------- Brand header ---------- */
-.brand{background:var(--paper); border-bottom:1px solid var(--line)}
-.brand-in{max-width:1020px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; gap:14px}
-.brand img{width:58px; height:58px; border-radius:50%; border:2px solid var(--gold); background:#fff; padding:2px; flex:none}
-.brand .bt{font-weight:700; font-size:1.15em; line-height:1.9; color:var(--forest)}
-.brand .bs{font-size:.72em; color:var(--muted); line-height:1.4}
-.brand .bs .lat{font-size:1.05em; letter-spacing:.08em; text-transform:uppercase}
-
-/* ---------- Sticky nav ---------- */
-nav{position:sticky; top:0; z-index:20; background:var(--forest); border-bottom:3px solid var(--gold); box-shadow:0 2px 10px rgba(0,0,0,.2)}
-nav .nav-in{max-width:1020px; margin:0 auto; padding:6px 10px; display:flex; gap:2px; overflow-x:auto; white-space:nowrap; scrollbar-width:none}
-nav .nav-in::-webkit-scrollbar{display:none}
-nav a{color:#f3e9c8; text-decoration:none; font-size:.95em; padding:6px 12px; border-radius:999px; line-height:1.9}
-nav a:hover, nav a:active{background:rgba(255,255,255,.12); color:#fff}
-
-/* ---------- Hero ---------- */
+/* Hero */
 .hero{
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cpath d='M38 10l6 22 22 6-22 6-6 22-6-22-22-6 22-6z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/%3E%3C/svg%3E"),
     radial-gradient(700px 320px at 50% -80px, rgba(201,162,39,.35), transparent 70%),
     linear-gradient(168deg, var(--deep), var(--forest) 55%, var(--emerald));
-  color:#fff; text-align:center; padding:52px 18px 40px;
+  color:#fff; text-align:center; padding:34px 16px 30px; border-bottom:4px solid var(--gold);
 }
-.hero .logo{width:138px; height:138px; border-radius:50%; background:#fff; padding:7px; border:4px solid var(--gold); box-shadow:0 6px 24px rgba(0,0,0,.45)}
-.hero h1{margin:18px 0 0; font-size:2em; line-height:1.9; font-weight:700}
-.hero .sub{color:#f0e2b6; font-size:.95em; margin-top:2px}
-.hero .sub .lat{letter-spacing:.14em; text-transform:uppercase; font-size:.92em}
-.verse-card{
-  max-width:640px; margin:26px auto 0; background:rgba(255,253,246,.97); color:var(--ink);
-  border:1px solid var(--gold); border-radius:18px; padding:20px 22px 16px; box-shadow:var(--shadow-lg);
-  border-top:5px solid var(--gold);
-}
-.verse-card .va{font-size:1.35em; line-height:2.1; color:var(--forest); font-weight:600}
-.verse-card .vt{font-size:1em; line-height:2.1; color:#3c4a41; margin-top:2px}
-.cta-row{margin-top:28px}
-.btn{
-  display:inline-block; background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; text-decoration:none;
-  font-weight:700; font-size:1.2em; line-height:2; padding:10px 34px; border-radius:16px;
-  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a8841c;
-}
-.btn:hover{filter:brightness(1.06)}
+.hero .logo{width:112px; height:112px; border-radius:50%; background:#fff; padding:6px; border:4px solid var(--gold); box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.hero h1{margin:14px 0 0; font-size:1.75em; line-height:1.9; font-weight:700}
+.hero .en{color:#e8dcb0; font-size:.78em; letter-spacing:.12em; text-transform:uppercase; margin-top:2px}
+.tagline{display:inline-flex; align-items:center; gap:12px; margin-top:12px; padding:2px 22px;
+  border:1px solid rgba(201,162,39,.7); border-radius:999px; background:rgba(0,0,0,.18);
+  color:#ffe9a8; font-weight:700; font-size:1.05em; line-height:2.1}
+.tagline i{width:6px; height:6px; background:var(--gold); transform:rotate(45deg); display:inline-block}
+.cta{margin-top:20px}
+.btn{display:inline-block; background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; text-decoration:none;
+  font-weight:700; font-size:1.05em; line-height:2; padding:8px 28px; border-radius:14px;
+  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a8841c}
 .btn:active{transform:scale(.97)}
-.btn.green{background:linear-gradient(180deg,#0d7a4c,#065f46); color:#fff; border-color:#04402f}
-.meta{color:#cfe3d6; font-size:.9em; margin-top:12px; line-height:1.9}
-.badges{display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:14px}
-.badge{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.35); color:#fdf6d8;
-  border-radius:999px; padding:2px 14px; font-size:.85em; line-height:2}
-.stats{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:24px}
-.stat{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28); border-radius:14px; padding:10px 22px 8px; min-width:96px}
-.stat b{display:block; font-size:1.5em; line-height:1.4; color:#ffe9a8}
-.stat span{font-size:.9em; color:#dceadf}
+.meta{color:#cfe3d6; font-size:.82em; margin:8px 0 0; line-height:1.9}
 
-/* ---------- Layout ---------- */
-main{max-width:1020px; margin:0 auto; padding:26px 16px 56px}
-section{scroll-margin-top:76px}
-.sec-head{text-align:center; margin:34px 0 6px}
-.sec-head .eyebrow{color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em}
-.sec-head h2{color:var(--forest); margin:0; font-size:1.5em; line-height:1.9}
-.sec-head .rule{width:56px; height:3px; background:var(--gold); border-radius:2px; margin:4px auto 0}
-.sec-head p{color:var(--muted); font-size:.95em; margin:6px 0 0}
-.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; margin:16px 0; box-shadow:var(--shadow)}
-.card h2{color:var(--forest); margin:0 0 6px; font-size:1.35em; line-height:1.9}
-.card h2 .rule{display:block; width:52px; height:3px; background:var(--gold); border-radius:2px; margin-top:2px}
-.card h3{color:var(--forest); margin:18px 0 2px; font-size:1.12em; line-height:1.9}
+main{max-width:980px; margin:0 auto; padding:22px 14px 50px}
+
+/* Tab tiles */
+.tiles{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  min-height:118px; padding:14px 8px 10px; text-align:center; text-decoration:none; color:var(--forest);
+  background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow);
+  border-top:4px solid var(--gold); transition:transform .15s, box-shadow .15s, border-color .15s; cursor:pointer}
+.tile:hover,.tile:active{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--gold)}
+.tile .ic{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(160deg,var(--forest),var(--emerald)); box-shadow:0 3px 10px rgba(2,44,34,.25)}
+.tile .ic svg{width:22px; height:22px}
+.tile .t{font-weight:700; font-size:.98em; line-height:1.85}
+
+/* Panels */
+.panel{display:none; animation:fade .25s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+.back{display:inline-flex; align-items:center; gap:8px; background:var(--forest); color:#fff; text-decoration:none;
+  border-radius:999px; padding:2px 18px; font-size:.92em; line-height:2.1; box-shadow:var(--shadow); cursor:pointer; border:none; font-family:inherit}
+.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 18px; margin:14px 0; box-shadow:var(--shadow); border-top:5px solid var(--gold)}
+.card h2{color:var(--forest); margin:0 0 4px; font-size:1.4em; line-height:1.9; text-align:center}
+.card h2 + .rule{width:56px; height:3px; background:var(--gold); border-radius:2px; margin:0 auto 14px}
+.card h3{color:var(--forest); margin:16px 0 2px; font-size:1.1em; line-height:1.9}
 .card p{margin:6px 0}
+.taaruf p{font-size:1.06em; line-height:2.45; text-align:right}
+.taaruf .closing{margin-top:14px; padding:14px 16px; background:#fbf3d9; border:1px solid #e8d5a0; border-radius:14px; text-align:center; font-weight:600; color:#4a3b06}
 .muted{color:var(--muted); font-size:.92em}
-.center{text-align:center}
-.note{background:#fbf3d9; border:1px solid #e8d5a0; border-radius:14px; padding:14px 18px; margin:14px 0}
-.note b{color:#6d5708}
-
-/* ---------- Quick cards ---------- */
-.grid{display:grid; grid-template-columns:1fr; gap:14px; margin:20px 0 8px}
-.feat{display:block; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 16px 18px; text-align:center; box-shadow:var(--shadow); text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s, transform .15s}
-.feat:hover, .feat:active{border-color:var(--gold); box-shadow:var(--shadow-lg); transform:translateY(-2px)}
-.feat .ic{font-size:34px; line-height:1.4}
-.feat .t{font-weight:700; margin-top:2px; font-size:1.08em; color:var(--forest)}
-.feat .u{color:var(--muted); font-size:.88em; line-height:2}
-.feat .go{color:var(--gold-deep); font-size:.85em; font-weight:700}
-
-/* ---------- Feature detail grid ---------- */
-.features{display:grid; grid-template-columns:1fr; gap:14px; margin:16px 0}
-.feature{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:var(--shadow)}
-.feature .eyebrow{color:var(--gold-deep); font-size:.78em; font-weight:700; letter-spacing:.16em}
-.feature h3{color:var(--forest); margin:0 0 4px; font-size:1.3em; line-height:1.9}
-.feature p{margin:6px 0}
-.feature.featured{border-top:5px solid var(--gold); background:linear-gradient(180deg,#fffdf4,#fff)}
-.chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
-.chip{background:#eef5ef; border:1px solid #cfdfd2; color:var(--forest); border-radius:999px; padding:2px 13px; font-size:.86em; line-height:2}
-
-/* ---------- Bayanat ---------- */
-.bayan{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--shadow); transition:border-color .15s, box-shadow .15s}
-.bayan:hover, .bayan:active{border-color:var(--gold); box-shadow:var(--shadow-lg)}
-.bayan>div{min-width:0}
-.bayan .play{flex:none; width:44px; height:44px; border-radius:50%; background:var(--emerald); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px}
-.bayan .bt{font-weight:700; font-size:1em; line-height:1.9; overflow-wrap:break-word; word-break:break-word}
-.bayan .bm{color:var(--muted); font-size:.82em; line-height:1.8}
-
-/* ---------- Taaruf / dev ---------- */
-.baani{display:flex; gap:20px; align-items:flex-start}
+.soon{text-align:center; padding:26px 10px 18px}
+.soon .orn{width:64px; height:64px; margin:0 auto 6px}
+.soon b{display:block; color:var(--forest); font-size:1.2em}
+.soon span{color:var(--muted); font-size:.92em}
+.baani{display:flex; gap:18px; align-items:flex-start}
 .baani img{width:160px; max-width:42%; border-radius:16px; border:3px solid var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.18); flex:none}
 .deg{color:var(--muted); font-size:.92em}
-.maqsad{text-align:center; font-size:1.22em; font-weight:700; color:var(--forest); margin:10px 0 0; line-height:2}
-.words{text-align:center; color:var(--muted); letter-spacing:1px; line-height:2}
-.dev{display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; margin:14px 0; box-shadow:var(--shadow)}
-.dev img{width:92px; height:92px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); flex:none}
-.dev .dn{font-weight:700; font-size:1.12em; color:var(--forest)}
-.dev .dr{color:var(--muted); font-size:.9em}
-.dev a{color:var(--emerald); overflow-wrap:anywhere}
+.chain{display:flex; flex-direction:column; align-items:center; gap:4px; margin:6px 0}
+.chain .node{width:100%; max-width:420px; text-align:center; background:#f3f8f4; border:1px solid #cfdfd2; border-radius:14px; padding:8px 12px; color:var(--forest); font-weight:700; line-height:2}
+.chain .arrow{color:var(--gold-deep); font-size:1.1em; line-height:1}
+.people{display:grid; grid-template-columns:1fr; gap:10px}
+.person{display:flex; align-items:center; gap:12px; background:#fafcf9; border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+.person .av{width:44px; height:44px; border-radius:50%; flex:none; background:linear-gradient(160deg,var(--forest),var(--emerald)); display:flex; align-items:center; justify-content:center}
+.person .av svg{width:22px; height:22px}
+.person .pn{font-weight:700; color:var(--forest); line-height:1.9}
+.chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.chip{background:#eef5ef; border:1px solid #cfdfd2; color:var(--forest); border-radius:999px; padding:2px 16px; font-size:.95em; line-height:2.1}
+.bayan{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--shadow)}
+.bayan>div{min-width:0}
+.bayan .play{flex:none; width:42px; height:42px; border-radius:50%; background:var(--emerald); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
+.bayan .bt{font-weight:700; font-size:.95em; line-height:1.9; overflow-wrap:break-word; word-break:break-word}
+.bayan .bm{color:var(--muted); font-size:.8em; line-height:1.8}
 
-/* ---------- Footer ---------- */
-footer{background:var(--deep); color:#cfe3d6; margin-top:44px; padding:34px 18px 26px; text-align:center}
-footer .ft{font-size:1.15em; font-weight:700; color:#ffe9a8; line-height:2}
-footer .fl{font-size:.88em; color:#9db8a8; line-height:2}
-footer nav2, footer .fnav{margin-top:10px}
-footer .fnav a{color:#cfe3d6; text-decoration:none; font-size:.88em; margin:0 8px}
-footer .fnav a:hover{color:#fff; text-decoration:underline}
+footer{background:var(--deep); color:#cfe3d6; padding:28px 16px 22px; text-align:center}
+footer .ft{font-size:1.1em; font-weight:700; color:#ffe9a8; line-height:2}
+footer .fl{font-size:.85em; color:#9db8a8; line-height:2}
 
-@media(min-width:600px){
-  .grid{grid-template-columns:1fr 1fr}
-  .features{grid-template-columns:1fr 1fr}
-  .feature.featured{grid-column:1 / -1}
-}
-@media(min-width:1024px){
-  body{font-size:18px}
-  .hero h1{font-size:2.3em}
-  .grid{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:560px){
-  .hero{padding:42px 14px 32px}
-  .hero h1{font-size:1.65em}
-  .hero .logo{width:118px; height:118px}
-  .dev{flex-direction:column; text-align:center}
-  .baani{flex-direction:column; align-items:center; text-align:center}
-  .baani img{max-width:72%}
-  .btn{padding:10px 26px; font-size:1.1em}
-  .card, .feature{padding:20px 16px}
-  .brand .bt{font-size:1.02em}
-}
+@media(max-width:599px){ .tile:last-child:nth-child(odd){grid-column:1 / -1} }
+@media(min-width:600px){ .tiles{grid-template-columns:repeat(3,1fr)} .people{grid-template-columns:1fr 1fr} }
+@media(min-width:960px){ body{font-size:18px} .tiles{grid-template-columns:repeat(5,1fr)} }
+@media(max-width:560px){ .baani{flex-direction:column; align-items:center; text-align:center} .baani img{max-width:70%} }
 </style>
 </head>
 <body>
 
-<header class="brand">
-  <div class="brand-in">
-    <img src="logo.png" alt="تحریک اتباعِ سنت پاکستان کا لوگو">
-    <div>
-      <div class="bt">تحریک اتباعِ سنت پاکستان</div>
-      <div class="bs"><span class="lat">Tehreek Ittiba-e-Sunnat Pakistan</span> — سنت اور خدمتِ انسانیت</div>
-    </div>
-  </div>
-</header>
-
-<nav>
-  <div class="nav-in">
-    <a href="#mazameen">مضامین</a><a href="#bayanat">بیانات</a><a href="#kitabein">کتابیں</a><a href="#more">مزید</a>
-  </div>
-</nav>
-
 <header class="hero">
-  <img class="logo" src="logo.png" alt="Tehreek Ittiba-e-Sunnat logo">
-  <h1>تحریک اتباعِ سنت پاکستان</h1>
-  <div class="sub"><span class="lat">Tehreek Ittiba-e-Sunnat Pakistan</span></div>
-
-  <div class="verse-card">
-    <div class="va">فَاِتَّبِعُونِیْ یُحْبِبْكُمُ اللّٰهُ</div>
-    <div class="vt">رسولِ اکرم ﷺ کی اتباع ہی اللہ کی محبت کی علامت ہے۔</div>
-  </div>
-
-  <div class="cta-row">
-    <a class="btn" href="ittiba-e-sunnat.apk" download>⬇ ایپ ڈاؤن لوڈ کریں – v2.2</a>
-    <p class="meta"><span class="lat" dir="ltr">Android 7.0+</span> • مفت • کوئی اشتہار نہیں</p>
-  </div>
-
-  <div class="badges">
-    <span class="badge">✓ مفت</span>
-    <span class="badge">✓ کوئی اشتہار نہیں</span>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><b class="num">10</b><span>بیانات</span></div>
+  <img class="logo" src="logo.png" alt="تحریکِ اتباعِ سنت پاکستان کا لوگو">
+  <h1>تحریکِ اتباعِ سنت پاکستان</h1>
+  <div class="en lat">Tehreek Ittiba-e-Sunnat Pakistan</div>
+  <div class="tagline">عبادت <i></i> اطاعت <i></i> خدمت</div>
+  <div class="cta">
+    <a class="btn" href="ittiba-e-sunnat.apk" download>ایپ ڈاؤن لوڈ کریں</a>
+    <p class="meta"><span class="lat">Android 7.0+</span></p>
   </div>
 </header>
 
 <main>
-  <div class="features">
-    <section class="feature" id="mazameen">
-      <div class="eyebrow"><span class="lat">ARTICLES</span></div>
-      <h3>✍️ مضامین</h3>
-      <p>مضامین جلد آ رہے ہیں — ان شاء اللہ یہاں تحریک کے مضامین شامل کیے جائیں گے۔</p>
-    </section>
-  </div>
+  <!-- HOME: tab tiles (order follows Dr Asif's sheet; no numbers shown) -->
+  <section id="home" class="panel on">
+    <div class="tiles" id="tiles"></div>
+  </section>
 
-  <section class="card" id="taaruf">
-    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">ABOUT THE TEHREEK</span></div>
-    <h2>👤 تعارف — بانیِ تحریک<span class="rule"></span></h2>
-    <div class="baani">
-      <img src="peer-photo.jpg" alt="Peer Muhammad Karamat Ali">
-      <div>
-        <h3 style="margin-top:0">بانیِ تحریک اتباعِ سنت پاکستان</h3>
-        <p><b>Baani-e-Tehreek Ittiba-e-Sunnat Pakistan — Peer-e-Tariqat Karamat Ali Razzaqi Azimi Mujaddidi Naqshbandi</b><br><span class="deg">(MA, LLB)</span></p>
+  <!-- 1 -->
+  <section class="panel" id="taaruf" data-title="تحریک کا تعارف">
+    <div class="card taaruf">
+      <h2>تحریک کا تعارف</h2><div class="rule"></div>
+      <p>یہ ایک غیر سیاسی، فرقہ پرستی سے پاک اصلاحی تحریک ہے جو امامِ ربانی مجدد الفِ ثانیؒ اور اپنے مرشدینِ کاملین، شمس الکونین خواجہ محمد عبدالخالق نقشبندی، قادری، سہروردیؒ، شمس العارفین حضرت سائیں عبدالرزاق خالقی نقشبندیؒ اور امام الذاکرین سائیں محمد عظیم اللہ رزاقی نقشبندیؒ کے طریقے پر لوگوں کو شریعت اور سنت کی طرف بلاتی ہے۔</p>
+      <div class="closing">یہاں نہ لالچ ہے، نہ شہرت و کثرت کا شوق، صرف اللہ کی رضا اور اصلاحِ قلب و نفس ہے۔</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="panel" id="maqasid" data-title="تحریک کے مقاصد"><div class="card"><h2>تحریک کے مقاصد</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+
+  <!-- 3 -->
+  <section class="panel" id="baani" data-title="بانی و قائد کا تعارف">
+    <div class="card">
+      <h2>بانی و قائد کا تعارف</h2><div class="rule"></div>
+      <div class="baani">
+        <img src="peer-photo.jpg" alt="Peer-e-Tariqat Karamat Ali">
+        <div>
+          <h3 style="margin-top:0">بانیِ تحریک اتباعِ سنت پاکستان</h3>
+          <p><b class="lat" style="font-size:.9em">Baani-e-Tehreek Ittiba-e-Sunnat Pakistan — Peer-e-Tariqat Karamat Ali Razzaqi Azimi Mujaddidi Naqshbandi</b><br><span class="deg lat">(MA, LLB)</span></p>
+        </div>
       </div>
-    </div>
-    <h3>انجینئر شعیب عالم عظیمی مجددی</h3>
-    <p><b>Engineer Shoaib Aalam Azimi Mujaddidi</b><br><span class="deg">(MA Islamiat)</span></p>
-    <div class="note">
-      <div class="maqsad">فروغِ شرع و سنت اور خدمتِ انسانیت ہمارا مقصد ہے</div>
-      <div class="words">عبادت، اطاعت، خدمت</div>
+      <p class="muted" style="text-align:center; margin-top:12px">مزید تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</p>
     </div>
   </section>
 
-  <section class="card" id="bayanat">
-    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">BAYANAT</span></div>
-    <h2>🎙️ بیانات<span class="rule"></span></h2>
-    <p class="muted">کسی بیان پر دبائیں — ویڈیو یوٹیوب پر چلے گی۔</p>
-    <a class="bayan" href="https://youtu.be/jz61CID4Jxw" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Dil Ko Tarpa Dene Wali Awaz Or Manqabat Faiz e Saein Jari Rahy Ga Shoaib Aalam Naqshbandi Azeemi Sb</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/sGwVVdiUtFs" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Huzur ﷺ Ka Ikhlaq Kaisa Tha? Peer e Tareeqat Hazrat Saein Karamat Ali Azeemi Naqshbandi Hafizahullah</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/huyrvR9OlCQ" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Kalam e Sultan Bahu Rehmatullah Aleh Darvesh Qari Ajmal Qadri Hafizahullah Saahib at Vehari Mehfil</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/ou6Q9KJGNhE" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Mairaj Beautiful Byan Peer e Tareeqat Hazrat Saein Karamat Ali Razzaqi Azeemi Mujadadi Hafizahullah</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/zkH9RGJhJBM" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Rohani/Wajdani Bayan Ay Mehboob hum ne aapko Alkousar ata kia Hazrat Saein Karamat Ali Razzaqi Sahib</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/Hgw23q4PKlM" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Saein Abdul Razzaq Naqshbandi Rehmatullah Aleh with Saein Karamat Ali Azeemi Hafizahullah Sahib</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/TOw_KB2T5Nc" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Shab e Mairaj Huzur Karamat Ali Azeemi Razzaqi Khalqi Naqshbandi Mujadadi Hafizahullah Sahib</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/xBE363Fj1hw" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Sohna Ay Amina Tera Lal Very Beautiful Naat and amazing heart touching voice Qari Ajmal Qadri Saahib</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/k7gSNhxz-bs" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Toheed_Aj_K_2_Number_Peero_Ki_Chitrol_Jin_Kis_Dakhil_Hota_Hay_Larki_Me_Toheed_Kia_Hay? Huzur Karamat</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-    <a class="bayan" href="https://youtu.be/xvbV0lxBh_0" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt">Ye Nazar Mere Peer Ki</div><div class="bm">YouTube — Dr Mohammad Asif Ameen Attari</div></div></a>
-  </section>
-
-  <section class="card" id="kitabein">
-    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">BOOKS</span></div>
-    <h2>📚 کتابیں<span class="rule"></span></h2>
-    <p>بانیِ تحریک کی کتابیں جلد شامل کی جائیں گی۔</p>
-  </section>
-
-  <section class="card" id="more">
-    <div class="eyebrow" style="color:var(--gold-deep); font-size:.8em; font-weight:700; letter-spacing:.14em"><span class="lat">MORE</span></div>
-    <h2>ℹ️ مزید<span class="rule"></span></h2>
-    <div class="dev">
-      <img src="developer-photo.jpg" alt="Dr Asif">
-      <div>
-        <div class="dn">ڈاکٹر محمد آصف امین عطاری کرامتی نقشبندی</div>
-        <div class="dr">Developer — Jilan Apps Official</div>
-        <a href="https://jilanapps.github.io/jilan-store/business/" target="_blank" rel="noopener">🌐 jilanapps.github.io/jilan-store/business</a>
+  <!-- 4 -->
+  <section class="panel" id="murshideen" data-title="مرشدینِ کاملین کا تعارف">
+    <div class="card">
+      <h2>مرشدینِ کاملین کا تعارف</h2><div class="rule"></div>
+      <div class="chain">
+        <div class="node">خواجہ عبدالخالقؒ</div><div class="arrow">▼</div>
+        <div class="node">سائیں جیؒ</div><div class="arrow">▼</div>
+        <div class="node">سائیں عظیم اللہؒ</div>
       </div>
-    </div>
-    <div class="note">
-      <b>📖 راہِ نور — اسلامی ایپ</b><br>
-      ڈاکٹر آصف کی دوسری اسلامی ایپ — راہِ نور۔<br>
-      <a href="https://jilanapps.github.io/rah-e-noor/" target="_blank" rel="noopener">🌐 rah-e-noor کھولیں</a>
-    </div>
-    <div class="center">
-      <a class="btn green" href="ittiba-e-sunnat.apk" download>⬇ ایپ ڈاؤن لوڈ کریں – v2.2</a>
-      <p class="muted"><span class="lat" dir="ltr">Android 7.0+</span> • مفت • کوئی اشتہار نہیں</p>
+      <p class="muted" style="text-align:center; margin-top:10px">تصاویر اور مزارات کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</p>
     </div>
   </section>
+
+  <!-- 5 -->
+  <section class="panel" id="mubalighin" data-title="مبلغین کا تعارف">
+    <div class="card">
+      <h2>مبلغین کا تعارف</h2><div class="rule"></div>
+      <div class="people" id="people"></div>
+      <p class="muted" style="text-align:center; margin-top:12px">تصاویر اور ویڈیوز جلد شامل کی جائیں گی، ان شاء اللہ۔</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="panel" id="marakiz" data-title="ذیلی مراکز و مدارس">
+    <div class="card">
+      <h2>ذیلی مراکز و مدارس</h2><div class="rule"></div>
+      <div class="chips">
+        <span class="chip">اسلام پور</span><span class="chip">کوٹلی نجابت</span><span class="chip">وہاڑی</span><span class="chip">کوٹ مصری خان</span><span class="chip">مہاجر گوٹھ</span><span class="chip">گوٹھ ابڑو</span><span class="chip">35 چک</span><span class="chip">راؤ گڑھ</span>
+      </div>
+      <p class="muted" style="text-align:center; margin-top:12px">باقی مراکز و مدارس کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="panel" id="bayanat" data-title="بیانات">
+    <div class="card">
+      <h2>بیانات</h2><div class="rule"></div>
+      <p class="muted" style="text-align:center">کسی بیان پر دبائیں — ویڈیو یوٹیوب پر چلے گی۔</p>
+      <a class="bayan" href="https://youtu.be/jz61CID4Jxw" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Dil Ko Tarpa Dene Wali Awaz Or Manqabat Faiz e Saein Jari Rahy Ga Shoaib Aalam Naqshbandi Azeemi Sb</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/sGwVVdiUtFs" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Huzur ﷺ Ka Ikhlaq Kaisa Tha? Peer e Tareeqat Hazrat Saein Karamat Ali Azeemi Naqshbandi Hafizahullah</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/huyrvR9OlCQ" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Kalam e Sultan Bahu Rehmatullah Aleh Darvesh Qari Ajmal Qadri Hafizahullah Saahib at Vehari Mehfil</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/ou6Q9KJGNhE" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Mairaj Beautiful Byan Peer e Tareeqat Hazrat Saein Karamat Ali Razzaqi Azeemi Mujadadi Hafizahullah</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/zkH9RGJhJBM" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Rohani/Wajdani Bayan Ay Mehboob hum ne aapko Alkousar ata kia Hazrat Saein Karamat Ali Razzaqi Sahib</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/Hgw23q4PKlM" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Saein Abdul Razzaq Naqshbandi Rehmatullah Aleh with Saein Karamat Ali Azeemi Hafizahullah Sahib</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/TOw_KB2T5Nc" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Shab e Mairaj Huzur Karamat Ali Azeemi Razzaqi Khalqi Naqshbandi Mujadadi Hafizahullah Sahib</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/xBE363Fj1hw" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Sohna Ay Amina Tera Lal Very Beautiful Naat and amazing heart touching voice Qari Ajmal Qadri Saahib</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/k7gSNhxz-bs" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Toheed_Aj_K_2_Number_Peero_Ki_Chitrol_Jin_Kis_Dakhil_Hota_Hay_Larki_Me_Toheed_Kia_Hay? Huzur Karamat</div><div class="bm">YouTube</div></div></a>
+      <a class="bayan" href="https://youtu.be/xvbV0lxBh_0" target="_blank" rel="noopener"><div class="play">▶</div><div><div class="bt lat">Ye Nazar Mere Peer Ki</div><div class="bm">YouTube</div></div></a>
+    </div>
+  </section>
+
+  <!-- 8 – 15 placeholders -->
+  <section class="panel" id="kutub" data-title="کتب"><div class="card"><h2>کتب</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="gallery" data-title="پکچر گیلری"><div class="card"><h2>پکچر گیلری</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="bait" data-title="بیعت و طریقت"><div class="card"><h2>بیعت و طریقت</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="mamulat" data-title="معمولاتِ سلسلہ"><div class="card"><h2>معمولاتِ سلسلہ</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="shajra" data-title="شجرۂ طریقت"><div class="card"><h2>شجرۂ طریقت</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="azkar" data-title="اذکارِ مسنونہ"><div class="card"><h2>اذکارِ مسنونہ</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="programs" data-title="سالانہ پروگرامز"><div class="card"><h2>سالانہ پروگرامز</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="rabta" data-title="رابطہ"><div class="card"><h2>رابطہ</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
 </main>
 
 <footer>
-  <div class="ft">تحریک اتباعِ سنت پاکستان</div>
-  <div class="fl">بیانات، کتابیں اور مضامین</div>
-  <div class="fnav">
-    <a href="#mazameen">مضامین</a><a href="#bayanat">بیانات</a><a href="#kitabein">کتابیں</a>
-  </div>
-  <div class="fl" style="margin-top:8px">تیار کردہ — Jilan Apps Official</div>
-  <div class="fl" dir="ltr" style="margin-top:6px">© 2026 Tehreek Ittiba-e-Sunnat Pakistan — All Rights Reserved</div>
+  <div class="ft">تحریکِ اتباعِ سنت پاکستان</div>
+  <div class="fl">عبادت ۔ اطاعت ۔ خدمت</div>
+  <div class="fl" style="margin-top:8px">تیار کردہ — <span class="lat">Jilan Apps Official</span></div>
+  <div class="fl lat" style="margin-top:6px">© 2026 Tehreek Ittiba-e-Sunnat Pakistan — All Rights Reserved</div>
 </footer>
+
+<script>
+(function(){
+  var ICON = {
+    moon:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+    star:'<path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z"/>',
+    book:'<path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-4a3 3 0 0 0-3 3"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5 6.5-5s5.7 1.5 6.5 5"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.2 4.8 1.7 5.5 4.9"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+    mosque:'<path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M5 21V12h14v9"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/>',
+    mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>',
+    image:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-9 8"/>',
+    hand:'<path d="M7 11V6a1.5 1.5 0 0 1 3 0v4"/><path d="M10 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M13 10V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M16 9.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4a1.5 1.5 0 0 1 2.6-1.5L7 14"/>',
+    clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>',
+    tree:'<circle cx="12" cy="4.5" r="2"/><circle cx="6" cy="13" r="2"/><circle cx="18" cy="13" r="2"/><circle cx="12" cy="20" r="2"/><path d="M12 6.5v11.5M12 9l-6 2.2M12 9l6 2.2"/>',
+    beads:'<circle cx="12" cy="12" r="7.5" stroke-dasharray="1.5 3.2"/><path d="M12 19.5v2.5"/>',
+    cal:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
+  };
+  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="#ffe9a8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ICON[k]+'</svg>';}
+  var TABS=[['taaruf','star'],['maqasid','target'],['baani','user'],['murshideen','moon'],['mubalighin','users'],
+    ['marakiz','mosque'],['bayanat','mic'],['kutub','book'],['gallery','image'],['bait','hand'],
+    ['mamulat','clock'],['shajra','tree'],['azkar','beads'],['programs','cal'],['rabta','phone']];
+  var tiles=document.getElementById('tiles'), html='';
+  TABS.forEach(function(t){
+    var title=document.getElementById(t[0]).getAttribute('data-title');
+    html+='<a class="tile" href="#'+t[0]+'"><span class="ic">'+svg(t[1])+'</span><span class="t">'+title+'</span></a>';
+  });
+  tiles.innerHTML=html;
+
+  var PEOPLE=['انجینئر شعیب عالم','مزمل اورنگزیب','منظور حسین','سعید اختر','مسیح اللہ'];
+  document.getElementById('people').innerHTML=PEOPLE.map(function(n){
+    return '<div class="person"><span class="av">'+svg('user')+'</span><span class="pn">'+n+'</span></div>';}).join('');
+
+  var SOON='<div class="soon"><svg class="orn" viewBox="0 0 64 64"><g fill="none" stroke="#c9a227" stroke-width="2"><rect x="14" y="14" width="36" height="36" transform="rotate(45 32 32)"/><rect x="14" y="14" width="36" height="36"/></g><circle cx="32" cy="32" r="6" fill="#065f46"/></svg><b>جلد آ رہا ہے</b><span>اس حصے کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</span></div>';
+  Array.prototype.forEach.call(document.querySelectorAll('.soon-slot'),function(s){s.innerHTML=SOON;});
+
+  // Back button in every content panel
+  Array.prototype.forEach.call(document.querySelectorAll('.panel:not(#home)'),function(p){
+    var b=document.createElement('a'); b.className='back'; b.href='#home'; b.textContent='→ واپس';
+    p.insertBefore(b,p.firstChild);
+  });
+
+  function show(){
+    var id=(location.hash||'#home').slice(1);
+    if(!document.getElementById(id)||!document.getElementById(id).classList.contains('panel')) id='home';
+    Array.prototype.forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.toggle('on',p.id===id);});
+    if(id!=='home'){ document.querySelector('main').scrollIntoView({behavior:'smooth'}); }
+  }
+  window.addEventListener('hashchange',show); show();
+})();
+</script>
 </body>
 </html>
