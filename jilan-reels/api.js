@@ -11,9 +11,10 @@
   var L = window.JRLib;
   var Api = window.JRApi = {
     me: null,          // { uid, ...users/{uid} data } or null
-    state: { likes: {}, follow: {}, blocks: {}, comments: {} },
+    state: { likes: {}, follow: {}, blocks: {}, comments: {}, clikes: {}, favs: {} },
     isAdmin: false,
-    admins: []
+    admins: [],
+    verified: []
   };
   function db() { return window.JRAuth.db; }
   function FV() { return firebase.firestore.FieldValue; }
@@ -36,10 +37,11 @@
   /* ---------- start-up: 3 small reads ---------- */
   Api.loadMe = function (u) {
     Api.me = null; Api.isAdmin = false; Api.admins = [];
-    Api.state = { likes: {}, follow: {}, blocks: {}, comments: {} };
-    if (!u) return Promise.resolve(null);
+    Api.state = { likes: {}, follow: {}, blocks: {}, comments: {}, clikes: {}, favs: {} };
+    if (!u) { Api.loadConfig(); return Promise.resolve(null); }
     var cfgP = db().collection('config').doc('app').get().then(function (d) {
       Api.admins = (d.exists && Array.isArray(d.data().admins)) ? d.data().admins : [];
+      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : [];
       Api.isAdmin = Api.admins.indexOf(u.uid) >= 0;
     }).catch(function () {});
     var meP = db().collection('users').doc(u.uid).get();
@@ -48,7 +50,7 @@
       var meDoc = r[1], st = r[2];
       if (st && st.exists) {
         var s = st.data() || {};
-        Api.state = { likes: s.likes || {}, follow: s.follow || {}, blocks: s.blocks || {}, comments: s.comments || {} };
+        Api.state = { likes: s.likes || {}, follow: s.follow || {}, blocks: s.blocks || {}, comments: s.comments || {}, clikes: s.clikes || {}, favs: s.favs || {} };
       }
       if (!meDoc.exists) return null;              // needs a username first
       Api.me = docData(meDoc); Api.me.uid = u.uid;
@@ -163,6 +165,7 @@
     }
     b.set(stateRef(), { likes: likes }, { merge: true });
     return b.commit().then(function () {
+      if (on && v.ownerUid && v.ownerUid !== uid()) Api.notify(v.ownerUid, 'like', { vid: v.id });
       Object.keys(likes).forEach(function (k) { if (k === v.id && on) Api.state.likes[k] = likes[k]; else delete Api.state.likes[k]; });
     });
   };
@@ -193,7 +196,7 @@
     };
     var p = on ? go(true) : tref.get().then(function (d) { return go(d.exists); });
     return p.then(function () {
-      if (on) { Api.state.follow[target] = f[target]; Api.me.following = (Api.me.following || 0) + 1; }
+      if (on) { Api.state.follow[target] = f[target]; Api.me.following = (Api.me.following || 0) + 1; Api.notify(target, 'follow', {}); }
       else { delete Api.state.follow[target]; Api.me.following = Math.max(0, (Api.me.following || 0) - 1); }
     }).catch(function (e) {
       if (!on && e && e.code === 'permission-denied') {
@@ -211,17 +214,21 @@
     return vids().doc(vid).collection('comments').orderBy('createdAt', 'desc').limit(50).get()
       .then(function (qs) { return qs.docs.map(docData); });
   };
-  Api.addComment = function (v, text) {
+  Api.addComment = function (v, text, reply) {
     needMe();
     text = L.cleanText(text, L.MAX_COMMENT);
     if (!text) return Promise.reject(new Error('Write a comment first.'));
     var vref = vids().doc(v.id), cref = vref.collection('comments').doc(), b = db().batch();
     var data = { uid: uid(), name: Api.me.name, username: Api.me.username, text: text, createdAt: ST() };
+    if (reply && reply.id) { data.replyTo = String(reply.id); data.replyName = String(reply.username || '').slice(0, 40); }
     b.set(cref, data);
     b.update(vref, { commentCount: inc(1), lastCommentId: cref.id });
     b.set(stateRef(), { comments: keyOf(v.id, cref.id) }, { merge: true });
     return b.commit().then(function () {
       Api.state.comments[cref.id] = v.id;
+      if (v.ownerUid !== uid()) Api.notify(v.ownerUid, 'comment', { vid: v.id, text: text });
+      if (reply && reply.uid && reply.uid !== uid() && reply.uid !== v.ownerUid) Api.notify(reply.uid, 'reply', { vid: v.id, text: text });
+      L.parseMentions(text).forEach(function (un) { Api.notify(null, 'mention', { vid: v.id, text: text }, un); });
       data.id = cref.id; data.createdAt = { toMillis: function () { return Date.now(); } };
       return data;
     }).catch(function (e) {
@@ -242,7 +249,7 @@
   };
 
   /* ---------- videos ---------- */
-  Api.createVideo = function (up, caption) {
+  Api.createVideo = function (up, caption, extras) {
     needMe();
     caption = L.cleanText(caption, L.MAX_CAPTION);
     var ref = vids().doc(), b = db().batch();
@@ -253,11 +260,21 @@
       caption: caption, tags: L.parseHashtags(caption), video: video,
       likeCount: 0, commentCount: 0, createdAt: ST(), hidden: false
     };
+    var x = extras || {};
+    if (x.soundId) { data.soundId = String(x.soundId); data.soundName = L.cleanText(x.soundName || 'Original sound', 60); }
+    if (x.remix) data.remix = { type: x.remix.type, vid: String(x.remix.vid), username: String(x.remix.username || '').slice(0, 20) };
+    if (x.link) { var lk = L.cleanLink(x.link.title, x.link.url); if (lk) data.link = lk; }
+    if (x.allowRemix === false) data.allowRemix = false;
+    if (x.coverSec) data.coverSec = Math.max(0, Math.min(60, Math.round(x.coverSec * 10) / 10));
+    if (x.publishAt && x.publishAt > Date.now() + 60000) data.publishAt = firebase.firestore.Timestamp.fromMillis(x.publishAt);
     b.set(ref, data);
     b.update(db().collection('users').doc(uid()), { videoCount: inc(1), lastVideo: ref.id });
     return b.commit().then(function () {
       Api.me.videoCount = (Api.me.videoCount || 0) + 1;
       data.id = ref.id; data.createdAt = { toMillis: function () { return Date.now(); } };
+      if (data.publishAt) { var pm = x.publishAt; data.publishAt = { toMillis: function () { return pm; } }; }
+      if (data.remix) Api.notify(null, 'mention', { vid: ref.id, text: data.remix.type }, data.remix.username);
+      L.parseMentions(caption).forEach(function (un) { Api.notify(null, 'mention', { vid: ref.id, text: caption.slice(0, 100) }, un); });
       return data;
     });
   };
@@ -332,6 +349,213 @@
   };
   Api.purgeDone = function (id) { return db().collection('purge').doc(id).delete(); };
 
+  /* ================= v1.3 features ================= */
+  Api.loadConfig = function () {
+    return db().collection('config').doc('app').get().then(function (d) {
+      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : [];
+    }).catch(function () {});
+  };
+  Api.isVerified = function (u) { return (Api.verified || []).indexOf(u) >= 0; };
+  Api.setVerified = function (target, on) {
+    var b = db().batch();
+    b.update(db().collection('users').doc(target), { verified: !!on });
+    b.update(db().collection('config').doc('app'), { verified: on ? FV().arrayUnion(target) : FV().arrayRemove(target) });
+    return b.commit().then(function () {
+      var i = Api.verified.indexOf(target);
+      if (on && i < 0) Api.verified.push(target); if (!on && i >= 0) Api.verified.splice(i, 1);
+    });
+  };
+
+  /* activity notifications: best effort, never blocks the main action */
+  Api.notify = function (toUid, type, extra, toUsername) {
+    if (!uid() || !Api.me) return Promise.resolve();
+    var p = toUid ? Promise.resolve(toUid) : (toUsername ? Api.uidForUsername(String(toUsername).toLowerCase()) : Promise.resolve(null));
+    return p.then(function (to) {
+      if (!to || to === uid()) return;
+      var d = { type: type, from: uid(), fromName: Api.me.name, fromUsername: Api.me.username, createdAt: ST(), read: false };
+      if (extra && extra.vid) d.vid = String(extra.vid);
+      if (extra && extra.text) d.text = L.cleanText(extra.text, 100);
+      return db().collection('users').doc(to).collection('notifs').add(d);
+    }).catch(function (e) { console.warn('notify', e && e.code); });
+  };
+  Api.listNotifs = function () {
+    needMe();
+    return db().collection('users').doc(uid()).collection('notifs').orderBy('createdAt', 'desc').limit(30).get()
+      .then(function (qs) { return qs.docs.map(docData); });
+  };
+  Api.unreadCount = function () {
+    if (!uid()) return Promise.resolve(0);
+    return db().collection('users').doc(uid()).collection('notifs').where('read', '==', false).limit(20).get()
+      .then(function (qs) { return qs.size; }).catch(function () { return 0; });
+  };
+  Api.markRead = function (list) {
+    var un = (list || []).filter(function (n) { return !n.read; }).slice(0, 20);
+    if (!un.length) return Promise.resolve();
+    var b = db().batch();
+    un.forEach(function (n) { b.update(db().collection('users').doc(uid()).collection('notifs').doc(n.id), { read: true }); n.read = true; });
+    return b.commit().catch(function () {});
+  };
+
+  /* comment likes + pin */
+  Api.isCLiked = function (cid) { return !!(Api.state.clikes || {})[cid]; };
+  Api.setCommentLike = function (vid, c, on) {
+    needMe();
+    var cref = vids().doc(vid).collection('comments').doc(c.id), lref = cref.collection('likes').doc(uid()), b = db().batch(), x = {};
+    if (on) { b.set(lref, { at: ST() }); b.update(cref, { likeCount: inc(1) }); x[c.id] = Date.now(); }
+    else { b.delete(lref); b.update(cref, { likeCount: inc(-1) }); x[c.id] = FV().delete(); }
+    b.set(stateRef(), { clikes: x }, { merge: true });
+    return b.commit().then(function () {
+      if (on) { Api.state.clikes[c.id] = Date.now(); c.likeCount = (c.likeCount || 0) + 1; if (c.uid !== uid()) Api.notify(c.uid, 'like', { vid: vid, text: 'your comment' }); }
+      else { delete Api.state.clikes[c.id]; c.likeCount = Math.max(0, (c.likeCount || 0) - 1); }
+    });
+  };
+  Api.pinComment = function (v, cid) {
+    needMe();
+    return vids().doc(v.id).update({ pinnedComment: cid || '' }).then(function () { v.pinnedComment = cid || ''; });
+  };
+  Api.setAllowRemix = function (v, on) { return vids().doc(v.id).update({ allowRemix: !!on }).then(function () { v.allowRemix = !!on; }); };
+
+  /* favourites (private, in the state doc) */
+  Api.isFav = function (vid) { return !!(Api.state.favs || {})[vid]; };
+  Api.setFav = function (vid, on) {
+    needMe();
+    var x = {}; x[vid] = on ? Date.now() : FV().delete();
+    return mergeState({ favs: x }).then(function () { if (on) Api.state.favs[vid] = Date.now(); else delete Api.state.favs[vid]; });
+  };
+  Api.favVideos = function () {
+    var f = Api.state.favs || {}, ids = Object.keys(f).sort(function (a, b) { return f[b] - f[a]; }).slice(0, 30);
+    return Promise.all(ids.map(Api.getVideo)).then(function (l) { return l.filter(Boolean); });
+  };
+
+  /* views: once per video per app session, flushed in small batches */
+  var seen = {}, viewQ = [], viewT = null;
+  Api.markView = function (v) {
+    if (!uid() || !v || !v.id || seen[v.id] || v.hidden) return;
+    seen[v.id] = 1; viewQ.push(v);
+    if (!viewT) viewT = setTimeout(Api.flushViews, 15000);
+  };
+  Api.flushViews = function () {
+    viewT = null; var list = viewQ.splice(0, 20); if (!list.length) return Promise.resolve();
+    var b = db().batch();
+    list.forEach(function (v) { b.update(vids().doc(v.id), { views: inc(1) }); });
+    return b.commit().then(function () { list.forEach(function (v) { v.views = (v.views || 0) + 1; }); })
+      .catch(function () { /* rules not yet published or a video was removed: try one by one */
+        return Promise.all(list.map(function (v) { return vids().doc(v.id).update({ views: inc(1) }).then(function () { v.views = (v.views || 0) + 1; }).catch(function () {}); }));
+      });
+  };
+  window.addEventListener('pagehide', function () { try { Api.flushViews(); } catch (e) {} });
+
+  /* Q&A */
+  function qcol(owner) { return db().collection('users').doc(owner).collection('questions'); }
+  Api.listQuestions = function (owner) {
+    var q = (uid() === owner) ? qcol(owner).orderBy('createdAt', 'desc').limit(30) : qcol(owner).where('answered', '==', true).orderBy('createdAt', 'desc').limit(30);
+    return q.get().then(function (qs) { return qs.docs.map(docData); });
+  };
+  Api.ask = function (owner, text) {
+    needMe(); text = L.cleanText(text, 150);
+    if (!text) return Promise.reject(new Error('Write your question first.'));
+    return qcol(owner).add({ from: uid(), fromName: Api.me.name, fromUsername: Api.me.username, text: text, createdAt: ST(), answered: false })
+      .then(function () { Api.notify(owner, 'question', { text: text }); });
+  };
+  Api.answer = function (q, text) {
+    needMe(); text = L.cleanText(text, 300);
+    if (!text) return Promise.reject(new Error('Write an answer first.'));
+    return qcol(uid()).doc(q.id).update({ answer: text, answered: true, answeredAt: ST() })
+      .then(function () { q.answer = text; q.answered = true; Api.notify(q.from, 'answer', { text: text }); });
+  };
+  Api.deleteQuestion = function (owner, q) { return qcol(owner).doc(q.id).delete(); };
+
+  /* playlists / series */
+  function pcol(owner) { return db().collection('users').doc(owner).collection('playlists'); }
+  Api.listPlaylists = function (owner) { return pcol(owner).limit(20).get().then(function (qs) { return qs.docs.map(docData); }); };
+  Api.savePlaylist = function (pl) {
+    needMe(); var name = L.cleanName(pl.name); if (!name) return Promise.reject(new Error('Give the playlist a name.'));
+    var ids = (pl.videoIds || []).slice(0, 50), ref = pl.id ? pcol(uid()).doc(pl.id) : pcol(uid()).doc();
+    var d = { name: name, videoIds: ids, createdAt: pl.createdAt || ST(), updatedAt: ST() };
+    return ref.set(d).then(function () { d.id = ref.id; return d; });
+  };
+  Api.deletePlaylist = function (id) { return pcol(uid()).doc(id).delete(); };
+  Api.playlistVideos = function (pl) { return Promise.all((pl.videoIds || []).slice(0, 50).map(Api.getVideo)).then(function (l) { return l.filter(Boolean); }); };
+
+  /* sounds */
+  Api.soundVideos = function (soundId, cursor) {
+    return page(vids().where('soundId', '==', soundId).where('hidden', '==', false).orderBy('createdAt', 'desc'), cursor, 30);
+  };
+
+  /* discover */
+  Api.searchUsers = function (prefix) {
+    prefix = L.normalizeUsername(prefix).replace(/[^a-z0-9_]/g, '');
+    if (prefix.length < 1) return Promise.resolve([]);
+    var FP = firebase.firestore.FieldPath;
+    return db().collection('usernames').orderBy(FP.documentId()).startAt(prefix).endAt(prefix + '\uf8ff').limit(10).get()
+      .then(function (qs) { return Promise.all(qs.docs.map(function (d) { return Api.getUser(d.data().uid).then(function (u) { if (u) u.uid = d.data().uid; return u; }); })); })
+      .then(function (l) { return l.filter(Boolean); });
+  };
+
+  /* direct messages (mutual followers) */
+  Api.followsMe = function (other) {
+    return db().collection('follows').doc(L.followId(other, uid())).get().then(function (d) { return d.exists; }).catch(function () { return false; });
+  };
+  Api.listThreads = function () {
+    needMe();
+    return db().collection('threads').where('members', 'array-contains', uid()).orderBy('lastAt', 'desc').limit(30).get()
+      .then(function (qs) { return qs.docs.map(docData); });
+  };
+  Api.threadRef = function (other) { return db().collection('threads').doc(L.threadId(uid(), other)); };
+  Api.sendMessage = function (other, otherUser, text) {
+    needMe(); text = L.cleanText(text, 500);
+    if (!text) return Promise.reject(new Error('Write a message first.'));
+    var tref = Api.threadRef(other), mref = tref.collection('messages').doc();
+    return tref.get().then(function (t) {
+      var b = db().batch(), last = text.slice(0, 100), seenMap = {}; seenMap[uid()] = Date.now();
+      if (!t.exists) {
+        var mem = [uid(), other].sort(), names = {};
+        names[uid()] = { name: Api.me.name, username: Api.me.username };
+        names[other] = { name: (otherUser && otherUser.name) || '', username: (otherUser && otherUser.username) || '' };
+        b.set(tref, { members: mem, names: names, last: last, lastAt: ST(), lastFrom: uid(), createdAt: ST(), seen: seenMap });
+      } else b.update(tref, { last: last, lastAt: ST(), lastFrom: uid(), seen: Object.assign({}, t.data().seen || {}, seenMap) });
+      b.set(mref, { from: uid(), text: text, createdAt: ST() });
+      return b.commit();
+    }).catch(function (e) {
+      if (e && e.code === 'permission-denied') throw new Error('You can message people who follow you back.');
+      throw e;
+    });
+  };
+  Api.markThreadSeen = function (t) {
+    var s = Object.assign({}, t.seen || {}); s[uid()] = Date.now();
+    return db().collection('threads').doc(t.id).update({ seen: s }).then(function () { t.seen = s; }).catch(function () {});
+  };
+
+  /* admin stats via REST aggregation (count + sum, ~1 read per 1000 docs) */
+  Api.adminStats = function () {
+    var cfg = window.JR_FIREBASE_CONFIG || {};
+    var u = window.JRAuth.auth.currentUser; if (!u) return Promise.reject(new Error('Log in first.'));
+    var proj = cfg.projectId || 'jilan-reels';
+    var start = new Date(); start.setHours(0, 0, 0, 0);
+    var since = start.toISOString();
+    function agg(col, aggs, where) {
+      var q = { structuredAggregationQuery: { structuredQuery: { from: [{ collectionId: col }] }, aggregations: aggs } };
+      if (where) q.structuredAggregationQuery.structuredQuery.where = where;
+      return u.getIdToken().then(function (tok) {
+        return fetch('https://firestore.googleapis.com/v1/projects/' + proj + '/databases/(default)/documents:runAggregationQuery', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: JSON.stringify(q)
+        });
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        var res = (j && j[0] && j[0].result && j[0].result.aggregateFields) || {};
+        var out = {}; Object.keys(res).forEach(function (k) { var x = res[k]; out[k] = Number(x.integerValue || x.doubleValue || 0); });
+        return out;
+      });
+    }
+    var today = { fieldFilter: { field: { fieldPath: 'createdAt' }, op: 'GREATER_THAN_OR_EQUAL', value: { timestampValue: since } } };
+    return Promise.all([
+      agg('users', [{ alias: 'n', count: {} }]),
+      agg('videos', [{ alias: 'n', count: {} }, { alias: 'views', sum: { field: { fieldPath: 'views' } } }]),
+      agg('users', [{ alias: 'n', count: {} }], today),
+      agg('videos', [{ alias: 'n', count: {} }], today)
+    ]).then(function (r) {
+      return { users: r[0].n || 0, videos: r[1].n || 0, views: r[1].views || 0, usersToday: r[2].n || 0, videosToday: r[3].n || 0 };
+    });
+  };
   /* ---------- account deletion (Play UGC requirement) ---------- */
   // Deletes: my videos (queued for Cloudinary purge), my comments, my likes
   // I can find, my follows, my blocks, private state, username claim,

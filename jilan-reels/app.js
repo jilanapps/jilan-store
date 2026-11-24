@@ -30,7 +30,13 @@
     doc: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>',
     refresh: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>',
     out: '<svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>',
-    edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'
+    edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    bookmark: '<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+    verified: '<svg class="vtick" viewBox="0 0 24 24" aria-label="Verified"><path class="vbg" d="M12 2l2.6 2 3.2-.3.9 3.1 2.8 1.6-1.2 3 1.2 3-2.8 1.6-.9 3.1-3.2-.3L12 22l-2.6-2-3.2.3-.9-3.1-2.8-1.6 1.2-3-1.2-3 2.8-1.6.9-3.1 3.2.3z"/><path class="vck" d="M8 12l3 3 5-6"/></svg>',
+    bag: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+    eye: '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+    download: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+    bell: '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>'
   };
   var HOME = window.JR_HOME_URL || (location.origin + location.pathname);
 
@@ -46,7 +52,7 @@
   var notInterested = {};
   try { notInterested = JSON.parse(localStorage.getItem('jr-not-interested') || '{}') || {}; } catch (e) {}
   function saveNI() { try { var k = Object.keys(notInterested); if (k.length > 500) k.slice(0, k.length - 500).forEach(function (x) { delete notInterested[x]; }); localStorage.setItem('jr-not-interested', JSON.stringify(notInterested)); } catch (e) {} }
-  function visible(v) { return v && !v.hidden && !Api.isBlocked(v.ownerUid) && !notInterested[v.id]; }
+  function visible(v) { return v && !v.hidden && !Api.isBlocked(v.ownerUid) && !notInterested[v.id] && (!L.isScheduled(v) || isMine(v)); }
   var cache = {}; // id -> video
   function remember(list) { list.forEach(function (v) { cache[v.id] = v; }); return list; }
   function isMine(v) { return !!(Api.me && v.ownerUid === Api.me.uid); }
@@ -102,6 +108,7 @@
         v.muted = !soundOn;
         var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
         maybeMore(en.target);
+        var cv = cache[en.target.dataset.id]; if (cv) Api.markView(cv);
       } else { v.pause(); }
     });
   }, { threshold: [0, 0.6, 1] });
@@ -118,7 +125,7 @@
   function reelHtml(v) {
     var mine = isMine(v), followed = Api.isFollowing(v.ownerUid), liked = Api.isLiked(v.id);
     return '<div class="reel" data-id="' + esc(v.id) + '">' +
-      '<video data-src="' + esc(v.video.url) + '" poster="' + esc(v.video.thumb) + '" playsinline webkit-playsinline loop muted preload="none"></video>' +
+      '<video data-src="' + esc(L.playUrl(v.video.url, window.JRX && JRX.saver())) + '" poster="' + esc(L.coverUrl(v.video.thumb, v.coverSec)) + '" playsinline webkit-playsinline loop muted preload="none"></video>' +
       '<div class="shade"></div><div class="pause-ico">' + ICON.play + '</div>' +
       (soundOn ? '' : '<button class="sound-pill">' + ICON.mute + 'Tap for sound</button>') +
       '<div class="rail">' +
@@ -126,12 +133,15 @@
           (mine ? '' : '<button class="follow' + (followed ? ' done' : '') + '" data-u="' + esc(v.ownerUid) + '" aria-label="Follow">' + (followed ? ICON.check : ICON.plus) + '</button>') + '</div>' +
         '<button class="like' + (liked ? ' liked' : '') + '" aria-label="Like">' + ICON.heart + '<span>' + fmt(v.likeCount) + '</span></button>' +
         '<button class="comments" aria-label="Comments">' + ICON.comment + '<span>' + fmt(v.commentCount) + '</span></button>' +
+        '<button class="fav' + (Api.isFav(v.id) ? ' on' : '') + '" aria-label="Save">' + ICON.bookmark + '<span>Save</span></button>' +
         '<button class="share" aria-label="Share">' + ICON.share + '<span>Share</span></button>' +
         '<button class="more" aria-label="More">' + ICON.more + '</button>' +
       '</div>' +
-      '<div class="info"><button class="who open-creator" data-u="' + esc(v.ownerUid) + '">@' + esc(v.ownerUsername) + (mine ? '<span class="mine-badge">You</span>' : '') + '</button>' +
+      '<div class="info"><button class="who open-creator" data-u="' + esc(v.ownerUid) + '">@' + esc(v.ownerUsername) + (Api.isVerified(v.ownerUid) ? ICON.verified : '') + (mine ? '<span class="mine-badge">You</span>' : '') + (L.isScheduled(v) ? '<span class="mine-badge">Scheduled</span>' : '') + '</button>' +
+        (v.remix ? '<div class="remix">' + (v.remix.type === 'duet' ? 'Duet with' : 'Stitched from') + ' <button class="open-user" data-un="' + esc(v.remix.username) + '">@' + esc(v.remix.username) + '</button></div>' : '') +
         '<div class="cap">' + capHtml(v.caption || '') + '</div>' +
-        '<div class="music">' + ICON.music + '<span>Original sound - ' + esc(v.ownerName) + '</span></div></div>' +
+        (v.link && v.link.url ? '<button class="shop-chip" data-url="' + esc(v.link.url) + '">' + ICON.bag + '<span>' + esc(v.link.title || 'Shop') + '</span></button>' : '') +
+        '<div class="music"><button class="open-sound" data-sid="' + esc(v.soundId || v.id) + '" data-sname="' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '">' + ICON.music + '<span>' + esc(v.soundName || ('Original sound - ' + v.ownerName)) + '</span></button><span class="views">' + ICON.eye + fmt(v.views || 0) + '</span></div></div>' +
       '<div class="progress"><i></i></div>' +
       '</div>';
   }
@@ -275,6 +285,10 @@
     if (t.closest('.follow')) { toggleFollow(t.closest('.follow').dataset.u, v && v.ownerName); return; }
     if (t.closest('.open-creator')) { openProfile(t.closest('.open-creator').dataset.u); return; }
     if (t.closest('.like')) { toggleLike(id); return; }
+    if (t.closest('.fav')) { if (window.JRX) JRX.toggleFav(id, t.closest('.fav')); return; }
+    if (t.closest('.shop-chip')) { if (window.JRX) JRX.openLink(t.closest('.shop-chip').dataset.url); return; }
+    if (t.closest('.open-sound')) { var sb = t.closest('.open-sound'); if (window.JRX) JRX.openSound(sb.dataset.sid, sb.dataset.sname, id); return; }
+    if (t.closest('.open-user')) { var ou = t.closest('.open-user').dataset.un; Api.uidForUsername(ou).then(function (u) { if (u) openProfile(u); }); return; }
     if (t.closest('.comments')) { openComments(id); return; }
     if (t.closest('.share')) { shareVideo(id); return; }
     if (t.closest('.more')) { openMore(id); return; }
@@ -301,28 +315,50 @@
   /* ---------- comments ---------- */
   function openComments(id) {
     var v = cache[id]; if (!v) return;
-    var list = [];
+    var list = [], replyTo = null;
+    function one(c, child) {
+      var canDel = Api.me && (c.uid === Api.me.uid || isMine(v) || Api.isAdmin);
+      var liked = Api.isCLiked(c.id), pinned = v.pinnedComment === c.id;
+      return '<div class="comment' + (child ? ' reply' : '') + '" data-cid="' + esc(c.id) + '">' + avatarHtml(c.name, '', c.uid, 'sm') + '<div class="c-body">' +
+        (pinned ? '<div class="c-pin">Pinned by creator</div>' : '') +
+        '<div class="c-name">' + esc(c.name) + ' <span class="muted">@' + esc(c.username) + '</span>' + (c.uid === v.ownerUid ? ' <span class="c-creator">Creator</span>' : '') + '</div>' +
+        '<div class="c-text">' + (c.replyName ? '<b class="muted">@' + esc(c.replyName) + '</b> ' : '') + esc(c.text) + '</div><div class="c-time">' + L.ago(Api.ms(c.createdAt)) +
+        ' · <button class="c-reply" data-cid="' + esc(c.id) + '">Reply</button>' +
+        (isMine(v) && !child ? ' · <button class="c-pinbtn" data-cid="' + esc(c.id) + '">' + (pinned ? 'Unpin' : 'Pin') + '</button>' : '') +
+        (Api.me && c.uid !== Api.me.uid ? ' · <button class="c-report" data-cid="' + esc(c.id) + '">Report</button>' : '') +
+        (canDel ? ' · <button class="c-del" data-cid="' + esc(c.id) + '">Delete</button>' : '') + '</div></div>' +
+        '<button class="c-like' + (liked ? ' on' : '') + '" data-cid="' + esc(c.id) + '">' + ICON.heart + '<span>' + fmt(c.likeCount || 0) + '</span></button></div>';
+    }
     function listHtml() {
       var vis = list.filter(function (c) { return !Api.isBlocked(c.uid); });
       if (!vis.length) return '<div class="empty small"><b>No comments yet</b><span>Be the first to comment.</span></div>';
-      return vis.map(function (c) {
-        var canDel = Api.me && (c.uid === Api.me.uid || isMine(v) || Api.isAdmin);
-        return '<div class="comment" data-cid="' + esc(c.id) + '">' + avatarHtml(c.name, '', c.uid, 'sm') + '<div class="c-body"><div class="c-name">' + esc(c.name) + ' <span class="muted">@' + esc(c.username) + '</span></div><div class="c-text">' + esc(c.text) + '</div><div class="c-time">' + L.ago(Api.ms(c.createdAt)) +
-          (Api.me && c.uid !== Api.me.uid ? ' · <button class="c-report" data-cid="' + esc(c.id) + '">Report</button>' : '') +
-          (canDel ? ' · <button class="c-del" data-cid="' + esc(c.id) + '">Delete</button>' : '') + '</div></div></div>';
+      var tops = vis.filter(function (c) { return !c.replyTo || !vis.some(function (p) { return p.id === c.replyTo; }); });
+      tops.sort(function (a, b) { return (b.id === v.pinnedComment) - (a.id === v.pinnedComment); });
+      return tops.map(function (c) {
+        var kids = vis.filter(function (k) { return k.replyTo === c.id; }).reverse();
+        return one(c, false) + kids.map(function (k) { return one(k, true); }).join('');
       }).join('');
     }
     function title() { return fmt(v.commentCount) + (v.commentCount === 1 ? ' comment' : ' comments'); }
     openSheet(head(title()) + '<div class="sh-body" id="cList"><div class="center" style="padding:30px"><div class="spinner"></div></div></div>' +
+      '<div class="c-replying hidden" id="cReplying"></div>' +
       '<div class="c-input"><input id="cInput" maxlength="150" placeholder="' + (loggedIn() ? 'Add a comment...' : 'Log in to comment') + '"><button id="cSend">Post</button></div>', function (sh) {
       var paint = function () { var el = $('#cList', sh); if (el) el.innerHTML = listHtml(); var t = $('.sh-title', sh); if (t) t.textContent = title(); };
+      var setReply = function (c) {
+        replyTo = c; var r = $('#cReplying', sh);
+        if (!c) { r.classList.add('hidden'); r.innerHTML = ''; return; }
+        r.innerHTML = 'Replying to @' + esc(c.username) + ' <button id="cNoReply">Cancel</button>'; r.classList.remove('hidden');
+        $('#cNoReply', sh).onclick = function () { setReply(null); };
+        $('#cInput', sh).focus();
+      };
       Api.listComments(id).then(function (r) { list = r; paint(); }).catch(function () { var el = $('#cList', sh); if (el) el.innerHTML = '<div class="empty small"><b>Could not load comments</b></div>'; });
       function send() {
         var inp = $('#cInput', sh), txt = L.cleanText(inp.value, L.MAX_COMMENT); if (!txt) return;
         requireLogin(function () {
           $('#cSend', sh).disabled = true;
-          Api.addComment(v, txt).then(function (c) {
-            inp.value = ''; list.unshift(c); v.commentCount = (v.commentCount || 0) + 1; paint(); updateReels(id);
+          var parent = replyTo ? (replyTo.replyTo ? (list.filter(function (x) { return x.id === replyTo.replyTo; })[0] || replyTo) : replyTo) : null;
+          Api.addComment(v, txt, parent ? { id: parent.id, username: replyTo.username, uid: replyTo.uid } : null).then(function (c) {
+            inp.value = ''; list.unshift(c); v.commentCount = (v.commentCount || 0) + 1; setReply(null); paint(); updateReels(id);
           }).catch(function (e) { toast(errMsg(e)); }).then(function () { var b = $('#cSend', sh); if (b) b.disabled = false; });
         });
       }
@@ -330,15 +366,26 @@
       $('#cInput', sh).addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
       $('#cInput', sh).addEventListener('focus', function () { if (!loggedIn()) { this.blur(); requireLogin(function () {}); } });
       sh.addEventListener('click', function (e) {
-        var d = e.target.closest('.c-del'), r = e.target.closest('.c-report');
+        var get = function (b) { return list.filter(function (x) { return x.id === b.dataset.cid; })[0]; };
+        var d = e.target.closest('.c-del'), r = e.target.closest('.c-report'), rp = e.target.closest('.c-reply'), lk = e.target.closest('.c-like'), pn = e.target.closest('.c-pinbtn');
+        if (rp) { var rc = get(rp); if (rc) requireLogin(function () { setReply(rc); }); return; }
+        if (lk) {
+          var lc = get(lk); if (!lc || lk.disabled) return;
+          requireLogin(function () {
+            lk.disabled = true;
+            Api.setCommentLike(id, lc, !Api.isCLiked(lc.id)).then(paint).catch(function (er) { toast(/permission/i.test(er.message || er.code || '') ? 'Comment likes are being switched on. Try again later.' : errMsg(er)); lk.disabled = false; });
+          });
+          return;
+        }
+        if (pn) { var pc = get(pn); if (!pc) return; Api.pinComment(v, v.pinnedComment === pc.id ? '' : pc.id).then(function () { paint(); toast(v.pinnedComment ? 'Comment pinned' : 'Comment unpinned'); }).catch(function (er) { toast(errMsg(er)); }); return; }
         if (d) {
-          var c = list.filter(function (x) { return x.id === d.dataset.cid; })[0]; if (!c) return;
+          var c = get(d); if (!c) return;
           Api.deleteComment(id, c).then(function () {
             list = list.filter(function (x) { return x.id !== c.id; }); v.commentCount = Math.max(0, (v.commentCount || 0) - 1); paint(); updateReels(id); toast('Comment deleted');
           }).catch(function (er) { toast(errMsg(er)); });
         }
         if (r) {
-          var cc = list.filter(function (x) { return x.id === r.dataset.cid; })[0]; if (!cc) return;
+          var cc = get(r); if (!cc) return;
           closeSheet(function () { openReport({ type: 'comment', targetId: id + '/' + cc.id, targetOwner: cc.uid, videoId: id }); });
         }
       });
@@ -348,10 +395,10 @@
   /* ---------- share ---------- */
   function shareUrl(id) { return HOME.split('#')[0] + '#v=' + id; }
   function shareVideo(id) {
-    var v = cache[id], url = shareUrl(id), text = '@' + v.ownerUsername + ' on Jilan Reels' + (v.caption ? ': ' + v.caption : '');
-    if (window.Android && Android.shareText) { try { Android.shareText(text + '\n' + url); return; } catch (e) {} }
-    if (navigator.share) { navigator.share({ title: 'Jilan Reels', text: text, url: url }).catch(function () {}); return; }
-    copyText(url); toast('Link copied');
+    var v = cache[id], url = shareUrl(id), text = L.shareText(url, v.ownerUsername);
+    if (window.Android && Android.shareText) { try { Android.shareText(text); return; } catch (e) {} }
+    if (navigator.share) { navigator.share({ title: 'Jilan Reels', text: text }).catch(function () {}); return; }
+    copyText(text); toast('Link copied');
   }
   function copyText(t) {
     if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).catch(function () { fallbackCopy(t); }); return; }
@@ -365,17 +412,21 @@
     if (isMine(v)) {
       openSheet(head('Your video') + '<div class="sh-body">' +
         (v.hidden ? '<div class="field"><label>This video was hidden by an admin. Only you can see it.</label></div>' : '') +
+        (window.JRX ? JRX.moreHtml(v) : '') +
         '<button class="opt red" data-a="delete">' + ICON.trash + 'Delete video</button></div>', function (sh) {
+        if (window.JRX) JRX.wireMore(sh, v);
         $('[data-a=delete]', sh).addEventListener('click', function () { closeSheet(function () { confirmDeleteVideo(v); }); });
       });
       return;
     }
     openSheet(head('Options') + '<div class="sh-body">' +
+      (window.JRX ? JRX.moreHtml(v) : '') +
       '<button class="opt" data-a="report">' + ICON.flag + 'Report video</button>' +
       '<button class="opt" data-a="hide">' + ICON.hide + 'Not interested</button>' +
       '<button class="opt red" data-a="block">' + ICON.block + 'Block @' + esc(v.ownerUsername) + '</button>' +
       (Api.isAdmin ? '<button class="opt" data-a="ahide">' + ICON.shield + 'Admin: hide video</button><button class="opt red" data-a="adel">' + ICON.trash + 'Admin: delete video</button>' : '') +
       '</div>', function (sh) {
+      if (window.JRX) JRX.wireMore(sh, v);
       $('[data-a=report]', sh).addEventListener('click', function () { closeSheet(function () { openReport({ type: 'video', targetId: id, targetOwner: v.ownerUid, videoId: id }); }); });
       $('[data-a=hide]', sh).addEventListener('click', function () { closeSheet(function () { notInterested[id] = Date.now(); saveNI(); dropWhere(function (x) { return x.id === id; }); toast("You won't see this video again"); }); });
       $('[data-a=block]', sh).addEventListener('click', function () { closeSheet(function () { confirmBlock(v.ownerUid, v.ownerName); }); });
@@ -473,6 +524,7 @@
     if (!tabLayer) { tabLayer = true; pushLayer(function () { tabLayer = false; show('home'); }); }
     if (name === 'profile') showProfile(loggedIn() ? Api.me.uid : null);
     if (name === 'discover') renderChips();
+    if (name === 'inbox' && window.JRX) JRX.showInbox();
     show(name);
   }
   $$('[data-go]').forEach(function (b) { b.addEventListener('click', function () { goTab(b.dataset.go); }); });
@@ -505,7 +557,7 @@
     if (mine) u = profileUser = Object.assign({}, profileUser, Api.me);
     $('#profileTitle').textContent = mine ? 'Profile' : u.name;
     $('#profileAvatar').outerHTML = avatarHtml(u.name, u.photo, profileOf, 'xl').replace('<div class="avatar xl"', '<div id="profileAvatar" class="avatar xl"');
-    $('#profileName').textContent = u.name;
+    $('#profileName').innerHTML = esc(u.name) + (Api.isVerified(profileOf) ? ICON.verified : '');
     $('#profileUser').textContent = '@' + u.username;
     $('#profileBio').textContent = u.bio || '';
     $('#profileBanned').classList.toggle('hidden', !u.banned);
@@ -537,6 +589,7 @@
       profileUser = Object.assign({ id: u }, pu); renderProfileHead();
       if (!mine && Api.isBlocked(u)) { $('#profileEmpty').innerHTML = '<b>You blocked this account</b><span>Unblock it from Settings to see videos.</span>'; $('#profileEmpty').classList.remove('hidden'); return; }
       loadProfileVideos(tok);
+      if (window.JRX) JRX.profileLoaded(u, profileUser);
     }).catch(function () { toast('Could not load this profile.'); });
   }
   function loadProfileVideos(tok) {
@@ -551,7 +604,7 @@
   function paintProfileGrid() {
     var mine = loggedIn() && profileOf === Api.me.uid;
     $('#profileGrid').innerHTML = profileList.map(function (v, i) {
-      return '<button class="cell" data-id="' + esc(v.id) + '" data-i="' + i + '" style="background-image:url(\'' + esc(v.video.thumb) + '\')"><em>' + esc(v.caption || '') + '</em><span>' + ICON.heart + fmt(v.likeCount) + '</span>' + (v.hidden ? '<span class="hid">Hidden</span>' : '') + '</button>';
+      return '<button class="cell" data-id="' + esc(v.id) + '" data-i="' + i + '" style="background-image:url(\'' + esc(v.video.thumb) + '\')"><em>' + esc(v.caption || '') + '</em><span>' + ICON.eye + fmt(v.views || 0) + '</span>' + (L.isScheduled(v) ? '<span class="hid">Scheduled</span>' : '') + (v.hidden ? '<span class="hid">Hidden</span>' : '') + '</button>';
     }).join('');
     $$('#profileGrid .cell').forEach(function (b) { b.addEventListener('click', function () { openPlayer(profileList, +b.dataset.i); }); });
     var em = $('#profileEmpty');
@@ -573,13 +626,16 @@
       '<button class="opt" data-a="share">' + ICON.share + 'Share profile</button>' +
       '<button class="opt" data-a="report">' + ICON.flag + 'Report account</button>' +
       (Api.isBlocked(u) ? '<button class="opt" data-a="unblock">' + ICON.block + 'Unblock</button>' : '<button class="opt red" data-a="block">' + ICON.block + 'Block</button>') +
+      (window.JRX ? JRX.profileMenuHtml(u, pu) : '') +
       (Api.isAdmin ? '<button class="opt red" data-a="ban">' + ICON.shield + (pu.banned ? 'Admin: unban account' : 'Admin: ban account') + '</button>' : '') +
       '</div>', function (sh) {
+      if (window.JRX) JRX.wireProfileMenu(sh, u, pu, renderProfileHead);
       $('[data-a=share]', sh).addEventListener('click', function () {
         closeSheet(function () {
           var url = HOME.split('#')[0] + '#u=' + pu.username;
-          if (window.Android && Android.shareText) { try { Android.shareText('@' + pu.username + ' on Jilan Reels\n' + url); return; } catch (e) {} }
-          copyText(url); toast('Profile link copied');
+          var ptxt = '@' + pu.username + ' on Jilan Reels\n' + url + '\n\nGet the app: ' + L.APK_URL;
+          if (window.Android && Android.shareText) { try { Android.shareText(ptxt); return; } catch (e) {} }
+          copyText(ptxt); toast('Profile link copied');
         });
       });
       $('[data-a=report]', sh).addEventListener('click', function () { closeSheet(function () { openReport({ type: 'user', targetId: u, targetOwner: u }); }); });
@@ -626,6 +682,7 @@
       '<button class="opt" data-a="edit">' + ICON.edit + 'Edit profile</button>' +
       (pwAcc() ? '<button class="opt" data-a="pass">' + ICON.edit + 'Change password</button>' : '') +
       '<button class="opt" data-a="blocked">' + ICON.block + 'Blocked accounts</button>' +
+      (window.JRX ? JRX.settingsHtml() : '') +
       (Api.isAdmin ? '<button class="opt" data-a="admin">' + ICON.shield + 'Admin panel</button>' : '') +
       (shell ? '<button class="opt" data-a="update">' + ICON.refresh + 'Check for updates' + (availableVersion ? ' (v' + esc(availableVersion) + ' ready)' : '') + '</button>' : '') +
       '<button class="opt" data-a="terms">' + ICON.doc + 'Terms of Use</button>' +
@@ -635,6 +692,7 @@
       '<button class="opt" data-a="logout">' + ICON.out + 'Log out</button>' +
       '<button class="opt red" data-a="delete">' + ICON.trash + 'Delete account</button></div>', function (sh) {
       var on = function (a, fn) { var b = $('[data-a=' + a + ']', sh); if (b) b.addEventListener('click', function () { closeSheet(fn); }); };
+      if (window.JRX) JRX.wireSettings(sh, on);
       on('edit', editProfile);
       on('pass', openChangePassword);
       on('blocked', openBlockedList);
@@ -836,8 +894,7 @@
   var searchState = null;
   function renderChips() {
     var m = {};
-    Object.keys(cache).forEach(function (id) { (cache[id].tags || []).forEach(function (t) { m[t] = (m[t] || 0) + 1; }); });
-    var tags = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }).slice(0, 12);
+    var tags = L.trending(Object.keys(cache).map(function (id) { return cache[id]; }).concat((window.JRX && JRX.trendPool) || []), 15);
     var q = $('#searchInput').value.trim().toLowerCase();
     $('#chips').innerHTML = tags.map(function (t) { return '<button class="' + (q === '#' + t ? 'on' : '') + '" data-t="' + esc(t) + '">#' + esc(t) + '</button>'; }).join('');
     $$('#chips button').forEach(function (b) { b.addEventListener('click', function () { $('#searchInput').value = '#' + b.dataset.t; runSearch(); }); });
@@ -846,14 +903,20 @@
     var s = L.parseSearch($('#searchInput').value);
     renderChips();
     var res = $('#searchResults');
-    if (s.kind === 'none') { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>Type a #hashtag or @username</b><span>Search finds exact matches only.</span></div>'; $('#searchMore').classList.add('hidden'); return; }
+    if (s.kind === 'none') { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>Type a #hashtag or @username</b><span>Usernames match from the start. Hashtags match exactly.</span></div>'; $('#searchMore').classList.add('hidden'); return; }
     if (s.kind === 'user') {
       res.innerHTML = '<div class="center" style="grid-column:1/-1;padding:30px"><div class="spinner"></div></div>';
       Api.uidForUsername(s.value).then(function (u) {
-        if (!u) { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>No user @' + esc(s.value) + '</b><span>Check the spelling. Usernames must match exactly.</span></div>'; return; }
+        if (!u) {
+          return Api.searchUsers(s.value).then(function (us) {
+            if (!us.length) { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>No user @' + esc(s.value) + '</b><span>Check the spelling.</span></div>'; return; }
+            res.innerHTML = us.map(function (pu) { return '<button class="comment usercard" style="grid-column:1/-1;align-items:center;text-align:left" data-u="' + esc(pu.uid) + '">' + avatarHtml(pu.name, pu.photo, pu.uid, 'sm') + '<div class="c-body"><div class="c-text">' + esc(pu.name) + (Api.isVerified(pu.uid) ? ICON.verified : '') + '</div><div class="c-name">@' + esc(pu.username) + ' · ' + fmt(pu.followers) + ' followers</div></div></button>'; }).join('');
+            $$('.usercard', res).forEach(function (b) { b.addEventListener('click', function () { openProfile(b.dataset.u); }); });
+          });
+        }
         return Api.getUser(u).then(function (pu) {
           if (!pu) { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>Account not found</b></div>'; return; }
-          res.innerHTML = '<button class="comment usercard" style="grid-column:1/-1;align-items:center;text-align:left" data-u="' + esc(u) + '">' + avatarHtml(pu.name, pu.photo, u, 'sm') + '<div class="c-body"><div class="c-text">' + esc(pu.name) + '</div><div class="c-name">@' + esc(pu.username) + ' · ' + fmt(pu.followers) + ' followers</div></div></button>';
+          res.innerHTML = '<button class="comment usercard" style="grid-column:1/-1;align-items:center;text-align:left" data-u="' + esc(u) + '">' + avatarHtml(pu.name, pu.photo, u, 'sm') + '<div class="c-body"><div class="c-text">' + esc(pu.name) + (Api.isVerified(u) ? ICON.verified : '') + '</div><div class="c-name">@' + esc(pu.username) + ' · ' + fmt(pu.followers) + ' followers</div></div></button>';
           $('.usercard', res).addEventListener('click', function () { openProfile(u); });
         });
       }).catch(function () { res.innerHTML = '<div class="empty small" style="grid-column:1/-1"><b>Search failed</b><span>Check your internet.</span></div>'; });
@@ -867,7 +930,7 @@
       searchState.items = searchState.items.concat(remember(r.items).filter(visible));
       var list = searchState.items;
       res.innerHTML = list.length ? list.map(function (v, i) {
-        return '<button class="cell" data-id="' + esc(v.id) + '" data-i="' + i + '" style="background-image:url(\'' + esc(v.video.thumb) + '\')"><em>@' + esc(v.ownerUsername) + '</em><span>' + ICON.heart + fmt(v.likeCount) + '</span></button>';
+        return '<button class="cell" data-id="' + esc(v.id) + '" data-i="' + i + '" style="background-image:url(\'' + esc(v.video.thumb) + '\')"><em>@' + esc(v.ownerUsername) + '</em><span>' + ICON.eye + fmt(v.views || 0) + '</span></button>';
       }).join('') : '<div class="empty small" style="grid-column:1/-1"><b>No videos for #' + esc(s.value) + '</b><span>Try another hashtag.</span></div>';
       $$('.cell', res).forEach(function (b) { b.addEventListener('click', function () { openPlayer(list, +b.dataset.i); }); });
       $('#searchMore').classList.toggle('hidden', searchState.done);
@@ -900,6 +963,7 @@
     $('#captionInput').value = ''; if (picked && picked.url) URL.revokeObjectURL(picked.url); picked = null;
     var pv = $('#previewVideo'); pv.pause(); pv.removeAttribute('src'); pv.load();
     $('#upBox').classList.add('hidden'); $('#btnPost').disabled = false; $('#btnPost').textContent = 'Post'; $('#btnRetake').disabled = false;
+    if (window.JRS) JRS.reset();
   }
   $('#createClose').addEventListener('click', function () { if (uploading) { toast('Please wait, your video is uploading.'); return; } closeTop(); });
   $('#btnGallery').addEventListener('click', function () { $('#fileInput').value = ''; $('#fileInput').click(); });
@@ -959,11 +1023,13 @@
         fxEngine = new FXL.Engine($('#camCanvas'), v); fxEngine.filter = fxChoice; fxEngine.mirror = facing === 'user'; fxEngine.start();
         clearInterval(fxThumbT); fxThumbT = setInterval(refreshThumbs, 400);
       }
+      if (window.JRS) JRS.onCamOpen();
     }).catch(function (e) { toast('Camera and microphone permission is needed to record.'); throw e; });
   }
   function stopCam() {
     if (recorder && recorder.state === 'recording') { try { recorder.onstop = null; recorder.stop(); } catch (e) {} }
     clearInterval(recTimer); recorder = null;
+    if (window.JRS) JRS.stopLive();
     clearInterval(fxThumbT); if (fxEngine) { fxEngine.stop(); fxEngine = null; }
     if (recStream) { recStream.getVideoTracks().forEach(function (t) { t.stop(); }); recStream = null; }
     if (camStream) { camStream.getTracks().forEach(function (t) { t.stop(); }); camStream = null; }
@@ -983,19 +1049,26 @@
     if (!camStream) return;
     if (recorder && recorder.state === 'recording') { recorder.stop(); return; }
     if (!window.MediaRecorder) { toast('Recording is not supported on this phone. Use Upload instead.'); return; }
+    if (window.JRS) { if (JRS.counting()) { JRS.cancelCountdown(); return; } JRS.prime(camStream); if (JRS.countdown(startRecording)) return; }
+    startRecording();
+  });
+  function startRecording() {
+    if (!camStream) return;
     recChunks = [];
     var mime = M.pickMime();
     // Record the filtered canvas + the microphone. Falls back to the plain camera if the canvas can't be captured.
     var src = camStream;
     if (fxEngine) {
       var cs = fxEngine.stream(30);
-      if (cs && cs.getVideoTracks().length) { camStream.getAudioTracks().forEach(function (t) { cs.addTrack(t); }); recStream = cs; src = cs; }
+      if (window.JRS) cs = JRS.videoStream(cs);
+      if (cs && cs.getVideoTracks().length) { (window.JRS ? JRS.audioTracks(camStream) : camStream.getAudioTracks()).forEach(function (t) { cs.addTrack(t); }); recStream = cs; src = cs; }
     }
     try { recorder = new MediaRecorder(src, mime ? { mimeType: mime, videoBitsPerSecond: 700000, audioBitsPerSecond: 64000 } : undefined); }
     catch (e) { toast('Recording is not supported on this phone.'); return; }
     recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
     recorder.onstop = function () {
       clearInterval(recTimer); $('#btnShutter').classList.remove('on');
+      if (window.JRS) JRS.onRecordStop();
       var secs = Math.min(MAX_SEC, (Date.now() - recStart) / 1000);
       var blob = new Blob(recChunks, { type: ((recorder && recorder.mimeType) || mime || 'video/webm').split(';')[0] });
       stopCam();
@@ -1003,17 +1076,19 @@
       showPreview(blob, URL.createObjectURL(blob), secs);
     };
     recorder.start(500); recStart = Date.now(); $('#btnShutter').classList.add('on');
+    if (window.JRS) JRS.onRecordStart(recStart);
     recTimer = setInterval(function () {
       var s = (Date.now() - recStart) / 1000;
       var _t = Math.min(MAX_SEC, Math.floor(s)); $('#recTimer').textContent = Math.floor(_t / 60) + ':' + String(_t % 60).padStart(2, '0') + ' / 1:00';
       $('#recProgress').style.width = Math.min(100, s / MAX_SEC * 100) + '%';
       if (s >= MAX_SEC && recorder && recorder.state === 'recording') recorder.stop();
     }, 200);
-  });
+  }
   function showPreview(blob, url, recordedSec) {
     picked = { blob: blob, url: url, recordedSec: recordedSec };
     $('#createPick').classList.add('hidden'); $('#createRec').classList.add('hidden'); $('#createPreview').classList.remove('hidden');
     var pv = $('#previewVideo'); pv.src = url; pv.play().catch(function () {});
+    if (window.JRS) JRS.onPreview(picked);
   }
   $('#btnRetake').addEventListener('click', resetCreate);
   function upStatus(text, frac) { $('#upText').textContent = text; $('#upFill').style.width = Math.round((frac || 0) * 100) + '%'; }
@@ -1024,7 +1099,10 @@
     uploading = true; btn.disabled = true; $('#btnRetake').disabled = true; btn.textContent = 'Posting...';
     $('#upBox').classList.remove('hidden'); upStatus('Checking video...', 0);
     $('#previewVideo').pause();
-    M.prepare(picked.blob, picked.recordedSec, function (f) { upStatus('Making the video smaller... ' + Math.round(f * 100) + '%', f * 0.3); })
+    var extras = window.JRS ? JRS.extras() : null;
+    (window.JRS ? JRS.finalize(picked, upStatus) : Promise.resolve(null))
+      .then(function (r) { if (r && r.blob) { picked.blob = r.blob; picked.recordedSec = r.sec; } upStatus('Checking video...', 0);
+        return M.prepare(picked.blob, picked.recordedSec, function (f) { upStatus('Making the video smaller... ' + Math.round(f * 100) + '%', f * 0.3); }); })
       .then(function (r) {
         upStatus('Uploading ' + (r.blob.size / 1048576).toFixed(1) + ' MB...', 0.3);
         return M.upload(r.blob, function (f) { upStatus('Uploading... ' + Math.round(f * 100) + '%', 0.3 + f * 0.65); }).then(function (up) {
@@ -1032,13 +1110,14 @@
           return up;
         });
       })
-      .then(function (up) { upStatus('Saving...', 0.97); return Api.createVideo(up, cap); })
+      .then(function (up) { upStatus('Saving...', 0.97); return Api.createVideo(up, cap, extras); })
       .then(function (v) {
         uploading = false;
+        if (window.JRS) JRS.posted();
         remember([v]);
         if (feeds.foryou) feeds.foryou.items.unshift(v);
         closeTop();
-        setTimeout(function () { goTab('home'); showMode('foryou'); toast('Posted'); }, 80);
+        setTimeout(function () { goTab('home'); showMode('foryou'); toast(L.isScheduled(v) ? 'Scheduled. Only you can see it until then.' : 'Posted'); }, 80);
       })
       .catch(function (e) {
         uploading = false; btn.disabled = false; $('#btnRetake').disabled = false; btn.textContent = 'Post';
@@ -1064,7 +1143,10 @@
   /* ---------- start ---------- */
   window.JR = { toast: toast, openSheet: openSheet, closeSheet: closeSheet, head: head, pushLayer: pushLayer, closeTop: closeTop, show: show, ICON: ICON, esc: esc,
     openProfile: openProfile, openPlayer: openPlayer, remember: remember, dropWhere: dropWhere, cache: cache, openLogin: openLogin, goTab: goTab, runSearch: runSearch,
-    openComments: openComments, openMore: openMore, openReport: openReport, showPreview: showPreview, feeds: feeds, errMsg: errMsg };
+    openComments: openComments, openMore: openMore, openReport: openReport, showPreview: showPreview, feeds: feeds, errMsg: errMsg,
+    openCreate: function () { requireLogin(openCreate); }, startCam: startCam, stopCam: stopCam, requireLogin: requireLogin, avatarHtml: avatarHtml, fmt: fmt,
+    copyText: copyText, isMine: isMine, updateReels: updateReels, showProfile: showProfile, upStatus: upStatus, shareUrl: shareUrl,
+    camFacing: function () { return facing; }, resetCreate: resetCreate, isRecording: function () { return !!(recorder && recorder.state === 'recording'); } };
   var started = false;
   if (A.ready) {
     A.onChange(function (u) {

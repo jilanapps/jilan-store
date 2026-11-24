@@ -36,7 +36,11 @@
         }
         finish(res, { width: v.videoWidth, height: v.videoHeight, duration: d, url: url });
       };
-      v.onerror = function () { finish(rej, new Error("This video can't be played here.")); };
+      v.onerror = function () {
+        // metadata already read: an error during the "find real length" seek is harmless (caller passes knownDuration)
+        if (v.videoWidth) finish(res, { width: v.videoWidth, height: v.videoHeight, duration: isFinite(v.duration) ? v.duration : 0, url: url });
+        else finish(rej, new Error("This video can't be played here."));
+      };
       setTimeout(function () { finish(rej, new Error("This video can't be read.")); }, 15000);
     });
   };

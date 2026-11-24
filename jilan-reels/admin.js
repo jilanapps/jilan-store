@@ -35,9 +35,21 @@
     if (t === 'reports') reports();
     else if (t === 'hidden') hidden();
     else if (t === 'purge') purge();
+    else if (t === 'stats') stats();
     else findUser();
   }
   $$('#adminTabs button').forEach(function (b) { b.addEventListener('click', function () { select(b.dataset.at); }); });
+  function stats() {
+    spin();
+    Api.adminStats().then(function (st) {
+      var box = function (n, l) { return '<div class="statbox"><b>' + Number(n || 0).toLocaleString('en-US') + '</b><span>' + esc(l) + '</span></div>'; };
+      body().innerHTML = '<div class="statgrid">' + box(st.users, 'Total users') + box(st.videos, 'Total videos') + box(st.views, 'Total views') +
+        box(st.usersToday, 'New users today') + box(st.videosToday, 'New videos today') + '</div>' +
+        '<p class="note">Counted on the server with count queries (about 1 read per 1,000 documents). Views count once per signed-in viewer per app session.</p>' +
+        '<div class="row"><button class="bigbtn alt small" id="stRefresh">Refresh</button></div>';
+      $('#stRefresh').addEventListener('click', stats);
+    }).catch(fail);
+  }
   $('#adminBack').addEventListener('click', function () { JR().closeTop(); });
 
   function act(btn, p, okMsg, then) {

@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Jilan Reels v1.0 — Firestore Security Rules (2026-11-24)
+// Jilan Reels v1.3 — Firestore Security Rules (2026-11-25)
 // Public short-video app (Play Store, user-generated content).
 //
 // PUBLIC READ: user profiles, usernames claims, visible videos, comments,
@@ -83,11 +83,36 @@ service cloud.firestore {
         && (t.size() < 10 || (t[9] is string && t[9].matches('^[a-z0-9_]{1,30}$')));
     }
     function captionOk(c) { return c is string && c.size() <= 150; }
+    // v1.3 optional video extras (all optional, so older clients still pass)
+    function linkOk(l) {
+      return l is map && l.keys().hasOnly(['title', 'url']) && l.keys().hasAll(['title', 'url'])
+        && l.title is string && l.title.size() >= 1 && l.title.size() <= 40
+        && l.url is string && l.url.size() <= 300 && l.url.matches('^https?://[^ ]{3,300}$');
+    }
+    function remixOk(r) {
+      return r is map && r.keys().hasOnly(['type', 'vid', 'username']) && r.keys().hasAll(['type', 'vid', 'username'])
+        && r.type in ['duet', 'stitch'] && r.vid is string && r.vid.size() <= 40
+        && r.username is string && r.username.size() <= 20;
+    }
+    function extrasOk(d) {
+      return (!('soundId' in d) || (d.soundId is string && d.soundId.matches('^[A-Za-z0-9]{1,40}$')))
+        && (!('soundName' in d) || (d.soundName is string && d.soundName.size() <= 60))
+        && (!('remix' in d) || remixOk(d.remix))
+        && (!('link' in d) || linkOk(d.link))
+        && (!('allowRemix' in d) || d.allowRemix is bool)
+        && (!('coverSec' in d) || (d.coverSec is number && d.coverSec >= 0 && d.coverSec <= 61))
+        && (!('publishAt' in d) || (d.publishAt is timestamp && d.publishAt > request.time
+              && d.publishAt < request.time + duration.value(31, 'd')));
+    }
 
     // ---------- config (admin list) ----------
     match /config/{docId} {
       allow read: if true;
-      allow write: if false;            // edit only in the Firebase console
+      allow write: if false;            // admins list: edit only in the Firebase console
+      // v1.3: admins may maintain the blue-tick list (never the admins list)
+      allow update: if isAdmin() && docId == 'app'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['verified'])
+        && request.resource.data.verified is list && request.resource.data.verified.size() <= 1000;
     }
 
     // ---------- usernames: permanent, unique claims ----------
@@ -141,9 +166,10 @@ service cloud.firestore {
 
       // Admin: ban / unban, and fix videoCount after deleting a video.
       allow update: if isAdmin()
-        && changed().hasOnly(['banned', 'videoCount'])
+        && changed().hasOnly(['banned', 'videoCount', 'verified'])
         && (!('banned' in request.resource.data) || request.resource.data.banned is bool)
-        && request.resource.data.videoCount is int && request.resource.data.videoCount >= 0;
+        && (!('verified' in request.resource.data) || request.resource.data.verified is bool)
+        && request.resource.data.get('videoCount', 0) is int && request.resource.data.get('videoCount', 0) >= 0;
 
       allow delete: if signedIn() && me() == uid;   // account deletion
 
@@ -173,7 +199,9 @@ service cloud.firestore {
       match /private/{docId} {
         allow read, delete: if signedIn() && me() == uid;
         allow create, update: if signedIn() && me() == uid && docId == 'state'
-          && request.resource.data.keys().hasOnly(['likes', 'follow', 'blocks', 'comments'])
+          && request.resource.data.keys().hasOnly(['likes', 'follow', 'blocks', 'comments', 'clikes', 'favs'])
+          && request.resource.data.get('clikes', {}) is map
+          && request.resource.data.get('favs', {}) is map
           && request.resource.data.get('likes', {}) is map
           && request.resource.data.get('follow', {}) is map
           && request.resource.data.get('blocks', {}) is map
@@ -186,6 +214,57 @@ service cloud.firestore {
         allow create: if signedIn() && me() == uid && other != uid
           && request.resource.data.keys().hasOnly(['at'])
           && request.resource.data.at == request.time;
+      }
+
+      // v1.3 Q&A: anyone asks, the creator answers publicly.
+      match /questions/{qid} {
+        allow read: if resource.data.answered == true
+          || (signedIn() && (me() == uid || resource.data.from == me()));
+        allow create: if active() && me() != uid
+          && request.resource.data.keys().hasOnly(['from', 'fromName', 'fromUsername', 'text', 'createdAt', 'answered'])
+          && request.resource.data.from == me()
+          && request.resource.data.fromUsername == get(userDoc(me())).data.username
+          && nameOk(request.resource.data.fromName)
+          && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 150
+          && request.resource.data.answered == false
+          && request.resource.data.createdAt == request.time
+          && !exists(docPath('users/' + uid + '/blocks/' + me()));
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'answered', 'answeredAt'])
+          && request.resource.data.answer is string && request.resource.data.answer.size() >= 1 && request.resource.data.answer.size() <= 300
+          && request.resource.data.answered == true
+          && request.resource.data.answeredAt == request.time;
+        allow delete: if signedIn() && (me() == uid || resource.data.from == me() || isAdmin());
+      }
+
+      // v1.3 playlists / series (public, owner-written).
+      match /playlists/{pid} {
+        allow read: if true;
+        allow create, update: if active() && me() == uid
+          && request.resource.data.keys().hasOnly(['name', 'videoIds', 'createdAt', 'updatedAt'])
+          && nameOk(request.resource.data.name)
+          && request.resource.data.videoIds is list && request.resource.data.videoIds.size() <= 50
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && me() == uid;
+      }
+
+      // v1.3 in-app activity (likes, comments, follows, mentions).
+      match /notifs/{nid} {
+        allow read, delete: if signedIn() && me() == uid;
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && request.resource.data.read is bool;
+        allow create: if active() && me() != uid
+          && request.resource.data.keys().hasOnly(['type', 'from', 'fromName', 'fromUsername', 'vid', 'text', 'createdAt', 'read'])
+          && request.resource.data.from == me()
+          && request.resource.data.fromUsername == get(userDoc(me())).data.username
+          && request.resource.data.type in ['like', 'comment', 'follow', 'mention', 'reply', 'question', 'answer']
+          && nameOk(request.resource.data.fromName)
+          && (!('vid' in request.resource.data) || (request.resource.data.vid is string && request.resource.data.vid.size() <= 40))
+          && (!('text' in request.resource.data) || (request.resource.data.text is string && request.resource.data.text.size() <= 100))
+          && request.resource.data.read == false
+          && request.resource.data.createdAt == request.time
+          && !exists(docPath('users/' + uid + '/blocks/' + me()));
       }
     }
 
@@ -218,7 +297,9 @@ service cloud.firestore {
         || isAdmin();
 
       allow create: if active()
-        && request.resource.data.keys().hasOnly(['ownerUid', 'ownerName', 'ownerUsername', 'ownerPhoto', 'caption', 'tags', 'video', 'likeCount', 'commentCount', 'createdAt', 'hidden'])
+        && request.resource.data.keys().hasOnly(['ownerUid', 'ownerName', 'ownerUsername', 'ownerPhoto', 'caption', 'tags', 'video', 'likeCount', 'commentCount', 'createdAt', 'hidden',
+                                                 'soundId', 'soundName', 'remix', 'link', 'allowRemix', 'coverSec', 'publishAt'])
+        && extrasOk(request.resource.data)
         && request.resource.data.keys().hasAll(['ownerUid', 'ownerName', 'ownerUsername', 'caption', 'tags', 'video', 'likeCount', 'commentCount', 'createdAt', 'hidden'])
         && request.resource.data.ownerUid == me()
         && request.resource.data.ownerUsername == get(userDoc(me())).data.username
@@ -236,7 +317,10 @@ service cloud.firestore {
       // Owner edits the caption, or refreshes the copied name / photo
       // after editing the profile.
       allow update: if signedIn() && resource.data.ownerUid == me()
-        && changed().hasOnly(['caption', 'tags', 'ownerName', 'ownerPhoto'])
+        && changed().hasOnly(['caption', 'tags', 'ownerName', 'ownerPhoto', 'pinnedComment', 'allowRemix', 'link'])
+        && (!('pinnedComment' in request.resource.data) || (request.resource.data.pinnedComment is string && request.resource.data.pinnedComment.size() <= 40))
+        && (!('allowRemix' in request.resource.data) || request.resource.data.allowRemix is bool)
+        && (!('link' in request.resource.data) || linkOk(request.resource.data.link))
         && captionOk(request.resource.data.caption)
         && tagsOk(request.resource.data.tags)
         && nameOk(request.resource.data.ownerName)
@@ -252,6 +336,12 @@ service cloud.firestore {
       allow update: if active()
         && changed().hasOnly(['commentCount', 'lastCommentId'])
         && commentMoveOk(vid);
+
+      // v1.3 view counter: +1 per update by a signed-in viewer.
+      allow update: if signedIn()
+        && changed().hasOnly(['views'])
+        && resource.data.hidden == false
+        && request.resource.data.views == resource.data.get('views', 0) + 1;
 
       // Admin: hide / unhide.
       allow update: if isAdmin() && changed().hasOnly(['hidden']) && request.resource.data.hidden is bool;
@@ -290,7 +380,10 @@ service cloud.firestore {
       match /comments/{cid} {
         allow read: if true;
         allow create: if active()
-          && request.resource.data.keys().hasOnly(['uid', 'name', 'username', 'text', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['uid', 'name', 'username', 'text', 'createdAt', 'replyTo', 'replyName', 'likeCount'])
+          && (!('replyTo' in request.resource.data) || (request.resource.data.replyTo is string && request.resource.data.replyTo.size() <= 40))
+          && (!('replyName' in request.resource.data) || (request.resource.data.replyName is string && request.resource.data.replyName.size() <= 40))
+          && (!('likeCount' in request.resource.data) || request.resource.data.likeCount == 0)
           && request.resource.data.uid == me()
           && request.resource.data.username == get(userDoc(me())).data.username
           && nameOk(request.resource.data.name)
@@ -305,6 +398,69 @@ service cloud.firestore {
           && (resource.data.uid == me()
               || (exists(docPath('videos/' + vid)) && get(docPath('videos/' + vid)).data.ownerUid == me())
               || isAdmin());
+        // v1.3 comment likes: likeCount moves by 1 with the callers like doc.
+        allow update: if active()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
+          && ((request.resource.data.likeCount == resource.data.get('likeCount', 0) + 1
+                && !exists(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))
+                && existsAfter(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me())))
+           || (request.resource.data.likeCount == resource.data.get('likeCount', 0) - 1
+                && exists(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))
+                && !existsAfter(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))));
+
+        match /likes/{luid} {
+          allow read: if signedIn() && me() == luid;
+          allow create: if active() && me() == luid
+            && request.resource.data.keys().hasOnly(['at'])
+            && request.resource.data.at == request.time
+            && getAfter(docPath('videos/' + vid + '/comments/' + cid)).data.likeCount
+               == get(docPath('videos/' + vid + '/comments/' + cid)).data.get('likeCount', 0) + 1;
+          allow delete: if signedIn() && me() == luid;
+          allow update: if false;
+        }
+      }
+    }
+
+    // ---------- v1.3 direct messages (mutual followers only) ----------
+    match /threads/{tid} {
+      allow read: if signedIn() && me() in resource.data.members;
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['members', 'names', 'last', 'lastAt', 'lastFrom', 'createdAt', 'seen'])
+        && request.resource.data.members is list && request.resource.data.members.size() == 2
+        && me() in request.resource.data.members
+        && request.resource.data.members[0] < request.resource.data.members[1]
+        && tid == request.resource.data.members[0] + '_' + request.resource.data.members[1]
+        && exists(docPath('follows/' + request.resource.data.members[0] + '_' + request.resource.data.members[1]))
+        && exists(docPath('follows/' + request.resource.data.members[1] + '_' + request.resource.data.members[0]))
+        && !exists(docPath('users/' + request.resource.data.members[0] + '/blocks/' + request.resource.data.members[1]))
+        && !exists(docPath('users/' + request.resource.data.members[1] + '/blocks/' + request.resource.data.members[0]))
+        && request.resource.data.names is map
+        && request.resource.data.last is string && request.resource.data.last.size() <= 100
+        && request.resource.data.lastFrom == me()
+        && request.resource.data.lastAt == request.time
+        && request.resource.data.createdAt == request.time;
+      allow update: if signedIn() && me() in resource.data.members
+        && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['last', 'lastAt', 'lastFrom', 'seen'])
+             && request.resource.data.last is string && request.resource.data.last.size() <= 100
+             && request.resource.data.lastFrom == me() && request.resource.data.lastAt == request.time)
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']))
+        && request.resource.data.get('seen', {}) is map;
+      allow delete: if false;
+
+      match /messages/{mid} {
+        allow read: if signedIn() && me() in get(docPath('threads/' + tid)).data.members;
+        // getAfter: the first message is written in the same batch as the thread.
+        allow create: if active()
+          && me() in getAfter(docPath('threads/' + tid)).data.members
+          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt'])
+          && request.resource.data.from == me()
+          && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
+          && request.resource.data.createdAt == request.time
+          && exists(docPath('follows/' + getAfter(docPath('threads/' + tid)).data.members[0] + '_' + getAfter(docPath('threads/' + tid)).data.members[1]))
+          && exists(docPath('follows/' + getAfter(docPath('threads/' + tid)).data.members[1] + '_' + getAfter(docPath('threads/' + tid)).data.members[0]))
+          && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[0] + '/blocks/' + me()))
+          && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[1] + '/blocks/' + me()));
+        allow delete: if signedIn() && resource.data.from == me();
         allow update: if false;
       }
     }

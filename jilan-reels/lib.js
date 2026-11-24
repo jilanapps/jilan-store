@@ -157,6 +157,59 @@
     return { compress: needs, width: w, height: h, videoBitsPerSecond: vbps, audioBitsPerSecond: 64000 };
   };
 
+  /* ---------- v1.3 helpers ---------- */
+  L.APK_URL = 'https://jilanapps.github.io/jilan-store/jilan-reels/jilan-reels.apk';
+  L.threadId = function (a, b) { return a < b ? a + '_' + b : b + '_' + a; };
+  L.parseMentions = function (text) {
+    var out = [], m, re = /(^|[^A-Za-z0-9_])@([A-Za-z0-9_]{3,20})/g;
+    text = String(text || '');
+    while ((m = re.exec(text)) !== null) { var u = m[2].toLowerCase(); if (out.indexOf(u) < 0) out.push(u); if (out.length >= 5) break; }
+    return out;
+  };
+  // Data saver: smaller Cloudinary rendition for playback only.
+  L.playUrl = function (url, saver) {
+    if (!saver || typeof url !== 'string') return url;
+    return url.replace('/video/upload/q_auto,f_auto/', '/video/upload/q_auto:low,f_auto,w_480,c_limit/');
+  };
+  L.coverUrl = function (thumb, sec) {
+    sec = Number(sec) || 0;
+    if (!sec || typeof thumb !== 'string') return thumb;
+    return thumb.replace('/so_0,', '/so_' + (Math.round(sec * 10) / 10) + ',');
+  };
+  L.cleanLink = function (title, url) {
+    title = L.cleanText(title, 40); url = String(url || '').trim();
+    if (!title || !/^https?:\/\/[^\s]{3,300}$/i.test(url)) return null;
+    return { title: title, url: url };
+  };
+  L.shareText = function (videoUrl, who) {
+    return (who ? 'Watch @' + who + ' on Jilan Reels\n' : 'Watch on Jilan Reels\n') + videoUrl + '\n\nGet the app: ' + L.APK_URL;
+  };
+  L.isScheduled = function (v, now) {
+    if (!v || !v.publishAt) return false;
+    var t = typeof v.publishAt.toMillis === 'function' ? v.publishAt.toMillis() : (v.publishAt.seconds ? v.publishAt.seconds * 1000 : Number(v.publishAt) || 0);
+    return t > (now || Date.now());
+  };
+  L.trending = function (videos, n) {
+    var m = {};
+    (videos || []).forEach(function (v) { (v.tags || []).forEach(function (t) { m[t] = (m[t] || 0) + 1 + (v.likeCount || 0) * 0.1 + (v.views || 0) * 0.01; }); });
+    return Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }).slice(0, n || 15);
+  };
+  // Slideshow plan: seconds per photo so the total stays within limit.
+  L.slidePlan = function (count, maxSec) {
+    count = Math.max(1, Math.min(30, count | 0)); maxSec = maxSec || L.MAX_SEC;
+    var per = Math.min(3, maxSec / count);
+    return { per: Math.round(per * 100) / 100, total: Math.round(per * count * 100) / 100 };
+  };
+  // Watermarked download: Cloudinary burns "Jilan Reels @user" into the file (free on-the-fly transform).
+  L.downloadUrl = function (url, username) {
+    if (typeof url !== 'string' || url.indexOf('/video/upload/q_auto,f_auto/') < 0) return url;
+    var un = String(username || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+    var tx = encodeURIComponent('Jilan Reels @' + un).replace(/%2C/g, '%252C');
+    var pid = url.split('/video/upload/q_auto,f_auto/')[1].replace(/\.[a-z0-9]+$/i, '');
+    return url.split('/video/upload/')[0] + '/video/upload/l_text:Arial_26_bold:' + tx + ',co_white,o_85,g_south_east,x_18,y_150/q_auto,fl_attachment:jilan-reels-' + un + '/' + pid + '.mp4';
+  };
+  L.fmtTime = function (s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
   /* ---------- ids ---------- */
   L.followId = function (from, to) { return from + '_' + to; };
   L.chunk = function (arr, n) { var out = []; for (var i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; };
