@@ -883,7 +883,7 @@
   $('#searchMoreBtn').addEventListener('click', function () { runSearch(true); });
 
   /* ---------- create (record or gallery -> compress -> Cloudinary -> Firestore) ---------- */
-  var MAX_SEC = L.MAX_SEC, camStream = null, recorder = null, recChunks = [], recTimer = null, recStart = 0, facing = 'user';
+  var MAX_SEC = L.MAX_SEC, camStream = null, recStream = null, recorder = null, recChunks = [], recTimer = null, recStart = 0, facing = 'user';
   var picked = null; // {blob, url, recordedSec}
   function openCreate() {
     $$('video').forEach(function (v) { v.pause(); });
@@ -912,16 +912,60 @@
       showPreview(f, info.url, 0);
     }).catch(function (e) { toast(errMsg(e)); });
   });
+  /* live filter camera: camera -> canvas (filter) -> captureStream + mic */
+  var FXL = window.JRFx, fxEngine = null, fxChoice = 'normal', fxThumbT = 0, fxNameT = 0;
+  function buildFxStrip() {
+    var strip = $('#fxStrip'); if (!FXL || strip.childNodes.length) return;
+    FXL.list.forEach(function (f) {
+      var b = document.createElement('button'); b.className = 'fx-item'; b.setAttribute('data-fx', f.id);
+      b.innerHTML = '<canvas width="56" height="70"></canvas><span>' + esc(f.name) + '</span>';
+      b.addEventListener('click', function () { setFx(f.id, true); });
+      strip.appendChild(b);
+    });
+  }
+  function setFx(id, announce) {
+    if (!FXL) return;
+    fxChoice = FXL.byId(id).id; if (fxEngine) fxEngine.filter = fxChoice;
+    $$('#fxStrip .fx-item').forEach(function (b) {
+      var on = b.getAttribute('data-fx') === fxChoice; b.classList.toggle('on', on);
+      if (on && announce && b.scrollIntoView) { try { b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) {} }
+    });
+    if (announce) { var n = $('#fxName'); n.textContent = FXL.byId(fxChoice).name; n.classList.add('show'); clearTimeout(fxNameT); fxNameT = setTimeout(function () { n.classList.remove('show'); }, 900); }
+  }
+  function refreshThumbs() {
+    var v = $('#camView'); if (!FXL || !v.videoWidth) return;
+    $$('#fxStrip .fx-item').forEach(function (b) { FXL.thumb(b.querySelector('canvas'), v, FXL.byId(b.getAttribute('data-fx')), facing === 'user', Date.now()); });
+  }
+  // swipe left/right on the camera to change filter
+  (function () {
+    var cv = $('#camCanvas'), x0 = null, y0 = 0;
+    cv.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    cv.addEventListener('touchend', function (e) {
+      if (x0 === null || !FXL) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      var i = 0; FXL.list.forEach(function (f, k) { if (f.id === fxChoice) i = k; });
+      i = (i + (dx < 0 ? 1 : -1) + FXL.list.length) % FXL.list.length; setFx(FXL.list[i].id, true);
+    }, { passive: true });
+  })();
   function startCam() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Camera is not available. Use Upload instead.'); return Promise.reject(); }
     stopCam();
-    return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 540 }, height: { ideal: 960 } }, audio: true }).then(function (s) {
-      camStream = s; var v = $('#camView'); v.srcObject = s; v.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none'; v.play().catch(function () {});
+    // Ask for the camera's normal 16:9 mode. Asking for portrait sizes (540x960)
+    // made Android Chrome cut a narrow strip out of the sensor = zoomed face.
+    return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: true }).then(function (s) {
+      camStream = s; var v = $('#camView'); v.srcObject = s; v.play().catch(function () {});
+      if (FXL) {
+        buildFxStrip(); setFx(fxChoice, false);
+        fxEngine = new FXL.Engine($('#camCanvas'), v); fxEngine.filter = fxChoice; fxEngine.mirror = facing === 'user'; fxEngine.start();
+        clearInterval(fxThumbT); fxThumbT = setInterval(refreshThumbs, 400);
+      }
     }).catch(function (e) { toast('Camera and microphone permission is needed to record.'); throw e; });
   }
   function stopCam() {
     if (recorder && recorder.state === 'recording') { try { recorder.onstop = null; recorder.stop(); } catch (e) {} }
     clearInterval(recTimer); recorder = null;
+    clearInterval(fxThumbT); if (fxEngine) { fxEngine.stop(); fxEngine = null; }
+    if (recStream) { recStream.getVideoTracks().forEach(function (t) { t.stop(); }); recStream = null; }
     if (camStream) { camStream.getTracks().forEach(function (t) { t.stop(); }); camStream = null; }
     var v = $('#camView'); if (v) v.srcObject = null;
     $('#btnShutter').classList.remove('on');
@@ -933,6 +977,7 @@
     }).catch(function () {});
   });
   $('#btnFlip').addEventListener('click', function () { if (recorder && recorder.state === 'recording') return; facing = facing === 'user' ? 'environment' : 'user'; startCam().catch(function () {}); });
+  $('#fxStrip').addEventListener('click', function (e) { e.stopPropagation(); });
   $('#btnRecCancel').addEventListener('click', function () { stopCam(); resetCreate(); });
   $('#btnShutter').addEventListener('click', function () {
     if (!camStream) return;
@@ -940,7 +985,13 @@
     if (!window.MediaRecorder) { toast('Recording is not supported on this phone. Use Upload instead.'); return; }
     recChunks = [];
     var mime = M.pickMime();
-    try { recorder = new MediaRecorder(camStream, mime ? { mimeType: mime, videoBitsPerSecond: 700000, audioBitsPerSecond: 64000 } : undefined); }
+    // Record the filtered canvas + the microphone. Falls back to the plain camera if the canvas can't be captured.
+    var src = camStream;
+    if (fxEngine) {
+      var cs = fxEngine.stream(30);
+      if (cs && cs.getVideoTracks().length) { camStream.getAudioTracks().forEach(function (t) { cs.addTrack(t); }); recStream = cs; src = cs; }
+    }
+    try { recorder = new MediaRecorder(src, mime ? { mimeType: mime, videoBitsPerSecond: 700000, audioBitsPerSecond: 64000 } : undefined); }
     catch (e) { toast('Recording is not supported on this phone.'); return; }
     recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
     recorder.onstop = function () {
