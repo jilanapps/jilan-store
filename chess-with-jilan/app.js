@@ -1,7 +1,7 @@
-// Chess with Jilan v1.0 - Jilan Apps Official
+// Chess with Jilan v1.1 - Jilan Apps Official (online play, chat, voice)
 import { Chess } from './lib/chess.js?v=1.0.0';
 
-const APP_VERSION = '1.0';
+const APP_VERSION = '1.1';
 const SAVE_KEY = 'cwj_game_v1';
 const PREF_KEY = 'cwj_prefs_v1';
 const FILES = 'abcdefgh';
@@ -235,6 +235,7 @@ function sideAtBottom() { return flipped() ? 'b' : 'w'; }
 function playerName(color) {
   if (!S) return '';
   if (S.mode === '2p') return color === 'w' ? 'White' : 'Black';
+  if (S.mode === 'online') return color === S.human ? 'You' : oppName();
   return color === S.human ? 'You' : 'Jilan';
 }
 function renderPlayers() {
@@ -242,11 +243,13 @@ function renderPlayers() {
   const setP = (pos, color) => {
     const name = playerName(color);
     const av = $(pos === 'top' ? 'avTop' : 'avBot');
-    av.className = 'avatar' + (name === 'Jilan' ? '' : (name === 'You' ? ' me' : ' p2'));
-    av.textContent = name === 'Jilan' ? 'J' : (name === 'You' ? 'You' : (color === 'w' ? 'W' : 'B'));
-    $(pos === 'top' ? 'nameTop' : 'nameBot').innerHTML = name === 'Jilan'
+    const isOpp = S.mode === 'online' && color !== S.human;
+    const isJ = S.mode === 'ai' && name === 'Jilan';
+    av.className = 'avatar' + (isJ ? '' : (name === 'You' && !isOpp ? ' me' : ' p2'));
+    av.textContent = isJ ? 'J' : (name === 'You' && !isOpp ? 'You' : (isOpp ? (name.trim()[0] || 'F').toUpperCase() : (color === 'w' ? 'W' : 'B')));
+    $(pos === 'top' ? 'nameTop' : 'nameBot').innerHTML = isJ
       ? 'Jilan <small>Level ' + S.level + ' - ' + LEVELS[S.level].name + '</small>'
-      : name + ' <small>(' + (color === 'w' ? 'White' : 'Black') + ')</small>';
+      : esc(name) + ' <small>(' + (color === 'w' ? 'White' : 'Black') + ')</small>';
     $(pos === 'top' ? 'plTop' : 'plBot').classList.toggle('turn', !S.over && game.turn() === color);
   };
   setP('top', top); setP('bot', bot);
@@ -291,10 +294,24 @@ function renderStatus() {
   const st = $('status'); st.classList.remove('alert');
   if (S.over) { st.textContent = S.result.title + ' - ' + S.result.reason; return; }
   if (thinking) { st.textContent = 'Jilan is thinking...'; return; }
+  if (S.mode === 'online') {
+    if (!O.room) { st.textContent = 'Connecting to room...'; return; }
+    if (O.room.status === 'waiting') { st.textContent = 'Waiting for friend to join...'; return; }
+    if (S.over) { st.textContent = 'Game over'; return; }
+    const w2 = game.turn() === S.human ? 'Your move' : esc(oppName()) + "'s move";
+    if (game.inCheck()) { st.innerHTML = 'Check! ' + w2; st.classList.add('alert'); } else st.innerHTML = w2;
+    return;
+  }
   const who = S.mode === 'ai' ? (game.turn() === S.human ? 'Your move' : "Jilan's move") : (game.turn() === 'w' ? 'White to move' : 'Black to move');
   if (game.inCheck()) { st.textContent = 'Check! ' + who; st.classList.add('alert'); } else st.textContent = who;
 }
 function renderButtons() {
+  if (S.mode === 'online') {
+    const playing = !!(O.room && O.room.status === 'playing') && !S.over;
+    $('btnUndo').disabled = true; $('btnHint').disabled = true;
+    $('btnDraw').disabled = !playing || O.room.drawOffer === S.human;
+    $('btnResign').disabled = !playing; return;
+  }
   const ai = S.mode === 'ai', h = game.history().length;
   $('btnUndo').disabled = h === 0 || (ai && h < (S.human === 'w' ? 1 : 2) && !S.over);
   $('btnHint').disabled = S.over || thinking || (ai && game.turn() !== S.human);
@@ -308,7 +325,7 @@ function toast(msg, ms = 2200) { const t = $('toast'); t.textContent = msg; t.hi
 
 // ---------------- Save / resume ----------------
 function save() {
-  if (!S) return;
+  if (!S || S.mode === 'online') return;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify({ S, moves: game.history({ verbose: true }).map((m) => m.lan || (m.from + m.to + (m.promotion || ''))), t: Date.now() })); } catch (e) {}
 }
 function tryResume() {
@@ -324,6 +341,7 @@ function tryResume() {
 
 // ---------------- Game flow ----------------
 function newGame(opts) {
+  if (opts && opts.mode === 'online') opts = Object.assign({}, opts, { mode: 'ai' });
   stopThinking();
   const human = opts.mode === 'ai' ? (opts.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : opts.color) : 'w';
   S = { mode: opts.mode, human, level: opts.level, clock: opts.clock, autoFlip: !!opts.autoFlip,
@@ -341,11 +359,12 @@ function doMove(m, byHuman) {
   try { res = game.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' }); } catch (e) { res = null; }
   if (!res) { sound('illegal'); return false; }
   selected = null; legalForSel = []; hintMove = null; lastMove = { from: res.from, to: res.to };
-  if (S.clock > 0) { if (!S.clockStarted) { S.clockStarted = true; lastTick = performance.now(); startClock(); } }
+  if (S.clock > 0 && S.mode !== 'online') { if (!S.clockStarted) { S.clockStarted = true; lastTick = performance.now(); startClock(); } }
   const k = game.inCheck() ? 'check' : res.flags.includes('p') ? 'promote' : (res.flags.includes('k') || res.flags.includes('q')) ? 'castle' : res.captured ? 'capture' : 'move';
   sound(k); buzz(res.captured ? 25 : 12);
   if (S.mode === '2p' && S.autoFlip && !game.isGameOver()) { S.flipped = game.turn() === 'b'; buildSquares(); relayoutPieces(); }
   renderAll(true);
+  if (S.mode === 'online' && byHuman) onlinePushMove(res);
   if (checkGameOver()) { save(); return true; }
   save();
   if (S.mode === 'ai' && game.turn() !== S.human) setTimeout(aiMove, 220);
@@ -354,6 +373,7 @@ function doMove(m, byHuman) {
 
 function checkGameOver() {
   if (!game.isGameOver()) return false;
+  if (S.mode === 'online') { const g = gameOverCode(); if (g && !S.over) endGame(resultView(g.res, g.reason)); return true; }
   let title, reason, kind;
   if (game.isCheckmate()) {
     const winner = game.turn() === 'w' ? 'b' : 'w'; reason = 'by checkmate';
@@ -427,11 +447,11 @@ function startClock() {
   }, 100);
 }
 function stopClock() { if (clockTimer) clearInterval(clockTimer); clockTimer = null; }
-document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if (S && S.clockStarted && !S.over) { lastTick = performance.now(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.mode === 'online') heartbeat(); if (document.hidden) save(); else if (S && S.clockStarted && !S.over) { lastTick = performance.now(); } });
 
 // ---------------- Input: tap + drag ----------------
 let drag = null; // {sq, el, startX, startY, moved}
-function canMoveColor(c) { if (!S || S.over || thinking) return false; if (S.mode === 'ai') return c === S.human && game.turn() === S.human; return c === game.turn(); }
+function canMoveColor(c) { if (!S || S.over || thinking) return false; if (S.mode === 'online') return !!(O.room && O.room.status === 'playing') && c === S.human && game.turn() === S.human; if (S.mode === 'ai') return c === S.human && game.turn() === S.human; return c === game.turn(); }
 function select(sq) { selected = sq; legalForSel = game.moves({ square: sq, verbose: true }); renderMarks(); }
 function tryMoveTo(sq) {
   const ms = legalForSel.filter((m) => m.to === sq); if (!ms.length) return false;
@@ -449,6 +469,7 @@ wrapEl.addEventListener('pointerdown', (e) => {
     if (pe) { drag = { sq, el: pe.el, moved: false, x0: e.clientX, y0: e.clientY, id: e.pointerId }; try { wrapEl.setPointerCapture(e.pointerId); } catch (er) {} }
   } else if (selected) { selected = null; legalForSel = []; renderMarks(); }
   else if (p && S && !S.over && S.mode === 'ai' && p.color === S.human && game.turn() !== S.human) toast('Wait for Jilan to move');
+  else if (p && S && !S.over && S.mode === 'online' && p.color === S.human && O.room && O.room.status === 'playing' && game.turn() !== S.human) toast('Wait for your friend to move');
 });
 wrapEl.addEventListener('pointermove', (e) => {
   if (!drag || e.pointerId !== drag.id) return;
@@ -515,6 +536,7 @@ $('btnHint').onclick = async () => {
 };
 $('btnFlip').onclick = () => { if (!S) return; S.flipped = !S.flipped; buildSquares(); relayoutPieces(); renderMarks(); renderPlayers(); save(); };
 $('btnDraw').onclick = () => {
+  if (S && S.mode === 'online') { onlineOfferDraw(); return; }
   if (!S || S.over || S.mode !== 'ai') return;
   const moves = game.history().length; let accept = false;
   if (lastEval) { // eval is from Jilan's side (Jilan was to move)
@@ -527,6 +549,7 @@ $('btnDraw').onclick = () => {
 $('btnResign').onclick = () => {
   if (!S || S.over) return;
   if (!confirm('Resign this game?')) return;
+  if (S.mode === 'online') { onlineResign(); return; }
   if (S.mode === 'ai') endGame({ title: 'Jilan wins', reason: 'you resigned', kind: 'lose' });
   else { const loser = game.turn(); endGame({ title: (loser === 'w' ? 'Black' : 'White') + ' wins', reason: (loser === 'w' ? 'White' : 'Black') + ' resigned', kind: 'win' }); }
 };
@@ -537,6 +560,12 @@ function openNew() {
   const sync = () => {
     back.querySelectorAll('.seg').forEach((seg) => seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', String(prefs[seg.dataset.key]) === b.dataset.v)));
     back.querySelectorAll('.ai-only').forEach((x) => (x.hidden = prefs.mode !== 'ai'));
+    back.querySelectorAll('.color-f').forEach((x) => (x.hidden = prefs.mode === '2p'));
+    back.querySelectorAll('.online-only').forEach((x) => (x.hidden = prefs.mode !== 'online'));
+    $('btnStart').hidden = prefs.mode === 'online';
+    const one = back.querySelector('[data-key="clock"] [data-v="1"]'); if (one) one.hidden = prefs.mode === 'online';
+    if (prefs.mode === 'online' && prefs.clock === 1) { prefs.clock = 3; back.querySelectorAll('[data-key="clock"] button').forEach((b) => b.classList.toggle('on', b.dataset.v === '3')); }
+    if (!$('onName').value) $('onName').value = prefs.onlineName || '';
     back.querySelectorAll('.two-only').forEach((x) => (x.hidden = prefs.mode !== '2p'));
     $('lvl').value = prefs.level; $('lvlLabel').textContent = prefs.level + ' - ' + LEVELS[prefs.level].name; $('optAutoFlip').checked = prefs.autoFlip;
   };
@@ -545,9 +574,12 @@ function openNew() {
   $('optAutoFlip').onchange = () => { prefs.autoFlip = $('optAutoFlip').checked; };
   sync();
 }
-$('btnNew').onclick = openNew;
+$('btnNew').onclick = () => {
+  if (S && S.mode === 'online' && O.room && O.room.status === 'playing' && !S.over && !confirm('Leave this online game? You can come back with the same room code.')) return;
+  openNew();
+};
 $('btnCancelNew').onclick = () => ($('newBack').hidden = true);
-$('btnStart').onclick = () => { savePrefs(); $('newBack').hidden = true; $('resultBack').hidden = true; newGame(prefs); };
+$('btnStart').onclick = () => { savePrefs(); $('newBack').hidden = true; $('resultBack').hidden = true; if (S && S.mode === 'online') onlineLeave(); newGame(prefs); };
 $('newBack').onclick = (e) => { if (e.target === $('newBack') && S) $('newBack').hidden = true; };
 
 // Menu
@@ -571,7 +603,7 @@ document.querySelectorAll('#aboutBack a').forEach((a) => a.addEventListener('cli
 }));
 
 // Result
-$('btnRematch').onclick = () => { $('resultBack').hidden = true; const o = { mode: S.mode, color: S.mode === 'ai' ? (prefs.color === 'r' ? 'r' : (S.human === 'w' ? 'b' : 'w')) : 'w', level: S.level, clock: S.clock, autoFlip: S.autoFlip }; if (S.mode === 'ai' && prefs.color !== 'r') prefs.color = o.color; newGame(o); };
+$('btnRematch').onclick = () => { if (S && S.mode === 'online') { onlineRematch(); return; } $('resultBack').hidden = true; const o = { mode: S.mode, color: S.mode === 'ai' ? (prefs.color === 'r' ? 'r' : (S.human === 'w' ? 'b' : 'w')) : 'w', level: S.level, clock: S.clock, autoFlip: S.autoFlip }; if (S.mode === 'ai' && prefs.color !== 'r') prefs.color = o.color; newGame(o); };
 $('btnNewFromRes').onclick = () => { $('resultBack').hidden = true; openNew(); };
 $('btnReview').onclick = () => ($('resultBack').hidden = true);
 
@@ -580,15 +612,498 @@ window.showAvailableVersion = function (v) { if (v) toast('Update ' + v + ' is r
 
 // ---------------- Layout ----------------
 function fitBoard() {
-  const app = $('app'); const others = 52 + 2 * 64 + 22 + 40 + 70 + 24; // header, players, status, moves, controls, gaps
+  const app = $('app'); let others = 52 + 2 * 64 + 22 + 40 + 70 + 24; // header, players, status, moves, controls, gaps
+  if (!$('onBar').hidden) others += 52; if (!$('onPrompt').hidden) others += 50;
   const avail = window.innerHeight - others; const w = Math.min(app.clientWidth - 16, Math.max(240, avail));
   wrapEl.style.width = w + 'px'; wrapEl.style.height = w + 'px';
 }
 window.addEventListener('resize', () => { fitBoard(); });
 
+// ---------------- Online play: rooms, chat, voice (Firestore, project jilan-chat, free Spark) ----------------
+const ONLINE_KEY = 'cwj_online_v1', UID_KEY = 'cwj_uid_v1';
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const DAY = 24 * 3600 * 1000;
+const APK_URL = 'https://jilanapps.github.io/jilan-store/chess-with-jilan/chess-with-jilan.apk';
+const QUICK = ['Salam', 'Good move!', 'Hurry up', 'Nice game', 'Oops!', 'GG'];
+const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }];
+const O = { db: null, ref: null, code: null, room: null, unsub: null, msgUnsub: null, rtcUnsub: null, offset: 0, hb: null, tick: null,
+  appliedGame: 0, unread: 0, msgs: [], msgsLoaded: false, prompt: null, voice: null, pendingOffer: null, pendingCands: [],
+  spkMuted: false, flagSent: false, rematching: 0, hbT0: 0, lastMySeen: null, enterAt: 0 };
+
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function cleanName(s) { return String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+function rid(n) { return Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => (b % 36).toString(36)).join(''); }
+function myUid() { let u = null; try { u = localStorage.getItem(UID_KEY); } catch (e) {} if (!u) { u = rid(16); try { localStorage.setItem(UID_KEY, u); } catch (e) {} } return u; }
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('load')); document.head.appendChild(s); }); }
+function withTimeout(p, ms, msg) { return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(msg || 'timeout')), ms))]); }
+let fbLoading = null;
+function fb() {
+  if (O.db) return Promise.resolve(O.db);
+  if (!fbLoading) fbLoading = (async () => {
+    if (!window.firebase) { await loadScript('lib/firebase/firebase-app-compat.js?v=1.1.0'); await loadScript('lib/firebase/firebase-firestore-compat.js?v=1.1.0'); }
+    if (!window.CWJ_FIREBASE_CONFIG) await loadScript('lib/firebase/online-config.js?v=1.1.0');
+    const app = firebase.apps.find((a) => a.name === 'cwj') || firebase.initializeApp(window.CWJ_FIREBASE_CONFIG, 'cwj');
+    const db = app.firestore();
+    try { db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) {}
+    O.db = db; return db;
+  })().catch((e) => { fbLoading = null; throw e; });
+  return fbLoading;
+}
+const FV = () => firebase.firestore.FieldValue;
+function srvNow() { return Date.now() - O.offset; }
+function tsMs(t) { return t && t.toMillis ? t.toMillis() : null; }
+function oppSide() { return S && S.human === 'w' ? 'b' : 'w'; }
+function oppName() { const r = O.room; if (!r || !S) return 'Friend'; return (S.human === 'w' ? r.bName : r.wName) || 'Friend'; }
+function myName() { return cleanName(prefs.onlineName) || 'Player'; }
+function uciList(g) { return g.history({ verbose: true }).map((m) => m.from + m.to + (m.promotion || '')); }
+function friendlyErr(e) {
+  const m = (e && (e.message || e.code)) || '';
+  if (/not found|expired|full|code/i.test(m) && !/permission/i.test(m)) return m;
+  if (/timeout|unavailable|network|load/i.test(m)) return 'Could not connect - check your internet';
+  if (/permission/i.test(m)) return 'This room cannot be joined (it may be older than 24 hours)';
+  return 'Something went wrong - please try again';
+}
+
+function gameOverCode() {
+  if (!game.isGameOver()) return null;
+  if (game.isCheckmate()) return { res: game.turn() === 'w' ? 'b' : 'w', reason: 'checkmate' };
+  return { res: 'd', reason: game.isStalemate() ? 'stalemate' : game.isInsufficientMaterial() ? 'insufficient' : game.isThreefoldRepetition() ? 'threefold' : 'fifty' };
+}
+function resultView(res, reason) {
+  const me = S.human, opp = oppName();
+  const txt = { checkmate: 'by checkmate', stalemate: 'by stalemate', insufficient: 'by insufficient material', threefold: 'by threefold repetition',
+    fifty: 'by the 50-move rule', time: 'on time', timedraw: 'time out, no mating material', agreement: 'by agreement' }[reason]
+    || (reason === 'resign' ? (res === me ? opp + ' resigned' : 'you resigned') : '');
+  if (res === 'd') return { title: 'Draw', reason: txt || 'by agreement', kind: 'draw' };
+  if (res === me) return { title: 'You won!', reason: txt, kind: 'win' };
+  return { title: opp + ' wins', reason: txt, kind: 'lose' };
+}
+
+// ---- create / join / enter / leave ----
+async function onlineCreate(name, colorPref, clock) {
+  const db = await withTimeout(fb(), 20000, 'timeout'); const uid = myUid();
+  const side = colorPref === 'r' || !colorPref ? (Math.random() < 0.5 ? 'w' : 'b') : colorPref;
+  clock = [0, 3, 5, 10].includes(clock) ? clock : 0;
+  for (let i = 0; i < 6; i++) {
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => CODE_CHARS[b % 32]).join('');
+    const ref = db.collection('chessRooms').doc(code);
+    const ok = await withTimeout(db.runTransaction(async (tx) => {
+      const d = await tx.get(ref); if (d.exists) return false;
+      tx.set(ref, { code, createdAt: FV().serverTimestamp(), game: 1, status: 'waiting', clock, fen: new Chess().fen(), moves: '',
+        wName: side === 'w' ? name : '', bName: side === 'b' ? name : '', wId: side === 'w' ? uid : '', bId: side === 'b' ? uid : '',
+        tw: clock * 60000, tb: clock * 60000, lastMoveAt: null, seenW: side === 'w' ? FV().serverTimestamp() : null, seenB: side === 'b' ? FV().serverTimestamp() : null,
+        drawOffer: '', rematchW: false, rematchB: false, result: '', reason: '', creatorColor: side });
+      return true;
+    }), 20000, 'timeout');
+    if (ok) return code;
+  }
+  throw new Error('Could not create a room - please try again');
+}
+async function onlineJoin(code, name) {
+  const db = await withTimeout(fb(), 20000, 'timeout'); const uid = myUid(); const ref = db.collection('chessRooms').doc(code);
+  await withTimeout(db.runTransaction(async (tx) => {
+    const d = await tx.get(ref); if (!d.exists) throw new Error('Room not found - check the code');
+    const r = d.data(); const ca = tsMs(r.createdAt);
+    if (ca && Date.now() - ca > DAY) throw new Error('This room has expired - ask your friend to create a new one');
+    if (r.wId === uid || r.bId === uid) return;
+    if (r.status !== 'waiting' || (r.wId && r.bId)) throw new Error('This room is already full');
+    const up = r.wId ? { bName: name, bId: uid, seenB: FV().serverTimestamp() } : { wName: name, wId: uid, seenW: FV().serverTimestamp() };
+    up.status = 'playing'; tx.update(ref, up);
+  }), 20000, 'timeout');
+  return code;
+}
+async function onlineEnter(code) {
+  const db = await withTimeout(fb(), 20000, 'timeout');
+  onlineDetach();
+  O.code = code; O.ref = db.collection('chessRooms').doc(code); O.appliedGame = 0; O.room = null; O.msgs = []; O.msgsLoaded = false; O.unread = 0;
+  O.enterAt = Date.now(); O.flagSent = false; O.pendingOffer = null; O.pendingCands = [];
+  try { localStorage.setItem(ONLINE_KEY, JSON.stringify({ code, t: Date.now() })); } catch (e) {}
+  stopThinking(); stopClock(); $('resultBack').hidden = true;
+  S = { mode: 'online', human: 'w', level: 3, clock: 0, autoFlip: false, flipped: false, over: false, result: null, times: { w: 0, b: 0 }, clockStarted: false, startFen: null };
+  game = new Chess(); selected = null; legalForSel = []; hintMove = null; lastMove = null;
+  pieceEls.forEach((e) => e.el.remove()); pieceEls = [];
+  $('onRoom').textContent = 'Room ' + code; $('onBar').hidden = false; hidePrompt(); renderBadge(); renderVoice(); fitBoard();
+  buildSquares(); renderAll(false);
+  O.unsub = O.ref.onSnapshot((snap) => {
+    if (!snap.exists) { toast('Room not found'); onlineLeave(); restoreOffline(); return; }
+    onRoom(snap.data({ serverTimestamps: 'estimate' }), snap.metadata.hasPendingWrites);
+  }, (err) => { toast('Connection problem - retrying when internet is back'); });
+  O.msgUnsub = O.ref.collection('msgs').orderBy('at').limitToLast(200).onSnapshot(onMsgs, () => {});
+  const since = firebase.firestore.Timestamp.fromMillis(Date.now() - 90000);
+  O.rtcUnsub = O.ref.collection('rtc').where('at', '>', since).orderBy('at').onSnapshot(onRtc, () => {});
+  O.hb = setInterval(heartbeat, 15000); O.tick = setInterval(onlineTick, 250);
+}
+function onlineDetach() {
+  [O.unsub, O.msgUnsub, O.rtcUnsub].forEach((f) => { try { f && f(); } catch (e) {} });
+  O.unsub = O.msgUnsub = O.rtcUnsub = null; clearInterval(O.hb); clearInterval(O.tick); O.hb = O.tick = null;
+  if (O.voice) voiceHangup(true);
+}
+function onlineLeave() {
+  onlineDetach(); O.code = null; O.room = null; O.ref = null;
+  try { localStorage.removeItem(ONLINE_KEY); } catch (e) {}
+  $('onBar').hidden = true; hidePrompt(); $('waitBack').hidden = true; $('chatBack').hidden = true; fitBoard();
+}
+function restoreOffline() {
+  if (tryResume()) { pieceEls.forEach((e) => e.el.remove()); pieceEls = []; buildSquares(); renderAll(false); if (S.mode === 'ai') Engine.init(); }
+  else newGame(prefs);
+}
+
+// ---- room snapshot ----
+function onRoom(r, pending) {
+  const prev = O.room; const uid = myUid();
+  const side = r.wId === uid ? 'w' : r.bId === uid ? 'b' : null;
+  if (!side) { toast('This room is full - you are not a player in it'); onlineLeave(); restoreOffline(); return; }
+  O.room = r;
+  // server clock offset from my own confirmed heartbeat
+  const mySeen = tsMs(side === 'w' ? r.seenW : r.seenB);
+  if (!pending && mySeen && mySeen !== O.lastMySeen) {
+    O.lastMySeen = mySeen;
+    if (O.hbT0 && Date.now() - O.hbT0 < 10000) O.offset = Date.now() - mySeen - Math.min(800, (Date.now() - O.hbT0) / 2);
+  }
+  const newGameNo = r.game !== O.appliedGame;
+  if (newGameNo) {
+    const first = O.appliedGame === 0; O.appliedGame = r.game; O.flagSent = false; O.rematching = 0;
+    game = new Chess(); lastMove = null; selected = null; legalForSel = []; S.over = false; S.result = null;
+    $('resultBack').hidden = true; S.human = side; S.flipped = side === 'b';
+    pieceEls.forEach((e) => e.el.remove()); pieceEls = []; buildSquares();
+    if (!first) { toast('New game - you play ' + (side === 'w' ? 'White' : 'Black')); hidePrompt(); }
+    if (first) heartbeat();
+  }
+  S.human = side; S.clock = r.clock;
+  // moves
+  const remote = typeof r.moves === 'string' ? r.moves.split(' ').filter(Boolean) : uciList(game);
+  const local = uciList(game);
+  const isPrefix = local.length <= remote.length && local.every((u, i) => u === remote[i]);
+  let animate = true;
+  if (isPrefix && remote.length > local.length) {
+    const many = remote.length - local.length > 1; animate = !many;
+    for (let i = local.length; i < remote.length; i++) {
+      const u = remote[i]; let res = null;
+      try { res = game.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || undefined }); } catch (e) { res = null; }
+      if (!res) { rebuildFrom(remote); animate = false; break; }
+      lastMove = { from: res.from, to: res.to }; selected = null; legalForSel = []; hintMove = null;
+      if (!many) {
+        const k = game.inCheck() ? 'check' : res.flags.includes('p') ? 'promote' : (res.flags.includes('k') || res.flags.includes('q')) ? 'castle' : res.captured ? 'capture' : 'move';
+        sound(k); buzz(res.captured ? 25 : 12);
+      }
+    }
+  } else if (!isPrefix && !(remote.length < local.length && remote.every((u, i) => u === local[i]))) { rebuildFrom(remote); animate = false; }
+  // clocks
+  S.clockStarted = r.status === 'playing' && !!r.lastMoveAt;
+  S.times = { w: r.tw, b: r.tb };
+  // waiting sheet
+  if (r.status === 'waiting') { $('waitCode').textContent = r.code; if (!prev || prev.status !== 'waiting' || newGameNo) $('waitBack').hidden = false; }
+  else { $('waitBack').hidden = true; }
+  if (prev && prev.status === 'waiting' && r.status === 'playing') { toast(oppName() + ' joined - game on!', 2600); buzz(40); sound('promote'); }
+  // game over from server
+  if (r.status === 'over' && !S.over) { renderAll(animate); endGame(resultView(r.result, r.reason)); }
+  // draw offer
+  if (r.status === 'playing' && r.drawOffer === oppSide()) showPrompt('draw', esc(oppName()) + ' offers a draw', 'Accept', 'Decline');
+  else if (O.prompt === 'draw') hidePrompt();
+  if (prev && prev.drawOffer === side && r.drawOffer === '' && r.status === 'playing' && prev.moves === r.moves) toast('Draw offer declined');
+  // rematch
+  if (r.status === 'over') {
+    const mine = side === 'w' ? r.rematchW : r.rematchB, theirs = side === 'w' ? r.rematchB : r.rematchW;
+    if (mine && theirs) { if (side === 'w') startRematch(); }
+    else if (theirs && !mine) { if (O.prompt !== 'rematch') setTimeout(() => { if (O.prompt === 'rematch') $('resultBack').hidden = true; }, 700); showPrompt('rematch', esc(oppName()) + ' wants a rematch', 'Play', 'No'); }
+    else if (O.prompt === 'rematch') hidePrompt();
+  } else if (O.prompt === 'rematch') hidePrompt();
+  renderAll(animate); renderOpp();
+}
+function rebuildFrom(remote) {
+  const g = new Chess();
+  for (const u of remote) { try { g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || undefined }); } catch (e) { break; } }
+  game = g; const hv = game.history({ verbose: true }); const lm = hv[hv.length - 1]; lastMove = lm ? { from: lm.from, to: lm.to } : null;
+  selected = null; legalForSel = []; pieceEls.forEach((e) => e.el.remove()); pieceEls = [];
+}
+
+// ---- writes ----
+function onlinePushMove(res) {
+  const r = O.room; if (!r || !O.ref) return;
+  const up = { moves: uciList(game).join(' '), fen: game.fen(), drawOffer: '', lastMoveAt: FV().serverTimestamp() };
+  if (r.clock > 0 && r.lastMoveAt) { const key = 't' + res.color; up[key] = Math.max(0, Math.round(r[key] - (srvNow() - tsMs(r.lastMoveAt)))); }
+  const g = gameOverCode(); if (g) { up.status = 'over'; up.result = g.res; up.reason = g.reason; }
+  O.ref.update(up).catch(() => toast('Move not sent yet - it will be sent when internet is back'));
+}
+function heartbeat() {
+  if (!O.ref || !O.room || document.hidden) return;
+  O.hbT0 = Date.now(); const up = {}; up[S.human === 'w' ? 'seenW' : 'seenB'] = FV().serverTimestamp();
+  O.ref.update(up).catch(() => {});
+}
+function onlineOfferDraw() {
+  const r = O.room; if (!r || r.status !== 'playing' || S.over) return;
+  if (r.drawOffer === oppSide()) { acceptDraw(); return; }
+  O.ref.update({ drawOffer: S.human }).then(() => toast('Draw offered to ' + oppName())).catch(() => toast('Could not send - check internet'));
+}
+function acceptDraw() { O.ref.update({ status: 'over', result: 'd', reason: 'agreement', drawOffer: '' }).catch(() => {}); }
+function onlineResign() { if (!O.room || O.room.status !== 'playing') return; O.ref.update({ status: 'over', result: oppSide(), reason: 'resign', drawOffer: '' }).catch(() => toast('Could not send - check internet')); }
+function onlineRematch() {
+  const r = O.room; if (!r || r.status !== 'over') return;
+  const theirs = S.human === 'w' ? r.rematchB : r.rematchW;
+  $('resultBack').hidden = true;
+  if (theirs) { startRematch(); return; }
+  O.ref.update({ ['rematch' + S.human.toUpperCase()]: true }).then(() => toast('Rematch request sent to ' + oppName())).catch(() => toast('Could not send - check internet'));
+}
+function startRematch() {
+  const r = O.room; if (!r || O.rematching === r.game) return; O.rematching = r.game;
+  O.ref.update({ game: r.game + 1, status: 'playing', moves: '', fen: new Chess().fen(), wName: r.bName, bName: r.wName, wId: r.bId, bId: r.wId,
+    seenW: r.seenB || null, seenB: r.seenW || null, tw: r.clock * 60000, tb: r.clock * 60000, lastMoveAt: null, drawOffer: '',
+    rematchW: false, rematchB: false, result: '', reason: '' }).catch(() => { O.rematching = 0; toast('Could not start rematch - try again'); });
+}
+
+// ---- clock + presence ----
+function onlineTick() {
+  const r = O.room; if (!r || !S || S.mode !== 'online') return;
+  renderOpp();
+  if (r.clock > 0) {
+    const t = { w: r.tw, b: r.tb };
+    if (r.status === 'playing' && r.lastMoveAt && !S.over) {
+      const c = game.turn(); t[c] = r['t' + c] - (srvNow() - tsMs(r.lastMoveAt));
+      if (t[c] <= 0 && !O.flagSent) {
+        O.flagSent = true; const winner = c === 'w' ? 'b' : 'w';
+        const onlyKing = game.board().flat().filter((p) => p && p.color === winner).every((p) => p.type === 'k');
+        const up = { status: 'over', result: onlyKing ? 'd' : winner, reason: onlyKing ? 'timedraw' : 'time', drawOffer: '' }; up['t' + c] = 0;
+        O.ref.update(up).catch(() => { O.flagSent = false; });
+      }
+    }
+    S.times = t; renderClocks();
+  }
+}
+function oppOnline() {
+  const r = O.room; if (!r) return false; const t = tsMs(S.human === 'w' ? r.seenB : r.seenW); return !!t && srvNow() - t < 40000;
+}
+function renderOpp() {
+  const r = O.room; const el = $('onOpp');
+  if (!r) { $('onOppText').textContent = 'Connecting...'; el.classList.remove('on'); return; }
+  if (r.status === 'waiting') { $('onOppText').textContent = 'Waiting for friend'; el.classList.remove('on'); return; }
+  const on = oppOnline(); el.classList.toggle('on', on);
+  $('onOppText').textContent = oppName() + (on ? ' - online' : ' - offline');
+}
+
+// ---- prompt bar ----
+function showPrompt(kind, html, yes, no) {
+  O.prompt = kind; $('onPromptText').innerHTML = html; $('onYes').textContent = yes; $('onNo').textContent = no;
+  if ($('onPrompt').hidden) { $('onPrompt').hidden = false; fitBoard(); buzz(30); }
+}
+function hidePrompt() { O.prompt = null; if (!$('onPrompt').hidden) { $('onPrompt').hidden = true; fitBoard(); } }
+$('onYes').onclick = () => {
+  const k = O.prompt; hidePrompt();
+  if (k === 'draw') acceptDraw();
+  else if (k === 'rematch') onlineRematch();
+  else if (k === 'voice' && O.pendingOffer) voiceAnswer(O.pendingOffer);
+};
+$('onNo').onclick = () => {
+  const k = O.prompt; hidePrompt();
+  if (k === 'draw' && O.ref) O.ref.update({ drawOffer: '' }).catch(() => {});
+  else if (k === 'voice' && O.pendingOffer) {
+    const d = O.pendingOffer; O.pendingOffer = null;
+    O.ref.collection('rtc').add({ side: S.human, sess: d.sess, type: 'bye', sdp: '', at: FV().serverTimestamp() }).catch(() => {});
+  }
+};
+
+// ---- new game sheet: create / join ----
+function onlineBusy(on, which) {
+  $('btnCreateRoom').disabled = on; $('btnJoinRoom').disabled = on;
+  $('btnCreateRoom').textContent = on && which === 'c' ? 'Connecting...' : 'Create room';
+  $('btnJoinRoom').textContent = on && which === 'j' ? 'Joining...' : 'Join room';
+}
+function readName() {
+  const n = cleanName($('onName').value);
+  if (!n) { toast('Please enter your name first'); $('onName').focus(); return null; }
+  prefs.onlineName = n; savePrefs(); return n;
+}
+$('joinCode').addEventListener('input', () => { const v = $('joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/[IO01]/g, (c) => ({ I: 'J', O: '0', 0: '0', 1: '1' }[c] || c)).slice(0, 6); if (v !== $('joinCode').value) $('joinCode').value = v; });
+$('btnCreateRoom').onclick = async () => {
+  const name = readName(); if (!name) return; savePrefs(); onlineBusy(true, 'c');
+  try {
+    const code = await onlineCreate(name, prefs.color, prefs.clock === 1 ? 3 : prefs.clock);
+    $('newBack').hidden = true; await onlineEnter(code); $('waitCode').textContent = code; $('waitBack').hidden = false;
+  } catch (e) { toast(friendlyErr(e), 3500); }
+  finally { onlineBusy(false); }
+};
+$('btnJoinRoom').onclick = async () => {
+  const name = readName(); if (!name) return;
+  const code = $('joinCode').value.trim().toUpperCase();
+  if (!/^[A-HJ-NP-Z2-9]{6}$/.test(code)) { toast('Enter the 6-character room code'); return; }
+  onlineBusy(true, 'j');
+  try { await onlineJoin(code, name); $('newBack').hidden = true; await onlineEnter(code); }
+  catch (e) { toast(friendlyErr(e), 3500); }
+  finally { onlineBusy(false); }
+};
+function shareText(code) {
+  return "Let's play chess on Chess with Jilan!\nRoom code: " + code + "\nOpen the app, tap New game, Online, Join room and enter the code.\nGet the app: " + APK_URL;
+}
+function openExternal(url) { if (window.Android && Android.openLink) { try { Android.openLink(url); return; } catch (e) {} } window.open(url, '_blank'); }
+$('btnShareRoom').onclick = () => { if (O.code) openExternal('https://wa.me/?text=' + encodeURIComponent(shareText(O.code))); };
+$('btnCopyRoom').onclick = async () => {
+  if (!O.code) return; let ok = false;
+  try { await navigator.clipboard.writeText(shareText(O.code)); ok = true; } catch (e) {}
+  if (!ok) { try { const t = document.createElement('textarea'); t.value = shareText(O.code); document.body.appendChild(t); t.select(); ok = document.execCommand('copy'); t.remove(); } catch (e) {} }
+  toast(ok ? 'Code copied - paste it to your friend' : 'Code: ' + O.code, 2600);
+};
+$('btnHideWait').onclick = () => ($('waitBack').hidden = true);
+$('btnCancelRoom').onclick = () => { onlineLeave(); restoreOffline(); openNew(); };
+
+// ---- chat ----
+function onMsgs(snap) {
+  const first = !O.msgsLoaded; O.msgsLoaded = true;
+  O.msgs = snap.docs.map((d) => Object.assign({ id: d.id }, d.data({ serverTimestamps: 'estimate' })));
+  if (!first && S) snap.docChanges().forEach((ch) => {
+    if (ch.type !== 'added') return; const m = ch.doc.data(); if (m.side === S.human) return;
+    if ($('chatBack').hidden) { O.unread++; toast(cleanName(m.name) + ': ' + String(m.text).slice(0, 60), 2600); }
+    try { if (prefs.sound) { const a = audio(); if (a) tone(a.currentTime + 0.01, 1180, 0.12, 0.08); } } catch (e) {}
+    buzz(20);
+  });
+  renderBadge(); if (!$('chatBack').hidden) renderChat();
+}
+function renderBadge() { const b = $('chatBadge'); b.hidden = !O.unread; b.textContent = O.unread > 9 ? '9+' : String(O.unread); }
+function renderChat() {
+  const box = $('chatList'); box.innerHTML = '';
+  if (!O.msgs.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Say salam to ' + oppName() + '!'; box.appendChild(e); }
+  for (const m of O.msgs) {
+    const d = document.createElement('div'); d.className = 'msg' + (S && m.side === S.human ? ' me' : '');
+    d.textContent = String(m.text || ''); // plain text only, links are not clickable
+    const t = tsMs(m.at); const sm = document.createElement('small');
+    sm.textContent = (S && m.side === S.human ? 'You' : cleanName(m.name) || 'Friend') + (t ? ' - ' + new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '');
+    d.appendChild(sm); box.appendChild(d);
+  }
+  box.scrollTop = box.scrollHeight;
+}
+function sendChat(text) {
+  text = String(text || '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, 200);
+  if (!text || !O.ref || !S) return Promise.resolve(false);
+  return O.ref.collection('msgs').add({ side: S.human, name: myName(), text, at: FV().serverTimestamp() }).then(() => true)
+    .catch(() => { toast('Message not sent - check internet'); return false; });
+}
+$('chatChips').innerHTML = QUICK.map((q) => '<button data-q="' + esc(q) + '">' + esc(q) + '</button>').join('');
+$('chatChips').onclick = (e) => { const b = e.target.closest('button'); if (b) sendChat(b.dataset.q); };
+$('btnChat').onclick = () => { $('chatTitle').textContent = 'Chat with ' + oppName(); $('chatBack').hidden = false; O.unread = 0; renderBadge(); renderChat(); };
+$('btnCloseChat').onclick = () => ($('chatBack').hidden = true);
+$('chatBack').onclick = (e) => { if (e.target === $('chatBack')) $('chatBack').hidden = true; };
+$('btnSendChat').onclick = () => { const v = $('chatInput').value; $('chatInput').value = ''; sendChat(v); $('chatInput').focus(); };
+$('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('btnSendChat').click(); } });
+
+// ---- voice chat (WebRTC audio, peer-to-peer, free Google STUN, signalling in rooms/{code}/rtc) ----
+async function getMic() {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw Object.assign(new Error('no media'), { name: 'NotSupportedError' });
+    return await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+  } catch (e) {
+    toast(e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')
+      ? 'Microphone is blocked. Please allow the mic permission for Chess with Jilan (phone Settings > Apps > Chess with Jilan > Permissions), then try again.'
+      : 'Microphone is not available on this phone', 4500);
+    return null;
+  }
+}
+function sig(type, sdp, sess) {
+  return O.ref.collection('rtc').add({ side: S.human, sess: sess || (O.voice && O.voice.sess) || '', type, sdp: sdp || '', at: FV().serverTimestamp() });
+}
+function newPC() {
+  const pc = new RTCPeerConnection({ iceServers: ICE });
+  pc.onicecandidate = (e) => { if (e.candidate && O.voice && O.voice.pc === pc) sig('cand', JSON.stringify(e.candidate.toJSON())).catch(() => {}); };
+  pc.ontrack = (e) => {
+    const a = $('remoteAudio'); a.srcObject = (e.streams && e.streams[0]) || new MediaStream([e.track]); a.muted = O.spkMuted;
+    const p = a.play(); if (p && p.catch) p.catch(() => {});
+  };
+  pc.onconnectionstatechange = () => {
+    const v = O.voice; if (!v || v.pc !== pc) return; const st = pc.connectionState;
+    if (st === 'connected') { v.state = 'connected'; clearTimeout(v.timeout); toast('Voice connected - you can talk now'); buzz(30); renderVoice(); }
+    else if (st === 'failed') { toast('Voice could not connect on this network. Moves and chat still work.', 4200); voiceHangup(true); }
+  };
+  return pc;
+}
+function addCands(v, list) { for (const c of list) { try { v.pc.addIceCandidate(c).catch(() => {}); } catch (e) {} } }
+async function voiceStart() {
+  if (O.voice) return;
+  if (!O.room || O.room.status === 'waiting') { toast('Wait for your friend to join first'); return; }
+  const stream = await getMic(); if (!stream) return; if (O.voice) { stream.getTracks().forEach((t) => t.stop()); return; }
+  const v = O.voice = { sess: rid(10), pc: null, stream, state: 'calling', micMuted: false, cands: [], remoteSet: false, timeout: 0 };
+  try {
+    v.pc = newPC(); stream.getTracks().forEach((t) => v.pc.addTrack(t, stream));
+    const off = await v.pc.createOffer(); await v.pc.setLocalDescription(off);
+    await sig('offer', JSON.stringify(v.pc.localDescription));
+    toast('Calling ' + oppName() + ' for voice chat...'); renderVoice();
+    v.timeout = setTimeout(() => { if (O.voice === v && v.state !== 'connected') { toast('Voice chat: no answer or could not connect'); voiceHangup(true); } }, 45000);
+  } catch (e) { toast('Could not start voice chat'); voiceHangup(true); }
+}
+async function voiceAnswer(d) {
+  O.pendingOffer = null; hidePrompt('voice');
+  if (O.voice) voiceHangup(false);
+  const stream = await getMic(); // null = listen only
+  const v = O.voice = { sess: d.sess, pc: null, stream, state: 'connecting', micMuted: false, cands: [], remoteSet: false, timeout: 0 };
+  try {
+    v.pc = newPC();
+    if (stream) stream.getTracks().forEach((t) => v.pc.addTrack(t, stream)); else v.pc.addTransceiver('audio', { direction: 'recvonly' });
+    await v.pc.setRemoteDescription(JSON.parse(d.sdp)); v.remoteSet = true;
+    addCands(v, O.pendingCands.filter((x) => x.sess === d.sess).map((x) => x.c)); O.pendingCands = [];
+    const ans = await v.pc.createAnswer(); await v.pc.setLocalDescription(ans);
+    await sig('answer', JSON.stringify(v.pc.localDescription));
+    renderVoice();
+    v.timeout = setTimeout(() => { if (O.voice === v && v.state !== 'connected') { toast('Voice could not connect on this network. Moves and chat still work.', 4200); voiceHangup(true); } }, 30000);
+  } catch (e) { toast('Could not join voice chat'); voiceHangup(true); }
+}
+function voiceHangup(sendBye) {
+  const v = O.voice; if (!v) return; O.voice = null; clearTimeout(v.timeout);
+  if (sendBye && O.ref && S) sig('bye', '', v.sess).catch(() => {});
+  try { v.pc && v.pc.close(); } catch (e) {}
+  if (v.stream) v.stream.getTracks().forEach((t) => t.stop());
+  const a = $('remoteAudio'); try { a.srcObject = null; } catch (e) {}
+  renderVoice();
+}
+function onRtc(snap) {
+  if (!S) return;
+  snap.docChanges().forEach((ch) => {
+    if (ch.type !== 'added') return; const d = ch.doc.data({ serverTimestamps: 'estimate' });
+    if (d.side === S.human) return; const at = tsMs(d.at) || srvNow(); const v = O.voice;
+    if (d.type === 'offer') {
+      if (srvNow() - at > 40000) return;
+      if (v && v.state === 'calling') { if (S.human === 'b') voiceAnswer(d); return; } // both pressed Voice: Black answers White's call
+      if (v) return;
+      O.pendingOffer = d; showPrompt('voice', esc(oppName()) + ' wants to talk (voice chat)', 'Join', 'Ignore');
+    } else if (d.type === 'answer') {
+      if (v && v.sess === d.sess && !v.remoteSet) {
+        v.state = 'connecting';
+        v.pc.setRemoteDescription(JSON.parse(d.sdp)).then(() => { v.remoteSet = true; addCands(v, v.cands); v.cands = []; }).catch(() => {});
+        renderVoice();
+      }
+    } else if (d.type === 'cand') {
+      let c = null; try { c = JSON.parse(d.sdp); } catch (e) { return; }
+      if (v && v.sess === d.sess) { if (v.remoteSet) addCands(v, [c]); else v.cands.push(c); }
+      else O.pendingCands.push({ sess: d.sess, c });
+    } else if (d.type === 'bye') {
+      if (v && v.sess === d.sess) { const wasOn = v.state === 'connected'; voiceHangup(false); toast(wasOn ? oppName() + ' ended voice chat' : (v.state === 'calling' ? oppName() + ' did not join voice chat' : 'Voice could not connect on this network. Moves and chat still work.'), 3500); }
+      if (O.pendingOffer && O.pendingOffer.sess === d.sess) { O.pendingOffer = null; if (O.prompt === 'voice') hidePrompt(); }
+    }
+  });
+}
+function renderVoice() {
+  const v = O.voice, b = $('btnVoice');
+  b.classList.toggle('live', !!v && v.state === 'connected'); b.classList.toggle('calling', !!v && v.state !== 'connected');
+  $('voiceLbl').textContent = !v ? 'Voice' : v.state === 'connected' ? 'End' : 'Cancel';
+  $('btnMic').hidden = !v; $('btnSpk').hidden = !v;
+  $('btnMic').classList.toggle('off', !!v && (v.micMuted || !v.stream));
+  $('btnSpk').classList.toggle('off', O.spkMuted);
+}
+$('btnVoice').onclick = () => { audio(); if (O.voice) { voiceHangup(true); toast('Voice chat ended'); } else voiceStart(); };
+$('btnMic').onclick = () => {
+  const v = O.voice; if (!v) return;
+  if (!v.stream) { toast('Microphone is off - allow the mic permission to talk'); return; }
+  v.micMuted = !v.micMuted; v.stream.getAudioTracks().forEach((t) => (t.enabled = !v.micMuted));
+  toast(v.micMuted ? 'Your mic is muted' : 'Your mic is on'); renderVoice();
+};
+$('btnSpk').onclick = () => {
+  O.spkMuted = !O.spkMuted; $('remoteAudio').muted = O.spkMuted;
+  toast(O.spkMuted ? 'Friend is muted' : 'Friend unmuted'); renderVoice();
+};
+window.addEventListener('online', () => { if (S && S.mode === 'online') heartbeat(); });
+
 // ---------------- Start ----------------
 applyTheme(); fitBoard();
-if (tryResume()) {
+const savedOnline = loadJSON(ONLINE_KEY);
+if (savedOnline && savedOnline.code && Date.now() - (savedOnline.t || 0) < DAY) {
+  newGame(prefs);
+  onlineEnter(savedOnline.code).then(() => toast('Reconnecting to room ' + savedOnline.code + '...')).catch(() => { toast('Could not open the online room'); onlineLeave(); });
+} else if (tryResume()) {
   buildSquares(); renderAll(false);
   if (S.over) { /* show finished board */ }
   else {
@@ -597,6 +1112,6 @@ if (tryResume()) {
     if (game.history().length) toast('Welcome back - your last game is restored');
   }
 } else { newGame(prefs); setTimeout(openNew, 300); }
-window.__cwj = { get game() { return game; }, get S() { return S; }, Engine, doMove, newGame, LEVELS, tryResume };
+window.__cwj = { get game() { return game; }, get S() { return S; }, Engine, doMove, newGame, LEVELS, tryResume, O, onlineCreate, onlineJoin, onlineEnter, onlineLeave, sendChat, voiceStart, voiceHangup };
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }

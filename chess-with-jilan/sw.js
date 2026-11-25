@@ -1,6 +1,6 @@
 // Chess with Jilan service worker: play offline after the first open.
-const CACHE = 'cwj-1.0.0';
-const CORE = ['./', 'index.html', 'style.css?v=1.0.0', 'app.js?v=1.0.0', 'lib/chess.js?v=1.0.0', 'manifest.json', 'icon-192.png',
+const CACHE = 'cwj-1.1.0';
+const CORE = ['./', 'index.html', 'style.css?v=1.1.0', 'app.js?v=1.1.0', 'lib/chess.js?v=1.0.0', 'manifest.json', 'icon-192.png',
   'engine/stockfish-18-lite-single.js', 'engine/stockfish-18-lite-single.wasm',
   ...['w', 'b'].flatMap((c) => ['K', 'Q', 'R', 'B', 'N', 'P'].map((p) => 'pieces/' + c + p + '.svg'))];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())); });

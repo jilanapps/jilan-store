@@ -10,12 +10,12 @@
    "name": "Chess with Jilan",
    "package": "com.jilanapps.chesswithjilan",
    "size": "0.1 MB (+7 MB engine on first open)",
-   "versionCode": 1,
-   "versionName": "1.0",
+   "versionCode": 2,
+   "versionName": "1.1",
    "web": "https://jilanapps.github.io/jilan-store/chess-with-jilan/",
-   "version": "1.0",
-   "md5": "8caff030e8eb812ff30ba45c8263bf97",
-   "description": "Real chess: play against Jilan (Stockfish engine, 10 levels from Easy to Master) or with a friend on the same phone. Hints, undo, clocks, 4 board themes, resume last game."
+   "version": "1.1",
+   "md5": "deb237664142b83badd09ee565cce695",
+   "description": "Real chess: play against Jilan (Stockfish engine, 10 levels from Easy to Master) or with a friend on the same phone or ONLINE (room code, works across countries) with in-game chat and voice chat. Hints, undo, clocks, 4 board themes, resume last game."
   },
   {
    "apk": "https://jilanapps.github.io/rah-e-noor/rah-e-noor.apk",

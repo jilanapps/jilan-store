@@ -106,3 +106,48 @@ input[type=range]{width:100%;accent-color:var(--gold);height:28px}
 .trophy svg{width:68px;height:68px}
 .toast{position:fixed;left:50%;bottom:calc(130px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#eef2f8;color:#0c1526;padding:10px 16px;border-radius:22px;font-size:14px;font-weight:600;z-index:40;box-shadow:0 6px 24px rgba(0,0,0,.4);max-width:90vw;text-align:center}
 @media (min-height:760px){.controls button{padding:11px 0 8px}.player{min-height:56px}}
+
+/* ---- Online play (v1.1) ---- */
+.onbar{display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--panel);border-radius:12px;padding:5px 6px 5px 10px;margin:4px 0}
+.oninfo{display:flex;flex-direction:column;min-width:0;font-size:12px;line-height:1.35}
+.oninfo .room{color:var(--gold);font-weight:700;letter-spacing:.5px}
+.oninfo .opp{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.pdot{width:8px;height:8px;border-radius:50%;background:#6b778a;flex:none}
+.opp.on .pdot{background:#33d17a;box-shadow:0 0 6px #33d17a}
+.onbtns{display:flex;gap:5px;flex:none}
+.onbtns button{position:relative;border:0;background:var(--panel2);color:var(--text);border-radius:10px;height:38px;min-width:40px;padding:0 9px;display:flex;align-items:center;gap:5px;font-size:13px}
+.onbtns svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.onbtns .slash{display:none}
+.onbtns button.off .slash{display:inline}.onbtns button.off .wave{display:none}
+.onbtns button.off{background:#5a2330;color:#ffb3bf}
+.onbtns button.live{background:#1f7a46;color:#fff}
+.onbtns button.calling{background:#8a6a14;color:#fff}
+.badge{position:absolute;top:-5px;right:-5px;background:#e5383b;color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.onprompt{display:flex;align-items:center;gap:6px;background:#22375a;border:1px solid var(--gold);border-radius:12px;padding:7px 8px;margin:4px 0;font-size:14px}
+.onprompt span{flex:1}
+.onprompt button{border:0;border-radius:9px;padding:8px 10px;font-weight:700;font-size:13px}
+.onprompt .yes{background:var(--gold);color:#1a1205}.onprompt .no{background:var(--panel2);color:var(--text)}
+.txt{width:100%;background:var(--panel2);border:1px solid #2a3f63;color:var(--text);border-radius:10px;padding:11px 12px;font-size:16px;outline:none;user-select:text;-webkit-user-select:text}
+.txt:focus{border-color:var(--accent)}
+.joinrow{display:flex;gap:8px;margin-top:10px}
+.joinrow .txt{text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.joinrow .primary{width:auto;flex:none;margin:0;padding:0 16px}
+.note,.muted{color:var(--muted);font-size:13px;line-height:1.45}
+.bigcode{font-size:42px;font-weight:800;letter-spacing:8px;text-align:center;color:var(--gold);background:#0a1220;border-radius:14px;padding:14px 0;margin:10px 0 14px;user-select:text;-webkit-user-select:text}
+.waiting{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted)}
+.spin{width:16px;height:16px;border:2px solid #2a3f63;border-top-color:var(--gold);border-radius:50%;animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.danger{color:#ff8a8a!important}
+.sheet.chat{display:flex;flex-direction:column;height:78vh}
+.chathead{display:flex;align-items:center;justify-content:space-between}
+.chathead h2{margin:0}
+.chatlist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px 2px;user-select:text;-webkit-user-select:text}
+.chatlist .empty{color:var(--muted);text-align:center;margin-top:30px;font-size:14px}
+.msg{max-width:80%;padding:7px 10px;border-radius:12px;font-size:15px;line-height:1.35;word-wrap:break-word;white-space:pre-wrap;background:var(--panel2)}
+.msg.me{align-self:flex-end;background:var(--accent);color:#fff}
+.msg small{display:block;font-size:10px;opacity:.7;margin-top:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:1px solid #2a3f63;background:var(--panel2);color:var(--text);border-radius:16px;padding:7px 12px;font-size:13px}
+.chatin{display:flex;gap:8px}
+.chatin .primary{width:auto;margin:0;padding:0 16px}

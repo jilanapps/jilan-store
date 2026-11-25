@@ -8,7 +8,7 @@
 <meta name="description" content="Chess with Jilan - play chess against Jilan, a Stockfish-powered computer with 10 levels, or play with a friend on the same phone.">
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css?v=1.0.0">
+<link rel="stylesheet" href="style.css?v=1.1.0">
 </head>
 <body>
 <div id="app">
@@ -37,6 +37,16 @@
     <div class="clock" id="clockBot" hidden>5:00</div>
   </section>
 
+  <div class="onbar" id="onBar" hidden>
+    <div class="oninfo"><span class="room" id="onRoom">Room</span><span class="opp" id="onOpp"><i class="pdot"></i><span id="onOppText">Friend</span></span></div>
+    <div class="onbtns">
+      <button id="btnChat" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.4A8 8 0 1121 12z"/></svg><b class="badge" id="chatBadge" hidden>0</b></button>
+      <button id="btnVoice" aria-label="Voice chat"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span id="voiceLbl">Voice</span></button>
+      <button id="btnMic" aria-label="Mute my mic" hidden><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/><path class="slash" d="M4 4l16 16"/></svg></button>
+      <button id="btnSpk" aria-label="Mute friend" hidden><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M17 9a4 4 0 010 6"/><path class="slash" d="M16 9l5 6M21 9l-5 6"/></svg></button>
+    </div>
+  </div>
+  <div class="onprompt" id="onPrompt" hidden><span id="onPromptText"></span><button class="yes" id="onYes">Accept</button><button class="no" id="onNo">Decline</button></div>
   <div class="status" id="status">White to move</div>
   <div class="moves" id="moves"></div>
 
@@ -54,8 +64,8 @@
   <div class="sheet" role="dialog" aria-label="New game">
     <h2>New game</h2>
     <div class="field"><label>Mode</label>
-      <div class="seg" data-key="mode"><button data-v="ai">vs Jilan</button><button data-v="2p">2 Players</button></div></div>
-    <div class="field ai-only"><label>Play as</label>
+      <div class="seg" data-key="mode"><button data-v="ai">vs Jilan</button><button data-v="2p">2 Players</button><button data-v="online">Online</button></div></div>
+    <div class="field color-f"><label>Play as</label>
       <div class="seg" data-key="color"><button data-v="w"><img src="pieces/wK.svg" alt="">White</button><button data-v="r">Random</button><button data-v="b"><img src="pieces/bK.svg" alt="">Black</button></div></div>
     <div class="field ai-only"><label>Jilan level: <b id="lvlLabel">3 - Beginner</b></label>
       <input type="range" id="lvl" min="1" max="10" step="1" value="3">
@@ -63,6 +73,12 @@
     <div class="field"><label>Clock</label>
       <div class="seg" data-key="clock"><button data-v="0">None</button><button data-v="1">1 min</button><button data-v="3">3 min</button><button data-v="5">5 min</button><button data-v="10">10 min</button></div></div>
     <div class="field two-only"><label class="chk"><input type="checkbox" id="optAutoFlip"> Auto-flip board after each move</label></div>
+    <div class="online-only">
+      <div class="field"><label>Your name</label><input class="txt" id="onName" maxlength="20" placeholder="Your name" autocomplete="off"></div>
+      <button class="primary" id="btnCreateRoom">Create room</button>
+      <div class="joinrow"><input class="txt" id="joinCode" maxlength="6" placeholder="Room code" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="primary" id="btnJoinRoom">Join room</button></div>
+      <p class="note">Online play needs internet on both phones. Create a room and send the code to your friend, or join with your friend's code.</p>
+    </div>
     <button class="primary" id="btnStart">Start game</button>
     <button class="ghost" id="btnCancelNew">Cancel</button>
   </div>
@@ -89,8 +105,9 @@
   <div class="sheet about" role="dialog" aria-label="About">
     <img src="icon-192.png" alt="" class="about-icon">
     <h2>Chess with Jilan</h2>
-    <p class="ver">Version <span id="verText">1.0</span></p>
-    <p>Play chess against <b>Jilan</b>, a computer opponent with 10 levels from Easy to Master, or play with a friend on the same phone.</p>
+    <p class="ver">Version <span id="verText">1.1</span></p>
+    <p>Play chess against <b>Jilan</b>, a computer opponent with 10 levels from Easy to Master, or play with a friend on the same phone or online.</p>
+    <p class="note">Online play, chat and voice need internet on both phones.</p>
     <p class="credit">Made by Dr Asif - Jilan Apps Official</p>
     <p><a href="https://wa.me/923007379385" id="waLink">WhatsApp: 0300-7379385</a></p>
     <p><a href="https://jilanapps.github.io/jilan-store/" id="storeLink">Jilan App Store</a></p>
@@ -116,7 +133,32 @@
   </div>
 </div>
 
+<!-- Waiting room -->
+<div class="sheet-back" id="waitBack" hidden>
+  <div class="sheet wait" role="dialog" aria-label="Room">
+    <h2>Room created</h2>
+    <p class="muted">Send this code to your friend. They open Chess with Jilan, tap New game, Online, Join room.</p>
+    <div class="bigcode" id="waitCode">------</div>
+    <button class="primary" id="btnShareRoom">Share on WhatsApp</button>
+    <button class="ghost" id="btnCopyRoom">Copy code</button>
+    <p class="waiting"><span class="spin"></span>Waiting for friend...</p>
+    <button class="ghost" id="btnHideWait">View board</button>
+    <button class="ghost danger" id="btnCancelRoom">Cancel room</button>
+  </div>
+</div>
+
+<!-- Chat -->
+<div class="sheet-back" id="chatBack" hidden>
+  <div class="sheet chat" role="dialog" aria-label="Chat">
+    <div class="chathead"><h2 id="chatTitle">Chat</h2><button class="icon-btn" id="btnCloseChat" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="chatlist" id="chatList"></div>
+    <div class="chips" id="chatChips"></div>
+    <div class="chatin"><input class="txt" id="chatInput" maxlength="200" placeholder="Type a message" autocomplete="off"><button class="primary" id="btnSendChat">Send</button></div>
+  </div>
+</div>
+<audio id="remoteAudio" autoplay playsinline></audio>
+
 <div class="toast" id="toast" hidden></div>
-<script type="module" src="app.js?v=1.0.0"></script>
+<script type="module" src="app.js?v=1.1.0"></script>
 </body>
 </html>
