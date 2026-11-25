@@ -563,6 +563,35 @@
       throw e;
     });
   };
+  // v1.5 inbox extras: photo / view once, reactions, typing
+  Api.sendPhoto = function (other, otherUser, dataUrl, once) {
+    needMe();
+    if (!/^data:image\/jpeg;base64,/.test(dataUrl || '') || dataUrl.length > 160000) return Promise.reject(new Error('This photo is too big.'));
+    var tref = Api.threadRef(other), mref = tref.collection('messages').doc();
+    return tref.get().then(function (t) {
+      if (!t.exists) throw new Error('Send a text message first.');
+      var b = db().batch(), seenMap = {}; seenMap[uid()] = Date.now();
+      b.update(tref, { last: once ? 'View once photo' : 'Photo', lastAt: ST(), lastFrom: uid(), seen: Object.assign({}, t.data().seen || {}, seenMap) });
+      var m = { from: uid(), text: once ? 'View once photo' : 'Photo', createdAt: ST(), media: dataUrl }; if (once) m.once = true;
+      b.set(mref, m);
+      return b.commit();
+    }).catch(function (e) {
+      if (e && e.code === 'permission-denied') throw new Error('You can message people who follow you back.');
+      throw e;
+    });
+  };
+  Api.reactMessage = function (tid, m, emoji) {
+    var r = Object.assign({}, m.react || {});
+    if (!emoji || r[uid()] === emoji) delete r[uid()]; else r[uid()] = emoji;
+    return db().collection('threads').doc(tid).collection('messages').doc(m.id).update({ react: r }).then(function () { m.react = r; return r; });
+  };
+  Api.openOnce = function (tid, m) {
+    return db().collection('threads').doc(tid).collection('messages').doc(m.id).update({ opened: true, media: firebase.firestore.FieldValue.delete() });
+  };
+  Api.setTyping = function (tid, typing) {
+    var t = Object.assign({}, typing || {}); t[uid()] = Date.now();
+    return db().collection('threads').doc(tid).update({ typing: t }).catch(function () {});
+  };
   Api.markThreadSeen = function (t) {
     var s = Object.assign({}, t.seen || {}); s[uid()] = Date.now();
     return db().collection('threads').doc(t.id).update({ seen: s }).then(function () { t.seen = s; }).catch(function () {});

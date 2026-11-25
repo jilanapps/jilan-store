@@ -1,4 +1,4 @@
-/* Jilan Reels — sw.js (v1.4.1)
+/* Jilan Reels — sw.js (v1.5.0)
  * Makes the 2nd and later opens fast:
  *  - app files (js/css/png, Firebase SDK) come from the phone's cache;
  *  - the page itself (index.html) and version.json always try the network
@@ -6,12 +6,13 @@
  *  - videos (Cloudinary), Firestore and Google sign-in are never touched.
  * A new version = new CACHE name; old caches are deleted on activate.
  */
-var CACHE = 'jr-shell-1.4.1';
+var PFX = /preview/.test(self.registration ? self.registration.scope : '') ? 'jrp-shell-' : 'jr-shell-';
+var CACHE = PFX + '1.5.0';
 var SHELL = [
-  './', 'index.html', 'style.css?v=1.4.1',
+  './', 'index.html', 'style.css?v=1.5.0', 'v15.css?v=1.5.0', 'v15.js?v=1.5.0',
   'firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js', 'firebase-config.js',
-  'lib.js?v=1.4.1', 'i18n.js?v=1.4.1', 'auth.js?v=1.4.1', 'api.js?v=1.4.1', 'media.js?v=1.4.1',
-  'social.js?v=1.4.1', 'app.js?v=1.4.1', 'fx.js?v=1.4.1', 'studio.js?v=1.4.1', 'admin.js?v=1.4.1',
+  'lib.js?v=1.5.0', 'i18n.js?v=1.5.0', 'auth.js?v=1.5.0', 'api.js?v=1.5.0', 'media.js?v=1.5.0',
+  'social.js?v=1.5.0', 'app.js?v=1.5.0', 'fx.js?v=1.5.0', 'studio.js?v=1.5.0', 'admin.js?v=1.5.0',
   'icon-192.png', 'manifest.json'
 ];
 
@@ -24,7 +25,7 @@ self.addEventListener('install', function (e) {
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k.indexOf('jr-shell-') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+    return Promise.all(keys.filter(function (k) { return k.indexOf(PFX) === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
 

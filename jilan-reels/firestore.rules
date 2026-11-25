@@ -478,7 +478,13 @@ service cloud.firestore {
         && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['last', 'lastAt', 'lastFrom', 'seen'])
              && request.resource.data.last is string && request.resource.data.last.size() <= 100
              && request.resource.data.lastFrom == me() && request.resource.data.lastAt == request.time)
-          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']))
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+          // v1.5: typing indicator - only my own key changes, value is a time number
+          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['typing'])
+              && request.resource.data.typing is map
+              && request.resource.data.typing.keys().hasOnly(resource.data.members)
+              && request.resource.data.typing.diff(resource.data.get('typing', {})).affectedKeys().hasOnly([me()])
+              && request.resource.data.typing[me()] is number))
         && request.resource.data.get('seen', {}) is map;
       allow delete: if false;
 
@@ -487,8 +493,11 @@ service cloud.firestore {
         // getAfter: the first message is written in the same batch as the thread.
         allow create: if active()
           && me() in getAfter(docPath('threads/' + tid)).data.members
-          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt', 'media', 'once'])
           && request.resource.data.from == me()
+          && (!('media' in request.resource.data) || (request.resource.data.media is string && request.resource.data.media.size() <= 160000
+              && request.resource.data.media.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')))
+          && (!('once' in request.resource.data) || (request.resource.data.once is bool && 'media' in request.resource.data))
           && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
           && request.resource.data.createdAt == request.time
           && exists(docPath('follows/' + getAfter(docPath('threads/' + tid)).data.members[0] + '_' + getAfter(docPath('threads/' + tid)).data.members[1]))
@@ -496,7 +505,17 @@ service cloud.firestore {
           && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[0] + '/blocks/' + me()))
           && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[1] + '/blocks/' + me()));
         allow delete: if signedIn() && resource.data.from == me();
-        allow update: if false;
+        // v1.5: quick emoji reactions (each member sets only their own) and "view once" opened flag
+        allow update: if signedIn() && me() in get(docPath('threads/' + tid)).data.members
+          && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['react'])
+               && request.resource.data.react is map
+               && request.resource.data.react.diff(resource.data.get('react', {})).affectedKeys().hasOnly([me()])
+               && (!(me() in request.resource.data.react) || (request.resource.data.react[me()] is string && request.resource.data.react[me()].size() >= 1 && request.resource.data.react[me()].size() <= 8)))
+            // the receiver opens a view-once photo: the photo itself is removed from the message
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['opened', 'media'])
+               && request.resource.data.opened == true && !('media' in request.resource.data)
+               && resource.data.get('once', false) == true
+               && resource.data.from != me()));
       }
     }
 

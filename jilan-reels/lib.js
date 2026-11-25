@@ -210,6 +210,33 @@
   L.shareText = function (videoUrl, who) {
     return (who ? 'Watch @' + who + ' on Jilan Reels\n' : 'Watch on Jilan Reels\n') + videoUrl + '\n\nGet the app: ' + L.APK_URL;
   };
+  // v1.5: any timestamp shape -> ms
+  L.tsMs = function (t) {
+    if (!t) return 0;
+    if (typeof t.toMillis === 'function') return t.toMillis();
+    if (t.seconds) return t.seconds * 1000;
+    if (t.__ts) return t.__ts;
+    return Number(t) || 0;
+  };
+  // v1.5: posted in the last 24 hours (story-style ring around the creator)
+  L.isFresh = function (v, now) { var t = L.tsMs(v && v.createdAt); return !!t && (now || Date.now()) - t < 864e5 && (now || Date.now()) - t >= -6e4; };
+  // v1.5: grouped search text matching (caption words, hashtags, username, name)
+  L.matchText = function (v, q) {
+    q = String(q || '').trim().toLowerCase(); if (!q || !v) return false;
+    var hay = [v.caption || '', (v.tags || []).join(' '), v.ownerUsername || '', v.ownerName || '', v.soundName || ''].join(' ').toLowerCase();
+    return q.split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
+  };
+  // v1.5: group sounds used by more than one cached video (rising sounds)
+  L.risingSounds = function (list, n) {
+    var m = {};
+    (list || []).forEach(function (v) {
+      if (!v || v.hidden) return;
+      var id = v.soundId || v.id, name = v.soundName || ('Original sound - ' + (v.ownerName || ''));
+      if (!m[id]) m[id] = { id: id, name: name, count: 0, views: 0, owner: v.ownerName || '', from: v.id };
+      m[id].count++; m[id].views += v.views || 0;
+    });
+    return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return (b.count - a.count) || (b.views - a.views); }).slice(0, n || 6);
+  };
   L.isScheduled = function (v, now) {
     if (!v || !v.publishAt) return false;
     var t = typeof v.publishAt.toMillis === 'function' ? v.publishAt.toMillis() : (v.publishAt.seconds ? v.publishAt.seconds * 1000 : Number(v.publishAt) || 0);

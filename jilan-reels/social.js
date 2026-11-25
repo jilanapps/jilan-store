@@ -25,8 +25,16 @@
              set: function (k, v) { try { localStorage.setItem('jr-' + k, v); } catch (e) {} } };
 
   /* ---------- theme + data saver (applied at start) ---------- */
-  function applyTheme() { document.documentElement.classList.toggle('light', LS.get('theme', 'dark') === 'light'); }
+  // v1.5: Dark (default) / Light / System (follows the phone)
+  var mqLight = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function themeMode() { var t = LS.get('theme', 'dark'); return t === 'light' || t === 'system' ? t : 'dark'; }
+  function applyTheme() {
+    var m = themeMode(), light = m === 'light' || (m === 'system' && !!(mqLight && mqLight.matches));
+    document.documentElement.classList.toggle('light', light);
+    var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.setAttribute('content', light ? '#ffffff' : '#000000');
+  }
   applyTheme();
+  if (mqLight) { var onMq = function () { if (themeMode() === 'system') applyTheme(); }; if (mqLight.addEventListener) mqLight.addEventListener('change', onMq); else if (mqLight.addListener) mqLight.addListener(onMq); }
   function saver() { return LS.get('saver', '0') === '1'; }
 
   /* ---------- favourites ---------- */
@@ -154,7 +162,7 @@
     var row = $('#profileAction').parentNode, mb = $('#profileMsg');
     if (mb) mb.remove();
     if (!mine && Api.me) {
-      mb = document.createElement('button'); mb.className = 'bigbtn alt small'; mb.id = 'profileMsg'; mb.textContent = 'Message';
+      mb = document.createElement('button'); mb.className = 'bigbtn alt small'; mb.id = 'profileMsg'; mb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Message';
       row.appendChild(mb); mb.addEventListener('click', function () { openChat(uid, user); });
     }
   }
@@ -316,60 +324,187 @@
 
   /* ---------- chat screen ---------- */
   var chat = { unsub: null };
+  var REACTS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
   function chatScreen() {
     var sc = $('#screen-chat');
     if (!sc) {
       sc = document.createElement('section'); sc.id = 'screen-chat'; sc.className = 'screen overlay page chat';
-      sc.innerHTML = '<div class="pagebar"><button class="iconbtn" id="chatBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 id="chatTitle"></h2><span class="spacer"></span></div>' +
-        '<div id="chatList" class="chat-list"></div><div class="c-input chat-input"><input id="chatIn" maxlength="500" placeholder="Message..."><button id="chatSend">Send</button></div>';
+      sc.innerHTML = '<div class="pagebar"><button class="iconbtn" id="chatBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="chat-head"><h2 id="chatTitle"></h2><small id="chatSub"></small></div><span class="spacer"></span></div>' +
+        '<div id="chatList" class="chat-list"></div>' +
+        '<div class="c-input chat-input"><button class="iconbtn chat-photo" id="chatPhoto" aria-label="Send a photo"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg></button>' +
+        '<input id="chatIn" maxlength="500" placeholder="Message..."><button id="chatSend">Send</button>' +
+        '<input type="file" id="chatFile" accept="image/*" class="hidden"></div>';
       $('#app').appendChild(sc);
       $('#chatBack', sc).addEventListener('click', function () { JR().closeTop(); });
     }
     return sc;
   }
+  // small JPEG for photo messages (max ~110 KB of text so it fits the message rule)
+  function photoMsgData(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var tries = [[720, 0.7], [560, 0.6], [420, 0.55], [320, 0.5]], k = 0, out = '';
+        while (k < tries.length) {
+          var m = tries[k][0], sc = Math.min(1, m / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.naturalWidth * sc)); c.height = Math.max(1, Math.round(img.naturalHeight * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          out = c.toDataURL('image/jpeg', tries[k][1]);
+          if (out.length <= 110000) break; k++;
+        }
+        URL.revokeObjectURL(url);
+        if (out.length > 150000) rej(new Error('This photo is too big.')); else res(out);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('Could not open this photo.')); };
+      img.src = url;
+    });
+  }
+  function msgHtml(m, me, isLastMine, seenByOther) {
+    var mine = m.from === me, body;
+    if (m.once) {
+      if (m.opened || !m.media) body = '<span class="once-chip done"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>' + (mine ? 'Opened' : 'Photo opened') + '</span>';
+      else body = mine ? '<span class="once-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>View once photo sent</span>'
+        : '<button class="once-chip open-once" data-m="' + esc(m.id) + '"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="10" stroke="none" fill="currentColor">1</text></svg>Tap to view photo (once)</button>';
+    } else if (m.media) body = '<img class="msg-img" alt="Photo" src="' + esc(m.media) + '">';
+    else body = '<span>' + esc(m.text) + '</span>';
+    var r = m.react || {}, rk = Object.keys(r), rx = rk.length ? '<b class="msg-react">' + rk.map(function (k) { return esc(r[k]); }).join('') + '</b>' : '';
+    return '<div class="msg' + (mine ? ' me' : '') + (m.media || m.once ? ' media' : '') + '" data-m="' + esc(m.id) + '">' + body + '<i>' + (m.createdAt ? L.ago(Api.ms(m.createdAt)) : '') + '</i>' + rx + '</div>' +
+      (isLastMine ? '<div class="seen-line">' + (seenByOther ? 'Seen' : 'Sent') + '</div>' : '');
+  }
   function openChat(other, ou, thread) {
     JR().requireLogin(function () {
       if (Api.isBlocked(other)) { toast('Unblock this account to send messages.'); return; }
       var sc = chatScreen(), prev = (($('.screen.active') || {}).id || 'screen-home').replace('screen-', '');
-      $('#chatTitle', sc).textContent = '@' + ((ou && ou.username) || '');
-      $('#chatList', sc).innerHTML = '<div class="center" style="padding:30px"><div class="spinner"></div></div>';
+      $('#chatTitle', sc).textContent = (ou && ou.username) ? '@' + ou.username : ((ou && ou.name) || '');
+      if (!(ou && ou.username)) Api.getUser(other).then(function (u) { if (u && u.username) $('#chatTitle', sc).textContent = '@' + u.username; }).catch(function () {});
+      $('#chatSub', sc).textContent = '';
+      $('#chatList', sc).innerHTML = '<div class="skel-chat"><i></i><i class="r"></i><i></i></div>';
       JR().show('chat');
-      JR().pushLayer(function () { if (chat.unsub) { chat.unsub(); chat.unsub = null; } JR().show(prev === 'chat' ? 'inbox' : prev); if (prev === 'inbox') paintInbox(); });
-      var me = Api.me.uid, ref = Api.threadRef(other);
+      var me = Api.me.uid, ref = Api.threadRef(other), tid = L.threadId(me, other), msgs = [], th = thread || null, typT = null, lastTypingSent = 0;
+      function cleanup() { if (chat.unsub) { chat.unsub(); chat.unsub = null; } if (chat.unsubT) { chat.unsubT(); chat.unsubT = null; } clearInterval(typT); }
+      JR().pushLayer(function () { cleanup(); JR().show(prev === 'chat' ? 'inbox' : prev); if (prev === 'inbox') paintInbox(); });
       Api.followsMe(other).then(function (f) {
         if (!f || !Api.isFollowing(other)) $('#chatList', sc).innerHTML = '<div class="empty small"><b>You can message people who follow you back</b><span>Both of you need to follow each other.</span></div>';
       });
-      if (chat.unsub) chat.unsub();
-      chat.unsub = ref.collection('messages').orderBy('createdAt', 'desc').limit(30).onSnapshot(function (qs) {
-        var msgs = qs.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }).reverse();
+      cleanup();
+      function seenByOther() {
+        var mine = msgs.filter(function (m) { return m.from === me; }).pop(); if (!mine || !th) return false;
+        var s = (th.seen || {})[other]; return !!s && (!mine.createdAt || s >= Api.ms(mine.createdAt) - 1000);
+      }
+      function paintSub() {
+        var t = th && th.typing && th.typing[other];
+        $('#chatSub', sc).textContent = t && Date.now() - t < 6000 ? 'typing…' : '';
+        sc.classList.toggle('typing-on', !!(t && Date.now() - t < 6000));
+      }
+      function paint() {
         var el = $('#chatList', sc);
-        if (!msgs.length) { if (!$('.empty', el)) el.innerHTML = '<div class="empty small"><b>Say hello</b></div>'; return; }
-        el.innerHTML = msgs.map(function (m) { return '<div class="msg' + (m.from === me ? ' me' : '') + '"><span>' + esc(m.text) + '</span><i>' + (m.createdAt ? L.ago(Api.ms(m.createdAt)) : '') + '</i></div>'; }).join('');
+        if (!msgs.length) { if (!$('.empty', el)) el.innerHTML = '<div class="empty small"><b>Say hello</b><span>Tap and hold a message to react.</span></div>'; return; }
+        var lastMine = -1; msgs.forEach(function (m, k) { if (m.from === me) lastMine = k; });
+        var sb = seenByOther();
+        el.innerHTML = msgs.map(function (m, k) { return msgHtml(m, me, k === lastMine && k === msgs.length - 1, sb); }).join('') + '<div class="typing-dots" aria-label="typing"><i></i><i></i><i></i></div>';
         el.scrollTop = el.scrollHeight;
+      }
+      chat.unsub = ref.collection('messages').orderBy('createdAt', 'desc').limit(30).onSnapshot(function (qs) {
+        msgs = qs.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }).reverse();
+        paint();
         if (thread) Api.markThreadSeen(thread);
-      }, function () { /* no thread yet or rules not published */ var el = $('#chatList', sc); if (el && $('.spinner', el)) el.innerHTML = '<div class="empty small"><b>Say hello</b></div>'; });
+      }, function () { /* no thread yet or rules not published */ var el = $('#chatList', sc); if (el && $('.skel-chat', el)) el.innerHTML = '<div class="empty small"><b>Say hello</b></div>'; });
+      try {
+        chat.unsubT = ref.onSnapshot(function (d) { if (!d.exists) return; var x = d.data(); x.id = d.id; th = x; if (thread) { thread.seen = x.seen; } else { thread = { id: tid, seen: x.seen || {} }; Api.markThreadSeen(thread); } paint(); paintSub(); }, function () {});
+      } catch (e) {}
+      typT = setInterval(paintSub, 2000);
+      // react: long-press (or right-click / double-tap) a message
+      var list = $('#chatList', sc), pressT = null;
+      function reactBar(mid, x, y) {
+        var old = $('.react-bar', sc); if (old) old.remove();
+        var m = msgs.filter(function (q) { return q.id === mid; })[0]; if (!m) return;
+        var bar = document.createElement('div'); bar.className = 'react-bar';
+        bar.innerHTML = REACTS.map(function (e) { return '<button data-e="' + e + '"' + ((m.react || {})[me] === e ? ' class="on"' : '') + '>' + e + '</button>'; }).join('');
+        sc.appendChild(bar);
+        var top = Math.max(64, Math.min(y - 64, sc.clientHeight - 140));
+        bar.style.top = top + 'px';
+        bar.addEventListener('click', function (e) {
+          var b = e.target.closest('button'); if (!b) return;
+          bar.remove(); if (navigator.vibrate) try { navigator.vibrate(10); } catch (er) {}
+          Api.reactMessage(tid, m, b.dataset.e).then(paint, function () { toast("Couldn't react to this message."); });
+        });
+        setTimeout(function () { document.addEventListener('pointerdown', function off(ev) { if (!bar.contains(ev.target)) { bar.remove(); document.removeEventListener('pointerdown', off, true); } }, true); }, 0);
+      }
+      list.onpointerdown = function (e) {
+        var mm = e.target.closest('.msg'); if (!mm) return; var x = e.clientX, y = e.clientY;
+        clearTimeout(pressT); pressT = setTimeout(function () { reactBar(mm.dataset.m, x, y); }, 450);
+      };
+      list.onpointerup = list.onpointercancel = list.onpointerleave = function () { clearTimeout(pressT); };
+      list.oncontextmenu = function (e) { var mm = e.target.closest('.msg'); if (mm) { e.preventDefault(); reactBar(mm.dataset.m, e.clientX, e.clientY); } };
+      list.ondblclick = function (e) { var mm = e.target.closest('.msg'); if (mm) reactBar(mm.dataset.m, e.clientX, e.clientY); };
+      list.onclick = function (e) {
+        var ob = e.target.closest('.open-once');
+        if (ob) {
+          var m = msgs.filter(function (q) { return q.id === ob.dataset.m; })[0]; if (!m || !m.media) return;
+          var src = m.media;
+          var v = document.createElement('div'); v.className = 'once-view';
+          v.innerHTML = '<img alt="Photo" src="' + esc(src) + '"><div class="once-note">View once - this photo is removed after you close it</div><button class="iconbtn glass once-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+          sc.appendChild(v);
+          Api.openOnce(tid, m).catch(function () {});
+          v.addEventListener('click', function () { v.remove(); });
+          return;
+        }
+        var im = e.target.closest('.msg-img');
+        if (im) { var w = document.createElement('div'); w.className = 'once-view'; w.innerHTML = '<img alt="Photo" src="' + esc(im.src) + '"><button class="iconbtn glass once-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'; sc.appendChild(w); w.addEventListener('click', function () { w.remove(); }); }
+      };
       var send = function () {
         var inp = $('#chatIn', sc), t = inp.value; if (!L.cleanText(t, 500)) return;
         $('#chatSend', sc).disabled = true;
-        Api.sendMessage(other, ou, t).then(function () { inp.value = ''; if (!thread) thread = { id: L.threadId(me, other), seen: {} }; }).catch(function (e) { toast(e && e.message && /follow you back/.test(e.message) ? e.message : nice(e)); })
+        Api.sendMessage(other, ou, t).then(function () { inp.value = ''; if (!thread) thread = { id: tid, seen: {} }; if (navigator.vibrate) try { navigator.vibrate(8); } catch (er) {} }).catch(function (e) { toast(e && e.message && /follow you back/.test(e.message) ? e.message : nice(e)); })
           .then(function () { $('#chatSend', sc).disabled = false; });
       };
       $('#chatSend', sc).onclick = send;
       $('#chatIn', sc).onkeydown = function (e) { if (e.key === 'Enter') send(); };
+      $('#chatIn', sc).oninput = function () {
+        if (!th || Date.now() - lastTypingSent < 4000) return;
+        lastTypingSent = Date.now(); Api.setTyping(tid, th.typing);
+      };
+      $('#chatPhoto', sc).onclick = function () {
+        if (!th) { toast('Send a text message first.'); return; }
+        JR().openSheet(JR().head('Send a photo') + '<div class="sh-body"><button class="opt" data-ph="once">' + JR().ICON.eye + 'View once (removed after it is opened)</button><button class="opt" data-ph="keep">' + JR().ICON.download + 'Normal photo (stays in the chat)</button></div>', function (sh) {
+          $('.sh-body', sh).addEventListener('click', function (e) {
+            var b = e.target.closest('[data-ph]'); if (!b) return;
+            chat.once = b.dataset.ph === 'once'; JR().closeSheet();
+            var f = $('#chatFile', sc); f.value = ''; f.click();
+          });
+        });
+      };
+      $('#chatFile', sc).onchange = function () {
+        var f = this.files && this.files[0]; if (!f) return;
+        if (!/^image\//.test(f.type || '')) { toast('Please choose a photo.'); return; }
+        toast('Sending photo...');
+        photoMsgData(f).then(function (d) { return Api.sendPhoto(other, ou, d, !!chat.once); }).then(function () { toast(chat.once ? 'View once photo sent' : 'Photo sent'); }, function (e) { toast(e.message || nice(e)); });
+      };
     });
   }
 
   /* ---------- settings rows ---------- */
   function settingsHtml() {
     var I = JR().ICON, ur = window.JRI && JRI.lang() === 'ur';
-    return '<button class="opt" data-a="theme">' + I.eye + 'Theme: ' + (LS.get('theme', 'dark') === 'light' ? 'Light' : 'Dark') + '</button>' +
-      '<button class="opt" data-a="saver">' + I.download + 'Data saver: ' + (saver() ? 'On' : 'Off') + '</button>' +
-      '<button class="opt" data-a="lang">' + I.comment + 'Language: ' + (ur ? 'اردو' : 'English') + '</button>' +
+    return '<div class="opt-sec">Preferences</div>' +
+      '<button class="opt" data-a="theme">' + I.eye + 'Theme<em>' + ({ dark: 'Dark', light: 'Light', system: 'System' })[themeMode()] + '</em></button>' +
+      '<button class="opt" data-a="saver">' + I.download + 'Data saver<em>' + (saver() ? 'On' : 'Off') + '</em></button>' +
+      '<button class="opt" data-a="lang">' + I.comment + 'Language<em>' + (ur ? 'اردو' : 'English') + '</em></button>' +
+      '<div class="opt-sec">Your stuff</div>' +
       '<button class="opt" data-a="favs">' + I.bookmark + 'Favourites</button>' +
       ((window.JRS || window.JRLazy) ? '<button class="opt" data-a="drafts">' + I.edit + 'Drafts</button>' : '');
   }
   function wireSettings(sh, on) {
-    on('theme', function () { LS.set('theme', LS.get('theme', 'dark') === 'light' ? 'dark' : 'light'); applyTheme(); toast('Theme changed'); });
+    on('theme', function () {
+      var cur = themeMode();
+      sheet('Theme', ['dark', 'light', 'system'].map(function (k) {
+        return '<button class="opt radio' + (k === cur ? ' on' : '') + '" data-th="' + k + '">' + ({ dark: 'Dark', light: 'Light', system: 'System (follow phone)' })[k] + '</button>';
+      }).join(''), function (s2) {
+        $$('[data-th]', s2).forEach(function (b) { b.addEventListener('click', function () {
+          LS.set('theme', b.dataset.th); applyTheme(); JR().closeSheet(); toast('Theme: ' + b.textContent);
+        }); });
+      });
+    });
     on('saver', function () { LS.set('saver', saver() ? '0' : '1'); toast(saver() ? 'Data saver on: videos load in lower quality' : 'Data saver off'); });
     on('lang', function () {
       sheet('Language', '<button class="opt" data-l="en">English</button><button class="opt" data-l="ur">اردو (Urdu)</button>', function (s2) {

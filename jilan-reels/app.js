@@ -138,7 +138,7 @@
       '<button class="mute-btn" aria-label="Sound on or off">' + (soundOn ? ICON.sound : ICON.mute) + '</button>' +
       (soundOn ? '' : '<button class="sound-pill">' + ICON.mute + 'Tap for sound</button>') +
       '<div class="rail">' +
-        '<div class="creator"><button class="open-creator" data-u="' + esc(v.ownerUid) + '">' + avatarHtml(v.ownerName, v.ownerPhoto, v.ownerUid) + '</button>' +
+        '<div class="creator"><button class="open-creator' + (L.isFresh && L.isFresh(v) ? ' ring' : '') + '" data-u="' + esc(v.ownerUid) + '">' + avatarHtml(v.ownerName, v.ownerPhoto, v.ownerUid) + '</button>' +
           (mine ? '' : '<button class="follow' + (followed ? ' done' : '') + '" data-u="' + esc(v.ownerUid) + '" aria-label="Follow">' + (followed ? ICON.check : ICON.plus) + '</button>') + '</div>' +
         '<button class="like' + (liked ? ' liked' : '') + '" aria-label="Like">' + ICON.heart + '<span>' + fmt(v.likeCount) + '</span></button>' +
         '<button class="comments" aria-label="Comments">' + ICON.comment + '<span>' + fmt(v.commentCount) + '</span></button>' +
@@ -610,7 +610,7 @@
     if (name === 'home') { if (tabLayer) closeTop(); else show('home'); return; }
     if (!tabLayer) { tabLayer = true; pushLayer(function () { tabLayer = false; show('home'); }); }
     if (name === 'profile') showProfile(loggedIn() ? Api.me.uid : null);
-    if (name === 'discover') renderChips();
+    if (name === 'discover') { renderChips(); if (window.JRV) JRV.discoverHome(); }
     if (name === 'inbox' && window.JRX) JRX.showInbox();
     show(name);
   }
@@ -696,7 +696,7 @@
     }).join('');
     $$('#profileGrid .cell').forEach(function (b) { b.addEventListener('click', function () { openPlayer(profileList, +b.dataset.i); }); });
     var em = $('#profileEmpty');
-    if (!profileList.length) { em.innerHTML = mine ? '<b>No videos yet</b><span>Tap + to post your first video.</span>' : '<b>No videos yet</b>'; em.classList.remove('hidden'); } else em.classList.add('hidden');
+    if (!profileList.length) { em.innerHTML = mine ? '<b>No videos yet</b><span>Your first reel is one tap away.</span><button class="bigbtn small cta" data-cta="create">Create a reel</button>' : '<b>No videos yet</b><span>Follow to see their reels first when they post.</span>'; em.classList.remove('hidden'); var cb = $('[data-cta=create]', em); if (cb) cb.addEventListener('click', function () { goTab('create'); }); } else em.classList.add('hidden');
     $('#profileMore').classList.toggle('hidden', profileDone);
   }
   $('#profileMoreBtn').addEventListener('click', function () { loadProfileVideos(profileToken); });
@@ -772,18 +772,20 @@
   };
   function openSettings() {
     var shell = !!(window.Android && Android.checkUpdate);
-    openSheet(head('Settings') + '<div class="sh-body">' +
+    openSheet(head('Settings') + '<div class="sh-body settings">' + '<div class="opt-sec">Account</div>' +
       '<button class="opt" data-a="edit">' + ICON.edit + 'Edit profile</button>' +
       (pwAcc() ? '<button class="opt" data-a="pass">' + ICON.edit + 'Change password</button>' : '') +
       '<button class="opt" data-a="blocked">' + ICON.block + 'Blocked accounts</button>' +
       (window.JRX ? JRX.settingsHtml() : '') +
-      (Api.isAdmin ? '<button class="opt" data-a="admin">' + ICON.shield + 'Admin panel</button>' : '') +
+      (Api.isAdmin ? '<div class="opt-sec">Admin</div><button class="opt" data-a="admin">' + ICON.shield + 'Admin panel</button>' : '') +
+      '<div class="opt-sec">Support and legal</div>' +
       (shell ? '<button class="opt" data-a="update">' + ICON.refresh + 'Check for updates' + (availableVersion ? ' (v' + esc(availableVersion) + ' ready)' : '') + '</button>' : '') +
       '<button class="opt" data-a="terms">' + ICON.doc + 'Terms of Use</button>' +
       '<button class="opt" data-a="privacy">' + ICON.doc + 'Privacy Policy</button>' +
       '<button class="opt" data-a="guidelines">' + ICON.shield + 'Community Guidelines</button>' +
       '<button class="opt" data-a="safety">' + ICON.shield + 'Child safety</button>' +
       '<button class="opt" data-a="about">' + ICON.info + 'About Jilan Reels</button>' +
+      '<div class="opt-sec">Log out and delete</div>' +
       '<button class="opt" data-a="logout">' + ICON.out + 'Log out</button>' +
       '<button class="opt red" data-a="delete">' + ICON.trash + 'Delete account</button></div>', function (sh) {
       var on = function (a, fn) { var b = $('[data-a=' + a + ']', sh); if (b) b.addEventListener('click', function () { closeSheet(fn); }); };
@@ -996,6 +998,7 @@
     $$('#chips button').forEach(function (b) { b.addEventListener('click', function () { $('#searchInput').value = '#' + b.dataset.t; runSearch(); }); });
   }
   function runSearch(more) {
+    if (window.JRV && JRV.search($('#searchInput').value, more)) return;
     var s = L.parseSearch($('#searchInput').value);
     renderChips();
     var res = $('#searchResults');
@@ -1057,6 +1060,12 @@
     if (prev === 'player' || prev === 'create' || prev === 'admin') prev = 'home';
     $$('.screen:not(#screen-gate)').forEach(function (s) { s.classList.toggle('active', s.id === 'screen-create'); });
     pushLayer(function () { stopCam(); resetCreate(); show(prev); });
+    // v1.5 camera-first: open the camera straight away (not for duet/stitch, which start it themselves)
+    setTimeout(function () {
+      var st = window.JRS && JRS._state;
+      if ((st && st.remix) || camStream || !$('#screen-create').classList.contains('active') || $('#createPick').classList.contains('hidden')) return;
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $('#btnRecord').click();
+    }, 30);
   }
   var uploading = false;
   function resetCreate() {
@@ -1071,6 +1080,7 @@
   $('#btnGallery').addEventListener('click', function () { $('#fileInput').value = ''; $('#fileInput').click(); });
   $('#fileInput').addEventListener('change', function () {
     var f = this.files && this.files[0]; if (!f) return;
+    if (!(recorder && recorder.state === 'recording')) stopCam();
     if (!/^video\//.test(f.type || 'video/')) { toast('Please choose a video.'); return; }
     if (f.size > 200 * 1024 * 1024) { toast('This video is too big. Please choose a shorter one.'); return; }
     M.probe(f).then(function (info) {
@@ -1113,12 +1123,14 @@
       i = (i + (dx < 0 ? 1 : -1) + FXL.list.length) % FXL.list.length; setFx(FXL.list[i].id, true);
     }, { passive: true });
   })();
+  var camGen = 0;
   function startCam() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Camera is not available. Use Upload instead.'); return Promise.reject(); }
-    stopCam();
+    stopCam(); var gen = ++camGen;
     // Ask for the camera's normal 16:9 mode. Asking for portrait sizes (540x960)
     // made Android Chrome cut a narrow strip out of the sensor = zoomed face.
     return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: true }).then(function (s) {
+      if (gen !== camGen) { s.getTracks().forEach(function (t) { t.stop(); }); return false; }
       camStream = s; var v = $('#camView'); v.srcObject = s; v.play().catch(function () {});
       if (FXL) {
         buildFxStrip(); setFx(fxChoice, false);
@@ -1129,6 +1141,7 @@
     }).catch(function (e) { toast('Camera and microphone permission is needed to record.'); throw e; });
   }
   function stopCam() {
+    camGen++;
     if (recorder && recorder.state === 'recording') { try { recorder.onstop = null; recorder.stop(); } catch (e) {} }
     clearInterval(recTimer); recorder = null;
     if (window.JRS) JRS.stopLive();
@@ -1139,7 +1152,8 @@
     $('#btnShutter').classList.remove('on');
   }
   $('#btnRecord').addEventListener('click', function () {
-    startCam().then(function () {
+    startCam().then(function (r) {
+      if (r === false) return;
       $('#createPick').classList.add('hidden'); $('#createRec').classList.remove('hidden');
       $('#recTimer').textContent = '0:00 / 1:00'; $('#recProgress').style.width = '0';
     }).catch(function () {});
@@ -1147,6 +1161,8 @@
   $('#btnFlip').addEventListener('click', function () { if (recorder && recorder.state === 'recording') return; facing = facing === 'user' ? 'environment' : 'user'; startCam().catch(function () {}); });
   $('#fxStrip').addEventListener('click', function (e) { e.stopPropagation(); });
   $('#btnRecCancel').addEventListener('click', function () { stopCam(); resetCreate(); });
+  if ($('#btnCamGallery')) $('#btnCamGallery').addEventListener('click', function () { if (recorder && recorder.state === 'recording') return; $('#fileInput').value = ''; $('#fileInput').click(); });
+  if ($('#btnCamClose')) $('#btnCamClose').addEventListener('click', function () { if (recorder && recorder.state === 'recording') return; stopCam(); closeTop(); });
   $('#btnShutter').addEventListener('click', function () {
     if (!camStream) return;
     if (recorder && recorder.state === 'recording') { recorder.stop(); return; }
@@ -1250,7 +1266,7 @@
     openComments: openComments, openMore: openMore, openReport: openReport, showPreview: showPreview, feeds: feeds, errMsg: errMsg,
     openCreate: function () { requireLogin(openCreate); }, startCam: startCam, stopCam: stopCam, requireLogin: requireLogin, avatarHtml: avatarHtml, fmt: fmt,
     copyText: copyText, isMine: isMine, updateReels: updateReels, showProfile: showProfile, upStatus: upStatus, shareUrl: shareUrl,
-    camFacing: function () { return facing; }, resetCreate: resetCreate, isRecording: function () { return !!(recorder && recorder.state === 'recording'); } };
+    camFacing: function () { return facing; }, camStream: function () { return camStream; }, openDiscover: openDiscover, visible: visible, resetCreate: resetCreate, isRecording: function () { return !!(recorder && recorder.state === 'recording'); } };
   var started = false;
   // Start-up: the For You feed starts at once (cached copy first, then the
   // server), without waiting for sign-in. Like/follow marks and blocks are

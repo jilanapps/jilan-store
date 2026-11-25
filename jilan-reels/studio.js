@@ -35,9 +35,12 @@
     if (tools) return tools;
     var rec = $('#createRec'); if (!rec) return null;
     tools = document.createElement('div'); tools.className = 'cam-tools';
-    tools.innerHTML = '<button data-t="timer"><b>Off</b><span>Timer</span></button>' +
+    tools.innerHTML = '<button data-t="torch"><b>Off</b><span>Flash</span></button>' +
+      '<button data-t="timer"><b>Off</b><span>Timer</span></button>' +
       '<button data-t="speed"><b>1x</b><span>Speed</span></button>' +
-      '<button data-t="cc"><b>Off</b><span>Captions</span></button>';
+      '<button data-t="cc"><b>Off</b><span>Captions</span></button>' +
+      '<button data-t="slides"><b><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 3h14v14"/></svg></b><span>Photos</span></button>' +
+      '<button data-t="drafts"><b><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg></b><span>Drafts</span></button>';
     rec.appendChild(tools);
     var cd = document.createElement('div'); cd.className = 'countdown hidden'; cd.id = 'jrsCount'; rec.appendChild(cd);
     var lab = document.createElement('div'); lab.className = 'remix-label hidden'; lab.id = 'jrsRemixLabel'; rec.appendChild(lab);
@@ -45,6 +48,8 @@
       e.stopPropagation();
       var b = e.target.closest('button'); if (!b || JR().isRecording()) return;
       var t = b.dataset.t;
+      if (t === 'torch') { setTorch(!S.torch); return; }
+      if (t === 'slides' || t === 'drafts') { if (JR().isRecording && JR().isRecording()) return; var keep = S.remix && S.remix.type === 'sound' ? S.remix : null; JR().stopCam(); JR().resetCreate(); S.remix = keep; if (t === 'slides') slideshow(); else openDrafts(); return; }
       if (t === 'timer') S.timer = S.timer === 0 ? 3 : S.timer === 3 ? 10 : 0;
       if (t === 'speed') S.speed = S.speed === 1 ? 0.5 : S.speed === 0.5 ? 2 : 1;
       if (t === 'cc') {
@@ -60,11 +65,21 @@
   function paintTools() {
     if (!tools) return;
     $('[data-t=timer] b', tools).textContent = S.timer ? S.timer + 's' : 'Off';
+    $('[data-t=torch] b', tools).textContent = S.torch ? 'On' : 'Off';
     $('[data-t=speed] b', tools).textContent = S.speed + 'x';
     $('[data-t=cc] b', tools).textContent = S.cc ? 'On' : 'Off';
-    $$('button', tools).forEach(function (b) { var t = b.dataset.t; b.classList.toggle('on', (t === 'timer' && S.timer) || (t === 'speed' && S.speed !== 1) || (t === 'cc' && S.cc)); });
+    $$('button', tools).forEach(function (b) { var t = b.dataset.t; b.classList.toggle('on', (t === 'torch' && S.torch) || (t === 'timer' && S.timer) || (t === 'speed' && S.speed !== 1) || (t === 'cc' && S.cc)); });
   }
   var cdT = null;
+  // Flash = the phone's torch on the back camera (not every phone or browser allows it)
+  function camTrack() { var cs = JR().camStream && JR().camStream(); return cs && cs.getVideoTracks()[0]; }
+  function torchOK() { var t = camTrack(); try { return !!(t && t.getCapabilities && t.getCapabilities().torch); } catch (e) { return false; } }
+  function setTorch(on) {
+    var t = camTrack();
+    if (on && !torchOK()) { S.torch = false; paintTools(); toast(JR().camFacing() === 'user' ? 'Flash works with the back camera. Tap Flip first.' : 'Flash is not supported on this phone.'); return; }
+    if (!t) { S.torch = false; paintTools(); return; }
+    t.applyConstraints({ advanced: [{ torch: !!on }] }).then(function () { S.torch = !!on; paintTools(); }, function () { S.torch = false; paintTools(); toast('Flash is not supported on this phone.'); });
+  }
   function counting() { return !!cdT; }
   function cancelCountdown() { clearInterval(cdT); cdT = null; var c = $('#jrsCount'); if (c) c.classList.add('hidden'); }
   function countdown(go) {
@@ -103,7 +118,7 @@
   }
   // Called when the camera screen opens (after startCam).
   function onCamOpen() {
-    camTools(); remixLabel();
+    camTools(); S.torch = false; paintTools(); remixLabel();
     stopRx();
     if (!S.remix) return;
     var cam = $('#camCanvas'), out = document.createElement('canvas');
@@ -262,7 +277,7 @@
     var lay = $('#pvLayer'), ed = S.ed; if (!lay || !ed) return;
     var h = lay.clientHeight || 400;
     lay.innerHTML = ed.items.map(function (it, i) {
-      return '<div class="ov-item' + (it.kind === 'text' ? ' txt' : '') + '" data-i="' + i + '" style="left:' + (it.x * 100) + '%;top:' + (it.y * 100) + '%;font-size:' + Math.round(it.size * h) + 'px;color:' + esc(it.color || '#fff') + (it.bg ? ';background:rgba(0,0,0,.55)' : '') + '">' + esc(it.text) + '<i class="ov-x" data-x="' + i + '">x</i></div>';
+      return '<div class="ov-item' + (it.kind === 'text' ? ' txt' : '') + '" data-i="' + i + '" style="left:' + (it.x * 100) + '%;top:' + (it.y * 100) + '%;font-size:' + Math.round(it.size * h) + 'px;color:' + esc(it.color || '#fff') + (it.bg ? ';background:rgba(0,0,0,.55)' : '') + ';transform:translate(-50%,-50%) rotate(' + (it.rot || 0) + 'rad)">' + esc(it.text) + '<i class="ov-x" data-x="' + i + '">x</i></div>';
     }).join('') + '<div class="ov-cap hidden" id="ovCap"></div>';
     $$('.ov-item', lay).forEach(drag);
     $$('.ov-x', lay).forEach(function (x) { x.addEventListener('click', function (e) { e.stopPropagation(); ed.items.splice(+x.dataset.x, 1); paintItems(); paintNote(); }); });
@@ -274,22 +289,41 @@
     el.textContent = c ? c.text : ''; el.classList.toggle('hidden', !c);
   }
   function drag(el) {
-    var ed = S.ed, it = ed.items[+el.dataset.i], sx, sy, ox, oy, lay = el.parentNode, pinch = null;
+    var ed = S.ed, it = ed.items[+el.dataset.i], lay = el.parentNode, pts = {}, g = null;
+    function start() {
+      var ids = Object.keys(pts), a = pts[ids[0]], b = pts[ids[1]];
+      if (ids.length === 1) g = { one: true, sx: a.x, sy: a.y, ox: it.x, oy: it.y };
+      else if (ids.length >= 2) g = { one: false, d: Math.hypot(b.x - a.x, b.y - a.y) || 1, ang: Math.atan2(b.y - a.y, b.x - a.x), size: it.size, rot: it.rot || 0,
+        cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, ox: it.x, oy: it.y };
+    }
     el.addEventListener('pointerdown', function (e) {
       if (e.target.classList.contains('ov-x')) return;
-      e.preventDefault(); el.setPointerCapture(e.pointerId); sx = e.clientX; sy = e.clientY; ox = it.x; oy = it.y;
-      el.classList.add('drag');
+      e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (er) {}
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY }; el.classList.add('drag'); start();
     });
     el.addEventListener('pointermove', function (e) {
-      if (!el.classList.contains('drag')) return;
-      it.x = Math.max(0, Math.min(1, ox + (e.clientX - sx) / lay.clientWidth));
-      it.y = Math.max(0, Math.min(1, oy + (e.clientY - sy) / lay.clientHeight));
+      if (!pts[e.pointerId] || !g) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pts), a = pts[ids[0]], b = pts[ids[1]];
+      if (g.one) {
+        it.x = Math.max(0, Math.min(1, g.ox + (a.x - g.sx) / lay.clientWidth));
+        it.y = Math.max(0, Math.min(1, g.oy + (a.y - g.sy) / lay.clientHeight));
+      } else if (b) {
+        var d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        it.size = Math.max(0.025, Math.min(0.25, g.size * d / g.d));
+        it.rot = g.rot + Math.atan2(b.y - a.y, b.x - a.x) - g.ang;
+        it.x = Math.max(0, Math.min(1, g.ox + ((a.x + b.x) / 2 - g.cx) / lay.clientWidth));
+        it.y = Math.max(0, Math.min(1, g.oy + ((a.y + b.y) / 2 - g.cy) / lay.clientHeight));
+        el.style.fontSize = Math.round(it.size * (lay.clientHeight || 400)) + 'px';
+      }
       el.style.left = (it.x * 100) + '%'; el.style.top = (it.y * 100) + '%';
+      el.style.transform = 'translate(-50%,-50%) rotate(' + (it.rot || 0) + 'rad)';
     });
-    var up = function () { el.classList.remove('drag'); };
+    var up = function (e) { delete pts[e.pointerId]; if (!Object.keys(pts).length) { el.classList.remove('drag'); g = null; } else start(); };
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
     el.addEventListener('dblclick', function () { it.size = it.size >= 0.12 ? 0.04 : it.size + 0.02; paintItems(); });
-    void pinch;
+    // mouse wheel / trackpad: resize; with Shift: rotate (desktop)
+    el.addEventListener('wheel', function (e) { e.preventDefault(); if (e.shiftKey) it.rot = (it.rot || 0) + (e.deltaY > 0 ? 0.08 : -0.08); else it.size = Math.max(0.025, Math.min(0.25, it.size * (e.deltaY > 0 ? 0.92 : 1.08))); paintItems(); }, { passive: false });
   }
   function sheet(title, html, ready) { JR().openSheet(JR().head(title) + '<div class="sh-body">' + html + '</div>', ready); }
   function tool(name) {
@@ -520,10 +554,12 @@
     ed.items.forEach(function (it) {
       var fs = Math.max(10, Math.round(it.size * H));
       c.font = 'bold ' + fs + 'px system-ui, "Noto Sans", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      var x = it.x * W, y = it.y * H;
+      var x0 = it.x * W, y0 = it.y * H, x = 0, y = 0;
+      c.save(); c.translate(x0, y0); if (it.rot) c.rotate(it.rot);
       if (it.bg) { var w = c.measureText(it.text).width + fs * 0.6; c.fillStyle = 'rgba(0,0,0,.55)'; roundRect(c, x - w / 2, y - fs * 0.65, w, fs * 1.3, fs * 0.25); c.fill(); }
       else { c.lineWidth = Math.max(2, fs / 10); c.strokeStyle = 'rgba(0,0,0,.6)'; c.strokeText(it.text, x, y); }
       c.fillStyle = it.color || '#fff'; c.fillText(it.text, x, y);
+      c.restore();
     });
     var cap = ed.captions.filter(function (x) { return t >= x.t0 && t <= x.t1; })[0];
     if (cap) {
@@ -753,7 +789,8 @@
     videoStream: videoStream, audioTracks: audioTracks, onRecordStart: onRecordStart, onRecordStop: onRecordStop,
     onCamOpen: onCamOpen, stopLive: function () { stopRx(); }, onPreview: onPreview, finalize: finalize, extras: extras,
     posted: posted, reset: reset, startRemix: startRemix, slideshow: slideshow, openDrafts: openDrafts,
-    _render: render, _makeSlides: makeSlides, _state: S, _needsRender: needsRender
+    setTorch: setTorch, _render: render, _makeSlides: makeSlides, _state: S, _needsRender: needsRender
   };
   initPick();
+  (function () { var b = document.getElementById('btnSaveDraft'); if (b) b.addEventListener('click', function () { if (!S.ed) { toast('Record or pick a video first.'); return; } saveDraft(); }); })();
 })();
