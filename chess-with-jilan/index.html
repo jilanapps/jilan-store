@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0c1526">
+<title>Chess with Jilan</title>
+<meta name="description" content="Chess with Jilan - play chess against Jilan, a Stockfish-powered computer with 10 levels, or play with a friend on the same phone.">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css?v=1.0.0">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="brand"><img src="icon-192.png" alt=""><span>Chess with <b>Jilan</b></span></div>
+    <button class="icon-btn" id="btnNew" aria-label="New game"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </header>
+
+  <section class="player" id="plTop">
+    <div class="avatar" id="avTop">J</div>
+    <div class="pinfo"><div class="pname" id="nameTop">Jilan</div><div class="caps" id="capsTop"></div></div>
+    <div class="thinking" id="thinking" hidden><i></i><i></i><i></i></div>
+    <div class="clock" id="clockTop" hidden>5:00</div>
+  </section>
+
+  <div class="board-wrap" id="boardWrap">
+    <div class="board" id="board"></div>
+    <div class="pieces" id="pieces"></div>
+    <div class="promo" id="promo" hidden></div>
+  </div>
+
+  <section class="player" id="plBot">
+    <div class="avatar me" id="avBot">You</div>
+    <div class="pinfo"><div class="pname" id="nameBot">You</div><div class="caps" id="capsBot"></div></div>
+    <div class="clock" id="clockBot" hidden>5:00</div>
+  </section>
+
+  <div class="status" id="status">White to move</div>
+  <div class="moves" id="moves"></div>
+
+  <nav class="controls">
+    <button id="btnUndo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/></svg><span>Undo</span></button>
+    <button id="btnHint"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg><span>Hint</span></button>
+    <button id="btnFlip"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg><span>Flip</span></button>
+    <button id="btnDraw"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg><span>Draw</span></button>
+    <button id="btnResign"><svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Resign</span></button>
+  </nav>
+</div>
+
+<!-- New game sheet -->
+<div class="sheet-back" id="newBack" hidden>
+  <div class="sheet" role="dialog" aria-label="New game">
+    <h2>New game</h2>
+    <div class="field"><label>Mode</label>
+      <div class="seg" data-key="mode"><button data-v="ai">vs Jilan</button><button data-v="2p">2 Players</button></div></div>
+    <div class="field ai-only"><label>Play as</label>
+      <div class="seg" data-key="color"><button data-v="w"><img src="pieces/wK.svg" alt="">White</button><button data-v="r">Random</button><button data-v="b"><img src="pieces/bK.svg" alt="">Black</button></div></div>
+    <div class="field ai-only"><label>Jilan level: <b id="lvlLabel">3 - Beginner</b></label>
+      <input type="range" id="lvl" min="1" max="10" step="1" value="3">
+      <div class="lvl-scale"><span>Easy</span><span>Master</span></div></div>
+    <div class="field"><label>Clock</label>
+      <div class="seg" data-key="clock"><button data-v="0">None</button><button data-v="1">1 min</button><button data-v="3">3 min</button><button data-v="5">5 min</button><button data-v="10">10 min</button></div></div>
+    <div class="field two-only"><label class="chk"><input type="checkbox" id="optAutoFlip"> Auto-flip board after each move</label></div>
+    <button class="primary" id="btnStart">Start game</button>
+    <button class="ghost" id="btnCancelNew">Cancel</button>
+  </div>
+</div>
+
+<!-- Menu sheet -->
+<div class="sheet-back" id="menuBack" hidden>
+  <div class="sheet" role="dialog" aria-label="Menu">
+    <h2>Settings</h2>
+    <div class="field"><label>Board theme</label>
+      <div class="themes" id="themes"></div></div>
+    <div class="field"><label class="chk"><input type="checkbox" id="optSound"> Move sounds</label>
+      <label class="chk"><input type="checkbox" id="optDots"> Show legal moves</label>
+      <label class="chk"><input type="checkbox" id="optCoords"> Board coordinates</label>
+      <label class="chk"><input type="checkbox" id="optVibrate"> Vibrate on move</label></div>
+    <button class="ghost" id="btnCheckUpdate">Check for update</button>
+    <button class="ghost" id="btnAbout">About</button>
+    <button class="primary" id="btnCloseMenu">Done</button>
+  </div>
+</div>
+
+<!-- About -->
+<div class="sheet-back" id="aboutBack" hidden>
+  <div class="sheet about" role="dialog" aria-label="About">
+    <img src="icon-192.png" alt="" class="about-icon">
+    <h2>Chess with Jilan</h2>
+    <p class="ver">Version <span id="verText">1.0</span></p>
+    <p>Play chess against <b>Jilan</b>, a computer opponent with 10 levels from Easy to Master, or play with a friend on the same phone.</p>
+    <p class="credit">Made by Dr Asif - Jilan Apps Official</p>
+    <p><a href="https://wa.me/923007379385" id="waLink">WhatsApp: 0300-7379385</a></p>
+    <p><a href="https://jilanapps.github.io/jilan-store/" id="storeLink">Jilan App Store</a></p>
+    <details><summary>Open-source credits</summary>
+      <p><b>Stockfish 18</b> chess engine via Stockfish.js (c) Chess.com, LLC and the Stockfish developers - GNU GPL v3. <a href="engine/COPYING-GPLv3.txt">License</a>. Source: github.com/nmrugg/stockfish.js</p>
+      <p><b>chess.js</b> (c) Jeff Hlywa - BSD 2-Clause. <a href="lib/CHESSJS-LICENSE.txt">License</a></p>
+      <p>Chess pieces <b>cburnett</b> by Colin M.L. Burnett - GPL v2+.</p>
+      <p>This app is free software under the GNU GPL v3. Sounds are made inside the app.</p>
+    </details>
+    <button class="primary" id="btnCloseAbout">Close</button>
+  </div>
+</div>
+
+<!-- Result -->
+<div class="sheet-back center" id="resultBack" hidden>
+  <div class="result" role="dialog" aria-label="Result">
+    <div class="trophy" id="resIcon"></div>
+    <h2 id="resTitle">You won!</h2>
+    <p id="resReason">by checkmate</p>
+    <button class="primary" id="btnRematch">Play again</button>
+    <button class="ghost" id="btnNewFromRes">New game settings</button>
+    <button class="ghost" id="btnReview">View board</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="app.js?v=1.0.0"></script>
+</body>
+</html>
