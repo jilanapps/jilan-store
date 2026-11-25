@@ -100,7 +100,15 @@
 
   // Decide + run compression. Returns {blob, compressed}.
   M.prepare = function (blob, knownDuration, onProgress) {
-    return M.probe(blob).then(function (info) {
+    // Some phones (Android WebView) can't open a 2nd decoder while the preview
+    // plays, so the probe fails on a file that already played fine. Then just
+    // upload the original if it is small enough (Cloudinary checks length).
+    try { var pv = document.getElementById('previewVideo'); if (pv) pv.pause(); } catch (e) {}
+    return M.probe(blob).catch(function (e) {
+      if (blob.size <= L.HARD_MAX_BYTES) return { fallback: true };
+      throw e;
+    }).then(function (info) {
+      if (info.fallback) return { blob: blob, compressed: false, duration: knownDuration || 0 };
       if (knownDuration) info.duration = knownDuration;
       if (info.duration && info.duration > L.MAX_SEC + 0.5) throw new Error('Please choose a video of 60 seconds or less.');
       var plan = L.planCompression(blob.size, info.width, info.height, info.duration || L.MAX_SEC);
