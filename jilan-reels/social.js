@@ -11,6 +11,8 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var esc = L.esc;
   function JR() { return window.JR; }
+  // Create tools (studio.js) load lazily; run fn once they are there.
+  function withS(fn) { if (window.JRS || !window.JRLazy) return fn(); window.JRLazy.tools().then(fn, function (e) { JR().toast(e.message); }); }
   function toast(t) { JR().toast(t); }
   function sheet(title, html, ready) { JR().openSheet(JR().head(title) + '<div class="sh-body">' + html + '</div>', ready); }
   function nice(e) {
@@ -78,8 +80,8 @@
   }
   function pickSoundUse(v) {
     sheet('Use this sound', '<button class="opt" data-a="rec">' + JR().ICON.music + 'Record a video with this sound</button><button class="opt" data-a="ss">' + JR().ICON.music + 'Photo slideshow with this sound</button>', function (sh) {
-      $('[data-a=rec]', sh).addEventListener('click', function () { JR().closeSheet(function () { window.JRS.startRemix('sound', v); }); });
-      $('[data-a=ss]', sh).addEventListener('click', function () { JR().closeSheet(function () { JR().requireLogin(function () { JR().openCreate(); window.JRS._state.remix = { type: 'sound', v: v }; setTimeout(window.JRS.slideshow, 80); }); }); });
+      $('[data-a=rec]', sh).addEventListener('click', function () { JR().closeSheet(function () { withS(function () { window.JRS.startRemix('sound', v); }); }); });
+      $('[data-a=ss]', sh).addEventListener('click', function () { JR().closeSheet(function () { JR().requireLogin(function () { withS(function () { JR().openCreate(); window.JRS._state.remix = { type: 'sound', v: v }; setTimeout(window.JRS.slideshow, 80); }); }); }); });
     });
   }
 
@@ -100,8 +102,8 @@
     on('fav', function () { toggleFav(v.id); });
     on('dl', function () { download(v); });
     on('sound', function () { pickSoundUse(v); });
-    on('duet', function () { window.JRS.startRemix('duet', v); });
-    on('stitch', function () { window.JRS.startRemix('stitch', v); });
+    on('duet', function () { withS(function () { window.JRS.startRemix('duet', v); }); });
+    on('stitch', function () { withS(function () { window.JRS.startRemix('stitch', v); }); });
     on('playlist', function () { addToPlaylist(v); });
     on('remixtoggle', function () { Api.setAllowRemix(v, v.allowRemix === false).then(function () { toast(v.allowRemix ? 'Duet and stitch allowed' : 'Duet and stitch turned off'); }).catch(function (e) { toast(nice(e)); }); });
   }
@@ -364,7 +366,7 @@
       '<button class="opt" data-a="saver">' + I.download + 'Data saver: ' + (saver() ? 'On' : 'Off') + '</button>' +
       '<button class="opt" data-a="lang">' + I.comment + 'Language: ' + (ur ? 'اردو' : 'English') + '</button>' +
       '<button class="opt" data-a="favs">' + I.bookmark + 'Favourites</button>' +
-      (window.JRS ? '<button class="opt" data-a="drafts">' + I.edit + 'Drafts</button>' : '');
+      ((window.JRS || window.JRLazy) ? '<button class="opt" data-a="drafts">' + I.edit + 'Drafts</button>' : '');
   }
   function wireSettings(sh, on) {
     on('theme', function () { LS.set('theme', LS.get('theme', 'dark') === 'light' ? 'dark' : 'light'); applyTheme(); toast('Theme changed'); });
@@ -375,7 +377,7 @@
       });
     });
     on('favs', function () { JR().goTab('profile'); setTimeout(function () { if ($('#pTabs [data-pt=favs]')) selTab('favs'); }, 600); });
-    on('drafts', function () { window.JRS.openDrafts(); });
+    on('drafts', function () { withS(function () { window.JRS.openDrafts(); }); });
   }
 
   window.JRX = { saver: saver, toggleFav: toggleFav, openLink: openLink, openSound: openSound, moreHtml: moreHtml, wireMore: wireMore,

@@ -176,17 +176,34 @@
     if (!f || f.loading || f.done) return Promise.resolve();
     if (!A.ready) { showFeedEmpty(); return Promise.resolve(); }
     f.loading = true;
-    var p = mode === 'following' ? Api.followingPage(f.cursor) : Api.feedPage(f.cursor);
+    var first = !f.cursor && mode === 'foryou';
+    var p = mode === 'following' ? Api.followingPage(f.cursor) : Api.feedPage(f.cursor, first ? 5 : undefined);
     return p.then(function (r) {
       f.loading = false; f.cursor = r.cursor || f.cursor; f.done = r.done;
+      if (first) Api.saveFeedCache(r.items);
       var fresh = remember(r.items).filter(visible);
+      if (f.cached) {
+        // replace the instant cached copy: keep the reel being watched, drop the rest
+        var ids = {}; fresh.forEach(function (v) { ids[v.id] = 1; });
+        var cur = current && current.parentNode === $('#feed') ? current.dataset.id : null;
+        if (feedMode === mode) $$('#feed .reel').forEach(function (r) {
+          if (!ids[r.dataset.id] && r.dataset.id !== cur) { playObserver.unobserve(r); r.remove(); }
+        });
+        var shown = {}; $$('#feed .reel').forEach(function (r) { shown[r.dataset.id] = 1; });
+        f.items = f.items.filter(function (v) { return shown[v.id] && ids[v.id]; });
+        fresh.forEach(function (v) { if (shown[v.id]) updateReels(v.id); });
+        fresh = fresh.filter(function (v) { return !shown[v.id]; });
+        f.cached = false;
+      }
       f.items = f.items.concat(fresh);
       if (feedMode === mode) appendReels($('#feed'), fresh);
       showFeedEmpty();
+      if (window.JRSplashDone) window.JRSplashDone();
       // a page that was all filtered out: fetch the next one
       if (!fresh.length && !f.done && feedMode === mode && f.items.length < 3) return loadFeedPage(mode);
     }).catch(function (e) {
       f.loading = false; console.error(e);
+      if (window.JRSplashDone) window.JRSplashDone();
       if (feedMode === mode) toast(/index/i.test(e.message || '') ? 'The server is getting ready. Please try again in a few minutes.' : 'Could not load videos. Check your internet.');
       showFeedEmpty(true);
     });
@@ -206,11 +223,30 @@
     if (feedMode === mode) { clearFeed($('#feed')); $('#feed').scrollTop = 0; }
     return loadFeedPage(mode);
   }
+  var feedCacheUsed = false;
+  // The verified list can arrive after the first reels are drawn: add/remove ticks then.
+  window.addEventListener('jr-config', function () {
+    $$('.reel').forEach(function (r) {
+      var v = cache[r.dataset.id], b = r.querySelector('.info .who'); if (!v || !b) return;
+      var has = !!b.querySelector('.vtick, svg.verified'), want = Api.isVerified(v.ownerUid);
+      if (want === has) return;
+      var tmp = document.createElement('div'); tmp.innerHTML = reelHtml(v);
+      var nb = tmp.querySelector('.info .who'); if (nb) b.innerHTML = nb.innerHTML;
+    });
+  });
   function showMode(mode) {
     feedMode = mode;
     $$('.tab').forEach(function (x) { x.classList.toggle('on', x.dataset.feed === mode); });
     clearFeed($('#feed')); $('#feed').scrollTop = 0;
-    if (!feeds[mode]) { feeds[mode] = newFeed(); loadFeedPage(mode); }
+    if (!feeds[mode]) {
+      feeds[mode] = newFeed();
+      if (mode === 'foryou' && !feedCacheUsed) {
+        feedCacheUsed = true;
+        var cv = remember(Api.readFeedCache()).filter(visible);
+        if (cv.length) { feeds[mode].cached = true; feeds[mode].items = cv; appendReels($('#feed'), cv); if (window.JRSplashDone) window.JRSplashDone(); }
+      }
+      loadFeedPage(mode);
+    }
     else { appendReels($('#feed'), feeds[mode].items.filter(visible)); showFeedEmpty(); }
   }
   function maybeMore(reel) {
@@ -755,7 +791,7 @@
       on('edit', editProfile);
       on('pass', openChangePassword);
       on('blocked', openBlockedList);
-      on('admin', function () { if (window.JRAdmin) window.JRAdmin.open(); });
+      on('admin', function () { if (window.JRAdmin) window.JRAdmin.open(); else if (window.JRLazy) JRLazy.admin().then(function () { window.JRAdmin.open(); }, function (e) { toast(e.message); }); });
       on('update', function () { try { Android.checkUpdate(); } catch (e) {} });
       on('terms', function () { openPage('terms.html'); });
       on('privacy', function () { openPage('privacy.html'); });
@@ -1009,6 +1045,12 @@
   var MAX_SEC = L.MAX_SEC, camStream = null, recStream = null, recorder = null, recChunks = [], recTimer = null, recStart = 0, facing = 'user';
   var picked = null; // {blob, url, recordedSec}
   function openCreate() {
+    if (window.JRLazy && !(window.JRS && window.JRFx)) {
+      $$('video').forEach(function (v) { v.pause(); });
+      JRLazy.tools().then(function () { FXL = window.JRFx || null; openCreate(); }, function (e) { toast(e.message); });
+      return;
+    }
+    FXL = FXL || window.JRFx || null;
     $$('video').forEach(function (v) { v.pause(); });
     resetCreate();
     var prev = (($('.screen.active') || {}).id || 'screen-home').replace('screen-', '');
@@ -1037,9 +1079,9 @@
     }).catch(function (e) { toast(errMsg(e)); });
   });
   /* live filter camera: camera -> canvas (filter) -> captureStream + mic */
-  var FXL = window.JRFx, fxEngine = null, fxChoice = 'normal', fxThumbT = 0, fxNameT = 0;
+  var FXL = window.JRFx || null, fxEngine = null, fxChoice = 'normal', fxThumbT = 0, fxNameT = 0;
   function buildFxStrip() {
-    var strip = $('#fxStrip'); if (!FXL || strip.childNodes.length) return;
+    var strip = $('#fxStrip'); FXL = FXL || window.JRFx || null; if (!FXL || strip.childNodes.length) return;
     FXL.list.forEach(function (f) {
       var b = document.createElement('button'); b.className = 'fx-item'; b.setAttribute('data-fx', f.id);
       b.innerHTML = '<canvas width="56" height="70"></canvas><span>' + esc(f.name) + '</span>';
@@ -1210,13 +1252,23 @@
     copyText: copyText, isMine: isMine, updateReels: updateReels, showProfile: showProfile, upStatus: upStatus, shareUrl: shareUrl,
     camFacing: function () { return facing; }, resetCreate: resetCreate, isRecording: function () { return !!(recorder && recorder.state === 'recording'); } };
   var started = false;
+  // Start-up: the For You feed starts at once (cached copy first, then the
+  // server), without waiting for sign-in. Like/follow marks and blocks are
+  // re-applied when the account arrives (refreshAfterAuth).
+  function splashDone() { if (window.JRSplashDone) window.JRSplashDone(); }
+  function idleTools() {
+    if (!window.JRLazy) return;
+    var go = function () { JRLazy.tools().catch(function () {}); if (Api.isAdmin) JRLazy.admin().catch(function () {}); };
+    if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 1500);
+  }
   if (A.ready) {
+    showMode('foryou');
     A.onChange(function (u) {
       onUser(u).then(function () {
-        if (!started) { started = true; showMode('foryou'); openHash(); window.JR.ready = true; }
+        if (!started) { started = true; openHash(); window.JR.ready = true; idleTools(); }
       });
     });
-  } else { showMode('foryou'); window.JR.ready = true; }
+  } else { showMode('foryou'); window.JR.ready = true; splashDone(); }
   window.addEventListener('hashchange', openHash);
   try { if (window.Android && Android.checkUpdate) { /* shell checks on start by itself */ } } catch (e) {}
 })();

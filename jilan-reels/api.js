@@ -41,7 +41,7 @@
     if (!u) { Api.loadConfig(); return Promise.resolve(null); }
     var cfgP = db().collection('config').doc('app').get().then(function (d) {
       Api.admins = (d.exists && Array.isArray(d.data().admins)) ? d.data().admins : [];
-      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : [];
+      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : []; try { window.dispatchEvent(new Event('jr-config')); } catch (e) {}
       Api.isAdmin = Api.admins.indexOf(u.uid) >= 0;
     }).catch(function () {});
     var meP = db().collection('users').doc(u.uid).get();
@@ -117,8 +117,26 @@
     });
   }
   function vids() { return db().collection('videos'); }
-  Api.feedPage = function (cursor) {
-    return page(vids().where('hidden', '==', false).orderBy('createdAt', 'desc'), cursor);
+  Api.feedPage = function (cursor, n) {
+    return page(vids().where('hidden', '==', false).orderBy('createdAt', 'desc'), cursor, n);
+  };
+  // Small plain-JSON copy of the first feed page, shown instantly on the next open.
+  var FEED_KEY = 'jr.feedcache.v1';
+  Api.saveFeedCache = function (items) {
+    try {
+      var out = items.slice(0, 5).map(function (v) {
+        var o = {}; for (var k in v) { var x = v[k]; o[k] = (x && typeof x.toMillis === 'function') ? x.toMillis() : x; }
+        return o;
+      });
+      localStorage.setItem(FEED_KEY, JSON.stringify({ at: Date.now(), items: out }));
+    } catch (e) {}
+  };
+  Api.readFeedCache = function () {
+    try {
+      var c = JSON.parse(localStorage.getItem(FEED_KEY) || 'null');
+      if (!c || !Array.isArray(c.items) || Date.now() - c.at > 7 * 864e5) return [];
+      return c.items.filter(function (v) { return v && v.id && v.video && v.video.url; });
+    } catch (e) { return []; }
   };
   // Following feed: newest videos of up to 30 most recently followed people.
   Api.followingUids = function () {
@@ -376,7 +394,7 @@
   /* ================= v1.3 features ================= */
   Api.loadConfig = function () {
     return db().collection('config').doc('app').get().then(function (d) {
-      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : [];
+      Api.verified = (d.exists && Array.isArray(d.data().verified)) ? d.data().verified : []; try { window.dispatchEvent(new Event('jr-config')); } catch (e) {}
     }).catch(function () {});
   };
   Api.isVerified = function (u) { return (Api.verified || []).indexOf(u) >= 0; };
