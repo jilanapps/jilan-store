@@ -3,168 +3,304 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#0e0e0e">
 <title>تحریکِ اتباعِ سنت پاکستان — Tehreek Ittiba-e-Sunnat Pakistan</title>
 <meta name="description" content="تحریکِ اتباعِ سنت پاکستان — عبادت، اطاعت، خدمت">
+<link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+/* ===== Design tokens — logo palette only: black · white · saffron ===== */
 :root{
-  /* Logo palette only: black, white, saffron (2026-11-25) */
-  --coal:#2a2a2a; --black:#141414; --night:#0a0a0a;
-  --saffron:#d0701f; --saffron-deep:#a9561a; --saffron-lt:#f3a24f;
-  --cream:#f7f5f2; --paper:#ffffff; --card:#ffffff;
-  --ink:#161616; --muted:#5c5c5c; --line:#e6e1dc;
-  --shadow:0 2px 12px rgba(0,0,0,.08);
-  --shadow-lg:0 8px 28px rgba(0,0,0,.16);
+  --night:#0b0b0b; --black:#141414; --coal:#242424; --ink:#1b1b1b; --muted:#5a5550;
+  --ivory:#faf7f2; --paper:#ffffff; --sand:#f4eee6; --line:#ebe4da; --line-2:#e0d6ca;
+  --saffron:#d0701f; --saffron-deep:#9c4f14; --saffron-lt:#f2a35a; --saffron-tint:#fcf0e4; --saffron-tint-2:#f6dcc3;
+  --r-sm:12px; --r:18px; --r-lg:24px;
+  --sh-1:0 1px 2px rgba(20,14,8,.05), 0 2px 8px rgba(20,14,8,.05);
+  --sh-2:0 6px 18px rgba(20,14,8,.09), 0 2px 6px rgba(20,14,8,.05);
+  --sh-3:0 18px 40px rgba(20,14,8,.14);
+  --wrap:1120px; --nav-h:64px;
+  --f-ur:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic',serif;
+  --f-ar:'Noto Naskh Arabic','Amiri',serif;
+  --f-lat:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0; background:var(--cream); color:var(--ink);
-  font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic',serif;
-  font-size:17px; line-height:2.15; overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; overflow-x:clip}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important; transition:none!important}}
+body{margin:0; background:var(--ivory); color:var(--ink); font-family:var(--f-ur); font-size:17px; line-height:2.1; overflow-x:clip; -webkit-font-smoothing:antialiased}
+html[lang="ar"] body, html[lang="sd"] body{font-family:var(--f-ar); line-height:1.95}
+html[lang="en"] body{font-family:var(--f-lat); line-height:1.7; font-size:16px}
+img{max-width:100%; display:block}
 a{color:var(--saffron-deep)}
-.lat{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate}
+.lat{font-family:var(--f-lat); direction:ltr; unicode-bidi:isolate}
+.ur-keep{font-family:var(--f-ur); line-height:2.2}
+.wrap{max-width:var(--wrap); margin:0 auto; padding:0 18px}
+:focus-visible{outline:3px solid var(--saffron); outline-offset:3px; border-radius:8px}
+.skip{position:absolute; inset-inline-start:12px; top:-60px; z-index:100; background:var(--saffron); color:#111; padding:4px 16px; border-radius:10px; text-decoration:none; font-weight:700}
+.skip:focus{top:10px}
 
-/* Hero */
-.hero{
+/* ===== Sticky nav ===== */
+.site-header{position:sticky; top:0; z-index:50; background:rgba(11,11,11,.92); backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px); border-bottom:1px solid rgba(208,112,31,.35)}
+.nav{display:flex; align-items:center; gap:14px; height:var(--nav-h)}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; min-width:0; padding:3px 3px 3px 0}
+.brand img{width:40px; height:40px; border-radius:50%; background:#fff; padding:2px; box-shadow:0 0 0 2px var(--saffron)}
+.brand-txt{display:flex; flex-direction:column; min-width:0}
+.brand-ur{font-family:var(--f-ur); font-weight:700; font-size:14.5px; line-height:2.25; white-space:nowrap}
+.brand-en{font-family:var(--f-lat); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--saffron-lt); line-height:1.2; white-space:nowrap; margin-top:3px}
+.nav-links{display:none; margin-inline-start:auto; gap:4px; list-style:none; padding:0; margin-block:0}
+.nav-links a{display:block; color:#e9e4de; text-decoration:none; font-size:14.5px; line-height:2; padding:4px 12px; border-radius:10px; transition:background .15s,color .15s}
+.nav-links a:hover{background:rgba(255,255,255,.07); color:#fff}
+.nav-links a[aria-current="page"]{color:var(--saffron-lt); background:rgba(208,112,31,.12)}
+.nav .nav-cta{display:none}
+.menu-btn{margin-inline-start:auto; width:44px; height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:transparent; color:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer}
+.menu-btn svg{width:22px; height:22px}
+.menu-btn .x{display:none}
+.menu-btn[aria-expanded="true"] .x{display:block}
+.menu-btn[aria-expanded="true"] .bars{display:none}
+.drawer{display:none; border-top:1px solid rgba(255,255,255,.08); background:var(--night)}
+.drawer.open{display:block; animation:drop .18s ease}
+@keyframes drop{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+.drawer ul{list-style:none; margin:0 auto; padding-block:10px 14px; display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.drawer a{display:block; color:#eee; text-decoration:none; padding:6px 14px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); font-size:15px; line-height:2}
+.drawer a:hover,.drawer a[aria-current="page"]{border-color:rgba(208,112,31,.6); color:var(--saffron-lt)}
+.drawer .dl{grid-column:1/-1; text-align:center; background:var(--saffron); color:#111; font-weight:700; border-color:var(--saffron)}
+
+/* ===== Hero ===== */
+.hero{position:relative; color:#fff; text-align:center; overflow:hidden;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cpath d='M38 10l6 22 22 6-22 6-6 22-6-22-22-6 22-6z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/%3E%3C/svg%3E"),
-    radial-gradient(700px 320px at 50% -80px, rgba(208,112,31,.35), transparent 70%),
-    linear-gradient(168deg, var(--night), var(--black) 55%, var(--coal));
-  color:#fff; text-align:center; padding:34px 16px 30px; border-bottom:4px solid var(--saffron);
-}
-.hero .logo{width:112px; height:112px; border-radius:50%; background:#fff; padding:6px; border:4px solid var(--saffron); box-shadow:0 6px 24px rgba(0,0,0,.45)}
-.hero h1{margin:14px 0 0; font-size:1.75em; line-height:1.9; font-weight:700}
-.hero .en{color:#f0c8a0; font-size:.78em; letter-spacing:.12em; text-transform:uppercase; margin-top:2px}
-.tagline{display:inline-flex; align-items:center; gap:12px; margin-top:12px; padding:2px 22px;
-  border:1px solid rgba(208,112,31,.7); border-radius:999px; background:rgba(0,0,0,.18);
-  color:#f3a24f; font-weight:700; font-size:1.05em; line-height:2.1}
+    radial-gradient(640px 300px at 50% -40px, rgba(208,112,31,.30), transparent 70%),
+    linear-gradient(180deg, var(--night), #161412 70%, #1d1915);
+  border-bottom:3px solid var(--saffron)}
+.hero::before{content:""; position:absolute; inset:0; opacity:.55; pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23d0701f' stroke-opacity='0.16' stroke-width='1'%3E%3Crect x='28' y='28' width='40' height='40'/%3E%3Crect x='28' y='28' width='40' height='40' transform='rotate(45 48 48)'/%3E%3Ccircle cx='48' cy='48' r='9'/%3E%3Cpath d='M0 48h20M76 48h20M48 0v20M48 76v20'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-image:radial-gradient(ellipse at 50% 30%, #000 30%, transparent 78%); mask-image:radial-gradient(ellipse at 50% 30%, #000 30%, transparent 78%)}
+.hero-in{position:relative; padding:28px 18px 40px; max-width:760px; margin:0 auto}
+.langsw{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:0 auto 22px}
+.langsw button{font-family:var(--f-ar); font-size:13px; line-height:1.6; padding:4px 13px; min-height:32px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.04); color:#e9e4de; cursor:pointer; transition:border-color .15s, background .15s}
+.langsw button:hover{border-color:var(--saffron)}
+.langsw button.on{background:var(--saffron); border-color:var(--saffron); color:#111; font-weight:700}
+.hero .logo{width:120px; height:120px; margin:0 auto; border-radius:50%; background:#fff; padding:5px; box-shadow:0 0 0 3px var(--saffron), 0 0 0 9px rgba(208,112,31,.14), 0 14px 34px rgba(0,0,0,.5)}
+.hero h1{margin:18px 0 0; font-size:clamp(1.65em,5.4vw,2.35em); line-height:2; font-weight:700; letter-spacing:0}
+.hero .en{color:var(--saffron-lt); font-size:12px; letter-spacing:.18em; text-transform:uppercase; margin-top:12px; font-weight:600}
+.tagline{display:inline-flex; align-items:center; gap:12px; margin-top:16px; padding:2px 22px; border:1px solid rgba(208,112,31,.55); border-radius:999px; background:rgba(208,112,31,.08); color:#fff; font-weight:700; font-size:1.05em; line-height:2.1}
 .tagline i{width:6px; height:6px; background:var(--saffron); transform:rotate(45deg); display:inline-block}
-.cta{margin-top:20px}
-.btn{display:inline-block; background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; text-decoration:none;
-  font-weight:700; font-size:1.05em; line-height:2; padding:8px 28px; border-radius:14px;
-  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a9561a}
-.btn:active{transform:scale(.97)}
-.meta{color:#d9d9d9; font-size:.82em; margin:8px 0 0; line-height:1.9}
+.hero .lead{color:#d6d0c8; font-size:.98em; line-height:2.2; margin:16px auto 0; max-width:460px; text-wrap:balance}
+html[lang="en"] .hero .lead{line-height:1.7}
+.cta{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:24px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; font-family:inherit; font-weight:700; font-size:1.02em; line-height:2; padding:4px 26px; border-radius:14px; text-decoration:none; cursor:pointer; border:1px solid transparent; transition:transform .15s, box-shadow .15s, background .15s}
+.btn svg{width:18px; height:18px; flex:none}
+.btn-primary{background:var(--saffron); color:#111; box-shadow:0 8px 22px rgba(208,112,31,.32)}
+.btn-primary:hover{background:#dc7c2a; transform:translateY(-1px)}
+.btn-ghost{background:transparent; color:#fff; border-color:rgba(255,255,255,.3)}
+.btn-ghost:hover{border-color:var(--saffron-lt); color:var(--saffron-lt)}
+.btn:active{transform:scale(.98)}
+.meta{color:#a9a29a; font-size:12.5px; margin:12px 0 0; line-height:1.6}
 
-main{max-width:980px; margin:0 auto; padding:22px 14px 50px}
+/* ===== Main / sections ===== */
+main{display:block}
+.content{padding-block:32px 60px}
+.sec-head{display:flex; align-items:center; gap:14px; margin:38px 0 16px}
+.sec-head h2{margin:0; font-size:1.3em; line-height:1.9; color:var(--black); white-space:nowrap}
+.sec-head::after{content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--line-2), transparent)}
+html[dir="rtl"] .sec-head::after{background:linear-gradient(270deg, var(--line-2), transparent)}
+.sec-head .orn{width:22px; height:22px; flex:none; color:var(--saffron)}
 
-/* Tab tiles */
-.tiles{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-.tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-  min-height:118px; padding:14px 8px 10px; text-align:center; text-decoration:none; color:var(--black);
-  background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow);
-  border-top:4px solid var(--saffron); transition:transform .15s, box-shadow .15s, border-color .15s; cursor:pointer}
-.tile:hover,.tile:active{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--saffron)}
-.tile .ic{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(160deg,var(--black),var(--coal)); box-shadow:0 3px 10px rgba(0,0,0,.25)}
-.tile .ic svg{width:22px; height:22px}
-.tile .t{font-weight:700; font-size:.98em; line-height:1.85}
+/* Tiles */
+.tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+.tile{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:124px; padding:16px 10px 12px; text-align:center; text-decoration:none; color:var(--ink);
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--sh-1); transition:transform .18s, box-shadow .18s, border-color .18s}
+.tile::after{content:""; position:absolute; top:-1px; inset-inline:28%; height:3px; border-radius:0 0 4px 4px; background:var(--saffron); opacity:.85; transition:inset .18s}
+.tile:hover{transform:translateY(-3px); box-shadow:var(--sh-2); border-color:var(--saffron-tint-2)}
+.tile:hover::after{inset-inline:14%}
+.tile .ic{width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--black); color:var(--saffron-lt); box-shadow:0 4px 12px rgba(0,0,0,.18); transition:background .18s}
+.tile:hover .ic{background:var(--saffron); color:#111}
+.tile .ic svg{width:23px; height:23px}
+.tile .t{font-weight:700; font-size:.97em; line-height:1.9}
+html[lang="en"] .tile .t{line-height:1.35; font-size:.95em}
 
 /* Panels */
-.panel{display:none; animation:fade .25s ease}
-.panel.on{display:block}
+.panel{display:none}
+.panel.on{display:block; animation:fade .25s ease}
 @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-.back{display:inline-flex; align-items:center; gap:8px; background:var(--black); color:#fff; text-decoration:none;
-  border-radius:999px; padding:2px 18px; font-size:.92em; line-height:2.1; box-shadow:var(--shadow); cursor:pointer; border:none; font-family:inherit}
-.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 18px; margin:14px 0; box-shadow:var(--shadow); border-top:5px solid var(--saffron)}
-.card h2{color:var(--black); margin:0 0 4px; font-size:1.4em; line-height:1.9; text-align:center}
-.card h2 + .rule{width:56px; height:3px; background:var(--saffron); border-radius:2px; margin:0 auto 14px}
+.panel:not(#home){max-width:820px; margin:0 auto; scroll-margin-top:calc(var(--nav-h) + 12px)}
+.back{display:inline-flex; align-items:center; gap:8px; background:var(--paper); color:var(--ink); text-decoration:none; border:1px solid var(--line-2); border-radius:999px; padding:2px 18px; min-height:40px; font-size:.92em; line-height:2.1; box-shadow:var(--sh-1); cursor:pointer; font-family:inherit; transition:border-color .15s}
+.back:hover{border-color:var(--saffron)}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px 22px; margin:16px 0; box-shadow:var(--sh-1)}
+.card h2{color:var(--black); margin:0 0 6px; font-size:1.45em; line-height:1.9; text-align:center}
+.card h2 + .rule{width:48px; height:3px; background:var(--saffron); border-radius:3px; margin:0 auto 18px; position:relative}
+.card h2 + .rule::before,.card h2 + .rule::after{content:""; position:absolute; top:-2px; width:7px; height:7px; background:var(--saffron); transform:rotate(45deg)}
+.card h2 + .rule::before{inset-inline-start:-14px}.card h2 + .rule::after{inset-inline-end:-14px}
 .card h3{color:var(--black); margin:16px 0 2px; font-size:1.1em; line-height:1.9}
 .card p{margin:6px 0}
-.taaruf p{font-size:1.06em; line-height:2.45; text-align:right}
-.taaruf .closing{margin-top:14px; padding:14px 16px; background:#fdf1e6; border:1px solid #f0d2b4; border-radius:14px; text-align:center; font-weight:600; color:#6b3410}
+.taaruf p{font-size:1.06em; line-height:2.45; text-align:justify; text-align-last:right}
+.taaruf .closing{margin-top:16px; padding:16px 18px; background:var(--saffron-tint); border:1px solid var(--saffron-tint-2); border-inline-start:4px solid var(--saffron); border-radius:14px; text-align:center; font-weight:600; color:#5a2d0c}
 .muted{color:var(--muted); font-size:.92em}
-.soon{text-align:center; padding:26px 10px 18px}
-.soon .orn{width:64px; height:64px; margin:0 auto 6px}
-.soon b{display:block; color:var(--black); font-size:1.2em}
+.soon{text-align:center; padding:22px 10px 12px}
+.soon .orn{width:60px; height:60px; margin:0 auto 6px}
+.soon b{display:block; color:var(--black); font-size:1.15em}
 .soon span{color:var(--muted); font-size:.92em}
-.don-line{text-align:center; font-size:1.02em; line-height:2.3; margin:4px 0 0; padding:12px 14px; background:#fdf1e6; border:1px solid #f0d2b4; border-radius:14px; color:#6b3410; font-weight:600}
-.baani{display:flex; gap:18px; align-items:flex-start}
-.baani img{width:160px; max-width:42%; border-radius:16px; border:3px solid var(--saffron); box-shadow:0 4px 16px rgba(0,0,0,.18); flex:none}
+.don-line{text-align:center; font-size:1.02em; line-height:2.3; margin:4px 0 0; padding:14px 16px; background:var(--saffron-tint); border:1px solid var(--saffron-tint-2); border-radius:14px; color:#5a2d0c; font-weight:600}
+.baani{display:flex; gap:20px; align-items:flex-start}
+.baani img{width:170px; max-width:42%; border-radius:18px; border:1px solid var(--line); box-shadow:0 0 0 4px var(--paper), 0 0 0 5px var(--saffron), var(--sh-2); flex:none}
 .deg{color:var(--muted); font-size:.92em}
 .chain{display:flex; flex-direction:column; align-items:center; gap:4px; margin:6px 0}
-.chain .node{width:100%; max-width:420px; text-align:center; background:#fdf5ec; border:1px solid #f0d2b4; border-radius:14px; padding:8px 12px; color:var(--black); font-weight:700; line-height:2}
-.chain .arrow{color:var(--saffron-deep); font-size:1.1em; line-height:1}
+.chain .node{width:100%; max-width:420px; text-align:center; background:var(--ivory); border:1px solid var(--line-2); border-radius:14px; padding:8px 12px; color:var(--black); font-weight:700; line-height:2}
+.chain .arrow{color:var(--saffron); font-size:1em; line-height:1}
 .people{display:grid; grid-template-columns:1fr; gap:10px}
-.person{display:flex; align-items:center; gap:12px; background:#fbfaf8; border:1px solid var(--line); border-radius:14px; padding:10px 14px}
-.person .av{width:44px; height:44px; border-radius:50%; flex:none; background:linear-gradient(160deg,var(--black),var(--coal)); display:flex; align-items:center; justify-content:center}
+.person{display:flex; align-items:center; gap:12px; background:var(--ivory); border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+.person .av{width:44px; height:44px; border-radius:12px; flex:none; background:var(--black); color:var(--saffron-lt); display:flex; align-items:center; justify-content:center}
 .person .av svg{width:22px; height:22px}
 .person .pn{font-weight:700; color:var(--black); line-height:1.9}
 .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
-.chip{background:#fdf1e6; border:1px solid #f0d2b4; color:var(--black); border-radius:999px; padding:2px 16px; font-size:.95em; line-height:2.1}
-.bayan{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--shadow)}
+.chip{background:var(--ivory); border:1px solid var(--line-2); color:var(--black); border-radius:999px; padding:2px 16px; font-size:.95em; line-height:2.1}
+.bayan{display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--sh-1); transition:border-color .15s, box-shadow .15s, transform .15s}
+.bayan:hover{border-color:var(--saffron-tint-2); box-shadow:var(--sh-2); transform:translateY(-1px)}
 .bayan>div{min-width:0}
-.bayan .play{flex:none; width:42px; height:42px; border-radius:50%; background:var(--saffron); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
-.bayan .bt{font-weight:700; font-size:.95em; line-height:1.9; overflow-wrap:break-word; word-break:break-word}
-.bayan .bm{color:var(--muted); font-size:.8em; line-height:1.8}
+.bayan .play{flex:none; width:42px; height:42px; border-radius:50%; background:var(--saffron); color:#111; display:flex; align-items:center; justify-content:center; font-size:14px}
+.bayan .bt{font-weight:600; font-size:.9em; line-height:1.6; overflow-wrap:break-word; word-break:break-word}
+.bayan .bm{color:var(--muted); font-size:.78em; line-height:1.6; font-family:var(--f-lat)}
 
-footer{background:var(--night); color:#d9d9d9; padding:28px 16px 22px; text-align:center}
-footer .ft{font-size:1.1em; font-weight:700; color:#f3a24f; line-height:2}
-footer .fl{font-size:.85em; color:#9a9a9a; line-height:2}
-
-@media(max-width:599px){ .tile:last-child:nth-child(odd){grid-column:1 / -1} }
-@media(min-width:600px){ .tiles{grid-template-columns:repeat(3,1fr)} .people{grid-template-columns:1fr 1fr} }
-@media(min-width:960px){ body{font-size:18px} .tiles{grid-template-columns:repeat(5,1fr)} }
-@media(max-width:560px){ .baani{flex-direction:column; align-items:center; text-align:center} .baani img{max-width:70%} }
-
-/* ===== preview additions: language switcher, Durood-e-Pak, About App ===== */
-.langsw{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:0 auto 16px; max-width:520px}
-.langsw button{font-family:'Noto Naskh Arabic',system-ui,sans-serif; font-size:13px; line-height:1.6; padding:3px 12px;
-  border-radius:999px; border:1px solid rgba(208,112,31,.65); background:rgba(0,0,0,.2); color:#f3a24f; cursor:pointer}
-.langsw button.on{background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; font-weight:700}
-html[lang="ar"] body, html[lang="sd"] body{font-family:'Noto Naskh Arabic','Noto Nastaliq Urdu',serif; line-height:1.95}
-html[lang="en"] body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; line-height:1.7}
-.ur-keep{font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif; line-height:2.2}
-.dcard{padding:0 0 16px; overflow:hidden; text-align:center; border-top:5px solid var(--saffron)}
-.dcard .dimg{display:block; width:100%; aspect-ratio:16/9; object-fit:cover}
-.dcard .dbody{padding:12px 16px 0}
-.dcard .dlabel{display:inline-block; background:#fdf1e6; border:1px solid #f0d2b4; color:var(--black); border-radius:999px; padding:0 14px; font-size:.82em; line-height:2.1}
-.dcard .dtitle{color:var(--black); font-weight:700; font-size:1.3em; line-height:1.9; margin:6px 0 0}
+/* Durood card */
+.dcard{padding:0; overflow:hidden; text-align:center; margin-top:0}
+.dcard .dimg{width:100%; aspect-ratio:16/9; object-fit:cover}
+.dcard .dbody{padding:16px 20px 22px}
+.dcard .dlabel{display:inline-block; background:var(--saffron-tint); border:1px solid var(--saffron-tint-2); color:#5a2d0c; border-radius:999px; padding:0 14px; font-size:.82em; line-height:2.1}
+.dcard .dtitle{color:var(--black); font-weight:700; font-size:1.35em; line-height:1.9; margin:6px 0 0}
 .dcard .dcall{color:var(--saffron-deep); font-size:.92em; line-height:1.9}
-.dcard .dar{font-family:'Noto Naskh Arabic','Amiri',serif; direction:rtl; font-size:1.32em; line-height:2.15; color:var(--night);
-  background:#fdf5ec; border:1px solid #f0d2b4; border-radius:14px; padding:12px 12px; margin:12px 0 10px; overflow-wrap:break-word}
+.dcard .dar{font-family:var(--f-ar); direction:rtl; font-size:1.32em; line-height:2.15; color:var(--night); background:var(--ivory); border:1px solid var(--line-2); border-radius:16px; padding:14px; margin:14px 0 10px; overflow-wrap:break-word}
 .dcard .dtr{font-size:.98em; line-height:2.2; color:var(--ink); margin:4px 0}
-html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.65}
-.dcard .dref{display:inline-block; margin-top:8px; color:var(--saffron-deep); font-weight:700; font-size:.88em; line-height:2; border-top:1px dashed var(--line); padding-top:4px}
-.dcard .dref bdi{font-family:system-ui,sans-serif}
-.dcard .dshare{margin-top:12px; border:none; cursor:pointer; font-family:inherit}
+html[lang="en"] .dcard .dtr.en{font-family:var(--f-lat); line-height:1.7}
+.dcard .dref{display:inline-block; margin-top:8px; color:var(--saffron-deep); font-weight:700; font-size:.88em; line-height:2; border-top:1px dashed var(--line-2); padding-top:4px}
+.dcard .dref bdi{font-family:var(--f-lat)}
+.dcard .dshare{margin-top:14px}
 .dcard .dnote{color:var(--muted); font-size:.78em; margin-top:6px; line-height:1.8}
+
+/* About App */
 .dev{display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px}
-.dev .ph{width:132px; height:132px; border-radius:50%; object-fit:cover; border:4px solid var(--saffron); box-shadow:0 4px 16px rgba(0,0,0,.18)}
-.dev .by{color:var(--muted); font-size:.9em; margin-top:8px}
+.dev .ph{width:132px; height:132px; border-radius:50%; object-fit:cover; box-shadow:0 0 0 4px var(--paper), 0 0 0 6px var(--saffron), var(--sh-2)}
+.dev .by{color:var(--muted); font-size:.9em; margin-top:10px}
 .dev .nm{color:var(--black); font-weight:700; font-size:1.25em; line-height:1.9}
 .dev .co{font-weight:700; color:var(--saffron-deep); font-size:1.02em}
 .dev .pl{color:var(--muted); font-size:.92em}
 .dev .q{color:var(--ink); font-size:.92em; margin-top:8px}
-.devbtns{display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:12px auto 0; width:100%; max-width:340px}
-.devbtns a{display:flex; align-items:center; gap:8px; justify-content:center; 
-  text-decoration:none; border-radius:14px; padding:6px 14px; font-weight:700; line-height:1.9; border:1px solid var(--line); box-shadow:var(--shadow)}
+.devbtns{display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:14px auto 0; width:100%; max-width:340px}
+.devbtns a{display:flex; align-items:center; gap:8px; justify-content:center; text-decoration:none; border-radius:14px; padding:6px 14px; font-weight:700; line-height:1.9; border:1px solid var(--line); box-shadow:var(--sh-1); transition:transform .15s, box-shadow .15s}
+.devbtns a:hover{transform:translateY(-1px); box-shadow:var(--sh-2)}
 .devbtns a svg{width:20px; height:20px; flex:none}
-.devbtns .wa{background:#141414; color:#fff; border-color:#000}
-.devbtns .em{background:#fff; color:#141414; border-color:#141414}
-.devbtns .wb{background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; border-color:#a9561a}
+.devbtns .wa{background:var(--black); color:#fff; border-color:#000}
+.devbtns .em{background:var(--paper); color:var(--black); border-color:var(--black)}
+.devbtns .wb{background:var(--saffron); color:#111; border-color:var(--saffron-deep)}
 .devbtns small{display:block; font-weight:400; font-size:.78em; opacity:.9; overflow-wrap:anywhere; line-height:1.5}
 .devbtns a>span{min-width:0; text-align:center}
+
+/* Footer */
+footer{background:var(--night); color:#cfc9c1; border-top:3px solid var(--saffron)}
+.ft-grid{display:grid; gap:26px; padding-block:36px 22px}
+.ft-brand{display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px}
+.ft-brand img{width:58px; height:58px; border-radius:50%; background:#fff; padding:2px; box-shadow:0 0 0 2px var(--saffron)}
+.ft-brand .ft{font-size:1.1em; font-weight:700; color:#fff; line-height:2; margin-top:6px}
+.ft-brand .fl{font-size:.9em; color:var(--saffron-lt); line-height:2}
+.ft-col h3{margin:0 0 6px; font-size:.95em; color:#fff; line-height:2; text-align:center}
+.ft-col ul{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:4px 16px}
+.ft-col a{color:#cfc9c1; text-decoration:none; font-size:.9em; line-height:2}
+.ft-col a:hover{color:var(--saffron-lt)}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.08); padding-block:14px 20px; text-align:center; font-size:.82em; color:#8f8880; line-height:2}
+
+/* Views: hero only on home */
+body[data-view="panel"] .hero{display:none}
+
+/* ===== Responsive ===== */
+@media(max-width:599px){ .tile:last-child:nth-child(odd){grid-column:1/-1} }
+@media(max-width:560px){ .baani{flex-direction:column; align-items:center; text-align:center} .baani img{max-width:70%} }
+@media(max-width:360px){ .brand-en{display:none} }
+@media(min-width:640px){
+  .tiles{grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+  .people{grid-template-columns:1fr 1fr}
+  .hero-in{padding:40px 24px 54px}
+  .drawer ul{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:900px){
+  .dcard{display:grid; grid-template-columns:1fr 1fr; align-items:stretch; text-align:start}
+  .dcard .dimg{height:100%; aspect-ratio:auto}
+  .dcard .dbody{padding:26px 30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center}
+}
+@media(min-width:1024px){
+  body{font-size:18px}
+  html[lang="en"] body{font-size:16.5px}
+  .tiles{grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px}
+  .tile{min-height:136px}
+  .menu-btn,.drawer,.drawer.open{display:none}
+  .nav-links{display:flex}
+  .nav .nav-cta{display:inline-flex; min-height:40px; padding:2px 18px; font-size:14px; border-radius:12px; margin-inline-start:6px}
+  .hero-in{padding:56px 24px 70px}
+  .ft-grid{grid-template-columns:1.2fr 1fr 1fr; align-items:start}
+  .ft-brand{align-items:flex-start; text-align:start}
+  .ft-col h3{text-align:start}
+  .ft-col ul{justify-content:flex-start}
+}
+
 </style>
 </head>
-<body>
+<body data-view="home">
+<a class="skip" href="#content">مواد پر جائیں</a>
 
-<header class="hero">
-  <div class="langsw" id="langsw" data-noi><button data-l="ur" lang="ur">اردو</button><button data-l="en" lang="en">English</button><button data-l="ar" lang="ar">العربية</button><button data-l="sd" lang="sd">سنڌي</button><button data-l="rg" lang="ur">رانگڑی</button></div>
-  <img class="logo" src="logo.png" alt="تحریکِ اتباعِ سنت پاکستان کا لوگو">
-  <h1>تحریکِ اتباعِ سنت پاکستان</h1>
-  <div class="en lat">Tehreek Ittiba-e-Sunnat Pakistan</div>
-  <div class="tagline">عبادت <i></i> اطاعت <i></i> خدمت</div>
-  <div class="cta">
-    <a class="btn" href="ittiba-e-sunnat.apk" download>ایپ ڈاؤن لوڈ کریں</a>
-    <p class="meta"><span class="lat">Android 7.0+</span></p>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="#home" aria-label="Home">
+      <img src="logo.png" alt="" width="40" height="40">
+      <span class="brand-txt"><span class="brand-ur ur-keep" data-noi>تحریکِ اتباعِ سنت پاکستان</span><span class="brand-en">Ittiba-e-Sunnat</span></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home">صفحۂ اول</a></li>
+      <li><a href="#taaruf">تحریک کا تعارف</a></li>
+      <li><a href="#baani">بانی و قائد کا تعارف</a></li>
+      <li><a href="#bayanat">بیانات</a></li>
+      <li><a href="#atiyat">عطیات</a></li>
+      <li><a href="#rabta">رابطہ</a></li>
+      <li><a href="#about">ایپ کے بارے میں</a></li>
+    </ul>
+    <a class="btn btn-primary nav-cta" href="ittiba-e-sunnat.apk" download>ایپ ڈاؤن لوڈ کریں</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu">
+      <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </nav>
+  <div class="drawer" id="drawer">
+    <ul class="wrap">
+      <li><a href="#home">صفحۂ اول</a></li>
+      <li><a href="#taaruf">تحریک کا تعارف</a></li>
+      <li><a href="#maqasid">تحریک کے مقاصد</a></li>
+      <li><a href="#baani">بانی و قائد کا تعارف</a></li>
+      <li><a href="#markaz">مرکزی مرکز</a></li>
+      <li><a href="#bayanat">بیانات</a></li>
+      <li><a href="#kutub">کتب</a></li>
+      <li><a href="#atiyat">عطیات</a></li>
+      <li><a href="#rabta">رابطہ</a></li>
+      <li><a href="#about">ایپ کے بارے میں</a></li>
+      <li><a class="dl" href="ittiba-e-sunnat.apk" download>ایپ ڈاؤن لوڈ کریں</a></li>
+    </ul>
   </div>
 </header>
 
-<main>
+<main id="content">
+<section class="hero" aria-labelledby="heroTitle">
+  <div class="hero-in">
+    <div class="langsw" id="langsw" data-noi role="group" aria-label="Language"><button type="button" data-l="ur" lang="ur">اردو</button><button type="button" data-l="en" lang="en">English</button><button type="button" data-l="ar" lang="ar">العربية</button><button type="button" data-l="sd" lang="sd">سنڌي</button><button type="button" data-l="rg" lang="ur">رانگڑی</button></div>
+    <img class="logo" src="logo.png" alt="تحریکِ اتباعِ سنت پاکستان کا لوگو" width="120" height="120">
+    <h1 id="heroTitle">تحریکِ اتباعِ سنت پاکستان</h1>
+    <div class="en lat">Tehreek Ittiba-e-Sunnat Pakistan</div>
+    <div class="tagline">عبادت <i></i> اطاعت <i></i> خدمت</div>
+    <p class="lead">ایک غیر سیاسی اصلاحی تحریک — شریعت اور سنت کی طرف دعوت</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="ittiba-e-sunnat.apk" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>ایپ ڈاؤن لوڈ کریں</span></a>
+      <a class="btn btn-ghost" href="#taaruf">تحریک کا تعارف</a>
+    </div>
+    <p class="meta"><span class="lat">Android 7.0+</span></p>
+  </div>
+</section>
+
+<div class="wrap content">
   <!-- HOME: tab tiles (order follows Dr Asif's sheet; no numbers shown) -->
   <section id="home" class="panel on">
     <div class="card dcard" id="durood">
@@ -176,10 +312,11 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
         <div class="dar" id="dAr" lang="ar" data-noi></div>
         <div class="dtr" id="dTr" data-noi></div>
         <div class="dref" id="dRef" data-noi></div><br>
-        <button class="btn dshare" id="dShare" type="button">اسٹیٹس کے لیے شیئر کریں</button>
+        <button class="btn btn-primary dshare" id="dShare" type="button">اسٹیٹس کے لیے شیئر کریں</button>
         <div class="dnote" id="dNote" data-noi></div>
       </div>
     </div>
+    <div class="sec-head"><svg class="orn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="6" width="12" height="12"/><rect x="6" y="6" width="12" height="12" transform="rotate(45 12 12)"/></svg><h2>تحریک کے شعبے</h2></div>
     <div class="tiles" id="tiles"></div>
   </section>
 
@@ -292,13 +429,29 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
       </div>
     </div>
   </section>
+</div>
 </main>
 
 <footer>
-  <div class="ft">تحریکِ اتباعِ سنت پاکستان</div>
-  <div class="fl">عبادت ۔ اطاعت ۔ خدمت</div>
-  <div class="fl" style="margin-top:8px">تیار کردہ — <span class="lat">Jilan Apps Official</span></div>
-  <div class="fl lat" style="margin-top:6px">© 2026 Tehreek Ittiba-e-Sunnat Pakistan — All Rights Reserved</div>
+  <div class="wrap ft-grid">
+    <div class="ft-brand">
+      <img src="logo.png" alt="" width="58" height="58">
+      <div class="ft">تحریکِ اتباعِ سنت پاکستان</div>
+      <div class="fl">عبادت ۔ اطاعت ۔ خدمت</div>
+    </div>
+    <nav class="ft-col" aria-label="Footer">
+      <h3>فہرست</h3>
+      <ul><li><a href="#taaruf">تحریک کا تعارف</a></li><li><a href="#baani">بانی و قائد کا تعارف</a></li><li><a href="#bayanat">بیانات</a></li><li><a href="#kutub">کتب</a></li><li><a href="#markaz">مرکزی مرکز</a></li></ul>
+    </nav>
+    <div class="ft-col">
+      <h3>رابطہ</h3>
+      <ul><li><a href="#atiyat">عطیات</a></li><li><a href="#rabta">رابطہ</a></li><li><a href="#about">ایپ کے بارے میں</a></li><li><a href="ittiba-e-sunnat.apk" download>ایپ ڈاؤن لوڈ کریں</a></li></ul>
+    </div>
+  </div>
+  <div class="wrap ft-bottom">
+    <div>تیار کردہ — <span class="lat">Jilan Apps Official</span></div>
+    <div class="lat">© 2026 Tehreek Ittiba-e-Sunnat Pakistan — All Rights Reserved</div>
+  </div>
 </footer>
 
 <script>
@@ -323,7 +476,7 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
     heart:'<path d="M12 20s-7.5-4.6-7.5-10A4 4 0 0 1 12 7.6 4 4 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>',
     phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
   };
-  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="#f3a24f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ICON[k]+'</svg>';}
+  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ICON[k]+'</svg>';}
   var TABS=[['taaruf','star'],['maqasid','target'],['baani','user'],['murshideen','moon'],['mubalighin','users'],
     ['markaz','dome'],['marakiz','mosque'],['bayanat','mic'],['kutub','book'],['gallery','image'],['bait','hand'],
     ['mamulat','clock'],['shajra','tree'],['azkar','beads'],['programs','cal'],['atiyat','heart'],['rabta','phone'],['about','info']];
@@ -347,11 +500,20 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
     p.insertBefore(b,p.firstChild);
   });
 
+  var menuBtn=document.getElementById('menuBtn'), drawer=document.getElementById('drawer');
+  function setMenu(open){ menuBtn.setAttribute('aria-expanded', open?'true':'false'); drawer.classList.toggle('open', open); }
+  menuBtn.addEventListener('click',function(){ setMenu(menuBtn.getAttribute('aria-expanded')!=='true'); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && menuBtn.getAttribute('aria-expanded')==='true'){ setMenu(false); menuBtn.focus(); } });
+  drawer.addEventListener('click',function(e){ if(e.target.closest('a')) setMenu(false); });
+
   function show(){
     var id=(location.hash||'#home').slice(1);
     if(!document.getElementById(id)||!document.getElementById(id).classList.contains('panel')) id='home';
     Array.prototype.forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.toggle('on',p.id===id);});
-    if(id!=='home'){ document.querySelector('main').scrollIntoView({behavior:'smooth'}); }
+    document.body.setAttribute('data-view', id==='home'?'home':'panel');
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-links a, .drawer a'),function(a){
+      if(a.getAttribute('href')==='#'+id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    if(id!=='home'){ window.scrollTo({top:0, behavior:'auto'}); var h=document.querySelector('#'+id+' h2'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } }
   }
   window.addEventListener('hashchange',show); show();
 })();
@@ -364,6 +526,11 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
   var LANGS = ['ur','en','ar','sd','rg'];
   /* key = original Urdu UI text. Rangri (rg) labels are a draft for the user to correct. */
   var T = {
+    'صفحۂ اول':{en:'Home',ar:'الرئيسية',sd:'پهريون صفحو',rg:'پہلا صفحہ'},
+    'مواد پر جائیں':{en:'Skip to content',ar:'انتقل إلى المحتوى',sd:'مواد ڏانهن وڃو',rg:'مواد پہ جاؤ'},
+    'تحریک کے شعبے':{en:'Sections',ar:'الأقسام',sd:'تحريڪ جا شعبا',rg:'تحریک کے حصے'},
+    'فہرست':{en:'Contents',ar:'المحتويات',sd:'فهرست',rg:'فہرست'},
+    'ایک غیر سیاسی اصلاحی تحریک — شریعت اور سنت کی طرف دعوت':{en:'A non-political reformative movement — an invitation to the Shariah and the Sunnah',ar:'حركة إصلاحية غير سياسية — دعوة إلى الشريعة والسنة',sd:'هڪ غير سياسي اصلاحي تحريڪ — شريعت ۽ سنت ڏانهن دعوت',rg:'اک غیر سیاسی اصلاحی تحریک — شریعت اور سنت آلے پاسے دعوت'},
     'تحریک کا تعارف':{en:'About the Tehreek',ar:'التعريف بالحركة',sd:'تحريڪ جو تعارف',rg:'تحریک کا تعارف'},
     'تحریک کے مقاصد':{en:'Aims of the Tehreek',ar:'أهداف الحركة',sd:'تحريڪ جا مقصد',rg:'تحریک کے مقصد'},
     'بانی و قائد کا تعارف':{en:'Founder & Leader',ar:'التعريف بالمؤسس والقائد',sd:'باني ۽ اڳواڻ جو تعارف',rg:'بانی اور قائد کا تعارف'},
@@ -424,7 +591,7 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
   function x(k){ return X[k][LANG] || X[k].ur; }
 
   /* Urdu body text that is not translated keeps RTL + Nastaliq in every language */
-  ['.taaruf p','.taaruf .closing','.chain .node','.chip','.person .pn','#taaruf h3','.hero h1','footer .ft']
+  ['.taaruf p','.taaruf .closing','.chain .node','.chip','.person .pn','#taaruf h3','.hero h1','footer .ft','.brand-ur']
     .forEach(function(sel){ Array.prototype.forEach.call(document.querySelectorAll(sel), function(e){ e.setAttribute('dir','rtl'); e.classList.add('ur-keep'); }); });
 
   function applyLang(){
