@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#064e3b">
+<meta name="theme-color" content="#111111">
 <title>تحریکِ اتباعِ سنت پاکستان — Tehreek Ittiba-e-Sunnat Pakistan</title>
 <meta name="description" content="تحریکِ اتباعِ سنت پاکستان — عبادت، اطاعت، خدمت">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,54 +11,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --emerald:#065f46; --forest:#064e3b; --deep:#022c22;
-  --gold:#c9a227; --gold-deep:#9a7b14;
-  --cream:#fdf9ef; --paper:#fffdf6; --card:#ffffff;
-  --ink:#1e2a23; --muted:#5d6f64; --line:#e7e0cd;
-  --shadow:0 2px 12px rgba(2,44,34,.08);
-  --shadow-lg:0 8px 28px rgba(2,44,34,.16);
+  /* Logo palette only: black, white, saffron (2026-11-25) */
+  --coal:#2a2a2a; --black:#141414; --night:#0a0a0a;
+  --saffron:#d0701f; --saffron-deep:#a9561a; --saffron-lt:#f3a24f;
+  --cream:#f7f5f2; --paper:#ffffff; --card:#ffffff;
+  --ink:#161616; --muted:#5c5c5c; --line:#e6e1dc;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 28px rgba(0,0,0,.16);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0; background:var(--cream); color:var(--ink);
   font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic',serif;
   font-size:17px; line-height:2.15; overflow-x:hidden}
-a{color:var(--emerald)}
+a{color:var(--saffron-deep)}
 .lat{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; direction:ltr; unicode-bidi:isolate}
 
 /* Hero */
 .hero{
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cpath d='M38 10l6 22 22 6-22 6-6 22-6-22-22-6 22-6z' fill='none' stroke='%23ffffff' stroke-opacity='0.07'/%3E%3C/svg%3E"),
-    radial-gradient(700px 320px at 50% -80px, rgba(201,162,39,.35), transparent 70%),
-    linear-gradient(168deg, var(--deep), var(--forest) 55%, var(--emerald));
-  color:#fff; text-align:center; padding:34px 16px 30px; border-bottom:4px solid var(--gold);
+    radial-gradient(700px 320px at 50% -80px, rgba(208,112,31,.35), transparent 70%),
+    linear-gradient(168deg, var(--night), var(--black) 55%, var(--coal));
+  color:#fff; text-align:center; padding:34px 16px 30px; border-bottom:4px solid var(--saffron);
 }
-.hero .logo{width:112px; height:112px; border-radius:50%; background:#fff; padding:6px; border:4px solid var(--gold); box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.hero .logo{width:112px; height:112px; border-radius:50%; background:#fff; padding:6px; border:4px solid var(--saffron); box-shadow:0 6px 24px rgba(0,0,0,.45)}
 .hero h1{margin:14px 0 0; font-size:1.75em; line-height:1.9; font-weight:700}
-.hero .en{color:#e8dcb0; font-size:.78em; letter-spacing:.12em; text-transform:uppercase; margin-top:2px}
+.hero .en{color:#f0c8a0; font-size:.78em; letter-spacing:.12em; text-transform:uppercase; margin-top:2px}
 .tagline{display:inline-flex; align-items:center; gap:12px; margin-top:12px; padding:2px 22px;
-  border:1px solid rgba(201,162,39,.7); border-radius:999px; background:rgba(0,0,0,.18);
-  color:#ffe9a8; font-weight:700; font-size:1.05em; line-height:2.1}
-.tagline i{width:6px; height:6px; background:var(--gold); transform:rotate(45deg); display:inline-block}
+  border:1px solid rgba(208,112,31,.7); border-radius:999px; background:rgba(0,0,0,.18);
+  color:#f3a24f; font-weight:700; font-size:1.05em; line-height:2.1}
+.tagline i{width:6px; height:6px; background:var(--saffron); transform:rotate(45deg); display:inline-block}
 .cta{margin-top:20px}
-.btn{display:inline-block; background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; text-decoration:none;
+.btn{display:inline-block; background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; text-decoration:none;
   font-weight:700; font-size:1.05em; line-height:2; padding:8px 28px; border-radius:14px;
-  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a8841c}
+  box-shadow:0 5px 16px rgba(0,0,0,.3); border:1px solid #a9561a}
 .btn:active{transform:scale(.97)}
-.meta{color:#cfe3d6; font-size:.82em; margin:8px 0 0; line-height:1.9}
+.meta{color:#d9d9d9; font-size:.82em; margin:8px 0 0; line-height:1.9}
 
 main{max-width:980px; margin:0 auto; padding:22px 14px 50px}
 
 /* Tab tiles */
 .tiles{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 .tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-  min-height:118px; padding:14px 8px 10px; text-align:center; text-decoration:none; color:var(--forest);
+  min-height:118px; padding:14px 8px 10px; text-align:center; text-decoration:none; color:var(--black);
   background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow);
-  border-top:4px solid var(--gold); transition:transform .15s, box-shadow .15s, border-color .15s; cursor:pointer}
-.tile:hover,.tile:active{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--gold)}
+  border-top:4px solid var(--saffron); transition:transform .15s, box-shadow .15s, border-color .15s; cursor:pointer}
+.tile:hover,.tile:active{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--saffron)}
 .tile .ic{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(160deg,var(--forest),var(--emerald)); box-shadow:0 3px 10px rgba(2,44,34,.25)}
+  background:linear-gradient(160deg,var(--black),var(--coal)); box-shadow:0 3px 10px rgba(0,0,0,.25)}
 .tile .ic svg{width:22px; height:22px}
 .tile .t{font-weight:700; font-size:.98em; line-height:1.85}
 
@@ -66,42 +67,43 @@ main{max-width:980px; margin:0 auto; padding:22px 14px 50px}
 .panel{display:none; animation:fade .25s ease}
 .panel.on{display:block}
 @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-.back{display:inline-flex; align-items:center; gap:8px; background:var(--forest); color:#fff; text-decoration:none;
+.back{display:inline-flex; align-items:center; gap:8px; background:var(--black); color:#fff; text-decoration:none;
   border-radius:999px; padding:2px 18px; font-size:.92em; line-height:2.1; box-shadow:var(--shadow); cursor:pointer; border:none; font-family:inherit}
-.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 18px; margin:14px 0; box-shadow:var(--shadow); border-top:5px solid var(--gold)}
-.card h2{color:var(--forest); margin:0 0 4px; font-size:1.4em; line-height:1.9; text-align:center}
-.card h2 + .rule{width:56px; height:3px; background:var(--gold); border-radius:2px; margin:0 auto 14px}
-.card h3{color:var(--forest); margin:16px 0 2px; font-size:1.1em; line-height:1.9}
+.card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 18px; margin:14px 0; box-shadow:var(--shadow); border-top:5px solid var(--saffron)}
+.card h2{color:var(--black); margin:0 0 4px; font-size:1.4em; line-height:1.9; text-align:center}
+.card h2 + .rule{width:56px; height:3px; background:var(--saffron); border-radius:2px; margin:0 auto 14px}
+.card h3{color:var(--black); margin:16px 0 2px; font-size:1.1em; line-height:1.9}
 .card p{margin:6px 0}
 .taaruf p{font-size:1.06em; line-height:2.45; text-align:right}
-.taaruf .closing{margin-top:14px; padding:14px 16px; background:#fbf3d9; border:1px solid #e8d5a0; border-radius:14px; text-align:center; font-weight:600; color:#4a3b06}
+.taaruf .closing{margin-top:14px; padding:14px 16px; background:#fdf1e6; border:1px solid #f0d2b4; border-radius:14px; text-align:center; font-weight:600; color:#6b3410}
 .muted{color:var(--muted); font-size:.92em}
 .soon{text-align:center; padding:26px 10px 18px}
 .soon .orn{width:64px; height:64px; margin:0 auto 6px}
-.soon b{display:block; color:var(--forest); font-size:1.2em}
+.soon b{display:block; color:var(--black); font-size:1.2em}
 .soon span{color:var(--muted); font-size:.92em}
+.don-line{text-align:center; font-size:1.02em; line-height:2.3; margin:4px 0 0; padding:12px 14px; background:#fdf1e6; border:1px solid #f0d2b4; border-radius:14px; color:#6b3410; font-weight:600}
 .baani{display:flex; gap:18px; align-items:flex-start}
-.baani img{width:160px; max-width:42%; border-radius:16px; border:3px solid var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.18); flex:none}
+.baani img{width:160px; max-width:42%; border-radius:16px; border:3px solid var(--saffron); box-shadow:0 4px 16px rgba(0,0,0,.18); flex:none}
 .deg{color:var(--muted); font-size:.92em}
 .chain{display:flex; flex-direction:column; align-items:center; gap:4px; margin:6px 0}
-.chain .node{width:100%; max-width:420px; text-align:center; background:#f3f8f4; border:1px solid #cfdfd2; border-radius:14px; padding:8px 12px; color:var(--forest); font-weight:700; line-height:2}
-.chain .arrow{color:var(--gold-deep); font-size:1.1em; line-height:1}
+.chain .node{width:100%; max-width:420px; text-align:center; background:#fdf5ec; border:1px solid #f0d2b4; border-radius:14px; padding:8px 12px; color:var(--black); font-weight:700; line-height:2}
+.chain .arrow{color:var(--saffron-deep); font-size:1.1em; line-height:1}
 .people{display:grid; grid-template-columns:1fr; gap:10px}
-.person{display:flex; align-items:center; gap:12px; background:#fafcf9; border:1px solid var(--line); border-radius:14px; padding:10px 14px}
-.person .av{width:44px; height:44px; border-radius:50%; flex:none; background:linear-gradient(160deg,var(--forest),var(--emerald)); display:flex; align-items:center; justify-content:center}
+.person{display:flex; align-items:center; gap:12px; background:#fbfaf8; border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+.person .av{width:44px; height:44px; border-radius:50%; flex:none; background:linear-gradient(160deg,var(--black),var(--coal)); display:flex; align-items:center; justify-content:center}
 .person .av svg{width:22px; height:22px}
-.person .pn{font-weight:700; color:var(--forest); line-height:1.9}
+.person .pn{font-weight:700; color:var(--black); line-height:1.9}
 .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
-.chip{background:#eef5ef; border:1px solid #cfdfd2; color:var(--forest); border-radius:999px; padding:2px 16px; font-size:.95em; line-height:2.1}
+.chip{background:#fdf1e6; border:1px solid #f0d2b4; color:var(--black); border-radius:999px; padding:2px 16px; font-size:.95em; line-height:2.1}
 .bayan{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; text-decoration:none; color:var(--ink); box-shadow:var(--shadow)}
 .bayan>div{min-width:0}
-.bayan .play{flex:none; width:42px; height:42px; border-radius:50%; background:var(--emerald); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
+.bayan .play{flex:none; width:42px; height:42px; border-radius:50%; background:var(--saffron); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
 .bayan .bt{font-weight:700; font-size:.95em; line-height:1.9; overflow-wrap:break-word; word-break:break-word}
 .bayan .bm{color:var(--muted); font-size:.8em; line-height:1.8}
 
-footer{background:var(--deep); color:#cfe3d6; padding:28px 16px 22px; text-align:center}
-footer .ft{font-size:1.1em; font-weight:700; color:#ffe9a8; line-height:2}
-footer .fl{font-size:.85em; color:#9db8a8; line-height:2}
+footer{background:var(--night); color:#d9d9d9; padding:28px 16px 22px; text-align:center}
+footer .ft{font-size:1.1em; font-weight:700; color:#f3a24f; line-height:2}
+footer .fl{font-size:.85em; color:#9a9a9a; line-height:2}
 
 @media(max-width:599px){ .tile:last-child:nth-child(odd){grid-column:1 / -1} }
 @media(min-width:600px){ .tiles{grid-template-columns:repeat(3,1fr)} .people{grid-template-columns:1fr 1fr} }
@@ -111,39 +113,39 @@ footer .fl{font-size:.85em; color:#9db8a8; line-height:2}
 /* ===== preview additions: language switcher, Durood-e-Pak, About App ===== */
 .langsw{display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:0 auto 16px; max-width:520px}
 .langsw button{font-family:'Noto Naskh Arabic',system-ui,sans-serif; font-size:13px; line-height:1.6; padding:3px 12px;
-  border-radius:999px; border:1px solid rgba(201,162,39,.65); background:rgba(0,0,0,.2); color:#ffe9a8; cursor:pointer}
-.langsw button.on{background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; font-weight:700}
+  border-radius:999px; border:1px solid rgba(208,112,31,.65); background:rgba(0,0,0,.2); color:#f3a24f; cursor:pointer}
+.langsw button.on{background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; font-weight:700}
 html[lang="ar"] body, html[lang="sd"] body{font-family:'Noto Naskh Arabic','Noto Nastaliq Urdu',serif; line-height:1.95}
 html[lang="en"] body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif; line-height:1.7}
 .ur-keep{font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif; line-height:2.2}
-.dcard{padding:0 0 16px; overflow:hidden; text-align:center; border-top:5px solid var(--gold)}
+.dcard{padding:0 0 16px; overflow:hidden; text-align:center; border-top:5px solid var(--saffron)}
 .dcard .dimg{display:block; width:100%; aspect-ratio:16/9; object-fit:cover}
 .dcard .dbody{padding:12px 16px 0}
-.dcard .dlabel{display:inline-block; background:#eef5ef; border:1px solid #cfdfd2; color:var(--forest); border-radius:999px; padding:0 14px; font-size:.82em; line-height:2.1}
-.dcard .dtitle{color:var(--forest); font-weight:700; font-size:1.3em; line-height:1.9; margin:6px 0 0}
-.dcard .dcall{color:var(--gold-deep); font-size:.92em; line-height:1.9}
-.dcard .dar{font-family:'Noto Naskh Arabic','Amiri',serif; direction:rtl; font-size:1.32em; line-height:2.15; color:var(--deep);
-  background:#fbf6e6; border:1px solid #e8d5a0; border-radius:14px; padding:12px 12px; margin:12px 0 10px; overflow-wrap:break-word}
+.dcard .dlabel{display:inline-block; background:#fdf1e6; border:1px solid #f0d2b4; color:var(--black); border-radius:999px; padding:0 14px; font-size:.82em; line-height:2.1}
+.dcard .dtitle{color:var(--black); font-weight:700; font-size:1.3em; line-height:1.9; margin:6px 0 0}
+.dcard .dcall{color:var(--saffron-deep); font-size:.92em; line-height:1.9}
+.dcard .dar{font-family:'Noto Naskh Arabic','Amiri',serif; direction:rtl; font-size:1.32em; line-height:2.15; color:var(--night);
+  background:#fdf5ec; border:1px solid #f0d2b4; border-radius:14px; padding:12px 12px; margin:12px 0 10px; overflow-wrap:break-word}
 .dcard .dtr{font-size:.98em; line-height:2.2; color:var(--ink); margin:4px 0}
 html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.65}
-.dcard .dref{display:inline-block; margin-top:8px; color:var(--emerald); font-weight:700; font-size:.88em; line-height:2; border-top:1px dashed var(--line); padding-top:4px}
+.dcard .dref{display:inline-block; margin-top:8px; color:var(--saffron-deep); font-weight:700; font-size:.88em; line-height:2; border-top:1px dashed var(--line); padding-top:4px}
 .dcard .dref bdi{font-family:system-ui,sans-serif}
 .dcard .dshare{margin-top:12px; border:none; cursor:pointer; font-family:inherit}
 .dcard .dnote{color:var(--muted); font-size:.78em; margin-top:6px; line-height:1.8}
 .dev{display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px}
-.dev .ph{width:132px; height:132px; border-radius:50%; object-fit:cover; border:4px solid var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.dev .ph{width:132px; height:132px; border-radius:50%; object-fit:cover; border:4px solid var(--saffron); box-shadow:0 4px 16px rgba(0,0,0,.18)}
 .dev .by{color:var(--muted); font-size:.9em; margin-top:8px}
-.dev .nm{color:var(--forest); font-weight:700; font-size:1.25em; line-height:1.9}
-.dev .co{font-weight:700; color:var(--gold-deep); font-size:1.02em}
+.dev .nm{color:var(--black); font-weight:700; font-size:1.25em; line-height:1.9}
+.dev .co{font-weight:700; color:var(--saffron-deep); font-size:1.02em}
 .dev .pl{color:var(--muted); font-size:.92em}
 .dev .q{color:var(--ink); font-size:.92em; margin-top:8px}
 .devbtns{display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:12px auto 0; width:100%; max-width:340px}
 .devbtns a{display:flex; align-items:center; gap:8px; justify-content:center; 
   text-decoration:none; border-radius:14px; padding:6px 14px; font-weight:700; line-height:1.9; border:1px solid var(--line); box-shadow:var(--shadow)}
 .devbtns a svg{width:20px; height:20px; flex:none}
-.devbtns .wa{background:#1f9d55; color:#fff; border-color:#17803f}
-.devbtns .em{background:var(--forest); color:#fff}
-.devbtns .wb{background:linear-gradient(180deg,#e3c14f,#c9a227); color:#3d2f00; border-color:#a8841c}
+.devbtns .wa{background:#141414; color:#fff; border-color:#000}
+.devbtns .em{background:#fff; color:#141414; border-color:#141414}
+.devbtns .wb{background:linear-gradient(180deg,#e58a3a,#d0701f); color:#111111; border-color:#a9561a}
 .devbtns small{display:block; font-weight:400; font-size:.78em; opacity:.9; overflow-wrap:anywhere; line-height:1.5}
 .devbtns a>span{min-width:0; text-align:center}
 </style>
@@ -230,6 +232,9 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
     </div>
   </section>
 
+  <!-- Main Markaz (details pending from Tehreek) -->
+  <section class="panel" id="markaz" data-title="مرکزی مرکز"><div class="card"><h2>مرکزی مرکز</h2><div class="rule"></div><div class="soon-slot" data-msg="مرکزی مرکز کی تفصیل (پتہ، رابطہ، تصویر) جلد شامل کی جائے گی، ان شاء اللہ۔"></div></div></section>
+
   <!-- 6 -->
   <section class="panel" id="marakiz" data-title="ذیلی مراکز و مدارس">
     <div class="card">
@@ -267,6 +272,7 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
   <section class="panel" id="shajra" data-title="شجرۂ طریقت"><div class="card"><h2>شجرۂ طریقت</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
   <section class="panel" id="azkar" data-title="اذکارِ مسنونہ"><div class="card"><h2>اذکارِ مسنونہ</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
   <section class="panel" id="programs" data-title="سالانہ پروگرامز"><div class="card"><h2>سالانہ پروگرامز</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
+  <section class="panel" id="atiyat" data-title="عطیات"><div class="card"><h2>عطیات</h2><div class="rule"></div><p class="don-line">تحریک کی دینی و اصلاحی خدمات میں تعاون کے خواہش مند احباب کے لیے — اللہ تعالیٰ قبول فرمائے۔</p><div class="soon-slot" data-msg="بینک اکاؤنٹ / جاز کیش / ایزی پیسہ کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔"></div></div></section>
   <section class="panel" id="rabta" data-title="رابطہ"><div class="card"><h2>رابطہ</h2><div class="rule"></div><div class="soon-slot"></div></div></section>
   <section class="panel" id="about" data-title="ایپ کے بارے میں">
     <div class="card">
@@ -313,12 +319,14 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
     beads:'<circle cx="12" cy="12" r="7.5" stroke-dasharray="1.5 3.2"/><path d="M12 19.5v2.5"/>',
     cal:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.4"/>',
+    dome:'<path d="M3 21h18"/><path d="M6 21v-8h12v8"/><path d="M7.5 13a4.5 4.5 0 0 1 9 0"/><path d="M12 5.5v3"/><path d="M3.5 21v-9M20.5 21v-9"/><path d="M10.5 21v-3a1.5 1.5 0 0 1 3 0v3"/>',
+    heart:'<path d="M12 20s-7.5-4.6-7.5-10A4 4 0 0 1 12 7.6 4 4 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>',
     phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
   };
-  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="#ffe9a8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ICON[k]+'</svg>';}
+  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="#f3a24f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ICON[k]+'</svg>';}
   var TABS=[['taaruf','star'],['maqasid','target'],['baani','user'],['murshideen','moon'],['mubalighin','users'],
-    ['marakiz','mosque'],['bayanat','mic'],['kutub','book'],['gallery','image'],['bait','hand'],
-    ['mamulat','clock'],['shajra','tree'],['azkar','beads'],['programs','cal'],['rabta','phone'],['about','info']];
+    ['markaz','dome'],['marakiz','mosque'],['bayanat','mic'],['kutub','book'],['gallery','image'],['bait','hand'],
+    ['mamulat','clock'],['shajra','tree'],['azkar','beads'],['programs','cal'],['atiyat','heart'],['rabta','phone'],['about','info']];
   var tiles=document.getElementById('tiles'), html='';
   TABS.forEach(function(t){
     var title=document.getElementById(t[0]).getAttribute('data-title');
@@ -330,8 +338,8 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
   document.getElementById('people').innerHTML=PEOPLE.map(function(n){
     return '<div class="person"><span class="av">'+svg('user')+'</span><span class="pn">'+n+'</span></div>';}).join('');
 
-  var SOON='<div class="soon"><svg class="orn" viewBox="0 0 64 64"><g fill="none" stroke="#c9a227" stroke-width="2"><rect x="14" y="14" width="36" height="36" transform="rotate(45 32 32)"/><rect x="14" y="14" width="36" height="36"/></g><circle cx="32" cy="32" r="6" fill="#065f46"/></svg><b>جلد آ رہا ہے</b><span>اس حصے کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</span></div>';
-  Array.prototype.forEach.call(document.querySelectorAll('.soon-slot'),function(s){s.innerHTML=SOON;});
+  var SOON='<div class="soon"><svg class="orn" viewBox="0 0 64 64"><g fill="none" stroke="#d0701f" stroke-width="2"><rect x="14" y="14" width="36" height="36" transform="rotate(45 32 32)"/><rect x="14" y="14" width="36" height="36"/></g><circle cx="32" cy="32" r="6" fill="#141414"/></svg><b>جلد آ رہا ہے</b><span>اس حصے کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔</span></div>';
+  Array.prototype.forEach.call(document.querySelectorAll('.soon-slot'),function(s){var m=s.getAttribute('data-msg'); s.innerHTML=m?SOON.replace('اس حصے کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔',m):SOON;});
 
   // Back button in every content panel
   Array.prototype.forEach.call(document.querySelectorAll('.panel:not(#home)'),function(p){
@@ -370,6 +378,11 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
     'شجرۂ طریقت':{en:'Shajra-e-Tariqat',ar:'شجرة الطريقة',sd:'شجرو طريقت',rg:'شجرہ طریقت'},
     'اذکارِ مسنونہ':{en:'Sunnah Adhkar',ar:'الأذكار المسنونة',sd:'مسنون ذڪر',rg:'سنت آلے ذکر'},
     'سالانہ پروگرامز':{en:'Annual Programmes',ar:'البرامج السنوية',sd:'سالياني پروگرام',rg:'سال کے پروگرام'},
+    'مرکزی مرکز':{en:'Main Markaz',ar:'المركز الرئيسي',sd:'مرڪزي مرڪز',rg:'وڈا مرکز'},
+    'عطیات':{en:'Donations',ar:'التبرعات',sd:'عطيا',rg:'عطیات'},
+    'مرکزی مرکز کی تفصیل (پتہ، رابطہ، تصویر) جلد شامل کی جائے گی، ان شاء اللہ۔':{en:'Details of the Main Markaz (address, contact, photo) will be added soon, In sha Allah.',ar:'ستُضاف تفاصيل المركز الرئيسي (العنوان، التواصل، الصورة) قريبًا إن شاء الله.',sd:'مرڪزي مرڪز جو تفصيل (پتو، رابطو، تصوير) جلد شامل ڪيو ويندو، ان شاءالله.',rg:'وڈے مرکز کی تفصیل (پتہ، رابطہ، تصویر) جلد پا دی جاوے گی، ان شاء اللہ۔'},
+    'تحریک کی دینی و اصلاحی خدمات میں تعاون کے خواہش مند احباب کے لیے — اللہ تعالیٰ قبول فرمائے۔':{en:'For those who wish to support the religious and reformative services of the Tehreek — may Allah accept it.',ar:'لمن يرغب في دعم الخدمات الدينية والإصلاحية للحركة — تقبّل الله منكم.',sd:'تحريڪ جي ديني ۽ اصلاحي خدمتن ۾ تعاون ڪرڻ وارن لاءِ — الله تعاليٰ قبول فرمائي.',rg:'تحریک کی دینی اور اصلاحی خدمتاں وچ تعاون کرن آلیاں تائیں — اللہ قبول فرماوے۔'},
+    'بینک اکاؤنٹ / جاز کیش / ایزی پیسہ کی تفصیل جلد شامل کی جائے گی، ان شاء اللہ۔':{en:'Bank account / JazzCash / Easypaisa details will be added soon, In sha Allah.',ar:'ستُضاف تفاصيل الحساب البنكي / جاز كاش / إيزي بيسه قريبًا إن شاء الله.',sd:'بئنڪ اڪائونٽ / جاز ڪيش / ايزي پيسا جو تفصيل جلد شامل ڪيو ويندو، ان شاءالله.',rg:'بینک اکاؤنٹ / جاز کیش / ایزی پیسہ کی تفصیل جلد پا دی جاوے گی، ان شاء اللہ۔'},
     'رابطہ':{en:'Contact',ar:'اتصل بنا',sd:'رابطو',rg:'رابطہ'},
     'ایپ کے بارے میں':{en:'About App',ar:'عن التطبيق',sd:'ايپ بابت',rg:'ایپ کے بارے میں'},
     'عبادت':{en:'Worship',ar:'عبادة',sd:'عبادت',rg:'عبادت'},
@@ -492,20 +505,20 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
       var dome = r[1], logo = r[2];
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var g = c.getContext('2d');
-      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#022c22'); bg.addColorStop(.55, '#064e3b'); bg.addColorStop(1, '#065f46');
+      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#000000'); bg.addColorStop(.55, '#111111'); bg.addColorStop(1, '#1c1c1c');
       g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      var glow = g.createRadialGradient(W/2, 0, 10, W/2, 0, 700); glow.addColorStop(0, 'rgba(201,162,39,.35)'); glow.addColorStop(1, 'rgba(201,162,39,0)');
+      var glow = g.createRadialGradient(W/2, 0, 10, W/2, 0, 700); glow.addColorStop(0, 'rgba(208,112,31,.35)'); glow.addColorStop(1, 'rgba(208,112,31,0)');
       g.fillStyle = glow; g.fillRect(0, 0, W, 700);
-      g.strokeStyle = '#c9a227'; g.lineWidth = 6; g.strokeRect(30, 30, W-60, H-60);
-      g.strokeStyle = 'rgba(201,162,39,.45)'; g.lineWidth = 2; g.strokeRect(46, 46, W-92, H-92);
+      g.strokeStyle = '#d0701f'; g.lineWidth = 6; g.strokeRect(30, 30, W-60, H-60);
+      g.strokeStyle = 'rgba(208,112,31,.45)'; g.lineWidth = 2; g.strokeRect(46, 46, W-92, H-92);
       g.textAlign = 'center'; g.textBaseline = 'middle'; g.direction = 'rtl';
       var y = 92;
       if (dome){ var iw = 900, ih = Math.round(iw * dome.height / dome.width); g.save(); roundRect(g, (W-iw)/2, y, iw, ih, 28); g.clip(); g.drawImage(dome, (W-iw)/2, y, iw, ih); g.restore();
-        g.strokeStyle = '#c9a227'; g.lineWidth = 4; roundRect(g, (W-iw)/2, y, iw, ih, 28); g.stroke(); y += ih + 70; }
-      g.fillStyle = '#ffe9a8'; g.font = (LANG === 'en' ? '700 64px ' + SANS : '700 62px ' + (LANG==='ar'||LANG==='sd' ? NASKH : NAST));
+        g.strokeStyle = '#d0701f'; g.lineWidth = 4; roundRect(g, (W-iw)/2, y, iw, ih, 28); g.stroke(); y += ih + 70; }
+      g.fillStyle = '#f3a24f'; g.font = (LANG === 'en' ? '700 64px ' + SANS : '700 62px ' + (LANG==='ar'||LANG==='sd' ? NASKH : NAST));
       g.direction = (LANG === 'en') ? 'ltr' : 'rtl';
       g.fillText(nameOf(p), W/2, y); y += 70;
-      g.fillStyle = '#c9a227'; g.fillRect(W/2 - 60, y, 120, 5); y += 40;
+      g.fillStyle = '#d0701f'; g.fillRect(W/2 - 60, y, 120, 5); y += 40;
       /* Arabic box */
       g.direction = 'rtl';
       var footTop = H - 420, refH = 90;
@@ -514,8 +527,8 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
       var ar = fitBlock(g, p.ar, NASKH, '600', 56, 30, 900, arMaxH - 60, 1.8);
       var boxH = ar.h + 60;
       g.fillStyle = 'rgba(255,253,246,.96)'; roundRect(g, 70, y, W-140, boxH, 26); g.fill();
-      g.strokeStyle = '#c9a227'; g.lineWidth = 3; roundRect(g, 70, y, W-140, boxH, 26); g.stroke();
-      g.fillStyle = '#022c22'; g.font = '600 ' + ar.size + 'px ' + NASKH;
+      g.strokeStyle = '#d0701f'; g.lineWidth = 3; roundRect(g, 70, y, W-140, boxH, 26); g.stroke();
+      g.fillStyle = '#000000'; g.font = '600 ' + ar.size + 'px ' + NASKH;
       var ly = y + 30 + ar.size * 1.8 / 2;
       ar.lines.forEach(function(l){ g.fillText(l, W/2, ly); ly += ar.size * 1.8; });
       y += boxH + 40;
@@ -528,7 +541,7 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
       tr.lines.forEach(function(l){ g.fillText(l, W/2, ty); ty += tr.size * lhT; });
       y += tr.h + 44;
       /* reference */
-      g.fillStyle = '#ffe9a8';
+      g.fillStyle = '#f3a24f';
       g.font = (LANG === 'en') ? '600 36px ' + SANS : '700 36px ' + NAST;
       var refTxt = refOf(p);
       if (LANG !== 'en') refTxt = refTxt.replace(/(\d+(?::\d+)?)/g, '\u2066$1\u2069');
@@ -536,13 +549,13 @@ html[lang="en"] .dcard .dtr.en{font-family:system-ui,sans-serif; line-height:1.6
       /* footer (Urdu + developer credit, no link, user 2026-11-25) */
       g.direction = 'rtl';
       g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(36, footTop + 20, W-72, H - footTop - 56);
-      g.fillStyle = '#c9a227'; g.fillRect(36, footTop + 20, W-72, 4);
+      g.fillStyle = '#d0701f'; g.fillRect(36, footTop + 20, W-72, 4);
       var fx = W/2;
       if (logo){ g.save(); g.beginPath(); g.arc(fx, footTop + 92, 50, 0, Math.PI*2); g.fillStyle = '#fff'; g.fill(); g.clip(); g.drawImage(logo, fx-46, footTop + 46, 92, 92); g.restore();
-        g.strokeStyle = '#c9a227'; g.lineWidth = 4; g.beginPath(); g.arc(fx, footTop + 92, 50, 0, Math.PI*2); g.stroke(); }
-      g.fillStyle = '#ffe9a8'; g.font = '700 44px ' + NAST; g.fillText('تحریکِ اتباعِ سنت پاکستان', W/2, footTop + 200);
-      g.fillStyle = '#cfe3d6'; g.font = '400 30px ' + NAST; g.fillText('عبادت ۔ اطاعت ۔ خدمت', W/2, footTop + 268);
-      g.direction = 'ltr'; g.fillStyle = 'rgba(201,162,39,.6)'; g.fillRect(W/2 - 160, footTop + 300, 320, 2);
+        g.strokeStyle = '#d0701f'; g.lineWidth = 4; g.beginPath(); g.arc(fx, footTop + 92, 50, 0, Math.PI*2); g.stroke(); }
+      g.fillStyle = '#f3a24f'; g.font = '700 44px ' + NAST; g.fillText('تحریکِ اتباعِ سنت پاکستان', W/2, footTop + 200);
+      g.fillStyle = '#d9d9d9'; g.font = '400 30px ' + NAST; g.fillText('عبادت ۔ اطاعت ۔ خدمت', W/2, footTop + 268);
+      g.direction = 'ltr'; g.fillStyle = 'rgba(208,112,31,.6)'; g.fillRect(W/2 - 160, footTop + 300, 320, 2);
       g.fillStyle = '#ffffff'; g.font = '600 30px ' + SANS; g.fillText('Designed & Developed by Dr Asif \u00b7 Jilan Apps Official', W/2, footTop + 336);
       return c;
     });

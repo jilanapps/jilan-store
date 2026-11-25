@@ -2793,15 +2793,15 @@
   {
    "apk": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/ittiba-e-sunnat.apk",
    "category": "islamic",
-   "color": "#0b5d3b",
-   "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein, Bayanat, roz Durood-e-Pak aur 5 zubanein",
+   "color": "#d0701f",
+   "desc": "Tehreek Ittiba-e-Sunnat Pakistan — Taaruf, Kitabein, Bayanat, Markazi Markaz, Atiyat, roz Durood-e-Pak aur 5 zubanein",
    "icon": "icons/ittibaerasool.png",
    "id": "ittiba-e-sunnat",
    "name": "Tehreek Ittiba-e-Sunnat Pakistan",
    "package": "com.jilanapps.ittibaerasool",
    "size": 842265,
-   "versionCode": 16,
-   "versionName": "2.5",
+   "versionCode": 17,
+   "versionName": "2.6",
    "web": "https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/"
   },
   {
