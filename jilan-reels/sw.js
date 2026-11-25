@@ -7,7 +7,7 @@
  * A new version = new CACHE name; old caches are deleted on activate.
  */
 var PFX = /preview/.test(self.registration ? self.registration.scope : '') ? 'jrp-shell-' : 'jr-shell-';
-var CACHE = PFX + '1.5.1';
+var CACHE = PFX + '1.5.2';
 var SHELL = [
   './', 'index.html', 'style.css?v=1.5.1', 'v15.css?v=1.5.1', 'v15.js?v=1.5.1',
   'firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js', 'firebase-config.js',

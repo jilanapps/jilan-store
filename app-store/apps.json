@@ -2819,15 +2819,17 @@
       "apk": "https://jilanapps.github.io/jilan-store/jilan-reels/jilan-reels.apk",
       "category": "social",
       "color": "#1f7ae0",
-      "desc": "Short videos — watch, post up to 30 seconds, like, comment, follow, report and block",
+      "desc": "Short videos — watch, post up to 60 seconds, like, comment, follow, report and block",
       "icon": "icons/jilanreels.png",
       "id": "jilanreels",
       "name": "Jilan Reels",
       "package": "com.jilanapps.jilanreels",
-      "size": 66537,
-      "versionCode": 2,
-      "versionName": "1.0",
-      "web": "https://jilanapps.github.io/jilan-store/jilan-reels/"
+      "size": 205801,
+      "versionCode": 3,
+      "versionName": "1.1",
+      "web": "https://jilanapps.github.io/jilan-store/jilan-reels/",
+      "version": "1.1",
+      "md5": "62270030e9420349cfffbb157a771919"
     }
   ],
   "store": {
