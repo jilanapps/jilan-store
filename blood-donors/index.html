@@ -48,7 +48,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 .mcard .sig{font-size:12px;color:#5b6b7f;text-align:center;border-top:1px solid #e8edf1;padding-top:10px;margin-top:10px}
 .mcard .side-label{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:8px}
 .pdf-capture .side-label,.pdf-capture .verify-url{display:none!important}
-/*v103-drift*/#memberCardBody.pdf-capture.mc-drift .mc-f-idrow .mc-pill{box-sizing:border-box;height:38px;padding:0 20px 16px 20px}
+/*v103-drift*/#memberCardBody.pdf-capture.mc-drift .mc-f-idrow .mc-pill{box-sizing:border-box;height:38px;padding:0 16px 16px 16px}
 #memberCardBody.pdf-capture.mc-drift .mc-f-swoosh{margin-top:12.6px}
 #memberCardBody.pdf-capture.mc-drift .mc-f-photo,#memberCardBody.pdf-capture.mc-drift .mc-f-photo-ph{margin-top:4px}
 .mcard .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px dashed #e8edf1;font-size:14px}
@@ -133,7 +133,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 #memberCardBody .mc-f-idrow{display:flex;align-items:center;gap:9.1px;padding:0 24.2px;margin-top:8px}
 #memberCardBody .mc-f-idrow .mc-ln{flex:1;height:2.7px;background:#c8102e}
 #memberCardBody .mc-f-idrow .mc-pill{background:#d80027;color:#fff;font-weight:900;font-size:12px;line-height:1;
- border-radius:19px;padding:0 20px;height:38px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+ border-radius:19px;padding:0 16px;height:38px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
 #memberCardBody .mc-f-bottom{display:flex;align-items:center;justify-content:space-between;
  padding:0 9.1px;margin-top:3px;flex:1}
 #memberCardBody .mc-f-sigs{display:flex;align-items:flex-end;justify-content:space-between;width:187.5px}
@@ -1270,7 +1270,7 @@ html:not(.light) .pg-d:not(.pg-cap) .pg-ref{color:#BBF7D0}
 </div>
 <div class="row">
 <div class="fld static"><select id="mGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select><label for="mGroup">Blood Group *</label></div>
-<div class="fld"><span class="mut small">ID No. auto-assign hogi — pehle member 001, phir 002, 003…</span></div>
+<div class="fld"><span class="mut small">ID No. auto-assign hogi — pehle member BDBS-001, phir BDBS-002, BDBS-003…</span></div>
 </div>
 <div class="wbtns"><button class="btn ghost" onclick="wizBack('member')">← Back</button><button class="btn" onclick="wizNext('member',['mCnic','mGroup','mDob'])">Next →</button></div>
 </div>
@@ -1442,7 +1442,7 @@ html:not(.light) .pg-d:not(.pg-cap) .pg-ref{color:#BBF7D0}
 <div id="memberBox" style="margin-top:14px;border-top:1px solid #eee;padding-top:10px">
 <h3>Member Login</h3>
 <p class="mut">Society members: enter your Member ID and the phone number on your card to link your membership card here.</p>
-<label>Member ID</label><input id="mLinkId" placeholder="e.g. 001">
+<label>Member ID</label><input id="mLinkId" placeholder="e.g. BDBS-001">
 <label>Phone Number (on your card)</label><input id="mLinkPhone" type="tel" placeholder="e.g. 0300-1234567">
 <button class="btn" onclick="linkMemberRecord()">Link My Member Card</button>
 <div id="mLinkMsg"></div>
@@ -2304,7 +2304,7 @@ ur: {
 "Photo (optional)": "تصویر (اختیاری)",
 "4 • Membership": "4 • ممبرشپ",
 "3 • Contact & Education": "3 • رابطہ اور تعلیم",
-"ID No. auto-assign hogi — pehle member 001, phir 002, 003…": "ID نمبر خودکار طور پر ملے گا — پہلا ممبر 001، پھر 002، 003…",
+"ID No. auto-assign hogi — pehle member BDBS-001, phir BDBS-002, BDBS-003…": "ID نمبر خودکار طور پر ملے گا — پہلا ممبر BDBS-001، پھر BDBS-002، BDBS-003…",
 "Society members: enter your Member ID and the phone number on your card to link your membership card here.": "سوسائٹی کے ممبرز: اپنا ممبر کارڈ یہاں لنک کرنے کے لیے اپنا ممبر ID اور کارڈ پر موجود فون نمبر درج کریں۔",
 "Public member list shows only name, phone number and photo. All other member details are secret — admin only. Scan a member's QR code to verify membership.": "عوامی ممبر فہرست میں صرف نام، فون نمبر اور تصویر دکھائی جاتی ہے۔ ممبر کی باقی تمام تفصیلات خفیہ ہیں — صرف ایڈمن کے لیے۔ ممبرشپ کی تصدیق کے لیے ممبر کا QR کوڈ اسکین کریں۔",
 "Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.": "ممبرشپ کارڈ QR کوڈ کے ساتھ جاری کیا جاتا ہے۔ ممبر کی تصدیق کے لیے QR اسکین کریں۔ ذاتی تفصیلات صرف ایڈمن دیکھ سکتا ہے۔",
@@ -2672,7 +2672,7 @@ I18N.ar = {
 "Photo (optional)": "الصورة (اختياري)",
 "4 • Membership": "4 • العضوية",
 "3 • Contact & Education": "3 • الاتصال والتعليم",
-"ID No. auto-assign hogi — pehle member 001, phir 002, 003…": "سيُخصص رقم العضو تلقائياً — العضو الأول 001، ثم 002، 003…",
+"ID No. auto-assign hogi — pehle member BDBS-001, phir BDBS-002, BDBS-003…": "سيُخصص رقم العضو تلقائياً — العضو الأول BDBS-001، ثم BDBS-002، BDBS-003…",
 "Society members: enter your Member ID and the phone number on your card to link your membership card here.": "أعضاء الجمعية: أدخل رقم عضويتك ورقم الهاتف الموجود على بطاقتك لربط بطاقة عضويتك هنا.",
 "Public member list shows only name, phone number and photo. All other member details are secret — admin only. Scan a member's QR code to verify membership.": "تعرض قائمة الأعضاء العامة الاسم ورقم الهاتف والصورة فقط. جميع تفاصيل الأعضاء الأخرى سرية — للمسؤول فقط. امسح رمز QR الخاص بالعضو للتحقق من العضوية.",
 "Membership card is issued with a QR code. Scan the QR to verify a member. Personal details are admin-only.": "تُصدر بطاقة العضوية برمز QR. امسح الرمز للتحقق من العضو. التفاصيل الشخصية للمسؤول فقط.",
@@ -3162,7 +3162,7 @@ try {
    dabane se APK download hoti hai (Android DownloadManager) aur
    notification se install hoti hai. APP_VERSION har APK release par
    barhao — yehi version.json se compare hota hai. */
-var APP_VERSION = 'v104';
+var APP_VERSION = 'v106';
 /* ---------- social links (Design 4, 2026-11-17) ----------
    SIRF More menu wale developer card ("Developed by Dr Asif") me gol
    FB / TikTok / WhatsApp icon button dikhate hain — likhe hue
@@ -3224,6 +3224,7 @@ function showUpdateBanner(v){
 setTimeout(checkAppUpdate, 2000);
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+/*v105-bdbsid*/function fmtMemberId(v){var s=String(v==null?'':v).trim(); if(!s) return ''; if(/^BDBS-/i.test(s)) return s.toUpperCase(); var d=s.replace(/\D/g,''); if(!d) return s; return 'BDBS-'+(d.length<3?('000'+d).slice(-3):d);}
 function uid(p){return (p||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);}
 function lookupKey(no){ return String(no||'').trim().replace(/\//g,'-') || 'x'; }
 function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
@@ -4049,7 +4050,7 @@ function renumberMemberIds(){
       var want = String(i+1).padStart(3,'0');
       if ((m.idNo||'') !== want) jobs.push({m:m, want:want});
     });
-    if (!jobs.length) { say('<span class="ok">Member IDs are already in order (001, 002, 003…). Nothing to change.</span>'); return; }
+    if (!jobs.length) { say('<span class="ok">Member IDs are already in order (BDBS-001, BDBS-002, BDBS-003…). Nothing to change.</span>'); return; }
     if (!confirm('Renumber ' + jobs.length + ' member(s)? IDs will become 001, 002, 003… in join order.')) { say(''); return; }
     var done = 0;
     var one = function(){ done++; if (done >= jobs.length) { logAudit('renumber-member-ids', '', 'Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…'); say('<span class="ok">Renumbered ' + jobs.length + ' member(s). IDs are now 001, 002, 003…</span>'); renderAdmin(); loadMembers(); } };
@@ -5477,7 +5478,7 @@ function editMember(id){
     set('mAddress', m.address); set('mIssue', m.issue); set('mExpiry', m.expiry);
     var ph = document.getElementById('mPhoto'); if (ph) ph.value = '';
     var b = document.getElementById('mSubmitBtn'); if (b) b.textContent = 'Save Changes';
-    document.getElementById('mMsg').innerHTML = '<span class="mut">Editing ID No. ' + esc(m.idNo || '') + ' — ' + esc(m.name || '') + '. Photo change karni ho to nayi photo chunein, warna purani photo hi rahe gi. Save Changes dabayein.</span>';
+    document.getElementById('mMsg').innerHTML = '<span class="mut">Editing ID No. ' + esc(fmtMemberId(m.idNo)) + ' — ' + esc(m.name || '') + '. Photo change karni ho to nayi photo chunein, warna purani photo hi rahe gi. Save Changes dabayein.</span>';
     if (m.gender === 'Female') { document.getElementById('mMsg').innerHTML += '<br><span class="mut small">\uD83D\uDD12 Female member — admin is record ko public nahi kar sakta. Sirf woh khud apne account se public kar sakti hain.</span>'; }
     wizGo('member', 0);
     var nm = document.getElementById('mName'); if (nm) nm.scrollIntoView();
@@ -5486,7 +5487,7 @@ function editMember(id){
 /* v40 shared member-submit success UI (transaction path + legacy alike). */
 function memberSubmitSuccess(full, nextId, btn){
   try { writePushEvent({type:'new_member', targetRole:'admin', title:'New member added', body:(full.name||'A new member')+' joined the society.', reqNo:''}); } catch(e){}
-  document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(nextId)+' — welcome card is ready.</span>';
+  document.getElementById('mMsg').innerHTML = '<span class="ok">Member added. ID No. '+esc(fmtMemberId(nextId))+' — welcome card is ready.</span>';
   renderWelcomeCard(full); loadMembers();
   ['mName','mFather','mDesig','mGender','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
   document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
@@ -5517,7 +5518,7 @@ function submitMember(){
           /* v51: rebuild the mirror (delete + add) so a gender change to
              Female correctly becomes a private stub. */
           qDel('membersPublic', editId, function(){ qAdd('membersPublic', memberPub(updated), function(){
-            document.getElementById('mMsg').innerHTML = '<span class="ok">Member updated. ID No. '+esc(updated.idNo||'')+' — card is ready below.</span>';
+            document.getElementById('mMsg').innerHTML = '<span class="ok">Member updated. ID No. '+esc(fmtMemberId(updated.idNo))+' — card is ready below.</span>';
             renderMemberCard(updated); loadMembers(); exitMemberEdit();
             ['mName','mFather','mDesig','mGender','mCnic','mDob','mEdu','mPhone','mEmail','mAddress','mIssue','mExpiry'].forEach(function(i){document.getElementById(i).value='';});
             document.getElementById('mGroup').value=''; document.getElementById('mPhoto').value='';
@@ -5578,7 +5579,7 @@ function submitMemberTx(ph, cn, nameNorm, photo, btn){
     cacheUpsert('membersPublic', memberPub(out.full));
     memberSubmitSuccess(out.full, out.nextId, btn);
   }).catch(function(e){
-    if (e && String(e.message||'').indexOf('DUP:') === 0) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(String(e.message).slice(4))+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
+    if (e && String(e.message||'').indexOf('DUP:') === 0) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(fmtMemberId(String(e.message).slice(4)))+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
     /* Transaction could not run — fall back to the legacy submit. */
     submitMemberLegacy(ph, cn, photo, btn);
   });
@@ -5588,7 +5589,7 @@ function submitMemberTx(ph, cn, nameNorm, photo, btn){
 function submitMemberLegacy(ph, cn, photo, btn){
   qAll('members', function(ms){
     var dup = null; ms.forEach(function(x){ if (!dup && (samePhone(x.phone, ph) || (cn && (x.cnic||'').replace(/\D/g,'')===cn))) dup = x; });
-    if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(dup.idNo||'')+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
+    if (dup) { document.getElementById('mMsg').innerHTML = '<span class="err">Ye member pehle se maujood hai (ID No. '+esc(fmtMemberId(dup.idNo))+'). Dobara add nahi hoga.</span>'; if (btn) btn.disabled = false; return; }
     var used = {}; ms.forEach(function(x){ var n = parseInt(String(x.idNo||'').replace(/\D/g,''),10); if (n > 0) used[n] = true; });
     var nextN = 1; while (used[nextN]) nextN++;
     var nextId = String(nextN).padStart(3,'0');
@@ -5695,7 +5696,7 @@ function renderMemberCard(m){
     ' '+mcPhotoHTML(m)+'' +
     ' <div class="mc-f-name">'+esc(m.name)+'</div>' +
     ' <div class="mc-f-desig">'+esc(m.designation||'')+'</div>' +
-    ' <div class="mc-f-idrow"><span class="mc-ln"></span><span class="mc-pill">ID No: '+esc(m.idNo||'')+'</span><span class="mc-ln"></span></div>' +
+    ' <div class="mc-f-idrow"><span class="mc-ln"></span><span class="mc-pill">ID No: '+esc(fmtMemberId(m.idNo))+'</span><span class="mc-ln"></span></div>' +
     ' <div class="mc-f-bottom">' +
     '  <div class="mc-f-sigs">' +
     '   <div class="mc-csig"><div class="mc-scr">Naeem Asghar</div><svg class="mc-flourish" viewBox="0 0 260 16" xmlns="http://www.w3.org/2000/svg"><path d="M8,11 Q130,15 252,5" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg><div class="mc-sline">Patron In Chief</div><div class="mc-bdbs">BDBS</div></div>' +
@@ -5720,7 +5721,7 @@ function renderMemberCard(m){
     '   <div class="mc-bar mc-addr"><span class="mc-k">Address:</span><span class="mc-v">'+esc(m.address||'\u2014')+'</span></div>' +
     '   <div class="mc-bar"><span class="mc-k">Gmail:</span><span class="mc-v" style="font-size:9px">'+esc(m.email||'\u2014')+'</span></div>' +
     '  </div>' +
-    '  '+'<span class="mc-b-barcode">'+mcBarcodeSVG('BDBS-'+(m.idNo||''))+'</span>'+'' +
+    '  '+'<span class="mc-b-barcode">'+mcBarcodeSVG(fmtMemberId(m.idNo)||'BDBS-')+'</span>'+'' +
     ' </div>' +
     ' <div class="mc-b-dates">' +
     '  <div class="mc-half"><div class="mc-ic"><svg viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><rect x=\'3\' y=\'5\' width=\'18\' height=\'16\' rx=\'2\' fill=\'none\' stroke=\'#0b5ed7\' stroke-width=\'2\'/><line x1=\'3\' y1=\'10\' x2=\'21\' y2=\'10\' stroke=\'#0b5ed7\' stroke-width=\'2\'/><line x1=\'8\' y1=\'2\' x2=\'8\' y2=\'7\' stroke=\'#0b5ed7\' stroke-width=\'2\'/><line x1=\'16\' y1=\'2\' x2=\'16\' y2=\'7\' stroke=\'#0b5ed7\' stroke-width=\'2\'/><rect x=\'6.5\' y=\'13\' width=\'2.4\' height=\'2.4\' fill=\'#0b5ed7\'/><rect x=\'10.8\' y=\'13\' width=\'2.4\' height=\'2.4\' fill=\'#0b5ed7\'/><rect x=\'15.1\' y=\'13\' width=\'2.4\' height=\'2.4\' fill=\'#0b5ed7\'/><rect x=\'6.5\' y=\'17\' width=\'2.4\' height=\'2.4\' fill=\'#0b5ed7\'/><rect x=\'10.8\' y=\'17\' width=\'2.4\' height=\'2.4\' fill=\'#0b5ed7\'/></svg></div><div class="mc-l1">Issue Date:</div><div class="mc-d1">'+fmtDMY(m.issue)+'</div></div>' +
@@ -5968,7 +5969,7 @@ function shareMemberCardPDF(){
 function shareMemberCardPDFText(){
   var m = window._lastMemberCard; if (!m) return;
   try {
-    var front = ['Name: ' + (m.name||''), (m.father ? 'Father Name: ' + m.father : null), 'Designation: ' + (m.designation||''), 'ID No.: ' + (m.idNo||''), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry), '', 'Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization'].filter(function(x){ return x !== null; });
+    var front = ['Name: ' + (m.name||''), (m.father ? 'Father Name: ' + m.father : null), 'Designation: ' + (m.designation||''), 'ID No.: ' + fmtMemberId(m.idNo), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry), '', 'Verified Signature Authorized - Under Supervision, Basti Dawa Welfare Organization'].filter(function(x){ return x !== null; });
     var back = ['CNIC: ' + (m.cnic||''), 'Date of Birth: ' + (m.dob?fmtD(m.dob):'-'), 'Age: ' + (m.age||''), 'Education: ' + (m.education||''), 'Phone: ' + (m.phone||''), 'Email: ' + (m.email||''), 'Address: ' + (m.address||''), 'Blood Group: ' + (m.group||''), 'Issue Date: ' + fmtD(m.issue), 'Expiry Date: ' + fmtD(m.expiry)];
     var fname = 'BDBS-Member-Card-' + (m.idNo||m.id) + '.pdf';
     var blob = simplePDF([{title:'', lines:front}, {title:'', lines:back}]);
@@ -5987,7 +5988,7 @@ function removeMember(id){
     if (isProtectedMember(m)) { alert('Ye card sirf Dr Asif change kar sakte hain.'); return; } /* v72 */ /* v72: check before confirm */
     if (!confirm('Remove this member? The member record, public listing and card will be deleted. This cannot be undone.')) return;
     var idNo = m ? (m.idNo||'') : '';
-    var done = function(){ logAudit('remove-member', id, m ? ((m.name||'') + ' (ID No. ' + (idNo||'') + ')') : ''); renderAdmin(); loadMembers(); loadHome(); };
+    var done = function(){ logAudit('remove-member', id, m ? ((m.name||'') + ' (ID No. ' + fmtMemberId(idNo) + ')') : ''); renderAdmin(); loadMembers(); loadHome(); };
     qDel('members', id, function(){
       qDel('membersPublic', id, function(){
         if (idNo) qDel('memberLookup', idNo, function(){ done(); }); else done();
@@ -6105,7 +6106,7 @@ function renderWelcomeCard(m){
     '<p class="w-sub">Welcome to the Basti Dawa Blood Society family.<br>Thank you for joining us &mdash; <b>together we save lives.</b></p>' +
     photoHtml +
     '<div class="w-nameplate"><div class="w-nlbl">Our New Member</div><div class="w-name">'+esc(m.name||'')+'</div></div>' +
-    '<div class="w-kv"><span>Member ID</span><b>'+esc(m.idNo||'')+'</b></div>' +
+    '<div class="w-kv"><span>Member ID</span><b>'+esc(fmtMemberId(m.idNo))+'</b></div>' +
     '<div class="w-kv"><span>Designation</span><b>'+esc(m.designation||'')+'</b></div>' +
     '<p class="w-foot"><b>Head Office</b><br>Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan</p>' +
     '<p class="w-mail">bastidawabloodsociety@gmail.com</p>' +
@@ -6141,7 +6142,7 @@ function shareWelcomeCardPDF(){
 function shareWelcomeCardPDFText(){
   var m = window._lastWelcomeCard; if (!m) return;
   try {
-    var lines = ['Basti Dawa Blood Society', '', 'Welcome', '', 'Welcome to the Basti Dawa Blood Society family.', 'Thank you for joining us - together we save lives.', '', m.name||'', 'Member ID: ' + (m.idNo||''), 'Designation: ' + (m.designation||''), '', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan', 'bastidawabloodsociety@gmail.com'];
+    var lines = ['Basti Dawa Blood Society', '', 'Welcome', '', 'Welcome to the Basti Dawa Blood Society family.', 'Thank you for joining us - together we save lives.', '', m.name||'', 'Member ID: ' + fmtMemberId(m.idNo), 'Designation: ' + (m.designation||''), '', 'Head Office', 'Kamal Din Sroya Institute of Health Sciences, Basti Malook, Multan', 'bastidawabloodsociety@gmail.com'];
     var blob = simplePDF([{title:'', lines:lines}]);
     var fname = 'BDBS-Welcome-Card-' + (m.idNo||m.id) + '.pdf';
     var file = new File([blob], fname, {type:'application/pdf'});
@@ -7031,7 +7032,7 @@ function linkMemberRecord(){
   var idNo = String(val('mLinkId')||'').replace(/\D/g,'');
   var ph = normPhone(val('mLinkPhone'));
   var msg = document.getElementById('mLinkMsg');
-  if (!idNo) { msg.innerHTML = '<span class="err">Enter your Member ID (e.g. 001).</span>'; return; }
+  if (!idNo) { msg.innerHTML = '<span class="err">Enter your Member ID (e.g. BDBS-001).</span>'; return; }
   idNo = idNo.padStart(3,'0');
   if (!ph) { msg.innerHTML = '<span class="err">Enter the phone number on your member card.</span>'; return; }
   msg.innerHTML = '<span class="mut">Checking…</span>';
@@ -7062,7 +7063,7 @@ function loadMyMemberCard(memberId){
     var m = d.data(); m.id = d.id;
     window._myMember = m;
     box.style.display='block';
-    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(m.idNo||'')+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button> <button class="btn ghost" onclick="showMyWelcomeCard()">Welcome Card</button>' + (m.gender === 'Female' ? '<div style="margin-top:10px"><label><input type="checkbox" id="memberPubOptToggle" ' + (m.publicOptIn===true?'checked':'') + ' onchange="setMyMemberPublicOptIn(this.checked)"> Mera data public dikhao</label><div id="memberPubOptMsg" class="mut small"></div></div>' : '');
+    box.innerHTML = '<h3>My Member Card</h3><p class="mut">ID No. '+esc(fmtMemberId(m.idNo))+' — '+esc(m.designation||'')+'</p><button class="btn" onclick="openMyMemberCard()">Open My Card</button> <button class="btn ghost" onclick="showMyWelcomeCard()">Welcome Card</button>' + (m.gender === 'Female' ? '<div style="margin-top:10px"><label><input type="checkbox" id="memberPubOptToggle" ' + (m.publicOptIn===true?'checked':'') + ' onchange="setMyMemberPublicOptIn(this.checked)"> Mera data public dikhao</label><div id="memberPubOptMsg" class="mut small"></div></div>' : '');
   }).catch(function(){ box.style.display='none'; });
 }
 function openMyMemberCard(){ if (window._myMember) renderMemberCard(window._myMember); }
@@ -8206,7 +8207,7 @@ function renderAdmin(){
           h += '</table></div>';
           h += '<h3>Members ('+ms.length+') — full records (admin only)</h3><div style="overflow-x:auto"><table><tr><th>Name</th><th>Father</th><th>Designation</th><th>ID No.</th><th>CNIC</th><th>Group</th><th>Age</th><th>Education</th><th>Phone</th><th>Email</th><th>Address</th><th>Valid Till</th><th></th></tr>';
           ms.forEach(function(m){
-            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+(m.publicOptIn===false?' \uD83D\uDD12 Hidden':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(m.idNo)+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="viewWelcomeCard(\''+esc(m.id)+'\')">Welcome Card</button> <button class="btn ghost" onclick="toggleMemberPublic(\''+esc(m.id)+'\','+(m.publicOptIn===true?'false':'true')+')">'+(m.publicOptIn===true?'Hide':'Make Public')+'</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
+            h += '<tr><td>'+esc(m.name)+(m.demo?' <span class="badge demo">DEMO</span>':'')+(isFemalePrivate(m)?' \uD83D\uDD12 Private':'')+(m.publicOptIn===false?' \uD83D\uDD12 Hidden':'')+'</td><td>'+esc(m.father)+'</td><td>'+esc(m.designation)+'</td><td>'+esc(fmtMemberId(m.idNo))+'</td><td>'+esc(m.cnic)+'</td><td>'+esc(m.group)+'</td><td>'+esc(m.age)+'</td><td>'+esc(m.education)+'</td><td>'+esc(m.phone)+'</td><td>'+esc(m.email)+'</td><td>'+esc(m.address)+'</td><td>'+esc(fmtD(m.expiry))+'</td><td><button class="btn ghost" onclick="viewMemberCard(\''+esc(m.id)+'\')">View Card</button> <button class="btn ghost" onclick="viewWelcomeCard(\''+esc(m.id)+'\')">Welcome Card</button> <button class="btn ghost" onclick="toggleMemberPublic(\''+esc(m.id)+'\','+(m.publicOptIn===true?'false':'true')+')">'+(m.publicOptIn===true?'Hide':'Make Public')+'</button> <button class="btn ghost" onclick="editMember(\''+esc(m.id)+'\')">Edit</button> <button class="btn ghost" onclick="removeMember(\''+esc(m.id)+'\')">Remove</button></td></tr>';
           });
           h += '</table></div>';
           h += '<h3>Blood Requests ('+rs.length+')</h3><div style="overflow-x:auto"><table><tr><th>Req No.</th><th>Patient</th><th>Father</th><th>CNIC</th><th>Age</th><th>Group</th><th>Units</th><th>Hospital</th><th>Disease</th><th>Phone</th><th>Address</th><th>Status</th><th></th></tr>';
