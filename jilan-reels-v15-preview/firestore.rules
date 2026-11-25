@@ -1,0 +1,577 @@
+rules_version = '2';
+
+// Jilan Reels v1.4 — Firestore Security Rules (2026-11-25)
+// Public short-video app (Play Store, user-generated content).
+//
+// PUBLIC READ: user profiles, usernames claims, visible videos, comments,
+//   config/app (only holds the admin uid list). Everything else needs a
+//   signed-in user, and every write is checked here.
+// COUNTERS are tamper-proof: followers / following / videoCount /
+//   likeCount / commentCount can only move by exactly 1, and only in the
+//   same batch that creates or deletes the matching follow / video /
+//   like / comment document (checked with exists() vs existsAfter()).
+// ADMINS = uids listed in config/app.admins (create that doc by hand in the
+//   Firebase console — clients can never write it). Admins can hide/unhide
+//   videos, delete videos and comments, ban/unban users, and read/handle
+//   reports and the Cloudinary purge list.
+// BANNED users (users/{uid}.banned == true, set by an admin) can still sign
+//   in and watch, but cannot post, like, comment, follow or report. The
+//   admin also writes bans/{uid}, so deleting and re-creating the profile
+//   does not lift the ban.
+// Unknown collections are denied (deny-all fallback at the end).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    // Multi-segment path from a string ('videos/x/likes/y'). Uses the built-in
+    // path() so slashes split into segments.
+    function docPath(p) { return path('/databases/' + database + '/documents/' + p); }
+    function userDoc(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/config/app)
+        && me() in get(/databases/$(database)/documents/config/app).data.admins;
+    }
+    // Has a profile and is not banned.
+    function active() {
+      return signedIn()
+        && exists(userDoc(me()))
+        && get(userDoc(me())).data.get('banned', false) != true;
+    }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function isUsername(u) {
+      return u is string && u.matches('^[a-z0-9_]{3,20}$')
+        && !(u in ['drasif', 'asif', 'dr_asif', 'mohammadasif', 'jilan', 'jilanreels', 'jilanchat',
+                   'jilanapps', 'jilanappofficial', 'jilanappsofficial', 'admin', 'support', 'official',
+                   'system', 'owner', 'help', 'moderator', 'team']);
+    }
+    function nameOk(n) { return n is string && n.size() >= 1 && n.size() <= 40; }
+    function bioOk(b) { return b is string && b.size() <= 150; }
+    // Small profile photo: base64 JPEG data URL (no Storage needed), or ''.
+    function photoOk(p) {
+      return p is string && (p == '' || (p.size() <= 20000 && p.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')));
+    }
+    function publicIdOk(id) { return id is string && id.matches('^[A-Za-z0-9_/-]{1,200}$') && !id.matches('.*[.][.].*'); }
+    function videoMapOk(v) {
+      return v is map
+        && v.keys().hasOnly(['publicId', 'url', 'thumb', 'duration', 'w', 'h', 'bytes'])
+        && v.keys().hasAll(['publicId', 'url', 'thumb', 'duration'])
+        && publicIdOk(v.publicId)
+        && v.url is string
+        && v.url.matches('^https://res[.]cloudinary[.]com/rw1wri3w/video/upload/q_auto,f_auto/' + v.publicId + '$')
+        && v.thumb is string
+        && v.thumb.matches('^https://res[.]cloudinary[.]com/rw1wri3w/video/upload/so_0,w_360,c_limit,q_auto/' + v.publicId + '[.]jpg$')
+        && v.duration is number && v.duration > 0 && v.duration <= 61
+        && (!('w' in v) || (v.w is int && v.w >= 0 && v.w <= 4096))
+        && (!('h' in v) || (v.h is int && v.h >= 0 && v.h <= 4096))
+        && (!('bytes' in v) || (v.bytes is int && v.bytes >= 0 && v.bytes <= 104857600));
+    }
+    // v1.4 blocked words (nudity / sexual / immoral) — same list as lib.js BAD_RULES_RE.
+    // Game tags like #gta are allowed.
+    function clean(s) { return !s.lower().matches('(?s).*(porn|xxx|nude|nudity|naked|sexy|sextape|sex tape|sex video|sexvideo|blowjob|hentai|onlyfans|nsfw|boobs|pussy|fuck|milf|horny|xvideos|xnxx|brazzers|stripper|striptease|erotic|camgirl|adult video|adultvideo|nangi|chudai|phudi|gandi video|gandivideo|gandi film|blue film|bluefilm|mujra|kanjri|behenchod|bhenchod|madarchod|chutiya|bhosdi|سیکس|ننگی|فحش|چدائی|بلیو فلم|گندی ویڈیو|عریاں|عریانی|رنڈی|کنجری|مجرا|(^|[^a-z])sex([^a-z]|$)|(^|[^a-z])18plus([^a-z]|$)|(^|[^a-z])randi([^a-z]|$)).*'); }
+    function tagOk(x) { return x is string && x.matches('^[a-z0-9_]{1,30}$') && clean(x); }
+    function tagsOk(t) {
+      return t is list && t.size() <= 10
+        && (t.size() < 1 || (tagOk(t[0])))
+        && (t.size() < 2 || (tagOk(t[1])))
+        && (t.size() < 3 || (tagOk(t[2])))
+        && (t.size() < 4 || (tagOk(t[3])))
+        && (t.size() < 5 || (tagOk(t[4])))
+        && (t.size() < 6 || (tagOk(t[5])))
+        && (t.size() < 7 || (tagOk(t[6])))
+        && (t.size() < 8 || (tagOk(t[7])))
+        && (t.size() < 9 || (tagOk(t[8])))
+        && (t.size() < 10 || (tagOk(t[9])));
+    }
+    function captionOk(c) { return c is string && c.size() <= 150 && clean(c); }
+    // v1.3 optional video extras (all optional, so older clients still pass)
+    function linkOk(l) {
+      return l is map && l.keys().hasOnly(['title', 'url']) && l.keys().hasAll(['title', 'url'])
+        && l.title is string && l.title.size() >= 1 && l.title.size() <= 40 && clean(l.title)
+        && l.url is string && l.url.size() <= 300 && l.url.matches('^https?://[^ ]{3,300}$');
+    }
+    function remixOk(r) {
+      return r is map && r.keys().hasOnly(['type', 'vid', 'username']) && r.keys().hasAll(['type', 'vid', 'username'])
+        && r.type in ['duet', 'stitch'] && r.vid is string && r.vid.size() <= 40
+        && r.username is string && r.username.size() <= 20;
+    }
+    function extrasOk(d) {
+      return (!('soundId' in d) || (d.soundId is string && d.soundId.matches('^[A-Za-z0-9]{1,40}$')))
+        && (!('soundName' in d) || (d.soundName is string && d.soundName.size() <= 60 && clean(d.soundName)))
+        && (!('remix' in d) || remixOk(d.remix))
+        && (!('link' in d) || linkOk(d.link))
+        && (!('allowRemix' in d) || d.allowRemix is bool)
+        && (!('coverSec' in d) || (d.coverSec is number && d.coverSec >= 0 && d.coverSec <= 61))
+        && (!('publishAt' in d) || (d.publishAt is timestamp && d.publishAt > request.time
+              && d.publishAt < request.time + duration.value(31, 'd')));
+    }
+
+    // ---------- config (admin list) ----------
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;            // admins list: edit only in the Firebase console
+      // v1.3: admins may maintain the blue-tick list (never the admins list)
+      allow update: if isAdmin() && docId == 'app'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['verified'])
+        && request.resource.data.verified is list && request.resource.data.verified.size() <= 1000;
+    }
+
+    // ---------- usernames: permanent, unique claims ----------
+    match /usernames/{u} {
+      allow read: if true;              // signup checks availability
+      allow create: if signedIn()
+        && isUsername(u)
+        && request.resource.data.keys().hasOnly(['uid', 'at'])
+        && request.resource.data.uid == me()
+        && request.resource.data.at == request.time
+        // the profile with this username is created in the same batch
+        && getAfter(userDoc(me())).data.username == u
+        && !exists(userDoc(me()));
+      allow update: if false;           // a username never changes hands
+      allow delete: if signedIn() && (resource.data.uid == me() || isAdmin());
+    }
+
+    // ---------- public profiles ----------
+    match /users/{uid} {
+      allow read: if true;
+
+      allow create: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['name', 'username', 'bio', 'photo', 'followers', 'following', 'videoCount', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'username', 'followers', 'following', 'videoCount', 'createdAt'])
+        && nameOk(request.resource.data.name)
+        && isUsername(request.resource.data.username)
+        && existsAfter(docPath('usernames/' + request.resource.data.username))
+        && getAfter(docPath('usernames/' + request.resource.data.username)).data.uid == me()
+        && request.resource.data.followers == 0
+        && request.resource.data.following == 0
+        && request.resource.data.videoCount == 0
+        && request.resource.data.createdAt == request.time
+        // a banned account cannot delete + re-create its profile to escape
+        && !exists(docPath('bans/' + uid))
+        && (!('bio' in request.resource.data) || bioOk(request.resource.data.bio))
+        && (!('photo' in request.resource.data) || photoOk(request.resource.data.photo));
+
+      // Owner: name / bio / photo, plus counter moves tied to a real doc.
+      allow update: if signedIn() && me() == uid
+        && changed().hasOnly(['name', 'bio', 'photo', 'following', 'videoCount', 'lastFollow', 'lastVideo'])
+        && nameOk(request.resource.data.name)
+        && (!('bio' in request.resource.data) || bioOk(request.resource.data.bio))
+        && (!('photo' in request.resource.data) || photoOk(request.resource.data.photo))
+        && (!changed().hasAny(['following']) || followingMoveOk(uid))
+        && (!changed().hasAny(['videoCount']) || videoCountMoveOk(uid));
+
+      // Anyone: followers +1 / -1 only together with their own follow doc.
+      allow update: if signedIn() && me() != uid
+        && changed().hasOnly(['followers'])
+        && followersMoveOk(uid);
+
+      // Admin: ban / unban, and fix videoCount after deleting a video.
+      allow update: if isAdmin()
+        && changed().hasOnly(['banned', 'videoCount', 'verified'])
+        && (!('banned' in request.resource.data) || request.resource.data.banned is bool)
+        && (!('verified' in request.resource.data) || request.resource.data.verified is bool)
+        && request.resource.data.get('videoCount', 0) is int && request.resource.data.get('videoCount', 0) >= 0;
+
+      allow delete: if signedIn() && me() == uid;   // account deletion
+
+      function followingMoveOk(uid) {
+        let t = request.resource.data.lastFollow;
+        let f = docPath('follows/' + uid + '_' + t);
+        return t is string
+          && ((request.resource.data.following == resource.data.following + 1 && !exists(f) && existsAfter(f))
+           || (request.resource.data.following == resource.data.following - 1 && exists(f) && !existsAfter(f)));
+      }
+      function videoCountMoveOk(uid) {
+        let v = request.resource.data.lastVideo;
+        let d = docPath('videos/' + v);
+        return v is string
+          && ((request.resource.data.videoCount == resource.data.videoCount + 1 && !exists(d) && existsAfter(d)
+               && getAfter(d).data.ownerUid == uid)
+           || (request.resource.data.videoCount == resource.data.videoCount - 1 && exists(d) && !existsAfter(d)));
+      }
+      function followersMoveOk(uid) {
+        let f = docPath('follows/' + me() + '_' + uid);
+        return (request.resource.data.followers == resource.data.followers + 1 && !exists(f) && existsAfter(f))
+          || (request.resource.data.followers == resource.data.followers - 1 && exists(f) && !existsAfter(f));
+      }
+
+      // Private per-user state: liked ids, followed uids, blocked uids,
+      // own comment refs (one doc = one read at app start).
+      match /private/{docId} {
+        allow read, delete: if signedIn() && me() == uid;
+        allow create, update: if signedIn() && me() == uid && docId == 'state'
+          && request.resource.data.keys().hasOnly(['likes', 'follow', 'blocks', 'comments', 'clikes', 'favs'])
+          && request.resource.data.get('clikes', {}) is map
+          && request.resource.data.get('favs', {}) is map
+          && request.resource.data.get('likes', {}) is map
+          && request.resource.data.get('follow', {}) is map
+          && request.resource.data.get('blocks', {}) is map
+          && request.resource.data.get('comments', {}) is map;
+      }
+
+      // Blocks: the blocked person cannot comment on or follow this user.
+      match /blocks/{other} {
+        allow read, delete: if signedIn() && me() == uid;
+        allow create: if signedIn() && me() == uid && other != uid
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time;
+      }
+
+      // v1.3 Q&A: anyone asks, the creator answers publicly.
+      match /questions/{qid} {
+        allow read: if resource.data.answered == true
+          || (signedIn() && (me() == uid || resource.data.from == me()));
+        allow create: if active() && me() != uid
+          && request.resource.data.keys().hasOnly(['from', 'fromName', 'fromUsername', 'text', 'createdAt', 'answered'])
+          && request.resource.data.from == me()
+          && request.resource.data.fromUsername == get(userDoc(me())).data.username
+          && nameOk(request.resource.data.fromName)
+          && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 150
+          && request.resource.data.answered == false
+          && request.resource.data.createdAt == request.time
+          && !exists(docPath('users/' + uid + '/blocks/' + me()));
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'answered', 'answeredAt'])
+          && request.resource.data.answer is string && request.resource.data.answer.size() >= 1 && request.resource.data.answer.size() <= 300
+          && request.resource.data.answered == true
+          && request.resource.data.answeredAt == request.time;
+        allow delete: if signedIn() && (me() == uid || resource.data.from == me() || isAdmin());
+      }
+
+      // v1.3 playlists / series (public, owner-written).
+      match /playlists/{pid} {
+        allow read: if true;
+        allow create, update: if active() && me() == uid
+          && request.resource.data.keys().hasOnly(['name', 'videoIds', 'createdAt', 'updatedAt'])
+          && nameOk(request.resource.data.name)
+          && request.resource.data.videoIds is list && request.resource.data.videoIds.size() <= 50
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && me() == uid;
+      }
+
+      // v1.3 in-app activity (likes, comments, follows, mentions).
+      match /notifs/{nid} {
+        allow read, delete: if signedIn() && me() == uid;
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && request.resource.data.read is bool;
+        allow create: if active() && me() != uid
+          && request.resource.data.keys().hasOnly(['type', 'from', 'fromName', 'fromUsername', 'vid', 'text', 'createdAt', 'read'])
+          && request.resource.data.from == me()
+          && request.resource.data.fromUsername == get(userDoc(me())).data.username
+          && request.resource.data.type in ['like', 'comment', 'follow', 'mention', 'reply', 'question', 'answer']
+          && nameOk(request.resource.data.fromName)
+          && (!('vid' in request.resource.data) || (request.resource.data.vid is string && request.resource.data.vid.size() <= 40))
+          && (!('text' in request.resource.data) || (request.resource.data.text is string && request.resource.data.text.size() <= 100))
+          && request.resource.data.read == false
+          && request.resource.data.createdAt == request.time
+          && !exists(docPath('users/' + uid + '/blocks/' + me()));
+      }
+    }
+
+    // ---------- follows (id = followerUid_targetUid) ----------
+    match /follows/{fid} {
+      allow read: if signedIn() && (resource.data.from == me() || resource.data.to == me());
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['from', 'to', 'at'])
+        && request.resource.data.from == me()
+        && request.resource.data.to is string
+        && request.resource.data.to != me()
+        && fid == me() + '_' + request.resource.data.to
+        && request.resource.data.at == request.time
+        && exists(userDoc(request.resource.data.to))
+        && !exists(docPath('users/' + request.resource.data.to + '/blocks/' + me()))
+        // both counters move in the same batch
+        && getAfter(userDoc(request.resource.data.to)).data.followers == get(userDoc(request.resource.data.to)).data.followers + 1
+        && getAfter(userDoc(me())).data.following == get(userDoc(me())).data.following + 1;
+      allow delete: if signedIn() && resource.data.from == me()
+        && (!exists(userDoc(resource.data.to))
+            || getAfter(userDoc(resource.data.to)).data.followers == get(userDoc(resource.data.to)).data.followers - 1);
+      allow update: if false;
+    }
+
+    // ---------- videos ----------
+    match /videos/{vid} {
+      // Public feed queries must filter hidden == false.
+      allow read: if resource.data.hidden == false
+        || (signedIn() && resource.data.ownerUid == me())
+        || isAdmin();
+
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'ownerName', 'ownerUsername', 'ownerPhoto', 'caption', 'tags', 'video', 'likeCount', 'commentCount', 'createdAt', 'hidden',
+                                                 'soundId', 'soundName', 'remix', 'link', 'allowRemix', 'coverSec', 'publishAt'])
+        && extrasOk(request.resource.data)
+        && request.resource.data.keys().hasAll(['ownerUid', 'ownerName', 'ownerUsername', 'caption', 'tags', 'video', 'likeCount', 'commentCount', 'createdAt', 'hidden'])
+        && request.resource.data.ownerUid == me()
+        && request.resource.data.ownerUsername == get(userDoc(me())).data.username
+        && nameOk(request.resource.data.ownerName)
+        && (!('ownerPhoto' in request.resource.data) || photoOk(request.resource.data.ownerPhoto))
+        && captionOk(request.resource.data.caption)
+        && tagsOk(request.resource.data.tags)
+        && videoMapOk(request.resource.data.video)
+        && request.resource.data.likeCount == 0
+        && request.resource.data.commentCount == 0
+        && request.resource.data.hidden == false
+        && request.resource.data.createdAt == request.time
+        && getAfter(userDoc(me())).data.videoCount == get(userDoc(me())).data.videoCount + 1;
+
+      // Owner edits the caption, or refreshes the copied name / photo
+      // after editing the profile.
+      allow update: if signedIn() && resource.data.ownerUid == me()
+        && changed().hasOnly(['caption', 'tags', 'ownerName', 'ownerPhoto', 'pinnedComment', 'allowRemix', 'link'])
+        && (!('pinnedComment' in request.resource.data) || (request.resource.data.pinnedComment is string && request.resource.data.pinnedComment.size() <= 40))
+        && (!('allowRemix' in request.resource.data) || request.resource.data.allowRemix is bool)
+        && (!('link' in request.resource.data) || linkOk(request.resource.data.link))
+        && captionOk(request.resource.data.caption)
+        && tagsOk(request.resource.data.tags)
+        && nameOk(request.resource.data.ownerName)
+        && (!('ownerPhoto' in request.resource.data) || photoOk(request.resource.data.ownerPhoto));
+
+      // Like counter: +1 / -1 only with the caller's own like doc.
+      allow update: if active()
+        && changed().hasOnly(['likeCount'])
+        && likeMoveOk(vid);
+
+      // Comment counter: +1 with a new comment by the caller, -1 with a
+      // comment deleted in the same batch. lastCommentId names it.
+      allow update: if active()
+        && changed().hasOnly(['commentCount', 'lastCommentId'])
+        && commentMoveOk(vid);
+
+      // v1.3 view counter: +1 per update by a signed-in viewer.
+      allow update: if signedIn()
+        && changed().hasOnly(['views'])
+        && resource.data.hidden == false
+        && request.resource.data.views == resource.data.get('views', 0) + 1;
+
+      // v1.4 auto-hide: each signed-in user (not the owner) may add exactly
+      // +1 to reportCount, once per video, together with their own
+      // reporters/{uid} doc. The 3rd report must set hidden + autoHidden, so
+      // the video leaves the feed until an admin reviews it.
+      allow update: if active()
+        && resource.data.ownerUid != me()
+        && resource.data.hidden == false
+        && changed().hasOnly(['reportCount', 'hidden', 'autoHidden'])
+        && request.resource.data.reportCount == resource.data.get('reportCount', 0) + 1
+        && !exists(docPath('videos/' + vid + '/reporters/' + me()))
+        && existsAfter(docPath('videos/' + vid + '/reporters/' + me()))
+        && ((request.resource.data.reportCount >= 3
+              && request.resource.data.hidden == true && request.resource.data.autoHidden == true)
+         || (request.resource.data.reportCount < 3
+              && request.resource.data.hidden == false
+              && request.resource.data.get('autoHidden', false) == resource.data.get('autoHidden', false)));
+
+      // Admin: hide / unhide (unhide may also reset the auto-hide counter).
+      allow update: if isAdmin() && changed().hasOnly(['hidden', 'autoHidden', 'reportCount'])
+        && request.resource.data.hidden is bool
+        && (!changed().hasAny(['autoHidden']) || request.resource.data.autoHidden == false)
+        && (!changed().hasAny(['reportCount']) || request.resource.data.reportCount == 0);
+
+      allow delete: if signedIn() && (resource.data.ownerUid == me() || isAdmin());
+
+      function likeMoveOk(vid) {
+        let l = docPath('videos/' + vid + '/likes/' + me());
+        return (request.resource.data.likeCount == resource.data.likeCount + 1 && !exists(l) && existsAfter(l))
+          || (request.resource.data.likeCount == resource.data.likeCount - 1 && exists(l) && !existsAfter(l));
+      }
+      function commentMoveOk(vid) {
+        let cid = request.resource.data.lastCommentId;
+        let c = docPath('videos/' + vid + '/comments/' + cid);
+        return cid is string
+          && ((request.resource.data.commentCount == resource.data.commentCount + 1 && !exists(c) && existsAfter(c)
+               && getAfter(c).data.uid == me())
+           || (request.resource.data.commentCount == resource.data.commentCount - 1 && exists(c) && !existsAfter(c)));
+      }
+
+      // Likes: one per user per video; only the liker can read theirs.
+      // v1.4: one doc per user who reported this video (counts each user once).
+      match /reporters/{ruid} {
+        allow read: if isAdmin() || (signedIn() && me() == ruid);
+        allow create: if active() && me() == ruid
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time
+          && getAfter(docPath('videos/' + vid)).data.get('reportCount', 0) == get(docPath('videos/' + vid)).data.get('reportCount', 0) + 1;
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+
+      match /likes/{uid} {
+        allow read: if signedIn() && me() == uid;
+        allow create: if active() && me() == uid
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time
+          && get(docPath('videos/' + vid)).data.hidden == false
+          && getAfter(docPath('videos/' + vid)).data.likeCount == get(docPath('videos/' + vid)).data.likeCount + 1;
+        allow delete: if signedIn() && me() == uid
+          && (!exists(docPath('videos/' + vid))
+              || getAfter(docPath('videos/' + vid)).data.likeCount == get(docPath('videos/' + vid)).data.likeCount - 1);
+        allow update: if false;
+      }
+
+      // Comments: public read; author, video owner or admin can delete.
+      match /comments/{cid} {
+        allow read: if true;
+        allow create: if active()
+          && request.resource.data.keys().hasOnly(['uid', 'name', 'username', 'text', 'createdAt', 'replyTo', 'replyName', 'likeCount'])
+          && (!('replyTo' in request.resource.data) || (request.resource.data.replyTo is string && request.resource.data.replyTo.size() <= 40))
+          && (!('replyName' in request.resource.data) || (request.resource.data.replyName is string && request.resource.data.replyName.size() <= 40))
+          && (!('likeCount' in request.resource.data) || request.resource.data.likeCount == 0)
+          && request.resource.data.uid == me()
+          && request.resource.data.username == get(userDoc(me())).data.username
+          && nameOk(request.resource.data.name)
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 150
+          && request.resource.data.createdAt == request.time
+          && get(docPath('videos/' + vid)).data.hidden == false
+          && !exists(docPath('users/' + get(docPath('videos/' + vid)).data.ownerUid + '/blocks/' + me()))
+          && getAfter(docPath('videos/' + vid)).data.commentCount == get(docPath('videos/' + vid)).data.commentCount + 1
+          && getAfter(docPath('videos/' + vid)).data.lastCommentId == cid;
+        allow delete: if signedIn()
+          && (resource.data.uid == me()
+              || (exists(docPath('videos/' + vid)) && get(docPath('videos/' + vid)).data.ownerUid == me())
+              || isAdmin());
+        // v1.3 comment likes: likeCount moves by 1 with the callers like doc.
+        allow update: if active()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
+          && ((request.resource.data.likeCount == resource.data.get('likeCount', 0) + 1
+                && !exists(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))
+                && existsAfter(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me())))
+           || (request.resource.data.likeCount == resource.data.get('likeCount', 0) - 1
+                && exists(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))
+                && !existsAfter(docPath('videos/' + vid + '/comments/' + cid + '/likes/' + me()))));
+
+        match /likes/{luid} {
+          allow read: if signedIn() && me() == luid;
+          allow create: if active() && me() == luid
+            && request.resource.data.keys().hasOnly(['at'])
+            && request.resource.data.at == request.time
+            && getAfter(docPath('videos/' + vid + '/comments/' + cid)).data.likeCount
+               == get(docPath('videos/' + vid + '/comments/' + cid)).data.get('likeCount', 0) + 1;
+          allow delete: if signedIn() && me() == luid;
+          allow update: if false;
+        }
+      }
+    }
+
+    // ---------- v1.3 direct messages (mutual followers only) ----------
+    match /threads/{tid} {
+      allow read: if signedIn() && me() in resource.data.members;
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['members', 'names', 'last', 'lastAt', 'lastFrom', 'createdAt', 'seen'])
+        && request.resource.data.members is list && request.resource.data.members.size() == 2
+        && me() in request.resource.data.members
+        && request.resource.data.members[0] < request.resource.data.members[1]
+        && tid == request.resource.data.members[0] + '_' + request.resource.data.members[1]
+        && exists(docPath('follows/' + request.resource.data.members[0] + '_' + request.resource.data.members[1]))
+        && exists(docPath('follows/' + request.resource.data.members[1] + '_' + request.resource.data.members[0]))
+        && !exists(docPath('users/' + request.resource.data.members[0] + '/blocks/' + request.resource.data.members[1]))
+        && !exists(docPath('users/' + request.resource.data.members[1] + '/blocks/' + request.resource.data.members[0]))
+        && request.resource.data.names is map
+        && request.resource.data.last is string && request.resource.data.last.size() <= 100
+        && request.resource.data.lastFrom == me()
+        && request.resource.data.lastAt == request.time
+        && request.resource.data.createdAt == request.time;
+      allow update: if signedIn() && me() in resource.data.members
+        && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['last', 'lastAt', 'lastFrom', 'seen'])
+             && request.resource.data.last is string && request.resource.data.last.size() <= 100
+             && request.resource.data.lastFrom == me() && request.resource.data.lastAt == request.time)
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+          // v1.5: typing indicator - only my own key changes, value is a time number
+          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['typing'])
+              && request.resource.data.typing is map
+              && request.resource.data.typing.keys().hasOnly(resource.data.members)
+              && request.resource.data.typing.diff(resource.data.get('typing', {})).affectedKeys().hasOnly([me()])
+              && request.resource.data.typing[me()] is number))
+        && request.resource.data.get('seen', {}) is map;
+      allow delete: if false;
+
+      match /messages/{mid} {
+        allow read: if signedIn() && me() in get(docPath('threads/' + tid)).data.members;
+        // getAfter: the first message is written in the same batch as the thread.
+        allow create: if active()
+          && me() in getAfter(docPath('threads/' + tid)).data.members
+          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt', 'media', 'once'])
+          && request.resource.data.from == me()
+          && (!('media' in request.resource.data) || (request.resource.data.media is string && request.resource.data.media.size() <= 160000
+              && request.resource.data.media.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')))
+          && (!('once' in request.resource.data) || (request.resource.data.once is bool && 'media' in request.resource.data))
+          && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 500
+          && request.resource.data.createdAt == request.time
+          && exists(docPath('follows/' + getAfter(docPath('threads/' + tid)).data.members[0] + '_' + getAfter(docPath('threads/' + tid)).data.members[1]))
+          && exists(docPath('follows/' + getAfter(docPath('threads/' + tid)).data.members[1] + '_' + getAfter(docPath('threads/' + tid)).data.members[0]))
+          && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[0] + '/blocks/' + me()))
+          && !exists(docPath('users/' + getAfter(docPath('threads/' + tid)).data.members[1] + '/blocks/' + me()));
+        allow delete: if signedIn() && resource.data.from == me();
+        // v1.5: quick emoji reactions (each member sets only their own) and "view once" opened flag
+        allow update: if signedIn() && me() in get(docPath('threads/' + tid)).data.members
+          && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['react'])
+               && request.resource.data.react is map
+               && request.resource.data.react.diff(resource.data.get('react', {})).affectedKeys().hasOnly([me()])
+               && (!(me() in request.resource.data.react) || (request.resource.data.react[me()] is string && request.resource.data.react[me()].size() >= 1 && request.resource.data.react[me()].size() <= 8)))
+            // the receiver opens a view-once photo: the photo itself is removed from the message
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['opened', 'media'])
+               && request.resource.data.opened == true && !('media' in request.resource.data)
+               && resource.data.get('once', false) == true
+               && resource.data.from != me()));
+      }
+    }
+
+    // ---------- reports -> admin queue ----------
+    match /reports/{rid} {
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['by', 'type', 'targetId', 'targetOwner', 'videoId', 'reason', 'note', 'createdAt', 'status'])
+        && request.resource.data.keys().hasAll(['by', 'type', 'targetId', 'reason', 'createdAt', 'status'])
+        && request.resource.data.by == me()
+        && request.resource.data.type in ['video', 'user', 'comment']
+        && request.resource.data.targetId is string && request.resource.data.targetId.size() <= 128
+        && (!('targetOwner' in request.resource.data) || (request.resource.data.targetOwner is string && request.resource.data.targetOwner.size() <= 128))
+        && (!('videoId' in request.resource.data) || (request.resource.data.videoId is string && request.resource.data.videoId.size() <= 128))
+        && request.resource.data.reason in ['Spam or misleading', 'Nudity or sexual content', 'Violence or dangerous acts',
+             'Hate speech', 'Harassment or bullying', 'Child safety', 'False information', 'Copyright', 'Something else']
+        && (!('note' in request.resource.data) || (request.resource.data.note is string && request.resource.data.note.size() <= 300))
+        && request.resource.data.status == 'open'
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && changed().hasOnly(['status', 'handledBy', 'handledAt'])
+        && request.resource.data.status in ['open', 'done']
+        && request.resource.data.handledBy == me();
+    }
+
+    // ---------- bans (admin-written; survives profile deletion) ----------
+    match /bans/{uid} {
+      allow read: if isAdmin() || (signedIn() && me() == uid);
+      allow create: if isAdmin() && uid != me()
+        && request.resource.data.keys().hasOnly(['by', 'at'])
+        && request.resource.data.by == me()
+        && request.resource.data.at == request.time;
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ---------- Cloudinary purge list ----------
+    // Unsigned uploads cannot delete files, so when a video doc is deleted
+    // its Cloudinary public id is queued here for the admin to remove.
+    match /purge/{vid} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['publicId', 'by', 'at'])
+        && request.resource.data.by == me()
+        && publicIdOk(request.resource.data.publicId)
+        && request.resource.data.at == request.time
+        && exists(docPath('videos/' + vid))
+        && get(docPath('videos/' + vid)).data.video.publicId == request.resource.data.publicId
+        && (get(docPath('videos/' + vid)).data.ownerUid == me() || isAdmin())
+        && !existsAfter(docPath('videos/' + vid));
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ---------- everything else: denied ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jilan Reels — returning to the app...</title>
+<style>
+  body { font-family: sans-serif; background: #000; color: #fff; margin: 0; padding: 40px 20px; text-align: center; }
+  a.btn { display: inline-block; margin-top: 20px; padding: 14px 24px; background: #1f7ae0; color: #fff; text-decoration: none; border-radius: 10px; font-size: 18px; }
+  p { font-size: 16px; color: #ccc; }
+</style>
+</head>
+<body>
+<!-- Jilan Reels — Google OAuth return page. Google may only redirect to a
+     registered https:// URL, so the Android app opens Google sign-in in the
+     system browser and Google returns here. This page forwards the URL
+     fragment (id_token or error) to the app via jilanreels://auth. -->
+<p id="msg">Finishing sign-in. Returning to Jilan Reels...</p>
+<a class="btn" id="backBtn" href="#">Back to Jilan Reels</a>
+<script>
+(function () {
+  var frag = window.location.hash ? window.location.hash.substring(1) : "";
+  var target = "jilanreels://auth#" + frag;
+  var btn = document.getElementById("backBtn");
+  btn.href = target;
+  try { window.location.replace(target); } catch (e) {}
+  setTimeout(function () {
+    document.getElementById("msg").textContent = "If the app didn't open, tap the button below.";
+  }, 1500);
+})();
+</script>
+</body>
+</html>
