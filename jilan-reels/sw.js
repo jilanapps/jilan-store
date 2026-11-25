@@ -1,4 +1,4 @@
-/* Jilan Reels — sw.js (v1.5.0)
+/* Jilan Reels — sw.js (v1.5.1)
  * Makes the 2nd and later opens fast:
  *  - app files (js/css/png, Firebase SDK) come from the phone's cache;
  *  - the page itself (index.html) and version.json always try the network
@@ -7,12 +7,12 @@
  * A new version = new CACHE name; old caches are deleted on activate.
  */
 var PFX = /preview/.test(self.registration ? self.registration.scope : '') ? 'jrp-shell-' : 'jr-shell-';
-var CACHE = PFX + '1.5.0';
+var CACHE = PFX + '1.5.1';
 var SHELL = [
-  './', 'index.html', 'style.css?v=1.5.0', 'v15.css?v=1.5.0', 'v15.js?v=1.5.0',
+  './', 'index.html', 'style.css?v=1.5.1', 'v15.css?v=1.5.1', 'v15.js?v=1.5.1',
   'firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js', 'firebase-config.js',
-  'lib.js?v=1.5.0', 'i18n.js?v=1.5.0', 'auth.js?v=1.5.0', 'api.js?v=1.5.0', 'media.js?v=1.5.0',
-  'social.js?v=1.5.0', 'app.js?v=1.5.0', 'fx.js?v=1.5.0', 'studio.js?v=1.5.0', 'admin.js?v=1.5.0',
+  'lib.js?v=1.5.1', 'i18n.js?v=1.5.1', 'auth.js?v=1.5.1', 'api.js?v=1.5.1', 'media.js?v=1.5.1',
+  'social.js?v=1.5.1', 'app.js?v=1.5.1', 'fx.js?v=1.5.1', 'studio.js?v=1.5.1', 'admin.js?v=1.5.1',
   'icon-192.png', 'manifest.json'
 ];
 

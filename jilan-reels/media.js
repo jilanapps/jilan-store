@@ -127,7 +127,14 @@
   };
 
   // Unsigned upload with progress. Resolves with JRLib.pickUpload(...).
+  // One automatic retry if the connection drops.
   M.upload = function (blob, onProgress) {
+    return M.upload1(blob, onProgress).catch(function (e) {
+      if (!e || !e.netFail) throw e;
+      return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return M.upload1(blob, onProgress); });
+    });
+  };
+  M.upload1 = function (blob, onProgress) {
     var c = window.JR_CLOUDINARY || {};
     return new Promise(function (res, rej) {
       if (!c.cloudName || /PLACEHOLDER/.test(c.cloudName)) return rej(new Error("Video upload isn't set up yet."));
@@ -150,7 +157,7 @@
           } catch (e) { rej(e); }
         } else rej(new Error('Upload failed' + (j && j.error && j.error.message ? ': ' + j.error.message : '. Please try again.')));
       };
-      x.onerror = function () { rej(new Error('Upload failed. Check your internet.')); };
+      x.onerror = function () { var er = new Error('Upload failed. Check your internet.'); er.netFail = true; rej(er); };
       x.ontimeout = function () { rej(new Error('Upload timed out. Please try again.')); };
       x.timeout = 10 * 60 * 1000;
       x.send(fd);

@@ -1083,7 +1083,10 @@
     if (!(recorder && recorder.state === 'recording')) stopCam();
     if (!/^video\//.test(f.type || 'video/')) { toast('Please choose a video.'); return; }
     if (f.size > 200 * 1024 * 1024) { toast('This video is too big. Please choose a shorter one.'); return; }
-    M.probe(f).then(function (info) {
+    // Copy the picked file into memory: on Android WebView the gallery file
+    // handle can stop being readable later, which made the upload fail.
+    var keep = (f.size <= 60 * 1024 * 1024 && f.arrayBuffer) ? f.arrayBuffer().then(function (b) { return new Blob([b], { type: f.type || 'video/mp4' }); }, function () { return f; }) : Promise.resolve(f);
+    keep.then(function (fb) { f = fb; return M.probe(f); }).then(function (info) {
       if (info.duration && info.duration > MAX_SEC + 0.5) { URL.revokeObjectURL(info.url); toast('Please choose a video of 60 seconds or less.'); return; }
       showPreview(f, info.url, 0);
     }).catch(function (e) { toast(errMsg(e)); });
