@@ -47,6 +47,7 @@ footer{text-align:center;color:#64748B;font-size:12px;padding:16px}
 <script>
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtD(d){if(!d) return '—'; try{return new Date(d).toISOString().slice(0,10);}catch(e){return String(d);}}
+/*v105-bdbsid*/function fmtMemberId(v){var s=String(v==null?'':v).trim(); if(!s) return ''; if(/^BDBS-/i.test(s)) return s.toUpperCase(); var d=s.replace(/\D/g,''); if(!d) return s; return 'BDBS-'+(d.length<3?('000'+d).slice(-3):d);}
 function notVerified(msg){
   document.getElementById('out').innerHTML = '<div class="card"><p class="notverified">✗ NOT VERIFIED</p><p class="mut">'+esc(msg||'This membership could not be verified. It may be expired, removed, or the QR code may be wrong.')+'</p></div>';
 }
@@ -61,7 +62,7 @@ function showMember(m){
     '<p class="verified">✓ VERIFIED MEMBER</p>' +
     '<h2 style="margin:6px 0">'+esc(m.name)+'</h2>' +
     (m.designation ? '<p>Designation: <b>'+esc(m.designation)+'</b></p>' : '') +
-    (m.idNo ? '<p>Member ID: <b>'+esc(m.idNo)+'</b></p>' : '') +
+    (m.idNo ? '<p>Member ID: <b>'+esc(fmtMemberId(m.idNo))+'</b></p>' : '') +
     '<p>Phone: <b>'+esc(m.phone||'—')+'</b></p>' +
     '<p class="mut">Basti Dawa Blood Society (BDBS)<br>Under Supervision — Basti Dawa Welfare Organization</p></div>';
 }
