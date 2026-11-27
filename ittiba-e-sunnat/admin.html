@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ایڈمن — تحریک اتباعِ سنت پاکستان</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--black:#111;--paper:#fff;--saffron:#d0701f;--saffron-deep:#a9550f;--line:#e4ddd4;--muted:#6b6259}
+body{margin:0;background:#f6f3ef;color:var(--black);font-family:'Noto Nastaliq Urdu',serif;line-height:2}
+header{background:var(--black);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+header img{width:42px;height:42px;border-radius:50%;background:#fff}
+header h1{font-size:17px;margin:0;font-weight:700}
+header small{display:block;color:var(--saffron);font-size:12px;font-family:sans-serif;letter-spacing:.5px}
+main{max-width:720px;margin:0 auto;padding:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 6px}
+.btn{font-family:inherit;font-size:15px;border:1.5px solid var(--black);background:var(--paper);color:var(--black);border-radius:10px;padding:4px 14px;cursor:pointer}
+.btn.p{background:var(--saffron);border-color:var(--saffron);color:#fff}
+.btn.d{border-color:#b3261e;color:#b3261e}
+.btn:disabled{opacity:.5}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button{flex:1 1 22%}
+.tabs button.on{background:var(--black);color:#fff}
+label{display:block;font-size:14px;margin-top:8px}
+input,textarea{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;color:var(--black)}
+input[type=url],input[type=date],input[type=time],input[type=number]{direction:ltr;text-align:left;font-family:sans-serif}
+textarea{min-height:90px}
+.hint{font-size:13px;color:var(--muted);line-height:1.9}
+.warn{background:#fff4e8;border:1px solid var(--saffron);border-radius:8px;padding:6px 10px;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.item{border-top:1px solid var(--line);padding:8px 0;display:flex;gap:10px;align-items:flex-start}
+.item .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.item .t b{display:block}
+.item .t span{font-size:12px;color:var(--muted);font-family:sans-serif;line-height:1.6}
+.item img{width:44px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+#msg{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:6px 16px;border-radius:10px;display:none;max-width:92%;font-size:14px;z-index:9}
+.hidden{display:none}
+.who{font-size:13px;color:var(--muted);direction:ltr;text-align:right;font-family:sans-serif}
+#coverPrev{max-width:90px;border-radius:6px;margin-top:6px;display:none}
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt=""><div><h1>ایڈمن پینل</h1><small>TEHREEK ITTIBA-E-SUNNAT PAKISTAN</small></div></header>
+<main>
+  <div class="card" id="loginCard">
+    <h2>ایڈمن لاگ ان</h2>
+    <p class="hint">صرف تحریک کے منظور شدہ ایڈمن اپنے Google اکاؤنٹ سے لاگ ان کر سکتے ہیں۔ پاس ورڈ آپ کے اپنے فون پر Google کے پاس رہتا ہے، یہاں محفوظ نہیں ہوتا۔</p>
+    <button class="btn p" id="loginBtn" type="button">Google سے لاگ ان کریں</button>
+    <p class="hint" id="loginErr"></p>
+  </div>
+
+  <div id="panel" class="hidden">
+    <div class="card"><div class="who" id="who"></div><div class="row"><a class="btn" href="./">ایپ / ویب سائٹ دیکھیں</a><button class="btn" id="logoutBtn" type="button">لاگ آؤٹ</button></div></div>
+    <div class="tabs" id="tabs">
+      <button class="btn on" data-k="elan" type="button">اعلانات</button>
+      <button class="btn" data-k="mehfil" type="button">محافل</button>
+      <button class="btn" data-k="bayan" type="button">بیانات</button>
+      <button class="btn" data-k="kitab" type="button">کتب</button>
+    </div>
+    <div class="card">
+      <h2 id="formTitle">نیا اعلان</h2>
+      <div id="f-common">
+        <label id="lTitle">عنوان *</label><input id="fTitle" maxlength="200">
+      </div>
+      <div data-for="kitab"><label>مؤلف / مرتب (پوری لائن)</label><input id="fAuthor" maxlength="400"></div>
+      <div data-for="mehfil">
+        <label>تاریخ</label><input id="fDate" type="date">
+        <label>وقت (مثلاً: بعد نمازِ عشاء، یا شام 7 بجے)</label><input id="fTime" maxlength="20">
+        <label>مقام</label><input id="fPlace" maxlength="200">
+      </div>
+      <div data-for="elan mehfil kitab bayan"><label id="lBody">تفصیل</label><textarea id="fBody" maxlength="3000"></textarea></div>
+      <div data-for="kitab"><label>صفحات</label><input id="fPages" type="number" min="1" max="99999"></div>
+      <div data-for="elan bayan kitab">
+        <label id="lUrl">لنک</label><input id="fUrl" type="url" maxlength="500" placeholder="https://">
+        <p class="hint" id="urlHint"></p>
+      </div>
+      <div data-for="kitab">
+        <label>سرورق کی تصویر (اختیاری)</label>
+        <input id="fCover" type="file" accept="image/*">
+        <img id="coverPrev" alt="">
+        <p class="hint">تصویر خود بخود چھوٹی کر کے اپلوڈ ہو گی۔ تصویر نہ لگائیں تو تحریک کا لوگو نظر آئے گا۔</p>
+      </div>
+      <div class="row"><button class="btn p" id="saveBtn" type="button">محفوظ کریں</button><button class="btn hidden" id="cancelBtn" type="button">ترمیم ختم کریں</button></div>
+    </div>
+    <div class="card"><h2 id="listTitle">موجودہ اعلانات</h2><div id="list"><p class="hint">لوڈ ہو رہا ہے…</p></div>
+      <p class="hint">نوٹ: یہاں صرف وہ چیزیں ہیں جو ایڈمن پینل سے ڈالی گئیں۔ ایپ میں پہلے سے موجود مواد ویسا ہی رہے گا۔</p></div>
+  </div>
+</main>
+<div id="msg"></div>
+<script src="admin/firebase-app-compat.js"></script>
+<script src="admin/firebase-auth-compat.js"></script>
+<script src="admin/firebase-firestore-compat.js"></script>
+<script>
+var TZ_CONFIG={apiKey:'AIzaSyCRSugFDu9Uvf85Qr9aprHsxD40aSjdJn0',authDomain:'jilan-chat.firebaseapp.com',projectId:'jilan-chat',storageBucket:'jilan-chat.firebasestorage.app',messagingSenderId:'442847596741',appId:'1:442847596741:web:434c1c8fb65d56d5c3a0ac'};
+var ADMINS=['jilanappsofficial@gmail.com','shoaibrao.gcuf@gmail.com'];
+var CLOUD={cloud:'rw1wri3w',preset:'jilan_reels_unsigned',folder:'tehreek'};
+var LABEL={elan:['نیا اعلان','موجودہ اعلانات'],mehfil:['نئی محفل / اجتماع','آنے والی محافل'],bayan:['نیا بیان','بیانات (ایڈمن سے ڈالے گئے)'],kitab:['نئی کتاب','کتب (ایڈمن سے ڈالی گئیں)']};
+var URLHINT={elan:'اختیاری — کوئی ویب لنک ہو تو لگائیں۔',bayan:'YouTube ویڈیو کا لنک لازمی ہے (youtube.com یا youtu.be)۔',kitab:'کتاب کی PDF کا Google Drive لنک لازمی ہے۔ Drive میں فائل پر ⋮ ← Share ← General access ← "Anyone with the link" کر کے لنک کاپی کریں۔ (مفت سرور پر PDF براہِ راست اپلوڈ نہیں ہو سکتی۔)'};
+var kind='elan', editing=null, items=[], coverUrl='', db, auth;
+function $(i){return document.getElementById(i);}
+function toast(t){var m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(function(){m.style.display='none';},3500);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function driveId(u){var m=/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{20,})/.exec(u||'');return m?m[1]:'';}
+function setKind(k){kind=k;clearForm();document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===k);});
+  document.querySelectorAll('[data-for]').forEach(function(d){d.style.display=d.getAttribute('data-for').split(' ').indexOf(k)>=0?'':'none';});
+  $('lUrl').textContent=k==='bayan'?'YouTube لنک *':k==='kitab'?'PDF کا Google Drive لنک *':'لنک (اختیاری)';
+  $('lBody').textContent=k==='bayan'?'مختصر تفصیل (اختیاری، مثلاً بیان کرنے والے کا نام)':k==='kitab'?'دوسری لائن (اختیاری)':'تفصیل';
+  $('urlHint').textContent=URLHINT[k]||''; $('formTitle').textContent=LABEL[k][0]; $('listTitle').textContent=LABEL[k][1]; renderList();}
+function clearForm(){editing=null;coverUrl='';['fTitle','fAuthor','fDate','fTime','fPlace','fBody','fPages','fUrl'].forEach(function(i){$(i).value='';});$('fCover').value='';$('coverPrev').style.display='none';$('cancelBtn').classList.add('hidden');$('saveBtn').textContent='محفوظ کریں';if(LABEL[kind])$('formTitle').textContent=LABEL[kind][0];}
+function renderList(){var l=items.filter(function(i){return i.kind===kind;});
+  if(!l.length){$('list').innerHTML='<p class="hint">ابھی کچھ نہیں ڈالا گیا۔</p>';return;}
+  $('list').innerHTML=l.map(function(i){return '<div class="item">'+(i.kind==='kitab'?'<img src="'+esc(i.cover||'logo.png')+'" alt="">':'')+'<div class="t"><b>'+esc(i.title)+'</b><span>'+esc([i.date,i.time,i.place].filter(Boolean).join(' • '))+(i.url?'<br><span dir="ltr">'+esc(i.url)+'</span>':'')+'<br>'+esc(i.by||'')+'</span></div><button class="btn" type="button" data-e="'+i.id+'">ترمیم</button> <button class="btn d" type="button" data-d="'+i.id+'">حذف</button></div>';}).join('');}
+function startEdit(id){var i=items.filter(function(x){return x.id===id;})[0];if(!i)return;editing=id;$('fTitle').value=i.title||'';$('fAuthor').value=i.author||'';$('fDate').value=i.date||'';$('fTime').value=i.time||'';$('fPlace').value=i.place||'';$('fBody').value=i.body||'';$('fPages').value=i.pages||'';$('fUrl').value=i.url||'';coverUrl=i.cover||'';if(coverUrl){$('coverPrev').src=coverUrl;$('coverPrev').style.display='block';}
+  $('formTitle').textContent='ترمیم: '+i.title;$('saveBtn').textContent='تبدیلی محفوظ کریں';$('cancelBtn').classList.remove('hidden');window.scrollTo(0,0);}
+function shrink(file){return new Promise(function(res,rej){var img=new Image();img.onload=function(){var s=Math.min(1,700/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(b){b?res(b):rej(new Error('img'));},'image/jpeg',0.85);};img.onerror=function(){rej(new Error('img'));};img.src=URL.createObjectURL(file);});}
+function uploadCover(file){return shrink(file).then(function(blob){var fd=new FormData();fd.append('file',blob,'cover.jpg');fd.append('upload_preset',CLOUD.preset);fd.append('folder',CLOUD.folder);
+  return fetch('https://api.cloudinary.com/v1_1/'+CLOUD.cloud+'/image/upload',{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(j){if(!j.secure_url)throw new Error((j.error&&j.error.message)||'upload');return j.secure_url;});});}
+$('fCover').addEventListener('change',function(){var f=this.files[0];if(!f)return;$('saveBtn').disabled=true;toast('تصویر اپلوڈ ہو رہی ہے…');uploadCover(f).then(function(u){coverUrl=u;$('coverPrev').src=u;$('coverPrev').style.display='block';toast('تصویر اپلوڈ ہو گئی');}).catch(function(e){toast('تصویر اپلوڈ نہیں ہوئی: '+e.message);}).then(function(){$('saveBtn').disabled=false;});});
+function save(){var t=$('fTitle').value.trim(),u=$('fUrl').value.trim();
+  if(!t){toast('عنوان لکھیں');return;}
+  if(u&&!/^https:\/\//.test(u)){toast('لنک https:// سے شروع ہونا چاہیے');return;}
+  if(kind==='bayan'&&!/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u)){toast('درست YouTube لنک لگائیں');return;}
+  if(kind==='kitab'){if(!u){toast('کتاب کا Google Drive لنک لگائیں');return;} var id=driveId(u); if(/drive\.google\.com/.test(u)&&!id){toast('Drive لنک درست نہیں');return;} if(id)u='https://drive.google.com/file/d/'+id+'/view';}
+  var ts=firebase.firestore.FieldValue.serverTimestamp(), d={kind:kind,title:t,by:auth.currentUser.email,updatedAt:ts};
+  var body=$('fBody').value.trim(); if(body)d.body=body;
+  if(u)d.url=u;
+  if(kind==='mehfil'){if($('fDate').value)d.date=$('fDate').value;if($('fTime').value.trim())d.time=$('fTime').value.trim();if($('fPlace').value.trim())d.place=$('fPlace').value.trim();}
+  if(kind==='kitab'){if($('fAuthor').value.trim())d.author=$('fAuthor').value.trim();if($('fPages').value)d.pages=String($('fPages').value);if(coverUrl)d.cover=coverUrl;}
+  $('saveBtn').disabled=true;
+  var col=db.collection('tehreek_items'), p;
+  if(editing){var del=firebase.firestore.FieldValue.delete();['body','url','date','time','place','author','pages','cover'].forEach(function(k){if(!(k in d))d[k]=del;});p=col.doc(editing).update(d);}
+  else{d.createdAt=ts;p=col.add(d);}
+  p.then(function(){toast(editing?'تبدیلی محفوظ ہو گئی — ایپ میں نظر آئے گی':'محفوظ ہو گیا — ایپ میں سب کو نظر آئے گا');clearForm();}).catch(function(e){toast('محفوظ نہیں ہوا: '+(e.code==='permission-denied'?'اجازت نہیں':e.message));}).then(function(){$('saveBtn').disabled=false;});}
+function del(id){var i=items.filter(function(x){return x.id===id;})[0];if(!i||!confirm('"'+i.title+'" حذف کر دیں؟'))return;db.collection('tehreek_items').doc(id).delete().then(function(){toast('حذف ہو گیا');}).catch(function(e){toast('حذف نہیں ہوا: '+e.message);});}
+document.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.k)setKind(b.dataset.k);else if(b.dataset.e)startEdit(b.dataset.e);else if(b.dataset.d)del(b.dataset.d);});
+$('saveBtn').onclick=save;$('cancelBtn').onclick=clearForm;
+var unsub=null;
+function login(){$('loginErr').textContent='';var p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+  auth.signInWithPopup(p).catch(function(e){if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){return auth.signInWithRedirect(p);} if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')$('loginErr').textContent='لاگ ان نہیں ہوا: '+e.code;});}
+function start(){
+  var app=firebase.initializeApp(TZ_CONFIG,'tehreek-admin'); auth=app.auth(); db=app.firestore();
+  auth.getRedirectResult().catch(function(e){$('loginErr').textContent='لاگ ان نہیں ہوا: '+e.code;});
+  $('loginBtn').onclick=login; $('logoutBtn').onclick=function(){auth.signOut();};
+  auth.onAuthStateChanged(function(u){if(unsub){unsub();unsub=null;}
+    if(u&&ADMINS.indexOf((u.email||'').toLowerCase())>=0&&u.emailVerified){$('loginCard').classList.add('hidden');$('panel').classList.remove('hidden');$('who').textContent=u.email;setKind(kind);
+      unsub=db.collection('tehreek_items').onSnapshot(function(s){items=s.docs.map(function(d){var o=d.data();o.id=d.id;o.ct=o.createdAt&&o.createdAt.toMillis?o.createdAt.toMillis():9e15;return o;}).sort(function(a,b){return b.ct-a.ct;});renderList();},function(e){toast('ڈیٹا لوڈ نہیں ہوا: '+e.code);});}
+    else{$('panel').classList.add('hidden');$('loginCard').classList.remove('hidden');if(u){$('loginErr').textContent='یہ اکاؤنٹ ('+u.email+') ایڈمن نہیں ہے۔ درست Gmail سے لاگ ان کریں۔';auth.signOut();}}});
+}
+start();
+</script>
+</body>
+</html>
