@@ -4,94 +4,292 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Installock Master Dashboard (Dr Asif)</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>/* theme: ?theme=light|dark > saved > system */(function(){try{var q=(location.search.match(/[?&]theme=(light|dark)/)||[])[1];var t=q||localStorage.getItem("il_theme")||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}})();</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
+/* ===== Installock Shop — DESIGN SYSTEM v3 (2026-11-27 redesign TEST) =====
+   Enterprise fintech / device-management look. Tokens drive everything;
+   light + dark sets. Theme = ?theme= param > saved choice > system. */
+:root{
+  --bg:#F4F6FA; --surface:#FFFFFF; --surface-2:#F1F4F9; --surface-3:#E9EEF5;
+  --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text:#0F172A; --text-2:#334155; --muted:#64748B;
+  --primary:#4338CA; --primary-hover:#3730A3; --on-primary:#FFFFFF;
+  --primary-soft:#EEF2FF; --primary-soft-text:#3730A3; --accent:#4338CA; --link:#4F46E5;
+  --ok:#047857; --ok-soft:#ECFDF5; --ok-line:#A7F3D0;
+  --warn:#B45309; --warn-soft:#FFFBEB; --warn-line:#FDE68A;
+  --bad:#BE123C; --bad-soft:#FFF1F2; --bad-line:#FECDD3;
+  --slate:#475569; --slate-soft:#F1F5F9; --slate-line:#CBD5E1;
+  --focus:rgba(67,56,202,.35);
+  --r-sm:10px; --r:14px; --r-lg:16px;
+  --shadow:0 1px 2px rgba(15,23,42,.04);
+  --font:'Inter','Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg:#0A0F1C; --surface:#111827; --surface-2:#161F31; --surface-3:#1C2740;
+  --border:#232F47; --border-strong:#33415E;
+  --text:#E8ECF4; --text-2:#C3CBDA; --muted:#8B97AD;
+  --primary:#6366F1; --primary-hover:#818CF8; --on-primary:#FFFFFF;
+  --primary-soft:rgba(99,102,241,.16); --primary-soft-text:#A5B4FC; --accent:#A5B4FC; --link:#A5B4FC;
+  --ok:#34D399; --ok-soft:rgba(16,185,129,.13); --ok-line:rgba(52,211,153,.35);
+  --warn:#FBBF24; --warn-soft:rgba(245,158,11,.13); --warn-line:rgba(251,191,36,.35);
+  --bad:#FB7185; --bad-soft:rgba(244,63,94,.13); --bad-line:rgba(251,113,133,.38);
+  --slate:#A3B0C5; --slate-soft:rgba(148,163,184,.12); --slate-line:rgba(148,163,184,.32);
+  --focus:rgba(129,140,248,.45);
+  --shadow:none;
+  color-scheme:dark;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0b1120;color:#e8eaf2;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
-header{background:#151b30;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e8b93c;position:sticky;top:0;z-index:10}
-header h1{color:#e8b93c;font-size:18px}
-header .user{font-size:13px;color:#9aa7c7}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-.card{background:#151b30;border-radius:12px;padding:18px;margin-bottom:16px;border:1px solid #232c4a}
-.card h2{color:#e8b93c;font-size:16px;margin-bottom:12px}
-input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5e;background:#0b1120;color:#fff;margin-bottom:10px;font-size:15px}
-button{background:#e8b93c;color:#0b1120;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;margin:4px 4px 4px 0}
-button.ghost{background:#232c4a;color:#e8b93c}
-button.danger{background:#7b1f1f;color:#fff}
-button.small{padding:6px 10px;font-size:12px}
+html,body{max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.45;min-height:100vh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.num,.stat .n,.fbox .n,.pc-kv .v,.big-amt{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+a{color:var(--link)}
 .hidden{display:none!important}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
-.stat{background:#151b30;border-radius:10px;padding:14px;text-align:center;border:1px solid #232c4a}
-.stat .n{font-size:26px;font-weight:800;color:#e8b93c}
-.stat .l{font-size:12px;color:#9aa7c7}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #232c4a}
-th{color:#e8b93c;font-size:12px;text-transform:uppercase}
-.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.c-active{background:#1f6b3a;color:#fff}.c-grace{background:#8a6d1c;color:#fff}
-.c-limited{background:#7b1f1f;color:#fff}.c-offline{background:#4a2c7b;color:#fff}
-.c-released{background:#3a4a5e;color:#fff}
-.c-dead{background:#7a1d1d;color:#fff}
-/* ===== Device Health view (2026-11-07) ===== */
-.hdot{font-size:15px}
-.h-ok{color:#4caf50}.h-warn{color:#ffb74d}.h-bad{color:#ff6b6b}
-.hchip{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
-.hchip.ok{background:#1f6b3a}.hchip.warn{background:#8a6d1c}.hchip.bad{background:#c62828}
-#healthOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow:auto;padding:18px}
-#healthOverlay.open{display:block}
-.healthbox{max-width:640px;margin:0 auto;background:#151b30;border:1px solid #232c4a;border-radius:12px;padding:18px}
+
+/* ---- app bar ---- */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;position:sticky;top:0;z-index:20}
+header h1{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.01em;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header h1 .mark{width:30px;height:30px;border-radius:9px;background:var(--primary);color:var(--on-primary);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+header h1 .mark svg{width:16px;height:16px}
+header .user{order:3;flex-basis:100%;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:40px}
+header .user:empty{display:none}
+.theme-btn{width:34px;height:34px;flex-shrink:0;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);display:inline-flex;align-items:center;justify-content:center;padding:0;margin:0;cursor:pointer}
+.theme-btn svg{width:16px;height:16px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;margin-bottom:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{color:var(--text);font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:6px 2px 10px;display:flex;align-items:center;justify-content:space-between}
+
+/* ---- inputs ---- */
+input,select{width:100%;padding:11px 12px;border-radius:var(--r-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);margin-bottom:10px;font-size:15px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--focus)}
+input::placeholder{color:var(--muted)}
+
+/* ---- buttons: primary solid / tonal / outline / danger ---- */
+button{font-family:inherit;background:var(--primary);color:var(--on-primary);border:1px solid transparent;border-radius:var(--r-sm);padding:10px 16px;font-weight:600;font-size:14px;line-height:1.2;cursor:pointer;margin:4px 4px 4px 0;transition:background .15s,border-color .15s,transform .05s}
+button:active{transform:scale(.98)}
+button:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
+button.danger{background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)}
+button.small{padding:7px 12px;font-size:13px}
+
+/* ---- section nav (was pastel tiles) ---- */
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.tabs button,.tabs button:nth-child(n){background:var(--surface);color:var(--text-2);border:1px solid var(--border);margin:0;padding:10px 4px;min-height:58px;border-radius:var(--r-sm);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tabs button .ti{line-height:0;color:var(--muted)}
+.tabs button .ti svg{width:20px;height:20px}
+.tabs button.on .ti{color:var(--primary-soft-text)}
+.tabs button .tl{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.tabs button.on{background:var(--primary-soft);color:var(--primary-soft-text);border-color:var(--primary)}
+.tabs .badge{display:inline-block;min-width:16px;padding:0 5px;border-radius:999px;background:var(--bad);color:#fff;font-size:10px;line-height:16px}
+.tabs .badge:empty{display:none}
+.qactions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.qactions button{margin:0;min-height:42px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:9px 6px}
+.qactions button.out{background:transparent;color:var(--text-2);border-color:var(--border-strong)}
+@media(min-width:900px){.tabs{grid-template-columns:repeat(8,minmax(0,1fr))}}
+
+/* ---- KPI stat cards ---- */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px}
+@media(min-width:900px){.stats{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.stat,.stats .stat:nth-child(n){background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:left;min-width:0;position:relative;box-shadow:var(--shadow)}
+.stat .top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
+.stat .l,.stats .stat .l{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stat .n,.stats .stat .n{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .ic{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--slate-soft);color:var(--slate)}
+.stat .ic svg{width:15px;height:15px}
+.stat.wide{grid-column:1 / -1}
+.stat.wide .n{font-size:28px}
+.t-primary .ic{background:var(--primary-soft);color:var(--primary-soft-text)}
+.t-ok .ic{background:var(--ok-soft);color:var(--ok)}
+.t-warn .ic{background:var(--warn-soft);color:var(--warn)}
+.t-bad .ic{background:var(--bad-soft);color:var(--bad)}
+.t-slate .ic{background:var(--slate-soft);color:var(--slate)}
+.t-ok .n.tone{color:var(--ok)}.t-bad .n.tone{color:var(--bad)}.t-warn .n.tone{color:var(--warn)}
+.stat .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+
+/* ---- semantic pills ---- */
+.chip,.pchip,.hchip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;line-height:1.5;white-space:nowrap;border:1px solid transparent}
+.chip::before,.pchip::before,.hchip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.c-active,.pchip-active,.hchip.ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)}
+.c-grace,.pchip-off,.hchip.warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
+.c-limited,.c-released,.pchip-released{background:var(--slate-soft);color:var(--slate);border-color:var(--slate-line)}
+.c-offline{background:var(--slate-soft);color:var(--slate);border-color:var(--slate-line)}
+.c-overdue,.c-dead,.pchip-overdue,.hchip.bad{background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)}
+
+/* ---- health ---- */
+.hdot{font-size:13px}
+.h-ok{color:var(--ok)}.h-warn{color:var(--warn)}.h-bad{color:var(--bad)}
+#healthOverlay,#docOverlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.6);backdrop-filter:blur(2px);z-index:60;overflow:auto;padding:16px}
+#healthOverlay.open,#docOverlay.open{display:block}
+.healthbox{max-width:640px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px}
+.healthbox h2{color:var(--text)!important}
 .healthbox table.kv{width:100%;border-collapse:collapse;font-size:14px}
-.healthbox table.kv td{padding:8px;border-bottom:1px solid #232c4a}
-.healthbox table.kv td.k{width:45%;color:#9aa7c7}
-.alert{background:#2a1a1a;border-left:4px solid #e85c5c;padding:10px;border-radius:6px;margin-bottom:8px;font-size:13px}
+.healthbox table.kv td{padding:10px 6px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-word}
+.healthbox table.kv td.k{width:45%;color:var(--muted)}
+
+/* ---- alerts ---- */
+.alert{background:var(--bad-soft);border:1px solid var(--bad-line);border-left:3px solid var(--bad);padding:10px 12px;border-radius:var(--r-sm);margin-bottom:8px;font-size:13px;color:var(--text);word-break:break-word}
 .alert.seen{opacity:.55}
-.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:100px}
-/* ===== KW-style multi-color tiles (2026-11-06) — har tile ka alag rang =====
-   Pastel palette (KW jaisi): pink, yellow, mint, sky, lavender, peach,
-   rose, teal, lime, indigo, cyan, fuchsia. Dark navy shell waisa hi hai;
-   tiles par dark text taake readable rahe. Logout aakhri button hai —
-   wo subdued dark rehta hai taake action tiles se alag nazar aaye. */
-.tabs button{background:#fde68a;color:#1f2430;border:1px solid rgba(0,0,0,.08)}
-.tabs button:nth-child(1){background:#f9a8d4}
-.tabs button:nth-child(2){background:#fde68a}
-.tabs button:nth-child(3){background:#a7f3d0}
-.tabs button:nth-child(4){background:#bae6fd}
-.tabs button:nth-child(5){background:#ddd6fe}
-.tabs button:nth-child(6){background:#fed7aa}
-.tabs button:nth-child(7){background:#fda4af}
-.tabs button:nth-child(8){background:#99f6e4}
-.tabs button:nth-child(9){background:#d9f99d}
-.tabs button:nth-child(10){background:#c7d2fe}
-.tabs button:nth-child(11){background:#a5f3fc}
-.tabs button:nth-child(12){background:#f5d0fe}
-.tabs button:nth-child(13){background:#f9a8d4}
-.tabs button:nth-child(14){background:#fde68a}
-.tabs button:last-child{background:#232c4a;color:#e8b93c;border:1px solid #3a4a6b}
-.stats .stat{border:1px solid rgba(0,0,0,.08)}
-.stats .stat:nth-child(1){background:#f9a8d4}
-.stats .stat:nth-child(2){background:#fde68a}
-.stats .stat:nth-child(3){background:#a7f3d0}
-.stats .stat:nth-child(4){background:#bae6fd}
-.stats .stat:nth-child(5){background:#ddd6fe}
-.stats .stat:nth-child(6){background:#fed7aa}
-.stats .stat .n{color:#1f2430}
-.stats .stat .l{color:#4b5563}
-footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
-@media(max-width:600px){table{font-size:11px}th,td{padding:6px 4px}}
-/* ===== v4.0 PRO: tags, hisaab, agreement/receipt print ===== */
-.c-overdue{background:#c62828;color:#fff}
-.tag-off{color:#ffb74d;font-weight:700;font-size:11px}
-.tag-dead{color:#ff6b6b;font-weight:700;font-size:11px}
-#docOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow:auto;padding:18px}
-#docOverlay.open{display:block}
+.silent-alert{background:var(--bad-soft);border:1px solid var(--bad-line);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--text-2);word-break:break-word}
+.silent-alert b{color:var(--bad)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-size:12px;text-transform:uppercase}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 16px 28px}
+
+/* ---- QR enrollment card ---- */
+.qr-card .qr-frame{margin:2px auto 14px;width:max-content;background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:0 0 0 6px var(--surface-2)}
+.qr-card .qr-frame img{width:176px;height:176px;display:block}
+.qr-card .qr-desc{color:var(--muted);font-size:13px;text-align:center;margin:0 auto 12px;max-width:420px}
+.qr-card .linkrow{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 6px 6px 12px;min-width:0}
+.qr-card .linkrow a{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;font-family:ui-monospace,'SF Mono',Menlo,monospace}
+.qr-card .linkrow button{margin:0;flex-shrink:0;padding:8px 14px;font-size:13px}
+.qr-card .linkrow button.copied{background:var(--ok);color:#fff}
+.qr-card #copyMsg{display:block;text-align:center;font-size:12px;color:var(--ok);margin-top:8px;min-height:16px}
+.qr-card h2 .step{margin-left:auto;font-size:11px;font-weight:600;color:var(--primary-soft-text);background:var(--primary-soft);padding:2px 8px;border-radius:999px}
+
+/* ---- folders (status boxes) ---- */
+.folders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:2px 0 14px}
+@media(min-width:900px){.folders{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.fbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 12px 12px 14px;text-align:left;cursor:pointer;user-select:none;position:relative;overflow:hidden;min-width:0;color:var(--text)}
+.fbox::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--slate)}
+.fbox .n{font-size:24px;font-weight:700;line-height:1.1;color:var(--text)}
+.fbox .l{font-size:13px;font-weight:600;color:var(--text-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbox .s{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f-all::before{background:var(--primary)}.f-active::before{background:var(--ok)}.f-overdue::before{background:var(--bad)}.f-released::before{background:var(--slate)}
+.f-active .n{color:var(--ok)}.f-overdue .n{color:var(--bad)}.f-all .n{color:var(--primary-soft-text)}
+.fbox.on{border-color:var(--primary);box-shadow:0 0 0 3px var(--focus)}
+#folderHead{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--primary-soft);border:1px solid var(--primary);border-radius:var(--r-sm);padding:8px 8px 8px 12px;margin-bottom:12px;color:var(--primary-soft-text);font-weight:600;font-size:13px}
+#folderHead.open{display:flex}
+#folderHead button{margin:0}
+#folderBoxes,#folderHead{scroll-margin-top:70px}
+
+/* ---- phone cards ---- */
+.pcards{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:820px){.pcards{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}}
+.pc-empty{color:var(--muted);padding:18px;text-align:center;border:1px dashed var(--border-strong);border-radius:var(--r)}
+.pcard,.pcard.pc-overdue,.pcard.pc-released{background:var(--surface);border:1px solid var(--border);border-left:1px solid var(--border);border-radius:var(--r);padding:16px;min-width:0;overflow:hidden;position:relative}
+.pcard::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--ok)}
+.pcard.pc-overdue::before{background:var(--bad)}.pcard.pc-released::before{background:var(--slate)}
+.pc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.pc-title{min-width:0}
+.pc-name{font-size:16px;font-weight:700;color:var(--text);word-break:break-word;letter-spacing:-.01em}
+.pc-sub{font-size:12.5px;color:var(--muted);font-weight:500;margin-top:2px}
+.pc-chips{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:10px}
+.pc-kv{background:var(--surface);padding:9px 11px;min-width:0;border:0;border-radius:0}
+.pc-kv.wide{grid-column:1 / -1}
+.pc-kv .k{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.pc-kv .v{font-size:14px;color:var(--text);font-weight:600;word-break:break-word;margin-top:2px}
+.pc-health{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:8px;font-size:13px}
+.pc-health br{display:none}
+.pc-health button{margin:0 0 0 auto}
+.pc-note{font-size:12.5px;margin:0 0 8px;color:var(--muted);word-break:break-word}
+.pc-photos{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.pc-photos img{width:60px!important;height:60px!important;object-fit:cover;border-radius:10px!important;border:1px solid var(--border)!important}
+.agrp{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
+.agl{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.abtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.abtns > button,.abtns > a,.abtns > span{width:100%;margin:0!important;min-height:42px;padding:8px 4px;font-size:12.5px!important;font-weight:600;border-radius:var(--r-sm);text-align:center;display:flex;align-items:center;justify-content:center;box-sizing:border-box;line-height:1.2;overflow-wrap:anywhere;min-width:0}
+.abtns > button:not(.ghost):not(.danger){background:var(--primary);color:var(--on-primary)}
+.abtns > a{background:var(--surface-2);color:var(--text-2)!important;border:1px solid var(--border);text-decoration:none}
+.abtns > span{background:transparent;border:1px dashed var(--border-strong);color:var(--muted)!important;font-size:11.5px!important;font-weight:500}
+.abtns > input[type=time]{width:100%!important;min-width:0;box-sizing:border-box;margin:0;padding:9px 8px;font-size:14px}
+.agrp-sched .abtns{grid-template-columns:repeat(2,minmax(0,1fr))}
+.agrp-danger .abtns > button.ghost{background:transparent;color:var(--bad);border-color:var(--bad-line)}
+
+/* ---- misc content cards ---- */
+.shop-row{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:10px}
+.tab-card ul{margin-left:18px}
+.tab-card li{line-height:1.9}
+
+
+/* ===== Installock MASTER additions (2026-11-27 redesign TEST) ===== */
+.tag-off{color:var(--warn);font-weight:700;font-size:11.5px}
+.tag-dead{color:var(--bad);font-weight:700;font-size:11.5px}
+
+/* account card replaces the heavy header bar (native app already has a header) */
+header.acct{position:static;background:transparent;border:0;padding:16px 16px 0;max-width:1100px;margin:0 auto;display:block}
+.acct-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 14px 14px 16px;display:flex;align-items:center;gap:12px;min-width:0}
+.acct-card .mark{width:40px;height:40px;border-radius:12px;background:var(--primary-soft);color:var(--primary-soft-text);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.acct-card .mark svg{width:20px;height:20px}
+.acct-card .who{flex:1;min-width:0}
+.acct-card h1{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;white-space:normal;line-height:1.3;display:block;margin:0;flex:none}
+.acct-card .user{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;padding:0;order:0;flex-basis:auto}
+.acct-card .user:empty{display:none}
+.acct-card .role{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);padding:2px 8px;border-radius:999px}
+.acct-card .role::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* master has 10 sections -> 5 x 2 tile grid */
+.tabs.m10{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.tabs.m10 button{min-height:62px;font-size:11px;padding:8px 2px;gap:5px}
+.tabs.m10 .tl{display:flex;align-items:center;gap:3px}
+@media(min-width:900px){.tabs.m10{grid-template-columns:repeat(10,minmax(0,1fr))}}
+.qactions.m{display:flex;gap:8px}
+.qactions.m button{flex:1 1 0;min-width:0}
+.qactions.m button.hidden{display:none!important}
+
+/* Shop QR panel */
+#shopQrPanel .warnbox{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);border-radius:var(--r-sm);padding:9px 12px;font-size:12.5px;margin:6px 0 10px;font-weight:500}
+#shopQrBox{border:1px solid var(--border)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow button{margin:0}
+
+/* forms inside section cards */
+textarea{width:100%;padding:11px 12px;border-radius:var(--r-sm);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);margin-bottom:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical}
+textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--focus)}
+.tab-card label{color:var(--text-2)}
+.tab-card input[type=checkbox]{accent-color:var(--primary);margin-right:6px;vertical-align:middle}
+.tab-card .lead{color:var(--muted);font-size:13px;margin-bottom:12px}
+.tab-card .callout{background:var(--warn-soft);border:1px solid var(--warn-line);border-left:3px solid var(--warn);color:var(--text-2);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;margin-bottom:10px}
+.tab-card h2.sub{margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.addon{border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;background:var(--surface-2)}
+.addon .price{color:var(--primary-soft-text);font-weight:700}
+
+/* ===== phone card v3 (master): hero + grouped details + tidy actions ===== */
+.pc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr) minmax(0,1.15fr);gap:0;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:12px;background:var(--surface-2)}
+.pc-hero .ph-main{grid-column:1 / -1;padding:12px 12px 10px;border-bottom:1px solid var(--border);background:var(--surface)}
+.pc-hero .ph-main .v{font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--text);line-height:1.15}
+.pc-hero .ph-main .v.zero{color:var(--muted)}
+.pc-hero .ph-cell{padding:9px 10px;min-width:0;border-right:1px solid var(--border)}
+.pc-hero .ph-cell:last-child{border-right:0}
+.pc-hero .ph-cell .v{font-size:13.5px;font-weight:600;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-hero .ph-cell .v.bad{color:var(--bad)}
+.pc-hero .k{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-hero .v{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.pc-sec{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:2px 2px 6px}
+.pc-grid + .pc-sec{margin-top:10px}
+.pc-kv .v .chip{font-size:11px;padding:1px 8px}
+.pc-kv .v .mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:.02em}
+.pc-more{border-top:1px solid var(--border);margin-top:10px;padding-top:2px}
+.pc-more > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 2px 6px;font-size:13px;font-weight:600;color:var(--text-2);user-select:none}
+.pc-more > summary::-webkit-details-marker{display:none}
+.pc-more > summary .hint2{font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;text-align:right}
+.pc-more > summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 3px 2px;transition:transform .15s;flex-shrink:0}
+.pc-more[open] > summary::after{transform:rotate(-135deg);margin-bottom:-3px}
+.pc-more .agrp:first-of-type{border-top:0;margin-top:0;padding-top:4px}
+.abtns > button.small.danger{background:var(--bad-soft);color:var(--bad);border-color:var(--bad-line)}
+.agrp-main .abtns > button:not(.ghost):not(.danger){background:var(--primary);color:var(--on-primary)}
+.abtns > button.ghost{background:var(--surface);border-color:var(--border-strong);color:var(--text-2)}
+#tab-phones{padding:16px 12px}
+#tab-phones > h2{padding:0 4px}
+
+/* ---- print docs (unchanged) ---- */
 .docbox{max-width:780px;margin:0 auto}
-.doctoolbar{background:#151b30;border:1px solid #232c4a;border-radius:10px;padding:12px;margin-bottom:12px}
+.doctoolbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px}
 .doctoolbar input{margin-bottom:6px}
-.doctoolbar .hint{font-size:12px;color:#9aa7c7}
+.doctoolbar .hint{font-size:12px;color:var(--muted)}
 #printArea{background:#fff;color:#111;border-radius:6px;padding:30px 34px;font-size:14px;line-height:1.45}
 #printArea h1{font-size:21px;text-align:center;margin-bottom:2px;color:#111}
 #printArea h3{font-size:15px;margin:14px 0 6px;color:#111}
@@ -116,57 +314,17 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
   .doctoolbar{display:none!important}
   #printArea{border-radius:0;padding:6mm}
 }
-
-/* ===== FOLDERS (2026-11-27): status boxes + phone-card layout ===== */
-.folders{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:4px 0 14px}
-@media(min-width:900px){.folders{grid-template-columns:repeat(4,1fr)}}
-.fbox{border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;border:3px solid transparent;color:#fff;user-select:none}
-.fbox .n{font-size:30px;font-weight:800;line-height:1.1;color:#fff}
-.fbox .l{font-size:15px;font-weight:800;color:#fff}
-.fbox .s{font-size:11px;color:rgba(255,255,255,.85);margin-top:2px}
-.f-all{background:#1e3a8a}.f-active{background:#15803d}.f-overdue{background:#c62828}.f-released{background:#475569}
-.fbox.on{border-color:#e8b93c;box-shadow:0 0 12px rgba(232,185,60,.55)}
-#folderHead{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#151b30;border:1px solid #e8b93c;border-radius:10px;padding:10px 12px;margin-bottom:12px;color:#fff;font-weight:700}
-#folderHead.open{display:flex}
-#folderBoxes,#folderHead{scroll-margin-top:110px}
-
-/* ===== CARDS (2026-11-27): phone list as cards ===== */
-.pcards{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:820px){.pcards{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}}
-.pc-empty{color:#9aa7c7;padding:14px;text-align:center}
-.pcard{background:#151b30;border:1px solid #2c3a63;border-left:6px solid #15803d;border-radius:14px;padding:12px;min-width:0;overflow:hidden}
-.pcard.pc-overdue{border-left-color:#e53935;background:#1d1626}
-.pcard.pc-released{border-left-color:#64748b}
-.pc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
-.pc-title{min-width:0}
-.pc-name{font-size:18px;font-weight:800;color:#fff;word-break:break-word}
-.pc-sub{font-size:13px;color:#e8b93c;font-weight:700;margin-top:2px}
-.pc-chips{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.pchip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
-.pchip-active{background:#15803d}.pchip-overdue{background:#e53935}.pchip-released{background:#64748b}.pchip-off{background:#b45309}
-.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.pc-kv{background:#0f1426;border:1px solid #232c4a;border-radius:10px;padding:7px 9px;min-width:0}
-.pc-kv.wide{grid-column:1 / -1}
-.pc-kv .k{font-size:10.5px;color:#9aa7c7;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.pc-kv .v{font-size:14px;color:#fff;font-weight:700;word-break:break-word;margin-top:1px}
-.pc-health{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0f1426;border:1px solid #232c4a;border-radius:10px;padding:7px 9px;margin-bottom:8px;font-size:13px}
-.pc-note{font-size:12.5px;margin:0 0 8px;color:#9aa7c7;word-break:break-word}
-.pc-photos{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.pc-photos img{width:64px;height:64px;object-fit:cover;border-radius:8px}
-.agrp{border-top:1px solid #232c4a;padding-top:8px;margin-top:8px}
-.agl{font-size:11px;color:#e8b93c;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-.abtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.abtns > button,.abtns > a,.abtns > span{width:100%;margin:0 !important;min-height:40px;padding:8px 4px;font-size:13px;border-radius:10px;text-align:center;display:flex;align-items:center;justify-content:center;box-sizing:border-box;word-break:break-word}
-.abtns > a{background:#232c4a;color:#e8b93c !important;font-weight:700;text-decoration:none;font-size:13px !important}
-.abtns > span{background:transparent;border:1px dashed #2c3a63;font-size:11.5px !important}
-.abtns > input[type=time]{width:100% !important;min-width:0;box-sizing:border-box;margin:0}
-.agrp-sched .abtns{grid-template-columns:repeat(2,minmax(0,1fr))}
 </style>
 </head>
 <body>
-<header>
-<h1>🔒 Installock Master Dashboard (Dr Asif)</h1>
+<header class="acct">
+<div class="acct-card">
+<span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
+<div class="who"><h1>Installock Master Dashboard (Dr Asif)</h1>
 <span class="user" id="userLabel"></span>
+<span class="role">Master admin</span></div>
+<button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Light / Dark" aria-label="Toggle light or dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</div>
 </header>
 <div class="wrap">
 
@@ -178,62 +336,58 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <input id="loginEmail" type="email" placeholder="Email">
 <input id="loginPass" type="password" placeholder="Password">
 <button onclick="doLogin()">Login</button>
-<p style="font-size:12px;color:#9aa7c7;margin-top:8px">API Key + Project ID ek martaba dalein — browser me save rahega.</p>
+<p style="font-size:12px;color:var(--muted);margin-top:8px">API Key + Project ID ek martaba dalein — browser me save rahega.</p>
 </div>
 
 <!-- MASTER ONLY GATE: retailers see this message, never shop data -->
 <div class="card hidden" id="masterOnlyMsg">
 <h2>Master Dashboard — sirf Master ke liye</h2>
-<p style="color:#9aa7c7;font-size:14px">Ye Installock Master Dashboard (Dr Asif) hai. Aap ka login Master (admin) nahi hai, is liye is page par koi shop data nahi dikhaya ja raha hai.</p>
-<p style="margin-top:10px"><a href="dashboard-shop.html" style="color:#e8b93c;font-weight:700">Installock Shop Dashboard par jayein →</a></p>
+<p style="color:var(--muted);font-size:14px">Ye Installock Master Dashboard (Dr Asif) hai. Aap ka login Master (admin) nahi hai, is liye is page par koi shop data nahi dikhaya ja raha hai.</p>
+<p style="margin-top:10px"><a href="dashboard-shop.html" style="color:var(--accent);font-weight:700">Installock Shop Dashboard par jayein →</a></p>
 <button class="ghost" onclick="doLogout()">Logout</button>
 </div>
 
 <!-- MAIN -->
 <div id="mainUI" class="hidden">
-<div class="tabs">
-<button onclick="showTab('phones')">📱 Phones</button>
-<button onclick="showTab('alerts')">⚠️ Alerts <span id="alertCount"></span></button>
-<button onclick="showTab('shops')">🏪 Shops</button>
-<button onclick="showTab('tid')">💳 TID Requests <span id="tidCount"></span></button>
-<button onclick="showTab('staff')">👥 Staff</button>
-<button onclick="showTab('dealers')">🏬 Dealers</button>
-<button onclick="showTab('credit')">🔍 Credit Check</button>
-<button onclick="showTab('referrals')">🎁 Referrals</button>
-<button onclick="showTab('store')">🛒 Store</button>
-<button onclick="showTab('help')">🎥 Video Help</button>
-<button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">🔳 Shop QR</button>
-<button class="ghost" onclick="updateAll()">⬆️ Update All</button>
-<button class="ghost" onclick="exportCSV()">📥 CSV Export</button>
-<button class="ghost" onclick="doLogout()">Logout</button>
+<div class="tabs m10" id="secTabs">
+<button data-tab="phones" class="on" onclick="showTab('phones')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18h2"/></svg></span><span class="tl">Phones</span></button>
+<button data-tab="alerts" onclick="showTab('alerts')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></span><span class="tl">Alerts <span class="badge" id="alertCount"></span></span></button>
+<button data-tab="shops" onclick="showTab('shops')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M3 9h18"/><path d="M10 20v-6h4v6"/></svg></span><span class="tl">Shops</span></button>
+<button data-tab="tid" onclick="showTab('tid')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/></svg></span><span class="tl">TID <span class="badge" id="tidCount"></span></span></button>
+<button data-tab="staff" onclick="showTab('staff')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg></span><span class="tl">Staff</span></button>
+<button data-tab="dealers" onclick="showTab('dealers')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16v10H4z"/><path d="M2 10l2-6h16l2 6"/><path d="M9 20v-5h6v5"/></svg></span><span class="tl">Dealers</span></button>
+<button data-tab="credit" onclick="showTab('credit')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><span class="tl">Credit</span></button>
+<button data-tab="referrals" onclick="showTab('referrals')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8S10.5 3.5 8 4.5 9 8 12 8zM12 8s1.5-4.5 4-3.5S15 8 12 8z"/></svg></span><span class="tl">Referrals</span></button>
+<button data-tab="store" onclick="showTab('store')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h3l2.6 12.4h11l2-8.4H6.4"/></svg></span><span class="tl">Store</span></button>
+<button data-tab="help" onclick="showTab('help')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10l6-3v10l-6-3z"/></svg></span><span class="tl">Videos</span></button>
+</div>
+<div class="qactions m">
+<button id="shopQrBtn" class="ghost hidden" onclick="toggleShopQr()">Shop QR</button>
+<button class="ghost" onclick="updateAll()">Update All</button>
+<button class="ghost" onclick="exportCSV()">CSV Export</button>
+<button class="ghost out" onclick="doLogout()">Logout</button>
 </div>
 
 <div class="card hidden" id="shopQrPanel">
 <h2>Shop QR — Cloud ID</h2>
 <input id="shopQrEmail" type="email" placeholder="Shop email" autocomplete="off">
 <input id="shopQrPass" type="password" placeholder="Shop password" autocomplete="new-password">
-<button onclick="makeShopQr()">QR banao</button>
-<button class="ghost" onclick="toggleShopQr(false)">Band karein</button>
-<p style="color:#ffb74d;font-size:13px;margin-top:8px">Is QR me password hai — isay khufiya rakhein, aam share na karein.</p>
+<div class="btnrow"><button onclick="makeShopQr()">QR banao</button>
+<button class="ghost" onclick="toggleShopQr(false)">Band karein</button></div>
+<div class="warnbox">Is QR me password hai — isay khufiya rakhein, aam share na karein.</div>
 <div id="shopQrBox" style="display:none;background:#fff;border-radius:10px;padding:12px;width:max-content;max-width:100%;margin-top:10px"></div>
-<p id="shopQrMsg" style="color:#9aa7c7;font-size:13px;margin-top:8px"></p>
+<p id="shopQrMsg" style="color:var(--muted);font-size:13px;margin-top:8px"></p>
 </div>
 
+<div class="sec-title"><span>Overview</span><span id="ovUpdated" class="num"></span></div>
 <div class="stats" id="statsRow"></div>
 <!-- FEATURE (2026-11-06): QR + Link card — evergreen provisioning QR-A + customer app link -->
-<div class="card" id="qrLinkCard">
-<h2>📱 QR + Link — Phone Enroll karein</h2>
-<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-<div style="background:#fff;border-radius:10px;padding:10px;width:max-content">
-<img src="qr-a.png" alt="Installock provisioning QR (QR-A)" style="width:180px;height:180px;display:block">
-</div>
-<div style="flex:1;min-width:220px">
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:8px">Naye phone par Installock lagane ke liye QR scan karein, ya link tap karke customer app download karein.</p>
-<p style="margin-bottom:8px"><a href="https://jilanapps.github.io/jilan-store/installock/installock-v3.apk" style="color:#e8b93c;font-weight:700;word-break:break-all">https://jilanapps.github.io/jilan-store/installock/installock-v3.apk</a></p>
-<button onclick="copyAppLink()">📋 Copy Link</button>
-<span id="copyMsg" style="color:#7bd88f;font-size:13px;margin-left:8px"></span>
-</div>
-</div>
+<div class="card qr-card" id="qrLinkCard">
+<h2>QR + Link — Phone Enroll karein <span class="step">New phone</span></h2>
+<div class="qr-frame"><img src="qr-a.png" alt="Installock provisioning QR (QR-A)"></div>
+<p class="qr-desc">Naye phone par Installock lagane ke liye QR scan karein, ya link share karke customer app download karein.</p>
+<div class="linkrow"><a href="https://jilanapps.github.io/jilan-store/installock/installock-v3.apk" title="https://jilanapps.github.io/jilan-store/installock/installock-v3.apk">https://jilanapps.github.io/jilan-store/installock/installock-v3.apk</a><button id="copyBtn" onclick="copyAppLink()">Copy Link</button></div>
+<span id="copyMsg"></span>
 </div>
 
 
@@ -241,6 +395,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <div id="silentAlert"></div>
 
 <!-- v4.0 PRO: hisaab strip -->
+<div class="sec-title"><span>Revenue &amp; today</span></div>
 <div class="stats" id="hisaabRow"></div>
 <div class="stats" id="dashTiles"></div>
 
@@ -252,28 +407,28 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <div id="phoneRows" class="pcards"><div class="pc-empty">Loading...</div></div>
 </div>
 
-<div class="card hidden" id="tab-alerts">
+<div class="card tab-card hidden" id="tab-alerts">
 <h2>Alerts</h2>
 <div id="alertList">Loading...</div>
 <!-- v4.0 PRO: tamper / security events from the phones -->
-<h2 style="margin-top:20px">🔐 Security Events</h2>
+<h2 class="sub">Security Events</h2>
 <div id="eventList">Loading...</div>
 </div>
 
-<div class="card hidden" id="tab-shops">
+<div class="card tab-card hidden" id="tab-shops">
 <h2>Shops</h2>
 <div id="shopList">Loading...</div>
 </div>
 
-<div class="card hidden" id="tab-tid">
-<h2>💳 TID Payment Requests (Pending)</h2>
-<p style="color:#ffb74d;font-size:14px">TID khud saboot nahi — apni JazzCash/Easypaisa history me TID, raqam aur waqt match karke hi Verify karein.</p>
-<p style="color:#9aa7c7;font-size:13px">Customer ka TID submit sirf aik pending request banata hai — na auto-unlock hota hai, na due date / qist / baqi raqam badalti hai. Verify dabane par hi maujooda PAYMENT_RECEIVED flow chalta hai (payments doc + command, phone online hone par apply). Reject par koi payment record nahi banta aur phone unlock nahi hota. Koi bhi TID, payment ya dashboard action Google FRP nahi kholta.</p>
+<div class="card tab-card hidden" id="tab-tid">
+<h2>TID Payment Requests (Pending)</h2>
+<p class="callout">TID khud saboot nahi — apni JazzCash/Easypaisa history me TID, raqam aur waqt match karke hi Verify karein.</p>
+<p style="color:var(--muted);font-size:13px">Customer ka TID submit sirf aik pending request banata hai — na auto-unlock hota hai, na due date / qist / baqi raqam badalti hai. Verify dabane par hi maujooda PAYMENT_RECEIVED flow chalta hai (payments doc + command, phone online hone par apply). Reject par koi payment record nahi banta aur phone unlock nahi hota. Koi bhi TID, payment ya dashboard action Google FRP nahi kholta.</p>
 <div id="tidList">Loading...</div>
 </div>
-<div class="card hidden" id="tab-staff">
-<h2>👥 Staff Management</h2>
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Staff ka login (Firebase Auth user) aap khud Firebase Console me banayein — yahan sirf staff ka naam, role aur rights record hote hain.</p>
+<div class="card tab-card hidden" id="tab-staff">
+<h2>Staff Management</h2>
+<p class="lead">Staff ka login (Firebase Auth user) aap khud Firebase Console me banayein — yahan sirf staff ka naam, role aur rights record hote hain.</p>
 <input id="staffName" placeholder="Staff name">
 <input id="staffContact" placeholder="Contact (phone)">
 <select id="staffRole"><option value="staff">Staff</option><option value="manager">Manager</option></select>
@@ -282,58 +437,58 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <label style="display:block;font-size:14px;margin:6px 0"><input type="checkbox" id="staffCanRelease" style="width:auto"> Release kar sakta hai</label>
 <button onclick="addStaff()">+ Add Staff</button>
 <div id="staffList" style="margin-top:12px">Loading...</div>
-<h2 style="margin-top:20px">📋 Activity Log</h2>
+<h2 class="sub">Activity Log</h2>
 <div id="activityList">Loading...</div>
 </div>
 
-<div class="card hidden" id="tab-dealers">
-<h2>🏬 Distributor Keys — Dealer Pools</h2>
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Dealer ko keys ka pool assign karein. Single-key flow (Jilan Key) waisa hi chalta rahega — ye pool us se alag record hai. Master app ka key-generator sync baad me hoga.</p>
+<div class="card tab-card hidden" id="tab-dealers">
+<h2>Distributor Keys — Dealer Pools</h2>
+<p class="lead">Dealer ko keys ka pool assign karein. Single-key flow (Jilan Key) waisa hi chalta rahega — ye pool us se alag record hai. Master app ka key-generator sync baad me hoga.</p>
 <input id="dealerName" placeholder="Dealer name">
 <input id="dealerContact" placeholder="Dealer contact (phone)">
-<textarea id="dealerKeys" placeholder="Key codes — aik line par aik key (JLN-XXXX-XXXX-XXXX)" rows="4" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5e;background:#0b1120;color:#fff;margin-bottom:10px;font-size:15px"></textarea>
+<textarea id="dealerKeys" placeholder="Key codes — aik line par aik key (JLN-XXXX-XXXX-XXXX)" rows="4"></textarea>
 <button onclick="addDealer()">+ Create Dealer &amp; Assign Pool</button>
 <div id="dealerList" style="margin-top:12px">Loading...</div>
 </div>
 
-<div class="card hidden" id="tab-credit">
-<h2>🔍 Credit Check — Internal History</h2>
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">CNIC ya phone number se customer ka Installock record check karein. Ye sirf Installock ki apni history hai (KW jaisi bahari credit check nahi).</p>
+<div class="card tab-card hidden" id="tab-credit">
+<h2>Credit Check — Internal History</h2>
+<p class="lead">CNIC ya phone number se customer ka Installock record check karein. Ye sirf Installock ki apni history hai (KW jaisi bahari credit check nahi).</p>
 <input id="creditQuery" placeholder="CNIC (e.g. 36302-1234567-1) ya phone (03XX-XXXXXXX)">
 <button onclick="runCreditCheck()">Check</button>
 <div id="creditResult" style="margin-top:12px"></div>
 </div>
 
-<div class="card hidden" id="tab-referrals">
-<h2>🎁 Refer a Friend — Gift Keys</h2>
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">Apna referral code share karein: nayi dukaan Installock join kare aur keys recharge kare to aap ko bonus keys milengi.</p>
+<div class="card tab-card hidden" id="tab-referrals">
+<h2>Refer a Friend — Gift Keys</h2>
+<p class="lead">Apna referral code share karein: nayi dukaan Installock join kare aur keys recharge kare to aap ko bonus keys milengi.</p>
 <p style="margin-bottom:8px">Referral code: <b id="refCode">—</b> <button class="small ghost" onclick="copyRefCode()">📋 Copy</button></p>
-<p style="color:#ffb74d;font-size:13px;margin-bottom:10px">Bonus keys per successful referral: TBD — Dr Asif decide karein ge (abhi tay nahi).</p>
+<p class="callout">Bonus keys per successful referral: TBD — Dr Asif decide karein ge (abhi tay nahi).</p>
 <input id="refShopName" placeholder="Referred shop name">
 <input id="refShopContact" placeholder="Referred shop contact">
 <button onclick="addReferral()">+ Record Referral</button>
 <div id="refList" style="margin-top:12px">Loading...</div>
 </div>
 
-<div class="card hidden" id="tab-store">
-<h2>🛒 Store — Premium Add-ons</h2>
-<div style="border:1px solid #e8b93c;border-radius:8px;padding:14px;margin-bottom:10px">
-<b>Wireless Premium Fast</b> — <span style="color:#e8b93c;font-weight:700">PKR 1,500 one-time</span><br>
-<span style="color:#9aa7c7;font-size:13px">One tap. A live ring. Every Android phone.</span><br>
+<div class="card tab-card hidden" id="tab-store">
+<h2>Store — Premium Add-ons</h2>
+<div class="addon">
+<b>Wireless Premium Fast</b> — <span class="price num">PKR 1,500 one-time</span><br>
+<span style="color:var(--muted);font-size:13px">One tap. A live ring. Every Android phone.</span><br>
 <span class="chip c-grace" style="margin-top:6px;display:inline-block">Coming soon — details on request</span>
-<p style="color:#9aa7c7;font-size:12px;margin-top:8px">Note: ye add-on KW ki video me dikhaya gaya tha; uska kaam karne ka tareeqa video me nahi bataya gaya, is liye details on request hain.</p>
+<p style="color:var(--muted);font-size:12px;margin-top:8px">Note: ye add-on KW ki video me dikhaya gaya tha; uska kaam karne ka tareeqa video me nahi bataya gaya, is liye details on request hain.</p>
 </div>
-<p style="color:#9aa7c7;font-size:13px">More add-ons coming soon.</p>
+<p style="color:var(--muted);font-size:13px">More add-ons coming soon.</p>
 </div>
 
-<div class="card hidden" id="tab-help">
-<h2>🎥 Video Help</h2>
-<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">How-to videos — dekhne ke liye tap karein:</p>
+<div class="card tab-card hidden" id="tab-help">
+<h2>Video Help</h2>
+<p class="lead">How-to videos — dekhne ke liye tap karein:</p>
 <ul style="margin-left:18px;line-height:2;font-size:14px">
-<li>1. Setup — naye phone par Installock enroll kaise karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-1-setup.mp4" target="_blank" style="color:#4fc3f7">Dekhein (1:03)</a></li>
-<li>2. Lock / Unlock — phone lock aur unlock kaise karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-2-lock-unlock.mp4" target="_blank" style="color:#4fc3f7">Dekhein (0:33)</a></li>
-<li>3. Keys — Jilan Key lagane ka tareeqa — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-3-keys.mp4" target="_blank" style="color:#4fc3f7">Dekhein (0:38)</a></li>
-<li>4. Dues &amp; Payments — qist aur payment kaise record karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-4-dues-payments.mp4" target="_blank" style="color:#4fc3f7">Dekhein (0:44)</a></li>
+<li>1. Setup — naye phone par Installock enroll kaise karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-1-setup.mp4" target="_blank" style="color:var(--link)">Dekhein (1:03)</a></li>
+<li>2. Lock / Unlock — phone lock aur unlock kaise karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-2-lock-unlock.mp4" target="_blank" style="color:var(--link)">Dekhein (0:33)</a></li>
+<li>3. Keys — Jilan Key lagane ka tareeqa — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-3-keys.mp4" target="_blank" style="color:var(--link)">Dekhein (0:38)</a></li>
+<li>4. Dues &amp; Payments — qist aur payment kaise record karein — <a href="https://jilanapps.github.io/jilan-store/installock/help-videos/installock-help-4-dues-payments.mp4" target="_blank" style="color:var(--link)">Dekhein (0:44)</a></li>
 </ul>
 </div>
 
@@ -346,7 +501,7 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 <div id="healthOverlay">
 <div class="healthbox">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-<h2 style="color:#e8b93c;font-size:16px">📱 Device Health</h2>
+<h2 style="color:var(--accent);font-size:16px">📱 Device Health</h2>
 <button class="ghost small" onclick="closeHealth()">✕ Band karein</button>
 </div>
 <div id="healthBody">Loading...</div>
@@ -390,7 +545,7 @@ function fmtShopJazz(v){
 function thumbImg(p, field, title){
   const u=p[field]||'';
   if(typeof u!=='string' || u.indexOf('data:image/jpeg;base64,')!==0) return '';
-  return '<img src="'+u+'" title="'+title+'" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #2a3350;cursor:pointer;vertical-align:top;margin:2px 6px 2px 0" onclick="window.open(this.src,\'_blank\')">';
+  return '<img src="'+u+'" title="'+title+'" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;vertical-align:top;margin:2px 6px 2px 0" onclick="window.open(this.src,\'_blank\')">';
 }
 function rs(n){ return 'Rs '+Number(n||0).toLocaleString('en-US'); }
 /** Firestore Timestamp / millis / ISO string -> epoch ms (0 if unknown). */
@@ -491,6 +646,13 @@ function doLogout(){ auth.signOut().then(()=>location.reload()); }
 function showTab(t){
   ['phones','alerts','shops','tid','staff','dealers','credit','referrals','store','help'].forEach(x=>
     document.getElementById('tab-'+x).classList.toggle('hidden', x!==t));
+  document.querySelectorAll('#secTabs button[data-tab]').forEach(b=>b.classList.toggle('on', b.getAttribute('data-tab')===t));
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';
+  const nx=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',nx);
+  try{localStorage.setItem('il_theme',nx);}catch(e){}
 }
 
 function canSee(shop){
@@ -689,7 +851,7 @@ function pendTag(p){
     const parts = k.split('|');
     if(parts[0]===(p._id||'') || parts[0]===(p.imei||'')) tags.push(parts[1]+' <button class="small danger" style="padding:1px 7px;margin-left:2px" onclick="cancelCmd(\''+(p.imei||'')+'\',\''+(p._id||'')+'\',\''+parts[1]+'\')" title="Cancel '+parts[1]+'">✕</button>');
   });
-  return tags.length ? '<br><span style="color:#e8b93c">⏳ Pending: '+tags.join(', ')
+  return tags.length ? '<br><span style="color:var(--accent)">⏳ Pending: '+tags.join(', ')
     +' — phone online hone par apply hoga</span>' : '';
 }
 // v3.4 (2026-11-12): pending command cancel — pehle confirm, phir is phone
@@ -800,7 +962,7 @@ function healthCell(p){
     + '<button class="small ghost" onclick="openHealth(\''+p._shop+'\',\''+p._id+'\')">Health</button>';
 }
 function healthYesNo(v){
-  if(v===true) return '<span style="color:#ff6b6b;font-weight:700">Yes \u26a0\ufe0f</span>';
+  if(v===true) return '<span style="color:var(--bad);font-weight:700">Yes \u26a0\ufe0f</span>';
   if(v===false) return 'No';
   return '—';
 }
@@ -822,8 +984,8 @@ function openHealth(shopId, phoneId){
     ['Last seen', fmtSeen(p.lastSeen)+(h.silentDays!==null ? ' ('+h.silentDays+' day'+(h.silentDays===1?'':'s')+' silent)' : '')],
     ['Last known location', hasLoc
       ? esc(Number(loc.lat).toFixed(5)+', '+Number(loc.lng).toFixed(5))
-        + ' <a href="https://maps.google.com/?q='+loc.lat+','+loc.lng+'" target="_blank" style="color:#e8b93c">\uD83D\uDCCD Map</a>'
-        + '<br><span style="color:#9aa7c7">'+(locMs ? fmtDateTime(locMs) : 'time —')+'</span>'
+        + ' <a href="https://maps.google.com/?q='+loc.lat+','+loc.lng+'" target="_blank" style="color:var(--accent)">\uD83D\uDCCD Map</a>'
+        + '<br><span style="color:var(--muted)">'+(locMs ? fmtDateTime(locMs) : 'time —')+'</span>'
       : '—'],
     ['SIM changed', healthYesNo(h.simChanged)],
     ['Developer options on', healthYesNo(h.devOn)],
@@ -831,12 +993,12 @@ function openHealth(shopId, phoneId){
     ['Lock status', esc(p.status||'active')],
     ['Due date', fmtDate(dueMs)]
   ];
-  let html = '<p style="color:#9aa7c7;font-size:13px;margin-bottom:10px">'
+  let html = '<p class="lead">'
     + esc((p.customerName||'')+' \u2022 '+(p.model||'')) + ' \u2022 IMEI ' + esc((p.imei||'—').substring(0,15)) + '</p>'
     + '<table class="kv"><tbody>'
     + rows.map(function(r){ return '<tr><td class="k">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; }).join('')
     + '</tbody></table>'
-    + '<p style="color:#9aa7c7;font-size:12px;margin-top:10px">Battery / last boot sirf v4.43+ phones bhejte hain — "\u2014" matlab phone ne abhi report nahi kiya. KHATRA = SIM changed ya Developer Options / ADB on. KHAMOSH = 3 din se zyada khamosh.</p>';
+    + '<p style="color:var(--muted);font-size:12px;margin-top:10px">Battery / last boot sirf v4.43+ phones bhejte hain — "\u2014" matlab phone ne abhi report nahi kiya. KHATRA = SIM changed ya Developer Options / ADB on. KHAMOSH = 3 din se zyada khamosh.</p>';
   document.getElementById('healthBody').innerHTML = html;
   document.getElementById('healthOverlay').classList.add('open');
 }
@@ -846,13 +1008,15 @@ function closeHealth(){ document.getElementById('healthOverlay').classList.remov
 /* ===== FEATURE (2026-11-06): QR + Link — copy customer app link ===== */
 function copyAppLink(){
   const link='https://jilanapps.github.io/jilan-store/installock/installock-v3.apk';
-  const done=function(){ const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓'; };
+  const done=function(){ const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓';
+    const b=document.getElementById('copyBtn'); if(b){ b.textContent='Copied ✓'; b.classList.add('copied'); setTimeout(function(){ b.textContent='Copy Link'; b.classList.remove('copied'); },2000); } };
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done).catch(function(){ fallbackCopy(link); }); }
   else fallbackCopy(link);
 }
 function fallbackCopy(t){
   const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓'; }catch(e){}
+  try{ document.execCommand('copy'); const m=document.getElementById('copyMsg'); if(m) m.textContent='Link copy ho gaya ✓';
+    const b=document.getElementById('copyBtn'); if(b){ b.textContent='Copied ✓'; b.classList.add('copied'); setTimeout(function(){ b.textContent='Copy Link'; b.classList.remove('copied'); },2000); } }catch(e){}
   document.body.removeChild(ta);
 }
 
@@ -865,9 +1029,9 @@ function renderTiles(){
   const now=new Date(); const dStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(); const dEnd=dStart+86400000;
   let today=0; allPayments.forEach(function(py){ const t=tsMs(py.date); if(t>=dStart && t<dEnd) today+=Number(py.amount)||0; });
   el.innerHTML=
-    '<div class="stat"><div class="n">'+(toRemind>0?toRemind:'✓')+'</div><div class="l">'+(toRemind>0?(toRemind===1?'phone to remind today':'phones to remind today'):'No one to remind today')+'</div></div>'
-    + '<div class="stat"><div class="n">'+(pendingTid>0?pendingTid:'✓')+'</div><div class="l">'+(pendingTid>0?(pendingTid===1?'payment pending verification':'payments pending verification'):'All verified ✓')+'</div></div>'
-    + '<div class="stat"><div class="n">PKR '+today.toLocaleString('en-US')+'</div><div class="l">collected today</div></div>';
+    stat(toRemind>0?toRemind:'0','To remind today',toRemind>0?'warn':'ok','bell',toRemind>0?(toRemind===1?'phone needs a reminder':'phones need a reminder'):'no one to remind')
+    + stat(pendingTid>0?pendingTid:'0','Pending TID',pendingTid>0?'warn':'ok','receipt',pendingTid>0?'awaiting verification':'all verified')
+    + stat('PKR '+today.toLocaleString('en-US'),'Collected Today','ok','cash','payments received today',true);
 }
 
 /* ===== FEATURE (2026-11-06): Credit Check — INTERNAL Installock history only =====
@@ -889,7 +1053,7 @@ function runCreditCheck(){
     if(num && variants[num]) return true;
     return false;
   });
-  if(!hits.length){ el.innerHTML='<b>Koi record nahi mila.</b><br><span style="color:#9aa7c7">Ye CNIC/number Installock ki history me nahi hai. (Sirf Installock ka apna record check hota hai — bahari credit bureau nahi.)</span>'; return; }
+  if(!hits.length){ el.innerHTML='<b>Koi record nahi mila.</b><br><span style="color:var(--muted)">Ye CNIC/number Installock ki history me nahi hai. (Sirf Installock ka apna record check hota hai — bahari credit bureau nahi.)</span>'; return; }
   let overdue=0, released=0, paid=0;
   hits.forEach(function(p){
     const dueMs=p.dueDate?Number(p.dueDate):0;
@@ -907,7 +1071,7 @@ function runCreditCheck(){
       + ' • Paid: Rs '+Number(p.paidSoFar||0).toLocaleString('en-US')
       + ' • Remaining: Rs '+Number(p.remainingAmount||0).toLocaleString('en-US')+'</div>';
   });
-  html+='<p style="color:#9aa7c7;font-size:12px;margin-top:8px">Internal history check — sirf Installock ka apna record. Ye kisi bahari credit bureau ki report nahi hai.</p>';
+  html+='<p style="color:var(--muted);font-size:12px;margin-top:8px">Internal history check — sirf Installock ka apna record. Ye kisi bahari credit bureau ki report nahi hai.</p>';
   el.innerHTML=html;
 }
 
@@ -1028,7 +1192,7 @@ function startFeatureListeners(){
         const used=pool.filter(function(k){ return k.used; }).length;
         html+='<div style="border:1px solid #232c4a;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px"><b>'+esc(v.name||'—')+'</b> • '+esc(v.contact||'')
           + '<br>Keys: total <b>'+pool.length+'</b> • Used <b>'+used+'</b> • Remaining <b>'+(pool.length-used)+'</b>'
-          + '<br><span style="color:#9aa7c7">'+pool.map(function(k){ return esc(k.code)+(k.used?' (used)':''); }).join(', ')+'</span>'
+          + '<br><span style="color:var(--muted)">'+pool.map(function(k){ return esc(k.code)+(k.used?' (used)':''); }).join(', ')+'</span>'
           + '<br><button class="small ghost" onclick="markDealerKeyUsed(\''+d.id+'\')">Mark a key used</button></div>';
       });
       el.innerHTML=html||'No dealers yet.';
@@ -1106,30 +1270,34 @@ function renderPhones(){
     const pcNum = function(v){ return (v!==undefined&&v!==null&&v!=='') ? Number(v) : null; };
     html += '<div class="pcard pc-'+pcFold+'">'
       + '<div class="pc-head"><div class="pc-title"><div class="pc-name">'+esc(p.customerName||'No name')+'</div>'
-      + '<div class="pc-sub">📱 '+esc(p.model||'Mobile')+(p.phoneType?' • '+(p.phoneType==='used'?'Used':'New'):'')+'</div></div>'
+      + '<div class="pc-sub">'+esc(p.model||'Mobile')+(p.phoneType?' • '+(p.phoneType==='used'?'Used':'New'):'')+'</div></div>'
       + '<div class="pc-chips"><span class="pchip pchip-'+pcFold+'">'+({active:'Active',overdue:'Overdue',released:'Released'}[pcFold])+'</span>'
       + (pcOff?'<span class="pchip pchip-off">Offline</span>':'')+'</div></div>'
-      + '<div class="pc-grid">'
-      + pcKv('Due date', fmtDate(dueMs)+(overdue?' ⚠️':''))
-      + pcKv('Qist baqi', pcNum(p.installmentsLeft)!==null ? String(pcNum(p.installmentsLeft)) : '')
-      + pcKv('Remaining', pcNum(p.remainingAmount)!==null ? rs(p.remainingAmount) : '')
-      + pcKv('Paid', (pcNum(p.paidSoFar)||0)>0 ? rs(p.paidSoFar) : '')
-      + pcKv('App', p.appVersion ? 'v'+esc(p.appVersion) : '')
-      + pcKv('Last seen', fmtSeen(p.lastSeen))
+      + '<div class="pc-hero">'
+      + '<div class="ph-main"><div class="k">Remaining amount</div><div class="v num'+(pcNum(p.remainingAmount)?'':' zero')+'">'+(pcNum(p.remainingAmount)!==null ? rs(p.remainingAmount) : '—')+'</div></div>'
+      + '<div class="ph-cell"><div class="k">Due date</div><div class="v'+(overdue?' bad':'')+'">'+fmtDate(dueMs)+'</div></div>'
+      + '<div class="ph-cell"><div class="k">Qist baqi</div><div class="v">'+(pcNum(p.installmentsLeft)!==null ? String(pcNum(p.installmentsLeft)) : '—')+'</div></div>'
+      + '<div class="ph-cell"><div class="k">Paid</div><div class="v">'+((pcNum(p.paidSoFar)||0)>0 ? rs(p.paidSoFar) : '—')+'</div></div>'
+      + '</div>'
+      + '<div class="pc-sec">Device</div><div class="pc-grid">'
+      + pcKv('IMEI / Serial', '<span class="mono">'+esc((p.imei||'—').substring(0,15))+'</span>', true)
+      + pcKv('Lock state', chip(st))
+      + pcKv('App version', p.appVersion ? 'v'+esc(p.appVersion) : '')
+      + pcKv('Last seen', fmtSeen(p.lastSeen), true)
+      + '</div>'
+      + '<div class="pc-sec">Customer</div><div class="pc-grid">'
       + pcKv('Customer no.', p.customerNumber ? esc(p.customerNumber) : '')
       + pcKv('Guarantor', p.guarantorNumber ? esc(p.guarantorNumber) : '')
-      + pcKv('Lock state', chip(st))
-      + pcKv('Shop', esc(p._shopName||'—'))
-      + pcKv('IMEI', esc((p.imei||'—').substring(0,15)), true)
+      + pcKv('Shop', esc(p._shopName||'—'), true)
       + pcKv('CNIC', p.cnicNumber ? esc(fmtCnic(p.cnicNumber))+(p.cnicSource?' ('+esc(p.cnicSource==='ocr'?'OCR':'manual')+')':'') : '', true)
       + '</div>'
-      + '<div class="pc-health"><b style="color:#9aa7c7;font-size:11px">HEALTH</b> '+healthCell(p)+'</div>'
-      + (p.healthCertSummary?'<div class="pc-note" style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</div>':'')
+      + '<div class="pc-health"><span class="agl" style="margin:0">Health</span> '+healthCell(p)+'</div>'
+      + (p.healthCertSummary?'<div class="pc-note" style="color:var(--ok)">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</div>':'')
       + (pcOff && pcAge > 3*86400000 ? '<div class="pc-note"><span class="tag-off">⚠️ OFFLINE 3+ DAYS</span></div>' : '')
       + (pcOff && pcAge <= 3*86400000 ? '<div class="pc-note"><span class="tag-dead">\uD83D\uDD34 24h+ khamoshi — band/reset ho sakta hai</span></div>' : '')
       + (pendTag(p) ? '<div class="pc-note">'+pendTag(p)+'</div>' : '')
       + ((p.photoCustomerThumb||p.photoCnicThumb)?'<div class="pc-photos">'+thumbImg(p,'photoCustomerThumb','Customer photo')+thumbImg(p,'photoCnicThumb','ID card photo')+'</div>':'')
-      + '<div class="agrp"><div class="agl">Main</div><div class="abtns">'
+      + '<div class="agrp agrp-main"><div class="agl">Installment</div><div class="abtns">'
       + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
       + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')"'+dis(p.imei,'UNLOCK')+'>Unlock</button>'
       + '<button class="small ghost" onclick="setMasterPin(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_MASTER_HASH')+'>Master PIN</button>'
@@ -1140,31 +1308,33 @@ function renderPhones(){
       + '<div class="agrp"><div class="agl">Remind & find</div><div class="abtns">'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
-      + ((overdue&&waNum)?' <button class="small" onclick="window.open(\'https://wa.me/'+waNum+'?text='+remEnc+'\',\'_blank\')">📲 WhatsApp</button> <a href="sms:+'+waNum+'?body='+remEnc+'" style="color:#e8b93c;font-size:12px">SMS</a>':'')
-      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'<span style="color:#9aa7c7;font-size:12px">📍 Location nahi mili</span>')
+      + ((overdue&&waNum)?' <button class="small" onclick="window.open(\'https://wa.me/'+waNum+'?text='+remEnc+'\',\'_blank\')">WhatsApp</button> <a href="sms:+'+waNum+'?body='+remEnc+'" style="color:var(--accent);font-size:12px">SMS</a>':'')
+      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:var(--accent);font-size:12px">Map</a>':'<span style="color:var(--muted);font-size:12px">No location yet</span>')
       + '</div></div>'
-      + '<div class="agrp"><div class="agl">Control</div><div class="abtns">'
-      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
+      + '<div class="agrp"><div class="agl">Device control</div><div class="abtns">'
+      + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>Update</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
-      + '<button class="small ghost" onclick="blockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">🚫 App Block</button>'
-      + '<button class="small ghost" onclick="unblockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">✅ App Unblock</button>'
+      + '<button class="small ghost" onclick="blockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">App Block</button>'
+      + '<button class="small ghost" onclick="unblockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">App Unblock</button>'
       + '</div></div>'
       + '<div class="agrp agrp-sched"><div class="agl">Auto lock schedule</div><div class="abtns">'
-      + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" > <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" > <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">⏰ Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
+      + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" > <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" > <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
       + '</div></div>'
+      + '<details class="pc-more"><summary>More actions<span class="hint2">Agreement · Receipt · Release · Wipe · Delete</span></summary>'
       + '<div class="agrp"><div class="agl">Papers</div><div class="abtns">'
-      + '<button class="small ghost" onclick="openAgreement(\''+p._shop+'\',\''+p._id+'\')">📄 Agreement</button>'
+      + '<button class="small ghost" onclick="openAgreement(\''+p._shop+'\',\''+p._id+'\')">Agreement</button>'
       + '<button class="small ghost" onclick="openReceipt(\''+p._shop+'\',\''+p._id+'\')"'
       + (((Number(p.lastPaymentAmount)||0)>0 || (Number(p.lastPaymentAt)||0)>0 || (Number(p.lastPaymentDate)||0)>0)
           ? '' : ' disabled style="opacity:.45"')
-      + '>🧾 Receipt</button>'
+      + '>Receipt</button>'
       + '</div></div>'
-      + '<div class="agrp"><div class="agl">Danger</div><div class="abtns">'
+      + '<div class="agrp agrp-danger"><div class="agl">Danger</div><div class="abtns">'
       + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
-      + '<button class="small danger" onclick="wipePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')">🧨 Wipe</button>'
-      + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">\uD83D\uDDD1 Delete</button>'
+      + '<button class="small danger" onclick="wipePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')">Wipe</button>'
+      + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">Delete</button>'
       + '</div></div>'
+      + '</details>'
       + '</div>';
   });
   document.getElementById('phoneRows').innerHTML = html || ('<div class="pc-empty">'+(curFolder!=='all' && allPhones.length ? 'No phones in this folder' : 'No phones yet')+'</div>');
@@ -1181,19 +1351,29 @@ function renderPhones(){
     const el = document.getElementById('silentAlert');
     if (el) {
       el.innerHTML = silent.length === 0 ? '' :
-        '<div style="background:#2a1515;border:1px solid #e53935;border-radius:10px;padding:12px;margin-bottom:16px">'
-        + '<b style="color:#ff8a80">\u26a0\ufe0f ' + silent.length + ' phone 24 ghante se zyada khamosh hai — band, net off ya reset ho sakta hai (confirmed removal nahi):</b><br>'
+        '<div class="silent-alert">'
+        + '<b>\u26a0\ufe0f ' + silent.length + ' phone 24 ghante se zyada khamosh hai — band, net off ya reset ho sakta hai (confirmed removal nahi):</b><br>'
         + silent.map(p => esc((p.customerName||p._shopName||'—')) + ' — ' + esc(p._shopName||'—') + ' — aakhri seen: ' + fmtSeen(p.lastSeen)).join('<br>')
         + '</div>';
     }
   } catch(e) {}
   document.getElementById('statsRow').innerHTML =
-    stat(allPhones.length,'Total Phones')+stat(counts.active,'Active')
-    +stat(counts.grace,'Grace')+stat(counts.limited,'Limited')
-    +stat(counts.offline_locked,'Offline Lock');
+    stat(allPhones.length,'Total Phones','primary','phone','all enrolled devices',true)
+    +stat(counts.active,'Active','ok','check','running normally')
+    +stat(counts.grace,'Grace','warn','clock','in grace period')
+    +stat(counts.limited,'Limited','slate','pause','features limited')
+    +stat(counts.offline_locked,'Offline Lock','bad','lock','locked offline');
+  try{ const o=document.getElementById('ovUpdated'); if(o) o.textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){}
   renderHisaab();
 }
-function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+const STAT_ICONS={"phone": "<rect x=\"7\" y=\"2.5\" width=\"10\" height=\"19\" rx=\"2\"/><path d=\"M11 18h2\"/>", "check": "<path d=\"M20 6 9 17l-5-5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "pause": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M10 9v6M14 9v6\"/>", "lock": "<rect x=\"5\" y=\"11\" width=\"14\" height=\"10\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/>", "wallet": "<path d=\"M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z\"/><path d=\"M3 7V6a2 2 0 0 1 2-2h11\"/><circle cx=\"16.5\" cy=\"13.5\" r=\"1.3\"/>", "trend": "<path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "alert": "<path d=\"M12 3 2 20h20L12 3z\"/><path d=\"M12 10v4M12 17h.01\"/>", "bell": "<path d=\"M6 16V11a6 6 0 1 1 12 0v5l2 2H4l2-2z\"/><path d=\"M10 20a2 2 0 0 0 4 0\"/>", "receipt": "<path d=\"M6 3h12v18l-3-2-3 2-3-2-3 2V3z\"/><path d=\"M9 8h6M9 12h6\"/>", "cash": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/>"};
+/* v3 design: KPI card = label + icon on top, tabular number, optional sub line.
+   tone: primary|ok|warn|bad|slate ; wide spans the full grid row. */
+function stat(n,l,tone,ic,sub,wide){
+  const svg = ic && STAT_ICONS[ic] ? '<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+STAT_ICONS[ic]+'</svg></span>' : '';
+  return '<div class="stat t-'+(tone||'slate')+(wide?' wide':'')+'"><div class="top"><div class="l">'+l+'</div>'+svg+'</div>'
+    + '<div class="n num">'+n+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')+'</div>';
+}
 
 /* ===== v4.0 PRO: hisaab strip =====
    Total Outstanding: sum of remaining balances (spec formula) over
@@ -1221,20 +1401,20 @@ function renderHisaab(){
     if(t >= mStart && t < mEnd) collected += Number(py.amount)||0;
   });
   el.innerHTML =
-    stat(rs(outstanding),'Total Outstanding')
-    + stat(rs(collected),'Collected This Month')
-    + stat(overdue,'Overdue Phones');
+    stat(rs(outstanding),'Total Outstanding','primary','wallet','remaining on active plans',true)
+    + stat(rs(collected),'Collected This Month','ok','trend',new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}))
+    + stat(overdue,'Overdue Phones',overdue>0?'bad':'slate','alert',overdue>0?'due date passed':'none overdue');
   renderTiles();
 }
 
 function renderAlerts(){
   const unseen = allAlerts.filter(a=>!a.seen).length;
-  document.getElementById('alertCount').textContent = unseen?('('+unseen+')'):'';
+  document.getElementById('alertCount').textContent = unseen?String(unseen):'';
   let html='';
   allAlerts.forEach(a=>{
     html += '<div class="alert'+(a.seen?' seen':'')+'">'
       + '<b>'+(a.type||'ALERT')+'</b> — IMEI '+(a.imei||'—')
-      + ' <span style="color:#9aa7c7">'+fmtSeen(a.at)+'</span>'
+      + ' <span style="color:var(--muted)">'+fmtSeen(a.at)+'</span>'
       + (a.seen?'':' <button class="small ghost" onclick="markSeen(\''+a._id+'\')">Mark seen</button>')
       + '</div>';
   });
@@ -1254,7 +1434,7 @@ function renderEvents(){
       + '<b>'+esc(ev.type||'EVENT')+'</b> — '+(ev._shopName||'')
       + ' • IMEI '+esc(ev.imei||'—')
       + (ev.extra ? ' • '+esc(ev.extra) : '')
-      + ' <span style="color:#9aa7c7">'+fmtSeen(ev.at)+'</span>'
+      + ' <span style="color:var(--muted)">'+fmtSeen(ev.at)+'</span>'
       + '</div>';
   });
   el.innerHTML = html;
@@ -1264,9 +1444,9 @@ function renderShops(shops){
   let html='';
   shops.forEach(s=>{
     const n = allPhones.filter(p=>p._shop===s._id).length;
-    html += '<div class="card" style="margin-bottom:10px"><b>'+esc(s.name||s._id)+'</b>'
-      + ' <span style="color:#9aa7c7;font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span>'
-      + (s.shopDisplayName || s.shopJazzCashNumber ? '<br><span style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</span>' : '<br><span style="color:#9aa7c7;font-size:13px">No JazzCash number saved</span>')
+    html += '<div class="shop-row"><b>'+esc(s.name||s._id)+'</b>'
+      + ' <span style="color:var(--muted);font-size:13px">'+n+' phones • grace '+(s.graceDays||3)+' days</span>'
+      + (s.shopDisplayName || s.shopJazzCashNumber ? '<br><span style="color:var(--ok);font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</span>' : '<br><span style="color:var(--muted);font-size:13px">No JazzCash number saved</span>')
       + ' <button class="small" onclick="editShopPayment(\''+s._id+'\')">Payment details</button></div>';
   });
   document.getElementById('shopList').innerHTML = html || 'No shops';
@@ -1488,17 +1668,17 @@ function renderTidRequests(){
   const mine = new Set(myShopsArr.map(s=>s._id));
   const rows = allTidRequests.filter(r=>mine.has(r._shop));
   if(cnt) cnt.textContent = rows.length ? '('+rows.length+')' : '';
-  if(!rows.length){ el.innerHTML = '<p style="color:#9aa7c7">Koi pending TID request nahi hai.</p>'; return; }
+  if(!rows.length){ el.innerHTML = '<p style="color:var(--muted)">Koi pending TID request nahi hai.</p>'; return; }
   // DRAFT 2026-10-26: show each owned shop's own pay-to line above the TID
   // table, so the shopkeeper confirms the customer was told the right shop.
   let payLines = '';
   myShopsArr.forEach(s=>{
-    if(s.shopJazzCashNumber){ payLines += '<div style="color:#4caf50;font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</div>'; }
+    if(s.shopJazzCashNumber){ payLines += '<div style="color:var(--ok);font-size:13px">Pay to: '+esc(s.shopDisplayName||s.name||s._id)+' — JazzCash: '+esc(fmtShopJazz(s.shopJazzCashNumber))+'</div>'; }
   });
   let html = payLines + '<div style="overflow-x:auto"><table><thead><tr><th>Shop / Phone</th><th>TID</th><th>Amount / Method</th><th>Time</th><th>Actions</th></tr></thead><tbody>';
   rows.forEach(r=>{
     const phone = findPhone(r._shop, r.phoneDocId);
-    html += '<tr><td>'+esc(r._shopName||r._shop)+'<br><span style="color:#9aa7c7">'+esc(r.phoneDocId||'')+(phone&&phone.imei ? ' / '+esc(String(phone.imei).substring(0,15)) : '')+'</span></td>'
+    html += '<tr><td>'+esc(r._shopName||r._shop)+'<br><span style="color:var(--muted)">'+esc(r.phoneDocId||'')+(phone&&phone.imei ? ' / '+esc(String(phone.imei).substring(0,15)) : '')+'</span></td>'
       + '<td>'+esc(r.tid||'')+'</td>'
       + '<td>'+rs(r.amount)+' / '+esc(r.method||'')+'</td>'
       + '<td>'+fmtSeen(r.createdAt)+'</td>'
