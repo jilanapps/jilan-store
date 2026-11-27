@@ -115,6 +115,51 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
   .doctoolbar{display:none!important}
   #printArea{border-radius:0;padding:6mm}
 }
+
+/* ===== FOLDERS (2026-11-27): status boxes + phone-card layout ===== */
+.folders{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:4px 0 14px}
+@media(min-width:900px){.folders{grid-template-columns:repeat(4,1fr)}}
+.fbox{border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;border:3px solid transparent;color:#fff;user-select:none}
+.fbox .n{font-size:30px;font-weight:800;line-height:1.1;color:#fff}
+.fbox .l{font-size:15px;font-weight:800;color:#fff}
+.fbox .s{font-size:11px;color:rgba(255,255,255,.85);margin-top:2px}
+.f-all{background:#1e3a8a}.f-active{background:#15803d}.f-overdue{background:#c62828}.f-released{background:#475569}
+.fbox.on{border-color:#e8b93c;box-shadow:0 0 12px rgba(232,185,60,.55)}
+#folderHead{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#151b30;border:1px solid #e8b93c;border-radius:10px;padding:10px 12px;margin-bottom:12px;color:#fff;font-weight:700}
+#folderHead.open{display:flex}
+#folderBoxes,#folderHead{scroll-margin-top:110px}
+
+/* ===== CARDS (2026-11-27): phone list as cards ===== */
+.pcards{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:820px){.pcards{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}}
+.pc-empty{color:#9aa7c7;padding:14px;text-align:center}
+.pcard{background:#151b30;border:1px solid #2c3a63;border-left:6px solid #15803d;border-radius:14px;padding:12px;min-width:0;overflow:hidden}
+.pcard.pc-overdue{border-left-color:#e53935;background:#1d1626}
+.pcard.pc-released{border-left-color:#64748b}
+.pc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.pc-title{min-width:0}
+.pc-name{font-size:18px;font-weight:800;color:#fff;word-break:break-word}
+.pc-sub{font-size:13px;color:#e8b93c;font-weight:700;margin-top:2px}
+.pc-chips{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pchip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
+.pchip-active{background:#15803d}.pchip-overdue{background:#e53935}.pchip-released{background:#64748b}.pchip-off{background:#b45309}
+.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.pc-kv{background:#0f1426;border:1px solid #232c4a;border-radius:10px;padding:7px 9px;min-width:0}
+.pc-kv.wide{grid-column:1 / -1}
+.pc-kv .k{font-size:10.5px;color:#9aa7c7;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.pc-kv .v{font-size:14px;color:#fff;font-weight:700;word-break:break-word;margin-top:1px}
+.pc-health{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0f1426;border:1px solid #232c4a;border-radius:10px;padding:7px 9px;margin-bottom:8px;font-size:13px}
+.pc-note{font-size:12.5px;margin:0 0 8px;color:#9aa7c7;word-break:break-word}
+.pc-photos{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.pc-photos img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.agrp{border-top:1px solid #232c4a;padding-top:8px;margin-top:8px}
+.agl{font-size:11px;color:#e8b93c;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.abtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.abtns > button,.abtns > a,.abtns > span{width:100%;margin:0 !important;min-height:40px;padding:8px 4px;font-size:13px;border-radius:10px;text-align:center;display:flex;align-items:center;justify-content:center;box-sizing:border-box;word-break:break-word}
+.abtns > a{background:#232c4a;color:#e8b93c !important;font-weight:700;text-decoration:none;font-size:13px !important}
+.abtns > span{background:transparent;border:1px dashed #2c3a63;font-size:11.5px !important}
+.abtns > input[type=time]{width:100% !important;min-width:0;box-sizing:border-box;margin:0}
+.agrp-sched .abtns{grid-template-columns:repeat(2,minmax(0,1fr))}
 </style>
 </head>
 <body>
@@ -186,12 +231,10 @@ footer{text-align:center;color:#5b6b8c;font-size:12px;padding:20px}
 
 <div class="card" id="tab-phones">
 <h2>Phones</h2>
-<div style="overflow-x:auto">
-<table>
-<thead><tr><th>IMEI</th><th>Shop</th><th>Status</th><th>Health</th><th>Due Date</th><th>Last Seen</th><th>Actions</th></tr></thead>
-<tbody id="phoneRows"><tr><td colspan="7">Loading...</td></tr></tbody>
-</table>
-</div>
+<!-- FOLDERS (2026-11-27): status boxes -->
+<div id="folderBoxes" class="folders"></div>
+<div id="folderHead"></div>
+<div id="phoneRows" class="pcards"><div class="pc-empty">Loading...</div></div>
 </div>
 
 <div class="card hidden" id="tab-alerts">
@@ -818,6 +861,50 @@ function startFeatureListeners(){
   }catch(e){}
 }
 
+
+/* ===== FOLDERS (2026-11-27) =====
+   Status folder of a phone, computed ONLY from already-loaded allPhones
+   (no extra Firestore reads):
+     released = p.status === 'released'
+     overdue  = not released AND p.dueDate set AND now > p.dueDate
+     active   = everything else (not released, not past due — includes
+                grace / limited / offline_locked phones whose due date
+                has not passed, e.g. a manual lock)
+   Same overdue rule as the red OVERDUE chip in the list. */
+let curFolder = 'all';
+function phoneFolder(p){
+  const st = p.status||'active';
+  if(st==='released') return 'released';
+  const dueMs = p.dueDate ? Number(p.dueDate) : 0;
+  if(dueMs && Date.now()>dueMs) return 'overdue';
+  return 'active';
+}
+const FOLDER_LABEL = {all:'All Phones', active:'Active Mobiles', overdue:'Overdue', released:'Released'};
+function renderFolders(){
+  const el = document.getElementById('folderBoxes'); if(!el) return;
+  const c = {all:allPhones.length, active:0, overdue:0, released:0};
+  allPhones.forEach(function(p){ c[phoneFolder(p)]++; });
+  const sub = {all:'every phone', active:'running, not late', overdue:'due date passed', released:'fully paid / released'};
+  el.innerHTML = ['active','overdue','released','all'].map(function(k){
+    return '<div class="fbox f-'+k+(curFolder===k?' on':'')+'" onclick="openFolder(\''+k+'\')">'
+      + '<div class="n">'+c[k]+'</div><div class="l">'+FOLDER_LABEL[k]+'</div><div class="s">'+sub[k]+'</div></div>';
+  }).join('');
+  const h = document.getElementById('folderHead');
+  if(h){
+    if(curFolder==='all'){ h.className=''; h.innerHTML=''; }
+    else {
+      h.className='open';
+      h.innerHTML = '<span>📂 '+FOLDER_LABEL[curFolder]+' — '+c[curFolder]+' phone'+(c[curFolder]===1?'':'s')+'</span>'
+        + '<button class="small" onclick="openFolder(\'all\')">← All Phones</button>';
+    }
+  }
+}
+function openFolder(k){
+  curFolder = (k===curFolder && k!=='all') ? 'all' : k;
+  renderPhones();
+  const h = document.getElementById(curFolder==='all' ? 'folderBoxes' : 'folderHead');
+  if(h && h.scrollIntoView) h.scrollIntoView({behavior:'smooth', block:'start'});
+}
 function renderPhones(){
   const counts = {active:0,grace:0,limited:0,offline_locked:0};
   let html = '';
@@ -830,64 +917,78 @@ function renderPhones(){
     const waNum=custNum?(custNum.indexOf('92')===0?custNum:(custNum.indexOf('0')===0?'92'+custNum.slice(1):custNum)):'';
     const remMsg='Assalam-o-Alaikum'+(p.customerName?', '+p.customerName:'')+', your Installock installment was due on '+fmtDate(dueMs)+(p.remainingAmount?'. Remaining amount: Rs '+Number(p.remainingAmount).toLocaleString('en-US'):'')+'. Please pay at your shop to keep your phone active. - Installock';
     const remEnc=encodeURIComponent(remMsg);
-    html += '<tr'+(overdue?' style="background:#2a1515"':'')+'>'
-      + '<td>'+esc((p.imei||'—').substring(0,15))+'</td>'
-      + '<td>'+esc(p._shopName||'—')+'</td>'
-      + '<td>'+chip(st)+(overdue?' <span class="chip c-overdue">OVERDUE</span>':'')
-      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
-          return ls>0 && (Date.now()-ls) > 86400000; })())
-          ? ' <span class="chip c-dead">\uD83D\uDD34 RABTA KHATAM?</span>' : '')+'</td>'
-      + '<td>'+healthCell(p)+'</td>'
-      + '<td>'+fmtDate(dueMs)+(overdue?' ⚠️':'')
-      + ((p.installmentsLeft!==undefined&&p.installmentsLeft!==null)?'<br><span style="color:#9aa7c7">'+Number(p.installmentsLeft)+' qist baqi</span>':'')
-      + ((p.remainingAmount!==undefined&&p.remainingAmount!==null&&Number(p.remainingAmount)>0)?'<br><span style="color:#9aa7c7">Remaining: Rs '+Number(p.remainingAmount).toLocaleString('en-US')+'</span>':'')
-      + ((p.paidSoFar!==undefined&&p.paidSoFar!==null&&Number(p.paidSoFar)>0)?'<br><span style="color:#9aa7c7">Paid: Rs '+Number(p.paidSoFar).toLocaleString('en-US')+'</span>':'')
-      + (p.phoneType?'<br><span style="color:#9aa7c7">Type: '+(p.phoneType==='used'?'Used':'New')+'</span>':'')
-      + (p.appVersion?'<br><span style="color:#9aa7c7">App: v'+p.appVersion+'</span>':'')
-      + (p.model?'<br><span style="color:#9aa7c7">Mobile: '+esc(p.model)+'</span>':'')
-      + ((p.customerName||p.customerNumber)?'<br><span style="color:#9aa7c7">Customer: '+esc((p.customerName||'')+(p.customerName&&p.customerNumber?' ('+p.customerNumber+')':(p.customerNumber||'')))+'</span>':'')
-      + (p.cnicNumber?'<br><span style="color:#9aa7c7">CNIC: '+esc(fmtCnic(p.cnicNumber))+(p.cnicSource?' ('+esc(p.cnicSource==='ocr'?'OCR':'manual')+')':'')+'</span>':'')
-      + ((p.photoCustomerThumb||p.photoCnicThumb)?'<br>'+thumbImg(p,'photoCustomerThumb','Customer photo')+thumbImg(p,'photoCnicThumb','ID card photo'):'')
-      + (p.guarantorNumber?'<br><span style="color:#9aa7c7">Guarantor: '+esc(p.guarantorNumber)+'</span>':'')
-      + (p.healthCertSummary?'<br><span style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</span>':'')
-      + pendTag(p)
-      + '</td>'
-      + '<td>'+fmtSeen(p.lastSeen)
-      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
-          return ls>0 && (Date.now()-ls) > 3*86400000; })())
-          ? '<br><span class="tag-off">⚠️ OFFLINE 3+ DAYS</span>' : '')
-      + ((st!=='released' && (function(){ const ls = tsMs(p.lastSeen)||tsMs(p.lastSync);
-          const age = ls>0 ? (Date.now()-ls) : 0;
-          return age > 86400000 && age <= 3*86400000; })())
-          ? '<br><span class="tag-dead">\uD83D\uDD34 24h+ khamoshi — band/reset ho sakta hai</span>' : '')
-      + '</td>'
-      + '<td>'
+    if(curFolder!=='all' && phoneFolder(p)!==curFolder) return; // FOLDERS filter
+    /* CARDS (2026-11-27): card header + info grid */
+    const pcLs = tsMs(p.lastSeen)||tsMs(p.lastSync);
+    const pcAge = pcLs>0 ? (Date.now()-pcLs) : 0;
+    const pcFold = phoneFolder(p);
+    const pcOff = st!=='released' && pcLs>0 && pcAge>86400000;
+    const pcKv = function(k,v,wide){ return (v===''||v===null||v===undefined) ? '' : '<div class="pc-kv'+(wide?' wide':'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
+    const pcNum = function(v){ return (v!==undefined&&v!==null&&v!=='') ? Number(v) : null; };
+    html += '<div class="pcard pc-'+pcFold+'">'
+      + '<div class="pc-head"><div class="pc-title"><div class="pc-name">'+esc(p.customerName||'No name')+'</div>'
+      + '<div class="pc-sub">📱 '+esc(p.model||'Mobile')+(p.phoneType?' • '+(p.phoneType==='used'?'Used':'New'):'')+'</div></div>'
+      + '<div class="pc-chips"><span class="pchip pchip-'+pcFold+'">'+({active:'Active',overdue:'Overdue',released:'Released'}[pcFold])+'</span>'
+      + (pcOff?'<span class="pchip pchip-off">Offline</span>':'')+'</div></div>'
+      + '<div class="pc-grid">'
+      + pcKv('Due date', fmtDate(dueMs)+(overdue?' ⚠️':''))
+      + pcKv('Qist baqi', pcNum(p.installmentsLeft)!==null ? String(pcNum(p.installmentsLeft)) : '')
+      + pcKv('Remaining', pcNum(p.remainingAmount)!==null ? rs(p.remainingAmount) : '')
+      + pcKv('Paid', (pcNum(p.paidSoFar)||0)>0 ? rs(p.paidSoFar) : '')
+      + pcKv('App', p.appVersion ? 'v'+esc(p.appVersion) : '')
+      + pcKv('Last seen', fmtSeen(p.lastSeen))
+      + pcKv('Customer no.', p.customerNumber ? esc(p.customerNumber) : '')
+      + pcKv('Guarantor', p.guarantorNumber ? esc(p.guarantorNumber) : '')
+      + pcKv('Lock state', chip(st))
+      + pcKv('Shop', esc(p._shopName||'—'))
+      + pcKv('IMEI', esc((p.imei||'—').substring(0,15)), true)
+      + pcKv('CNIC', p.cnicNumber ? esc(fmtCnic(p.cnicNumber))+(p.cnicSource?' ('+esc(p.cnicSource==='ocr'?'OCR':'manual')+')':'') : '', true)
+      + '</div>'
+      + '<div class="pc-health"><b style="color:#9aa7c7;font-size:11px">HEALTH</b> '+healthCell(p)+'</div>'
+      + (p.healthCertSummary?'<div class="pc-note" style="color:#7bd88f">🩺 '+esc(String(p.healthCertSummary).substring(0,150))+'</div>':'')
+      + (pcOff && pcAge > 3*86400000 ? '<div class="pc-note"><span class="tag-off">⚠️ OFFLINE 3+ DAYS</span></div>' : '')
+      + (pcOff && pcAge <= 3*86400000 ? '<div class="pc-note"><span class="tag-dead">\uD83D\uDD34 24h+ khamoshi — band/reset ho sakta hai</span></div>' : '')
+      + (pendTag(p) ? '<div class="pc-note">'+pendTag(p)+'</div>' : '')
+      + ((p.photoCustomerThumb||p.photoCnicThumb)?'<div class="pc-photos">'+thumbImg(p,'photoCustomerThumb','Customer photo')+thumbImg(p,'photoCnicThumb','ID card photo')+'</div>':'')
+      + '<div class="agrp"><div class="agl">Main</div><div class="abtns">'
       + '<button class="small danger" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCK\')"'+dis(p.imei,'LOCK')+'>Lock</button>'
       + '<button class="small" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UNLOCK\')"'+dis(p.imei,'UNLOCK')+'>Unlock</button>'
       + '<button class="small" onclick="paymentReceived(\''+p._shop+'\',\''+p._id+'\',\''+(p.imei||'')+'\','+(p.monthlyInstallment?Number(p.monthlyInstallment):0)+','+(p.installmentsLeft!==undefined&&p.installmentsLeft!==null?Number(p.installmentsLeft):-1)+')"'+dis(p.imei,'PAYMENT_RECEIVED')+'>Paid ✓</button>'
       + '<button class="small ghost" onclick="setDue(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_DUE_DATE')+'>Due Date</button>'
       + '<button class="small ghost" onclick="setPlan(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'SET_PLAN')+'>Plan</button>'
+      + '</div></div>'
+      + '<div class="agrp"><div class="agl">Remind & find</div><div class="abtns">'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'LOCATE\')">Locate</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'REMIND\')">Remind</button>'
       + ((overdue&&waNum)?' <button class="small" onclick="window.open(\'https://wa.me/'+waNum+'?text='+remEnc+'\',\'_blank\')">📲 WhatsApp</button> <a href="sms:+'+waNum+'?body='+remEnc+'" style="color:#e8b93c;font-size:12px">SMS</a>':'')
+      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'<span style="color:#9aa7c7;font-size:12px">📍 Location nahi mili</span>')
+      + '</div></div>'
+      + '<div class="agrp"><div class="agl">Control</div><div class="abtns">'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'UPDATE_NOW\')"'+dis(p.imei,'UPDATE_NOW')+'>⬆️ Update</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_ON\',null,\'FRP ON karein? Customer Google account add/remove NAHI kar sakega, Play Store shop account se chalega.\')"'+dis(p.imei,'FRP_ON')+'>FRP On</button>'
       + '<button class="small ghost" onclick="sendCmd(\''+p._shop+'\',\''+(p.imei||'')+'\',\'FRP_OFF\',null,\'FRP OFF karein? Customer phir se Google account add/remove kar sakega.\')"'+dis(p.imei,'FRP_OFF')+'>FRP Off</button>'
       + '<button class="small ghost" onclick="blockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">🚫 App Block</button>'
       + '<button class="small ghost" onclick="unblockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">✅ App Unblock</button>'
-      + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" style="width:86px"> <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" style="width:86px"> <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">⏰ Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
-      + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
-      + '<button class="small danger" onclick="wipePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')">🧨 Wipe</button>'
+      + '</div></div>'
+      + '<div class="agrp agrp-sched"><div class="agl">Auto lock schedule</div><div class="abtns">'
+      + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" > <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" > <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">⏰ Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
+      + '</div></div>'
+      + '<div class="agrp"><div class="agl">Papers</div><div class="abtns">'
       + '<button class="small ghost" onclick="openAgreement(\''+p._shop+'\',\''+p._id+'\')">📄 Agreement</button>'
       + '<button class="small ghost" onclick="openReceipt(\''+p._shop+'\',\''+p._id+'\')"'
       + (((Number(p.lastPaymentAmount)||0)>0 || (Number(p.lastPaymentAt)||0)>0 || (Number(p.lastPaymentDate)||0)>0)
           ? '' : ' disabled style="opacity:.45"')
       + '>🧾 Receipt</button>'
+      + '</div></div>'
+      + '<div class="agrp"><div class="agl">Danger</div><div class="abtns">'
+      + '<button class="small danger" onclick="releasePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')"'+dis(p.imei,'RELEASE')+'>Release</button>'
+      + '<button class="small danger" onclick="wipePhone(\''+p._shop+'\',\''+(p.imei||'')+'\')">🧨 Wipe</button>'
       + '<button class="small ghost" onclick="deleteRecord(\''+p._shop+'\',\''+p._id+'\')">\uD83D\uDDD1 Delete</button>'
-      + (p.lastLocation&&p.lastLocation.lat?'<a href="https://maps.google.com/?q='+p.lastLocation.lat+','+p.lastLocation.lng+'" target="_blank" style="color:#e8b93c;font-size:12px">📍 Map</a>':'<span style="color:#9aa7c7;font-size:12px">📍 Location nahi mili</span>')
-      + '</td></tr>';
+      + '</div></div>'
+      + '</div>';
   });
-  document.getElementById('phoneRows').innerHTML = html || '<tr><td colspan="7">No phones yet</td></tr>';
+  document.getElementById('phoneRows').innerHTML = html || ('<div class="pc-empty">'+(curFolder!=='all' && allPhones.length ? 'No phones in this folder' : 'No phones yet')+'</div>');
+  renderFolders();
   // Silent-phone banner: 24h+ khamosh, released nahi. Ye 'possible
   // removal' hai, confirmed removal nahi — band phone / net off bhi
   // khamosh lagta hai. Sirf naam + shop + aakhri seen, number nahi.
