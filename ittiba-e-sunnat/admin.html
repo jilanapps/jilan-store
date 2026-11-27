@@ -51,6 +51,9 @@ textarea{min-height:90px}
     <h2>ایڈمن لاگ ان</h2>
     <p class="hint">صرف تحریک کے منظور شدہ ایڈمن اپنے Google اکاؤنٹ سے لاگ ان کر سکتے ہیں۔ پاس ورڈ آپ کے اپنے فون پر Google کے پاس رہتا ہے، یہاں محفوظ نہیں ہوتا۔</p>
     <button class="btn p" id="loginBtn" type="button">Google سے لاگ ان کریں</button>
+    <p class="hint" style="margin-top:16px">اگر Google لاگ ان نہ چلے تو اپنی ایڈمن Gmail لکھ کر لنک منگوائیں۔ Gmail میں آئی ای میل کا لنک اسی فون پر کھولیں۔</p>
+    <input id="elEmail" type="email" dir="ltr" placeholder="your@gmail.com" autocomplete="email" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px;margin:6px 0">
+    <button class="btn" id="linkBtn" type="button">Gmail پر لنک بھیجیں</button>
     <p class="hint" id="loginErr"></p>
   </div>
 
@@ -140,12 +143,31 @@ function del(id){var i=items.filter(function(x){return x.id===id;})[0];if(!i||!c
 document.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.k)setKind(b.dataset.k);else if(b.dataset.e)startEdit(b.dataset.e);else if(b.dataset.d)del(b.dataset.d);});
 $('saveBtn').onclick=save;$('cancelBtn').onclick=clearForm;
 var unsub=null;
-function login(){$('loginErr').textContent='';var p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
-  auth.signInWithPopup(p).catch(function(e){if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){return auth.signInWithRedirect(p);} if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')$('loginErr').textContent='لاگ ان نہیں ہوا: '+e.code;});}
+var GCID='442847596741-97cebkonkpjhrt68nec8g58eqeujf13m.apps.googleusercontent.com';
+var GRET='https://jilanapps.github.io/jilan-store/jilan-chat/oauth-return.html';
+function rnd(){var c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',o='',b=new Uint8Array(32);crypto.getRandomValues(b);for(var i=0;i<b.length;i++)o+=c.charAt(b[i]%c.length);return o;}
+function login(){$('loginErr').textContent='';var st='tadmin.'+rnd();try{localStorage.setItem('tadmin-state',st);}catch(e){}
+  location.href='https://accounts.google.com/o/oauth2/v2/auth?client_id='+encodeURIComponent(GCID)+'&redirect_uri='+encodeURIComponent(GRET)+'&response_type=id_token&scope='+encodeURIComponent('openid email profile')+'&state='+encodeURIComponent(st)+'&nonce='+encodeURIComponent(rnd())+'&prompt=select_account';}
+function finishGoogle(){var h=location.hash.replace(/^#/,'');if(h.indexOf('id_token=')<0&&h.indexOf('error=')<0)return;
+  var q={};h.split('&').forEach(function(x){var i=x.indexOf('=');if(i>0){try{q[x.slice(0,i)]=decodeURIComponent(x.slice(i+1));}catch(e){}}});
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+  var st=null;try{st=localStorage.getItem('tadmin-state');localStorage.removeItem('tadmin-state');}catch(e){}
+  if(q.error){if(q.error!=='access_denied')$('loginErr').textContent='لاگ ان نہیں ہوا: '+q.error;return;}
+  if(!q.id_token||!st||q.state!==st){$('loginErr').textContent='لاگ ان کی تصدیق نہیں ہوئی، دوبارہ کوشش کریں۔';return;}
+  $('loginErr').textContent='لاگ ان ہو رہا ہے…';
+  auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(q.id_token)).then(function(){$('loginErr').textContent='';}).catch(function(e){$('loginErr').textContent='لاگ ان نہیں ہوا: '+(e.code||e.message);});}
+function sendLink(){var em=($('elEmail').value||'').trim().toLowerCase();$('loginErr').textContent='';
+  if(ADMINS.indexOf(em)<0){$('loginErr').textContent='یہ Gmail ایڈمن لسٹ میں نہیں ہے۔';return;}
+  $('linkBtn').disabled=true;
+  auth.sendSignInLinkToEmail(em,{url:'https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/admin.html',handleCodeInApp:true}).then(function(){try{localStorage.setItem('tadmin-email',em);}catch(e){}
+    $('loginErr').textContent='لنک بھیج دیا گیا۔ اپنی Gmail کھولیں (Spam بھی دیکھیں) اور لنک اسی فون پر کھولیں۔';}).catch(function(e){$('loginErr').textContent='لنک نہیں گیا: '+(e.code||e.message);}).then(function(){$('linkBtn').disabled=false;});}
+function finishLink(){if(!auth.isSignInWithEmailLink(location.href))return;var em=null;try{em=localStorage.getItem('tadmin-email');}catch(e){}
+  if(!em)em=(prompt('جس Gmail پر لنک آیا تھا وہ لکھیں:')||'').trim().toLowerCase();if(!em)return;
+  $('loginErr').textContent='لاگ ان ہو رہا ہے…';
+  auth.signInWithEmailLink(em,location.href).then(function(){try{localStorage.removeItem('tadmin-email');history.replaceState(null,'',location.pathname);}catch(e){}$('loginErr').textContent='';}).catch(function(e){$('loginErr').textContent='لنک سے لاگ ان نہیں ہوا: '+(e.code||e.message)+' — نیا لنک منگوائیں۔';});}
 function start(){
   var app=firebase.initializeApp(TZ_CONFIG,'tehreek-admin'); auth=app.auth(); db=app.firestore();
-  auth.getRedirectResult().catch(function(e){$('loginErr').textContent='لاگ ان نہیں ہوا: '+e.code;});
-  $('loginBtn').onclick=login; $('logoutBtn').onclick=function(){auth.signOut();};
+  $('loginBtn').onclick=login; $('linkBtn').onclick=sendLink; finishGoogle(); finishLink(); $('logoutBtn').onclick=function(){auth.signOut();};
   auth.onAuthStateChanged(function(u){if(unsub){unsub();unsub=null;}
     if(u&&ADMINS.indexOf((u.email||'').toLowerCase())>=0&&u.emailVerified){$('loginCard').classList.add('hidden');$('panel').classList.remove('hidden');$('who').textContent=u.email;setKind(kind);
       unsub=db.collection('tehreek_items').onSnapshot(function(s){items=s.docs.map(function(d){var o=d.data();o.id=d.id;o.ct=o.createdAt&&o.createdAt.toMillis?o.createdAt.toMillis():9e15;return o;}).sort(function(a,b){return b.ct-a.ct;});renderList();},function(e){toast('ڈیٹا لوڈ نہیں ہوا: '+e.code);});}

@@ -23,6 +23,15 @@
 (function () {
   var frag = window.location.hash ? window.location.hash.substring(1) : "";
   var target = "jilanchat://auth#" + frag;
+  // Tehreek Ittiba-e-Sunnat admin panel reuses this registered return URL.
+  // Its state always starts with "tadmin." (Jilan Chat state is plain
+  // alphanumeric), so only those returns go to the admin page on the web.
+  var st = (/(?:^|&)state=([^&]*)/.exec(frag) || [])[1] || "";
+  try { st = decodeURIComponent(st); } catch (e) {}
+  if (st.indexOf("tadmin.") === 0) {
+    window.location.replace("https://jilanapps.github.io/jilan-store/ittiba-e-sunnat/admin.html#" + frag);
+    return;
+  }
   var btn = document.getElementById("backBtn");
   btn.href = target;
   // Auto-forward right away; the button is the fallback if it is blocked.
