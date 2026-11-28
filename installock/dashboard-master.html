@@ -1318,6 +1318,11 @@ function renderPhones(){
       + '<button class="small ghost" onclick="blockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">App Block</button>'
       + '<button class="small ghost" onclick="unblockApp(\''+p._shop+'\',\''+(p.imei||'')+'\')">App Unblock</button>'
       + '</div></div>'
+      + '<div class="agrp"><div class="agl">Watermark: '+(p.wmMode==='off'?'OFF':p.wmMode==='on'?'ON':'AUTO (SIM)')+'</div><div class="abtns">'
+      + '<button class="small'+(p.wmMode==='off'?'':' ghost')+'" onclick="setWm(\''+p._shop+'\',\''+p._id+'\',\'off\')">Off</button>'
+      + '<button class="small'+(p.wmMode==='on'?'':' ghost')+'" onclick="setWm(\''+p._shop+'\',\''+p._id+'\',\'on\')">On</button>'
+      + '<button class="small'+((p.wmMode!=='off'&&p.wmMode!=='on')?'':' ghost')+'" onclick="setWm(\''+p._shop+'\',\''+p._id+'\',\'auto\')">Auto</button>'
+      + '</div></div>'
       + '<div class="agrp agrp-sched"><div class="agl">Auto lock schedule</div><div class="abtns">'
       + '<input type="time" id="schedL-'+p._id+'" value="'+esc(p.schedLock||'')+'" > <input type="time" id="schedU-'+p._id+'" value="'+esc(p.schedUnlock||'')+'" > <button class="small ghost" onclick="saveSchedule(\''+p._shop+'\',\''+p._id+'\')">Schedule</button> <button class="small ghost" onclick="clearSchedule(\''+p._shop+'\',\''+p._id+'\')">✕</button>'
       + '</div></div>'
@@ -1608,6 +1613,19 @@ async function setPlan(shopId, imei){
 /* Auto lock schedule (2026-11-15): phones doc par schedLock /
    schedUnlock likhta hai — Rules v57 me phones update allow hai,
    koi rules change nahi chahiye. */
+// v4.58 (2026-11-28): watermark control — phone doc wmMode (off/on/auto),
+// phone reads it on next sync (same path as schedule; no rules change).
+async function setWm(shopId, phoneId, mode){
+  const lbl = mode==='off'?'OFF':mode==='on'?'ON':'AUTO (SIM ho to band)';
+  if(!confirm('Watermark '+lbl+' karna hai? (phone online hone par agli sync me apply hoga, app v4.58 chahiye)')) return;
+  try{
+    await db.collection('shops').doc(shopId).collection('phones').doc(phoneId).update({wmMode: mode});
+    const ph = allPhones.find(x=>x._shop===shopId && x._id===phoneId); if(ph) ph.wmMode = mode;
+    alert('Watermark '+lbl+' save ho gaya ✅');
+    try{ renderPhones(); }catch(e){}
+  }catch(e){ alert('Error: '+e.message); }
+}
+
 async function saveSchedule(shopId, phoneId){
   const lockEl = document.getElementById('schedL-'+phoneId);
   const unlockEl = document.getElementById('schedU-'+phoneId);
