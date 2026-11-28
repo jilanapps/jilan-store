@@ -1249,6 +1249,7 @@ function openFolder(k){
   if(h && h.scrollIntoView) h.scrollIntoView({behavior:'smooth', block:'start'});
 }
 function renderPhones(){
+  try{ if(typeof myShopsArr!=="undefined" && myShopsArr.length) renderShops(myShopsArr); }catch(e){}
   const counts = {active:0,grace:0,limited:0,offline_locked:0};
   let html = '';
   allPhones.forEach(p=>{
@@ -1443,6 +1444,31 @@ function renderEvents(){
       + '</div>';
   });
   el.innerHTML = html;
+}
+
+// 2026-11-28: shop rename + payment details (button existed, function was missing)
+async function editShopPayment(shopId){
+  const s = (myShopsArr||[]).find(x=>x._id===shopId) || {};
+  const name = prompt('Shop ka naam:', s.name||'');
+  if(name===null) return;
+  const upd = {};
+  if(name.trim() && name.trim()!==(s.name||'')) upd.name = name.trim();
+  if(myRole==='admin'){
+    const jz = prompt('Shop JazzCash number (khali chhor dein agar nahi):', s.shopJazzCashNumber||'');
+    if(jz===null) return;
+    if(jz.trim()!==(s.shopJazzCashNumber||'')) upd.shopJazzCashNumber = jz.trim();
+    const dn = prompt('Pay to naam (lock screen par):', s.shopDisplayName||name.trim());
+    if(dn===null) return;
+    if(dn.trim()!==(s.shopDisplayName||'')) upd.shopDisplayName = dn.trim();
+  }
+  if(!Object.keys(upd).length){ alert('Koi tabdeeli nahi'); return; }
+  try{
+    await db.collection('shops').doc(shopId).update(upd);
+    Object.assign(s, upd);
+    if(upd.name){ shopNames[shopId]=upd.name; allPhones.forEach(p=>{ if(p._shop===shopId) p._shopName=upd.name; }); }
+    renderShops(myShopsArr); renderPhones();
+    alert('Save ho gaya ✅');
+  }catch(e){ alert('Save nahi hua: '+(e.message||e)); }
 }
 
 function renderShops(shops){
